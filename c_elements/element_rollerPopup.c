@@ -37,7 +37,7 @@ void event_Roller(lv_event_t * e)
               lv_style_reset(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
               lv_style_reset(&gui.element.rollerPopup.style_roller);
               lv_msgbox_close(godFatherCont);
-              //lv_obj_delete(godFatherCont);
+              gui.element.rollerPopup.mBoxRollerParent = NULL;
               gui.page.settings.settingsParams.calibratedTemp = rollerSelected;  
               qSysAction( SAVE_PROCESS_CONFIG );
               return;   
@@ -79,7 +79,7 @@ void event_Roller(lv_event_t * e)
  
               lv_style_reset(&gui.element.rollerPopup.style_roller);
               lv_msgbox_close(godFatherCont);
-              //lv_obj_delete(godFatherCont);
+              gui.element.rollerPopup.mBoxRollerParent = NULL;
               return; 
             }
 
@@ -102,7 +102,7 @@ void event_Roller(lv_event_t * e)
 
               lv_style_reset(&gui.element.rollerPopup.style_roller);
               lv_msgbox_close(godFatherCont);
-              //lv_obj_delete(godFatherCont);
+              gui.element.rollerPopup.mBoxRollerParent = NULL;
               return; 
             }
             if((lv_obj_t *)data == gui.tempStepNode->step.stepDetails->stepDetailMinTextArea){
@@ -124,10 +124,10 @@ void event_Roller(lv_event_t * e)
               lv_style_reset(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
               lv_style_reset(&gui.element.rollerPopup.style_roller);
               lv_msgbox_close(gui.element.rollerPopup.mBoxRollerParent);
+              gui.element.rollerPopup.mBoxRollerParent = NULL;
               gui.tempStepNode->step.stepDetails->somethingChanged = true;
               lv_obj_send_event( gui.tempStepNode->step.stepDetails->stepSaveButton, LV_EVENT_REFRESH, NULL);
-              //lv_obj_delete(gui.element.rollerPopup.mBoxRollerParent);
-              return; 
+              return;
             }
             if((lv_obj_t *)data == gui.tempStepNode->step.stepDetails->stepDetailSecTextArea){
               if(isScrolled == 0) {
@@ -148,7 +148,7 @@ void event_Roller(lv_event_t * e)
               lv_style_reset(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
               lv_style_reset(&gui.element.rollerPopup.style_roller);
               lv_msgbox_close(gui.element.rollerPopup.mBoxRollerParent);
-              //lv_obj_delete(gui.element.rollerPopup.mBoxRollerParent);
+              gui.element.rollerPopup.mBoxRollerParent = NULL;
               gui.tempStepNode->step.stepDetails->somethingChanged = true;
               lv_obj_send_event( gui.tempStepNode->step.stepDetails->stepSaveButton, LV_EVENT_REFRESH, NULL);
               return; 
@@ -161,7 +161,7 @@ void event_Roller(lv_event_t * e)
               lv_textarea_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea, tempBuffer);
               lv_style_reset(&gui.element.rollerPopup.style_roller);
               lv_msgbox_close(godFatherCont);
-              //lv_obj_delete(godFatherCont);
+              gui.element.rollerPopup.mBoxRollerParent = NULL;
               return; 
             }
           rollerSelected = 0;
@@ -192,7 +192,12 @@ void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *w
   /*********************
   *    PAGE HEADER
   *********************/
-   LV_LOG_USER("Roller popup create");  
+   /* Guard: prevent creating a second popup if one already exists */
+   if(gui.element.rollerPopup.mBoxRollerParent != NULL) {
+       LV_LOG_USER("Roller popup already exists, skipping duplicate creation");
+       return;
+   }
+   LV_LOG_USER("Roller popup create");
    gui.element.rollerPopup.whoCallMe = whoCallMe;
 
    gui.element.rollerPopup.mBoxRollerParent = lv_obj_class_create_obj(&lv_msgbox_backdrop_class, lv_layer_top());

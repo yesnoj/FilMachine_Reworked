@@ -390,14 +390,22 @@ void event_stepElement(lv_event_t *e) {
     }
 
       if (code == LV_EVENT_SHORT_CLICKED ) {
-        /* If the cursor moved from the press point, this was a swipe attempt — not a tap */
-        lv_point_t release_point;
-        lv_indev_get_point(indev, &release_point);
-        int32_t dx = release_point.x - press_point.x;
-        int32_t dy = release_point.y - press_point.y;
-        if ((dx * dx + dy * dy) > (10 * 10)) {  /* ~10px threshold */
-            LV_LOG_USER("SHORT_CLICKED ignored: cursor moved %"PRId32",%"PRId32" from press", dx, dy);
-            return;
+        /* Skip distance check for action buttons — they appear after a swipe,
+           so the old press_point from the swipe would always reject the click */
+        bool is_action_button = (obj == currentNode->step.deleteButton ||
+                                 obj == currentNode->step.deleteButtonLabel ||
+                                 obj == currentNode->step.editButton ||
+                                 obj == currentNode->step.editButtonLabel);
+        if (!is_action_button) {
+            /* If the cursor moved from the press point, this was a swipe attempt — not a tap */
+            lv_point_t release_point;
+            lv_indev_get_point(indev, &release_point);
+            int32_t dx = release_point.x - press_point.x;
+            int32_t dy = release_point.y - press_point.y;
+            if ((dx * dx + dy * dy) > (10 * 10)) {  /* ~10px threshold */
+                LV_LOG_USER("SHORT_CLICKED ignored: cursor moved %"PRId32",%"PRId32" from press", dx, dy);
+                return;
+            }
         }
         /* When panel is open: tap on summary/step area closes it */
         if (currentNode->step.swipedRight == true && obj != currentNode->step.deleteButton

@@ -143,8 +143,10 @@ void event_processDetail(lv_event_t * e) {
   }
 
 
-  if(code == LV_EVENT_FOCUSED) { 
-      
+  if(code == LV_EVENT_FOCUSED) {
+      /* Guard: prevent double-fire of FOCUSED event from creating two popups */
+      if(gui.element.rollerPopup.mBoxRollerParent != NULL) return;
+
       if(data == gui.tempProcessNode->process.processDetails->processTempTextArea){
           LV_LOG_USER("Set Temperature");
           

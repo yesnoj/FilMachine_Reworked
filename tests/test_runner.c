@@ -62,6 +62,11 @@ __attribute__((weak)) void cleanRelayManager(uint8_t a, uint8_t b, uint8_t c, bo
 __attribute__((weak)) void sendValueToRelay(uint8_t a, uint8_t b, bool c) { }
 __attribute__((weak)) void rebootBoard(void) { }
 
+/* Temperature control stubs for tests (no simulation needed) */
+float sim_getTemperature(uint8_t sensorPin) { return 20.0f; }
+void  sim_setHeater(bool on) { }
+void  sim_resetTemperatures(void) { }
+
 /* ═══════════════════════════════════════════════
  * Test Data Generator — creates processes when no config file is present
  * ═══════════════════════════════════════════════ */

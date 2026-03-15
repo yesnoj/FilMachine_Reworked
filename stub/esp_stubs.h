@@ -1,6 +1,9 @@
 #ifndef ESP_STUBS_H
 #define ESP_STUBS_H
 
+/* Flag: we are building for the PC simulator (not real ESP32 hardware) */
+#define SIMULATOR_BUILD 1
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>

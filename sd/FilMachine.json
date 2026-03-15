@@ -1,15 +1,15 @@
 {
   "settingsParams": {
-    "tempUnit": 1,
+    "tempUnit": 0,
     "waterInlet": 1,
-    "calibratedTemp": 1,
-    "filmRotationSpeedSetpoint": 70,
-    "rotationIntervalSetpoint": 50,
-    "randomSetpoint": 60,
-    "isPersistentAlarm": 0,
+    "calibratedTemp": 20,
+    "filmRotationSpeedSetpoint": 50,
+    "rotationIntervalSetpoint": 10,
+    "randomSetpoint": 20,
+    "isPersistentAlarm": 1,
     "isProcessAutostart": 0,
-    "drainFillOverlapSetpoint": 50,
-    "multiRinseTime": 90
+    "drainFillOverlapSetpoint": 0,
+    "multiRinseTime": 60
   },
   "processes": [
     {

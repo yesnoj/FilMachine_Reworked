@@ -64,7 +64,9 @@ static void resetStuffBeforeNextProcess(){
 
     tankFillTime = 0;
     tankTimeElapsed = 0;
-    tankPercentage = 0; 
+    tankPercentage = 0;
+
+    sim_resetTemperatures();
 }
 
 void event_checkup(lv_event_t * e){
@@ -83,8 +85,10 @@ void event_checkup(lv_event_t * e){
 
   if(code == LV_EVENT_FOCUSED) {
       if(data == gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea){
+          /* Guard: prevent double-fire of FOCUSED event from creating two popups */
+          if(gui.element.rollerPopup.mBoxRollerParent != NULL) return;
           LV_LOG_USER("Set Tank Size");
-          rollerPopupCreate(checkupTankSizesList,checkupTankSize_text,data,gui.tempProcessNode->process.processDetails->checkup->tankSize); //referenceProcess  THIS IS BROKEN! NEEDS ATTENTION
+          rollerPopupCreate(checkupTankSizesList,checkupTankSize_text,data,gui.tempProcessNode->process.processDetails->checkup->tankSize);
       }
   }
   if(code == LV_EVENT_VALUE_CHANGED) {
@@ -136,13 +140,21 @@ void event_checkup(lv_event_t * e){
       }
       if(data == gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempContainer){
         LV_LOG_USER("User pressed gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton on Step 2");
+        /* Stop temp timer and heater if running */
+        if(gui.tempProcessNode->process.processDetails->checkup->tempTimer != NULL) {
+            lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->tempTimer);
+            gui.tempProcessNode->process.processDetails->checkup->tempTimer = NULL;
+        }
+        sim_setHeater(false);
+        gui.tempProcessNode->process.processDetails->checkup->heaterOn = false;
+
         gui.tempProcessNode->process.processDetails->checkup->isProcessing = 0;
         gui.tempProcessNode->process.processDetails->checkup->processStep = 3;
         gui.tempProcessNode->process.processDetails->checkup->stepFillWaterStatus = 2;
         gui.tempProcessNode->process.processDetails->checkup->stepReachTempStatus = 2;
         gui.tempProcessNode->process.processDetails->checkup->stepCheckFilmStatus = 1;
         checkup(gui.tempProcessNode);
-      
+
       }
     }
 
@@ -162,6 +174,12 @@ void event_checkup(lv_event_t * e){
             lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
             gui.tempProcessNode->process.processDetails->checkup->pumpTimer = NULL;
         }
+        if(gui.tempProcessNode->process.processDetails->checkup->tempTimer != NULL) {
+            lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->tempTimer);
+            gui.tempProcessNode->process.processDetails->checkup->tempTimer = NULL;
+        }
+        /* Safety: always turn off the heater when leaving checkup */
+        sim_setHeater(false);
 
         /* Reset static state for next process run */
         resetStuffBeforeNextProcess();
@@ -286,8 +304,9 @@ LV_LOG_USER("pumpTimer running :%d", tankPercentage);
                         LV_LOG_USER("Last step DRAINING COMPLETE");
                         lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc,100 - tankPercentage);
                         lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupDrainingComplete_text);
-                        lv_obj_clear_state(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, LV_STATE_DISABLED); 
+                        lv_obj_clear_state(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, LV_STATE_DISABLED);
                         lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
+                        gui.tempProcessNode->process.processDetails->checkup->pumpTimer = NULL;
                         return;
                       }
               }
@@ -310,8 +329,9 @@ LV_LOG_USER("pumpTimer running :%d", tankPercentage);
             lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc, tankPercentage);
             lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupDrainingComplete_text);
             
-            lv_obj_clear_state(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, LV_STATE_DISABLED); 
+            lv_obj_clear_state(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, LV_STATE_DISABLED);
             lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
+            gui.tempProcessNode->process.processDetails->checkup->pumpTimer = NULL;
             return;
            }
     }
@@ -350,8 +370,9 @@ LV_LOG_USER("pumpTimer running :%d", tankPercentage);
               LV_LOG_USER("STOP AFTER step DRAINING COMPLETE");
               lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc,100 - tankPercentage);
               lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupDrainingComplete_text);
-              lv_obj_clear_state(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, LV_STATE_DISABLED); 
+              lv_obj_clear_state(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, LV_STATE_DISABLED);
               lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
+              gui.tempProcessNode->process.processDetails->checkup->pumpTimer = NULL;
               return;
             }
           }
@@ -374,8 +395,9 @@ LV_LOG_USER("pumpTimer running :%d", tankPercentage);
                     lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc, tankPercentage);
                     lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupDrainingComplete_text);
                     
-                    lv_obj_clear_state(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, LV_STATE_DISABLED); 
+                    lv_obj_clear_state(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, LV_STATE_DISABLED);
                     lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
+                    gui.tempProcessNode->process.processDetails->checkup->pumpTimer = NULL;
                     return;
                   }
             }
@@ -512,6 +534,110 @@ void processTimer(lv_timer_t * timer) {
           gui.tempProcessNode->process.processDetails->checkup->processTimer = NULL;
           lv_timer_resume(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
         }
+    }
+}
+
+/* ═══════════════════════════════════════════════
+ * Temperature monitoring timer callback (1 second interval)
+ * Reads simulated sensors, controls heater, updates UI
+ * ═══════════════════════════════════════════════ */
+#define TEMP_TIMEOUT_SECONDS 600  /* 10 minutes safety timeout */
+
+void tempTimerCallback(lv_timer_t * timer) {
+    sCheckup *ckup = gui.tempProcessNode->process.processDetails->checkup;
+    sProcessDetail *pd = gui.tempProcessNode->process.processDetails;
+
+    /* Read current temperatures */
+    ckup->currentWaterTemp = sim_getTemperature(TEMPERATURE_BATH_PIN);
+    ckup->currentChemTemp  = sim_getTemperature(TEMPERATURE_CHEMICAL_PIN);
+
+    /* Update UI with live values (use snprintf — LVGL builtin sprintf lacks %f) */
+    {
+        char buf[16];
+        if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP) {
+            snprintf(buf, sizeof(buf), "%.1f°C", ckup->currentWaterTemp);
+            lv_label_set_text(ckup->checkupTargetWaterTempValue, buf);
+            snprintf(buf, sizeof(buf), "%.1f°C", ckup->currentChemTemp);
+            lv_label_set_text(ckup->checkupTargetChemistryTempValue, buf);
+        } else {
+            snprintf(buf, sizeof(buf), "%.1f°F", ckup->currentWaterTemp * 1.8f + 32.0f);
+            lv_label_set_text(ckup->checkupTargetWaterTempValue, buf);
+            snprintf(buf, sizeof(buf), "%.1f°F", ckup->currentChemTemp * 1.8f + 32.0f);
+            lv_label_set_text(ckup->checkupTargetChemistryTempValue, buf);
+        }
+    }
+
+    /* Heater control logic: ON when below (target - tolerance), OFF when at target */
+    float targetTemp = (float)pd->temp;
+    float tolerance  = pd->tempTolerance;
+
+    if(ckup->currentWaterTemp < targetTemp - tolerance) {
+        if(!ckup->heaterOn) {
+            sim_setHeater(true);
+            ckup->heaterOn = true;
+        }
+    } else if(ckup->currentWaterTemp >= targetTemp) {
+        if(ckup->heaterOn) {
+            sim_setHeater(false);
+            ckup->heaterOn = false;
+        }
+    }
+
+    /* Update heater status label */
+    if(ckup->checkupHeaterStatusLabel != NULL)
+        lv_label_set_text_fmt(ckup->checkupHeaterStatusLabel, "Heater: %s", ckup->heaterOn ? "ON" : "OFF");
+
+    /* Safety timeout counter (logged to terminal only) */
+    ckup->tempTimeoutCounter++;
+
+    /* Check if temperature reached (water temp within target ± tolerance) */
+    bool tempReached = (ckup->currentWaterTemp >= targetTemp - tolerance) &&
+                       (ckup->currentWaterTemp <= targetTemp + tolerance);
+
+    if(tempReached) {
+        LV_LOG_USER("Temperature reached! Water=%.1f Target=%"PRIu32" Tol=%.1f",
+            ckup->currentWaterTemp, pd->temp, pd->tempTolerance);
+
+        sim_setHeater(false);
+        ckup->heaterOn = false;
+
+        lv_timer_delete(ckup->tempTimer);
+        ckup->tempTimer = NULL;
+
+        if(ckup->checkupHeaterStatusLabel != NULL)
+            lv_label_set_text(ckup->checkupHeaterStatusLabel, "TEMP OK!");
+
+        /* If autostart is enabled, advance to step 3 automatically */
+        if(gui.page.settings.settingsParams.isProcessAutostart) {
+            LV_LOG_USER("Autostart: advancing to step 3");
+            ckup->processStep = 3;
+            ckup->stepReachTempStatus = 2;
+            ckup->stepCheckFilmStatus = 1;
+            checkup(gui.tempProcessNode);
+        } else {
+            /* Show CONTINUE button for manual advance — widen to fit text */
+            if(ckup->checkupSkipButton != NULL)
+                lv_obj_set_width(ckup->checkupSkipButton, 150);
+            if(ckup->checkupSkipButtonLabel != NULL)
+                lv_label_set_text(ckup->checkupSkipButtonLabel, "CONTINUE");
+        }
+        return;
+    }
+
+    /* Safety timeout reached — stop heating, let user skip manually */
+    if(ckup->tempTimeoutCounter >= TEMP_TIMEOUT_SECONDS) {
+        LV_LOG_USER("Temperature timeout reached! Stopping heater.");
+
+        sim_setHeater(false);
+        ckup->heaterOn = false;
+
+        lv_timer_delete(ckup->tempTimer);
+        ckup->tempTimer = NULL;
+
+        if(ckup->checkupHeaterStatusLabel != NULL)
+            lv_label_set_text(ckup->checkupHeaterStatusLabel, "TIMEOUT!");
+        if(ckup->checkupSkipButtonLabel != NULL)
+            lv_label_set_text(ckup->checkupSkipButtonLabel, "SKIP");
     }
 }
 
@@ -689,6 +815,7 @@ void handleStopNow(sCheckup* checkup) {
         lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
         lv_obj_clear_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
         lv_timer_delete(checkup->pumpTimer);
+        checkup->pumpTimer = NULL;
 
     }
 }
@@ -761,6 +888,7 @@ void handleStopAfter(sCheckup* checkup) {
             lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
             lv_obj_clear_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
             lv_timer_delete(checkup->pumpTimer);
+            checkup->pumpTimer = NULL;
         }
     }
 }
@@ -800,6 +928,7 @@ void handleStopNowAfterStopAfter(sCheckup* checkup) {
         lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
         lv_obj_clear_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
         lv_timer_delete(checkup->pumpTimer);
+        checkup->pumpTimer = NULL;
     }
 }
 
@@ -1104,11 +1233,15 @@ void checkup(processNode *processToCheckup) {
 
                           gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempContainer);         
 
-                          if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
-                              lv_label_set_text_fmt(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempValue, "%.1f°C", 32.4); 
-                            } else{
-                                  lv_label_set_text_fmt(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempValue, "%.2f°F", 20.5); 
-                            }
+                          {
+                              char buf[16];
+                              if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
+                                  snprintf(buf, sizeof(buf), "%.1f°C", 32.4);
+                              } else{
+                                  snprintf(buf, sizeof(buf), "%.1f°F", 20.5);
+                              }
+                              lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempValue, buf);
+                          }
 
                           lv_obj_set_width(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempValue, LV_SIZE_CONTENT);
                           lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempValue, &lv_font_montserrat_20, 0);              
@@ -1311,7 +1444,11 @@ void checkup(processNode *processToCheckup) {
 
 
                                         gui.tempProcessNode->process.processDetails->checkup->checkupTargetToleranceTempValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempContainer);         
-                                        lv_label_set_text_fmt(gui.tempProcessNode->process.processDetails->checkup->checkupTargetToleranceTempValue, "%s ~%.1f",checkupTargetToleranceTemp_text, gui.tempProcessNode->process.processDetails->tempTolerance);
+                                        {
+                                            char buf[32];
+                                            snprintf(buf, sizeof(buf), "%s ~%.1f", checkupTargetToleranceTemp_text, gui.tempProcessNode->process.processDetails->tempTolerance);
+                                            lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTargetToleranceTempValue, buf);
+                                        }
                                         lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupTargetToleranceTempValue, &lv_font_montserrat_20, 0);              
                                         lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTargetToleranceTempValue, LV_ALIGN_CENTER, 0, 30);
 
@@ -1330,11 +1467,16 @@ void checkup(processNode *processToCheckup) {
 
                                         gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempContainer);   
 
-                                        if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
-                                            lv_label_set_text_fmt(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempValue, "%.1f°C", 15.4); 
-                                        } else{
-                                               lv_label_set_text_fmt(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempValue, "%.2f°F", 20.4); 
-                                              }
+                                        {
+                                            char buf[16];
+                                            float initWaterTemp = sim_getTemperature(TEMPERATURE_BATH_PIN);
+                                            if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
+                                                snprintf(buf, sizeof(buf), "%.1f°C", initWaterTemp);
+                                            } else{
+                                                snprintf(buf, sizeof(buf), "%.1f°F", initWaterTemp * 1.8f + 32.0f);
+                                            }
+                                            lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempValue, buf);
+                                        }
 
                                         lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempValue, &lv_font_montserrat_20, 0);              
                                         lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempValue, LV_ALIGN_CENTER, 0, 20);
@@ -1355,11 +1497,16 @@ void checkup(processNode *processToCheckup) {
 
                                         gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempContainer);         
 
-                                        if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
-                                            lv_label_set_text_fmt(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempValue, "%.1f°C", 32.4); 
-                                        } else{
-                                               lv_label_set_text_fmt(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempValue, "%.2f°F", 20.5); 
-                                              }
+                                        {
+                                            char buf[16];
+                                            float initChemTemp = sim_getTemperature(TEMPERATURE_CHEMICAL_PIN);
+                                            if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
+                                                snprintf(buf, sizeof(buf), "%.1f°C", initChemTemp);
+                                            } else{
+                                                snprintf(buf, sizeof(buf), "%.1f°F", initChemTemp * 1.8f + 32.0f);
+                                            }
+                                            lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempValue, buf);
+                                        }
 
                                         lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempValue, &lv_font_montserrat_20, 0);              
                                         lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempValue, LV_ALIGN_CENTER, 0, 20);
@@ -1373,11 +1520,35 @@ void checkup(processNode *processToCheckup) {
                                 lv_obj_set_style_bg_color(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
                                 lv_obj_move_foreground(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton);
 
-                                        gui.tempProcessNode->process.processDetails->checkup->checkupSkipButtonLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton);         
-                                        lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButtonLabel, checkupSkip_text); 
-                                        lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButtonLabel, &lv_font_montserrat_22, 0);              
+                                        gui.tempProcessNode->process.processDetails->checkup->checkupSkipButtonLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton);
+                                        lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButtonLabel, checkupSkip_text);
+                                        lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButtonLabel, &lv_font_montserrat_22, 0);
                                         lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButtonLabel, LV_ALIGN_CENTER, 0, 0);
-                  
+
+                                /* Heater status label (bottom of temps container) */
+                                gui.tempProcessNode->process.processDetails->checkup->checkupHeaterStatusLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempsContainer);
+                                lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupHeaterStatusLabel, "Heater: OFF");
+                                lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupHeaterStatusLabel, &lv_font_montserrat_16, 0);
+                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupHeaterStatusLabel, LV_ALIGN_BOTTOM_MID, 0, -35);
+
+                                /* Timeout label removed from UI — timeout logged to terminal only */
+                                gui.tempProcessNode->process.processDetails->checkup->checkupTempTimeoutLabel = NULL;
+
+                                /* Start temperature monitoring timer if temp control is enabled */
+                                if(gui.tempProcessNode->process.processDetails->isTempControlled) {
+                                    LV_LOG_USER("Temperature control enabled — starting temp timer (target=%"PRIu32"°C, tolerance=%.1f)",
+                                        gui.tempProcessNode->process.processDetails->temp,
+                                        gui.tempProcessNode->process.processDetails->tempTolerance);
+                                    gui.tempProcessNode->process.processDetails->checkup->tempTimeoutCounter = 0;
+                                    gui.tempProcessNode->process.processDetails->checkup->heaterOn = false;
+                                    gui.tempProcessNode->process.processDetails->checkup->currentWaterTemp = sim_getTemperature(TEMPERATURE_BATH_PIN);
+                                    gui.tempProcessNode->process.processDetails->checkup->currentChemTemp = sim_getTemperature(TEMPERATURE_CHEMICAL_PIN);
+                                    gui.tempProcessNode->process.processDetails->checkup->tempTimer = lv_timer_create(tempTimerCallback, 1000, NULL);
+                                } else {
+                                    gui.tempProcessNode->process.processDetails->checkup->tempTimer = NULL;
+                                    lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupHeaterStatusLabel, "No temp control");
+                                }
+
                         isStepStatus2created = 1;
                   }
 

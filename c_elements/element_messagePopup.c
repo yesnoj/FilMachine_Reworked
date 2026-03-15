@@ -103,8 +103,10 @@ void event_messagePopup(lv_event_t *e) {
                 lv_obj_add_flag(gui.tempProcessNode->process.processDetails->checkup->checkupProcessTimeLeftValue, LV_OBJ_FLAG_HIDDEN);
 
                 gui.page.tools.machineStats.stopped++;
-                if(gui.tempProcessNode->process.processDetails->checkup->processTimer != NULL)
+                if(gui.tempProcessNode->process.processDetails->checkup->processTimer != NULL) {
                   lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->processTimer);
+                  gui.tempProcessNode->process.processDetails->checkup->processTimer = NULL;
+                }
                 lv_timer_resume(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
                 qSysAction( SAVE_MACHINE_STATS );
             }
@@ -143,6 +145,13 @@ void event_messagePopup(lv_event_t *e) {
             if (gui.element.messagePopup.whoCallMe == gui.page.tools.toolsImportButton)
             {
                 LV_LOG_USER("Cancel import from SD");
+                lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
+                lv_msgbox_close(mboxCont);
+                gui.element.messagePopup.mBoxPopupParent = NULL;
+            }
+            if (gui.element.messagePopup.whoCallMe == gui.page.tools.toolsExportButton)
+            {
+                LV_LOG_USER("Cancel export to SD");
                 lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
                 lv_msgbox_close(mboxCont);
                 gui.element.messagePopup.mBoxPopupParent = NULL;

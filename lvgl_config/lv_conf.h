@@ -73,6 +73,12 @@
 #define LV_FONT_DEFAULT &lv_font_montserrat_14
 
 /*====================
+   THEMES
+ *====================*/
+#define LV_USE_THEME_DEFAULT 1
+#define LV_THEME_DEFAULT_DARK 1     /* 0: Light mode; 1: Dark mode */
+
+/*====================
    WIDGETS
  *====================*/
 #define LV_USE_ANIMIMG     1

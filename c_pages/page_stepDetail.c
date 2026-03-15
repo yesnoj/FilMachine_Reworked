@@ -113,7 +113,9 @@ void event_stepDetail(lv_event_t * e)
   }
 
     if(code == LV_EVENT_FOCUSED) {
-        
+        /* Guard: prevent double-fire of FOCUSED event from creating two popups */
+        if(gui.element.rollerPopup.mBoxRollerParent != NULL) return;
+
         if((lv_obj_t*)data == gui.tempStepNode->step.stepDetails->stepDetailMinTextArea){
             LV_LOG_USER("Set minutes");
             rollerPopupCreate(gui.element.rollerPopup.minutesOptions,setMinutesPopupTitle_text,gui.tempStepNode->step.stepDetails->stepDetailMinTextArea, findRolleStringIndex(lv_textarea_get_text(gui.tempStepNode->step.stepDetails->stepDetailMinTextArea),gui.element.rollerPopup.minutesOptions));

@@ -642,6 +642,8 @@ typedef struct sCheckup{
   	lv_obj_t		  	*checkupTargetToleranceTempValue;
 	lv_obj_t			*checkupTargetWaterTempValue;
 	lv_obj_t			*checkupTargetChemistryTempValue;
+	lv_obj_t			*checkupHeaterStatusLabel;
+	lv_obj_t			*checkupTempTimeoutLabel;
 	lv_obj_t			*checkupStepSourceValue;
 	lv_obj_t			*checkupTempControlValue;
 	lv_obj_t			*checkupWaterTempValue;
@@ -669,6 +671,7 @@ typedef struct sCheckup{
 	lv_obj_t			*checkupCloseButton;
   	lv_timer_t    		*processTimer;
   	lv_timer_t    		*pumpTimer;
+	lv_timer_t    		*tempTimer;
 
 	bool 			    isProcessing; // 0 or 1
 	uint8_t 			processStep;//0 or 1 or 2 or 3 or 4
@@ -682,6 +685,11 @@ typedef struct sCheckup{
 	uint8_t 			stepFillWaterStatus;
 	uint8_t 			stepReachTempStatus;
 	uint8_t 			stepCheckFilmStatus;
+
+	float				currentWaterTemp;
+	float				currentChemTemp;
+	bool				heaterOn;
+	uint16_t			tempTimeoutCounter;
 
 	lv_obj_t			*stepArc;
 	lv_obj_t			*processArc;
@@ -1291,6 +1299,10 @@ void testPin(uint8_t pin);
 //float getTemperature(DeviceAddress sensor);
 void initializeTemperatureSensor();
 void printTemperature(float temp);
+/* Temperature control — simulator stubs / hardware wrappers */
+float sim_getTemperature(uint8_t sensorPin);
+void  sim_setHeater(bool on);
+void  sim_resetTemperatures(void);
 //char* printAddressSensor(DeviceAddress deviceAddress);
 void writeMachineStats(machineStatistics *machineStats);
 void readMachineStats(machineStatistics *machineStats);

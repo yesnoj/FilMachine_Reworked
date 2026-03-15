@@ -108,6 +108,36 @@ if(APPLE)
 endif()
 
 # ──────────────────────────────────────────────
+# Ensure sd/ folder with config file exists in
+# build directory (simulator needs FilMachine.cfg)
+# ──────────────────────────────────────────────
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/sd")
+
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/sd/FilMachine.cfg")
+    # Priority 1: copy from source tree
+    if(EXISTS "${CMAKE_SOURCE_DIR}/sd/FilMachine.cfg")
+        file(COPY "${CMAKE_SOURCE_DIR}/sd/" DESTINATION "${CMAKE_BINARY_DIR}/sd")
+        message(STATUS "Copied config files: ${CMAKE_SOURCE_DIR}/sd/ → build/sd/")
+    else()
+        # Priority 2: generate via Python script
+        find_package(Python3 COMPONENTS Interpreter QUIET)
+        if(Python3_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/scripts/genFilMachineCFG.py")
+            execute_process(
+                COMMAND ${Python3_EXECUTABLE}
+                        "${CMAKE_SOURCE_DIR}/scripts/genFilMachineCFG.py"
+                        --realistic
+                        --output "${CMAKE_BINARY_DIR}/sd"
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            )
+            message(STATUS "Generated config via genFilMachineCFG.py → build/sd/")
+        else()
+            message(WARNING "No config found! Run manually:\n"
+                    "  python3 scripts/genFilMachineCFG.py --realistic --output build/sd/")
+        endif()
+    endif()
+endif()
+
+# ──────────────────────────────────────────────
 # Automated Test Runner
 # ──────────────────────────────────────────────
 set(TEST_SOURCES

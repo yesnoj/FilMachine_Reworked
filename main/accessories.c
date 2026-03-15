@@ -1507,13 +1507,34 @@ float getTemperature(Adafruit_SHT31 tempSensor){
 
 
 void testPin(uint8_t pin){
-#if 0	
+#if 0
     mcp.digitalWrite(pin, HIGH);
     delay(500);
     mcp.digitalWrite(pin, LOW);
     delay(500);
 #endif
 }
+
+/* ═══════════════════════════════════════════════════
+ * Temperature control wrappers
+ * On real hardware (ESP32), these will call the actual sensor/relay.
+ * In the simulator, src/main.c provides non-weak overrides.
+ * ═══════════════════════════════════════════════════ */
+#ifndef SIMULATOR_BUILD
+float sim_getTemperature(uint8_t sensorPin) {
+    /* TODO: implement with real DS18B20 sensor on ESP32 */
+    return 20.0f;
+}
+
+void sim_setHeater(bool on) {
+    /* TODO: call sendValueToRelay(HEATER_RLY, ...) on real hardware */
+    LV_LOG_USER("Heater %s", on ? "ON" : "OFF");
+}
+
+void sim_resetTemperatures(void) {
+    /* No-op on real hardware */
+}
+#endif
 
 void toLowerCase(char *str) {
     while (*str) {
