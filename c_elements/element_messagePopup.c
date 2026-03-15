@@ -151,7 +151,12 @@ void event_messagePopup(lv_event_t *e) {
         if (obj == gui.element.messagePopup.mBoxPopupButton2)
         {
             LV_LOG_USER("Pressed gui.element.messagePopup.mBoxPopupButton2");
-            if (gui.element.messagePopup.whoCallMe == gui.tempProcessNode || gui.element.messagePopup.whoCallMe == gui.tempStepNode || gui.element.messagePopup.whoCallMe == gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton || gui.element.messagePopup.whoCallMe == gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton)
+            if (gui.element.messagePopup.whoCallMe == gui.tempProcessNode
+                || gui.element.messagePopup.whoCallMe == gui.tempStepNode
+                || (gui.tempProcessNode != NULL && gui.tempProcessNode->process.processDetails != NULL
+                    && gui.tempProcessNode->process.processDetails->checkup != NULL
+                    && (gui.element.messagePopup.whoCallMe == gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton
+                        || gui.element.messagePopup.whoCallMe == gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton)))
             {
                 stepNode *newStep = NULL;  /* set by duplicate-step path, used after popup close */
 

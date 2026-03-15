@@ -239,7 +239,10 @@ void event_processElement(lv_event_t *e) {
 //    lv_obj_t *cont = (lv_obj_t *)lv_event_get_current_target(e);
     lv_obj_t *data = (lv_obj_t *)lv_event_get_user_data(e);
     processNode *currentNode = getProcElementEntryByObject(data);
-    lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
+    /* Fix #21: Guard against NULL indev — lv_obj_send_event() bypasses indev
+     * processing, so lv_indev_active() returns NULL in that context. */
+    lv_indev_t *active_indev = lv_indev_active();
+    lv_dir_t dir = active_indev ? lv_indev_get_gesture_dir(active_indev) : LV_DIR_NONE;
 
     int8_t x;
 

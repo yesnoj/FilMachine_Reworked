@@ -61,6 +61,10 @@ FilMachine_Simulator_v2/
 | 13 | Macro duplicate nel header | RISOLTO | Definizioni duplicate rimosse |
 | 14 | Messaggio errore fuorviante writeConfigFile | RISOLTO | Log condizionato al risultato di f_unlink (res != FR_OK && res != FR_NO_FILE) |
 | 15 | Memory leak in copyAndRenameFile | RISOLTO | Ora usa goto per liberare il buffer |
+| 16 | NULL dereference chain in element_messagePopup.c | RISOLTO | Guard con NULL check su tempProcessNode, processDetails, checkup |
+| 17 | Memory leak getRollerStringIndex() | RISOLTO | Risultato malloc'd salvato in variabile temp e poi free()'d |
+| 18 | Dereference senza NULL check in page_processDetail.c | RISOLTO | Guard all'inizio di event_processDetail() |
+| 19 | **CRITICAL** BUS ERROR — lv_msgbox_close su screen non-msgbox | RISOLTO | Rimosso lv_msgbox_close, aggiunto cleanup timer, delete checkupParent dopo lv_scr_load |
 
 ---
 
@@ -102,38 +106,29 @@ FilMachine_Simulator_v2/
 
 ---
 
-## NUOVI BUG TROVATI — DA RISOLVERE
+## NUOVI BUG TROVATI — RISOLTI
 
-### 16. CRITICO — NULL dereference chain in `element_messagePopup.c` riga 154
-```c
-if (whoCallMe == gui.tempProcessNode
-    || whoCallMe == gui.tempStepNode
-    || whoCallMe == gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton
-    || whoCallMe == gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton)
-```
-Se `gui.tempProcessNode` è NULL e le prime due condizioni sono false, la 3ª e 4ª condizione dereferenziano NULL → **crash**. L'operatore `||` short-circuit protegge solo se una condizione precedente è `true`.
+### 16. RISOLTO — NULL dereference chain in `element_messagePopup.c` riga 154
+La catena `||` con dereference di `gui.tempProcessNode->...->checkup->checkupStopAfterButton` veniva valutata anche se `gui.tempProcessNode` era NULL. Ristrutturata la condizione con `gui.tempProcessNode != NULL && processDetails != NULL && checkup != NULL` come guard prima di accedere ai campi checkup.
 
-**Rischio:** Medio in pratica (il popup è aperto solo con un processo attivo), ma critico se si verifica.
+### 17. RISOLTO — Memory leak in `getRollerStringIndex()` — `element_rollerPopup.c`
+`getRollerStringIndex()` restituisce memoria malloc'd. I 3 chiamanti passavano il risultato direttamente a `lv_textarea_set_text()` senza fare `free()`. Ora il risultato è salvato in variabile temporanea, passato a `lv_textarea_set_text()`, e poi `free()`'d.
 
-**Fix:** Aggiungere `gui.tempProcessNode != NULL` come prima condizione, oppure ristrutturare con controllo separato.
+### 18. RISOLTO — `page_processDetail.c`: dereference senza NULL check
+Aggiunto guard `if(gui.tempProcessNode == NULL || processDetails == NULL) return;` all'inizio di `event_processDetail()`, prima di tutti gli handler (CLICKED, REFRESH, VALUE_CHANGED).
 
-### 17. MEDIO — Memory leak in `getRollerStringIndex()` — `element_rollerPopup.c`
-```c
-lv_textarea_set_text(..., getRollerStringIndex(rollerSelected, ...));
-```
-`getRollerStringIndex()` (in `accessories.c:1781`) fa `malloc()` per la stringa risultato. `lv_textarea_set_text()` copia la stringa internamente, ma il puntatore malloc'd non viene mai `free()`'d.
+### 19. RISOLTO — **CRITICAL BUS ERROR** in `page_checkup.c`: `lv_msgbox_close()` su screen non-msgbox
+**Sintomo:** Crash `zsh: bus error` quando l'utente clicca il pulsante Close alla fine di un processo completo (dopo filling, processing, draining di tutti gli step). Il file di configurazione SD veniva corrotto dal crash.
 
-**Righe coinvolte:** `element_rollerPopup.c` righe 94, 116, 138 — ogni interazione col roller perde qualche byte.
+**Causa root:** In `event_checkup()`, il close handler calcolava `mboxCont = lv_obj_get_parent(lv_obj_get_parent(obj))` e poi chiamava `lv_msgbox_close(mboxCont)`. Per il `checkupCloseButton`, il grandparent è `checkupParent`, uno screen creato con `lv_obj_create(NULL)` — NON un `lv_msgbox`. `lv_msgbox_close()` tenta di accedere a dati interni specifici del msgbox, causando accesso a memoria non valida → BUS ERROR.
 
-**Fix:** Salvare il risultato in una variabile temporanea, passarlo a `lv_textarea_set_text()`, poi `free()`.
-
-### 18. BASSO — `page_processDetail.c` riga 29: dereference senza NULL check
-```c
-if(data == gui.tempProcessNode->process.processDetails->processDetailCloseButton)
-```
-Se `gui.tempProcessNode` fosse NULL, crash. In pratica sicuro perché il callback è registrato solo quando processDetail è aperto, ma difensivamente andrebbe protetto.
-
-**Fix:** Aggiungere guard `if(gui.tempProcessNode == NULL) return;` all'inizio dell'handler.
+**Fix applicato:**
+- Rimosso `lv_msgbox_close(mboxCont)` — non va usato su screen regolari
+- Aggiunto cleanup sicuro dei timer (`processTimer` e `pumpTimer`) con NULL check
+- Chiamata `resetStuffBeforeNextProcess()` per azzerare lo stato statico
+- `lv_scr_load(menu)` PRIMA di `lv_obj_delete(checkupParent)` per evitare accessi a oggetti eliminati
+- `checkupParent` e `checkupContainer` settati a NULL dopo la delete
+- Aggiunto `= NULL` dopo ogni `lv_timer_delete()` in 3 ulteriori posizioni nel file (processTimer e pumpTimer nelle callback dei timer)
 
 ---
 
@@ -143,6 +138,36 @@ Se `gui.tempProcessNode` fosse NULL, crash. In pratica sicuro perché il callbac
 - **Tastiera numeri/simboli** — Aggiunto tasto "123" sulla tastiera lettere per switchare a numeri e caratteri speciali. La tastiera si resetta sempre alle lettere alla riapertura.
 - **Fix: step duplicato non appariva visivamente** — Aggiunto `lv_obj_update_layout()` in `reorderStepElements` per forzare il ricalcolo dell'area scrollabile del container dopo l'aggiunta di figli dinamici. Aggiunto `lv_obj_scroll_to_view()` nel handler di duplicazione per scrollare automaticamente al nuovo step.
 - **Fix: swipe non sempre rilevato (GESTURE)** — Abbassate le soglie gesture nel simulatore (`gesture_limit` da 50 a 30, `gesture_min_velocity` da 3 a 2) in `src/main.c` per migliorare la rilevazione di swipe corti/lenti. Per l'hardware ESP32, la stessa modifica va applicata dove il touch indev viene creato.
+
+---
+
+## SISTEMA DI TEST AUTOMATICO
+
+### Architettura
+Framework di test leggero integrato nel build system CMake. Nessuna dipendenza esterna (no Unity, no Ruby). Simula touch input via un `lv_indev` custom con callback controllato dal test.
+
+### File
+```
+tests/
+├── test_runner.h          ← Macro (TEST_ASSERT, TEST_BEGIN/END), coordinate UI, prototipi
+├── test_runner.c          ← Entry point (sostituisce main.c), init LVGL + SDL, esegue suite
+├── test_helpers.c         ← Simulazione touch: test_click, test_swipe, test_long_press, test_pump
+├── test_navigation.c      ← 5 test: splash, start→menu, switch Processes/Settings/Tools
+├── test_processes.c       ← 5 test: lista processi, new process, click→detail, UI elements, close
+├── test_steps.c           ← 4 test: add step, verify UI, swipe-left duplicate, close
+└── test_settings.c        ← 3 test: UI elements, defaults validi, return to processes
+```
+
+### Come compilare e lanciare
+```bash
+cd build
+cmake ..
+make filmachine_test
+./filmachine_test
+```
+
+### Output
+Stampa PASS/FAIL per ogni test + riepilogo finale. Exit code 0 = tutto ok, 1 = fallimenti.
 
 ---
 

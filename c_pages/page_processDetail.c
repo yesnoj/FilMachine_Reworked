@@ -23,9 +23,11 @@ void event_processDetail(lv_event_t * e) {
 //  lv_obj_t * mboxParent = (lv_obj_t *)lv_obj_get_parent(mboxCont);
   lv_obj_t * data = (lv_obj_t *)lv_event_get_user_data(e);
 
+  /* Guard: all handlers below dereference gui.tempProcessNode */
+  if(gui.tempProcessNode == NULL || gui.tempProcessNode->process.processDetails == NULL) return;
 
   if(code == LV_EVENT_CLICKED) {
-    
+
     if(data == gui.tempProcessNode->process.processDetails->processDetailCloseButton){
         //gui.tempProcessNode->process.processDetails->stepElementsList.size = 0;
         //lv_obj_send_event(gui.tempProcessNode->process.processDetails->processSaveButton, LV_EVENT_REFRESH, NULL);

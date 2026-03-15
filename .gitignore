@@ -4,3 +4,4 @@ sim_data/
 .DS_Store
 *.o
 *.d
+test_results/

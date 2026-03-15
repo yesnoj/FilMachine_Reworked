@@ -212,9 +212,10 @@ void event_keyboard(lv_event_t* e) {
               	if(gui.element.filterPopup.filterName != NULL ) free( gui.element.filterPopup.filterName );
                 gui.element.filterPopup.filterName = (char *)malloc(sizeof(char) * (strlen(lv_textarea_get_text(gui.element.keyboardPopup.keyboardTextArea)) + 1)); // Alloca memoria per la stringa, lunghezza_stringa è la lunghezza della stringa da assegnare
 
-                if(gui.element.filterPopup.filterName != NULL )
+                if(gui.element.filterPopup.filterName != NULL ) {
                   strncpy(gui.element.filterPopup.filterName, lv_textarea_get_text(gui.element.keyboardPopup.keyboardTextArea), MAX_PROC_NAME_LEN);
                   gui.element.filterPopup.filterName[strlen(lv_textarea_get_text(gui.element.keyboardPopup.keyboardTextArea))] = '\0';
+                }
               } else if(gui.element.filterPopup.filterName != NULL ) {
                 free( gui.element.filterPopup.filterName );
                 gui.element.filterPopup.filterName = NULL;

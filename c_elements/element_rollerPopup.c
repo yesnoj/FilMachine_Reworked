@@ -91,7 +91,9 @@ void event_Roller(lv_event_t * e)
                 gui.tempProcessNode->process.processDetails->tempTolerance = atof(tempBuffer);
                 LV_LOG_USER("SET BUTTON from processToleranceTextArea value: %s, test: %.1f, test2: %.1f",tempBuffer,atof(tempBuffer),gui.tempProcessNode->process.processDetails->tempTolerance);
                 
-                lv_textarea_set_text(gui.tempProcessNode->process.processDetails->processToleranceTextArea, getRollerStringIndex(rollerSelected,gui.element.rollerPopup.tempToleranceOptions));
+                { char *tmp = getRollerStringIndex(rollerSelected, gui.element.rollerPopup.tempToleranceOptions);
+                lv_textarea_set_text(gui.tempProcessNode->process.processDetails->processToleranceTextArea, tmp != NULL ? tmp : "");
+                free(tmp); }
                 isScrolled = false;
               }
 
@@ -113,7 +115,9 @@ void event_Roller(lv_event_t * e)
                     itoa(rollerSelected, tempBuffer, 10);
                     LV_LOG_USER("SET BUTTON from stepDetailMinTextArea value %"PRIu32":",rollerSelected);
                     gui.tempStepNode->step.stepDetails->timeMins = rollerSelected;
-                    lv_textarea_set_text(gui.tempStepNode->step.stepDetails->stepDetailMinTextArea, getRollerStringIndex(rollerSelected,gui.element.rollerPopup.minutesOptions));
+                    { char *tmp = getRollerStringIndex(rollerSelected, gui.element.rollerPopup.minutesOptions);
+                    lv_textarea_set_text(gui.tempStepNode->step.stepDetails->stepDetailMinTextArea, tmp != NULL ? tmp : "");
+                    free(tmp); }
                     isScrolled = false;
               }
 
@@ -135,7 +139,9 @@ void event_Roller(lv_event_t * e)
                     itoa(rollerSelected, tempBuffer, 10);
                     LV_LOG_USER("SET BUTTON from stepDetailMinTextArea value %"PRIu32":",rollerSelected);
                     gui.tempStepNode->step.stepDetails->timeSecs = rollerSelected;
-                    lv_textarea_set_text(gui.tempStepNode->step.stepDetails->stepDetailSecTextArea, getRollerStringIndex(rollerSelected,gui.element.rollerPopup.secondsOptions));
+                    { char *tmp = getRollerStringIndex(rollerSelected, gui.element.rollerPopup.secondsOptions);
+                    lv_textarea_set_text(gui.tempStepNode->step.stepDetails->stepDetailSecTextArea, tmp != NULL ? tmp : "");
+                    free(tmp); }
                     isScrolled = false;
               }
 

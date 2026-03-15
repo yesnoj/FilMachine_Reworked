@@ -249,8 +249,10 @@ void event_stepElement(lv_event_t *e) {
     processNode *data = (processNode *)lv_event_get_user_data(e);
     stepNode *currentNode = getStepElementEntryByObject(obj, data);
 
+    /* Fix #21: Guard against NULL indev — lv_obj_send_event() bypasses indev
+     * processing, so lv_indev_active() returns NULL in that context. */
     lv_indev_t *indev = lv_indev_active();
-    lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
+    lv_dir_t dir = indev ? lv_indev_get_gesture_dir(indev) : LV_DIR_NONE;
 
     static lv_point_t last_point;
     static lv_point_t press_point;       /* Position where press started */

@@ -9,6 +9,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # ──────────────────────────────────────────────
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SDL2 REQUIRED sdl2)
+link_directories(${SDL2_LIBRARY_DIRS} /opt/homebrew/lib)
 
 # ──────────────────────────────────────────────
 # LVGL 9.2.2
@@ -86,7 +87,6 @@ target_include_directories(filmachine_sim PRIVATE
     ${SDL2_INCLUDE_DIRS}
 )
 
-link_directories(/opt/homebrew/lib)
 target_link_libraries(filmachine_sim
     lvgl
     ${SDL2_LIBRARIES}
@@ -104,6 +104,68 @@ target_compile_options(filmachine_sim PRIVATE
 )
 
 if(APPLE)
-    link_directories(/opt/homebrew/lib)
     target_link_libraries(filmachine_sim "-framework Cocoa")
+endif()
+
+# ──────────────────────────────────────────────
+# Automated Test Runner
+# ──────────────────────────────────────────────
+set(TEST_SOURCES
+    tests/test_runner.c
+    tests/test_helpers.c
+    tests/test_navigation.c
+    tests/test_processes.c
+    tests/test_process_crud.c
+    tests/test_steps.c
+    tests/test_step_crud.c
+    tests/test_execution.c
+    tests/test_persistence.c
+    tests/test_settings.c
+    tests/test_filter.c
+    tests/test_tools.c
+    tests/test_edge_cases.c
+    tests/test_utilities.c
+)
+
+add_executable(filmachine_test
+    ${TEST_SOURCES}
+    # Stubs (same as simulator, but test_runner.c replaces src/main.c)
+    stub/esp_stubs.c
+    stub/fatfs_stubs.c
+    stub/freertos_stubs.c
+    # All FilMachine application sources
+    ${FILMACHINE_SOURCES}
+)
+
+target_include_directories(filmachine_test PRIVATE
+    ${CMAKE_SOURCE_DIR}/main/include
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/stub
+    ${CMAKE_SOURCE_DIR}/tests
+    ${CMAKE_SOURCE_DIR}/lvgl_config
+    ${SDL2_INCLUDE_DIRS}
+)
+
+target_link_libraries(filmachine_test
+    lvgl
+    ${SDL2_LIBRARIES}
+    m
+    pthread
+)
+
+target_compile_definitions(filmachine_test PRIVATE
+    TEST_RESULTS_DIR="${CMAKE_SOURCE_DIR}/test_results"
+)
+
+target_compile_options(filmachine_test PRIVATE
+    ${SDL2_CFLAGS_OTHER}
+    -Wall
+    -Wno-unused-function
+    -Wno-unused-variable
+    -Wno-unused-but-set-variable
+    -Wno-missing-braces
+)
+
+if(APPLE)
+    target_link_libraries(filmachine_test "-framework Cocoa")
 endif()

@@ -147,21 +147,37 @@ void event_checkup(lv_event_t * e){
     }
 
     if(obj == gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton){
-        LV_LOG_USER("User pressed gui.tempProcessNode->process.processDetails->checkup->checkupCloseButtonLabel");
-        lv_msgbox_close(mboxCont);
-        
-        isProcessingStatus0created = 0;
-        isProcessingStatus1created = 0;
-        isStepStatus0created = 0;
-        isStepStatus1created = 0;
-        isStepStatus2created = 0;
-        isStepStatus3created = 0;
-        isStepStatus4created = 0;
-        
-        lv_obj_delete(gui.tempProcessNode->process.processDetails->checkup->checkupContainer); // was gui.tempProcessNode->process.processDetails->checkup
-        //list of all styles to be reset, so clean the memory.
+        LV_LOG_USER("User pressed checkupCloseButton");
+
+        /* FIX #19: Do NOT call lv_msgbox_close — checkupParent is a regular
+         * screen created with lv_obj_create(NULL), NOT an lv_msgbox.
+         * Calling lv_msgbox_close on it causes a BUS ERROR (crash). */
+
+        /* Safety: delete any timers that might still be running */
+        if(gui.tempProcessNode->process.processDetails->checkup->processTimer != NULL) {
+            lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->processTimer);
+            gui.tempProcessNode->process.processDetails->checkup->processTimer = NULL;
+        }
+        if(gui.tempProcessNode->process.processDetails->checkup->pumpTimer != NULL) {
+            lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
+            gui.tempProcessNode->process.processDetails->checkup->pumpTimer = NULL;
+        }
+
+        /* Reset static state for next process run */
+        resetStuffBeforeNextProcess();
+
+        /* Clean up the style */
         lv_style_reset(&gui.tempProcessNode->process.processDetails->checkup->textAreaStyleCheckup);
+
+        /* Switch back to the menu screen FIRST, then delete the checkup screen */
         lv_scr_load(gui.page.menu.screen_mainMenu);
+
+        /* Delete the entire checkup screen (checkupParent owns checkupContainer) */
+        if(gui.tempProcessNode->process.processDetails->checkup->checkupParent != NULL) {
+            lv_obj_delete(gui.tempProcessNode->process.processDetails->checkup->checkupParent);
+            gui.tempProcessNode->process.processDetails->checkup->checkupParent = NULL;
+            gui.tempProcessNode->process.processDetails->checkup->checkupContainer = NULL;
+        }
         return;
     }
     if(obj == gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton){
@@ -464,7 +480,7 @@ void processTimer(lv_timer_t * timer) {
     }
     else{
         lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->processTimer);
-
+        gui.tempProcessNode->process.processDetails->checkup->processTimer = NULL;
     }
 
     lv_label_set_text_fmt(gui.tempProcessNode->process.processDetails->checkup->checkupProcessTimeLeftValue, "%dm%ds", remainingProcessMins,
@@ -493,6 +509,7 @@ void processTimer(lv_timer_t * timer) {
           qSysAction( SAVE_MACHINE_STATS );
           
           lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->processTimer);
+          gui.tempProcessNode->process.processDetails->checkup->processTimer = NULL;
           lv_timer_resume(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
         }
     }
@@ -562,6 +579,7 @@ void handleIntermediateOrLastStep(sCheckup* checkup, bool isLastStep) {
             lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
             lv_obj_clear_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
             lv_timer_delete(checkup->pumpTimer);
+            checkup->pumpTimer = NULL;
         }
     } else {
         LV_LOG_USER("Intermediate step");
