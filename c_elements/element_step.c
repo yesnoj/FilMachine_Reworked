@@ -258,11 +258,14 @@ void event_stepElement(lv_event_t *e) {
     #define DRAG_AUTO_SCROLL_ZONE       60   /* px from container edge to trigger scroll */
     #define DRAG_AUTO_SCROLL_SPEED_MIN  4    /* px per tick — finger just entered zone */
     #define DRAG_AUTO_SCROLL_SPEED_MAX  18   /* px per tick — finger at the very edge */
+    #define STEP_HEIGHT                 70   /* px — height of one step element */
+    #define STEP_Y_START               -13   /* px — Y of the first step slot */
 
     static lv_point_t last_point;
     static lv_point_t press_point;       /* Position where press started */
     static bool dragging = false;
     static bool ignore_click = false;    /* Flag to ignore click */
+    static int drag_slot = -1;           /* Target slot index during drag (-1 = none) */
 
     if (indev == NULL)
         return;
@@ -293,68 +296,50 @@ void event_stepElement(lv_event_t *e) {
             if (currentNode->step.gestureHandled == true) {
                 currentNode->step.longPressHandled = false;
                 dragging = false;
+                drag_slot = -1;
                 lv_style_set_shadow_spread(&currentNode->step.stepStyle, 0);
                 lv_obj_add_flag(lv_obj_get_parent(stepObj), LV_OBJ_FLAG_SCROLLABLE);
+                reorderStepElements(data);  /* Reset all positions back */
                 LV_LOG_USER("Long press cancelled by gesture");
                 return;
             }
-            if (data->process.processDetails->stepElementsList.size > 1) {
+            if (data->process.processDetails->stepElementsList.size > 1 && drag_slot >= 0) {
                 lv_style_set_shadow_spread(&currentNode->step.stepStyle, 0);
                 lv_obj_add_flag(lv_obj_get_parent(stepObj), LV_OBJ_FLAG_SCROLLABLE);
 
                 /* Save original prev pointer to detect if order actually changed */
                 stepNode *originalPrev = currentNode->prev;
 
-                stepNode *previous = NULL;
-                stepNode *next = data->process.processDetails->stepElementsList.start;
-                lv_coord_t obj_y = lv_obj_get_y_aligned(stepObj);
-
-                bool moveUp = true;
-                lv_indev_get_point(lv_indev_get_act(), &last_point);
-
-                if (last_point.y > obj_y) {
-                    moveUp = false;
-                }
-
-                while (next) {
-                    /* Skip currentNode to avoid self-referencing circular link */
-                    if (next == currentNode) {
-                        next = next->next;
-                        continue;
-                    }
-                    lv_coord_t next_y = lv_obj_get_y_aligned(next->step.stepElement);
-                    if ((moveUp && next_y >= obj_y) || (!moveUp && next_y > obj_y)) {
-                        break;
-                    }
-                    previous = next;
-                    next = next->next;
-                }
-
+                /* Use drag_slot to find the insertion point in the linked list.
+                 * Walk the list (skipping currentNode) to find the node at slot drag_slot-1 */
                 removeStepElementFromList(data, currentNode);
 
-                if (previous == NULL) {
+                if(drag_slot == 0) {
                     insertStepElementAfter(data, NULL, currentNode);
                 } else {
-                    insertStepElementAfter(data, previous, currentNode);
+                    stepNode *target = data->process.processDetails->stepElementsList.start;
+                    for(int i = 1; i < drag_slot && target && target->next; i++) {
+                        target = target->next;
+                    }
+                    insertStepElementAfter(data, target, currentNode);
                 }
 
                 reorderStepElements(data);
 
-                /* After reorder, reset any accumulated scroll overshoot
-                   then smoothly scroll so the dropped step is visible */
-                lv_obj_t *cont = lv_obj_get_parent(stepObj);
-                lv_obj_scroll_to_y(cont, 0, LV_ANIM_OFF);
+                /* Clamp any accumulated scroll overshoot back to valid bounds,
+                   then scroll to show the dropped step */
+                lv_obj_readjust_scroll(lv_obj_get_parent(stepObj), LV_ANIM_OFF);
                 lv_obj_scroll_to_view(stepObj, LV_ANIM_ON);
                 lv_obj_invalidate(stepObj);
 
-                /* Detect reorder by comparing prev pointer (not Y positions,
-                   which reorderStepElements already reset to sequential) */
+                /* Detect reorder by comparing prev pointer */
                 if (currentNode->prev != originalPrev) {
                     gui.tempProcessNode->process.processDetails->somethingChanged = true;
                     lv_obj_send_event(gui.tempProcessNode->process.processDetails->processSaveButton, LV_EVENT_REFRESH, NULL);
                 }
 
                 dragging = false;
+                drag_slot = -1;
             }
             currentNode->step.longPressHandled = false;  /* Reset flag after reorder */
         }
@@ -553,11 +538,15 @@ void event_stepElement(lv_event_t *e) {
         lv_style_set_shadow_spread(&currentNode->step.stepStyle, 3);
         lv_obj_remove_flag(lv_obj_get_parent(stepObj), LV_OBJ_FLAG_SCROLLABLE);
         dragging = true;
+        /* Initialize drag_slot to current position in list */
+        drag_slot = 0;
+        stepNode *tmp = data->process.processDetails->stepElementsList.start;
+        while(tmp && tmp != currentNode) { drag_slot++; tmp = tmp->next; }
+        LV_LOG_USER("DRAG START drag_slot=%d step_y=%"PRIi32"", drag_slot, lv_obj_get_y_aligned(stepObj));
     }
 
     if (code == LV_EVENT_LONG_PRESSED_REPEAT && currentNode->step.swipedLeft == false && currentNode->step.swipedRight == false) {
         currentNode->step.longPressHandled = true;
-        LV_LOG_USER("LV_EVENT_LONG_PRESSED_REPEAT");
 
         if (gui.tempProcessNode->process.processDetails->stepElementsList.size > 1) {
             if (dragging) {
@@ -566,26 +555,10 @@ void event_stepElement(lv_event_t *e) {
 
                 lv_coord_t dy = current_point.y - last_point.y;
 
-                if (gui.tempProcessNode->process.processDetails->stepElementsList.start == currentNode) {
-                    LV_LOG_USER("IS FIRST STEP IN LIST %"PRIi32" %"PRIi32"", dy, lv_obj_get_y_aligned(stepObj));
-                    if ((dy + lv_obj_get_y_aligned(stepObj)) >= -16) {
-                        lv_obj_set_pos(stepObj, lv_obj_get_x_aligned(stepObj), lv_obj_get_y_aligned(stepObj) + dy);
-                        last_point = current_point;
-                        lv_obj_invalidate(stepObj);
-                    }
-                } else if (gui.tempProcessNode->process.processDetails->stepElementsList.end == currentNode) {
-                    LV_LOG_USER("IS LAST STEP IN LIST %"PRIi32" %"PRIi32"", dy, lv_obj_get_y_aligned(stepObj));
-                    if ((dy + lv_obj_get_y_aligned(stepObj)) <= (((gui.tempProcessNode->process.processDetails->stepElementsList.size) * 70) - 53)) {
-                        lv_obj_set_pos(stepObj, lv_obj_get_x_aligned(stepObj), lv_obj_get_y_aligned(stepObj) + dy);
-                        last_point = current_point;
-                        lv_obj_invalidate(stepObj);
-                    }
-                } else {
-                    LV_LOG_USER("IS MIDDLE STEP IN LIST %"PRIi32" %"PRIi32"", dy, lv_obj_get_y_aligned(stepObj));
-                    lv_obj_set_pos(stepObj, lv_obj_get_x_aligned(stepObj), lv_obj_get_y_aligned(stepObj) + dy);
-                    last_point = current_point;
-                    lv_obj_invalidate(stepObj);
-                }
+                /* Move the dragged step with the finger */
+                lv_obj_set_pos(stepObj, lv_obj_get_x_aligned(stepObj),
+                               lv_obj_get_y_aligned(stepObj) + dy);
+                last_point = current_point;
 
                 /* Auto-scroll: when finger is near container edge, scroll the list.
                  * Speed is proportional to proximity — closer to edge = faster scroll.
@@ -599,24 +572,72 @@ void event_stepElement(lv_event_t *e) {
                 lv_coord_t scroll_speed = 0;
 
                 if(dist_bottom < DRAG_AUTO_SCROLL_ZONE && dist_bottom >= 0) {
-                    /* Proportional: 0 at zone entry → max at edge */
                     scroll_speed = DRAG_AUTO_SCROLL_SPEED_MIN +
                         (DRAG_AUTO_SCROLL_SPEED_MAX - DRAG_AUTO_SCROLL_SPEED_MIN) *
                         (DRAG_AUTO_SCROLL_ZONE - dist_bottom) / DRAG_AUTO_SCROLL_ZONE;
-                    /* Near bottom → scroll down, compensate step upward shift */
-                    lv_obj_scroll_by(container, 0, -scroll_speed, LV_ANIM_OFF);
-                    lv_obj_set_pos(stepObj, lv_obj_get_x_aligned(stepObj),
-                                   lv_obj_get_y_aligned(stepObj) + scroll_speed);
+                    /* Clamp to remaining scrollable distance */
+                    lv_coord_t can_scroll = lv_obj_get_scroll_bottom(container);
+                    if(can_scroll <= 0) { scroll_speed = 0; }
+                    else if(scroll_speed > can_scroll) { scroll_speed = can_scroll; }
+                    if(scroll_speed > 0) {
+                        lv_obj_scroll_by(container, 0, -scroll_speed, LV_ANIM_OFF);
+                        lv_obj_set_pos(stepObj, lv_obj_get_x_aligned(stepObj),
+                                       lv_obj_get_y_aligned(stepObj) + scroll_speed);
+                    }
                 } else if(dist_top < DRAG_AUTO_SCROLL_ZONE && dist_top >= 0) {
-                    /* Proportional: 0 at zone entry → max at edge */
                     scroll_speed = DRAG_AUTO_SCROLL_SPEED_MIN +
                         (DRAG_AUTO_SCROLL_SPEED_MAX - DRAG_AUTO_SCROLL_SPEED_MIN) *
                         (DRAG_AUTO_SCROLL_ZONE - dist_top) / DRAG_AUTO_SCROLL_ZONE;
-                    /* Near top → scroll up, compensate step downward shift */
-                    lv_obj_scroll_by(container, 0, scroll_speed, LV_ANIM_OFF);
-                    lv_obj_set_pos(stepObj, lv_obj_get_x_aligned(stepObj),
-                                   lv_obj_get_y_aligned(stepObj) - scroll_speed);
+                    /* Clamp to remaining scrollable distance */
+                    lv_coord_t can_scroll = lv_obj_get_scroll_top(container);
+                    if(can_scroll <= 0) { scroll_speed = 0; }
+                    else if(scroll_speed > can_scroll) { scroll_speed = can_scroll; }
+                    if(scroll_speed > 0) {
+                        lv_obj_scroll_by(container, 0, scroll_speed, LV_ANIM_OFF);
+                        lv_obj_set_pos(stepObj, lv_obj_get_x_aligned(stepObj),
+                                       lv_obj_get_y_aligned(stepObj) - scroll_speed);
+                    }
                 }
+
+                /* ── Live reorder: shift other steps to open a gap ── */
+                lv_coord_t step_y = lv_obj_get_y_aligned(stepObj);
+                lv_coord_t step_center_y = step_y + STEP_HEIGHT / 2;
+                int total = (int)data->process.processDetails->stepElementsList.size;
+                int new_slot = (step_center_y - STEP_Y_START) / STEP_HEIGHT;
+                if(new_slot < 0) new_slot = 0;
+                if(new_slot >= total) new_slot = total - 1;
+
+                LV_LOG_USER("REPEAT dy=%"PRIi32" step_y=%"PRIi32" center=%"PRIi32" new_slot=%d drag_slot=%d scroll_spd=%"PRIi32"",
+                            dy, step_y, step_center_y, new_slot, drag_slot, scroll_speed);
+
+                if(new_slot != drag_slot) {
+                    LV_LOG_USER("SLOT CHANGED %d -> %d", drag_slot, new_slot);
+                    drag_slot = new_slot;
+
+                    /* Reposition all OTHER steps, leaving a gap at drag_slot */
+                    int slot = 0;
+                    stepNode *n = data->process.processDetails->stepElementsList.start;
+                    while(n) {
+                        if(n != currentNode) {
+                            /* Skip the gap slot — that's where the dragged step will land */
+                            if(slot == drag_slot) slot++;
+                            lv_coord_t target_y = STEP_Y_START + slot * STEP_HEIGHT;
+                            /* Animate other steps to their new positions */
+                            lv_anim_t a;
+                            lv_anim_init(&a);
+                            lv_anim_set_var(&a, n->step.stepElement);
+                            lv_anim_set_values(&a, lv_obj_get_y_aligned(n->step.stepElement), target_y);
+                            lv_anim_set_duration(&a, 150);
+                            lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)lv_obj_set_y);
+                            lv_anim_set_path_cb(&a, lv_anim_path_ease_out);
+                            lv_anim_start(&a);
+                            slot++;
+                        }
+                        n = n->next;
+                    }
+                }
+
+                lv_obj_invalidate(stepObj);
             }
         }
     }
