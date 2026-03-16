@@ -410,6 +410,13 @@ typedef enum {
 #define checkupTargetToleranceTemp_text				"tolerance"
 #define checkupProcessComplete_text					"Process\nCOMPLETE!"
 #define checkupProcessStopped_text					"Process\nSTOPPED!"
+#define checkupHeaterStatusFmt_text					"Heater: %s"
+#define checkupHeaterOn_text						"ON"
+#define checkupHeaterOff_text						"OFF"
+#define checkupTempReached_text						"Temp ok!"
+#define checkupTempTimedOut_text						"Timeout!"
+#define checkupContinue_text						"Continue"
+#define checkupNoTempControl_text					"No temp control"
 
 /* Process detail strings/vars */
 #define processDetailStep_text				 		"Steps"

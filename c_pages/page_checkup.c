@@ -585,7 +585,7 @@ void tempTimerCallback(lv_timer_t * timer) {
 
     /* Update heater status label */
     if(ckup->checkupHeaterStatusLabel != NULL)
-        lv_label_set_text_fmt(ckup->checkupHeaterStatusLabel, "Heater: %s", ckup->heaterOn ? "ON" : "OFF");
+        lv_label_set_text_fmt(ckup->checkupHeaterStatusLabel, checkupHeaterStatusFmt_text, ckup->heaterOn ? checkupHeaterOn_text : checkupHeaterOff_text);
 
     /* Safety timeout counter (logged to terminal only) */
     ckup->tempTimeoutCounter++;
@@ -605,7 +605,7 @@ void tempTimerCallback(lv_timer_t * timer) {
         ckup->tempTimer = NULL;
 
         if(ckup->checkupHeaterStatusLabel != NULL)
-            lv_label_set_text(ckup->checkupHeaterStatusLabel, "TEMP OK!");
+            lv_label_set_text(ckup->checkupHeaterStatusLabel, checkupTempReached_text);
 
         /* If autostart is enabled, advance to step 3 automatically */
         if(gui.page.settings.settingsParams.isProcessAutostart) {
@@ -619,7 +619,7 @@ void tempTimerCallback(lv_timer_t * timer) {
             if(ckup->checkupSkipButton != NULL)
                 lv_obj_set_width(ckup->checkupSkipButton, 150);
             if(ckup->checkupSkipButtonLabel != NULL)
-                lv_label_set_text(ckup->checkupSkipButtonLabel, "CONTINUE");
+                lv_label_set_text(ckup->checkupSkipButtonLabel, checkupContinue_text);
         }
         return;
     }
@@ -635,9 +635,9 @@ void tempTimerCallback(lv_timer_t * timer) {
         ckup->tempTimer = NULL;
 
         if(ckup->checkupHeaterStatusLabel != NULL)
-            lv_label_set_text(ckup->checkupHeaterStatusLabel, "TIMEOUT!");
+            lv_label_set_text(ckup->checkupHeaterStatusLabel, checkupTempTimedOut_text);
         if(ckup->checkupSkipButtonLabel != NULL)
-            lv_label_set_text(ckup->checkupSkipButtonLabel, "SKIP");
+            lv_label_set_text(ckup->checkupSkipButtonLabel, checkupSkip_text);
     }
 }
 
@@ -1527,7 +1527,7 @@ void checkup(processNode *processToCheckup) {
 
                                 /* Heater status label (bottom of temps container) */
                                 gui.tempProcessNode->process.processDetails->checkup->checkupHeaterStatusLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempsContainer);
-                                lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupHeaterStatusLabel, "Heater: OFF");
+                                lv_label_set_text_fmt(gui.tempProcessNode->process.processDetails->checkup->checkupHeaterStatusLabel, checkupHeaterStatusFmt_text, checkupHeaterOff_text);
                                 lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupHeaterStatusLabel, &lv_font_montserrat_16, 0);
                                 lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupHeaterStatusLabel, LV_ALIGN_BOTTOM_MID, 0, -35);
 
@@ -1546,7 +1546,7 @@ void checkup(processNode *processToCheckup) {
                                     gui.tempProcessNode->process.processDetails->checkup->tempTimer = lv_timer_create(tempTimerCallback, 1000, NULL);
                                 } else {
                                     gui.tempProcessNode->process.processDetails->checkup->tempTimer = NULL;
-                                    lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupHeaterStatusLabel, "No temp control");
+                                    lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupHeaterStatusLabel, checkupNoTempControl_text);
                                 }
 
                         isStepStatus2created = 1;

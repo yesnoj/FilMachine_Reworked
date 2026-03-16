@@ -254,6 +254,11 @@ void event_stepElement(lv_event_t *e) {
     lv_indev_t *indev = lv_indev_active();
     lv_dir_t dir = indev ? lv_indev_get_gesture_dir(indev) : LV_DIR_NONE;
 
+    /* Auto-scroll during drag & drop */
+    #define DRAG_AUTO_SCROLL_ZONE       60   /* px from container edge to trigger scroll */
+    #define DRAG_AUTO_SCROLL_SPEED_MIN  4    /* px per tick — finger just entered zone */
+    #define DRAG_AUTO_SCROLL_SPEED_MAX  18   /* px per tick — finger at the very edge */
+
     static lv_point_t last_point;
     static lv_point_t press_point;       /* Position where press started */
     static bool dragging = false;
@@ -297,6 +302,9 @@ void event_stepElement(lv_event_t *e) {
                 lv_style_set_shadow_spread(&currentNode->step.stepStyle, 0);
                 lv_obj_add_flag(lv_obj_get_parent(stepObj), LV_OBJ_FLAG_SCROLLABLE);
 
+                /* Save original prev pointer to detect if order actually changed */
+                stepNode *originalPrev = currentNode->prev;
+
                 stepNode *previous = NULL;
                 stepNode *next = data->process.processDetails->stepElementsList.start;
                 lv_coord_t obj_y = lv_obj_get_y_aligned(stepObj);
@@ -331,9 +339,17 @@ void event_stepElement(lv_event_t *e) {
                 }
 
                 reorderStepElements(data);
+
+                /* After reorder, reset any accumulated scroll overshoot
+                   then smoothly scroll so the dropped step is visible */
+                lv_obj_t *cont = lv_obj_get_parent(stepObj);
+                lv_obj_scroll_to_y(cont, 0, LV_ANIM_OFF);
+                lv_obj_scroll_to_view(stepObj, LV_ANIM_ON);
                 lv_obj_invalidate(stepObj);
 
-                if (hasListChanged(data)) {
+                /* Detect reorder by comparing prev pointer (not Y positions,
+                   which reorderStepElements already reset to sequential) */
+                if (currentNode->prev != originalPrev) {
                     gui.tempProcessNode->process.processDetails->somethingChanged = true;
                     lv_obj_send_event(gui.tempProcessNode->process.processDetails->processSaveButton, LV_EVENT_REFRESH, NULL);
                 }
@@ -569,6 +585,37 @@ void event_stepElement(lv_event_t *e) {
                     lv_obj_set_pos(stepObj, lv_obj_get_x_aligned(stepObj), lv_obj_get_y_aligned(stepObj) + dy);
                     last_point = current_point;
                     lv_obj_invalidate(stepObj);
+                }
+
+                /* Auto-scroll: when finger is near container edge, scroll the list.
+                 * Speed is proportional to proximity — closer to edge = faster scroll.
+                 * Compensate step position so it stays under the finger. */
+                lv_obj_t *container = lv_obj_get_parent(stepObj);
+                lv_area_t cont_coords;
+                lv_obj_get_coords(container, &cont_coords);
+
+                lv_coord_t dist_bottom = cont_coords.y2 - current_point.y;
+                lv_coord_t dist_top    = current_point.y - cont_coords.y1;
+                lv_coord_t scroll_speed = 0;
+
+                if(dist_bottom < DRAG_AUTO_SCROLL_ZONE && dist_bottom >= 0) {
+                    /* Proportional: 0 at zone entry → max at edge */
+                    scroll_speed = DRAG_AUTO_SCROLL_SPEED_MIN +
+                        (DRAG_AUTO_SCROLL_SPEED_MAX - DRAG_AUTO_SCROLL_SPEED_MIN) *
+                        (DRAG_AUTO_SCROLL_ZONE - dist_bottom) / DRAG_AUTO_SCROLL_ZONE;
+                    /* Near bottom → scroll down, compensate step upward shift */
+                    lv_obj_scroll_by(container, 0, -scroll_speed, LV_ANIM_OFF);
+                    lv_obj_set_pos(stepObj, lv_obj_get_x_aligned(stepObj),
+                                   lv_obj_get_y_aligned(stepObj) + scroll_speed);
+                } else if(dist_top < DRAG_AUTO_SCROLL_ZONE && dist_top >= 0) {
+                    /* Proportional: 0 at zone entry → max at edge */
+                    scroll_speed = DRAG_AUTO_SCROLL_SPEED_MIN +
+                        (DRAG_AUTO_SCROLL_SPEED_MAX - DRAG_AUTO_SCROLL_SPEED_MIN) *
+                        (DRAG_AUTO_SCROLL_ZONE - dist_top) / DRAG_AUTO_SCROLL_ZONE;
+                    /* Near top → scroll up, compensate step downward shift */
+                    lv_obj_scroll_by(container, 0, scroll_speed, LV_ANIM_OFF);
+                    lv_obj_set_pos(stepObj, lv_obj_get_x_aligned(stepObj),
+                                   lv_obj_get_y_aligned(stepObj) - scroll_speed);
                 }
             }
         }

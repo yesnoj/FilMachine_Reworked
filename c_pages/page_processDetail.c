@@ -408,7 +408,7 @@ if(existingProcess != NULL) {
                           } else{
                               lv_label_set_text(gui.tempProcessNode->process.processDetails->processTempUnitLabel, fahrenheit_text);
                           }
-                          lv_snprintf( tempBuffer, sizeof(tempBuffer), "%5.1f", gui.tempProcessNode->process.processDetails->tempTolerance);
+                          snprintf( tempBuffer, sizeof(tempBuffer), "%.1f", gui.tempProcessNode->process.processDetails->tempTolerance);
                           lv_textarea_set_text(gui.tempProcessNode->process.processDetails->processToleranceTextArea, tempBuffer);
 
                   gui.tempProcessNode->process.processDetails->processTotalTimeContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->processInfoContainer);
