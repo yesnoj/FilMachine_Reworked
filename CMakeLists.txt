@@ -44,6 +44,8 @@ set(SIMULATOR_SOURCES
 set(FILMACHINE_SOURCES
     # main/
     main/accessories.c
+    main/mcp23017.c
+    main/ds18b20.c
 
     # c_pages/
     c_pages/page_home.c

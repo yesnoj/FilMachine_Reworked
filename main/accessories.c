@@ -17,10 +17,13 @@
 #include "sdmmc_cmd.h"
 #include "driver/i2c.h"
 #include "driver/gpio.h"
+#include "driver/ledc.h"
 #include "esp_vfs_fat.h"
 #include "esp_heap_caps.h"
 
 #include "FilMachine.h"
+#include "mcp23017.h"
+#include "ds18b20.h"
 
 #define LESS_THAN_10 1
 #define GREATER_THAN_9 2
@@ -31,6 +34,22 @@ extern struct sys_components		sys;
 extern uint8_t						initErrors;
 
 static const char			*TAG = "Accessory"; /* ESP Debug Message Tag */
+static mcp23017_t           mcp;                /* MCP23017 I/O expander handle */
+static ds18b20_t            ds_bath;            /* DS18B20 bath temperature sensor */
+static ds18b20_t            ds_chemical;        /* DS18B20 chemical temperature sensor */
+
+/* LEDC PWM for motor ENA pin */
+#define MOTOR_LEDC_TIMER      LEDC_TIMER_0
+#define MOTOR_LEDC_MODE       LEDC_LOW_SPEED_MODE
+#define MOTOR_LEDC_CHANNEL    LEDC_CHANNEL_0
+#define MOTOR_LEDC_FREQ_HZ    5000
+#define MOTOR_LEDC_RESOLUTION  LEDC_TIMER_8_BIT
+
+static void motor_ledc_set_duty(uint8_t duty)
+{
+    ledc_set_duty(MOTOR_LEDC_MODE, MOTOR_LEDC_CHANNEL, duty);
+    ledc_update_duty(MOTOR_LEDC_MODE, MOTOR_LEDC_CHANNEL);
+}
 
 void rebootBoard(void) {
 	esp_restart();
@@ -771,47 +790,30 @@ void init_Pins_and_Buses( void ) {
     };
     ESP_ERROR_CHECK(i2c_param_config(I2C_NUM, &i2c_conf));
     ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM, i2c_conf.mode, 0, 0, 0));
-#if 0
-  if (!mcp.begin_I2C()) {
-    LV_LOG_USER("MCP23017_1 init ERROR!");
-    initErrors = INIT_ERROR_I2C_MCP;
-  } else {
-      LV_LOG_USER("MCP23017_1 init OK!");
-      initializeRelayPins();
-      initializeMotorPins();
-  }
-#endif
 
-#if 0 //Maybe this will never work, appears that on this board there is 1*I2C and 1*GPIO, the 1*I2C is the one that has io38 and io39 as SCL/SDA...
-  Wire1.begin(I2C2_SDA, I2C2_SCL); 
-  Wire1.beginTransmission(I2C1_ADR);
+    /* Initialize MCP23017 I/O expander */
+    if (mcp23017_init(&mcp, I2C_NUM, MCP23017_DEFAULT_ADDR) != ESP_OK) {
+        LV_LOG_USER("MCP23017 init ERROR!");
+        initErrors = INIT_ERROR_I2C_MCP;
+    } else {
+        LV_LOG_USER("MCP23017 init OK at 0x%02X", MCP23017_DEFAULT_ADDR);
+        initializeRelayPins();
+        initializeMotorPins();
+    }
 
-  if (Wire1.endTransmission() == 0) {
-    LV_LOG_USER("I2C2 device found at address 0x%x! TOUCH INIT OVER", I2C1_ADR);
-  } else {
-    initErrors = INIT_ERROR_WIRE;
-    LV_LOG_USER("Unknown error at address 0x%x ERROR:   TOUCH", I2C1_ADR);
-  }
-  if (!mcp.begin_I2C(I2C1_ADR,&Wire1)) {
-    LV_LOG_USER("MCP23017_2 init ERROR!");
-    initErrors = INIT_ERROR_I2C_MCP;
-  } else {
-      LV_LOG_USER("MCP23017_2 init OK!");
-      initializeRelayPins();
-      //initializeMotorPins();
-  }
-#endif
+    /* Initialize DS18B20 temperature sensors */
+    if (ds18b20_init(&ds_bath, TEMPERATURE_BATH_PIN) != ESP_OK) {
+        LV_LOG_USER("DS18B20 BATH sensor NOT found on GPIO%d", TEMPERATURE_BATH_PIN);
+    } else {
+        LV_LOG_USER("DS18B20 BATH sensor OK on GPIO%d", TEMPERATURE_BATH_PIN);
+    }
 
-#if 0 
+    if (ds18b20_init(&ds_chemical, TEMPERATURE_CHEMICAL_PIN) != ESP_OK) {
+        LV_LOG_USER("DS18B20 CHEMICAL sensor NOT found on GPIO%d", TEMPERATURE_CHEMICAL_PIN);
+    } else {
+        LV_LOG_USER("DS18B20 CHEMICAL sensor OK on GPIO%d", TEMPERATURE_CHEMICAL_PIN);
+    }
 
-  if (!ads.begin(I2C2_ADR)) {
-    LV_LOG_USER("ADS1115 init ERROR!");
-    initErrors = INIT_ERROR_I2C_ADS;
-  } else {
-      LV_LOG_USER("ADS1115 init OK!");
-      //initializeTemperatureSensor();
-  }
-#endif
   if (initErrors) {
 
     LV_LOG_USER("SOMETHING WRONG initErrors %d", initErrors);
@@ -1313,161 +1315,149 @@ char* generateRandomCharArray(uint8_t length) {
 }
 
 void initializeRelayPins(){
-//  for (uint8_t i = 0; i < RELAY_NUMBER ; i++) {
- //       mcp.pinMode(developingRelays[i], OUTPUT);
-  //      mcp.digitalWrite(developingRelays[i], LOW);
-  //      LV_LOG_USER("Relay Initialization %d : %d", developingRelays[i],mcp.digitalRead(developingRelays[i]));
-    //    }
-  }
+    for (uint8_t i = 0; i < RELAY_NUMBER; i++) {
+        mcp23017_pinMode(&mcp, i, MCP23017_OUTPUT);
+        mcp23017_digitalWrite(&mcp, i, 0);
+        LV_LOG_USER("Relay pin %d init: %d", i, mcp23017_digitalRead(&mcp, i));
+    }
+}
 
 
-void cleanRelayManager(uint8_t pumpFrom, uint8_t pumpTo,uint8_t pumpDir,bool activePump){
-#if 0
-    if (activePump) { // SET TO ON SELECTED RELAYS
-        mcp.digitalWrite(pumpFrom, HIGH);
-        LV_LOG_USER("From %d on : %d", pumpFrom, mcp.digitalRead(pumpFrom));
-        mcp.digitalWrite(pumpTo, HIGH);
-        LV_LOG_USER("To %d on : %d", pumpTo, mcp.digitalRead(pumpTo));
-        mcp.digitalWrite(pumpDir, HIGH);
-        LV_LOG_USER("Direction %d on : %d", pumpDir, mcp.digitalRead(pumpDir));
-    } else { // SET TO OFF ALL THE RELAY
+void cleanRelayManager(uint8_t pumpFrom, uint8_t pumpTo, uint8_t pumpDir, bool activePump){
+    if (activePump) {
+        mcp23017_digitalWrite(&mcp, pumpFrom, 1);
+        LV_LOG_USER("From %d on : %d", pumpFrom, mcp23017_digitalRead(&mcp, pumpFrom));
+        mcp23017_digitalWrite(&mcp, pumpTo, 1);
+        LV_LOG_USER("To %d on : %d", pumpTo, mcp23017_digitalRead(&mcp, pumpTo));
+        mcp23017_digitalWrite(&mcp, pumpDir, 1);
+        LV_LOG_USER("Direction %d on : %d", pumpDir, mcp23017_digitalRead(&mcp, pumpDir));
+    } else {
         if (pumpFrom != INVALID_RELAY && pumpTo != INVALID_RELAY && pumpDir != INVALID_RELAY) {
-            mcp.digitalWrite(pumpFrom, LOW);
-            LV_LOG_USER("From %d off : %d", pumpFrom, mcp.digitalRead(pumpFrom));
-            mcp.digitalWrite(pumpTo, LOW);
-            LV_LOG_USER("To %d off : %d", pumpTo, mcp.digitalRead(pumpTo));
-            mcp.digitalWrite(pumpDir, LOW);
-            LV_LOG_USER("Direction %d off : %d", pumpDir, mcp.digitalRead(pumpDir));
+            mcp23017_digitalWrite(&mcp, pumpFrom, 0);
+            LV_LOG_USER("From %d off : %d", pumpFrom, mcp23017_digitalRead(&mcp, pumpFrom));
+            mcp23017_digitalWrite(&mcp, pumpTo, 0);
+            LV_LOG_USER("To %d off : %d", pumpTo, mcp23017_digitalRead(&mcp, pumpTo));
+            mcp23017_digitalWrite(&mcp, pumpDir, 0);
+            LV_LOG_USER("Direction %d off : %d", pumpDir, mcp23017_digitalRead(&mcp, pumpDir));
         } else {
             for (uint8_t i = 0; i < RELAY_NUMBER; i++) {
-                mcp.digitalWrite(developingRelays[i], LOW);
-                LV_LOG_USER("Relay %d off : %d", developingRelays[i], mcp.digitalRead(developingRelays[i]));
+                mcp23017_digitalWrite(&mcp, i, 0);
+                LV_LOG_USER("Relay %d off : %d", i, mcp23017_digitalRead(&mcp, i));
             }
         }
     }
-#endif
 }
 
 
 void sendValueToRelay(uint8_t pumpFrom, uint8_t pumpDir, bool activePump) {
-	
-#if 0	
-    if (activePump) { // SET TO ON SELECTED RELAYS
-        mcp.digitalWrite(pumpFrom, HIGH);
-        LV_LOG_USER("From %d on : %d", pumpFrom, mcp.digitalRead(pumpFrom));
-        mcp.digitalWrite(pumpDir, HIGH);
-        LV_LOG_USER("Direction %d on : %d", pumpDir, mcp.digitalRead(pumpDir));
+    if (activePump) {
+        mcp23017_digitalWrite(&mcp, pumpFrom, 1);
+        LV_LOG_USER("From %d on : %d", pumpFrom, mcp23017_digitalRead(&mcp, pumpFrom));
+        mcp23017_digitalWrite(&mcp, pumpDir, 1);
+        LV_LOG_USER("Direction %d on : %d", pumpDir, mcp23017_digitalRead(&mcp, pumpDir));
         gui.tempProcessNode->process.processDetails->checkup->isAlreadyPumping = true;
-    } else { // SET TO OFF ALL THE RELAY
-        if (pumpFrom != NULL && pumpDir != NULL) {
-            mcp.digitalWrite(pumpFrom, LOW);
-            LV_LOG_USER("From %d off : %d", pumpFrom, mcp.digitalRead(pumpFrom));
-            mcp.digitalWrite(pumpDir, LOW);
-            LV_LOG_USER("Direction %d off : %d", pumpDir, mcp.digitalRead(pumpDir));
+    } else {
+        if (pumpFrom != INVALID_RELAY && pumpDir != INVALID_RELAY) {
+            mcp23017_digitalWrite(&mcp, pumpFrom, 0);
+            LV_LOG_USER("From %d off : %d", pumpFrom, mcp23017_digitalRead(&mcp, pumpFrom));
+            mcp23017_digitalWrite(&mcp, pumpDir, 0);
+            LV_LOG_USER("Direction %d off : %d", pumpDir, mcp23017_digitalRead(&mcp, pumpDir));
         } else {
             for (uint8_t i = 0; i < RELAY_NUMBER; i++) {
-                mcp.digitalWrite(developingRelays[i], LOW);
-                LV_LOG_USER("Relay %d off : %d", developingRelays[i], mcp.digitalRead(developingRelays[i]));
+                mcp23017_digitalWrite(&mcp, i, 0);
+                LV_LOG_USER("Relay %d off : %d", i, mcp23017_digitalRead(&mcp, i));
             }
         }
     }
-#endif    
-
 }
 
 
 void initializeMotorPins(){
+    /* IN1 and IN2 on MCP23017 */
+    mcp23017_pinMode(&mcp, MOTOR_IN1_PIN, MCP23017_OUTPUT);
+    mcp23017_digitalWrite(&mcp, MOTOR_IN1_PIN, 0);
+    LV_LOG_USER("Motor pin init %d: %d", MOTOR_IN1_PIN, mcp23017_digitalRead(&mcp, MOTOR_IN1_PIN));
 
-#if 0	
-    mcp.pinMode(MOTOR_IN1_PIN , OUTPUT);
-    mcp.digitalWrite(MOTOR_IN1_PIN , LOW);
-    LV_LOG_USER("Motor Pin Initialization %d: %d",MOTOR_IN1_PIN,mcp.digitalRead(MOTOR_IN1_PIN));
+    mcp23017_pinMode(&mcp, MOTOR_IN2_PIN, MCP23017_OUTPUT);
+    mcp23017_digitalWrite(&mcp, MOTOR_IN2_PIN, 0);
+    LV_LOG_USER("Motor pin init %d: %d", MOTOR_IN2_PIN, mcp23017_digitalRead(&mcp, MOTOR_IN2_PIN));
 
-    mcp.pinMode(MOTOR_IN2_PIN , OUTPUT);
-    mcp.digitalWrite(MOTOR_IN2_PIN , LOW);
-    LV_LOG_USER("Motor Pin Initialization %d: %d",MOTOR_IN2_PIN,mcp.digitalRead(MOTOR_IN2_PIN));
+    /* ENA on ESP32 GPIO via LEDC PWM (8-bit, 5kHz) */
+    ledc_timer_config_t timer_conf = {
+        .speed_mode      = MOTOR_LEDC_MODE,
+        .timer_num        = MOTOR_LEDC_TIMER,
+        .duty_resolution  = MOTOR_LEDC_RESOLUTION,
+        .freq_hz          = MOTOR_LEDC_FREQ_HZ,
+        .clk_cfg          = LEDC_AUTO_CLK,
+    };
+    ESP_ERROR_CHECK(ledc_timer_config(&timer_conf));
 
-    //this to use the second "i2c" pins as analog
-    
-//    ledcSetup(0, 5000, 8);
-//    ledcAttachPin(MOTOR_ENA_PIN, 0);
-    ledcAttach(MOTOR_ENA_PIN, 5000, 8);
+    ledc_channel_config_t ch_conf = {
+        .speed_mode = MOTOR_LEDC_MODE,
+        .channel    = MOTOR_LEDC_CHANNEL,
+        .timer_sel  = MOTOR_LEDC_TIMER,
+        .intr_type  = LEDC_INTR_DISABLE,
+        .gpio_num   = MOTOR_ENA_PIN,
+        .duty       = 0,
+        .hpoint     = 0,
+    };
+    ESP_ERROR_CHECK(ledc_channel_config(&ch_conf));
 
-    LV_LOG_USER("Motor Pin Initialization %d: %d",MOTOR_ENA_PIN,analogRead(MOTOR_ENA_PIN));
-#endif
+    LV_LOG_USER("Motor ENA pin %d LEDC init OK", MOTOR_ENA_PIN);
 }
 
 void stopMotor(uint8_t pin1, uint8_t pin2){
-#if 0
-  for (uint8_t dutyCycle = analogVal_rotationSpeedPercent; dutyCycle >= MOTOR_MIN_ANALOG_VAL; dutyCycle--) {
-    ledcWrite(0, dutyCycle);
-    delay(10); // small delay to see the change in brightness
+  for (uint8_t dutyCycle = sys.analogVal_rotationSpeedPercent; dutyCycle >= MOTOR_MIN_ANALOG_VAL; dutyCycle--) {
+    motor_ledc_set_duty(dutyCycle);
+    vTaskDelay(pdMS_TO_TICKS(10));
   }
-  mcp.digitalWrite(pin1, LOW);
-  mcp.digitalWrite(pin2, LOW);
-  ledcWrite(0, 0);
-#endif
+  mcp23017_digitalWrite(&mcp, pin1, 0);
+  mcp23017_digitalWrite(&mcp, pin2, 0);
+  motor_ledc_set_duty(0);
   LV_LOG_USER("Run stopMotor");
 }
 
 void runMotorFW(uint8_t pin1, uint8_t pin2){
+  mcp23017_digitalWrite(&mcp, pin1, 1);
+  mcp23017_digitalWrite(&mcp, pin2, 0);
 
-#if 0
-  mcp.digitalWrite(pin1, HIGH);
-  mcp.digitalWrite(pin2, LOW);
-  
-  for (uint8_t dutyCycle = MOTOR_MIN_ANALOG_VAL; dutyCycle <= analogVal_rotationSpeedPercent; dutyCycle++) {
-    ledcWrite(0, dutyCycle);
-    delay(10); // small delay to see the change in brightness
+  for (uint8_t dutyCycle = MOTOR_MIN_ANALOG_VAL; dutyCycle <= sys.analogVal_rotationSpeedPercent; dutyCycle++) {
+    motor_ledc_set_duty(dutyCycle);
+    vTaskDelay(pdMS_TO_TICKS(10));
   }
-#endif
-
-  LV_LOG_USER("Run runMotorFW at speed %d",sys.analogVal_rotationSpeedPercent);
+  LV_LOG_USER("Run runMotorFW at speed %d", sys.analogVal_rotationSpeedPercent);
 }
 
 void runMotorRV(uint8_t pin1, uint8_t pin2){
+  mcp23017_digitalWrite(&mcp, pin1, 0);
+  mcp23017_digitalWrite(&mcp, pin2, 1);
 
-#if 0
-  mcp.digitalWrite(pin1, LOW);
-  mcp.digitalWrite(pin2, HIGH);
-  
-  for (uint8_t dutyCycle = MOTOR_MIN_ANALOG_VAL; dutyCycle <= analogVal_rotationSpeedPercent; dutyCycle++) {
-    ledcWrite(0, dutyCycle);
-    delay(10);
-  }  
-#endif
-  LV_LOG_USER("Run runMotorRV at speed %d",sys.analogVal_rotationSpeedPercent);
-
-}
-
-void setMotorSpeed(uint8_t pin,uint8_t spd){//max 255
-
-#if 0
-  ledcWrite(0, spd);
-#endif
-  LV_LOG_USER("Set motor speed: %d",spd);
-}
-
-void setMotorSpeedUp(uint8_t pin, uint8_t spd){//max 255
-
-#if 0
-  for(uint8_t i = 0; i <= spd; i++){
-    ledcWrite(0, i);
-    delay(10);
+  for (uint8_t dutyCycle = MOTOR_MIN_ANALOG_VAL; dutyCycle <= sys.analogVal_rotationSpeedPercent; dutyCycle++) {
+    motor_ledc_set_duty(dutyCycle);
+    vTaskDelay(pdMS_TO_TICKS(10));
   }
-#endif
-  LV_LOG_USER("Increase speed to: %d",spd);
+  LV_LOG_USER("Run runMotorRV at speed %d", sys.analogVal_rotationSpeedPercent);
+}
+
+void setMotorSpeed(uint8_t pin, uint8_t spd){
+  motor_ledc_set_duty(spd);
+  LV_LOG_USER("Set motor speed: %d", spd);
+}
+
+void setMotorSpeedUp(uint8_t pin, uint8_t spd){
+  for (uint8_t i = 0; i <= spd; i++) {
+    motor_ledc_set_duty(i);
+    vTaskDelay(pdMS_TO_TICKS(10));
+  }
+  LV_LOG_USER("Increase speed to: %d", spd);
 }
 
 void setMotorSpeedDown(uint8_t pin, uint8_t spd){
-
-#if 0
-  for(uint8_t i = spd; i >= 0; --i){
-    ledcWrite(0, i);
-    delay(10);
+  for (int16_t i = spd; i >= 0; --i) {
+    motor_ledc_set_duty((uint8_t)i);
+    vTaskDelay(pdMS_TO_TICKS(10));
   }
-#endif
-  LV_LOG_USER("Decrease speed to: %d",spd);
+  LV_LOG_USER("Decrease speed to: %d", spd);
 }
 
 
@@ -1507,12 +1497,10 @@ float getTemperature(Adafruit_SHT31 tempSensor){
 
 
 void testPin(uint8_t pin){
-#if 0
-    mcp.digitalWrite(pin, HIGH);
-    delay(500);
-    mcp.digitalWrite(pin, LOW);
-    delay(500);
-#endif
+    mcp23017_digitalWrite(&mcp, pin, 1);
+    vTaskDelay(pdMS_TO_TICKS(500));
+    mcp23017_digitalWrite(&mcp, pin, 0);
+    vTaskDelay(pdMS_TO_TICKS(500));
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1522,13 +1510,27 @@ void testPin(uint8_t pin){
  * ═══════════════════════════════════════════════════ */
 #ifndef SIMULATOR_BUILD
 float sim_getTemperature(uint8_t sensorPin) {
-    /* TODO: implement with real DS18B20 sensor on ESP32 */
-    return 20.0f;
+    float temp = -255.0f;
+    ds18b20_t *sensor = NULL;
+
+    if (sensorPin == TEMPERATURE_BATH_PIN) {
+        sensor = &ds_bath;
+    } else if (sensorPin == TEMPERATURE_CHEMICAL_PIN) {
+        sensor = &ds_chemical;
+    }
+
+    if (sensor && sensor->initialized) {
+        if (ds18b20_read_temp(sensor, &temp) != ESP_OK) {
+            LV_LOG_USER("DS18B20 read error on GPIO%d", sensorPin);
+            temp = -255.0f;
+        }
+    }
+    return temp;
 }
 
 void sim_setHeater(bool on) {
-    /* TODO: call sendValueToRelay(HEATER_RLY, ...) on real hardware */
-    LV_LOG_USER("Heater %s", on ? "ON" : "OFF");
+    mcp23017_digitalWrite(&mcp, HEATER_RLY, on ? 1 : 0);
+    LV_LOG_USER("Heater %s (pin %d = %d)", on ? "ON" : "OFF", HEATER_RLY, mcp23017_digitalRead(&mcp, HEATER_RLY));
 }
 
 void sim_resetTemperatures(void) {
@@ -2100,24 +2102,24 @@ uint8_t getRandomRotationInterval() {
 
 void pwmLedTest(){
    LV_LOG_USER("pwmLedTest");
- #if 0
+   mcp23017_digitalWrite(&mcp, MOTOR_IN1_PIN, 0);
+   mcp23017_digitalWrite(&mcp, MOTOR_IN2_PIN, 1);
+
    for (uint8_t dutyCycle = MOTOR_MIN_ANALOG_VAL; dutyCycle <= MOTOR_MAX_ANALOG_VAL; dutyCycle++) {
-    ledcWrite(0, dutyCycle);
-    mcp.digitalWrite(MOTOR_IN1_PIN, LOW);
-    mcp.digitalWrite(MOTOR_IN2_PIN, HIGH);
-    LV_LOG_USER("dutyCycle %d",dutyCycle);
-    delay(10); // small delay to see the change in brightness
+    motor_ledc_set_duty(dutyCycle);
+    LV_LOG_USER("dutyCycle %d", dutyCycle);
+    vTaskDelay(pdMS_TO_TICKS(10));
   }
 
-  // Example: Decrease LED brightness
   for (uint8_t dutyCycle = MOTOR_MAX_ANALOG_VAL; dutyCycle >= MOTOR_MIN_ANALOG_VAL; dutyCycle--) {
-    ledcWrite(0, dutyCycle);
-    mcp.digitalWrite(MOTOR_IN1_PIN, LOW);
-    mcp.digitalWrite(MOTOR_IN2_PIN, HIGH);
-    LV_LOG_USER("dutyCycle %d",dutyCycle);
-    delay(10); // small delay to see the change in brightness
+    motor_ledc_set_duty(dutyCycle);
+    LV_LOG_USER("dutyCycle %d", dutyCycle);
+    vTaskDelay(pdMS_TO_TICKS(10));
   }
-#endif
+
+  mcp23017_digitalWrite(&mcp, MOTOR_IN1_PIN, 0);
+  mcp23017_digitalWrite(&mcp, MOTOR_IN2_PIN, 0);
+  motor_ledc_set_duty(0);
 }
 
 uint8_t mapPercentageToValue(uint8_t percentage, uint8_t minPercent, uint8_t maxPercent) {
