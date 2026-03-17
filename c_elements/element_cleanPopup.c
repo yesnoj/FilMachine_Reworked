@@ -531,7 +531,7 @@ void cleanPopup (void){
               /*Create style*/
               lv_style_init(&gui.element.cleanPopup.style_cleanTitleLine);
               lv_style_set_line_width(&gui.element.cleanPopup.style_cleanTitleLine, 2);
-              lv_style_set_line_color(&gui.element.cleanPopup.style_cleanTitleLine, lv_palette_main(LV_PALETTE_BLUE));
+              lv_style_set_line_color(&gui.element.cleanPopup.style_cleanTitleLine, lv_color_hex(WHITE));
               lv_style_set_line_rounded(&gui.element.cleanPopup.style_cleanTitleLine, true);
 
               /*Create a line and apply the new style*/

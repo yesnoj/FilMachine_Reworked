@@ -93,7 +93,8 @@ FilMachine_Simulator_v2/
 │   ├── element_filterPopup.c      #   Filter dialog (name, type, preferred)
 │   ├── element_messagePopup.c     #   Generic confirmation/alert popups
 │   ├── element_rollerPopup.c      #   Numeric selector (roller) widget
-│   └── element_cleanPopup.c       #   Cleaning process UI with timer
+│   ├── element_cleanPopup.c       #   Cleaning process UI with timer
+│   └── element_drainPopup.c       #   Drain process UI with animated tank bars
 │
 ├── c_fonts/                       # Custom icon fonts (5 sizes: 15/20/30/40/100px)
 ├── c_graphics/                    # Splash screen image data
@@ -216,6 +217,8 @@ The simulator opens a 480x320 window that reproduces the exact touchscreen inter
 - Filter and search functionality
 - Configuration save/load (reads/writes `sd/FilMachine.cfg`)
 - Export/Import (backup to `sd/FilMachine_Backup.cfg`)
+- Drain machine with animated tank-level bars and relay management
+- Clean machine with per-container rinse cycles and arc progress
 - Simulated temperature readings with heater model
 - Console logging of all system actions (`[SIM] sysAction: ...`)
 
@@ -322,8 +325,8 @@ All settings are saved automatically to the SD card when changed. Slider values 
 
 ### The Tools Tab
 
-- **Clean machine** — Automated cleaning cycle for chemical containers
-- **Drain machine** — Manual drain of all liquids
+- **Clean machine** — Automated cleaning cycle: select which containers to clean (C1, C2, C3), set the number of rinse cycles, and optionally drain the water bath when done. Each cycle fills the container with water from the water bath and then drains it back, with real-time progress shown via arc animations and remaining-time countdown.
+- **Drain machine** — Drains all containers (C1, C2, C3, WB) to waste sequentially. A confirmation screen lists the affected containers; once started, four colored tank bars animate from full to empty in real time, showing which container is currently draining, a ">> WASTE <<" indicator, and a countdown timer. The drain can be stopped at any time via the Stop button.
 - **Import/Export** — Backup and restore configuration to SD card
 - **Statistics** — Completed processes, total time, cleaning cycles, stopped processes
 - **Software info** — Firmware version and serial number

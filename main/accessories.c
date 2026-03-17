@@ -608,6 +608,7 @@ void initGlobals( void ) {
 
   // We only need to initialise the non-zero values
   gui.element.cleanPopup.titleLinePoints[1].x = 200;
+  gui.element.drainPopup.titleLinePoints[1].x = 200;
   gui.element.filterPopup.titleLinePoints[1].x = 200;
   gui.element.rollerPopup.titleLinePoints[1].x = 200;
   gui.element.messagePopup.titleLinePoints[1].x = 200;

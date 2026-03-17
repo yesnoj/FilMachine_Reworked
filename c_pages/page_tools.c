@@ -43,7 +43,7 @@ void event_toolsElement(lv_event_t * e) {
       if(obj == gui.page.tools.toolsCleaningButton) { 
             LV_LOG_USER("PRESSED gui.page.tools.toolsCleaningButton");
             if(gui.element.cleanPopup.cleanPopupParent == NULL) {
-//                cleanPopup();
+                cleanPopup();
                 LV_LOG_USER("New clean popup created!");
             } else {
                   LV_LOG_USER("Clean popup already created!");
@@ -52,8 +52,17 @@ void event_toolsElement(lv_event_t * e) {
                   lv_obj_remove_flag(gui.element.cleanPopup.cleanPopupParent, LV_OBJ_FLAG_HIDDEN);
             }
       }
-      if(obj == gui.page.tools.toolsDrainingButton){ 
+      if(obj == gui.page.tools.toolsDrainingButton){
               LV_LOG_USER("PRESSED gui.page.tools.toolsDrainingButton");
+              if(gui.element.drainPopup.drainPopupParent == NULL) {
+                  drainPopupCreate();
+                  LV_LOG_USER("New drain popup created!");
+              } else {
+                  LV_LOG_USER("Drain popup already created!");
+                  lv_obj_remove_flag(gui.element.drainPopup.drainConfirmContainer, LV_OBJ_FLAG_HIDDEN);
+                  lv_obj_add_flag(gui.element.drainPopup.drainProcessContainer, LV_OBJ_FLAG_HIDDEN);
+                  lv_obj_remove_flag(gui.element.drainPopup.drainPopupParent, LV_OBJ_FLAG_HIDDEN);
+              }
           }
       if(obj == gui.page.tools.toolsExportButton){
               LV_LOG_USER("PRESSED gui.page.tools.toolsExportButton");

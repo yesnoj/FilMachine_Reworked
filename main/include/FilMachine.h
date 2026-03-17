@@ -899,6 +899,49 @@ struct sFilterPopup {
 };
 
 
+struct sDrainPopup {
+	/* Main containers */
+	lv_obj_t			*drainPopupParent;
+	lv_obj_t			*drainContainer;
+	lv_obj_t			*drainTitle;
+	lv_obj_t			*drainTitleLine;
+	lv_style_t			 style_drainTitleLine;
+	lv_point_precise_t	 titleLinePoints[2];
+
+	/* Close button */
+	lv_obj_t			*drainCloseButton;
+	lv_obj_t			*drainCloseButtonLabel;
+
+	/* Confirm phase */
+	lv_obj_t			*drainConfirmContainer;
+	lv_obj_t			*drainInfoLabel;
+	lv_obj_t			*drainStartButton;
+	lv_obj_t			*drainStartButtonLabel;
+	lv_obj_t			*drainCancelButton;
+	lv_obj_t			*drainCancelButtonLabel;
+
+	/* Process phase */
+	lv_obj_t			*drainProcessContainer;
+	lv_obj_t			*tankBar[4];
+	lv_obj_t			*tankLabel[4];
+	lv_obj_t			*drainStatusLabel;
+	lv_obj_t			*drainWasteLabel;
+	lv_obj_t			*drainTimeLabel;
+	lv_obj_t			*drainStopButton;
+	lv_obj_t			*drainStopButtonLabel;
+
+	/* Timer */
+	lv_timer_t			*drainTimer;
+
+	/* Data */
+	bool				 isDraining;
+	bool				 stopNowPressed;
+	uint8_t				 currentTank;
+	int32_t				 tankElapsed;
+	int32_t				 totalElapsed;
+};
+
+
 struct sMessagePopup {
 	/* LVGL objects */
 	lv_obj_t			      *mBoxPopupParent;
@@ -1118,6 +1161,7 @@ struct sKeyboardPopup {
 struct sElements {
 	struct sFilterPopup			filterPopup;
   struct sCleanPopup      cleanPopup;
+  struct sDrainPopup      drainPopup;
 	struct sMessagePopup 		messagePopup;
 	struct sRollerPopup			rollerPopup;
   struct sKeyboardPopup   keyboardPopup;
@@ -1198,6 +1242,12 @@ void filterPopupCreate(void);
 // @file element_messagePopup.c
 void messagePopupCreate(const char *popupTitleText, const char *popupText, const char *textButton1, const char *textButton2, void *whoCallMe);
 void event_messagePopup(lv_event_t *e);
+// @file element_cleanPopup.c
+void event_cleanPopup(lv_event_t *e);
+void cleanPopup(void);
+// @file element_drainPopup.c
+void event_drainPopup(lv_event_t *e);
+void drainPopupCreate(void);
 // @file element_process.c
 void event_processElement(lv_event_t *e);
 void processElementCreate(processNode *newProcess, int32_t tempSize);
