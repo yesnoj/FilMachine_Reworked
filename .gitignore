@@ -1,0 +1,31 @@
+## Build directories
+build/
+build2/
+
+## LVGL library (submodule or vendored)
+lvgl/
+
+## Simulator data
+sim_data/
+
+## macOS junk
+.DS_Store
+**/.DS_Store
+
+## Compiled objects
+*.o
+*.d
+
+## Test output
+test_results/
+
+## ESP-IDF managed components (downloaded automatically)
+managed_components/
+
+## ESP-IDF backup config
+sdkconfig.old
+
+## Temporary / generated
+sd_backup/
+zi*
+*.zip
