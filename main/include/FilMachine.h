@@ -887,8 +887,10 @@ struct sFilterPopup {
 	lv_obj_t	      		*mBoxOnlyPreferredSwitch;
 	lv_obj_t	      		*mBoxResetFilterButton;
 	lv_obj_t	      		*mBoxApplyFilterButton;
+	lv_obj_t	      		*mBoxCloseButton;
+	lv_obj_t	      		*mBoxCloseButtonLabel;
 
-  
+
 	/* Params objects */
   char                filterName[MAX_PROC_NAME_LEN + 1];
   bool                isColorFilter;

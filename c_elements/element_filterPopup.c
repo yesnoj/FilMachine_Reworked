@@ -20,6 +20,13 @@ void event_filterMBox(lv_event_t * e){
   lv_event_code_t code = lv_event_get_code(e);
   lv_obj_t * obj = (lv_obj_t *)lv_event_get_target(e);
 
+  if(obj == gui.element.filterPopup.mBoxCloseButton){
+      if(code == LV_EVENT_CLICKED) {
+        LV_LOG_USER("Close filter popup");
+        lv_obj_add_flag(gui.element.filterPopup.mBoxFilterPopupParent, LV_OBJ_FLAG_HIDDEN);
+      }
+  }
+
   if(obj == gui.element.filterPopup.mBoxApplyFilterButton || obj == gui.element.filterPopup.mBoxResetFilterButton){
       if(code == LV_EVENT_CLICKED) {
         if(obj == gui.element.filterPopup.mBoxApplyFilterButton){
@@ -108,6 +115,19 @@ void filterPopupCreate (void){
       lv_line_set_points(gui.element.filterPopup.mBoxStepPopupTitleLine, gui.element.filterPopup.titleLinePoints, 2);
       lv_obj_add_style(gui.element.filterPopup.mBoxStepPopupTitleLine, &gui.element.filterPopup.style_mBoxTitleLine, 0);
       lv_obj_align(gui.element.filterPopup.mBoxStepPopupTitleLine, LV_ALIGN_TOP_MID, 0, 23);
+
+      //CLOSE BUTTON
+      gui.element.filterPopup.mBoxCloseButton = lv_button_create(gui.element.filterPopup.mBoxContainer);
+      lv_obj_set_size(gui.element.filterPopup.mBoxCloseButton, BUTTON_POPUP_CLOSE_WIDTH, BUTTON_POPUP_CLOSE_HEIGHT);
+      lv_obj_align(gui.element.filterPopup.mBoxCloseButton, LV_ALIGN_TOP_RIGHT, 7, -10);
+      lv_obj_add_event_cb(gui.element.filterPopup.mBoxCloseButton, event_filterMBox, LV_EVENT_CLICKED, gui.element.filterPopup.mBoxCloseButton);
+      lv_obj_set_style_bg_color(gui.element.filterPopup.mBoxCloseButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
+      lv_obj_move_foreground(gui.element.filterPopup.mBoxCloseButton);
+
+            gui.element.filterPopup.mBoxCloseButtonLabel = lv_label_create(gui.element.filterPopup.mBoxCloseButton);
+            lv_label_set_text(gui.element.filterPopup.mBoxCloseButtonLabel, closePopup_icon);
+            lv_obj_set_style_text_font(gui.element.filterPopup.mBoxCloseButtonLabel, &FilMachineFontIcons_20, 0);
+            lv_obj_align(gui.element.filterPopup.mBoxCloseButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
       //NAME TO FILTER
       gui.element.filterPopup.mBoxNameContainer = lv_obj_create(gui.element.filterPopup.mBoxContainer);
