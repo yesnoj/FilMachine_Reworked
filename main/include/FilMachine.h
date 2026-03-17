@@ -1238,6 +1238,7 @@ void event_settingPopupMBox(lv_event_t *e);
 void event_settings_handler(lv_event_t *e);
 void initSettings(void);
 void settings(void);
+void refreshSettingsUI(void);
 // @file page_stepDetail.c
 void event_stepDetail(lv_event_t *e);
 void stepDetail(processNode *referenceNode, stepNode *currentNode);

@@ -64,6 +64,7 @@ void event_tab_switch(lv_event_t * e) {
             lv_obj_set_style_border_opa(gui.page.menu.settingsTab, LV_OPA_50, 0);
             
             lv_obj_clear_flag(gui.page.processes.processesSection, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_scroll_to_y(gui.page.processes.processesListContainer, 0, LV_ANIM_OFF);
         }
         if(gui.page.menu.newSelection == TAB_SETTINGS){
             lv_obj_set_style_bg_color(gui.page.menu.newTabSelected, lv_color_hex(ORANGE_DARK), 0);
@@ -77,6 +78,7 @@ void event_tab_switch(lv_event_t * e) {
             lv_obj_set_style_border_opa(gui.page.menu.settingsTab, LV_OPA_MAX, 0);
 
             lv_obj_clear_flag(gui.page.settings.settingsSection, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_scroll_to_y(gui.page.settings.settingsContainer, 0, LV_ANIM_OFF);
         }
         if(gui.page.menu.newSelection == TAB_TOOLS){
             lv_obj_set_style_bg_color(gui.page.menu.newTabSelected, lv_color_hex(BLUE_DARK), 0);
@@ -90,6 +92,7 @@ void event_tab_switch(lv_event_t * e) {
             lv_obj_set_style_border_opa(gui.page.menu.settingsTab, LV_OPA_50, 0);
 
             lv_obj_clear_flag(gui.page.tools.toolsSection, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_scroll_to_y(gui.page.tools.toolsSection, 0, LV_ANIM_OFF);
         }
       }
     

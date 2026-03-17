@@ -120,6 +120,8 @@ void event_settings_handler(lv_event_t * e)
 	        lv_label_set_text_fmt((lv_obj_t*)lv_event_get_user_data(e), "%d%%", new_value);
 	        gui.page.settings.settingsParams.filmRotationSpeedSetpoint = new_value;
 	        LV_LOG_USER("Film Speed Rotation : %d, with analog value %d", new_value, analogVal_rotationSpeedPercent);
+	    }
+	    if (code == LV_EVENT_RELEASED) {
 	        qSysAction(SAVE_PROCESS_CONFIG);
 	    }
 	}
@@ -136,6 +138,8 @@ void event_settings_handler(lv_event_t * e)
             lv_label_set_text_fmt((lv_obj_t*)lv_event_get_user_data(e), "%"PRIi32"sec", lv_slider_get_value(act_cb));
             gui.page.settings.settingsParams.rotationIntervalSetpoint = lv_slider_get_value(act_cb);
             LV_LOG_USER("Film Rotation Inversion Interval : %"PRIi32"",lv_slider_get_value(act_cb));
+        }
+        if(code == LV_EVENT_RELEASED) {
             qSysAction(SAVE_PROCESS_CONFIG);
         }
     }
@@ -151,6 +155,8 @@ void event_settings_handler(lv_event_t * e)
             lv_label_set_text_fmt((lv_obj_t*)lv_event_get_user_data(e), "~%"PRIi32"%%", lv_slider_get_value(act_cb));
             gui.page.settings.settingsParams.randomSetpoint = lv_slider_get_value(act_cb);
             LV_LOG_USER("Film Randomness : %"PRIi32", for time: %"PRIu8"sec, is %"PRIu8"sec",lv_slider_get_value(act_cb),gui.page.settings.settingsParams.rotationIntervalSetpoint, getRandomRotationInterval());
+        }
+        if(code == LV_EVENT_RELEASED) {
             qSysAction(SAVE_PROCESS_CONFIG);
         }
      }
@@ -183,6 +189,8 @@ void event_settings_handler(lv_event_t * e)
             lv_label_set_text_fmt((lv_obj_t*)lv_event_get_user_data(e), "%"PRIi32"%%", lv_slider_get_value(act_cb));
             LV_LOG_USER("Drain/fill time overlap percent : %"PRIi32"",lv_slider_get_value(act_cb));
             gui.page.settings.settingsParams.drainFillOverlapSetpoint = lv_slider_get_value(act_cb);
+        }
+        if(code == LV_EVENT_RELEASED) {
             qSysAction(SAVE_PROCESS_CONFIG);
         }
     }
@@ -203,6 +211,8 @@ void event_settings_handler(lv_event_t * e)
             lv_label_set_text_fmt((lv_obj_t*)lv_event_get_user_data(e), "%ds", new_value);
             LV_LOG_USER("Multi rinse cycle time (s): %d", new_value);
             gui.page.settings.settingsParams.multiRinseTime = new_value;
+        }
+        if(code == LV_EVENT_RELEASED) {
             qSysAction(SAVE_PROCESS_CONFIG);
         }
     }
@@ -350,14 +360,15 @@ static void initSettings_sliders(lv_obj_t *parent)
         lv_obj_set_style_bg_color(gui.page.settings.filmRotationSpeedSlider,lv_color_hex(ORANGE) , LV_PART_KNOB);
         lv_obj_set_style_bg_color(gui.page.settings.filmRotationSpeedSlider,lv_color_hex(ORANGE_LIGHT) , LV_PART_INDICATOR);
         lv_obj_set_style_bg_color(gui.page.settings.filmRotationSpeedSlider, lv_palette_lighten(LV_PALETTE_GREY, 3), LV_PART_MAIN);
-        lv_slider_set_value(gui.page.settings.filmRotationSpeedSlider, gui.page.settings.settingsParams.filmRotationSpeedSetpoint, LV_ANIM_OFF);
         lv_slider_set_range(gui.page.settings.filmRotationSpeedSlider, 10, 100);
+        lv_slider_set_value(gui.page.settings.filmRotationSpeedSlider, gui.page.settings.settingsParams.filmRotationSpeedSetpoint, LV_ANIM_OFF);
 
 
         gui.page.settings.filmRotationSpeedValueLabel = lv_label_create(gui.page.settings.filmRotationSpeedContainer);
         lv_obj_set_style_text_font(gui.page.settings.filmRotationSpeedValueLabel, &lv_font_montserrat_22, 0);
         lv_obj_align(gui.page.settings.filmRotationSpeedValueLabel, LV_ALIGN_TOP_RIGHT, 5, -10);
         lv_obj_add_event_cb(gui.page.settings.filmRotationSpeedSlider, event_settings_handler, LV_EVENT_VALUE_CHANGED, gui.page.settings.filmRotationSpeedValueLabel);
+        lv_obj_add_event_cb(gui.page.settings.filmRotationSpeedSlider, event_settings_handler, LV_EVENT_RELEASED, gui.page.settings.filmRotationSpeedValueLabel);
         lv_label_set_text_fmt(gui.page.settings.filmRotationSpeedValueLabel, "%d%%", gui.page.settings.settingsParams.filmRotationSpeedSetpoint);
 
 
@@ -381,13 +392,14 @@ static void initSettings_sliders(lv_obj_t *parent)
         lv_obj_set_style_bg_color(gui.page.settings.filmRotationInversionIntervalSlider,lv_color_hex(ORANGE) , LV_PART_KNOB);
         lv_obj_set_style_bg_color(gui.page.settings.filmRotationInversionIntervalSlider,lv_color_hex(ORANGE_LIGHT) , LV_PART_INDICATOR);
         lv_obj_set_style_bg_color(gui.page.settings.filmRotationInversionIntervalSlider, lv_palette_lighten(LV_PALETTE_GREY, 3), LV_PART_MAIN);
-        lv_slider_set_value(gui.page.settings.filmRotationInversionIntervalSlider, gui.page.settings.settingsParams.rotationIntervalSetpoint, LV_ANIM_OFF);
         lv_slider_set_range(gui.page.settings.filmRotationInversionIntervalSlider, 10, 60);
+        lv_slider_set_value(gui.page.settings.filmRotationInversionIntervalSlider, gui.page.settings.settingsParams.rotationIntervalSetpoint, LV_ANIM_OFF);
 
         gui.page.settings.filmRotationInverseIntervalValueLabel = lv_label_create(gui.page.settings.filmRotationInverseIntervalContainer);
         lv_obj_set_style_text_font(gui.page.settings.filmRotationInverseIntervalValueLabel, &lv_font_montserrat_22, 0);
         lv_obj_align(gui.page.settings.filmRotationInverseIntervalValueLabel, LV_ALIGN_TOP_RIGHT, 5, -10);
         lv_obj_add_event_cb(gui.page.settings.filmRotationInversionIntervalSlider, event_settings_handler, LV_EVENT_VALUE_CHANGED, gui.page.settings.filmRotationInverseIntervalValueLabel);
+        lv_obj_add_event_cb(gui.page.settings.filmRotationInversionIntervalSlider, event_settings_handler, LV_EVENT_RELEASED, gui.page.settings.filmRotationInverseIntervalValueLabel);
         lv_label_set_text_fmt(gui.page.settings.filmRotationInverseIntervalValueLabel, "%"PRIu8"sec", gui.page.settings.settingsParams.rotationIntervalSetpoint);
 
 
@@ -417,6 +429,7 @@ static void initSettings_sliders(lv_obj_t *parent)
         lv_obj_set_style_text_font(gui.page.settings.filmRotationRandomValueLabel, &lv_font_montserrat_22, 0);
         lv_obj_align(gui.page.settings.filmRotationRandomValueLabel, LV_ALIGN_TOP_RIGHT, 5, -10);
         lv_obj_add_event_cb(gui.page.settings.filmRandomSlider, event_settings_handler, LV_EVENT_VALUE_CHANGED, gui.page.settings.filmRotationRandomValueLabel);
+        lv_obj_add_event_cb(gui.page.settings.filmRandomSlider, event_settings_handler, LV_EVENT_RELEASED, gui.page.settings.filmRotationRandomValueLabel);
         lv_label_set_text_fmt(gui.page.settings.filmRotationRandomValueLabel, "~%"PRIu8"%%", gui.page.settings.settingsParams.randomSetpoint);
 
 
@@ -446,6 +459,7 @@ static void initSettings_sliders(lv_obj_t *parent)
         lv_obj_set_style_text_font(gui.page.settings.drainFillTimeValueLabel, &lv_font_montserrat_22, 0);
         lv_obj_align(gui.page.settings.drainFillTimeValueLabel, LV_ALIGN_TOP_RIGHT, 5, -10);
         lv_obj_add_event_cb(gui.page.settings.drainFillTimeSlider, event_settings_handler, LV_EVENT_VALUE_CHANGED, gui.page.settings.drainFillTimeValueLabel);
+        lv_obj_add_event_cb(gui.page.settings.drainFillTimeSlider, event_settings_handler, LV_EVENT_RELEASED, gui.page.settings.drainFillTimeValueLabel);
         lv_label_set_text_fmt(gui.page.settings.drainFillTimeValueLabel, "%d%%", gui.page.settings.settingsParams.drainFillOverlapSetpoint);
 
 
@@ -466,13 +480,14 @@ gui.page.settings.multiRinseTimeContainer = lv_obj_create(parent);
         lv_obj_set_style_bg_color(gui.page.settings.multiRinseTimeSlider,lv_color_hex(ORANGE) , LV_PART_KNOB);
         lv_obj_set_style_bg_color(gui.page.settings.multiRinseTimeSlider,lv_color_hex(ORANGE_LIGHT) , LV_PART_INDICATOR);
         lv_obj_set_style_bg_color(gui.page.settings.multiRinseTimeSlider, lv_palette_lighten(LV_PALETTE_GREY, 3), LV_PART_MAIN);
-        lv_slider_set_value(gui.page.settings.multiRinseTimeSlider, gui.page.settings.settingsParams.multiRinseTime, LV_ANIM_OFF);
         lv_slider_set_range(gui.page.settings.multiRinseTimeSlider, 60, 180);
+        lv_slider_set_value(gui.page.settings.multiRinseTimeSlider, gui.page.settings.settingsParams.multiRinseTime, LV_ANIM_OFF);
 
         gui.page.settings.multiRinseTimeValueLabel = lv_label_create(gui.page.settings.multiRinseTimeContainer);
         lv_obj_set_style_text_font(gui.page.settings.multiRinseTimeValueLabel, &lv_font_montserrat_22, 0);
         lv_obj_align(gui.page.settings.multiRinseTimeValueLabel, LV_ALIGN_TOP_RIGHT, 5, -10);
         lv_obj_add_event_cb(gui.page.settings.multiRinseTimeSlider, event_settings_handler, LV_EVENT_VALUE_CHANGED, gui.page.settings.multiRinseTimeValueLabel);
+        lv_obj_add_event_cb(gui.page.settings.multiRinseTimeSlider, event_settings_handler, LV_EVENT_RELEASED, gui.page.settings.multiRinseTimeValueLabel);
         lv_label_set_text_fmt(gui.page.settings.multiRinseTimeValueLabel, "%ds", gui.page.settings.settingsParams.multiRinseTime);
 }
 
@@ -541,5 +556,77 @@ void settings(void)
 
 
   lv_style_set_line_color(&gui.page.settings.style_sectionTitleLine, lv_palette_main(LV_PALETTE_ORANGE));
+}
+
+
+/*──────────────────────────────────────────────────────────────
+ * refreshSettingsUI()
+ *
+ * Synchronise every settings widget with the values currently
+ * stored in gui.page.settings.settingsParams.
+ * Call this once after readConfigFile() so that the UI reflects
+ * the saved configuration.
+ *──────────────────────────────────────────────────────────────*/
+void refreshSettingsUI(void)
+{
+    /* Settings page not yet created — nothing to refresh.
+     * The widgets will pick up the correct values from settingsParams
+     * when initSettings() is eventually called. */
+    if (gui.page.settings.settingsSection == NULL)
+        return;
+
+    struct machineSettings *p = &gui.page.settings.settingsParams;
+
+    /* ── Temperature unit radio buttons ── */
+    /* Uncheck both first, then check the correct one */
+    lv_obj_remove_state(gui.page.settings.tempUnitCelsiusRadioButton, LV_STATE_CHECKED);
+    lv_obj_remove_state(gui.page.settings.tempUnitFahrenheitRadioButton, LV_STATE_CHECKED);
+    gui.page.settings.active_index = p->tempUnit;
+    lv_obj_add_state(lv_obj_get_child(gui.page.settings.tempUnitContainer, p->tempUnit),
+                     LV_STATE_CHECKED);
+
+    /* ── Switches ── */
+    if (p->waterInlet)
+        lv_obj_add_state(gui.page.settings.waterInletSwitch, LV_STATE_CHECKED);
+    else
+        lv_obj_remove_state(gui.page.settings.waterInletSwitch, LV_STATE_CHECKED);
+
+    if (p->isPersistentAlarm)
+        lv_obj_add_state(gui.page.settings.persistentAlarmSwitch, LV_STATE_CHECKED);
+    else
+        lv_obj_remove_state(gui.page.settings.persistentAlarmSwitch, LV_STATE_CHECKED);
+
+    if (p->isProcessAutostart)
+        lv_obj_add_state(gui.page.settings.autostartSwitch, LV_STATE_CHECKED);
+    else
+        lv_obj_remove_state(gui.page.settings.autostartSwitch, LV_STATE_CHECKED);
+
+    /* ── Sliders + value labels ── */
+    lv_slider_set_value(gui.page.settings.filmRotationSpeedSlider,
+                        p->filmRotationSpeedSetpoint, LV_ANIM_OFF);
+    lv_label_set_text_fmt(gui.page.settings.filmRotationSpeedValueLabel,
+                          "%d%%", p->filmRotationSpeedSetpoint);
+
+    lv_slider_set_value(gui.page.settings.filmRotationInversionIntervalSlider,
+                        p->rotationIntervalSetpoint, LV_ANIM_OFF);
+    lv_label_set_text_fmt(gui.page.settings.filmRotationInverseIntervalValueLabel,
+                          "%dsec", p->rotationIntervalSetpoint);
+
+    lv_slider_set_value(gui.page.settings.filmRandomSlider,
+                        p->randomSetpoint, LV_ANIM_OFF);
+    lv_label_set_text_fmt(gui.page.settings.filmRotationRandomValueLabel,
+                          "~%d%%", p->randomSetpoint);
+
+    lv_slider_set_value(gui.page.settings.drainFillTimeSlider,
+                        p->drainFillOverlapSetpoint, LV_ANIM_OFF);
+    lv_label_set_text_fmt(gui.page.settings.drainFillTimeValueLabel,
+                          "%d%%", p->drainFillOverlapSetpoint);
+
+    lv_slider_set_value(gui.page.settings.multiRinseTimeSlider,
+                        p->multiRinseTime, LV_ANIM_OFF);
+    lv_label_set_text_fmt(gui.page.settings.multiRinseTimeValueLabel,
+                          "%ds", p->multiRinseTime);
+
+    LV_LOG_USER("Settings UI refreshed from config");
 }
 

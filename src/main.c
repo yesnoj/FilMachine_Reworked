@@ -318,6 +318,9 @@ int main(int argc, char *argv[]) {
     /* Load saved configuration from sd/FilMachine.cfg */
     readConfigFile(FILENAME_SAVE, false);
 
+    /* Sync settings widgets with the values just loaded from config */
+    refreshSettingsUI();
+
     /* If no processes were loaded (missing or corrupt config), generate demo data */
     if (gui.page.processes.processElementsList.size == 0) {
         printf("[SIM] No config file found — generating demo processes\n");

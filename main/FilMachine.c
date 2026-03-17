@@ -316,6 +316,7 @@ create_keyboard();
 homePage();
 
 readConfigFile(FILENAME_SAVE, false);
+refreshSettingsUI();
 
     while (1) {
         // raise the task priority of LVGL and/or reduce the handler period can improve the performance
