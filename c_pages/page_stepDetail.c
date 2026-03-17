@@ -19,7 +19,9 @@ static bool step_detail_is_valid(sStepDetail *sd) {
     if (name == NULL || strlen(name) == 0) return false;
     long mins = strtol(lv_textarea_get_text(sd->stepDetailMinTextArea), NULL, 10);
     long secs = strtol(lv_textarea_get_text(sd->stepDetailSecTextArea), NULL, 10);
-    return (mins > 0 || secs > 0);
+    /* Minimum step duration: 30 seconds */
+    long totalSecs = mins * 60 + secs;
+    return (totalSecs >= 30);
 }
 
 /*--------------------------------------------------------------
@@ -143,8 +145,10 @@ static void step_detail_open_roller(stepNode *sn, lv_obj_t *focusedWidget) {
 static void step_detail_refresh_save_button(stepNode *sn, lv_obj_t *obj) {
     sStepDetail *sd = sn->step.stepDetails;
     if (obj == sd->stepSaveButton) {
-        if (sd->data.isEditMode == true || step_detail_is_valid(sd)) {
+        if (step_detail_is_valid(sd)) {
             lv_obj_clear_state(sd->stepSaveButton, LV_STATE_DISABLED);
+        } else {
+            lv_obj_add_state(sd->stepSaveButton, LV_STATE_DISABLED);
         }
     }
 }

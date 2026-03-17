@@ -2,119 +2,351 @@
 
 FilMachine is an automated film processing machine designed for photographic film development. It handles the entire process: chemical baths, water rinses, temperature regulation, and motor-driven film agitation — all controlled through a 3.5" color touchscreen display.
 
+The project includes a **desktop simulator** (SDL2 + LVGL) that reproduces the full touchscreen UI on macOS/Linux, enabling rapid development and testing without physical hardware, plus an **automated test suite** with 100+ tests.
+
+---
+
+## Table of Contents
+
+1. [What is FilMachine?](#what-is-filmachine)
+2. [Project Architecture](#project-architecture)
+3. [Directory Structure](#directory-structure)
+4. [Building the Project](#building-the-project)
+5. [Running the Simulator](#running-the-simulator)
+6. [Running the Tests](#running-the-tests)
+7. [User Interface Guide](#user-interface-guide)
+8. [Hardware Specifications](#hardware-specifications)
+9. [Configuration & Persistence](#configuration--persistence)
+10. [Typical Workflows](#typical-workflows)
+11. [Authors](#authors)
+
+---
+
 ## What is FilMachine?
 
 FilMachine takes the guesswork out of developing photographic film at home or in a small lab. Instead of manually timing each step, pouring chemicals by hand, and constantly checking the thermometer, FilMachine automates everything. You load your film in the developing tank, select a process, and press Start. The machine takes care of the rest: filling the right chemical at the right time, keeping the temperature stable, rotating the film at the correct speed, rinsing between steps, and alerting you when the process is complete.
 
 It supports both **color negative** (C41, E6) and **black & white** film development workflows, with full customization of every parameter.
 
-## Getting Started
+---
 
-When you turn on the machine, you will see a splash screen followed by the main interface. The interface is divided into three tabs accessible from the bottom navigation bar: **Processes**, **Settings**, and **Tools**.
+## Project Architecture
+
+The project has a **dual-target build system** that produces either ESP32-S3 firmware or a native desktop application from the same codebase.
+
+### Technology Stack
+
+| Layer | Firmware (ESP32-S3) | Simulator (macOS/Linux) |
+|-------|-------------------|------------------------|
+| **UI Library** | LVGL 9.2.2 | LVGL 9.2.2 (identical) |
+| **Display** | ILI9488 480x320 TFT | SDL2 window 480x320 |
+| **Touch Input** | FT5x06 capacitive | SDL2 mouse events |
+| **Storage** | FatFS on MicroSD | POSIX file I/O (sd/ directory) |
+| **RTOS** | FreeRTOS (ESP-IDF) | Stub (queues work, tasks are no-ops) |
+| **Temp Sensors** | DS18B20 OneWire | Simulated (20°C ambient, heater model) |
+| **Motor/Relays** | GPIO + MCP23017 I2C | printf stubs |
+| **Build Tool** | ESP-IDF (`idf.py`) | CMake + Make |
+| **Compiler** | xtensa-esp32s3-elf-gcc | Native cc/gcc/clang |
+
+### How the Simulator Works
+
+The simulator replaces all hardware-specific code with a **stub layer** that provides compatible implementations:
+
+- **FatFS stubs** map firmware paths (e.g., `/FilMachine.cfg`) to files inside the `sd/` subdirectory relative to the executable, so read/write operations work transparently.
+- **FreeRTOS stubs** provide working queue implementations (xQueueCreate, xQueueSend, xQueueReceive) using simple circular buffers. Task creation is a no-op since there are no real threads — instead, the main loop drains the system queue every frame.
+- **Hardware stubs** (GPIO, I2C, SPI, relay, motor, temperature) are either no-ops or printf-based logging functions. Temperature readings come from a simple thermal model that simulates heating/cooling.
+- **LVGL's SDL2 driver** provides the display backend and mouse input, which simulates the capacitive touchscreen.
+
+The key architectural principle is that **all UI code is shared 1:1** between firmware and simulator. Pages, elements, event handlers, and business logic are identical — only the hardware abstraction layer changes.
+
+---
+
+## Directory Structure
+
+```
+FilMachine_Simulator_v2/
+│
+├── main/                          # Core source (shared with ESP32 firmware)
+│   ├── include/
+│   │   ├── FilMachine.h           #   Main header — all structs, enums, constants, prototypes
+│   │   ├── ds18b20.h              #   Temperature sensor driver API
+│   │   └── pca9685.h              #   PWM controller driver API
+│   ├── FilMachine.c               #   ESP32 entry point (app_main, sysMan task, motorMan task)
+│   ├── accessories.c              #   Utilities — linked lists, deep copy, config I/O, keyboard
+│   ├── ds18b20.c                  #   DS18B20 OneWire temperature sensor driver
+│   ├── mcp23017.c                 #   MCP23017 I2C GPIO expander driver
+│   └── pca9685.c                  #   PCA9685 I2C PWM controller driver
+│
+├── c_pages/                       # UI pages (screens)
+│   ├── page_home.c                #   Splash screen & boot error display
+│   ├── page_menu.c                #   Tab bar navigation (Processes / Settings / Tools)
+│   ├── page_processes.c           #   Process list with filtering
+│   ├── page_processDetail.c       #   Process creation & editing
+│   ├── page_stepDetail.c          #   Step creation & editing with validation
+│   ├── page_settings.c            #   Machine settings (temp, speed, alarms, timers)
+│   ├── page_tools.c               #   Maintenance tools, import/export, statistics
+│   └── page_checkup.c             #   Process execution — the most complex page
+│
+├── c_elements/                    # Reusable UI components
+│   ├── element_process.c          #   Process list item (drag, delete, duplicate)
+│   ├── element_step.c             #   Step list item (swipe gestures, edit/delete)
+│   ├── element_filterPopup.c      #   Filter dialog (name, type, preferred)
+│   ├── element_messagePopup.c     #   Generic confirmation/alert popups
+│   ├── element_rollerPopup.c      #   Numeric selector (roller) widget
+│   └── element_cleanPopup.c       #   Cleaning process UI with timer
+│
+├── c_fonts/                       # Custom icon fonts (5 sizes: 15/20/30/40/100px)
+├── c_graphics/                    # Splash screen image data
+│
+├── src/
+│   └── main.c                     # Simulator entry point (SDL2 display, main loop,
+│                                  #   demo data generator, system queue drain)
+│
+├── stub/                          # Hardware abstraction for simulator
+│   ├── esp_stubs.h/c              #   ESP32 GPIO, timer, heap stubs
+│   ├── fatfs_stubs.h/c            #   FatFS → POSIX filesystem mapping
+│   ├── freertos_stubs.h/c         #   Queue stubs (circular buffer), task stubs (no-op)
+│   ├── driver/                    #   GPIO, I2C, LEDC, SDMMC driver stubs
+│   └── (redirect headers)         #   Thin #include wrappers for ESP-IDF compatibility
+│
+├── tests/                         # Automated test suite
+│   ├── test_runner.h/c            #   Test framework & entry point
+│   ├── test_helpers.c             #   Touch input simulation
+│   ├── test_navigation.c          #   Splash, menu, tab switching
+│   ├── test_processes.c           #   Process list display & creation
+│   ├── test_process_crud.c        #   Process create/read/update/delete
+│   ├── test_steps.c               #   Step creation, swipe, deletion
+│   ├── test_step_crud.c           #   Step lifecycle
+│   ├── test_execution.c           #   Process checkup execution flow
+│   ├── test_persistence.c         #   Config save/load/restore
+│   ├── test_settings.c            #   Settings UI & validation
+│   ├── test_filter.c              #   Filter logic
+│   ├── test_tools.c               #   Maintenance tools
+│   ├── test_edge_cases.c          #   Boundary conditions & error paths
+│   ├── test_utilities.c           #   Helper function tests
+│   └── test_destroy_and_lifecycle.c # Memory cleanup & object destruction
+│
+├── lvgl/                          # LVGL 9.2.2 library (auto-cloned on first build)
+├── lvgl_config/
+│   └── lv_conf.h                  # LVGL configuration (RGB565, 256KB heap, dark theme)
+│
+├── sd/                            # SD card simulation directory
+│   ├── FilMachine.cfg             #   Binary config (processes + settings + stats)
+│   ├── FilMachine_Backup.cfg      #   Backup copy (created by Export)
+│   └── FilMachine.json            #   Human-readable JSON export
+│
+├── scripts/
+│   └── genFilMachineCFG.py        # Config generator (realistic film recipes)
+├── resources/                     # Hardware datasheets & font usage docs
+│
+├── CMakeLists.txt                 # Dual-purpose build (ESP-IDF + simulator + tests)
+├── setup.sh                       # Project initialization script
+├── flash.sh                       # Flash firmware to ESP32 board
+├── ANALISI_PROGETTO.md            # Technical analysis (Italian)
+└── wiring_philosophy.md           # Hardware design philosophy
+```
+
+---
+
+## Building the Project
+
+### Prerequisites
+
+**macOS:**
+```bash
+brew install cmake sdl2 pkg-config
+```
+
+**Ubuntu / Debian:**
+```bash
+sudo apt install cmake libsdl2-dev pkg-config build-essential
+```
+
+LVGL 9.2.2 is automatically cloned from GitHub on the first build if not present.
+
+### Build the Simulator
+
+```bash
+mkdir -p build2 && cd build2
+cmake .. -DTARGET=sim
+make filmachine_sim
+```
+
+This produces the `filmachine_sim` executable. On first build, if `sd/FilMachine.cfg` doesn't exist, the Python script `genFilMachineCFG.py` runs automatically to generate sample data.
+
+### Build the Tests
+
+```bash
+mkdir -p build2 && cd build2
+cmake .. -DTARGET=sim
+make filmachine_test
+```
+
+### Build the Firmware (ESP32-S3)
+
+Requires the [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/) toolchain installed and configured.
+
+```bash
+idf.py build
+idf.py flash
+```
+
+Or use the helper script:
+```bash
+./flash.sh
+```
+
+---
+
+## Running the Simulator
+
+```bash
+cd build2
+./filmachine_sim
+```
+
+The simulator opens a 480x320 window that reproduces the exact touchscreen interface. Use the mouse to simulate touch input (click = tap, click-drag = swipe/scroll).
+
+### What works in the simulator
+
+- Full UI navigation (all pages, popups, dialogs)
+- Process creation, editing, duplication, deletion
+- Step management with swipe gestures
+- Settings with slider/switch/radio controls
+- Filter and search functionality
+- Configuration save/load (reads/writes `sd/FilMachine.cfg`)
+- Export/Import (backup to `sd/FilMachine_Backup.cfg`)
+- Simulated temperature readings with heater model
+- Console logging of all system actions (`[SIM] sysAction: ...`)
+
+### What is simulated (no real hardware)
+
+- Temperature sensors return simulated values (20°C ambient, gradual heating/cooling)
+- Motor control outputs to console only
+- Relay switching outputs to console only
+- Reboot is a no-op (prints message)
+
+### Generating sample data
+
+To generate realistic film development recipes:
+
+```bash
+python3 scripts/genFilMachineCFG.py --realistic --output build2/sd/
+```
+
+This creates config files with authentic C41, E6, and B&W development processes.
+
+---
+
+## Running the Tests
+
+```bash
+cd build2
+./filmachine_test
+```
+
+Results are displayed in the terminal and saved to `test_results/test_results_YYYYMMDD_HHMMSS.txt`.
+
+### Test Suites
+
+| Suite | Description |
+|-------|-------------|
+| **Navigation** | Splash screen, menu display, tab switching |
+| **Processes** | Process list rendering, creation UI |
+| **Process CRUD** | Full create/read/update/delete lifecycle |
+| **Steps** | Step creation, swipe gestures, deletion |
+| **Step CRUD** | Step lifecycle with validation |
+| **Execution** | Process checkup and execution flow |
+| **Persistence** | Config save → reload → verify all fields |
+| **Settings** | Settings UI, default values, slider/switch behavior |
+| **Filter** | Filter by name, film type, preferred flag |
+| **Tools** | Cleaning, draining, statistics display |
+| **Edge Cases** | Boundary conditions, max limits, error recovery |
+| **Utilities** | Helper functions, linked list operations |
+| **Destroy & Lifecycle** | Memory cleanup, object destruction |
+
+The persistence tests verify that every field (process name, temperature, tolerance, film type, preferred flag, step names, durations, types, sources, discard flags) survives a full save-and-reload cycle.
+
+---
+
+## User Interface Guide
 
 ### The Processes Tab
 
-This is where you manage your film development recipes. Each process is a sequence of steps that the machine will execute in order.
+This is where you manage your film development recipes. Each process is a sequence of steps the machine executes in order. The list shows each process with its name, total time, film type icon, and a star if marked as preferred.
 
-When you open this tab you will see a list of all your saved processes. Each entry shows the process name, the total development time, and a star icon if the process is marked as preferred. Color processes are displayed with a color palette icon, while black & white processes show a B&W icon.
-
-**Creating a new process:** Tap the "+" button in the top right corner. You will be taken to the process detail screen, where you can set the process name, choose the film type (Color or B&W), set the target temperature and tolerance, and mark it as preferred. You must add at least one step before saving.
-
-**Editing a process:** Tap on any process in the list to open its detail view. From there you can modify any parameter, add or remove steps, and save your changes.
-
-**Duplicating a process:** Swipe left on a process to reveal the duplicate option. This creates an exact copy that you can then customize — useful when you want to create a variation of an existing recipe (for example, a push-processed version).
-
-**Deleting a process:** Open the process detail, then tap the trash icon. A confirmation popup will ask you to confirm the deletion.
-
-**Filtering the list:** If you have many processes saved, tap the "Filters" button to narrow the list. You can filter by name (partial match), film type (Color, B&W, or Both), and whether the process is marked as preferred.
+- **Create:** Tap "+" to add a new process
+- **Edit:** Tap a process to open its detail view
+- **Duplicate:** Swipe left to reveal the duplicate button
+- **Delete:** Open the detail, tap the trash icon
+- **Filter:** Tap the filter icon to search by name, film type, or preferred status. The filter icon turns green when a filter is active, and returns to white when reset.
 
 ### Working with Steps
 
-Each process contains a list of steps. A step represents one phase of the development workflow, such as "Developer", "Stop Bath", "Fixer", or "Wash".
+Each process contains steps. A step represents one phase: "Developer", "Stop Bath", "Fixer", "Wash", etc.
 
-For each step, you can configure:
+For each step you configure: name, duration (minimum 30 seconds), chemical type (Chemistry / Rinse / Multi-Rinse), source container (C1, C2, C3, or WB), and whether to discard the chemical after use.
 
-- **Name** — A descriptive label (e.g., "Pre-wash", "Developer", "Bleach", "Final Wash")
-- **Duration** — Time in minutes and seconds for this step
-- **Chemical type** — Chemistry (a chemical bath), Rinse (a single water rinse), or Multi-Rinse (multiple consecutive water rinses)
-- **Source** — Which container supplies the liquid: C1, C2, C3 (three chemical containers), or WB (water bath)
-- **Discard after use** — Whether the chemical should be sent to the waste container after this step rather than returned to its source
-
-**Adding a step:** In the process detail view, tap the "+" button below the step list.
-
-**Reordering steps:** Long-press on a step and drag it up or down to change its position in the sequence.
-
-**Duplicating a step:** Swipe left on a step to duplicate it. The copy appears immediately after the original.
-
-**Editing a step:** Tap on a step to open its detail editor, where you can modify all parameters.
+- **Add:** Tap "+" below the step list
+- **Edit:** Tap a step to modify it
+- **Duplicate:** Swipe left on a step
+- **Delete:** Swipe left to reveal the delete button
+- **Reorder:** Long-press and drag
 
 ### Running a Process (Checkup)
 
-To start developing film, open a process and tap the Play button. This takes you to the Checkup screen, where the machine walks you through the pre-flight checks and then executes each step automatically.
+Open a process and tap Play. The machine walks through pre-flight checks, then executes each step automatically.
 
-**Before the process starts, the machine will:**
+**Pre-flight checks:** tank size selection, water bath fill, tank presence verification, motor check, and temperature stabilization (for temperature-controlled processes).
 
-1. Ask you to select the tank size and chemistry volume
-2. Fill the water bath (if connected to a water source; otherwise prompt you to fill it manually)
-3. Verify that the developing tank is in position
-4. Check that the film rotation motor is working
-5. If the process is temperature-controlled, heat the water bath to the target temperature (within the configured tolerance)
+**During execution:** the screen shows the current step name and remaining time, chemical source, current/target temperature, and upcoming steps.
 
-**During the process, the screen shows:**
-
-- The name of the current step and remaining time
-- The chemical source being used
-- Current water temperature and target temperature
-- The next step in the queue
-- A list of upcoming steps
-
-**Stopping a process:** You have two options. "Stop now!" immediately halts the process (the film may be ruined if chemicals are in the tank). "Stop after!" waits until the current step finishes before stopping — a safer choice that allows the current chemical to be properly drained.
+**Stopping:** "Stop now!" halts immediately (potentially unsafe). "Stop after!" waits for the current step to finish — the safer choice.
 
 ### The Settings Tab
 
-Here you configure the machine's operating parameters.
+| Setting | Description | Range |
+|---------|-------------|-------|
+| Temperature unit | °C or °F | — |
+| Water inlet | Automatic water fill if connected | On/Off |
+| Temp sensor calibration | Calibrate against a reference thermometer | Tune button |
+| Rotation speed | Film agitation motor RPM | 10–100% |
+| Inversion interval | Seconds between motor direction changes | 10–60s |
+| Randomness | Random variation on inversion interval | 0–100% |
+| Persistent alarm | Alarm sounds until acknowledged | On/Off |
+| Process autostart | Auto-start when temperature reached | On/Off |
+| Drain/fill overlap | Overlap between drain and fill operations | 0–100% |
+| Multi-rinse cycle time | Duration of each rinse in multi-rinse steps | 60–180s |
 
-**Temperature unit** — Switch between Celsius (°C) and Fahrenheit (°F). All temperatures throughout the interface will update accordingly.
-
-**Temperature sensor calibration** — To ensure accurate readings, you can calibrate the temperature sensor. Make sure the machine has reached a stable ambient temperature, measure the actual air temperature with a reliable thermometer, then enter that value and press "Tune". To reset the calibration, long-press the "Tune" button.
-
-**Rotation speed** — Controls the film agitation motor speed in RPM (range: 20–90 RPM). Proper agitation is critical for even development.
-
-**Rotation inversion interval** — The time in seconds (5–60s) between motor direction changes. The motor alternates between clockwise and counterclockwise rotation to prevent uneven development patterns.
-
-**Randomness** — Adds random variation to the inversion interval (0–100%). For example, 10% randomness on a 10-second interval means the actual interval will vary between 9 and 11 seconds. This helps prevent standing wave patterns on the film.
-
-**Water inlet link** — Enable this if the machine is connected to a water source for automatic water bath filling.
-
-**Persistent alarms** — When enabled, the alarm sound continues until acknowledged. When disabled, it sounds once and stops.
-
-**Process autostart** — When enabled, a temperature-controlled process starts automatically once the water bath reaches the target temperature. When disabled, you must press Start manually.
-
-**Drain/fill time overlap** — Controls how much the draining of one chemical overlaps with the filling of the next (0–100%). Higher values reduce total process time but require the plumbing to support simultaneous drain and fill operations.
-
-**Multi-rinse cycle time** — The duration of each rinse cycle in a multi-rinse step (60–180 seconds, in 30-second increments).
+All settings are saved automatically to the SD card when changed. Slider values are saved only when you release the slider (not during dragging) to reduce SD card wear.
 
 ### The Tools Tab
 
-This section provides maintenance and diagnostic features.
+- **Clean machine** — Automated cleaning cycle for chemical containers
+- **Drain machine** — Manual drain of all liquids
+- **Import/Export** — Backup and restore configuration to SD card
+- **Statistics** — Completed processes, total time, cleaning cycles, stopped processes
+- **Software info** — Firmware version and serial number
 
-**Clean machine** — Runs an automated cleaning cycle. You select which chemical containers to flush, the number of cleaning cycles, and whether to drain the water bath when finished. The machine will pump water through the selected containers to clean out residual chemicals.
+---
 
-**Drain machine** — Manually drains all liquids from the machine.
+## Hardware Specifications
 
-**Import/Export** — Back up your configuration (all processes and settings) to the SD card, or restore a previously saved configuration. Importing will overwrite your current data and reboot the machine.
+| Component | Detail |
+|-----------|--------|
+| **Controller** | ESP32-S3 |
+| **Display** | 3.5" ILI9488 TFT LCD, 480×320, 16-bit parallel interface |
+| **Touch** | FT5x06 capacitive touchscreen (I2C) |
+| **Storage** | MicroSD card via SPI3 |
+| **I/O Expander** | MCP23017 (I2C) — 8 relay outputs |
+| **PWM Controller** | PCA9685 (I2C) — pump speed control |
+| **Temperature** | 2× DS18B20 OneWire sensors (chemical bath + water bath) |
+| **Motor** | DC motor with H-bridge (GPIO 8/9), PWM speed (GPIO 18) |
+| **Relays** | Heater, 3 chemical valves (C1/C2/C3), water bath, waste, pump in, pump out |
 
-**Statistics** — View machine usage data: completed processes, total processing time, completed cleaning cycles, and stopped processes.
+### Chemical Container Layout
 
-**Software info** — Shows the firmware version and serial number.
-
-**Credits** — Information about the development team.
-
-## Chemical Container Layout
-
-The machine has four liquid containers and a waste output:
-
-| Label | Purpose | Example use |
+| Label | Purpose | Typical Use |
 |-------|---------|-------------|
 | **C1** | Chemical container 1 | Developer |
 | **C2** | Chemical container 2 | Bleach / Stop bath |
@@ -122,62 +354,44 @@ The machine has four liquid containers and a waste output:
 | **WB** | Water bath | Rinse water (temperature-controlled) |
 | **WASTE** | Waste drain | Discarded chemicals |
 
-You can assign any chemical to any container — the labels above are just typical usage examples. The important thing is that your process steps reference the correct source container for each chemical.
+### Constraints
+
+| Parameter | Limit |
+|-----------|-------|
+| Max processes | 50 |
+| Max steps per process | 30 |
+| Process/step name length | 20 characters |
+| Minimum step duration | 30 seconds |
+
+---
+
+## Configuration & Persistence
+
+All data is stored on the SD card in binary format (`FilMachine.cfg`). The file contains the complete machine state: settings, statistics, all processes with their steps.
+
+**Auto-save triggers:** creating/editing/deleting a process, changing any setting, toggling preferred, duplicating processes or steps.
+
+**Export** creates a backup copy (`FilMachine_Backup.cfg`) on the same SD card. **Import** restores from the backup and reboots the machine.
+
+In the simulator, these files live in the `sd/` subdirectory inside the build folder (e.g., `build2/sd/FilMachine.cfg`).
+
+---
 
 ## Typical Workflows
 
-### C41 Color Negative Development
+### C41 Color Negative (38°C)
 
-A standard C41 process at 38°C typically looks like this: Pre-wash with water, Developer from C1 (3:15), Bleach from C2 (6:30), Multi-rinse wash, Fixer from C3 (6:30), and a final multi-rinse wash. The machine maintains precise temperature control throughout, which is critical for color development.
+A standard C41 process: Pre-wash with water (1:00), Developer from C1 (3:15), Bleach from C2 (6:30), Wash (3:00), Fixer from C3 (6:30), Final Wash (3:00). Temperature control is critical — the machine maintains 38°C ± 0.3°C throughout.
 
-### Black & White Development
+### Black & White (20°C)
 
-B&W processes are more flexible in temperature (usually 20°C) and timing. A typical recipe: Developer from C1, Stop bath from C2, Fixer from C3, and a final wash. Since B&W development is less temperature-sensitive, you can optionally disable temperature control.
+B&W processes are more flexible: Developer from C1 (8:00), Stop Bath from C2 (1:00), Fixer from C3 (5:00), Wash (5:00). Temperature control can be disabled for ambient-temperature development, or set to 20°C ± 0.5°C for consistency.
 
-## Data Storage
+### E6 Slide Film (38°C)
 
-All your processes, settings, and statistics are saved to the SD card in a binary configuration file. The machine automatically saves when you create, modify, or delete a process, and when you change settings. A backup copy is maintained alongside the main file for safety.
+E6 requires precise timing and temperature: First Developer (6:00), Wash (2:00), Color Developer (6:00), Wash (2:00), Bleach (6:00), Fixer (4:00), Final Wash (4:00). All at 38°C with tight ±0.3°C tolerance.
 
-## Hardware Specifications
-
-| Component | Detail |
-|-----------|--------|
-| Controller | ESP32-S3 microcontroller |
-| Display | 3.5" ILI9488 TFT LCD, 480x320 resolution |
-| Touch | FT5x06 capacitive touchscreen |
-| Storage | MicroSD card |
-| Motor | DC motor with PWM speed control for film agitation |
-| Relays | 8-channel relay board (heater, 3 chemicals, water bath, waste, pump in, pump out) |
-| Sensors | SHT31 temperature sensors for chemical bath and water bath |
-
-## Building the Simulator
-
-A desktop simulator is available for testing and development. It reproduces the full touchscreen interface on macOS or Linux using SDL2.
-
-**Requirements:** CMake 3.14+, SDL2, pkg-config, and a C compiler (GCC or Clang).
-
-```bash
-# macOS
-brew install cmake sdl2 pkg-config
-
-# Ubuntu / Debian
-sudo apt install cmake libsdl2-dev pkg-config build-essential
-```
-
-**Build and run:**
-
-```bash
-mkdir -p build && cd build
-cmake ..
-make filmachine_sim
-./filmachine_sim
-```
-
-To generate sample process data for the simulator:
-
-```bash
-python3 scripts/genFilMachineCFG.py --realistic --output build/sd/
-```
+---
 
 ## License
 

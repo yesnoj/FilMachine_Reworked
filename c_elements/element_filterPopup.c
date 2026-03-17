@@ -29,7 +29,7 @@ void event_filterMBox(lv_event_t * e){
             lv_obj_set_style_text_color(gui.page.processes.iconFilterLabel, lv_color_hex(GREEN), LV_PART_MAIN);
             filterAndDisplayProcesses();
           } else {
-            lv_obj_set_style_text_color(gui.page.processes.iconFilterLabel, lv_color_hex(BLACK), LV_PART_MAIN);
+            lv_obj_set_style_text_color(gui.page.processes.iconFilterLabel, lv_color_hex(WHITE), LV_PART_MAIN);
             gui.page.processes.isFiltered = false;
             removeFiltersAndDisplayAllProcesses();
           }
@@ -46,6 +46,11 @@ void event_filterMBox(lv_event_t * e){
           gui.element.filterPopup.isBnWFilter = false;
           gui.element.filterPopup.preferredOnly = false;
           gui.element.filterPopup.filterName[0] = '\0';
+
+          /* Restore filter icon to white and show all processes */
+          lv_obj_set_style_text_color(gui.page.processes.iconFilterLabel, lv_color_hex(WHITE), LV_PART_MAIN);
+          gui.page.processes.isFiltered = false;
+          removeFiltersAndDisplayAllProcesses();
         }
       }
   }
