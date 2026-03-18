@@ -89,15 +89,7 @@ void filterPopupCreate (void){
    *********************/
   if (gui.element.filterPopup.mBoxFilterPopupParent == NULL)
   {
-      gui.element.filterPopup.mBoxFilterPopupParent = lv_obj_class_create_obj(&lv_msgbox_backdrop_class, lv_layer_top());
-      lv_obj_class_init_obj(gui.element.filterPopup.mBoxFilterPopupParent);
-      lv_obj_remove_flag(gui.element.filterPopup.mBoxFilterPopupParent, LV_OBJ_FLAG_IGNORE_LAYOUT);
-      lv_obj_set_size(gui.element.filterPopup.mBoxFilterPopupParent, LV_PCT(100), LV_PCT(100));
-
-      gui.element.filterPopup.mBoxContainer = lv_obj_create(gui.element.filterPopup.mBoxFilterPopupParent);
-      lv_obj_align(gui.element.filterPopup.mBoxContainer, LV_ALIGN_CENTER, 0, 0);
-      lv_obj_set_size(gui.element.filterPopup.mBoxContainer, 320, 240); 
-      lv_obj_remove_flag(gui.element.filterPopup.mBoxContainer, LV_OBJ_FLAG_SCROLLABLE); 
+      createPopupBackdrop(&gui.element.filterPopup.mBoxFilterPopupParent, &gui.element.filterPopup.mBoxContainer, 320, 240); 
 
       gui.element.filterPopup.mBoxTitle = lv_label_create(gui.element.filterPopup.mBoxContainer);         
       lv_label_set_text(gui.element.filterPopup.mBoxTitle, filterPopupTitle_text); 

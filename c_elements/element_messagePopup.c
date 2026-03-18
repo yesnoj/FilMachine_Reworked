@@ -322,15 +322,7 @@ void messagePopupCreate(const char * popupTitleText,const char * popupText,const
    gui.element.messagePopup.mBoxPopupButton2 = NULL;
 
    LV_LOG_USER("Message popup create");  
-   gui.element.messagePopup.mBoxPopupParent = lv_obj_class_create_obj(&lv_msgbox_backdrop_class, lv_layer_top());
-   lv_obj_class_init_obj(gui.element.messagePopup.mBoxPopupParent);
-   lv_obj_remove_flag(gui.element.messagePopup.mBoxPopupParent, LV_OBJ_FLAG_IGNORE_LAYOUT);
-   lv_obj_set_size(gui.element.messagePopup.mBoxPopupParent, LV_PCT(100), LV_PCT(100));
-
-         gui.element.messagePopup.mBoxPopupContainer = lv_obj_create(gui.element.messagePopup.mBoxPopupParent);
-         lv_obj_align(gui.element.messagePopup.mBoxPopupContainer, LV_ALIGN_CENTER, 0, 0);
-         lv_obj_set_size(gui.element.messagePopup.mBoxPopupContainer, 320, 240); 
-         lv_obj_remove_flag(gui.element.messagePopup.mBoxPopupContainer, LV_OBJ_FLAG_SCROLLABLE); 
+   createPopupBackdrop(&gui.element.messagePopup.mBoxPopupParent, &gui.element.messagePopup.mBoxPopupContainer, 320, 240); 
 
          gui.element.messagePopup.mBoxPopupTitle = lv_label_create(gui.element.messagePopup.mBoxPopupContainer);         
          lv_label_set_text(gui.element.messagePopup.mBoxPopupTitle, popupTitleText); 

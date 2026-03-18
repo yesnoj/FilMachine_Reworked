@@ -64,6 +64,16 @@ void event_toolsElement(lv_event_t * e) {
                   lv_obj_remove_flag(gui.element.drainPopup.drainPopupParent, LV_OBJ_FLAG_HIDDEN);
               }
           }
+      if(obj == gui.page.tools.toolsSelfcheckButton){
+              LV_LOG_USER("PRESSED gui.page.tools.toolsSelfcheckButton");
+              if(gui.element.selfcheckPopup.selfcheckPopupParent == NULL) {
+                  selfcheckPopupCreate();
+                  LV_LOG_USER("New selfcheck popup created!");
+              } else {
+                  LV_LOG_USER("Selfcheck popup already created!");
+                  lv_obj_remove_flag(gui.element.selfcheckPopup.selfcheckPopupParent, LV_OBJ_FLAG_HIDDEN);
+              }
+          }
       if(obj == gui.page.tools.toolsExportButton){
               LV_LOG_USER("PRESSED gui.page.tools.toolsExportButton");
 			  messagePopupCreate(exportConfigAndProcesses_text,exportConfigAndProcessesMBox_text, checkupNo_text, checkupYes_text, obj);
@@ -89,10 +99,7 @@ static void initTools_maintenance(lv_obj_t *parent) {
   lv_obj_set_style_text_font(gui.page.tools.toolsMaintenanceLabel, &lv_font_montserrat_28, 0);
   lv_obj_align(gui.page.tools.toolsMaintenanceLabel, LV_ALIGN_TOP_LEFT, -7, -5);
 
-  lv_style_init(&gui.page.tools.style_sectionTitleLine);
-  lv_style_set_line_width(&gui.page.tools.style_sectionTitleLine, 2);
-  lv_style_set_line_color(&gui.page.tools.style_sectionTitleLine, lv_color_hex(LIGHT_BLUE));
-  lv_style_set_line_rounded(&gui.page.tools.style_sectionTitleLine, true);
+  initTitleLineStyle(&gui.page.tools.style_sectionTitleLine, LIGHT_BLUE);
 
   gui.page.tools.sectionTitleLine = lv_line_create(parent);
   lv_line_set_points(gui.page.tools.sectionTitleLine, gui.page.tools.titleLinePoints, 2);
@@ -144,13 +151,36 @@ static void initTools_maintenance(lv_obj_t *parent) {
   lv_label_set_text(gui.page.tools.toolsDrainingButtonLabel, play_icon);
   lv_obj_set_style_text_font(gui.page.tools.toolsDrainingButtonLabel, &FilMachineFontIcons_30, 0);
   lv_obj_align(gui.page.tools.toolsDrainingButtonLabel, LV_ALIGN_CENTER, 0, 0);
+
+  gui.page.tools.toolsSelfcheckContainer = lv_obj_create(parent);
+  lv_obj_align(gui.page.tools.toolsSelfcheckContainer, LV_ALIGN_TOP_LEFT, -15, 135);
+  lv_obj_set_size(gui.page.tools.toolsSelfcheckContainer, 330, 50);
+  lv_obj_remove_flag(gui.page.tools.toolsSelfcheckContainer, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_scroll_dir(gui.page.tools.toolsSelfcheckContainer, LV_DIR_VER);
+  lv_obj_set_style_border_opa(gui.page.tools.toolsSelfcheckContainer, LV_OPA_TRANSP, 0);
+
+  gui.page.tools.toolsSelfcheckLabel = lv_label_create(gui.page.tools.toolsSelfcheckContainer);
+  lv_label_set_text(gui.page.tools.toolsSelfcheckLabel, selfCheck_text);
+  lv_obj_set_style_text_font(gui.page.tools.toolsSelfcheckLabel, &lv_font_montserrat_20, 0);
+  lv_obj_align(gui.page.tools.toolsSelfcheckLabel, LV_ALIGN_LEFT_MID, -5, 0);
+
+  gui.page.tools.toolsSelfcheckButton =  lv_button_create(gui.page.tools.toolsSelfcheckContainer);
+  lv_obj_set_size(gui.page.tools.toolsSelfcheckButton, BUTTON_PROCESS_WIDTH * 0.8, BUTTON_PROCESS_HEIGHT);
+  lv_obj_align(gui.page.tools.toolsSelfcheckButton, LV_ALIGN_RIGHT_MID, 0, 0);
+  lv_obj_add_event_cb(gui.page.tools.toolsSelfcheckButton, event_toolsElement, LV_EVENT_CLICKED, gui.page.tools.toolsSelfcheckButton);
+  lv_obj_set_style_bg_color(gui.page.tools.toolsSelfcheckButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
+
+  gui.page.tools.toolsSelfcheckButtonLabel = lv_label_create(gui.page.tools.toolsSelfcheckButton);
+  lv_label_set_text(gui.page.tools.toolsSelfcheckButtonLabel, play_icon);
+  lv_obj_set_style_text_font(gui.page.tools.toolsSelfcheckButtonLabel, &FilMachineFontIcons_30, 0);
+  lv_obj_align(gui.page.tools.toolsSelfcheckButtonLabel, LV_ALIGN_CENTER, 0, 0);
 }
 
 static void initTools_utilities(lv_obj_t *parent) {
   gui.page.tools.toolsUtilitiesLabel = lv_label_create(parent);
   lv_label_set_text(gui.page.tools.toolsUtilitiesLabel, Utilities_text);
   lv_obj_set_style_text_font(gui.page.tools.toolsUtilitiesLabel, &lv_font_montserrat_28, 0);
-  lv_obj_align(gui.page.tools.toolsUtilitiesLabel, LV_ALIGN_TOP_LEFT, -7, 135);
+  lv_obj_align(gui.page.tools.toolsUtilitiesLabel, LV_ALIGN_TOP_LEFT, -7, 185);
 
   lv_style_set_line_width(&gui.page.tools.style_sectionTitleLine, 2);
   lv_style_set_line_color(&gui.page.tools.style_sectionTitleLine, lv_color_hex(LIGHT_BLUE));
@@ -159,10 +189,10 @@ static void initTools_utilities(lv_obj_t *parent) {
   gui.page.tools.sectionTitleLine = lv_line_create(parent);
   lv_line_set_points(gui.page.tools.sectionTitleLine, gui.page.tools.titleLinePoints, 2);
   lv_obj_add_style(gui.page.tools.sectionTitleLine, &gui.page.tools.style_sectionTitleLine, 0);
-  lv_obj_align(gui.page.tools.sectionTitleLine, LV_ALIGN_TOP_MID, 0, 170);
+  lv_obj_align(gui.page.tools.sectionTitleLine, LV_ALIGN_TOP_MID, 0, 220);
 
   gui.page.tools.toolsImportContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.tools.toolsImportContainer, LV_ALIGN_TOP_LEFT, -15, 175);
+  lv_obj_align(gui.page.tools.toolsImportContainer, LV_ALIGN_TOP_LEFT, -15, 225);
   lv_obj_set_size(gui.page.tools.toolsImportContainer, 330, 50);
   lv_obj_remove_flag(gui.page.tools.toolsImportContainer, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_scroll_dir(gui.page.tools.toolsImportContainer, LV_DIR_VER);
@@ -187,7 +217,7 @@ static void initTools_utilities(lv_obj_t *parent) {
   lv_obj_align(gui.page.tools.toolsImportButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
   gui.page.tools.toolsExportContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.tools.toolsExportContainer, LV_ALIGN_TOP_LEFT, -15, 225);
+  lv_obj_align(gui.page.tools.toolsExportContainer, LV_ALIGN_TOP_LEFT, -15, 275);
   lv_obj_set_size(gui.page.tools.toolsExportContainer, 330, 50);
   lv_obj_remove_flag(gui.page.tools.toolsExportContainer, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_scroll_dir(gui.page.tools.toolsExportContainer, LV_DIR_VER);
@@ -216,7 +246,7 @@ static void initTools_statistics(lv_obj_t *parent) {
   gui.page.tools.toolsStatisticsLabel = lv_label_create(parent);
   lv_label_set_text(gui.page.tools.toolsStatisticsLabel, Statistics_text);
   lv_obj_set_style_text_font(gui.page.tools.toolsStatisticsLabel, &lv_font_montserrat_28, 0);
-  lv_obj_align(gui.page.tools.toolsStatisticsLabel, LV_ALIGN_TOP_LEFT, -7, 275);
+  lv_obj_align(gui.page.tools.toolsStatisticsLabel, LV_ALIGN_TOP_LEFT, -7, 325);
 
   lv_style_set_line_width(&gui.page.tools.style_sectionTitleLine, 2);
   lv_style_set_line_color(&gui.page.tools.style_sectionTitleLine, lv_color_hex(LIGHT_BLUE));
@@ -225,10 +255,10 @@ static void initTools_statistics(lv_obj_t *parent) {
   gui.page.tools.sectionTitleLine = lv_line_create(parent);
   lv_line_set_points(gui.page.tools.sectionTitleLine, gui.page.tools.titleLinePoints, 2);
   lv_obj_add_style(gui.page.tools.sectionTitleLine, &gui.page.tools.style_sectionTitleLine, 0);
-  lv_obj_align(gui.page.tools.sectionTitleLine, LV_ALIGN_TOP_MID, 0, 310);
+  lv_obj_align(gui.page.tools.sectionTitleLine, LV_ALIGN_TOP_MID, 0, 360);
 
   gui.page.tools.toolsStatCompleteProcessesContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.tools.toolsStatCompleteProcessesContainer, LV_ALIGN_TOP_LEFT, -15, 315);
+  lv_obj_align(gui.page.tools.toolsStatCompleteProcessesContainer, LV_ALIGN_TOP_LEFT, -15, 365);
   lv_obj_set_size(gui.page.tools.toolsStatCompleteProcessesContainer, 330, 40);
   lv_obj_remove_flag(gui.page.tools.toolsStatCompleteProcessesContainer, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_scroll_dir(gui.page.tools.toolsStatCompleteProcessesContainer, LV_DIR_VER);
@@ -245,7 +275,7 @@ static void initTools_statistics(lv_obj_t *parent) {
   lv_obj_align(gui.page.tools.toolStatCompletedProcessesValue, LV_ALIGN_RIGHT_MID, -5, 0);
 
   gui.page.tools.toolsStatTotalTimeContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.tools.toolsStatTotalTimeContainer, LV_ALIGN_TOP_LEFT, -15, 355);
+  lv_obj_align(gui.page.tools.toolsStatTotalTimeContainer, LV_ALIGN_TOP_LEFT, -15, 405);
   lv_obj_set_size(gui.page.tools.toolsStatTotalTimeContainer, 330, 40);
   lv_obj_remove_flag(gui.page.tools.toolsStatTotalTimeContainer, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_scroll_dir(gui.page.tools.toolsStatTotalTimeContainer, LV_DIR_VER);
@@ -262,7 +292,7 @@ static void initTools_statistics(lv_obj_t *parent) {
   lv_obj_align(gui.page.tools.toolStatTotalTimeValue, LV_ALIGN_RIGHT_MID, -5, 0);
 
   gui.page.tools.toolsStatCompleteCycleContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.tools.toolsStatCompleteCycleContainer, LV_ALIGN_TOP_LEFT, -15, 395);
+  lv_obj_align(gui.page.tools.toolsStatCompleteCycleContainer, LV_ALIGN_TOP_LEFT, -15, 445);
   lv_obj_set_size(gui.page.tools.toolsStatCompleteCycleContainer, 330, 40);
   lv_obj_remove_flag(gui.page.tools.toolsStatCompleteCycleContainer, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_scroll_dir(gui.page.tools.toolsStatCompleteCycleContainer, LV_DIR_VER);
@@ -279,7 +309,7 @@ static void initTools_statistics(lv_obj_t *parent) {
   lv_obj_align(gui.page.tools.toolStatCompleteCycleValue, LV_ALIGN_RIGHT_MID, -5, 0);
 
   gui.page.tools.toolsStatStoppedProcessesContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.tools.toolsStatStoppedProcessesContainer, LV_ALIGN_TOP_LEFT, -15, 435);
+  lv_obj_align(gui.page.tools.toolsStatStoppedProcessesContainer, LV_ALIGN_TOP_LEFT, -15, 485);
   lv_obj_set_size(gui.page.tools.toolsStatStoppedProcessesContainer, 330, 40);
   lv_obj_remove_flag(gui.page.tools.toolsStatStoppedProcessesContainer, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_scroll_dir(gui.page.tools.toolsStatStoppedProcessesContainer, LV_DIR_VER);
@@ -300,7 +330,7 @@ static void initTools_software(lv_obj_t *parent) {
   gui.page.tools.toolsSoftwareLabel = lv_label_create(parent);
   lv_label_set_text(gui.page.tools.toolsSoftwareLabel, Software_text);
   lv_obj_set_style_text_font(gui.page.tools.toolsSoftwareLabel, &lv_font_montserrat_28, 0);
-  lv_obj_align(gui.page.tools.toolsSoftwareLabel, LV_ALIGN_TOP_LEFT, -7, 475);
+  lv_obj_align(gui.page.tools.toolsSoftwareLabel, LV_ALIGN_TOP_LEFT, -7, 525);
 
   lv_style_set_line_width(&gui.page.tools.style_sectionTitleLine, 2);
   lv_style_set_line_color(&gui.page.tools.style_sectionTitleLine, lv_color_hex(LIGHT_BLUE));
@@ -309,10 +339,10 @@ static void initTools_software(lv_obj_t *parent) {
   gui.page.tools.sectionTitleLine = lv_line_create(parent);
   lv_line_set_points(gui.page.tools.sectionTitleLine, gui.page.tools.titleLinePoints, 2);
   lv_obj_add_style(gui.page.tools.sectionTitleLine, &gui.page.tools.style_sectionTitleLine, 0);
-  lv_obj_align(gui.page.tools.sectionTitleLine, LV_ALIGN_TOP_MID, 0, 510);
+  lv_obj_align(gui.page.tools.sectionTitleLine, LV_ALIGN_TOP_MID, 0, 560);
 
   gui.page.tools.toolsSoftwareVersionContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.tools.toolsSoftwareVersionContainer, LV_ALIGN_TOP_LEFT, -15, 515);
+  lv_obj_align(gui.page.tools.toolsSoftwareVersionContainer, LV_ALIGN_TOP_LEFT, -15, 565);
   lv_obj_set_size(gui.page.tools.toolsSoftwareVersionContainer, 330, 40);
   lv_obj_remove_flag(gui.page.tools.toolsSoftwareVersionContainer, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_scroll_dir(gui.page.tools.toolsSoftwareVersionContainer, LV_DIR_VER);
@@ -329,7 +359,7 @@ static void initTools_software(lv_obj_t *parent) {
   lv_obj_align(gui.page.tools.toolSoftwareVersionValue, LV_ALIGN_RIGHT_MID, -5, 0);
 
   gui.page.tools.toolsSoftwareSerialContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.tools.toolsSoftwareSerialContainer, LV_ALIGN_TOP_LEFT, -15, 555);
+  lv_obj_align(gui.page.tools.toolsSoftwareSerialContainer, LV_ALIGN_TOP_LEFT, -15, 605);
   lv_obj_set_size(gui.page.tools.toolsSoftwareSerialContainer, 330, 40);
   lv_obj_remove_flag(gui.page.tools.toolsSoftwareSerialContainer, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_scroll_dir(gui.page.tools.toolsSoftwareSerialContainer, LV_DIR_VER);
@@ -347,7 +377,7 @@ static void initTools_software(lv_obj_t *parent) {
 
   gui.page.tools.toolCreditButton = lv_button_create(parent);
   lv_obj_set_size(gui.page.tools.toolCreditButton, BUTTON_TUNE_WIDTH, BUTTON_TUNE_HEIGHT);
-  lv_obj_align(gui.page.tools.toolCreditButton, LV_ALIGN_TOP_MID, 5 , 595);
+  lv_obj_align(gui.page.tools.toolCreditButton, LV_ALIGN_TOP_MID, 5 , 645);
   lv_obj_add_event_cb(gui.page.tools.toolCreditButton, event_toolsPopup, LV_EVENT_CLICKED, gui.page.tools.toolCreditButton);
   lv_obj_set_style_bg_color(gui.page.tools.toolCreditButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
 
@@ -386,5 +416,10 @@ void tools(void)
 void tools_pause_timer(void)
 {
   if(guiUpdaterTimer != NULL) lv_timer_pause(guiUpdaterTimer);
+}
+
+void tools_delete_timer(void)
+{
+  safeTimerDelete(&guiUpdaterTimer);
 }
 

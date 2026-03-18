@@ -119,117 +119,11 @@ processNode* getProcElementEntryByObject(lv_obj_t* obj) {
     return currentNode;   // Will Return NULL if no matching processNode is found
 }
 
-/* Unused - kept for reference
-static bool deleteProcessElementByObj( lv_obj_t *obj ) {
-	processNode	*proc_ptr  = getProcElementEntryByObject( obj );
-	return deleteProcessElement( proc_ptr );
-}
-*/
-
-
-
 
 
 /******************************
 *  LVGL ELEMENTS IMPLEMENTATION
 ******************************/
-
-/*
-void event_processElement(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t * obj = (lv_obj_t *)lv_event_get_target(e);
-    lv_obj_t * cont = (lv_obj_t *)lv_event_get_current_target(e);
-    lv_obj_t * data = (lv_obj_t *)lv_event_get_user_data(e);
-    processNode *currentNode = getProcElementEntryByObject(data);
-    lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
-
-    int8_t x;
-
-    if (currentNode == NULL) {
-        LV_LOG_USER("Bad object passed to eventProcessElement!"); // This will stop a crash
-        return;                                                    // if something is wrong
-    }
-
-    if (code == LV_EVENT_RELEASED) {
-      LV_LOG_USER("LV_EVENT_RELEASED");
-      if(currentNode->process.gestureHandled == true && currentNode->process.swipedLeft == 1){
-        currentNode->process.gestureHandled = false;
-        return;
-      }
-    }
-
-    if (code == LV_EVENT_GESTURE && currentNode->process.longPressHandled == false) {
-        currentNode->process.gestureHandled = true; // Imposta il flag quando un gesto viene gestito
-
-        switch (dir) {
-            case LV_DIR_LEFT:
-                if (currentNode->process.swipedLeft == 0 && currentNode->process.swipedRight == 1) {
-                    LV_LOG_USER("Left gesture to return");
-                    x = lv_obj_get_x_aligned(obj) - 50;
-                    lv_obj_set_pos(obj, x, lv_obj_get_y_aligned(obj));
-                    currentNode->process.swipedRight = 0;
-                    currentNode->process.swipedLeft = 1;
-                    lv_obj_add_flag(currentNode->process.deleteButton, LV_OBJ_FLAG_HIDDEN);
-                }
-                break;
-
-            case LV_DIR_RIGHT:
-                if (currentNode->process.swipedLeft == 1 && currentNode->process.swipedRight == 0) {
-                    LV_LOG_USER("Right gesture for delete");
-                    x = lv_obj_get_x_aligned(obj) + 50;
-                    lv_obj_set_pos(obj, x, lv_obj_get_y_aligned(obj));
-                    currentNode->process.swipedRight = 1;
-                    currentNode->process.swipedLeft = 0;
-                    lv_obj_remove_flag(currentNode->process.deleteButton, LV_OBJ_FLAG_HIDDEN);
-                }
-                break;
-        }
-    } 
-    if (code == LV_EVENT_CLICKED && currentNode->process.longPressHandled == false) {
-         LV_LOG_USER("LV_EVENT_CLICKED");
-
-
-        if (obj == currentNode->process.preferredIcon) {
-            if (lv_color_eq(lv_obj_get_style_text_color(currentNode->process.preferredIcon, LV_PART_MAIN), lv_color_hex(RED))) {
-                lv_obj_set_style_text_color(currentNode->process.preferredIcon, lv_color_hex(WHITE), LV_PART_MAIN);
-                currentNode->process.processDetails->data.isPreferred = 0;
-            } else {
-                lv_obj_set_style_text_color(currentNode->process.preferredIcon, lv_color_hex(RED), LV_PART_MAIN);
-                currentNode->process.processDetails->data.isPreferred = 1;
-            }
-          LV_LOG_USER("Process is preferred : %d", currentNode->process.processDetails->data.isPreferred);
-          if(gui.page.processes.isFiltered == 1)
-            filterAndDisplayProcesses();
-            qSysAction( SAVE_PROCESS_CONFIG );
-        }
-
-        if (obj == currentNode->process.deleteButton) {
-            if (gui.element.messagePopup.mBoxPopupParent == NULL) {
-                LV_LOG_USER("Process Element click for popup delete");
-                gui.tempProcessNode = currentNode;
-                messagePopupCreate(deletePopupTitle_text, deletePopupBody_text, deleteButton_text, stepDetailCancel_text, currentNode);
-            }
-        }
-
-        if (obj == currentNode->process.processElementSummary && currentNode->process.swipedLeft == 1) {
-            LV_LOG_USER("Process Element Details address %p", currentNode);
-            gui.tempProcessNode = currentNode;
-            processDetail(currentNode->process.processDetails->processesContainer); // currentNode
-        }
-    }
-    if (code == LV_EVENT_LONG_PRESSED && currentNode->process.swipedLeft == 1) {
-        LV_LOG_USER("LV_EVENT_LONG_PRESSED");
-        currentNode->process.longPressHandled = true;
-        gui.tempProcessNode = currentNode;    
-        LV_LOG_USER("Duplicate process element %p", currentNode);
-        messagePopupCreate(duplicatePopupTitle_text, duplicateProcessPopupBody_text, checkupNo_text, checkupYes_text, currentNode);  
-     }
-
-    if (code == LV_EVENT_DELETE) {
-        lv_style_reset(&currentNode->process.processStyle);
-    }
-}
-*/
 
 void event_processElement(lv_event_t *e) {
     lv_event_code_t code = lv_event_get_code(e);

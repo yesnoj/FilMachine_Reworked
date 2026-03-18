@@ -94,7 +94,8 @@ FilMachine_Simulator_v2/
 │   ├── element_messagePopup.c     #   Generic confirmation/alert popups
 │   ├── element_rollerPopup.c      #   Numeric selector (roller) widget
 │   ├── element_cleanPopup.c       #   Cleaning process UI with timer
-│   └── element_drainPopup.c       #   Drain process UI with animated tank bars
+│   ├── element_drainPopup.c       #   Drain process UI with animated tank bars
+│   └── element_selfcheckPopup.c   #   Self-check diagnostic wizard (7-phase hardware test)
 │
 ├── c_fonts/                       # Custom icon fonts (5 sizes: 15/20/30/40/100px)
 ├── c_graphics/                    # Splash screen image data
@@ -219,6 +220,7 @@ The simulator opens a 480x320 window that reproduces the exact touchscreen inter
 - Export/Import (backup to `sd/FilMachine_Backup.cfg`)
 - Drain machine with animated tank-level bars and relay management
 - Clean machine with per-container rinse cycles and arc progress
+- Self-check diagnostic wizard with 7-phase hardware test simulation
 - Simulated temperature readings with heater model
 - Console logging of all system actions (`[SIM] sysAction: ...`)
 
@@ -320,6 +322,11 @@ Open a process and tap Play. The machine walks through pre-flight checks, then e
 | Process autostart | Auto-start when temperature reached | On/Off |
 | Drain/fill overlap | Overlap between drain and fill operations | 0–100% |
 | Multi-rinse cycle time | Duration of each rinse in multi-rinse steps | 60–180s |
+| Pump speed | Water pump speed percentage | 0–100% |
+| Tank size | Default developing tank size | S (500ml) / M (700ml) / L (1000ml) |
+| Container size | Chemistry container capacity | 250–2000 ml |
+| Water bath size | Water bath capacity | 1000–5000 ml |
+| Chemistry volume | Amount of chemistry used per step | Low / High |
 
 All settings are saved automatically to the SD card when changed. Slider values are saved only when you release the slider (not during dragging) to reduce SD card wear.
 
@@ -327,6 +334,7 @@ All settings are saved automatically to the SD card when changed. Slider values 
 
 - **Clean machine** — Automated cleaning cycle: select which containers to clean (C1, C2, C3), set the number of rinse cycles, and optionally drain the water bath when done. Each cycle fills the container with water from the water bath and then drains it back, with real-time progress shown via arc animations and remaining-time countdown.
 - **Drain machine** — Drains all containers (C1, C2, C3, WB) to waste sequentially. A confirmation screen lists the affected containers; once started, four colored tank bars animate from full to empty in real time, showing which container is currently draining, a ">> WASTE <<" indicator, and a countdown timer. The drain can be stopped at any time via the Stop button.
+- **Self-check** — Guided hardware diagnostic wizard that tests all machine components in 7 phases: temperature sensors (5s), water pump (20s), heater (30s), valves (10s), and the three containers C1/C2/C3 (10s each). The UI is split in two panels: a task list on the left showing icons per phase (check for done, dot for pending/skipped/stopped) and a detail panel on the right with phase description, real-time sensor data, countdown timer, and a progress bar. Three buttons control the flow: Stop (halts current phase), Start/Re-run (begins or repeats a phase), and Next (skips to the next phase). Each phase's state (done, skipped, stopped) is saved and visible when revisiting. When all phases complete successfully the title shows "Self-check complete!" in green; if any were skipped or stopped it shows "Self-check finished" in orange.
 - **Import/Export** — Backup and restore configuration to SD card
 - **Statistics** — Completed processes, total time, cleaning cycles, stopped processes
 - **Software info** — Firmware version and serial number

@@ -366,7 +366,6 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
                   lv_obj_align(sd->stepTypeLabel, LV_ALIGN_LEFT_MID, -10, 0);
 
 
-                  //lv_style_init(&sd->dropDownListStyle);
                   sd->stepTypeDropDownList = lv_dropdown_create(sd->stepTypeContainer);
                   lv_obj_set_style_border_opa(sd->stepTypeDropDownList, LV_OPA_TRANSP, 0);
                   lv_dropdown_set_options(sd->stepTypeDropDownList, stepTypeList);
@@ -396,7 +395,6 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
                   lv_obj_align(sd->stepSourceLabel, LV_ALIGN_LEFT_MID, -10, 0);
 
 
-                  //lv_style_init(&sd->dropDownListStyle);
                   sd->stepSourceDropDownList = lv_dropdown_create(sd->stepSourceContainer);
                   lv_obj_set_style_border_opa(sd->stepSourceDropDownList, LV_OPA_TRANSP, 0);
                   lv_dropdown_set_options(sd->stepSourceDropDownList, stepSourceList);

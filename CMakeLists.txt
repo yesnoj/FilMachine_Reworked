@@ -84,6 +84,7 @@ else()
         c_elements/element_rollerPopup.c
         c_elements/element_cleanPopup.c
         c_elements/element_drainPopup.c
+        c_elements/element_selfcheckPopup.c
 
         # c_fonts/
         c_fonts/FilMachineFontIcons_15.c

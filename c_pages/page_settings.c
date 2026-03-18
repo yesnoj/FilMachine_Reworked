@@ -605,7 +605,7 @@ gui.page.settings.tankSizeContainer = lv_obj_create(parent);
 
         /* Show saved tank size value */
         {
-            const char *sizes[] = {"500ml", "700ml", "1000ml"};
+            const char *sizes[] = tankSizeValues;
             uint8_t tsIdx = gui.page.settings.settingsParams.tankSize;
             if(tsIdx < 1 || tsIdx > 3) tsIdx = 2;
             gui.page.settings.tankSize_active_index = tsIdx - 1;
@@ -715,7 +715,7 @@ gui.page.settings.chemVolumeContainer = lv_obj_create(parent);
         lv_obj_set_style_border_color(gui.page.settings.chemVolumeTextArea, lv_color_hex(ORANGE), 0);
         lv_obj_add_event_cb(gui.page.settings.chemVolumeTextArea, event_settings_handler, LV_EVENT_FOCUSED, NULL);
         {
-            const char *vols[] = {"Low", "High"};
+            const char *vols[] = chemVolumeValues;
             uint8_t v = gui.page.settings.settingsParams.chemistryVolume;
             if(v < 1 || v > 2) v = 2;
             lv_textarea_set_text(gui.page.settings.chemVolumeTextArea, vols[v - 1]);
@@ -864,7 +864,7 @@ void refreshSettingsUI(void)
         uint8_t tsIdx = p->tankSize;
         if(tsIdx < 1 || tsIdx > 3) tsIdx = 2;
         gui.page.settings.tankSize_active_index = tsIdx - 1;
-        const char *sizes[] = {"500ml", "700ml", "1000ml"};
+        const char *sizes[] = tankSizeValues;
         lv_textarea_set_text(gui.page.settings.tankSizeTextArea, sizes[tsIdx - 1]);
     }
 
@@ -882,7 +882,7 @@ void refreshSettingsUI(void)
 
     /* ── Chemistry volume ── */
     {
-        const char *vols[] = {"Low", "High"};
+        const char *vols[] = chemVolumeValues;
         uint8_t v = p->chemistryVolume;
         if(v < 1 || v > 2) v = 2;
         lv_textarea_set_text(gui.page.settings.chemVolumeTextArea, vols[v - 1]);

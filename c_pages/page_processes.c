@@ -73,7 +73,6 @@ static void initProcesses(void){
   lv_obj_set_size(gui.page.processes.newProcessButton, 200, 45); 
   lv_obj_remove_flag(gui.page.processes.newProcessButton, LV_OBJ_FLAG_SCROLLABLE); 
   lv_obj_set_style_border_opa(gui.page.processes.newProcessButton, LV_OPA_TRANSP, 0);
-  //lv_obj_set_style_border_color(gui.page.processes.newProcessButton, lv_color_hex(GREEN_DARK), 0);
   lv_obj_add_event_cb(gui.page.processes.newProcessButton, event_tabProcesses, LV_EVENT_CLICKED, gui.page.processes.newProcessButton);
 
       //PROCESSES LABEL
@@ -94,7 +93,6 @@ static void initProcesses(void){
   lv_obj_set_size(gui.page.processes.processFilterButton, 45, 45); 
   lv_obj_remove_flag(gui.page.processes.processFilterButton, LV_OBJ_FLAG_SCROLLABLE); 
   lv_obj_set_style_border_opa(gui.page.processes.processFilterButton, LV_OPA_TRANSP, 0);
-  //lv_obj_set_style_border_color(gui.page.processes.processFilterButton, lv_color_hex(GREEN_DARK), 0);
   lv_obj_add_event_cb(gui.page.processes.processFilterButton, event_tabProcesses, LV_EVENT_CLICKED, gui.page.processes.processFilterButton);
                 
       //FILTER BUTTON ICON
@@ -110,7 +108,6 @@ static void initProcesses(void){
   lv_obj_set_style_border_opa(gui.page.processes.processesListContainer, LV_OPA_TRANSP, 0);
   lv_obj_set_style_bg_opa(gui.page.processes.processesListContainer, LV_OPA_TRANSP, 0);
   lv_obj_set_scroll_dir(gui.page.processes.processesListContainer, LV_DIR_VER);
-  //lv_obj_set_style_border_color(gui.page.processes.processesListContainer, lv_color_hex(GREY), 0);
 
   //CREATE STYLE AND LINE FOR THE TITLE
   /*Create style*/

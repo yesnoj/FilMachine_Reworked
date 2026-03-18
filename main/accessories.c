@@ -415,14 +415,33 @@ lv_obj_t * create_switch(lv_obj_t * parent, const char * icon, const char * txt,
 
 
 void createQuestionMark(lv_obj_t * parent,lv_obj_t * element,lv_event_cb_t e, const int32_t x, const int32_t y) {
-	
+
     lv_obj_t *questionMark = lv_label_create(parent);
-    lv_obj_set_size(questionMark, lv_font_get_line_height(&FilMachineFontIcons_15) * 1.5, lv_font_get_line_height(&FilMachineFontIcons_15) * 1.5);       
+    lv_obj_set_size(questionMark, lv_font_get_line_height(&FilMachineFontIcons_15) * 1.5, lv_font_get_line_height(&FilMachineFontIcons_15) * 1.5);
     lv_label_set_text(questionMark, questionMark_icon);
     lv_obj_add_event_cb(questionMark, e, LV_EVENT_CLICKED, element);
-    lv_obj_set_style_text_font(questionMark, &FilMachineFontIcons_15, 0);                     
+    lv_obj_set_style_text_font(questionMark, &FilMachineFontIcons_15, 0);
     lv_obj_align_to(questionMark, element, LV_ALIGN_OUT_RIGHT_MID, x, y);
     lv_obj_add_flag(questionMark, LV_OBJ_FLAG_CLICKABLE);
+}
+
+void createPopupBackdrop(lv_obj_t **parent, lv_obj_t **container, int32_t width, int32_t height) {
+    *parent = lv_obj_class_create_obj(&lv_msgbox_backdrop_class, lv_layer_top());
+    lv_obj_class_init_obj(*parent);
+    lv_obj_remove_flag(*parent, LV_OBJ_FLAG_IGNORE_LAYOUT);
+    lv_obj_set_size(*parent, LV_PCT(100), LV_PCT(100));
+
+    *container = lv_obj_create(*parent);
+    lv_obj_align(*container, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_size(*container, width, height);
+    lv_obj_remove_flag(*container, LV_OBJ_FLAG_SCROLLABLE);
+}
+
+void initTitleLineStyle(lv_style_t *style, uint32_t color) {
+    lv_style_init(style);
+    lv_style_set_line_width(style, 2);
+    lv_style_set_line_color(style, lv_color_hex(color));
+    lv_style_set_line_rounded(style, true);
 }
 
 int32_t convertCelsiusToFahrenheit( int32_t tempC ) {
@@ -609,6 +628,7 @@ void initGlobals( void ) {
   // We only need to initialise the non-zero values
   gui.element.cleanPopup.titleLinePoints[1].x = 200;
   gui.element.drainPopup.titleLinePoints[1].x = 200;
+  gui.element.selfcheckPopup.titleLinePoints[1].x = 320;
   gui.element.filterPopup.titleLinePoints[1].x = 200;
   gui.element.rollerPopup.titleLinePoints[1].x = 200;
   gui.element.messagePopup.titleLinePoints[1].x = 200;

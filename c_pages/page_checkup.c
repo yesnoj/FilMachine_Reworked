@@ -786,7 +786,7 @@ static void checkup_renderPreFlight(processNode *proc) {
 
         /* Always read tank size from settings (persistent) and sync to checkup data */
         {
-            const char *sizes[] = {"500ml", "700ml", "1000ml"};
+            const char *sizes[] = tankSizeValues;
             uint8_t idx = gui.page.settings.settingsParams.tankSize;
             if(idx < 1 || idx > 3) idx = 2;
             ckup->data.tankSize = idx;
@@ -813,7 +813,7 @@ static void checkup_renderPreFlight(processNode *proc) {
 
         /* Always read volume from settings and sync to checkup data */
         {
-            const char *vols[] = {"Low", "High"};
+            const char *vols[] = chemVolumeValues;
             uint8_t v = gui.page.settings.settingsParams.chemistryVolume;
             if(v < 1 || v > 2) v = 2;
             ckup->data.activeVolume_index = v;
@@ -1173,10 +1173,6 @@ void initCheckup(processNode *pn)
       
       //in this way create a new layer on top of others, so "checkout" will be on top of processDetail
       //ckup->checkupParent = lv_obj_class_create_obj(&lv_msgbox_backdrop_class, lv_layer_top());
-      //lv_obj_class_init_obj(ckup->checkupParent);
-      //lv_obj_remove_flag(ckup->checkupParent, LV_OBJ_FLAG_IGNORE_LAYOUT);
-      //lv_obj_set_size(ckup->checkupParent, LV_PCT(100), LV_PCT(100));
-      
       
       if(ckup->checkupParent == NULL){
         LV_LOG_USER("Object not created");

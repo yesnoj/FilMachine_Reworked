@@ -154,7 +154,7 @@ void event_Roller(lv_event_t * e)
             }
             /* ── Settings Tank Size roller ── */
             if((lv_obj_t *)data == gui.page.settings.tankSizeTextArea) {
-              const char *sizes[] = {"500ml", "700ml", "1000ml"};
+              const char *sizes[] = tankSizeValues;
               uint32_t sel = isScrolled ? rollerSelected : lv_roller_get_selected(gui.element.rollerPopup.roller);
               if(sel > 2) sel = 1;
               LV_LOG_USER("SET BUTTON from settingsTankSize value %"PRIu32":", sel + 1);
@@ -204,7 +204,7 @@ void event_Roller(lv_event_t * e)
             }
             /* ── Settings Chemistry Volume roller ── */
             if((lv_obj_t *)data == gui.page.settings.chemVolumeTextArea) {
-              const char *vols[] = {"Low", "High"};
+              const char *vols[] = chemVolumeValues;
               uint32_t sel = isScrolled ? rollerSelected : lv_roller_get_selected(gui.element.rollerPopup.roller);
               if(sel > 1) sel = 1;
               LV_LOG_USER("SET Chemistry Volume: %s (value=%d)", vols[sel], sel + 1);
@@ -254,15 +254,7 @@ void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *w
    LV_LOG_USER("Roller popup create");
    gui.element.rollerPopup.whoCallMe = whoCallMe;
 
-   gui.element.rollerPopup.mBoxRollerParent = lv_obj_class_create_obj(&lv_msgbox_backdrop_class, lv_layer_top());
-   lv_obj_class_init_obj(gui.element.rollerPopup.mBoxRollerParent);
-   lv_obj_remove_flag(gui.element.rollerPopup.mBoxRollerParent, LV_OBJ_FLAG_IGNORE_LAYOUT);
-   lv_obj_set_size(gui.element.rollerPopup.mBoxRollerParent, LV_PCT(100), LV_PCT(100));
-
-         gui.element.rollerPopup.mBoxRollerContainer = lv_obj_create(gui.element.rollerPopup.mBoxRollerParent);
-         lv_obj_align(gui.element.rollerPopup.mBoxRollerContainer, LV_ALIGN_CENTER, 0, 0);
-         lv_obj_set_size(gui.element.rollerPopup.mBoxRollerContainer, 250, 220); 
-         lv_obj_remove_flag(gui.element.rollerPopup.mBoxRollerContainer, LV_OBJ_FLAG_SCROLLABLE); 
+   createPopupBackdrop(&gui.element.rollerPopup.mBoxRollerParent, &gui.element.rollerPopup.mBoxRollerContainer, 250, 220); 
 
          gui.element.rollerPopup.mBoxRollerTitle = lv_label_create(gui.element.rollerPopup.mBoxRollerContainer);         
          lv_label_set_text(gui.element.rollerPopup.mBoxRollerTitle, popupTitle); 

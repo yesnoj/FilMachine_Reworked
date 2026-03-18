@@ -336,6 +336,40 @@ typedef enum {
 #define cleanDraining_text							"Draining"
 #define cleanFilling_text							"Filling"
 
+/* Drain popup texts */
+#define drainStopped_text                       "Drain stopped"
+#define drainComplete_text                      "Drain complete!"
+#define drainWasteIndicator_text                ">> WASTE <<"
+
+/* Self-check popup texts */
+#define selfCheck_text                          "Self-check"
+#define selfCheckTasks_text                     "Tasks:"
+#define selfCheckTempSensors_text               "Temp. sensors"
+#define selfCheckWaterPump_text                 "Water pump"
+#define selfCheckHeater_text                    "Heater"
+#define selfCheckValves_text                    "Valves"
+#define selfCheckContainer1_text                "Container C1"
+#define selfCheckContainer2_text                "Container C2"
+#define selfCheckContainer3_text                "Container C3"
+#define selfCheckRunning_text                   "Running..."
+#define selfCheckDone_text                      "Done"
+#define selfCheckComplete_text                  "Self-check complete!"
+#define selfCheckFinished_text                  "Self-check finished"
+#define selfCheckSkip_text                      "Skip"
+#define selfCheckNext_text                      "Next"
+
+/* Common button texts */
+#define buttonClose_text                        "Close"
+#define buttonStop_text                         "Stop"
+#define buttonStart_text                        "Start"
+#define buttonCancel_text                       "Cancel"
+
+/* Tank size display values */
+#define tankSizeValues                          {"500ml", "700ml", "1000ml"}
+
+/* Chemistry volume display values */
+#define chemVolumeValues                        {"Low", "High"}
+
 /* Popup elements */
 #define stopProcessPopupTitle_text 					"Stop process"
 #define warningPopupTitle_text 						"Warning!"
@@ -963,6 +997,48 @@ struct sDrainPopup {
 	int32_t				 totalElapsed;
 };
 
+struct sSelfcheckPopup {
+	lv_obj_t			*selfcheckPopupParent;
+	lv_obj_t			*selfcheckContainer;
+	lv_obj_t			*selfcheckTitle;
+	lv_obj_t			*selfcheckTitleLine;
+	lv_style_t			 style_selfcheckTitleLine;
+	lv_point_precise_t	 titleLinePoints[2];
+
+	/* Left panel - task list */
+	lv_obj_t			*leftPanel;
+	lv_obj_t			*tasksLabel;
+	lv_obj_t			*phaseIcon[7];
+	lv_obj_t			*phaseNameLabel[7];
+
+	/* Right panel - current phase */
+	lv_obj_t			*rightPanel;
+	lv_obj_t			*phaseTitle;
+	lv_obj_t			*phaseDescription;
+	lv_obj_t			*phaseStatus;
+	lv_obj_t			*phaseTimer;
+
+	/* Progress bar (for container phases) */
+	lv_obj_t			*progressBar;
+
+	/* Close button (X, green) */
+	lv_obj_t			*closeButton;
+	lv_obj_t			*closeButtonLabel;
+
+	/* Buttons */
+	lv_obj_t			*stopButton;
+	lv_obj_t			*stopButtonLabel;
+	lv_obj_t			*startButton;
+	lv_obj_t			*startButtonLabel;
+	lv_obj_t			*advanceButton;
+	lv_obj_t			*advanceButtonLabel;
+
+	/* State */
+	lv_timer_t			*checkTimer;
+	uint8_t				 currentPhase;
+	uint8_t				 phaseElapsed;
+	bool				 isRunning;
+};
 
 struct sMessagePopup {
 	/* LVGL objects */
@@ -1137,12 +1213,14 @@ struct sTools {
 
 	lv_obj_t 	        	*toolsCleaningContainer;
 	lv_obj_t 	        	*toolsDrainingContainer;
+	lv_obj_t 	        	*toolsSelfcheckContainer;
 	lv_obj_t 	        	*toolsImportContainer;
 	lv_obj_t 	        	*toolsExportContainer;
 
 
 	lv_obj_t 	        	*toolsCleaningLabel;
 	lv_obj_t 	        	*toolsDrainingLabel;
+	lv_obj_t 	        	*toolsSelfcheckLabel;
 	lv_obj_t 	        	*toolsImportLabel;
 	lv_obj_t 	        	*toolsExportLabel;
 
@@ -1150,6 +1228,8 @@ struct sTools {
   lv_obj_t 	        	*toolsCleaningButtonLabel;
 	lv_obj_t 	        	*toolsDrainingButton;
   lv_obj_t 	        	*toolsDrainingButtonLabel;
+	lv_obj_t 	        	*toolsSelfcheckButton;
+  lv_obj_t 	        	*toolsSelfcheckButtonLabel;
 	lv_obj_t 	        	*toolsImportButton;
   lv_obj_t 	          *toolsImportButtonLabel;
 	lv_obj_t 	        	*toolsExportButton;
@@ -1205,6 +1285,7 @@ struct sElements {
 	struct sFilterPopup			filterPopup;
   struct sCleanPopup      cleanPopup;
   struct sDrainPopup      drainPopup;
+  struct sSelfcheckPopup  selfcheckPopup;
 	struct sMessagePopup 		messagePopup;
 	struct sRollerPopup			rollerPopup;
   struct sKeyboardPopup   keyboardPopup;
@@ -1291,6 +1372,9 @@ void cleanPopup(void);
 // @file element_drainPopup.c
 void event_drainPopup(lv_event_t *e);
 void drainPopupCreate(void);
+// @file element_selfcheckPopup.c
+void event_selfcheckPopup(lv_event_t *e);
+void selfcheckPopupCreate(void);
 // @file element_process.c
 void event_processElement(lv_event_t *e);
 void processElementCreate(processNode *newProcess, int32_t tempSize);
@@ -1342,6 +1426,7 @@ void event_toolsElement(lv_event_t *e);
 void initTools(void);
 void tools(void);
 void tools_pause_timer(void);
+void tools_delete_timer(void);
 // @file FilMachine.c
 void stopMotorTask(void);
 void runMotorTask(void);
@@ -1359,6 +1444,8 @@ void event_cb(lv_event_t * e);
 void event_checkbox_handler(lv_event_t * e);
 void event_keyboard(lv_event_t* e);
 void createQuestionMark(lv_obj_t * parent,lv_obj_t * element,lv_event_cb_t e, const int32_t x, const int32_t y);
+void createPopupBackdrop(lv_obj_t **parent, lv_obj_t **container, int32_t width, int32_t height);
+void initTitleLineStyle(lv_style_t *style, uint32_t color);
 void createMessageBox(lv_obj_t *messageBox, char *title, char *text, char *button1Text, char *button2Text);
 void create_keyboard();
 void showKeyboard(lv_obj_t * whoCallMe, lv_obj_t * textArea);

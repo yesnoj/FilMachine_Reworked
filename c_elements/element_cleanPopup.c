@@ -515,15 +515,7 @@ void cleanPopup (void){
       gui.element.cleanPopup.cleanDrainWater = false;
       gui.element.cleanPopup.isCleaning = false;
 
-      gui.element.cleanPopup.cleanPopupParent = lv_obj_class_create_obj(&lv_msgbox_backdrop_class, lv_layer_top());
-      lv_obj_class_init_obj(gui.element.cleanPopup.cleanPopupParent);
-      lv_obj_remove_flag(gui.element.cleanPopup.cleanPopupParent, LV_OBJ_FLAG_IGNORE_LAYOUT);
-      lv_obj_set_size(gui.element.cleanPopup.cleanPopupParent, LV_PCT(100), LV_PCT(100));
-
-      gui.element.cleanPopup.cleanContainer = lv_obj_create(gui.element.cleanPopup.cleanPopupParent);
-      lv_obj_align(gui.element.cleanPopup.cleanContainer, LV_ALIGN_CENTER, 0, 0);
-      lv_obj_set_size(gui.element.cleanPopup.cleanContainer, 320, 280); 
-      lv_obj_remove_flag(gui.element.cleanPopup.cleanContainer, LV_OBJ_FLAG_SCROLLABLE); 
+      createPopupBackdrop(&gui.element.cleanPopup.cleanPopupParent, &gui.element.cleanPopup.cleanContainer, 320, 280); 
 
               gui.element.cleanPopup.cleanTitle = lv_label_create(gui.element.cleanPopup.cleanContainer);         
               lv_label_set_text(gui.element.cleanPopup.cleanTitle, cleanPopupTitle_text); 
@@ -531,10 +523,7 @@ void cleanPopup (void){
               lv_obj_align(gui.element.cleanPopup.cleanTitle, LV_ALIGN_TOP_MID, 0, - 10);
 
               /*Create style*/
-              lv_style_init(&gui.element.cleanPopup.style_cleanTitleLine);
-              lv_style_set_line_width(&gui.element.cleanPopup.style_cleanTitleLine, 2);
-              lv_style_set_line_color(&gui.element.cleanPopup.style_cleanTitleLine, lv_color_hex(WHITE));
-              lv_style_set_line_rounded(&gui.element.cleanPopup.style_cleanTitleLine, true);
+              initTitleLineStyle(&gui.element.cleanPopup.style_cleanTitleLine, WHITE);
 
               /*Create a line and apply the new style*/
               gui.element.cleanPopup.cleanPopupTitleLine = lv_line_create(gui.element.cleanPopup.cleanContainer);

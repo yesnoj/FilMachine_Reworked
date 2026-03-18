@@ -511,7 +511,6 @@ if(existingProcess != NULL) {
                   lv_obj_align(pd->processColorOrBnWContainer, LV_ALIGN_TOP_LEFT, -18, 137);
                   lv_obj_set_size(pd->processColorOrBnWContainer, 105, 40);
                   lv_obj_set_style_border_color(pd->processColorOrBnWContainer, lv_color_hex(WHITE), 0);
-                  //lv_obj_set_style_border_opa(pd->processColorOrBnWContainer, LV_OPA_TRANSP, 0);
 
 
                           pd->processColorLabel = lv_label_create(pd->processColorOrBnWContainer);
