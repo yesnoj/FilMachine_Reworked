@@ -31,6 +31,14 @@ void event_toolsPopup(lv_event_t * e) {
         LV_LOG_USER("PRESSED gui.page.tools.toolCreditButton");
         messagePopupCreate(softwareCredits_text,softwareCreditsValue_text, NULL, NULL, NULL);
     }
+    if(data == gui.page.tools.toolsUpdateSDLabel){
+        LV_LOG_USER("PRESSED gui.page.tools.toolsUpdateSDLabel (info)");
+        messagePopupCreate(otaUpdateFromSD_text, otaUpdateFromSDMBox_text, NULL, NULL, NULL);
+    }
+    if(data == gui.page.tools.toolsUpdateWifiLabel){
+        LV_LOG_USER("PRESSED gui.page.tools.toolsUpdateWifiLabel (info)");
+        messagePopupCreate(otaWifiUpdate_text, otaWifiUpdateMBox_text, NULL, NULL, NULL);
+    }
   }
 }
 
@@ -82,6 +90,23 @@ void event_toolsElement(lv_event_t * e) {
           LV_LOG_USER("PRESSED gui.page.tools.toolsImportButton");
           messagePopupCreate(importConfigAndProcesses_text,importConfigAndProcessesMBox2_text, checkupNo_text, checkupYes_text, obj);
         }
+      if(obj == gui.page.tools.toolsUpdateSDButton){
+          LV_LOG_USER("PRESSED gui.page.tools.toolsUpdateSDButton");
+          if (ota_is_running()) return;
+          char ver[32];
+          if (ota_check_sd(ver, sizeof(ver))) {
+              char msg[128];
+              snprintf(msg, sizeof(msg), otaConfirmUpdate_text, ver);
+              messagePopupCreate(otaUpdateFromSD_text, msg, checkupNo_text, checkupYes_text, obj);
+          } else {
+              messagePopupCreate(otaUpdateFromSD_text, otaNoFirmware_text, NULL, NULL, NULL);
+          }
+      }
+      if(obj == gui.page.tools.toolsUpdateWifiButton){
+          LV_LOG_USER("PRESSED gui.page.tools.toolsUpdateWifiButton");
+          if (ota_is_running()) return;
+          otaWifiPopupCreate();
+      }
     }
 }
 
@@ -330,7 +355,7 @@ static void initTools_software(lv_obj_t *parent) {
   gui.page.tools.toolsSoftwareLabel = lv_label_create(parent);
   lv_label_set_text(gui.page.tools.toolsSoftwareLabel, Software_text);
   lv_obj_set_style_text_font(gui.page.tools.toolsSoftwareLabel, &lv_font_montserrat_28, 0);
-  lv_obj_align(gui.page.tools.toolsSoftwareLabel, LV_ALIGN_TOP_LEFT, -7, 525);
+  lv_obj_align(gui.page.tools.toolsSoftwareLabel, LV_ALIGN_TOP_LEFT, -7, 685);
 
   lv_style_set_line_width(&gui.page.tools.style_sectionTitleLine, 2);
   lv_style_set_line_color(&gui.page.tools.style_sectionTitleLine, lv_color_hex(LIGHT_BLUE));
@@ -339,10 +364,10 @@ static void initTools_software(lv_obj_t *parent) {
   gui.page.tools.sectionTitleLine = lv_line_create(parent);
   lv_line_set_points(gui.page.tools.sectionTitleLine, gui.page.tools.titleLinePoints, 2);
   lv_obj_add_style(gui.page.tools.sectionTitleLine, &gui.page.tools.style_sectionTitleLine, 0);
-  lv_obj_align(gui.page.tools.sectionTitleLine, LV_ALIGN_TOP_MID, 0, 560);
+  lv_obj_align(gui.page.tools.sectionTitleLine, LV_ALIGN_TOP_MID, 0, 720);
 
   gui.page.tools.toolsSoftwareVersionContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.tools.toolsSoftwareVersionContainer, LV_ALIGN_TOP_LEFT, -15, 565);
+  lv_obj_align(gui.page.tools.toolsSoftwareVersionContainer, LV_ALIGN_TOP_LEFT, -15, 725);
   lv_obj_set_size(gui.page.tools.toolsSoftwareVersionContainer, 330, 40);
   lv_obj_remove_flag(gui.page.tools.toolsSoftwareVersionContainer, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_scroll_dir(gui.page.tools.toolsSoftwareVersionContainer, LV_DIR_VER);
@@ -354,12 +379,12 @@ static void initTools_software(lv_obj_t *parent) {
   lv_obj_align(gui.page.tools.toolSoftWareVersionLabel, LV_ALIGN_LEFT_MID, -5, 0);
 
   gui.page.tools.toolSoftwareVersionValue = lv_label_create(gui.page.tools.toolsSoftwareVersionContainer);
-  lv_label_set_text(gui.page.tools.toolSoftwareVersionValue, softwareVersionValue_text);
+  lv_label_set_text(gui.page.tools.toolSoftwareVersionValue, ota_get_running_version());
   lv_obj_set_style_text_font(gui.page.tools.toolSoftwareVersionValue, &lv_font_montserrat_20, 0);
   lv_obj_align(gui.page.tools.toolSoftwareVersionValue, LV_ALIGN_RIGHT_MID, -5, 0);
 
   gui.page.tools.toolsSoftwareSerialContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.tools.toolsSoftwareSerialContainer, LV_ALIGN_TOP_LEFT, -15, 605);
+  lv_obj_align(gui.page.tools.toolsSoftwareSerialContainer, LV_ALIGN_TOP_LEFT, -15, 765);
   lv_obj_set_size(gui.page.tools.toolsSoftwareSerialContainer, 330, 40);
   lv_obj_remove_flag(gui.page.tools.toolsSoftwareSerialContainer, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_scroll_dir(gui.page.tools.toolsSoftwareSerialContainer, LV_DIR_VER);
@@ -377,7 +402,7 @@ static void initTools_software(lv_obj_t *parent) {
 
   gui.page.tools.toolCreditButton = lv_button_create(parent);
   lv_obj_set_size(gui.page.tools.toolCreditButton, BUTTON_TUNE_WIDTH, BUTTON_TUNE_HEIGHT);
-  lv_obj_align(gui.page.tools.toolCreditButton, LV_ALIGN_TOP_MID, 5 , 645);
+  lv_obj_align(gui.page.tools.toolCreditButton, LV_ALIGN_TOP_MID, 5 , 805);
   lv_obj_add_event_cb(gui.page.tools.toolCreditButton, event_toolsPopup, LV_EVENT_CLICKED, gui.page.tools.toolCreditButton);
   lv_obj_set_style_bg_color(gui.page.tools.toolCreditButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
 
@@ -385,6 +410,71 @@ static void initTools_software(lv_obj_t *parent) {
   lv_label_set_text(gui.page.tools.toolCreditButtonLabel, softwareCredits_text);
   lv_obj_set_style_text_font(gui.page.tools.toolCreditButtonLabel, &lv_font_montserrat_18, 0);
   lv_obj_align(gui.page.tools.toolCreditButtonLabel, LV_ALIGN_CENTER, 0, 0);
+}
+
+static void initTools_update(lv_obj_t *parent) {
+  /* Section header: "Update" */
+  lv_obj_t *updateLabel = lv_label_create(parent);
+  lv_label_set_text(updateLabel, otaUpdate_text);
+  lv_obj_set_style_text_font(updateLabel, &lv_font_montserrat_28, 0);
+  lv_obj_align(updateLabel, LV_ALIGN_TOP_LEFT, -7, 525);
+
+  lv_obj_t *updateLine = lv_line_create(parent);
+  lv_line_set_points(updateLine, gui.page.tools.titleLinePoints, 2);
+  lv_obj_add_style(updateLine, &gui.page.tools.style_sectionTitleLine, 0);
+  lv_obj_align(updateLine, LV_ALIGN_TOP_MID, 0, 560);
+
+  /* Update from SD */
+  gui.page.tools.toolsUpdateContainer = lv_obj_create(parent);
+  lv_obj_align(gui.page.tools.toolsUpdateContainer, LV_ALIGN_TOP_LEFT, -15, 565);
+  lv_obj_set_size(gui.page.tools.toolsUpdateContainer, 330, 50);
+  lv_obj_remove_flag(gui.page.tools.toolsUpdateContainer, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_scroll_dir(gui.page.tools.toolsUpdateContainer, LV_DIR_VER);
+  lv_obj_set_style_border_opa(gui.page.tools.toolsUpdateContainer, LV_OPA_TRANSP, 0);
+
+  gui.page.tools.toolsUpdateSDLabel = lv_label_create(gui.page.tools.toolsUpdateContainer);
+  lv_label_set_text(gui.page.tools.toolsUpdateSDLabel, otaUpdateFromSD_text);
+  lv_obj_set_style_text_font(gui.page.tools.toolsUpdateSDLabel, &lv_font_montserrat_20, 0);
+  lv_obj_align(gui.page.tools.toolsUpdateSDLabel, LV_ALIGN_LEFT_MID, -5, 0);
+
+  createQuestionMark(gui.page.tools.toolsUpdateContainer, gui.page.tools.toolsUpdateSDLabel, event_toolsPopup, 2, -3);
+
+  gui.page.tools.toolsUpdateSDButton = lv_button_create(gui.page.tools.toolsUpdateContainer);
+  lv_obj_set_size(gui.page.tools.toolsUpdateSDButton, BUTTON_PROCESS_WIDTH * 0.8, BUTTON_PROCESS_HEIGHT);
+  lv_obj_align(gui.page.tools.toolsUpdateSDButton, LV_ALIGN_RIGHT_MID, 0, 0);
+  lv_obj_add_event_cb(gui.page.tools.toolsUpdateSDButton, event_toolsElement, LV_EVENT_CLICKED, gui.page.tools.toolsUpdateSDButton);
+  lv_obj_set_style_bg_color(gui.page.tools.toolsUpdateSDButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
+
+  gui.page.tools.toolsUpdateSDButtonLabel = lv_label_create(gui.page.tools.toolsUpdateSDButton);
+  lv_label_set_text(gui.page.tools.toolsUpdateSDButtonLabel, play_icon);
+  lv_obj_set_style_text_font(gui.page.tools.toolsUpdateSDButtonLabel, &FilMachineFontIcons_30, 0);
+  lv_obj_align(gui.page.tools.toolsUpdateSDButtonLabel, LV_ALIGN_CENTER, 0, 0);
+
+  /* Check for updates (Wi-Fi) */
+  gui.page.tools.toolsUpdateWifiContainer = lv_obj_create(parent);
+  lv_obj_align(gui.page.tools.toolsUpdateWifiContainer, LV_ALIGN_TOP_LEFT, -15, 615);
+  lv_obj_set_size(gui.page.tools.toolsUpdateWifiContainer, 330, 50);
+  lv_obj_remove_flag(gui.page.tools.toolsUpdateWifiContainer, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_scroll_dir(gui.page.tools.toolsUpdateWifiContainer, LV_DIR_VER);
+  lv_obj_set_style_border_opa(gui.page.tools.toolsUpdateWifiContainer, LV_OPA_TRANSP, 0);
+
+  gui.page.tools.toolsUpdateWifiLabel = lv_label_create(gui.page.tools.toolsUpdateWifiContainer);
+  lv_label_set_text(gui.page.tools.toolsUpdateWifiLabel, otaWifiUpdate_text);
+  lv_obj_set_style_text_font(gui.page.tools.toolsUpdateWifiLabel, &lv_font_montserrat_20, 0);
+  lv_obj_align(gui.page.tools.toolsUpdateWifiLabel, LV_ALIGN_LEFT_MID, -5, 0);
+
+  createQuestionMark(gui.page.tools.toolsUpdateWifiContainer, gui.page.tools.toolsUpdateWifiLabel, event_toolsPopup, 2, -3);
+
+  gui.page.tools.toolsUpdateWifiButton = lv_button_create(gui.page.tools.toolsUpdateWifiContainer);
+  lv_obj_set_size(gui.page.tools.toolsUpdateWifiButton, BUTTON_PROCESS_WIDTH * 0.8, BUTTON_PROCESS_HEIGHT);
+  lv_obj_align(gui.page.tools.toolsUpdateWifiButton, LV_ALIGN_RIGHT_MID, 0, 0);
+  lv_obj_add_event_cb(gui.page.tools.toolsUpdateWifiButton, event_toolsElement, LV_EVENT_CLICKED, gui.page.tools.toolsUpdateWifiButton);
+  lv_obj_set_style_bg_color(gui.page.tools.toolsUpdateWifiButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
+
+  gui.page.tools.toolsUpdateWifiButtonLabel = lv_label_create(gui.page.tools.toolsUpdateWifiButton);
+  lv_label_set_text(gui.page.tools.toolsUpdateWifiButtonLabel, play_icon);
+  lv_obj_set_style_text_font(gui.page.tools.toolsUpdateWifiButtonLabel, &FilMachineFontIcons_30, 0);
+  lv_obj_align(gui.page.tools.toolsUpdateWifiButtonLabel, LV_ALIGN_CENTER, 0, 0);
 }
 
 void initTools(void) {
@@ -397,6 +487,7 @@ void initTools(void) {
   initTools_maintenance(gui.page.tools.toolsSection);
   initTools_utilities(gui.page.tools.toolsSection);
   initTools_statistics(gui.page.tools.toolsSection);
+  initTools_update(gui.page.tools.toolsSection);
   initTools_software(gui.page.tools.toolsSection);
 }
 

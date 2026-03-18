@@ -417,6 +417,21 @@ typedef enum {
 #define softwareCredits_text 						"Credits"
 #define softwareCreditsValue_text 					"Credit to Frank P. \nand \nPete B."
 
+/* OTA update strings */
+#define otaUpdate_text								"Update"
+#define otaUpdateFromSD_text						"Update from SD"
+#define otaUpdateFromSDMBox_text					"Update firmware from\nSD card file."
+#define otaWifiUpdate_text							"Wi-Fi update"
+#define otaWifiUpdateMBox_text						"Start a local web server.\nUpload firmware via browser."
+#define otaUpdating_text							"Updating..."
+#define otaNoFirmware_text							"No firmware found on SD"
+#define otaConfirmUpdate_text						"Update firmware to %s?\nDo not turn off the machine!"
+#define otaRebootNow_text							"Reboot now to apply update?"
+#define otaWifiSSID_text							"Wi-Fi SSID"
+#define otaWifiSSIDAlert_text						"Enter the Wi-Fi network\nname for OTA updates."
+#define otaWifiPassword_text						"Wi-Fi password"
+#define otaWifiPasswordAlert_text					"Enter the Wi-Fi network\npassword."
+
 /* Process detail strings/vars */
 #define processDetailStep_text				 		"Steps"
 #define processDetailInfo_text				 		"Details"
@@ -1040,6 +1055,36 @@ struct sSelfcheckPopup {
 	bool				 isRunning;
 };
 
+struct sOtaProgressPopup {
+	lv_obj_t			*popupParent;
+	lv_obj_t			*popupContainer;
+	lv_obj_t			*titleLabel;
+	lv_obj_t			*titleLine;
+	lv_style_t			 style_titleLine;
+	lv_point_precise_t	 titleLinePoints[2];
+	lv_obj_t			*closeButton;
+	lv_obj_t			*closeButtonLabel;
+	lv_obj_t			*statusLabel;
+	lv_obj_t			*progressBar;
+	lv_obj_t			*percentLabel;
+};
+
+struct sOtaWifiPopup {
+	lv_obj_t			*popupParent;
+	lv_obj_t			*popupContainer;
+	lv_obj_t			*titleLabel;
+	lv_obj_t			*titleLine;
+	lv_style_t			 style_titleLine;
+	lv_point_precise_t	 titleLinePoints[2];
+	lv_obj_t			*closeButton;
+	lv_obj_t			*closeButtonLabel;
+	lv_obj_t			*ipLabel;
+	lv_obj_t			*pinLabel;
+	lv_obj_t			*statusLabel;
+	lv_obj_t			*progressBar;
+	char				 otaPin[6]; /* 5 digits + null */
+};
+
 struct sMessagePopup {
 	/* LVGL objects */
 	lv_obj_t			      *mBoxPopupParent;
@@ -1199,6 +1244,18 @@ struct sSettings {
 	lv_obj_t                *chemVolumeLabel;
 	lv_obj_t                *chemVolumeTextArea;
 
+	/* OTA / Wi-Fi settings */
+	/* OTA / Wi-Fi settings */
+	lv_obj_t                *otaSectionLabel;
+	lv_obj_t                *otaWifiSSIDContainer;
+	lv_obj_t                *otaWifiSSIDLabel;
+	lv_obj_t                *otaWifiSSIDTextArea;
+	lv_obj_t                *otaWifiPasswordContainer;
+	lv_obj_t                *otaWifiPasswordLabel;
+	lv_obj_t                *otaWifiPasswordTextArea;
+	char                     otaWifiSSID[33];
+	char                     otaWifiPassword[65];
+
   /* Params objects */
   struct machineSettings   settingsParams;
 };
@@ -1266,6 +1323,16 @@ struct sTools {
 	lv_obj_t 	        	*toolCreditButton;
 	lv_obj_t 	        	*toolCreditButtonLabel;
 
+	/* OTA Update UI */
+	lv_obj_t			*toolsUpdateContainer;
+	lv_obj_t			*toolsUpdateSDLabel;
+	lv_obj_t			*toolsUpdateSDButton;
+	lv_obj_t			*toolsUpdateSDButtonLabel;
+	lv_obj_t			*toolsUpdateWifiContainer;
+	lv_obj_t			*toolsUpdateWifiLabel;
+	lv_obj_t			*toolsUpdateWifiButton;
+	lv_obj_t			*toolsUpdateWifiButtonLabel;
+
 	/* Params objects */
   struct machineStatistics machineStats;
 };
@@ -1286,6 +1353,8 @@ struct sElements {
   struct sCleanPopup      cleanPopup;
   struct sDrainPopup      drainPopup;
   struct sSelfcheckPopup  selfcheckPopup;
+  struct sOtaWifiPopup    otaWifiPopup;
+  struct sOtaProgressPopup otaProgressPopup;
 	struct sMessagePopup 		messagePopup;
 	struct sRollerPopup			rollerPopup;
   struct sKeyboardPopup   keyboardPopup;
@@ -1427,6 +1496,22 @@ void initTools(void);
 void tools(void);
 void tools_pause_timer(void);
 void tools_delete_timer(void);
+// @file ota_update.c
+const char *ota_get_running_version(void);
+int         ota_get_progress(void);
+const char *ota_get_status_text(void);
+bool        ota_is_running(void);
+bool        ota_check_sd(char *version_out, size_t version_out_len);
+bool        ota_start_sd(void);
+bool        ota_wifi_server_start(void);
+bool        ota_wifi_server_stop(void);
+bool        ota_wifi_server_is_running(void);
+const char *ota_get_ip_address(void);
+// @file element_otaWifiPopup.c
+void otaWifiPopupCreate(void);
+void event_otaWifiPopup(lv_event_t *e);
+void otaProgressPopupCreate(const char *title);
+void event_otaProgressPopup(lv_event_t *e);
 // @file FilMachine.c
 void stopMotorTask(void);
 void runMotorTask(void);

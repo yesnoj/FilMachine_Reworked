@@ -207,7 +207,7 @@ void event_Roller(lv_event_t * e)
               const char *vols[] = chemVolumeValues;
               uint32_t sel = isScrolled ? rollerSelected : lv_roller_get_selected(gui.element.rollerPopup.roller);
               if(sel > 1) sel = 1;
-              LV_LOG_USER("SET Chemistry Volume: %s (value=%d)", vols[sel], sel + 1);
+              LV_LOG_USER("SET Chemistry Volume: %s (value=%lu)", vols[sel], (unsigned long)(sel + 1));
               gui.page.settings.settingsParams.chemistryVolume = sel + 1;
               lv_textarea_set_text(gui.page.settings.chemVolumeTextArea, vols[sel]);
               isScrolled = false;

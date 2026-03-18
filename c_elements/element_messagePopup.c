@@ -159,6 +159,13 @@ void event_messagePopup(lv_event_t *e) {
                 lv_msgbox_close(mboxCont);
                 gui.element.messagePopup.mBoxPopupParent = NULL;
             }
+            if (gui.element.messagePopup.whoCallMe == gui.page.tools.toolsUpdateSDButton)
+            {
+                LV_LOG_USER("Cancel OTA from SD");
+                lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
+                lv_msgbox_close(mboxCont);
+                gui.element.messagePopup.mBoxPopupParent = NULL;
+            }
         }
         else if (obj == gui.element.messagePopup.mBoxPopupButton2)
         {
@@ -304,6 +311,16 @@ void event_messagePopup(lv_event_t *e) {
                 lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
                 lv_msgbox_close(mboxCont);
                 gui.element.messagePopup.mBoxPopupParent = NULL;
+            }
+            if (gui.element.messagePopup.whoCallMe == gui.page.tools.toolsUpdateSDButton)
+            {
+                lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
+                lv_msgbox_close(mboxCont);
+                gui.element.messagePopup.mBoxPopupParent = NULL;
+
+                LV_LOG_USER("Confirmed OTA from SD — starting update");
+                ota_start_sd();
+                otaProgressPopupCreate(otaUpdateFromSD_text);
             }
         }
     }

@@ -65,6 +65,7 @@ else()
         main/mcp23017.c
         main/ds18b20.c
         main/pca9685.c
+        main/ota_update.c
 
         # c_pages/
         c_pages/page_home.c
@@ -85,6 +86,7 @@ else()
         c_elements/element_cleanPopup.c
         c_elements/element_drainPopup.c
         c_elements/element_selfcheckPopup.c
+        c_elements/element_otaWifiPopup.c
 
         # c_fonts/
         c_fonts/FilMachineFontIcons_15.c

@@ -7,5 +7,5 @@ idf_component_register(
     INCLUDE_DIRS include # optional, add here public include directories
     PRIV_INCLUDE_DIRS   # optional, add here private include directories
     REQUIRES fatfs sdmmc  # optional, list the public requirements (component names)
-    PRIV_REQUIRES       # optional, list the private requirements
+    PRIV_REQUIRES app_update esp_http_server esp_wifi esp_netif esp_event  # OTA + Wi-Fi web server
 )
