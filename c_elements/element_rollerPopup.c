@@ -152,18 +152,71 @@ void event_Roller(lv_event_t * e)
               lv_obj_send_event( gui.tempStepNode->step.stepDetails->stepSaveButton, LV_EVENT_REFRESH, NULL);
               return; 
             }
-            if(gui.tempProcessNode != NULL && gui.tempProcessNode->process.processDetails != NULL
-               && gui.tempProcessNode->process.processDetails->checkup != NULL
-               && (lv_obj_t*)data == gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea) {
-              LV_LOG_USER("SET BUTTON from checkupTankSizeTextArea value %"PRIu32":",rollerSelected + 1);
-              
-              gui.tempProcessNode->process.processDetails->checkup->data.tankSize = rollerSelected + 1;
+            /* ── Settings Tank Size roller ── */
+            if((lv_obj_t *)data == gui.page.settings.tankSizeTextArea) {
+              const char *sizes[] = {"500ml", "700ml", "1000ml"};
+              uint32_t sel = isScrolled ? rollerSelected : lv_roller_get_selected(gui.element.rollerPopup.roller);
+              if(sel > 2) sel = 1;
+              LV_LOG_USER("SET BUTTON from settingsTankSize value %"PRIu32":", sel + 1);
+              gui.page.settings.settingsParams.tankSize = sel + 1;
+              gui.page.settings.tankSize_active_index = sel;
+              lv_textarea_set_text(gui.page.settings.tankSizeTextArea, sizes[sel]);
+              isScrolled = false;
+
               lv_style_reset(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
-              lv_textarea_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea, tempBuffer);
               lv_style_reset(&gui.element.rollerPopup.style_roller);
-              lv_msgbox_close(godFatherCont);
+              lv_msgbox_close(gui.element.rollerPopup.mBoxRollerParent);
               gui.element.rollerPopup.mBoxRollerParent = NULL;
-              return; 
+              qSysAction(SAVE_PROCESS_CONFIG);
+              return;
+            }
+            /* ── Settings Chemistry Container Capacity roller ── */
+            if((lv_obj_t *)data == gui.page.settings.chemContainerMlTextArea) {
+              uint32_t sel = isScrolled ? rollerSelected : lv_roller_get_selected(gui.element.rollerPopup.roller);
+              uint16_t vals[] = {250, 500, 750, 1000, 1250, 1500};
+              if(sel > 5) sel = 1;
+              LV_LOG_USER("SET Chemistry Container: %d ml", vals[sel]);
+              gui.page.settings.settingsParams.chemContainerMl = vals[sel];
+              { char buf[16]; snprintf(buf, sizeof(buf), "%dml", vals[sel]); lv_textarea_set_text(gui.page.settings.chemContainerMlTextArea, buf); }
+              isScrolled = false;
+              lv_style_reset(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
+              lv_style_reset(&gui.element.rollerPopup.style_roller);
+              lv_msgbox_close(gui.element.rollerPopup.mBoxRollerParent);
+              gui.element.rollerPopup.mBoxRollerParent = NULL;
+              qSysAction(SAVE_PROCESS_CONFIG);
+              return;
+            }
+            /* ── Settings Water Bath Capacity roller ── */
+            if((lv_obj_t *)data == gui.page.settings.wbContainerMlTextArea) {
+              uint32_t sel = isScrolled ? rollerSelected : lv_roller_get_selected(gui.element.rollerPopup.roller);
+              uint16_t vals[] = {1000, 1500, 2000, 2500, 3000, 3500, 4000, 5000};
+              if(sel > 7) sel = 1;
+              LV_LOG_USER("SET Water Bath: %d ml", vals[sel]);
+              gui.page.settings.settingsParams.wbContainerMl = vals[sel];
+              { char buf[16]; snprintf(buf, sizeof(buf), "%dml", vals[sel]); lv_textarea_set_text(gui.page.settings.wbContainerMlTextArea, buf); }
+              isScrolled = false;
+              lv_style_reset(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
+              lv_style_reset(&gui.element.rollerPopup.style_roller);
+              lv_msgbox_close(gui.element.rollerPopup.mBoxRollerParent);
+              gui.element.rollerPopup.mBoxRollerParent = NULL;
+              qSysAction(SAVE_PROCESS_CONFIG);
+              return;
+            }
+            /* ── Settings Chemistry Volume roller ── */
+            if((lv_obj_t *)data == gui.page.settings.chemVolumeTextArea) {
+              const char *vols[] = {"Low", "High"};
+              uint32_t sel = isScrolled ? rollerSelected : lv_roller_get_selected(gui.element.rollerPopup.roller);
+              if(sel > 1) sel = 1;
+              LV_LOG_USER("SET Chemistry Volume: %s (value=%d)", vols[sel], sel + 1);
+              gui.page.settings.settingsParams.chemistryVolume = sel + 1;
+              lv_textarea_set_text(gui.page.settings.chemVolumeTextArea, vols[sel]);
+              isScrolled = false;
+              lv_style_reset(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
+              lv_style_reset(&gui.element.rollerPopup.style_roller);
+              lv_msgbox_close(gui.element.rollerPopup.mBoxRollerParent);
+              gui.element.rollerPopup.mBoxRollerParent = NULL;
+              qSysAction(SAVE_PROCESS_CONFIG);
+              return;
             }
           rollerSelected = 0;
         }

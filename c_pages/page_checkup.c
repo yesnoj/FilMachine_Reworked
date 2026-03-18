@@ -78,31 +78,6 @@ void event_checkup(lv_event_t * e){
       || pn->process.processDetails->checkup == NULL) return;
   sCheckup *ckup = pn->process.processDetails->checkup;
 
-  /* ── Radio buttons: target may differ from current_target (event bubbles) ── */
-  if(code == LV_EVENT_CLICKED && widget == ckup->checkupSelectTankChemistryContainer){
-      lv_obj_t *act_cb = (lv_obj_t *)lv_event_get_target(e);
-      if(act_cb == ckup->lowVolumeChemRadioButton || act_cb == ckup->highVolumeChemRadioButton){
-          lv_obj_t *old_cb = lv_obj_get_child(widget, ckup->data.activeVolume_index);
-          lv_obj_remove_state(old_cb, LV_STATE_CHECKED);
-          lv_obj_add_state(act_cb, LV_STATE_CHECKED);
-          ckup->data.activeVolume_index = lv_obj_get_index(act_cb);
-          LV_LOG_USER("Selected chemistry volume: %d", (int)ckup->data.activeVolume_index);
-      }
-  }
-
-  /* ── Tank size textarea events ── */
-  if(code == LV_EVENT_FOCUSED) {
-      if(widget == ckup->checkupTankSizeTextArea){
-          if(gui.element.rollerPopup.mBoxRollerParent != NULL) return;
-          LV_LOG_USER("Set Tank Size");
-          rollerPopupCreate(checkupTankSizesList,checkupTankSize_text,widget,ckup->data.tankSize - 1);
-      }
-  }
-  if(code == LV_EVENT_VALUE_CHANGED) {
-      if(widget == ckup->checkupTankSizeTextArea){
-          LV_LOG_USER("Set New Tank Size %d", ckup->data.tankSize);
-      }
-  }
 
   /* ── Button clicks: use processStep to disambiguate reused widgets ── */
   if(code == LV_EVENT_CLICKED){
@@ -790,43 +765,60 @@ static void checkup_renderPreFlight(processNode *proc) {
         lv_obj_set_style_text_font(ckup->checkupProcessReadyLabel, &lv_font_montserrat_22, 0);
         lv_obj_align(ckup->checkupProcessReadyLabel, LV_ALIGN_TOP_LEFT, -10, -8);
 
-        ckup->lowVolumeChemRadioButton = create_radiobutton(ckup->checkupSelectTankChemistryContainer, checkupChemistryLowVol_text, -105, 45, 27, &lv_font_montserrat_18, lv_color_hex(GREEN_DARK), lv_palette_main(LV_PALETTE_GREEN));
-        ckup->highVolumeChemRadioButton = create_radiobutton(ckup->checkupSelectTankChemistryContainer, checkupChemistryHighVol_text, -10, 45, 27, &lv_font_montserrat_18, lv_color_hex(GREEN_DARK), lv_palette_main(LV_PALETTE_GREEN));
-
         ckup->checkupTankSizeLabel = lv_label_create(ckup->checkupSelectTankChemistryContainer);
         lv_label_set_text(ckup->checkupTankSizeLabel, checkupTankSize_text);
         lv_obj_set_width(ckup->checkupTankSizeLabel, LV_SIZE_CONTENT);
         lv_obj_set_style_text_font(ckup->checkupTankSizeLabel, &lv_font_montserrat_18, 0);
-        lv_obj_align(ckup->checkupTankSizeLabel, LV_ALIGN_TOP_MID, 0, 20);
+        lv_obj_align(ckup->checkupTankSizeLabel, LV_ALIGN_TOP_MID, 0, 30);
 
         ckup->checkupTankSizeTextArea = lv_textarea_create(ckup->checkupSelectTankChemistryContainer);
         lv_textarea_set_one_line(ckup->checkupTankSizeTextArea, true);
         lv_textarea_set_placeholder_text(ckup->checkupTankSizeTextArea, checkupTankSizePlaceHolder_text);
-        lv_obj_align(ckup->checkupTankSizeTextArea, LV_ALIGN_TOP_MID, 0, 45);
+        lv_obj_align(ckup->checkupTankSizeTextArea, LV_ALIGN_TOP_MID, 0, 55);
         lv_obj_set_width(ckup->checkupTankSizeTextArea, 100);
 
-        lv_obj_add_event_cb(ckup->checkupTankSizeTextArea, event_checkup, LV_EVENT_FOCUSED, proc);
-        lv_obj_add_event_cb(ckup->checkupTankSizeTextArea, event_checkup, LV_EVENT_VALUE_CHANGED, proc);
-        lv_obj_add_state(ckup->checkupTankSizeTextArea, LV_STATE_FOCUSED);
         lv_obj_set_style_bg_color(ckup->checkupTankSizeTextArea, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
         lv_obj_set_style_text_align(ckup->checkupTankSizeTextArea, LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_add_style(ckup->checkupTankSizeTextArea, &ckup->textAreaStyleCheckup, LV_PART_MAIN);
         lv_obj_set_style_border_color(ckup->checkupTankSizeTextArea, lv_color_hex(WHITE), 0);
+        lv_obj_remove_flag(ckup->checkupTankSizeTextArea, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_set_style_text_color(ckup->checkupTankSizeTextArea, lv_palette_darken(LV_PALETTE_GREY, 1), 0);
 
-        /* Show the default tank size value in the text area (tankSize is 1-based) */
+        /* Always read tank size from settings (persistent) and sync to checkup data */
         {
-            const char *sizes[] = {"Small", "Medium", "Large"};
-            uint8_t idx = ckup->data.tankSize;
-            if(idx >= 1 && idx <= 3) {
-                lv_textarea_set_text(ckup->checkupTankSizeTextArea, sizes[idx - 1]);
-            }
+            const char *sizes[] = {"500ml", "700ml", "1000ml"};
+            uint8_t idx = gui.page.settings.settingsParams.tankSize;
+            if(idx < 1 || idx > 3) idx = 2;
+            ckup->data.tankSize = idx;
+            lv_textarea_set_text(ckup->checkupTankSizeTextArea, sizes[idx - 1]);
         }
 
         ckup->checkupChemistryVolumeLabel = lv_label_create(ckup->checkupSelectTankChemistryContainer);
         lv_label_set_text(ckup->checkupChemistryVolumeLabel, checkupChemistryVolume_text);
         lv_obj_set_width(ckup->checkupChemistryVolumeLabel, LV_SIZE_CONTENT);
         lv_obj_set_style_text_font(ckup->checkupChemistryVolumeLabel, &lv_font_montserrat_18, 0);
-        lv_obj_align(ckup->checkupChemistryVolumeLabel, LV_ALIGN_TOP_MID, 0, 110);
+        lv_obj_align(ckup->checkupChemistryVolumeLabel, LV_ALIGN_TOP_MID, 0, 90);
+
+        /* Read-only volume textarea */
+        ckup->checkupVolumeTextArea = lv_textarea_create(ckup->checkupSelectTankChemistryContainer);
+        lv_textarea_set_one_line(ckup->checkupVolumeTextArea, true);
+        lv_obj_align(ckup->checkupVolumeTextArea, LV_ALIGN_TOP_MID, 0, 115);
+        lv_obj_set_width(ckup->checkupVolumeTextArea, 100);
+        lv_obj_set_style_bg_color(ckup->checkupVolumeTextArea, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
+        lv_obj_set_style_text_align(ckup->checkupVolumeTextArea, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_add_style(ckup->checkupVolumeTextArea, &ckup->textAreaStyleCheckup, LV_PART_MAIN);
+        lv_obj_set_style_border_color(ckup->checkupVolumeTextArea, lv_color_hex(WHITE), 0);
+        lv_obj_remove_flag(ckup->checkupVolumeTextArea, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_set_style_text_color(ckup->checkupVolumeTextArea, lv_palette_darken(LV_PALETTE_GREY, 1), 0);
+
+        /* Always read volume from settings and sync to checkup data */
+        {
+            const char *vols[] = {"Low", "High"};
+            uint8_t v = gui.page.settings.settingsParams.chemistryVolume;
+            if(v < 1 || v > 2) v = 2;
+            ckup->data.activeVolume_index = v;
+            lv_textarea_set_text(ckup->checkupVolumeTextArea, vols[v - 1]);
+        }
 
         ckup->checkupStartButton = lv_button_create(ckup->checkupSelectTankChemistryContainer);
         lv_obj_set_size(ckup->checkupStartButton, BUTTON_PROCESS_WIDTH, BUTTON_PROCESS_HEIGHT);

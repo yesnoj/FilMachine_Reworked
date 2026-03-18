@@ -543,7 +543,7 @@ void* allocateAndInitializeNode(NodeType_t type) {
                     return NULL;
                 }
                 memset(process->process.processDetails->checkup, 0, sizeof(sCheckup));
-                process->process.processDetails->checkup->data.tankSize = 2; /* Default: Medium (1-based: 1=Small,2=Medium,3=Large) */
+                process->process.processDetails->checkup->data.tankSize = gui.page.settings.settingsParams.tankSize > 0 ? gui.page.settings.settingsParams.tankSize : 2;
             } else {
                 // Handle memory allocation failure
                 return NULL;
@@ -839,6 +839,11 @@ void readConfigFile(const char *path, bool enableLog) {
 	//        LV_LOG_USER("size:%d",sizeof(gui.page.settings.settingsParams.drainFillOverlapSetpoint));
 	        LV_LOG_USER("multiRinseTime:%d",gui.page.settings.settingsParams.multiRinseTime);
 	//        LV_LOG_USER("size:%d",sizeof(gui.page.settings.settingsParams.multiRinseTime));
+	        LV_LOG_USER("tankSize:%d",gui.page.settings.settingsParams.tankSize);
+	        LV_LOG_USER("pumpSpeed:%d",gui.page.settings.settingsParams.pumpSpeed);
+	        LV_LOG_USER("chemContainerMl:%d",gui.page.settings.settingsParams.chemContainerMl);
+	        LV_LOG_USER("wbContainerMl:%d",gui.page.settings.settingsParams.wbContainerMl);
+	        LV_LOG_USER("chemistryVolume:%d",gui.page.settings.settingsParams.chemistryVolume);
 	    }   
 
 	    // Load Processes
@@ -985,7 +990,9 @@ void writeConfigFile( const char *path, bool enableLog ) {
         }
 
         // Write Machine Parameters
+        LV_LOG_USER("Writing settingsParams: %zu bytes", sizeof(gui.page.settings.settingsParams));
         f_write( fp, &gui.page.settings.settingsParams, sizeof(gui.page.settings.settingsParams), &bytes_written );
+        LV_LOG_USER("settingsParams written OK: %u bytes", bytes_written);
 
         if (enableLog) {
             LV_LOG_USER("--- MACHINE PARAMS ---");
@@ -1001,6 +1008,7 @@ void writeConfigFile( const char *path, bool enableLog ) {
         }
 
         // Write Processes
+        LV_LOG_USER("Writing processes: count=%"PRIu32"", gui.page.processes.processElementsList.size);
         processNode *currentProcessNode = gui.page.processes.processElementsList.start;
         // Write process list size
         f_write( fp, &gui.page.processes.processElementsList.size, sizeof(gui.page.processes.processElementsList.size), &bytes_written );
@@ -2114,4 +2122,31 @@ void pwmLedTest(){
 uint8_t mapPercentageToValue(uint8_t percentage, uint8_t minPercent, uint8_t maxPercent) {
     uint8_t value = ((percentage - minPercent) * (MOTOR_MAX_ANALOG_VAL - MOTOR_MIN_ANALOG_VAL)) / (maxPercent - minPercent) + MOTOR_MIN_ANALOG_VAL;
     return value;
+}
+
+uint16_t calculateFillTime(uint16_t capacityMl, uint8_t pumpSpeedPercent) {
+    if (pumpSpeedPercent == 0) pumpSpeedPercent = 30;
+    /* Pump max = 15L/min = 250 ml/s */
+    /* flow = 250 * pumpSpeed / 100 */
+    /* time = capacity / flow = capacity * 100 / (250 * pumpSpeed) */
+    uint32_t timeMs = (uint32_t)capacityMl * 100 * 1000 / (250 * pumpSpeedPercent);
+    uint16_t timeSec = (timeMs + 500) / 1000; /* round to nearest second */
+    if (timeSec < 1) timeSec = 1;
+    return timeSec;
+}
+
+uint16_t getContainerFillTime(void) {
+    uint16_t ml = gui.page.settings.settingsParams.chemContainerMl;
+    uint8_t spd = gui.page.settings.settingsParams.pumpSpeed;
+    if (ml == 0) ml = 500;
+    if (spd == 0) spd = 30;
+    return calculateFillTime(ml, spd);
+}
+
+uint16_t getWbFillTime(void) {
+    uint16_t ml = gui.page.settings.settingsParams.wbContainerMl;
+    uint8_t spd = gui.page.settings.settingsParams.pumpSpeed;
+    if (ml == 0) ml = 2000;
+    if (spd == 0) spd = 30;
+    return calculateFillTime(ml, spd);
 }

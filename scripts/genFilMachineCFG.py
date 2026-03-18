@@ -158,7 +158,12 @@ DEFAULT_SETTINGS = {
     "isPersistentAlarm": 1,
     "isProcessAutostart": 0,
     "drainFillOverlapSetpoint": 0,
-    "multiRinseTime": 60
+    "multiRinseTime": 60,
+    "tankSize": 2,
+    "pumpSpeed": 30,
+    "chemContainerMl": 500,
+    "wbContainerMl": 2000,
+    "chemistryVolume": 2
 }
 
 def random_settings():
@@ -172,7 +177,12 @@ def random_settings():
         "isPersistentAlarm": random.randint(0, 1),
         "isProcessAutostart": random.randint(0, 1),
         "drainFillOverlapSetpoint": random.randrange(0, 100, 50),
-        "multiRinseTime": random.randrange(60, 181, 30)
+        "multiRinseTime": random.randrange(60, 181, 30),
+        "tankSize": random.randint(1, 3),
+        "pumpSpeed": random.randrange(10, 101, 10),
+        "chemContainerMl": random.choice([250, 500, 750, 1000, 1250, 1500]),
+        "wbContainerMl": random.choice([1000, 1500, 2000, 2500, 3000]),
+        "chemistryVolume": random.randint(1, 2)
     }
 
 # ═══════════════════════════════════════════════
@@ -262,6 +272,11 @@ def write_settings(f, s):
     f.write(struct.pack('<B', s["isProcessAutostart"]))
     f.write(struct.pack('<B', s["drainFillOverlapSetpoint"]))
     f.write(struct.pack('<B', s["multiRinseTime"]))
+    f.write(struct.pack('<B', s["tankSize"]))          # uint8_t (1=Small, 2=Medium, 3=Large)
+    f.write(struct.pack('<B', s["pumpSpeed"]))
+    f.write(struct.pack('<H', s["chemContainerMl"]))   # uint16_t
+    f.write(struct.pack('<H', s["wbContainerMl"]))     # uint16_t
+    f.write(struct.pack('<B', s["chemistryVolume"]))    # uint8_t (1=Low, 2=High)
 
 def write_process(f, p):
     f.write(p["processNameString"].encode('ASCII').ljust(MAX_PROC_NAME_LEN + 1, b'\x00'))

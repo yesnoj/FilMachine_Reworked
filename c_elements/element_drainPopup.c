@@ -14,16 +14,17 @@ extern struct gui_components gui;
 #define NUM_TANKS  4
 
 static const char    *tankNames[]   = { "C1",  "C2",  "C3",  "WB" };
-static const int32_t  tankTime[]    = { CONTAINER_FILLING_TIME,
-                                        CONTAINER_FILLING_TIME,
-                                        CONTAINER_FILLING_TIME,
-                                        WB_FILLING_TIME };
 static const uint32_t tankColor[]   = { ORANGE_LIGHT, GREEN_LIGHT, LIGHT_BLUE, BLUE };
 static const uint8_t  tankSource[]  = { SOURCE_C1, SOURCE_C2, SOURCE_C3, SOURCE_WB };
 
+static int32_t getTankTime(int tank) {
+    if (tank < 3) return (int32_t)getContainerFillTime();
+    return (int32_t)getWbFillTime();
+}
+
 static int32_t totalDrainTime(void) {
     int32_t t = 0;
-    for (int i = 0; i < NUM_TANKS; i++) t += tankTime[i];
+    for (int i = 0; i < NUM_TANKS; i++) t += getTankTime(i);
     return t;
 }
 
@@ -57,7 +58,7 @@ static void drain_timer_cb(lv_timer_t *timer) {
     dp->totalElapsed++;
 
     uint8_t  tank = dp->currentTank;
-    int32_t  tt   = tankTime[tank];
+    int32_t  tt   = getTankTime(tank);
 
     /* --- Update current tank bar (100 → 0) -------------- */
     int32_t pct = ((tt - dp->tankElapsed) * 100) / tt;

@@ -29,3 +29,4 @@ sdkconfig.old
 sd_backup/
 zi*
 *.zip
+*.pyc

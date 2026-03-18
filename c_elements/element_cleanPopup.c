@@ -125,11 +125,12 @@ void cleanWasteTimer(lv_timer_t * timer) {
     }
 
     /* Calculate remaining minutes and seconds */
-    stepMins = WB_FILLING_TIME / 60;
-    stepSecs = WB_FILLING_TIME % 60;
+    uint16_t wbFillTime = getWbFillTime();
+    stepMins = wbFillTime / 60;
+    stepSecs = wbFillTime % 60;
 
     uint32_t elapsedStepSecs = minutesStepElapsed * 60 + secondsStepElapsed;
-    uint32_t remainingStepSecs = WB_FILLING_TIME - elapsedStepSecs;
+    uint32_t remainingStepSecs = wbFillTime - elapsedStepSecs;
     uint8_t remainingStepMins = remainingStepSecs / 60;
     uint8_t remainingStepSecsOnly = remainingStepSecs % 60;
 
@@ -153,7 +154,7 @@ void cleanWasteTimer(lv_timer_t * timer) {
     }
 
     /* Check if time has expired */
-    if (elapsedStepSecs >= WB_FILLING_TIME) {
+    if (elapsedStepSecs >= wbFillTime) {
         lv_arc_set_value(gui.element.cleanPopup.cleanPumpArc, stepPercentage);
 
         lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanStopButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
@@ -253,12 +254,13 @@ void cleanPumpTimer(lv_timer_t * timer) {
         }
 
         /* Calculate percentages */
-        stepMins = CONTAINER_FILLING_TIME / 60;
-        stepSecs = CONTAINER_FILLING_TIME % 60;
+        uint16_t containerFillTime = getContainerFillTime();
+        stepMins = containerFillTime / 60;
+        stepSecs = containerFillTime % 60;
         stepPercentage = calculatePercentage(minutesStepElapsed, secondsStepElapsed, stepMins, stepSecs);
 
-        cycleMins = ((CONTAINER_FILLING_TIME * 2) * gui.element.cleanPopup.cleanCycles) / 60;
-        cycleSecs = ((CONTAINER_FILLING_TIME * 2) * gui.element.cleanPopup.cleanCycles) % 60;
+        cycleMins = ((containerFillTime * 2) * gui.element.cleanPopup.cleanCycles) / 60;
+        cycleSecs = ((containerFillTime * 2) * gui.element.cleanPopup.cleanCycles) % 60;
         cyclePercentage = calculatePercentage(minutesCycleElapsed, secondsCycleElapsed, cycleMins, cycleSecs);
 
         processPercentage = calculatePercentage(minutesProcessElapsed, secondsProcessElapsed, gui.element.cleanPopup.totalMins, gui.element.cleanPopup.totalSecs);
@@ -410,8 +412,8 @@ void event_cleanPopup(lv_event_t * e) {
 
             lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanStopButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
             lv_label_set_text(gui.element.cleanPopup.cleanNowCleaningLabel, cleanCurrentClean_text);
-         
-            getMinutesAndSeconds(CONTAINER_FILLING_TIME, gui.element.cleanPopup.containerToClean);
+
+            getMinutesAndSeconds(getContainerFillTime(), gui.element.cleanPopup.containerToClean);
             lv_label_set_text_fmt(gui.element.cleanPopup.cleanRemainingTimeValue, "%"PRIu32"m%"PRIu32"s",gui.element.cleanPopup.totalMins, gui.element.cleanPopup.totalSecs); 
             LV_LOG_USER("Process totalMin: %"PRIu32" totalSecs: %"PRIu32"",gui.element.cleanPopup.totalMins,gui.element.cleanPopup.totalSecs);
             

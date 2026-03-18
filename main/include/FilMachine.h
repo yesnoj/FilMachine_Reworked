@@ -254,6 +254,22 @@ typedef enum {
 #define autostart_text 								"Process autostart"
 #define drainFillTime_text 							"Drain/fill time overlap"
 #define multiRinseTime_text 						"Multi rinse cycle time"
+#define tankSize_text                       "Tank size"
+#define tankSizeAlertMBox_text              "Select the default tank size.\nSmall, Medium, or Large."
+#define tankSizeSmall_text                  "S"
+#define tankSizeMedium_text                 "M"
+#define tankSizeLarge_text                  "L"
+#define pumpSpeed_text                      "Pump speed"
+#define pumpSpeedAlertMBox_text             "Set the pump speed percentage.\nHigher values = faster fill/drain."
+#define chemContainerMl_text                "Container size"
+#define chemContainerMlAlertMBox_text       "Set the chemistry container\nsize in milliliters."
+#define wbContainerMl_text                  "Water bath size"
+#define wbContainerMlAlertMBox_text         "Set the water bath size\nin milliliters."
+#define chemistryVolume_text                "Chemistry size"
+#define chemistryVolumeAlertMBox_text       "Low: uses half the chemistry.\nHigh: fills the tank completely."
+#define chemistryVolumeList                 "Low\nHigh"
+#define chemContainerMlList                 "250\n500\n750\n1000\n1250\n1500"
+#define wbContainerMlList                   "1000\n1500\n2000\n2500\n3000\n3500\n4000\n5000"
 
 /* Checkup strings/vars */
 #define checkupNexStepsTitle_text 					"Next steps:"
@@ -273,8 +289,8 @@ typedef enum {
 #define checkupWaterTemp_text 						"Water temp:"
 #define checkupNextStep_text						"Next step:"
 #define checkupSelectBeforeStart_text 				"Select the tank size and chemistry amount and click the 'Start' button"
-#define checkupTankSize_text 						"Select tank size"
-#define checkupChemistryVolume_text 				"Select chemistry volume"
+#define checkupTankSize_text 						"Selected tank size"
+#define checkupChemistryVolume_text 				"Selected volume"
 #define checkupMinimumChemistry_text 				"Minimum required chemistry : 500ml"
 #define checkupFillWaterMachine_text 				"The machine is not connected to a water source.\n\nFill the water bath manually up to the top water level sensor"
 #define checkupTargetTemp_text 						"Target temperature"
@@ -408,7 +424,7 @@ typedef enum {
 #define LOGO_HEIGHT									89
 #define LOGO_WIDTH									102
 
-#define checkupTankSizesList						"Small\nMedium\nLarge"
+#define checkupTankSizesList						"500ml\n700ml\n1000ml"
 #define checkupStepStatuses 						{ dotStep_icon, arrowStep_icon, checkStep_icon }
 #define stepTypeList								"Chemistry\nRinse\nMultiRinse"
 #define stepSourceList								"C1\nC2\nC3\nWB"
@@ -448,6 +464,11 @@ struct __attribute__ ((packed)) machineSettings {
 	bool					isProcessAutostart;
 	uint8_t					drainFillOverlapSetpoint;
 	uint8_t					multiRinseTime;
+	uint8_t					tankSize;       // 1=Small, 2=Medium, 3=Large
+	uint8_t					pumpSpeed;          // 10-100% pump speed
+	uint16_t				chemContainerMl;    // Chemistry container capacity in ml (250-2000)
+	uint16_t				wbContainerMl;      // Water bath capacity in ml (1000-5000)
+	uint8_t					chemistryVolume;    // 1=Low, 2=High
 };
 
 typedef struct machineStatistics {
@@ -672,8 +693,9 @@ typedef struct sCheckup{
 	lv_obj_t			*stepArc;
 	lv_obj_t			*processArc;
   	lv_obj_t			*pumpArc;
- 
+
 	lv_obj_t			*checkupTankSizeTextArea;
+	lv_obj_t			*checkupVolumeTextArea;
 
 	/* Runtime cursor: current step being processed (replaces gui.tempStepNode in checkup) */
 	struct stepNode		*currentStep;
@@ -1079,6 +1101,27 @@ struct sSettings {
 
 	uint32_t 	        	active_index;
 
+	lv_obj_t                *tankSizeContainer;
+	lv_obj_t                *tankSizeLabel;
+	lv_obj_t                *tankSizeTextArea;
+	uint32_t                tankSize_active_index;
+
+	lv_obj_t                *pumpSpeedContainer;
+	lv_obj_t                *pumpSpeedLabel;
+	lv_obj_t                *pumpSpeedSlider;
+	lv_obj_t                *pumpSpeedValueLabel;
+
+	lv_obj_t                *chemContainerMlContainer;
+	lv_obj_t                *chemContainerMlLabel;
+	lv_obj_t                *chemContainerMlTextArea;
+
+	lv_obj_t                *wbContainerMlContainer;
+	lv_obj_t                *wbContainerMlLabel;
+	lv_obj_t                *wbContainerMlTextArea;
+
+	lv_obj_t                *chemVolumeContainer;
+	lv_obj_t                *chemVolumeLabel;
+	lv_obj_t                *chemVolumeTextArea;
 
   /* Params objects */
   struct machineSettings   settingsParams;
@@ -1383,4 +1426,7 @@ void pwmLedTest();
 void readConfigFile(const char *path, bool enableLog);
 void writeConfigFile( const char *path, bool enableLog );
 bool copyAndRenameFile( const char* sourceFile, const char* destFile );
+uint16_t calculateFillTime(uint16_t capacityMl, uint8_t pumpSpeedPercent);
+uint16_t getContainerFillTime(void);
+uint16_t getWbFillTime(void);
 #endif /* MAIN_FILMACHINE_H_ */
