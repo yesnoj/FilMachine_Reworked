@@ -178,6 +178,9 @@ else()
         tests/test_settings.c
         tests/test_filter.c
         tests/test_tools.c
+        tests/test_new_settings.c
+        tests/test_selfcheck.c
+        tests/test_ota.c
         tests/test_edge_cases.c
         tests/test_utilities.c
         tests/test_destroy_and_lifecycle.c

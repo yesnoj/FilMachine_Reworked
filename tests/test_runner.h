@@ -252,6 +252,15 @@ void test_suite_utilities(void);
 /** test_destroy_and_lifecycle.c — destroy functions, lifecycle, clone-in-place */
 void test_suite_destroy_and_lifecycle(void);
 
+/** test_selfcheck.c — self-check diagnostic popup */
+void test_suite_selfcheck(void);
+
+/** test_ota.c — OTA firmware update (SD + Wi-Fi) */
+void test_suite_ota(void);
+
+/** test_new_settings.c — new settings fields (pump, tank, container, WB, chem volume) */
+void test_suite_new_settings(void);
+
 
 /* ═══════════════════════════════════════════════
  * External globals (defined in main/src)

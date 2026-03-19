@@ -263,6 +263,9 @@ int main(int argc, char *argv[])
     test_suite_settings();
     test_suite_filter();
     test_suite_tools();
+    test_suite_new_settings();
+    test_suite_selfcheck();
+    test_suite_ota();
     test_suite_edge_cases();
     test_suite_utilities();
     test_suite_destroy_and_lifecycle();
