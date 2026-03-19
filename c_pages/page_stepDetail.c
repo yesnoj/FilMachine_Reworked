@@ -123,18 +123,22 @@ static void step_detail_open_roller(stepNode *sn, lv_obj_t *focusedWidget) {
 
     if (focusedWidget == sd->stepDetailMinTextArea) {
         LV_LOG_USER("Set minutes");
+        sd->minRollerCtx.textArea = sd->stepDetailMinTextArea;
+        sd->minRollerCtx.saveButton = sd->stepSaveButton;
         rollerPopupCreate(gui.element.rollerPopup.minutesOptions,
                           setMinutesPopupTitle_text,
-                          sd->stepDetailMinTextArea,
+                          &sd->minRollerCtx,
                           findRollerStringIndex(
                               lv_textarea_get_text(sd->stepDetailMinTextArea),
                               gui.element.rollerPopup.minutesOptions));
     }
     if (focusedWidget == sd->stepDetailSecTextArea) {
         LV_LOG_USER("Set seconds");
+        sd->secRollerCtx.textArea = sd->stepDetailSecTextArea;
+        sd->secRollerCtx.saveButton = sd->stepSaveButton;
         rollerPopupCreate(gui.element.rollerPopup.secondsOptions,
                           setSecondsPopupTitle_text,
-                          sd->stepDetailSecTextArea,
+                          &sd->secRollerCtx,
                           findRollerStringIndex(
                               lv_textarea_get_text(sd->stepDetailSecTextArea),
                               gui.element.rollerPopup.secondsOptions));
@@ -240,7 +244,7 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
       /* Store parent process reference for context-based event handling */
       gui.tempStepNode->step.stepDetails->parentProcess = referenceNode;
 
-      /* Local aliases — gui.tempStepNode is kept in sync for event_keyboard compat */
+      /* Local aliases */
       stepNode *sn = gui.tempStepNode;
       sStepDetail *sd = sn->step.stepDetails;
 
@@ -250,6 +254,17 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
       lv_obj_class_init_obj(sd->stepDetailParent);
       lv_obj_remove_flag(sd->stepDetailParent, LV_OBJ_FLAG_IGNORE_LAYOUT);
       lv_obj_set_size(sd->stepDetailParent, LV_PCT(100), LV_PCT(100));
+
+      memset(&sd->nameKeyboardCtx, 0, sizeof(sd->nameKeyboardCtx));
+      sd->nameKeyboardCtx.owner = KB_OWNER_STEP;
+      sd->nameKeyboardCtx.parentScreen = sd->stepDetailParent;
+      sd->nameKeyboardCtx.ownerData = sd;
+      memset(&sd->minRollerCtx, 0, sizeof(sd->minRollerCtx));
+      sd->minRollerCtx.owner = ROLLER_OWNER_STEP_MIN;
+      sd->minRollerCtx.ownerData = sd;
+      memset(&sd->secRollerCtx, 0, sizeof(sd->secRollerCtx));
+      sd->secRollerCtx.owner = ROLLER_OWNER_STEP_SEC;
+      sd->secRollerCtx.ownerData = sd;
 
 
             sd->stepDetailContainer = lv_obj_create(sd->stepDetailParent);
@@ -292,10 +307,11 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
                   lv_textarea_set_placeholder_text(sd->stepDetailNameTextArea, stepDetailPlaceHolder_text);
                   lv_obj_align(sd->stepDetailNameTextArea, LV_ALIGN_LEFT_MID, 70, 0);
                   lv_obj_set_width(sd->stepDetailNameTextArea, 210);
-                  lv_obj_add_event_cb(sd->stepDetailNameTextArea, event_keyboard, LV_EVENT_CLICKED, NULL);
-                  lv_obj_add_event_cb(sd->stepDetailNameTextArea, event_keyboard, LV_EVENT_DEFOCUSED, NULL);
-                  lv_obj_add_event_cb(sd->stepDetailNameTextArea, event_keyboard, LV_EVENT_CANCEL, NULL);
-                  lv_obj_add_event_cb(sd->stepDetailNameTextArea, event_keyboard, LV_EVENT_READY, NULL);
+                  sd->nameKeyboardCtx.textArea = sd->stepDetailNameTextArea;
+                  lv_obj_add_event_cb(sd->stepDetailNameTextArea, event_keyboard, LV_EVENT_CLICKED, &sd->nameKeyboardCtx);
+                  lv_obj_add_event_cb(sd->stepDetailNameTextArea, event_keyboard, LV_EVENT_DEFOCUSED, &sd->nameKeyboardCtx);
+                  lv_obj_add_event_cb(sd->stepDetailNameTextArea, event_keyboard, LV_EVENT_CANCEL, &sd->nameKeyboardCtx);
+                  lv_obj_add_event_cb(sd->stepDetailNameTextArea, event_keyboard, LV_EVENT_READY, &sd->nameKeyboardCtx);
                   lv_obj_add_state(sd->stepDetailNameTextArea, LV_STATE_FOCUSED);
                   lv_obj_set_style_bg_color(sd->stepDetailNameTextArea, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
                   lv_obj_set_style_border_color(sd->stepDetailNameTextArea, lv_color_hex(WHITE), 0);
@@ -452,6 +468,7 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
 
 
       sd->stepSaveButton = lv_button_create(sd->stepDetailContainer);
+      sd->nameKeyboardCtx.saveButton = sd->stepSaveButton;
       lv_obj_set_size(sd->stepSaveButton, BUTTON_PROCESS_WIDTH, BUTTON_PROCESS_HEIGHT);
       lv_obj_align(sd->stepSaveButton, LV_ALIGN_BOTTOM_LEFT, 10 , 10);
       lv_obj_add_event_cb(sd->stepSaveButton, event_stepDetail, LV_EVENT_CLICKED, sn);

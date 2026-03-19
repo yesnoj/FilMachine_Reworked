@@ -164,6 +164,9 @@ void cleanWasteTimer(lv_timer_t * timer) {
         lv_obj_clear_flag(gui.element.cleanPopup.cleanNowCleaningValue, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(gui.element.cleanPopup.cleanNowCleaningValue, cleanCompleteClean_text);
 
+        /* Start persistent alarm for clean completion */
+        alarm_start_persistent();
+
         cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
         LV_LOG_USER("Execution of cleanRelayManager after WB_FILLING_TIME done");
 
@@ -299,6 +302,9 @@ void cleanPumpTimer(lv_timer_t * timer) {
                             lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanStopButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
                             lv_label_set_text(gui.element.cleanPopup.cleanStopButtonLabel, cleanCloseButton_text);
 
+                            /* Start persistent alarm for clean completion */
+                            alarm_start_persistent();
+
                             /* Stop timer and save state */
                             lv_timer_del(gui.element.cleanPopup.pumpTimer);
                             gui.element.cleanPopup.pumpTimer = NULL;
@@ -374,6 +380,9 @@ void cleanPumpTimer(lv_timer_t * timer) {
                 lv_label_set_text(gui.element.cleanPopup.cleanNowCleaningValue, cleanCompleteClean_text);
                 lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanStopButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
                 lv_label_set_text(gui.element.cleanPopup.cleanStopButtonLabel, cleanCloseButton_text);
+
+                /* Start persistent alarm for clean completion */
+                alarm_start_persistent();
             }
         }
     }
@@ -436,6 +445,7 @@ void event_cleanPopup(lv_event_t * e) {
 	       		LV_LOG_USER("Stopped processTimer");
 		      //lv_timer_delete(gui.element.cleanPopup.pumpTimer);
 		      gui.element.cleanPopup.stopNowPressed = true;
+		      alarm_stop();
 		      lv_label_set_text(gui.element.cleanPopup.cleanTitle, cleanCanceled_text);
 		      lv_obj_add_state(gui.element.cleanPopup.cleanStopButton, LV_STATE_DISABLED);
 		      lv_obj_add_flag(gui.element.cleanPopup.cleanRemainingTimeValue, LV_OBJ_FLAG_HIDDEN);
@@ -443,12 +453,14 @@ void event_cleanPopup(lv_event_t * e) {
 		      lv_label_set_text(gui.element.cleanPopup.cleanNowCleaningLabel, cleanCanceled_text);
 		      return;
 			} else {
+				alarm_stop();
 				lv_obj_add_flag(gui.element.cleanPopup.cleanProcessContainer, LV_OBJ_FLAG_HIDDEN);
 				lv_obj_remove_flag(gui.element.cleanPopup.cleanSettingsContainer, LV_OBJ_FLAG_HIDDEN);
 				lv_label_set_text(gui.element.cleanPopup.cleanTitle, cleanPopupTitle_text);
 			}
 		} else {
-			lv_obj_add_flag(gui.element.cleanPopup.cleanRemainingTimeValue, LV_OBJ_FLAG_HIDDEN);  
+			alarm_stop();
+			lv_obj_add_flag(gui.element.cleanPopup.cleanRemainingTimeValue, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_add_flag(gui.element.cleanPopup.cleanProcessContainer, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_remove_flag(gui.element.cleanPopup.cleanSettingsContainer, LV_OBJ_FLAG_HIDDEN);
 			lv_label_set_text(gui.element.cleanPopup.cleanTitle, cleanPopupTitle_text);

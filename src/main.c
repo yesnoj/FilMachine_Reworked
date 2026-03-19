@@ -11,7 +11,9 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
+#include <stdbool.h>
 
+#include "SDL2/SDL.h"
 #include "FilMachine.h"
 #include "src/indev/lv_indev_private.h"   /* access gesture_limit / gesture_min_velocity */
 
@@ -91,11 +93,15 @@ float sim_getTemperature(uint8_t sensorIndex) {
             sim_chem_temp -= SIM_COOL_RATE;
     }
 
+    /* Apply calibration offset to all temperature readings */
+    extern struct gui_components gui;
+    float offset = gui.page.settings.settingsParams.tempCalibOffset / 10.0f;
+
     if (sensorIndex == TEMPERATURE_SENSOR_BATH)
-        return sim_water_temp;
+        return sim_water_temp + offset;
     else if (sensorIndex == TEMPERATURE_SENSOR_CHEMICAL)
-        return sim_chem_temp;
-    return SIM_AMBIENT;
+        return sim_chem_temp + offset;
+    return SIM_AMBIENT + offset;
 }
 
 void sim_setHeater(bool on) {
@@ -107,6 +113,76 @@ void sim_resetTemperatures(void) {
     sim_water_temp    = SIM_AMBIENT;
     sim_chem_temp     = SIM_AMBIENT;
     sim_heater_active = false;
+}
+
+/* ═══════════════════════════════════════════════
+ * Persistent alarm sound (SDL audio)
+ * ═══════════════════════════════════════════════ */
+static SDL_AudioDeviceID sim_audio_dev = 0;
+static lv_timer_t *alarm_timer = NULL;
+
+static void sim_init_audio(void) {
+    if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0) {
+        printf("[SIM] WARNING: SDL_INIT_AUDIO failed: %s\n", SDL_GetError());
+        return;
+    }
+    SDL_AudioSpec spec = {0};
+    spec.freq = 44100;
+    spec.format = AUDIO_S16SYS;
+    spec.channels = 1;
+    spec.samples = 2048;
+    spec.callback = NULL;
+    sim_audio_dev = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
+    if (sim_audio_dev) {
+        SDL_PauseAudioDevice(sim_audio_dev, 0);
+        printf("[SIM] Audio device initialized (ID: %u)\n", sim_audio_dev);
+    } else {
+        printf("[SIM] WARNING: Failed to open audio device: %s\n", SDL_GetError());
+    }
+}
+
+void buzzer_beep(void) {
+    if (!sim_audio_dev) return;
+
+    int samples = 44100 * 200 / 1000; /* 200ms */
+    int16_t *buf = malloc(samples * sizeof(int16_t));
+    if (!buf) return;
+
+    /* Generate 880Hz square wave */
+    for (int i = 0; i < samples; i++) {
+        buf[i] = (i / (44100/880) % 2) ? 8000 : -8000;
+    }
+
+    SDL_ClearQueuedAudio(sim_audio_dev);
+    SDL_QueueAudio(sim_audio_dev, buf, samples * sizeof(int16_t));
+    free(buf);
+    printf("[SIM] BEEP!\n");
+}
+
+static void alarm_timer_cb(lv_timer_t *t) {
+    (void)t;
+    buzzer_beep();
+}
+
+void alarm_start_persistent(void) {
+    buzzer_beep(); /* immediate beep */
+    if (gui.page.settings.settingsParams.isPersistentAlarm) {
+        if (alarm_timer == NULL) {
+            alarm_timer = lv_timer_create(alarm_timer_cb, 10000, NULL);
+        } else {
+            lv_timer_resume(alarm_timer);
+        }
+    }
+}
+
+void alarm_stop(void) {
+    if (alarm_timer != NULL) {
+        lv_timer_pause(alarm_timer);
+    }
+}
+
+bool alarm_is_active(void) {
+    return alarm_timer != NULL && lv_timer_get_paused(alarm_timer) == false;
 }
 
 /* ═══════════════════════════════════════════════
@@ -292,6 +368,9 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "ERROR: Failed to create SDL display!\n");
         return 1;
     }
+
+    /* Initialize SDL audio for buzzer/alarm */
+    sim_init_audio();
 
     /* Create SDL mouse input (simulates touchscreen) */
     lv_indev_t *mouse = lv_sdl_mouse_create();

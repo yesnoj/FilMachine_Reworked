@@ -226,7 +226,7 @@ typedef enum {
 #define filterPopupColor_text 			 			"Color"
 #define filterPopupBnW_text 			 			"B&W"
 #define filterPopupBoth_text 			 			"Both"
-#define filterPopupPreferred_text 		 			"Preferred only"
+#define filterPopupPreferred_text 		 			"Preferred"
 #define filterPopupApplyButton_text 	 			"Apply"
 #define filterPopupResetButton_text 	 			"Reset"
 
@@ -244,6 +244,8 @@ typedef enum {
 #define rotationInverseIntervalAlertMBox_text 		"The duration, which may be adjusted between 5 and 60 seconds,during which the film will spin in one direction before moving to the other."
 #define filmRotationRandomAlertMBox_text 			"Introduce random variation to inversion times for consistent development, e.g.,10% randomization on a 10-second inversion yields times between 8 and 10 seconds."
 #define drainFillTimeAlertMBox_text 				"Adjust the overlap of tank filling and draining times with processing times to affect the total processing time, as these actions cannot be rushed."
+#define multiRinseTimeAlertMBox_text 				"Sets the duration of a single multi-rinse wash cycle (not the entire step). Adjustable from 30 seconds to 3 minutes. Longer cycles are better for larger tanks, shorter for smaller ones. 2 minutes is a good default."
+#define waterInletAlertMBox_text 					"Tells the machine whether it's connected to a pressurized water source. If yes, the water bath will be automatically refilled. If no, you must manually fill the water bath."
 #define rotationSpeed_text 							"Rotation speed"
 #define rotationInversionInterval_text 				"Rotation inv. interval"
 #define rotationRandom_text 						"Randomness"
@@ -518,8 +520,35 @@ struct __attribute__ ((packed)) machineSettings {
 	uint16_t				chemContainerMl;    // Chemistry container capacity in ml (250-2000)
 	uint16_t				wbContainerMl;      // Water bath capacity in ml (1000-5000)
 	uint8_t					chemistryVolume;    // 1=Low, 2=High
+	int8_t					tempCalibOffset;    /* Calibration offset in tenths of degree (e.g., -15 = -1.5°C) */
 };
 
+
+
+typedef enum kbOwnerType { KB_OWNER_NONE, KB_OWNER_FILTER, KB_OWNER_PROCESS, KB_OWNER_STEP } kbOwnerType;
+
+typedef struct sKeyboardOwnerContext {
+    kbOwnerType         owner;
+    lv_obj_t           *textArea;
+    lv_obj_t           *parentScreen;
+    lv_obj_t           *saveButton;
+    void               *ownerData;
+} sKeyboardOwnerContext;
+
+typedef enum rollerOwnerType {
+    ROLLER_OWNER_NONE,
+    ROLLER_OWNER_PROCESS_TEMP,
+    ROLLER_OWNER_PROCESS_TOLERANCE,
+    ROLLER_OWNER_STEP_MIN,
+    ROLLER_OWNER_STEP_SEC
+} rollerOwnerType;
+
+typedef struct sRollerOwnerContext {
+    rollerOwnerType     owner;
+    lv_obj_t           *textArea;
+    lv_obj_t           *saveButton;
+    void               *ownerData;
+} sRollerOwnerContext;
 typedef struct machineStatistics {
   uint32_t 	          		completed;
   uint64_t 	          		totalMins;
@@ -588,6 +617,9 @@ typedef struct sStepDetail {
 
 	/* Business data (deep-copyable as a single block) */
     sStepData               data;
+    sKeyboardOwnerContext   nameKeyboardCtx;
+    sRollerOwnerContext     minRollerCtx;
+    sRollerOwnerContext     secRollerCtx;
 } sStepDetail;
 
 
@@ -813,6 +845,9 @@ typedef struct sProcessDetail {
 
     /* Business data (deep-copyable as a single block) */
     sProcessData        data;
+    sKeyboardOwnerContext nameKeyboardCtx;
+    sRollerOwnerContext tempRollerCtx;
+    sRollerOwnerContext toleranceRollerCtx;
 
 } sProcessDetail;
 
@@ -967,6 +1002,7 @@ struct sFilterPopup {
   bool                isColorFilter;
   bool                isBnWFilter;
   bool                preferredOnly;
+  sKeyboardOwnerContext nameKeyboardCtx;
 };
 
 
@@ -1217,6 +1253,7 @@ struct sSettings {
   lv_obj_t 	        	*multiRinseTimeSlider;
 
 	lv_obj_t	        	*tempSensorTuneButton;
+	lv_obj_t 	        	*tempCalibOffsetValueLabel;  /* Display current calibration offset */
 	lv_obj_t 	        	*tempUnitCelsiusRadioButton;
 	lv_obj_t 	        	*tempUnitFahrenheitRadioButton;
 
@@ -1495,6 +1532,7 @@ void event_toolsElement(lv_event_t *e);
 void initTools(void);
 void tools(void);
 void tools_pause_timer(void);
+void tools_resume_timer(void);
 void tools_delete_timer(void);
 // @file ota_update.c
 const char *ota_get_running_version(void);
@@ -1601,4 +1639,11 @@ bool copyAndRenameFile( const char* sourceFile, const char* destFile );
 uint16_t calculateFillTime(uint16_t capacityMl, uint8_t pumpSpeedPercent);
 uint16_t getContainerFillTime(void);
 uint16_t getWbFillTime(void);
+
+/* Buzzer / alarm API */
+void buzzer_beep(void);            /* play a short beep (hardware or simulator) */
+void alarm_start_persistent(void); /* start repeating beep every 10 seconds */
+void alarm_stop(void);             /* stop repeating beep */
+bool alarm_is_active(void);        /* check if persistent alarm is running */
+
 #endif /* MAIN_FILMACHINE_H_ */

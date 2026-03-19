@@ -82,6 +82,7 @@ void event_checkup(lv_event_t * e){
   /* ── Button clicks: use processStep to disambiguate reused widgets ── */
   if(code == LV_EVENT_CLICKED){
     if(widget == ckup->checkupStartButton){
+      alarm_stop();
       if(ckup->data.processStep == 0){
         LV_LOG_USER("User pressed checkupStartButton on Step 0");
         ckup->data.isProcessing = 0;
@@ -102,6 +103,7 @@ void event_checkup(lv_event_t * e){
       }
     }
     if(widget == ckup->checkupSkipButton){
+      alarm_stop();
       if(ckup->data.processStep == 1){
         LV_LOG_USER("User pressed checkupSkipButton on Step 1");
         ckup->data.isProcessing = 0;
@@ -133,6 +135,9 @@ void event_checkup(lv_event_t * e){
          * screen created with lv_obj_create(NULL), NOT an lv_msgbox.
          * Calling lv_msgbox_close on it causes a BUS ERROR (crash). */
 
+        /* Stop persistent alarm */
+        alarm_stop();
+
         /* Safety: delete any timers that might still be running */
         safeTimerDelete(&ckup->processTimer);
         safeTimerDelete(&ckup->pumpTimer);
@@ -159,10 +164,12 @@ void event_checkup(lv_event_t * e){
     }
     if(widget == ckup->checkupStopAfterButton){
         LV_LOG_USER("User pressed checkupStopAfterButton");
+        alarm_stop();
         messagePopupCreate(warningPopupTitle_text,stopAfterProcessPopupBody_text,checkupStop_text,stepDetailCancel_text, ckup->checkupStopAfterButton);
     }
     if(widget == ckup->checkupStopNowButton){
         LV_LOG_USER("User pressed checkupStopNowButton");
+        alarm_stop();
         messagePopupCreate(warningPopupTitle_text,stopNowProcessPopupBody_text,checkupStop_text,stepDetailCancel_text, ckup->checkupStopNowButton);
     }
 
@@ -208,21 +215,44 @@ void processTimer(lv_timer_t * timer) {
     }
 
 
-    processPercentage = calculatePercentage(minutesProcessElapsed, secondsProcessElapsed, pn->process.processDetails->data.timeMins, pn->process.processDetails->data.timeSecs);
+    /* Get overlap settings */
+    uint8_t overlapPct = gui.page.settings.settingsParams.drainFillOverlapSetpoint;
+    uint32_t overlapPerPhase = (uint32_t)tankFillTime * overlapPct / 100;
+    uint32_t totalOverlapPerStep = 2 * overlapPerPhase; /* fill + drain */
+
+    /* Adjusted total process time */
+    uint32_t origProcSecs = (uint32_t)pn->process.processDetails->data.timeMins * 60
+                           + pn->process.processDetails->data.timeSecs;
+    uint32_t numSteps = pn->process.processDetails->stepElementsList.size;
+    uint32_t totalAdjustment = numSteps * totalOverlapPerStep;
+    uint32_t adjProcSecs = (origProcSecs > totalAdjustment) ? (origProcSecs - totalAdjustment) : 1;
+    uint8_t adjProcMins = adjProcSecs / 60;
+    uint8_t adjProcRemSecs = adjProcSecs % 60;
+
+    processPercentage = calculatePercentage(minutesProcessElapsed, secondsProcessElapsed, adjProcMins, adjProcRemSecs);
     LV_LOG_USER("Elapsed Time %"PRIu8"h:%"PRIu32"m:%"PRIu8"s, processPercentage %"PRIu8" stepPercentage %"PRIu8"", hoursProcessElapsed, minutesProcessElapsed, secondsProcessElapsed, processPercentage, stepPercentage);
 
-    // Convert the remaining process time to minutes and seconds
-    uint8_t totalProcessSecs = pn->process.processDetails->data.timeMins * 60 + pn->process.processDetails->data.timeSecs;
+    // Convert the remaining process time to minutes and seconds (using adjusted values)
+    uint8_t totalProcessSecs = adjProcSecs;
     uint8_t elapsedProcessSecs = minutesProcessElapsed * 60 + secondsProcessElapsed;
-    uint8_t remainingProcessSecs = totalProcessSecs - elapsedProcessSecs;
+    uint8_t remainingProcessSecs = (totalProcessSecs > elapsedProcessSecs) ? (totalProcessSecs - elapsedProcessSecs) : 0;
 
     uint8_t remainingProcessMins = remainingProcessSecs / 60;
     uint8_t remainingProcessSecsOnly = remainingProcessSecs % 60;
 
-    // Convert the remaining step time to minutes and seconds
-    uint8_t totalStepSecs = ckup->currentStep->step.stepDetails->data.timeMins * 60 + ckup->currentStep->step.stepDetails->data.timeSecs;
+    /* Compute adjusted step time for remaining time display */
+    uint32_t origStepSecs = 0;
+    uint32_t adjStepSecs = 0;
+    if(ckup->currentStep != NULL) {
+        origStepSecs = (uint32_t)ckup->currentStep->step.stepDetails->data.timeMins * 60
+                      + ckup->currentStep->step.stepDetails->data.timeSecs;
+        adjStepSecs = (origStepSecs > totalOverlapPerStep) ? (origStepSecs - totalOverlapPerStep) : 0;
+    }
+
+    // Convert the remaining step time to minutes and seconds (using adjusted values)
+    uint8_t totalStepSecs = adjStepSecs;
     uint8_t elapsedStepSecs = minutesStepElapsed * 60 + secondsStepElapsed;
-    uint8_t remainingStepSecs = totalStepSecs - elapsedStepSecs;
+    uint8_t remainingStepSecs = (totalStepSecs > elapsedStepSecs) ? (totalStepSecs - elapsedStepSecs) : 0;
 
     uint8_t remainingStepMins = remainingStepSecs / 60;
     uint8_t remainingStepSecsOnly = remainingStepSecs % 60;
@@ -243,7 +273,14 @@ void processTimer(lv_timer_t * timer) {
             lv_timer_resume(ckup->pumpTimer);
         }
         else{
-          stepPercentage = calculatePercentage(minutesStepElapsed, secondsStepElapsed, ckup->currentStep->step.stepDetails->data.timeMins, ckup->currentStep->step.stepDetails->data.timeSecs);
+          /* Compute adjusted step time for percentage calculation */
+          origStepSecs = (uint32_t)ckup->currentStep->step.stepDetails->data.timeMins * 60
+                        + ckup->currentStep->step.stepDetails->data.timeSecs;
+          adjStepSecs = (origStepSecs > totalOverlapPerStep) ? (origStepSecs - totalOverlapPerStep) : 0;
+          uint8_t adjStepMins = adjStepSecs / 60;
+          uint8_t adjStepRemSecs = adjStepSecs % 60;
+
+          stepPercentage = calculatePercentage(minutesStepElapsed, secondsStepElapsed, adjStepMins, adjStepRemSecs);
           lv_arc_set_value(ckup->stepArc, stepPercentage);
           if(ckup->currentStep->next != NULL)
               lv_label_set_text(ckup->checkupStepSourceValue, tmp_processSourceList[ckup->currentStep->next->step.stepDetails->data.source]);
@@ -301,6 +338,9 @@ void processTimer(lv_timer_t * timer) {
           gui.page.tools.machineStats.completed++;
           gui.page.tools.machineStats.totalMins += pn->process.processDetails->data.timeMins;
           qSysAction( SAVE_MACHINE_STATS );
+
+          /* Start persistent alarm for process completion */
+          alarm_start_persistent();
 
           safeTimerDelete(&ckup->processTimer);
           lv_timer_resume(ckup->pumpTimer);
@@ -380,6 +420,9 @@ void tempTimerCallback(lv_timer_t * timer) {
 
         if(ckup->checkupHeaterStatusLabel != NULL)
             lv_label_set_text(ckup->checkupHeaterStatusLabel, checkupTempReached_text);
+
+        /* Start persistent alarm for temperature reached (if temp control enabled) */
+        alarm_start_persistent();
 
         /* If autostart is enabled, advance to step 3 automatically */
         if(gui.page.settings.settingsParams.isProcessAutostart) {
@@ -797,12 +840,12 @@ static void checkup_renderPreFlight(processNode *proc) {
         lv_label_set_text(ckup->checkupChemistryVolumeLabel, checkupChemistryVolume_text);
         lv_obj_set_width(ckup->checkupChemistryVolumeLabel, LV_SIZE_CONTENT);
         lv_obj_set_style_text_font(ckup->checkupChemistryVolumeLabel, &lv_font_montserrat_18, 0);
-        lv_obj_align(ckup->checkupChemistryVolumeLabel, LV_ALIGN_TOP_MID, 0, 90);
+        lv_obj_align(ckup->checkupChemistryVolumeLabel, LV_ALIGN_TOP_MID, 0, 100);
 
         /* Read-only volume textarea */
         ckup->checkupVolumeTextArea = lv_textarea_create(ckup->checkupSelectTankChemistryContainer);
         lv_textarea_set_one_line(ckup->checkupVolumeTextArea, true);
-        lv_obj_align(ckup->checkupVolumeTextArea, LV_ALIGN_TOP_MID, 0, 115);
+        lv_obj_align(ckup->checkupVolumeTextArea, LV_ALIGN_TOP_MID, 0, 125);
         lv_obj_set_width(ckup->checkupVolumeTextArea, 100);
         lv_obj_set_style_bg_color(ckup->checkupVolumeTextArea, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
         lv_obj_set_style_text_align(ckup->checkupVolumeTextArea, LV_TEXT_ALIGN_CENTER, 0);
@@ -831,7 +874,13 @@ static void checkup_renderPreFlight(processNode *proc) {
         lv_label_set_text(ckup->checkupStartButtonLabel, checkupStart_text);
         lv_obj_set_style_text_font(ckup->checkupStartButtonLabel, &lv_font_montserrat_22, 0);
         lv_obj_align(ckup->checkupStartButtonLabel, LV_ALIGN_CENTER, 0, 0);
-        lv_obj_add_state(ckup->checkupStartButton, LV_STATE_DISABLED);
+        /* Enable Start immediately if tank/volume are already set from settings */
+        if (ckup->data.tankSize > 0 && ckup->data.activeVolume_index > 0 && ckup->data.processStep < 1) {
+            lv_obj_clear_state(ckup->checkupStartButton, LV_STATE_DISABLED);
+            LV_LOG_USER("checkup: Start button ENABLED (tank=%d, vol=%d)", ckup->data.tankSize, ckup->data.activeVolume_index);
+        } else {
+            lv_obj_add_state(ckup->checkupStartButton, LV_STATE_DISABLED);
+        }
 
         isStepStatus0created = 1;
     }
@@ -1257,7 +1306,9 @@ void checkup(processNode *processToCheckup) {
     ckup->data.stepFillWaterStatus = 0;
     ckup->data.stepCheckFilmStatus = 0;
     ckup->data.stepReachTempStatus = 0;
-    ckup->data.activeVolume_index  = 0;
+    /* Initialize from settings so Start is active immediately */
+    ckup->data.tankSize            = gui.page.settings.settingsParams.tankSize;
+    ckup->data.activeVolume_index  = gui.page.settings.settingsParams.chemistryVolume;
     ckup->data.stopAfter  = false;
     ckup->data.stopNow    = false;
     ckup->data.isAlreadyPumping    = false;
@@ -1269,6 +1320,7 @@ void checkup(processNode *processToCheckup) {
     initCheckup(processToCheckup);
   }
     LV_LOG_USER("initCheckup Done!");
+
         resetStuffBeforeNextProcess();
         //LEFT SIDE OF SCREEN
         if(ckup->data.isProcessing == 0){

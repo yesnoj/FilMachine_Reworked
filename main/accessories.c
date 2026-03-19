@@ -171,19 +171,60 @@ void event_checkbox_handler(lv_event_t * e) {
  *  Keyboard context — captured once on CLICKED, reused by
  *  DEFOCUSED / CANCEL / READY so we never re-derive from globals.
  *-------------------------------------------------------------*/
-enum kbOwnerType { KB_OWNER_NONE, KB_OWNER_FILTER, KB_OWNER_PROCESS, KB_OWNER_STEP };
-
-static struct {
-    lv_obj_t          *textArea;       /* active textarea             */
-    lv_obj_t          *parentScreen;   /* parent for show/hide        */
-    lv_obj_t          *saveButton;     /* save button to refresh      */
-    sStepData         *stepData;       /* step data (KB_OWNER_STEP)   */
-    sProcessData      *processData;    /* process data (KB_OWNER_PROCESS) */
-    enum kbOwnerType   owner;
-} kbCtx = {0};
+static sKeyboardOwnerContext kbCtx = {0};
 
 static void kb_ctx_clear(void) {
     memset(&kbCtx, 0, sizeof(kbCtx));
+}
+
+static const char *kb_owner_name(kbOwnerType owner) {
+    switch(owner) {
+        case KB_OWNER_FILTER: return "filter";
+        case KB_OWNER_PROCESS: return "process";
+        case KB_OWNER_STEP: return "step";
+        default: return "unknown";
+    }
+}
+
+static void kb_commit_text(const char *kbText) {
+    if(kbText == NULL || kbCtx.owner == KB_OWNER_NONE || kbCtx.textArea == NULL) {
+        return;
+    }
+
+    lv_textarea_set_text(kbCtx.textArea, kbText);
+
+    switch(kbCtx.owner) {
+        case KB_OWNER_FILTER:
+            LV_LOG_USER("Press ok from filterPopup");
+            snprintf(gui.element.filterPopup.filterName,
+                     sizeof(gui.element.filterPopup.filterName), "%s", kbText);
+            break;
+
+        case KB_OWNER_PROCESS:
+            if(kbCtx.ownerData != NULL) {
+                sProcessDetail *pd = (sProcessDetail *)kbCtx.ownerData;
+                LV_LOG_USER("Press ok from processDetailNameTextArea");
+                snprintf(pd->data.processNameString, sizeof(pd->data.processNameString), "%s", kbText);
+                pd->data.somethingChanged = true;
+            }
+            break;
+
+        case KB_OWNER_STEP:
+            if(kbCtx.ownerData != NULL) {
+                sStepDetail *sd = (sStepDetail *)kbCtx.ownerData;
+                LV_LOG_USER("Press ok from stepDetailNameTextArea");
+                snprintf(sd->data.stepNameString, sizeof(sd->data.stepNameString), "%s", kbText);
+                sd->data.somethingChanged = true;
+            }
+            break;
+
+        default:
+            return;
+    }
+
+    if(kbCtx.saveButton != NULL) {
+        lv_obj_send_event(kbCtx.saveButton, LV_EVENT_REFRESH, NULL);
+    }
 }
 
 void event_keyboard(lv_event_t* e) {
@@ -191,7 +232,6 @@ void event_keyboard(lv_event_t* e) {
   lv_event_code_t code = lv_event_get_code(e);
   lv_obj_t * obj = (lv_obj_t *)lv_event_get_target(e);
 
-  /* ── Handle keyboard mode switch (letters ↔ numbers) ── */
   if(code == LV_EVENT_VALUE_CHANGED) {
       uint32_t btn_id = lv_buttonmatrix_get_selected_button(gui.element.keyboardPopup.keyboard);
       if(btn_id != LV_BUTTONMATRIX_BUTTON_NONE) {
@@ -202,99 +242,46 @@ void event_keyboard(lv_event_t* e) {
               LV_LOG_USER("Keyboard switched to numbers/symbols");
               return;
           }
-          else if(txt != NULL && strcmp(txt, "Abc") == 0) {
+          if(txt != NULL && strcmp(txt, "Abc") == 0) {
               for(int i = 0; i < 3; i++) lv_textarea_delete_char(gui.element.keyboardPopup.keyboardTextArea);
               lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_1);
               LV_LOG_USER("Keyboard switched to letters");
               return;
           }
       }
+      return;
   }
 
-  /* ── CLICKED: identify owner, capture context, open keyboard ── */
-  if(code == LV_EVENT_CLICKED){
-      if(obj == gui.element.filterPopup.mBoxNameTextArea){
-          LV_LOG_USER("LV_EVENT_FOCUSED on filterPopup.mBoxNameTextArea");
-          kb_ctx_clear();
-          kbCtx.owner        = KB_OWNER_FILTER;
-          kbCtx.textArea     = obj;
-          kbCtx.parentScreen = gui.element.filterPopup.mBoxFilterPopupParent;
-          showKeyboard(kbCtx.parentScreen, obj);
+  if(code == LV_EVENT_CLICKED) {
+      sKeyboardOwnerContext *ctx = (sKeyboardOwnerContext *)lv_event_get_user_data(e);
+      if(ctx != NULL && ctx->textArea == obj) {
+          LV_LOG_USER("LV_EVENT_FOCUSED on keyboard-managed textarea");
+          kbCtx = *ctx;
+          showKeyboard(kbCtx.parentScreen, kbCtx.textArea);
       }
-      if(gui.tempProcessNode != NULL && gui.tempProcessNode->process.processDetails != NULL &&
-         obj == gui.tempProcessNode->process.processDetails->processDetailNameTextArea){
-          LV_LOG_USER("LV_EVENT_FOCUSED on processDetailNameTextArea");
-          kb_ctx_clear();
-          kbCtx.owner        = KB_OWNER_PROCESS;
-          kbCtx.textArea     = obj;
-          kbCtx.parentScreen = gui.tempProcessNode->process.processDetails->processDetailParent;
-          kbCtx.saveButton   = gui.tempProcessNode->process.processDetails->processSaveButton;
-          kbCtx.processData  = &gui.tempProcessNode->process.processDetails->data;
-          showKeyboard(kbCtx.parentScreen, obj);
-      }
-      if(gui.tempStepNode != NULL && gui.tempStepNode->step.stepDetails != NULL &&
-         obj == gui.tempStepNode->step.stepDetails->stepDetailNameTextArea){
-          LV_LOG_USER("LV_EVENT_FOCUSED on stepDetailNameTextArea");
-          kb_ctx_clear();
-          kbCtx.owner        = KB_OWNER_STEP;
-          kbCtx.textArea     = obj;
-          kbCtx.parentScreen = gui.tempStepNode->step.stepDetails->stepDetailParent;
-          kbCtx.saveButton   = gui.tempStepNode->step.stepDetails->stepSaveButton;
-          kbCtx.stepData     = &gui.tempStepNode->step.stepDetails->data;
-          showKeyboard(kbCtx.parentScreen, obj);
-      }
+      return;
   }
 
-  /* ── DEFOCUSED: hide keyboard using captured context ── */
-  if(code == LV_EVENT_DEFOCUSED){
-      if(kbCtx.owner != KB_OWNER_NONE && obj == kbCtx.textArea){
-          LV_LOG_USER("LV_EVENT_DEFOCUSED on %s textarea",
-              kbCtx.owner == KB_OWNER_FILTER ? "filter" :
-              kbCtx.owner == KB_OWNER_PROCESS ? "process" : "step");
+  if(code == LV_EVENT_DEFOCUSED) {
+      if(kbCtx.owner != KB_OWNER_NONE && obj == kbCtx.textArea) {
+          LV_LOG_USER("LV_EVENT_DEFOCUSED on %s textarea", kb_owner_name(kbCtx.owner));
           hideKeyboard(kbCtx.parentScreen);
       }
+      return;
   }
 
-  /* ── CANCEL: hide keyboard using captured context ── */
-  if(code == LV_EVENT_CANCEL){
-      if(kbCtx.owner != KB_OWNER_NONE){
-          LV_LOG_USER("LV_EVENT_CANCEL on %s textarea",
-              kbCtx.owner == KB_OWNER_FILTER ? "filter" :
-              kbCtx.owner == KB_OWNER_PROCESS ? "process" : "step");
+  if(code == LV_EVENT_CANCEL) {
+      if(kbCtx.owner != KB_OWNER_NONE) {
+          LV_LOG_USER("LV_EVENT_CANCEL on %s textarea", kb_owner_name(kbCtx.owner));
           hideKeyboard(kbCtx.parentScreen);
       }
+      return;
   }
 
-  /* ── READY: commit text, notify owner, hide keyboard ── */
-  if(code == LV_EVENT_READY){
+  if(code == LV_EVENT_READY) {
       LV_LOG_USER("LV_EVENT_READY PRESSED");
-      const char *kbText = lv_textarea_get_text(gui.element.keyboardPopup.keyboardTextArea);
-
-      if(kbCtx.owner == KB_OWNER_FILTER){
-          LV_LOG_USER("Press ok from filterPopup");
-          lv_textarea_set_text(kbCtx.textArea, kbText);
-          if(strlen(kbText) > 0) {
-              snprintf(gui.element.filterPopup.filterName,
-                       sizeof(gui.element.filterPopup.filterName), "%s", kbText);
-          } else {
-              gui.element.filterPopup.filterName[0] = '\0';
-          }
-          hideKeyboard(kbCtx.parentScreen);
-      }
-      if(kbCtx.owner == KB_OWNER_PROCESS){
-          LV_LOG_USER("Press ok from processDetailNameTextArea");
-          lv_textarea_set_text(kbCtx.textArea, kbText);
-          kbCtx.processData->somethingChanged = true;
-          lv_obj_send_event(kbCtx.saveButton, LV_EVENT_REFRESH, NULL);
-          hideKeyboard(kbCtx.parentScreen);
-      }
-      if(kbCtx.owner == KB_OWNER_STEP){
-          LV_LOG_USER("Press ok from stepDetailNameTextArea");
-          lv_textarea_set_text(kbCtx.textArea, kbText);
-          kbCtx.stepData->somethingChanged = true;
-          lv_obj_send_event(kbCtx.saveButton, LV_EVENT_REFRESH, NULL);
-          hideKeyboard(kbCtx.parentScreen);
-      }
+      kb_commit_text(lv_textarea_get_text(gui.element.keyboardPopup.keyboardTextArea));
+      hideKeyboard(kbCtx.parentScreen);
   }
 }
 
@@ -637,6 +624,18 @@ void initGlobals( void ) {
   gui.page.settings.titleLinePoints[1].x = 310;
   gui.page.tools.titleLinePoints[1].x = 310;
   
+  /* Sensible defaults for settings (overridden by config file if present) */
+  gui.page.settings.settingsParams.tankSize = 2;           /* Medium */
+  gui.page.settings.settingsParams.pumpSpeed = 30;
+  gui.page.settings.settingsParams.chemContainerMl = 500;
+  gui.page.settings.settingsParams.wbContainerMl = 2000;
+  gui.page.settings.settingsParams.chemistryVolume = 2;    /* High */
+  gui.page.settings.settingsParams.filmRotationSpeedSetpoint = 50;
+  gui.page.settings.settingsParams.rotationIntervalSetpoint = 10;
+  gui.page.settings.settingsParams.calibratedTemp = 20;
+  gui.page.settings.settingsParams.multiRinseTime = 60;
+  gui.page.settings.settingsParams.drainFillOverlapSetpoint = 100;
+
   gui.element.rollerPopup.tempCelsiusOptions = createRollerValues(0,40,"",false);
   gui.element.rollerPopup.tempFahrenheitOptions = createRollerValues(0,40,"",true);
   gui.element.rollerPopup.minutesOptions = createRollerValues(0,240,"",false);
@@ -678,10 +677,11 @@ void showKeyboard(lv_obj_t * whoCallMe, lv_obj_t * textArea){
 }
 
 void hideKeyboard(lv_obj_t * whoCallMe){
+    LV_UNUSED(whoCallMe);
     lv_obj_add_flag(gui.element.keyboardPopup.keyBoardParent, LV_OBJ_FLAG_HIDDEN);
     lv_obj_move_background(gui.element.keyboardPopup.keyBoardParent);
     lv_textarea_set_text(gui.element.keyboardPopup.keyboardTextArea, "");
-    //lv_obj_remove_flag(whoCallMe, LV_OBJ_FLAG_HIDDEN);
+    kb_ctx_clear();
 }
 
 #if LV_USE_LOG != 0
@@ -983,6 +983,23 @@ void readConfigFile(const char *path, bool enableLog) {
 	      }
 	
 	    }
+
+	    /* ── Machine statistics (appended after processes) ── */
+	    {
+	        unsigned int br = 0;
+	        f_read( fp, &gui.page.tools.machineStats.completed, sizeof(gui.page.tools.machineStats.completed), &br );
+	        if(br > 0) {
+	            f_read( fp, &gui.page.tools.machineStats.totalMins, sizeof(gui.page.tools.machineStats.totalMins), &br );
+	            f_read( fp, &gui.page.tools.machineStats.stopped,   sizeof(gui.page.tools.machineStats.stopped),   &br );
+	            f_read( fp, &gui.page.tools.machineStats.clean,     sizeof(gui.page.tools.machineStats.clean),     &br );
+	            LV_LOG_USER("Loaded stats: completed=%"PRIu32" totalMins=%"PRIu64" stopped=%"PRIu32" clean=%"PRIu32"",
+	                gui.page.tools.machineStats.completed, gui.page.tools.machineStats.totalMins,
+	                gui.page.tools.machineStats.stopped, gui.page.tools.machineStats.clean);
+	        } else {
+	            LV_LOG_USER("No stats section in config (old format) — starting from zero");
+	        }
+	    }
+
 	    f_close( fp );
 	} else {
 		LV_LOG_USER("Failed to open configuration file for reading using default err: %d", res);
@@ -1079,6 +1096,12 @@ void writeConfigFile( const char *path, bool enableLog ) {
             }
             currentProcessNode = currentProcessNode->next;
         }
+        /* ── Machine statistics (appended after processes) ── */
+        f_write( fp, &gui.page.tools.machineStats.completed,  sizeof(gui.page.tools.machineStats.completed),  &bytes_written );
+        f_write( fp, &gui.page.tools.machineStats.totalMins,   sizeof(gui.page.tools.machineStats.totalMins),   &bytes_written );
+        f_write( fp, &gui.page.tools.machineStats.stopped,     sizeof(gui.page.tools.machineStats.stopped),     &bytes_written );
+        f_write( fp, &gui.page.tools.machineStats.clean,       sizeof(gui.page.tools.machineStats.clean),       &bytes_written );
+
         f_close( fp );
     }
 }
@@ -1188,8 +1211,9 @@ void calculateTotalTime(processNode *processNode){
     processNode->process.processDetails->data.timeMins = mins;
     processNode->process.processDetails->data.timeSecs = secs;
 
-    lv_label_set_text_fmt(processNode->process.processDetails->processTotalTimeValue, "%"PRIu32"m%"PRIu8"s", processNode->process.processDetails->data.timeMins, 
-      processNode->process.processDetails->data.timeSecs); 
+    if(processNode->process.processDetails->processTotalTimeValue != NULL)
+        lv_label_set_text_fmt(processNode->process.processDetails->processTotalTimeValue, "%"PRIu32"m%"PRIu8"s", processNode->process.processDetails->data.timeMins,
+          processNode->process.processDetails->data.timeSecs);
     LV_LOG_USER("Process %p has a total tilme of %"PRIu32"min:%"PRIu8"sec", processNode, mins, secs);
 }
 
@@ -1501,6 +1525,12 @@ float sim_getTemperature(uint8_t sensorIndex) {
             temp = -255.0f;
         }
     }
+
+    /* Apply calibration offset to temperature reading */
+    extern struct gui_components gui;
+    float offset = gui.page.settings.settingsParams.tempCalibOffset / 10.0f;
+    temp += offset;
+
     return temp;
 }
 
@@ -1753,9 +1783,14 @@ void emptyList(void *list, NodeType_t type) {
 }
 
 void readMachineStats(machineStatistics *machineStats) {
+    /* Stats are now read as part of readConfigFile — nothing extra needed */
+    (void)machineStats;
 }
 
 void writeMachineStats(machineStatistics *machineStats) {
+    /* Rewrite the full config file which now includes stats at the end */
+    (void)machineStats;
+    writeConfigFile(FILENAME_SAVE, false);
 }
 
 
@@ -1886,6 +1921,8 @@ sStepDetail *deepCopyStepDetail(sStepDetail *original) {
     /* Zero entire struct (all UI pointers become NULL) then copy business data */
     memset(copy, 0, sizeof(sStepDetail));
     copy->data = original->data;
+    /* Context structs (nameKeyboardCtx, minRollerCtx, secRollerCtx) are already
+       zeroed by the memset above — they're in sStepDetail, not sStepData */
 
     return copy;
 }
@@ -1988,6 +2025,8 @@ sProcessDetail *deepCopyProcessDetail(sProcessDetail *original) {
     /* Zero entire struct (all UI pointers become NULL) then copy business data */
     memset(copy, 0, sizeof(sProcessDetail));
     copy->data = original->data;
+    /* Context structs (nameKeyboardCtx, tempRollerCtx, toleranceRollerCtx) are already
+       zeroed by the memset above — they're in sProcessDetail, not sProcessData */
 
     /* Deep copy sub-structures that need special handling */
     copy->stepElementsList = deepCopyStepList(original->stepElementsList);

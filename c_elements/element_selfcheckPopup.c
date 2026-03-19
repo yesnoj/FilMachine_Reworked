@@ -120,14 +120,23 @@ static void sc_update_buttons(void) {
     uint8_t st = phaseState[sc->currentPhase];
 
     if (sc->isRunning) {
-        /* Running: Stop enabled, Start disabled, Advance disabled */
+        /* Running: Stop enabled, Start disabled, Advance disabled, X disabled */
         lv_obj_clear_state(sc->stopButton, LV_STATE_DISABLED);
         lv_obj_add_state(sc->startButton, LV_STATE_DISABLED);
         lv_obj_add_state(sc->advanceButton, LV_STATE_DISABLED);
+        lv_obj_add_state(sc->closeButton, LV_STATE_DISABLED);
     } else {
-        /* Not running: Stop disabled (nothing to stop), Start enabled, Advance enabled */
+        /* Not running: Stop disabled (nothing to stop), Start enabled, X enabled */
         lv_obj_add_state(sc->stopButton, LV_STATE_DISABLED);
-        lv_obj_clear_state(sc->advanceButton, LV_STATE_DISABLED);
+        lv_obj_clear_state(sc->closeButton, LV_STATE_DISABLED);
+
+        /* Hide Next on last phase, show otherwise */
+        if (sc->currentPhase >= SC_NUM_PHASES - 1) {
+            lv_obj_add_flag(sc->advanceButton, LV_OBJ_FLAG_HIDDEN);
+        } else {
+            lv_obj_remove_flag(sc->advanceButton, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_state(sc->advanceButton, LV_STATE_DISABLED);
+        }
 
         if (st == SC_DONE || st == SC_SKIPPED || st == SC_STOPPED) {
             lv_label_set_text(sc->startButtonLabel, "Re-run");

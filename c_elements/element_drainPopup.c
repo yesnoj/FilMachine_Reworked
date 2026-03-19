@@ -178,9 +178,8 @@ static void drain_start(void) {
     int32_t tot = totalDrainTime();
     lv_label_set_text_fmt(dp->drainTimeLabel,
                           "Time left: %ldm %02lds", (long)(tot / 60), (long)(tot % 60));
-    lv_label_set_text(dp->drainWasteLabel, drainWasteIndicator_text);
-    lv_obj_set_style_text_color(dp->drainWasteLabel,
-                                lv_color_hex(RED), LV_PART_MAIN);
+    lv_label_set_text(dp->drainWasteLabel, "");
+    lv_obj_add_flag(dp->drainWasteLabel, LV_OBJ_FLAG_HIDDEN);
 
     lv_label_set_text(dp->drainStopButtonLabel, buttonStop_text);
     lv_obj_set_style_bg_color(dp->drainStopButton,

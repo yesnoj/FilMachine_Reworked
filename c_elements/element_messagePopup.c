@@ -1,4 +1,3 @@
-
 /**
  * @file element_messagePopup.c
  *
@@ -8,329 +7,480 @@
 
 extern struct gui_components gui;
 
-void event_messagePopup(lv_event_t *e) {
-	
+/* Keep popup context local to this module so button handlers do not need to
+ * infer the owner from gui.tempProcessNode / gui.tempStepNode. */
+typedef enum {
+    MSGPOP_OWNER_NONE = 0,
+    MSGPOP_OWNER_INFO,
+    MSGPOP_OWNER_PROCESS,
+    MSGPOP_OWNER_STEP,
+    MSGPOP_OWNER_CHECKUP_STOP_NOW,
+    MSGPOP_OWNER_CHECKUP_STOP_AFTER,
+    MSGPOP_OWNER_DELETE_ALL,
+    MSGPOP_OWNER_IMPORT,
+    MSGPOP_OWNER_EXPORT,
+    MSGPOP_OWNER_OTA_SD,
+} message_popup_owner_t;
+
+typedef struct {
+    message_popup_owner_t type;
+    void        *whoCallMe;
+    processNode *process;
+    stepNode    *step;
+    sCheckup    *checkup;
+    lv_obj_t    *triggerObj;
+} message_popup_ctx_t;
+
+static message_popup_ctx_t g_msg_ctx = {0};
+
+static void message_popup_ctx_clear(void)
+{
+    memset(&g_msg_ctx, 0, sizeof(g_msg_ctx));
+}
+
+static processNode *message_popup_find_process_node(void *ptr)
+{
+    processNode *current = gui.page.processes.processElementsList.start;
+    while (current != NULL) {
+        if ((void *)current == ptr) {
+            return current;
+        }
+        current = current->next;
+    }
+    return NULL;
+}
+
+static bool message_popup_find_step_owner(void *ptr, processNode **out_process, stepNode **out_step)
+{
+    processNode *process = gui.page.processes.processElementsList.start;
+
+    while (process != NULL) {
+        if (process->process.processDetails != NULL) {
+            stepNode *step = process->process.processDetails->stepElementsList.start;
+            while (step != NULL) {
+                if ((void *)step == ptr) {
+                    if (out_process) *out_process = process;
+                    if (out_step) *out_step = step;
+                    return true;
+                }
+                step = step->next;
+            }
+        }
+        process = process->next;
+    }
+
+    return false;
+}
+
+static bool message_popup_find_checkup_owner(void *ptr, processNode **out_process, sCheckup **out_checkup, bool *out_stop_now)
+{
+    processNode *process = gui.page.processes.processElementsList.start;
+
+    while (process != NULL) {
+        if (process->process.processDetails != NULL && process->process.processDetails->checkup != NULL) {
+            sCheckup *ckup = process->process.processDetails->checkup;
+            if ((void *)ckup->checkupStopNowButton == ptr) {
+                if (out_process) *out_process = process;
+                if (out_checkup) *out_checkup = ckup;
+                if (out_stop_now) *out_stop_now = true;
+                return true;
+            }
+            if ((void *)ckup->checkupStopAfterButton == ptr) {
+                if (out_process) *out_process = process;
+                if (out_checkup) *out_checkup = ckup;
+                if (out_stop_now) *out_stop_now = false;
+                return true;
+            }
+        }
+        process = process->next;
+    }
+
+    return false;
+}
+
+static void message_popup_prepare_ctx(void *whoCallMe)
+{
+    processNode *process = NULL;
+    stepNode *step = NULL;
+    sCheckup *checkup = NULL;
+    bool stop_now = false;
+
+    message_popup_ctx_clear();
+    g_msg_ctx.whoCallMe = whoCallMe;
+    g_msg_ctx.triggerObj = (lv_obj_t *)whoCallMe;
+    gui.element.messagePopup.whoCallMe = whoCallMe;
+
+    if (whoCallMe == NULL) {
+        g_msg_ctx.type = MSGPOP_OWNER_INFO;
+        return;
+    }
+
+    if (whoCallMe == &gui) {
+        g_msg_ctx.type = MSGPOP_OWNER_DELETE_ALL;
+        return;
+    }
+
+    if (whoCallMe == gui.page.tools.toolsImportButton) {
+        g_msg_ctx.type = MSGPOP_OWNER_IMPORT;
+        return;
+    }
+
+    if (whoCallMe == gui.page.tools.toolsExportButton) {
+        g_msg_ctx.type = MSGPOP_OWNER_EXPORT;
+        return;
+    }
+
+    if (whoCallMe == gui.page.tools.toolsUpdateSDButton) {
+        g_msg_ctx.type = MSGPOP_OWNER_OTA_SD;
+        return;
+    }
+
+    if (message_popup_find_checkup_owner(whoCallMe, &process, &checkup, &stop_now)) {
+        g_msg_ctx.process = process;
+        g_msg_ctx.checkup = checkup;
+        g_msg_ctx.type = stop_now ? MSGPOP_OWNER_CHECKUP_STOP_NOW : MSGPOP_OWNER_CHECKUP_STOP_AFTER;
+        LV_LOG_USER("message_popup_prepare_ctx: CHECKUP_%s", stop_now ? "STOP_NOW" : "STOP_AFTER");
+        return;
+    }
+
+    if (message_popup_find_step_owner(whoCallMe, &process, &step)) {
+        g_msg_ctx.process = process;
+        g_msg_ctx.step = step;
+        g_msg_ctx.type = MSGPOP_OWNER_STEP;
+        return;
+    }
+
+    process = message_popup_find_process_node(whoCallMe);
+    if (process != NULL) {
+        g_msg_ctx.process = process;
+        g_msg_ctx.type = MSGPOP_OWNER_PROCESS;
+        return;
+    }
+
+    g_msg_ctx.type = MSGPOP_OWNER_NONE;
+    LV_LOG_USER("message_popup_prepare_ctx: OWNER_NONE — whoCallMe=%p not recognized", whoCallMe);
+}
+
+static void message_popup_close(lv_obj_t *mboxCont)
+{
+    lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
+    lv_msgbox_close(mboxCont);
+    gui.element.messagePopup.mBoxPopupParent = NULL;
+    message_popup_ctx_clear();
+}
+
+static void message_popup_handle_stop_now(void)
+{
+    processNode *pn = g_msg_ctx.process;
+    sCheckup *ckup = g_msg_ctx.checkup;
+
+    if (pn == NULL || ckup == NULL) {
+        return;
+    }
+
+    ckup->data.stopNow = true;
+    ckup->data.stopAfter = false;
+    lv_obj_add_state(ckup->checkupStopAfterButton, LV_STATE_DISABLED);
+    lv_obj_add_state(ckup->checkupStopNowButton, LV_STATE_DISABLED);
+
+    lv_label_set_text(ckup->checkupProcessCompleteLabel, checkupProcessStopped_text);
+    lv_obj_remove_flag(ckup->checkupProcessCompleteLabel, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ckup->checkupStepNameValue, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ckup->checkupStepTimeLeftValue, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ckup->checkupProcessTimeLeftValue, LV_OBJ_FLAG_HIDDEN);
+
+    gui.page.tools.machineStats.stopped++;
+    safeTimerDelete(&ckup->processTimer);
+    lv_timer_resume(ckup->pumpTimer);
+    qSysAction(SAVE_MACHINE_STATS);
+}
+
+static void message_popup_handle_stop_after(void)
+{
+    sCheckup *ckup = g_msg_ctx.checkup;
+
+    if (ckup == NULL) {
+        return;
+    }
+
+    ckup->data.stopAfter = true;
+    lv_obj_add_state(ckup->checkupStopAfterButton, LV_STATE_DISABLED);
+    lv_obj_clear_state(ckup->checkupStopNowButton, LV_STATE_DISABLED);
+
+    gui.page.tools.machineStats.stopped++;
+    qSysAction(SAVE_MACHINE_STATS);
+}
+
+static void message_popup_button1_clicked(lv_obj_t *mboxCont)
+{
+    processNode *pn = g_msg_ctx.process;
+    stepNode *sn = g_msg_ctx.step;
+
+    switch (g_msg_ctx.type) {
+        case MSGPOP_OWNER_PROCESS:
+            if (pn != NULL && pn->process.swipedRight == true && pn->process.swipedLeft == false) {
+                LV_LOG_USER("Delete process!");
+
+                if (!deleteProcessElement(pn)) {
+                    LV_LOG_USER("Delete process element instance at address 0x%p Failed!", pn);
+                } else {
+                    LV_LOG_USER("Delete process element instance at address 0x%p", pn);
+                    qSysAction(SAVE_PROCESS_CONFIG);
+                }
+
+                message_popup_close(mboxCont);
+            }
+            else if (pn != NULL && pn->process.swipedRight == false && pn->process.swipedLeft == true) {
+                LV_LOG_USER("Cancel duplicate");
+                message_popup_close(mboxCont);
+                pn->process.longPressHandled = false;
+            }
+            break;
+
+        case MSGPOP_OWNER_STEP:
+            if (pn != NULL && sn != NULL && sn->step.swipedLeft == false) {
+                LV_LOG_USER("Delete step!");
+                sn->step.longPressHandled = false;
+
+                if (!deleteStepElement(sn, pn, false)) {
+                    LV_LOG_USER("Delete step element instance at address 0x%p Failed!", sn);
+                } else {
+                    calculateTotalTime(pn);
+                    LV_LOG_USER("Delete step element instance at address 0x%p", sn);
+                    pn->process.processDetails->data.somethingChanged = true;
+                    lv_obj_send_event(pn->process.processDetails->processSaveButton, LV_EVENT_REFRESH, NULL);
+                    qSysAction(SAVE_PROCESS_CONFIG);
+                }
+
+                message_popup_close(mboxCont);
+            }
+            else if (sn != NULL && sn->step.swipedLeft == true) {
+                LV_LOG_USER("Cancel duplicate step");
+                sn->step.swipedLeft = false;
+                message_popup_close(mboxCont);
+            }
+            break;
+
+        case MSGPOP_OWNER_CHECKUP_STOP_NOW:
+            LV_LOG_USER("Stop process NOW!");
+            message_popup_handle_stop_now();
+            message_popup_close(mboxCont);
+            break;
+
+        case MSGPOP_OWNER_CHECKUP_STOP_AFTER:
+            LV_LOG_USER("Stop process AFTER!");
+            message_popup_handle_stop_after();
+            message_popup_close(mboxCont);
+            break;
+
+        case MSGPOP_OWNER_DELETE_ALL: {
+            LV_LOG_USER("Delete ALL PROCESS!");
+            message_popup_close(mboxCont);
+            lv_obj_clean(gui.page.processes.processesListContainer);
+            processList *processElementsList = &(gui.page.processes.processElementsList);
+            emptyList((void *)processElementsList, PROCESS_NODE);
+            qSysAction(SAVE_PROCESS_CONFIG);
+            break;
+        }
+
+        case MSGPOP_OWNER_IMPORT:
+            LV_LOG_USER("Cancel import from SD");
+            message_popup_close(mboxCont);
+            break;
+
+        case MSGPOP_OWNER_EXPORT:
+            LV_LOG_USER("Cancel export to SD");
+            message_popup_close(mboxCont);
+            break;
+
+        case MSGPOP_OWNER_OTA_SD:
+            LV_LOG_USER("Cancel OTA from SD");
+            message_popup_close(mboxCont);
+            break;
+
+        default:
+            break;
+    }
+}
+
+static void message_popup_button2_clicked(lv_obj_t *mboxCont)
+{
+    processNode *pn = g_msg_ctx.process;
+    stepNode *sn = g_msg_ctx.step;
+    stepNode *newStep = NULL;
+
+    switch (g_msg_ctx.type) {
+        case MSGPOP_OWNER_STEP:
+            if (sn != NULL && sn->step.swipedLeft == false && sn->step.swipedRight == true) {
+                LV_LOG_USER("Cancel delete step element!");
+                uint32_t x = lv_obj_get_x_aligned(sn->step.stepElement) - 50;
+                uint32_t y = lv_obj_get_y_aligned(sn->step.stepElement);
+                lv_obj_set_pos(sn->step.stepElement, x, y);
+                sn->step.swipedLeft = false;
+                sn->step.swipedRight = false;
+                lv_obj_add_flag(sn->step.deleteButton, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(sn->step.editButton, LV_OBJ_FLAG_HIDDEN);
+                sn->step.longPressHandled = false;
+            }
+
+            if (pn != NULL && sn != NULL && sn->step.swipedLeft == true && sn->step.swipedRight == false) {
+                LV_LOG_USER("Duplicate step!");
+
+                newStep = (stepNode *)allocateAndInitializeNode(STEP_NODE);
+                if (newStep == NULL) {
+                    LV_LOG_USER("Failed to allocate memory for duplicate step");
+                } else {
+                    memset(newStep->step.stepDetails, 0, sizeof(sStepDetail));
+                    newStep->step.stepDetails->data = sn->step.stepDetails->data;
+
+                    size_t nameLen = strlen(newStep->step.stepDetails->data.stepNameString);
+                    if (nameLen + 2 <= MAX_PROC_NAME_LEN) {
+                        strcat(newStep->step.stepDetails->data.stepNameString, "_c");
+                    } else if (nameLen > 0) {
+                        newStep->step.stepDetails->data.stepNameString[MAX_PROC_NAME_LEN - 2] = '_';
+                        newStep->step.stepDetails->data.stepNameString[MAX_PROC_NAME_LEN - 1] = 'c';
+                        newStep->step.stepDetails->data.stepNameString[MAX_PROC_NAME_LEN] = '\0';
+                    }
+
+                    newStep->step.stepElement = NULL;
+                    newStep->step.stepStyle.values_and_props = NULL;
+                    newStep->next = NULL;
+                    newStep->prev = NULL;
+
+                    addStepElement(newStep, pn);
+                    LV_LOG_USER("Duplicate step created at %p, process now has %d steps",
+                        newStep, pn->process.processDetails->stepElementsList.size);
+                    calculateTotalTime(pn);
+                }
+
+                sn->step.swipedLeft = false;
+            }
+
+            message_popup_close(mboxCont);
+
+            if (pn != NULL && newStep != NULL && newStep->step.stepElement == NULL) {
+                stepElementCreate(newStep, pn, -1);
+                reorderStepElements(pn);
+                lv_obj_scroll_to_view(newStep->step.stepElement, LV_ANIM_ON);
+            }
+            break;
+
+        case MSGPOP_OWNER_PROCESS:
+            if (pn != NULL && pn->process.swipedRight == true && pn->process.swipedLeft == false) {
+                LV_LOG_USER("Cancel delete process element!");
+                uint32_t x = lv_obj_get_x_aligned(pn->process.processElement) - 50;
+                uint32_t y = lv_obj_get_y_aligned(pn->process.processElement);
+                lv_obj_set_pos(pn->process.processElement, x, y);
+                pn->process.swipedLeft = true;
+                pn->process.swipedRight = false;
+                lv_obj_add_flag(pn->process.deleteButton, LV_OBJ_FLAG_HIDDEN);
+                pn->process.gestureHandled = false;
+            }
+
+            if (pn != NULL && pn->process.swipedRight == false && pn->process.swipedLeft == true && pn->process.longPressHandled == true) {
+                LV_LOG_USER("Duplicate process");
+                char *newProcessName = generateRandomSuffix(pn->process.processDetails->data.processNameString);
+                LV_LOG_USER("New name %s", newProcessName);
+
+                struct processNode *duplicatedNode = deepCopyProcessNode(pn);
+                if (duplicatedNode == NULL) {
+                    fprintf(stderr, "Failed to allocate memory for duplicatedNode\n");
+                    /* newProcessName is a static buffer — do NOT free */
+                    message_popup_close(mboxCont);
+                    break;
+                }
+
+                snprintf(duplicatedNode->process.processDetails->data.processNameString,
+                         sizeof(duplicatedNode->process.processDetails->data.processNameString),
+                         "%s", newProcessName);
+
+                duplicatedNode->process.longPressHandled = false;
+                pn->process.longPressHandled = false;
+                /* newProcessName is a static buffer from generateRandomSuffix — do NOT free */
+
+                /* Close popup FIRST — so the modal overlay is gone before
+                   we create GUI elements underneath (LVGL memory reuse) */
+                message_popup_close(mboxCont);
+
+                if (addProcessElement(duplicatedNode) != NULL) {
+                    LV_LOG_USER("Create GUI entry");
+                    processElementCreate(duplicatedNode, -1);
+                    qSysAction(SAVE_PROCESS_CONFIG);
+                }
+            } else {
+                message_popup_close(mboxCont);
+            }
+            break;
+
+        case MSGPOP_OWNER_CHECKUP_STOP_NOW:
+        case MSGPOP_OWNER_CHECKUP_STOP_AFTER:
+            message_popup_close(mboxCont);
+            break;
+
+        case MSGPOP_OWNER_IMPORT:
+            message_popup_close(mboxCont);
+            LV_LOG_USER("Import process from SD");
+            qSysAction(RELOAD_CFG);
+            break;
+
+        case MSGPOP_OWNER_EXPORT:
+            message_popup_close(mboxCont);
+            LV_LOG_USER("Export process to SD");
+            qSysAction(EXPORT_CFG);
+            break;
+
+        case MSGPOP_OWNER_DELETE_ALL:
+            LV_LOG_USER("Cancel delete all process!");
+            message_popup_close(mboxCont);
+            break;
+
+        case MSGPOP_OWNER_OTA_SD:
+            message_popup_close(mboxCont);
+            LV_LOG_USER("Confirmed OTA from SD — starting update");
+            ota_start_sd();
+            otaProgressPopupCreate(otaUpdateFromSD_text);
+            break;
+
+        default:
+            break;
+    }
+}
+
+void event_messagePopup(lv_event_t *e)
+{
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t *obj = (lv_obj_t *)lv_event_get_target(e);
     lv_obj_t *objCont = (lv_obj_t *)lv_obj_get_parent(obj);
     lv_obj_t *mboxCont = (lv_obj_t *)lv_obj_get_parent(objCont);
-//    lv_obj_t *mboxParent = (lv_obj_t *)lv_obj_get_parent(mboxCont);
 
-//    lv_obj_t *btn = (lv_obj_t *)lv_event_get_current_target(e);
-//    lv_obj_t *mbox = (lv_obj_t *)lv_obj_get_parent(lv_obj_get_parent(btn));
-
-    if (code == LV_EVENT_CLICKED)
-    {
-        if (obj == gui.element.messagePopup.mBoxPopupButtonClose)
-        {
-            LV_LOG_USER("Pressed gui.element.messagePopup.mBoxPopupButtonClose");
-            lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
-            lv_msgbox_close(mboxCont);
-            //lv_obj_delete(mboxCont);
-        }
-        else if (obj == gui.element.messagePopup.mBoxPopupButton1)
-        {
-            LV_LOG_USER("Pressed gui.element.messagePopup.mBoxPopupButton1");
-            if (gui.tempProcessNode != NULL && gui.element.messagePopup.whoCallMe == gui.tempProcessNode && gui.tempProcessNode->process.swipedRight == true && gui.tempProcessNode->process.swipedLeft == false)//manage the delete by pressing button with gesture
-            {
-                LV_LOG_USER("Delete process!");
-
-                if( !deleteProcessElement( gui.element.messagePopup.whoCallMe ) ) {
-                  LV_LOG_USER("Delete process element instance at address 0x%p Failed!", gui.element.messagePopup.whoCallMe);
-                } else {
-                  LV_LOG_USER("Delete process element instance at address 0x%p", gui.element.messagePopup.whoCallMe);
-                  qSysAction( SAVE_PROCESS_CONFIG );
-                }
-
-                lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
-                lv_msgbox_close(mboxCont);
-//                lv_obj_delete(mboxCont);  // Not required! Can cause crash!
-                gui.element.messagePopup.mBoxPopupParent = NULL;
-            }
-            else if (gui.tempProcessNode != NULL && gui.element.messagePopup.whoCallMe == gui.tempProcessNode && gui.tempProcessNode->process.swipedRight == false && gui.tempProcessNode->process.swipedLeft == true)//manage duplicate 
-            {
-                LV_LOG_USER("Cancel duplicate");
-                lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
-                lv_msgbox_close(mboxCont);
-                gui.element.messagePopup.mBoxPopupParent = NULL;
-                gui.tempProcessNode->process.longPressHandled = false;
-            }
-            else if (gui.tempStepNode != NULL && gui.element.messagePopup.whoCallMe == gui.tempStepNode && gui.tempStepNode->step.swipedLeft == false)
-            {
-                LV_LOG_USER("Delete step!");
-
-                if( !deleteStepElement( gui.element.messagePopup.whoCallMe , gui.tempProcessNode, false) ) {
-                  LV_LOG_USER("Delete step element instance at address 0x%p Failed!", gui.element.messagePopup.whoCallMe);
-                } else {
-                  calculateTotalTime(gui.tempProcessNode);
-                  LV_LOG_USER("Delete step element instance at address 0x%p", gui.element.messagePopup.whoCallMe);
-                  gui.tempProcessNode->process.processDetails->data.somethingChanged = true;
-                  lv_obj_send_event(gui.tempProcessNode->process.processDetails->processSaveButton, LV_EVENT_REFRESH, NULL);
-                  gui.tempStepNode->step.longPressHandled = false;
-                  qSysAction( SAVE_PROCESS_CONFIG );
-                }
-
-                lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
-                lv_msgbox_close(mboxCont);
-                //lv_obj_delete(mboxCont);
-                gui.element.messagePopup.mBoxPopupParent = NULL;
-            }
-            else if (gui.tempStepNode != NULL && gui.element.messagePopup.whoCallMe == gui.tempStepNode && gui.tempStepNode->step.swipedLeft == true)
-            {
-                LV_LOG_USER("Cancel duplicate step");
-                gui.tempStepNode->step.swipedLeft = false;
-                lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
-                lv_msgbox_close(mboxCont);
-                gui.element.messagePopup.mBoxPopupParent = NULL;
-            }
-            else if (gui.tempProcessNode != NULL && gui.element.messagePopup.whoCallMe != NULL
-                     && gui.tempProcessNode->process.processDetails != NULL
-                     && gui.tempProcessNode->process.processDetails->checkup != NULL
-                     && gui.element.messagePopup.whoCallMe == gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton)
-            {
-                LV_LOG_USER("Stop process NOW!");
-                lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
-                lv_msgbox_close(mboxCont);
-                //lv_obj_delete(mboxCont);
-                gui.element.messagePopup.mBoxPopupParent = NULL;
-                gui.tempProcessNode->process.processDetails->checkup->data.stopNow = true;
-                gui.tempProcessNode->process.processDetails->checkup->data.stopAfter = false;
-                lv_obj_add_state(gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton, LV_STATE_DISABLED);  
-                lv_obj_add_state(gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton, LV_STATE_DISABLED);  
-
-
-                lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupProcessCompleteLabel, checkupProcessStopped_text);
-                lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupProcessCompleteLabel, LV_OBJ_FLAG_HIDDEN);
-                lv_obj_add_flag(gui.tempProcessNode->process.processDetails->checkup->checkupStepNameValue, LV_OBJ_FLAG_HIDDEN);
-                lv_obj_add_flag(gui.tempProcessNode->process.processDetails->checkup->checkupStepTimeLeftValue, LV_OBJ_FLAG_HIDDEN);
-                lv_obj_add_flag(gui.tempProcessNode->process.processDetails->checkup->checkupProcessTimeLeftValue, LV_OBJ_FLAG_HIDDEN);
-
-                gui.page.tools.machineStats.stopped++;
-                safeTimerDelete(&gui.tempProcessNode->process.processDetails->checkup->processTimer);
-                lv_timer_resume(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
-                qSysAction( SAVE_MACHINE_STATS );
-            }
-            else if (gui.tempProcessNode != NULL && gui.element.messagePopup.whoCallMe != NULL
-                     && gui.tempProcessNode->process.processDetails != NULL
-                     && gui.tempProcessNode->process.processDetails->checkup != NULL
-                     && gui.element.messagePopup.whoCallMe == gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton)
-            {
-                LV_LOG_USER("Stop process AFTER!");
-                lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
-                lv_msgbox_close(mboxCont);
-                //lv_obj_delete(mboxCont);
-                gui.element.messagePopup.mBoxPopupParent = NULL;
-
-                gui.tempProcessNode->process.processDetails->checkup->data.stopAfter = true;
-                lv_obj_add_state(gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton, LV_STATE_DISABLED); 
-                lv_obj_clear_state(gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton, LV_STATE_DISABLED);  
-                
-                gui.page.tools.machineStats.stopped++;
-                qSysAction( SAVE_MACHINE_STATS );
-            }
-            if (gui.element.messagePopup.whoCallMe == &gui)
-            {
-                lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
-                lv_msgbox_close(mboxCont);
-                //lv_obj_delete(mboxCont);
-                gui.element.messagePopup.mBoxPopupParent = NULL;
-
-                //if(gui.page.processes.processElementsList.size > 0){
-                  LV_LOG_USER("Delete ALL PROCESS!"); 
-                  lv_obj_clean(gui.page.processes.processesListContainer);
-                  processList *processElementsList = &(gui.page.processes.processElementsList);
-                  emptyList((void *)processElementsList, PROCESS_NODE);                     
-                  //gui.page.processes.processElementsList.start = NULL;
-                  //gui.page.processes.processElementsList.size = 0;
-                  
-                  qSysAction( SAVE_PROCESS_CONFIG );
-            }
-            if (gui.element.messagePopup.whoCallMe == gui.page.tools.toolsImportButton)
-            {
-                LV_LOG_USER("Cancel import from SD");
-                lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
-                lv_msgbox_close(mboxCont);
-                gui.element.messagePopup.mBoxPopupParent = NULL;
-            }
-            if (gui.element.messagePopup.whoCallMe == gui.page.tools.toolsExportButton)
-            {
-                LV_LOG_USER("Cancel export to SD");
-                lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
-                lv_msgbox_close(mboxCont);
-                gui.element.messagePopup.mBoxPopupParent = NULL;
-            }
-            if (gui.element.messagePopup.whoCallMe == gui.page.tools.toolsUpdateSDButton)
-            {
-                LV_LOG_USER("Cancel OTA from SD");
-                lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
-                lv_msgbox_close(mboxCont);
-                gui.element.messagePopup.mBoxPopupParent = NULL;
-            }
-        }
-        else if (obj == gui.element.messagePopup.mBoxPopupButton2)
-        {
-            LV_LOG_USER("Pressed gui.element.messagePopup.mBoxPopupButton2");
-            if (gui.element.messagePopup.whoCallMe == gui.tempProcessNode
-                || gui.element.messagePopup.whoCallMe == gui.tempStepNode
-                || (gui.tempProcessNode != NULL && gui.tempProcessNode->process.processDetails != NULL
-                    && gui.tempProcessNode->process.processDetails->checkup != NULL
-                    && (gui.element.messagePopup.whoCallMe == gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton
-                        || gui.element.messagePopup.whoCallMe == gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton)))
-            {
-                stepNode *newStep = NULL;  /* set by duplicate-step path, used after popup close */
-
-                if(gui.element.messagePopup.whoCallMe == gui.tempStepNode && gui.tempStepNode->step.swipedLeft == false && gui.tempStepNode->step.swipedRight == true){
-                    if(gui.tempStepNode->step.swipedLeft == false && gui.tempStepNode->step.swipedRight == true){
-                      LV_LOG_USER("Cancel delete step element!");
-                      uint32_t  x = lv_obj_get_x_aligned(gui.tempStepNode->step.stepElement) - 50;
-                      uint32_t  y = lv_obj_get_y_aligned(gui.tempStepNode->step.stepElement);
-                      lv_obj_set_pos(gui.tempStepNode->step.stepElement, x, y);
-                      gui.tempStepNode->step.swipedLeft = false;
-                      gui.tempStepNode->step.swipedRight = false;
-                      lv_obj_add_flag(gui.tempStepNode->step.deleteButton, LV_OBJ_FLAG_HIDDEN);
-                      lv_obj_add_flag(gui.tempStepNode->step.editButton, LV_OBJ_FLAG_HIDDEN);
-                      gui.tempStepNode->step.longPressHandled = false;
-                    }
-                }
-                if(gui.element.messagePopup.whoCallMe == gui.tempStepNode && gui.tempStepNode->step.swipedLeft == true && gui.tempStepNode->step.swipedRight == false){
-                    LV_LOG_USER("Duplicate step!");
-
-                    newStep = (stepNode *)allocateAndInitializeNode(STEP_NODE);
-                    if (newStep == NULL) {
-                        LV_LOG_USER("Failed to allocate memory for duplicate step");
-                    } else {
-                        /* Zero UI pointers, copy only business data */
-                        memset(newStep->step.stepDetails, 0, sizeof(sStepDetail));
-                        newStep->step.stepDetails->data = gui.tempStepNode->step.stepDetails->data;
-
-                        /* Append suffix to name to distinguish the copy */
-                        size_t nameLen = strlen(newStep->step.stepDetails->data.stepNameString);
-                        if (nameLen + 2 <= MAX_PROC_NAME_LEN) {
-                            strcat(newStep->step.stepDetails->data.stepNameString, "_c");
-                        } else if (nameLen > 0) {
-                            newStep->step.stepDetails->data.stepNameString[MAX_PROC_NAME_LEN - 2] = '_';
-                            newStep->step.stepDetails->data.stepNameString[MAX_PROC_NAME_LEN - 1] = 'c';
-                            newStep->step.stepDetails->data.stepNameString[MAX_PROC_NAME_LEN] = '\0';
-                        }
-
-                        /* Reset LVGL widget pointers */
-                        newStep->step.stepElement = NULL;
-                        newStep->step.stepStyle.values_and_props = NULL;
-                        newStep->next = NULL;
-                        newStep->prev = NULL;
-
-                        /* Append to the END of the list (addStepElement handles
-                           size++, somethingChanged, and processSaveButton refresh) */
-                        addStepElement(newStep, gui.tempProcessNode);
-
-                        LV_LOG_USER("Duplicate step created at %p, process now has %d steps",
-                            newStep, gui.tempProcessNode->process.processDetails->stepElementsList.size);
-
-                        calculateTotalTime(gui.tempProcessNode);
-                    }
-
-                    gui.tempStepNode->step.swipedLeft = false;
-                }
-                if(gui.element.messagePopup.whoCallMe == gui.tempProcessNode && gui.tempProcessNode->process.swipedRight == true && gui.tempProcessNode->process.swipedLeft == false){
-                    if(gui.tempProcessNode->process.swipedLeft == false && gui.tempProcessNode->process.swipedRight == true){
-                      LV_LOG_USER("Cancel delete process element!");
-                      uint32_t  x = lv_obj_get_x_aligned(gui.tempProcessNode->process.processElement) - 50;
-                      uint32_t  y = lv_obj_get_y_aligned(gui.tempProcessNode->process.processElement);
-                      lv_obj_set_pos(gui.tempProcessNode->process.processElement, x, y);
-                      gui.tempProcessNode->process.swipedLeft = true;
-                      gui.tempProcessNode->process.swipedRight = false;
-                      lv_obj_add_flag(gui.tempProcessNode->process.deleteButton, LV_OBJ_FLAG_HIDDEN);
-                      gui.tempProcessNode->process.gestureHandled = false;
-                    }
-                }
-
-                if (gui.element.messagePopup.whoCallMe == gui.tempProcessNode && gui.tempProcessNode->process.swipedRight == false && gui.tempProcessNode->process.swipedLeft == true && gui.tempProcessNode->process.longPressHandled == true)
-                {
-                    LV_LOG_USER("Duplicate process");
-                    char* newProcessName = generateRandomSuffix(gui.tempProcessNode->process.processDetails->data.processNameString);
-                    LV_LOG_USER("New name %s",newProcessName);
-
-                    struct processNode *duplicatedNode = deepCopyProcessNode(gui.element.messagePopup.whoCallMe);
-                        if (duplicatedNode == NULL) {
-                            fprintf(stderr, "Failed to allocate memory for duplicatedNode\n");
-                            free(newProcessName);
-                            return;
-                        }
-
-                        snprintf(duplicatedNode->process.processDetails->data.processNameString, sizeof(duplicatedNode->process.processDetails->data.processNameString), "%s", newProcessName);
-
-                        if(addProcessElement(duplicatedNode) != NULL){
-                        LV_LOG_USER("Create GUI entry");
-                        processElementCreate(duplicatedNode, -1);
-                        qSysAction( SAVE_PROCESS_CONFIG );
-                    }
-
-                    duplicatedNode->process.longPressHandled = false;
-                    ((processNode *)(gui.element.messagePopup.whoCallMe))->process.longPressHandled = false;
-                    //gui.tempProcessNode->process.gestureHandled = false;
-
-                }
-
-                /* Close popup FIRST — so the modal overlay is gone before
-                   we create/reorder GUI elements underneath */
-                lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
-                lv_msgbox_close(mboxCont);
-                gui.element.messagePopup.mBoxPopupParent = NULL;
-
-                /* NOW create the GUI element for the duplicated step
-                   (after popup is closed, so invalidation actually redraws) */
-                if (newStep != NULL && newStep->step.stepElement == NULL) {
-                    stepElementCreate(newStep, gui.tempProcessNode, -1);
-                    reorderStepElements(gui.tempProcessNode);
-                    lv_obj_scroll_to_view(newStep->step.stepElement, LV_ANIM_ON);
-                }
-            }
-
-
-            if (gui.element.messagePopup.whoCallMe == gui.page.tools.toolsImportButton)
-            {
-                lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
-                lv_msgbox_close(mboxCont);
-                gui.element.messagePopup.mBoxPopupParent = NULL;
-
-                  LV_LOG_USER("Import process from SD"); 
-                  qSysAction( RELOAD_CFG );
-            }
-			if (gui.element.messagePopup.whoCallMe == gui.page.tools.toolsExportButton)
-			{
-			    lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
-			    lv_msgbox_close(mboxCont);
-			    gui.element.messagePopup.mBoxPopupParent = NULL;
-
-			      LV_LOG_USER("Export process to SD"); 
-			      qSysAction( EXPORT_CFG );
-			}
-
-            if(gui.element.messagePopup.whoCallMe == &gui){
-                LV_LOG_USER("Cancel delete all process!");
-                lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
-                lv_msgbox_close(mboxCont);
-                gui.element.messagePopup.mBoxPopupParent = NULL;
-            }
-            if (gui.element.messagePopup.whoCallMe == gui.page.tools.toolsUpdateSDButton)
-            {
-                lv_style_reset(&gui.element.messagePopup.style_mBoxPopupTitleLine);
-                lv_msgbox_close(mboxCont);
-                gui.element.messagePopup.mBoxPopupParent = NULL;
-
-                LV_LOG_USER("Confirmed OTA from SD — starting update");
-                ota_start_sd();
-                otaProgressPopupCreate(otaUpdateFromSD_text);
-            }
-        }
+    if (code != LV_EVENT_CLICKED) {
+        return;
     }
-}       
+
+    if (obj == gui.element.messagePopup.mBoxPopupButtonClose) {
+        LV_LOG_USER("Pressed gui.element.messagePopup.mBoxPopupButtonClose");
+        message_popup_close(mboxCont);
+        return;
+    }
+
+    if (obj == gui.element.messagePopup.mBoxPopupButton1) {
+        LV_LOG_USER("Pressed gui.element.messagePopup.mBoxPopupButton1");
+        message_popup_button1_clicked(mboxCont);
+        return;
+    }
+
+    if (obj == gui.element.messagePopup.mBoxPopupButton2) {
+        LV_LOG_USER("Pressed gui.element.messagePopup.mBoxPopupButton2");
+        message_popup_button2_clicked(mboxCont);
+        return;
+    }
+}
 
 void messagePopupCreate(const char * popupTitleText,const char * popupText,const char * textButton1, const char * textButton2, void * whoCallMe){
   /*********************
   *    PAGE HEADER
   *********************/
-   gui.element.messagePopup.whoCallMe = whoCallMe;
+   message_popup_prepare_ctx(whoCallMe);
 
    /* Clear stale button pointers so they cannot cause false matches
       in event_messagePopup when LVGL reuses memory addresses */
@@ -338,12 +488,12 @@ void messagePopupCreate(const char * popupTitleText,const char * popupText,const
    gui.element.messagePopup.mBoxPopupButton1 = NULL;
    gui.element.messagePopup.mBoxPopupButton2 = NULL;
 
-   LV_LOG_USER("Message popup create");  
-   createPopupBackdrop(&gui.element.messagePopup.mBoxPopupParent, &gui.element.messagePopup.mBoxPopupContainer, 320, 240); 
+   LV_LOG_USER("Message popup create");
+   createPopupBackdrop(&gui.element.messagePopup.mBoxPopupParent, &gui.element.messagePopup.mBoxPopupContainer, 320, 240);
 
-         gui.element.messagePopup.mBoxPopupTitle = lv_label_create(gui.element.messagePopup.mBoxPopupContainer);         
-         lv_label_set_text(gui.element.messagePopup.mBoxPopupTitle, popupTitleText); 
-         lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupTitle, &lv_font_montserrat_22, 0);              
+         gui.element.messagePopup.mBoxPopupTitle = lv_label_create(gui.element.messagePopup.mBoxPopupContainer);
+         lv_label_set_text(gui.element.messagePopup.mBoxPopupTitle, popupTitleText);
+         lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupTitle, &lv_font_montserrat_22, 0);
          lv_obj_align(gui.element.messagePopup.mBoxPopupTitle, LV_ALIGN_TOP_MID, 0, - 10);
 
 
@@ -365,35 +515,34 @@ void messagePopupCreate(const char * popupTitleText,const char * popupText,const
 
    gui.element.messagePopup.mBoxPopupTextContainer = lv_obj_create(gui.element.messagePopup.mBoxPopupContainer);
    lv_obj_align(gui.element.messagePopup.mBoxPopupTextContainer, LV_ALIGN_TOP_MID, 0, 30);
-   lv_obj_set_size(gui.element.messagePopup.mBoxPopupTextContainer, 305, 180); 
+   lv_obj_set_size(gui.element.messagePopup.mBoxPopupTextContainer, 305, 180);
    lv_obj_set_style_border_opa(gui.element.messagePopup.mBoxPopupTextContainer, LV_OPA_TRANSP, 0);
-   //lv_obj_set_style_border_color(gui.element.messagePopup.mBoxPopupTextContainer, lv_color_hex(GREEN_DARK), 0);
    lv_obj_set_scroll_dir(gui.element.messagePopup.mBoxPopupTextContainer, LV_DIR_VER);
 
-         gui.element.messagePopup.mBoxPopupText = lv_label_create(gui.element.messagePopup.mBoxPopupTextContainer);         
-         lv_label_set_text(gui.element.messagePopup.mBoxPopupText, popupText); 
-         lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupText, &lv_font_montserrat_20, 0);              
+         gui.element.messagePopup.mBoxPopupText = lv_label_create(gui.element.messagePopup.mBoxPopupTextContainer);
+         lv_label_set_text(gui.element.messagePopup.mBoxPopupText, popupText);
+         lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupText, &lv_font_montserrat_20, 0);
          lv_obj_align(gui.element.messagePopup.mBoxPopupText, LV_ALIGN_CENTER, 0, -18);
          lv_obj_set_size(gui.element.messagePopup.mBoxPopupText, 295, LV_SIZE_CONTENT);
          lv_label_set_long_mode(gui.element.messagePopup.mBoxPopupText, LV_LABEL_LONG_WRAP);
          lv_obj_set_style_text_align(gui.element.messagePopup.mBoxPopupText , LV_TEXT_ALIGN_CENTER, 0);
 
-  if(gui.element.messagePopup.whoCallMe == NULL){
+  if(g_msg_ctx.type == MSGPOP_OWNER_INFO){
       gui.element.messagePopup.mBoxPopupButtonClose = lv_button_create(gui.element.messagePopup.mBoxPopupContainer);
       lv_obj_set_size(gui.element.messagePopup.mBoxPopupButtonClose, BUTTON_POPUP_CLOSE_WIDTH, BUTTON_POPUP_CLOSE_HEIGHT);
       lv_obj_align(gui.element.messagePopup.mBoxPopupButtonClose, LV_ALIGN_TOP_RIGHT, 7 , -10);
-      lv_obj_add_event_cb(gui.element.messagePopup.mBoxPopupButtonClose, event_messagePopup, LV_EVENT_CLICKED, gui.element.filterPopup.mBoxApplyFilterButton);
+      lv_obj_add_event_cb(gui.element.messagePopup.mBoxPopupButtonClose, event_messagePopup, LV_EVENT_CLICKED, NULL);
 
-            gui.element.messagePopup.mBoxPopupButtonLabel = lv_label_create(gui.element.messagePopup.mBoxPopupButtonClose);         
-            lv_label_set_text(gui.element.messagePopup.mBoxPopupButtonLabel, closePopup_icon); 
-            lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupButtonLabel, &FilMachineFontIcons_20, 0);              
+            gui.element.messagePopup.mBoxPopupButtonLabel = lv_label_create(gui.element.messagePopup.mBoxPopupButtonClose);
+            lv_label_set_text(gui.element.messagePopup.mBoxPopupButtonLabel, closePopup_icon);
+            lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupButtonLabel, &FilMachineFontIcons_20, 0);
             lv_obj_align(gui.element.messagePopup.mBoxPopupButtonLabel, LV_ALIGN_CENTER, 0, 0);
   }
   else{
       gui.element.messagePopup.mBoxPopupButton1 = lv_button_create(gui.element.messagePopup.mBoxPopupContainer);
       lv_obj_set_size(gui.element.messagePopup.mBoxPopupButton1, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
       lv_obj_align(gui.element.messagePopup.mBoxPopupButton1, LV_ALIGN_BOTTOM_LEFT, 10 , 10);
-      lv_obj_add_event_cb(gui.element.messagePopup.mBoxPopupButton1, event_messagePopup, LV_EVENT_CLICKED, gui.element.messagePopup.mBoxPopupButton1);
+      lv_obj_add_event_cb(gui.element.messagePopup.mBoxPopupButton1, event_messagePopup, LV_EVENT_CLICKED, NULL);
       lv_obj_set_style_bg_color(gui.element.messagePopup.mBoxPopupButton1, lv_color_hex(RED_DARK), LV_PART_MAIN);
 
           gui.element.messagePopup.mBoxPopupButton1Label = lv_label_create(gui.element.messagePopup.mBoxPopupButton1);
@@ -405,7 +554,7 @@ void messagePopupCreate(const char * popupTitleText,const char * popupText,const
       gui.element.messagePopup.mBoxPopupButton2 = lv_button_create(gui.element.messagePopup.mBoxPopupContainer);
       lv_obj_set_size(gui.element.messagePopup.mBoxPopupButton2, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
       lv_obj_align(gui.element.messagePopup.mBoxPopupButton2, LV_ALIGN_BOTTOM_RIGHT, - 10 , 10);
-      lv_obj_add_event_cb(gui.element.messagePopup.mBoxPopupButton2, event_messagePopup, LV_EVENT_CLICKED, gui.element.messagePopup.mBoxPopupButton2);
+      lv_obj_add_event_cb(gui.element.messagePopup.mBoxPopupButton2, event_messagePopup, LV_EVENT_CLICKED, NULL);
       lv_obj_set_style_bg_color(gui.element.messagePopup.mBoxPopupButton2, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
 
             gui.element.messagePopup.mBoxPopupButton2Label = lv_label_create(gui.element.messagePopup.mBoxPopupButton2);
@@ -414,4 +563,3 @@ void messagePopupCreate(const char * popupTitleText,const char * popupText,const
             lv_obj_align(gui.element.messagePopup.mBoxPopupButton2Label, LV_ALIGN_CENTER, 0, 0);
   }
 }
-

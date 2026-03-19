@@ -15,6 +15,75 @@ static uint32_t rollerSelected;
 static bool isScrolled = false;
 static char tempBuffer[24];
 
+static void roller_popup_close(void)
+{
+  lv_style_reset(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
+  lv_style_reset(&gui.element.rollerPopup.style_roller);
+  lv_msgbox_close(gui.element.rollerPopup.mBoxRollerParent);
+  gui.element.rollerPopup.mBoxRollerParent = NULL;
+}
+
+static bool roller_apply_context(sRollerOwnerContext *ctx)
+{
+  if(ctx == NULL || ctx->ownerData == NULL || ctx->textArea == NULL) return false;
+  switch(ctx->owner) {
+    case ROLLER_OWNER_PROCESS_TEMP: {
+      sProcessDetail *pd = (sProcessDetail *)ctx->ownerData;
+      uint32_t sel = isScrolled ? rollerSelected : lv_roller_get_selected(gui.element.rollerPopup.roller);
+      pd->data.temp = sel;
+      if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP) snprintf(tempBuffer, sizeof(tempBuffer), "%lu", (unsigned long)sel);
+      else snprintf(tempBuffer, sizeof(tempBuffer), "%" PRIi32, convertCelsiusToFahrenheit(pd->data.temp));
+      lv_textarea_set_text(ctx->textArea, tempBuffer);
+      pd->data.somethingChanged = true;
+      if(ctx->saveButton) lv_obj_send_event(ctx->saveButton, LV_EVENT_REFRESH, NULL);
+      isScrolled = false;
+      return true;
+    }
+    case ROLLER_OWNER_PROCESS_TOLERANCE: {
+      sProcessDetail *pd = (sProcessDetail *)ctx->ownerData;
+      if(isScrolled) {
+        pd->data.tempTolerance = atof(tempBuffer);
+        char *tmp = getRollerStringIndex(rollerSelected, gui.element.rollerPopup.tempToleranceOptions);
+        lv_textarea_set_text(ctx->textArea, tmp != NULL ? tmp : "");
+        free(tmp);
+      }
+      pd->data.somethingChanged = true;
+      if(ctx->saveButton) lv_obj_send_event(ctx->saveButton, LV_EVENT_REFRESH, NULL);
+      isScrolled = false;
+      return true;
+    }
+    case ROLLER_OWNER_STEP_MIN: {
+      sStepDetail *sd = (sStepDetail *)ctx->ownerData;
+      uint32_t sel = isScrolled ? rollerSelected : lv_roller_get_selected(gui.element.rollerPopup.roller);
+      sd->data.timeMins = sel;
+      if(isScrolled) {
+        char *tmp = getRollerStringIndex(sel, gui.element.rollerPopup.minutesOptions);
+        lv_textarea_set_text(ctx->textArea, tmp != NULL ? tmp : "");
+        free(tmp);
+      } else { snprintf(tempBuffer, sizeof(tempBuffer), "%lu", (unsigned long)sel); lv_textarea_set_text(ctx->textArea, tempBuffer); }
+      sd->data.somethingChanged = true;
+      if(ctx->saveButton) lv_obj_send_event(ctx->saveButton, LV_EVENT_REFRESH, NULL);
+      isScrolled = false;
+      return true;
+    }
+    case ROLLER_OWNER_STEP_SEC: {
+      sStepDetail *sd = (sStepDetail *)ctx->ownerData;
+      uint32_t sel = isScrolled ? rollerSelected : lv_roller_get_selected(gui.element.rollerPopup.roller);
+      sd->data.timeSecs = sel;
+      if(isScrolled) {
+        char *tmp = getRollerStringIndex(sel, gui.element.rollerPopup.secondsOptions);
+        lv_textarea_set_text(ctx->textArea, tmp != NULL ? tmp : "");
+        free(tmp);
+      } else { snprintf(tempBuffer, sizeof(tempBuffer), "%lu", (unsigned long)sel); lv_textarea_set_text(ctx->textArea, tempBuffer); }
+      sd->data.somethingChanged = true;
+      if(ctx->saveButton) lv_obj_send_event(ctx->saveButton, LV_EVENT_REFRESH, NULL);
+      isScrolled = false;
+      return true;
+    }
+    default: return false;
+  }
+}
+
 
 void event_Roller(lv_event_t * e)
 {
@@ -31,16 +100,40 @@ void event_Roller(lv_event_t * e)
         lv_obj_clear_state(gui.element.rollerPopup.mBoxRollerButton, LV_STATE_DISABLED);
  
         if(obj == gui.element.rollerPopup.mBoxRollerButton)
-        {   
+        {
+            if (roller_apply_context((sRollerOwnerContext *)data)) {
+              roller_popup_close();
+              rollerSelected = 0;
+              return;
+            }
             if((lv_obj_t *)data == gui.page.settings.tempSensorTuneButton){
               LV_LOG_USER("SET BUTTON from tempSensorTuneButton value %"PRIu32":",rollerSelected);
               lv_style_reset(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
               lv_style_reset(&gui.element.rollerPopup.style_roller);
               lv_msgbox_close(godFatherCont);
               gui.element.rollerPopup.mBoxRollerParent = NULL;
-              gui.page.settings.settingsParams.calibratedTemp = rollerSelected;  
+              gui.page.settings.settingsParams.calibratedTemp = rollerSelected;
+
+              /* Calculate calibration offset */
+              float rawTemp = sim_getTemperature(TEMPERATURE_SENSOR_BATH);
+              /* Remove any existing offset to get the true raw reading */
+              float rawWithoutOffset = rawTemp - (gui.page.settings.settingsParams.tempCalibOffset / 10.0f);
+              float newOffset = (float)gui.page.settings.settingsParams.calibratedTemp - rawWithoutOffset;
+              gui.page.settings.settingsParams.tempCalibOffset = (int8_t)(newOffset * 10.0f);
+              LV_LOG_USER("Calibration: entered=%u, raw=%.1f, offset=%.2f, offsetTenths=%d",
+                         gui.page.settings.settingsParams.calibratedTemp, rawWithoutOffset, newOffset,
+                         gui.page.settings.settingsParams.tempCalibOffset);
+
               qSysAction( SAVE_PROCESS_CONFIG );
-              return;   
+
+              /* Show calibration result in a popup */
+              {
+                static char calMsg[80];
+                float offsetVal = gui.page.settings.settingsParams.tempCalibOffset / 10.0f;
+                snprintf(calMsg, sizeof(calMsg), "Calibration complete.\nOffset: %+.1f C", offsetVal);
+                messagePopupCreate("Calibration", calMsg, NULL, NULL, NULL);
+              }
+              return;
             }
             if(gui.tempProcessNode != NULL && gui.tempProcessNode->process.processDetails != NULL
                && (lv_obj_t *)data == gui.tempProcessNode->process.processDetails->processTempTextArea){
@@ -308,14 +401,7 @@ void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *w
    lv_obj_set_size(gui.element.rollerPopup.mBoxRollerButton, BUTTON_TUNE_WIDTH, BUTTON_TUNE_HEIGHT);
    lv_obj_align(gui.element.rollerPopup.mBoxRollerButton, LV_ALIGN_BOTTOM_MID, 0 , 0);
    lv_obj_add_event_cb(gui.element.rollerPopup.mBoxRollerButton, event_Roller, LV_EVENT_CLICKED, gui.element.rollerPopup.whoCallMe);
-   lv_obj_add_state(gui.element.rollerPopup.mBoxRollerButton, LV_STATE_DISABLED);
    lv_roller_set_selected(gui.element.rollerPopup.roller, currentVal, LV_ANIM_OFF);
-
-
-  if(currentVal == 0)  
-      lv_obj_add_state(gui.element.rollerPopup.mBoxRollerButton, LV_STATE_DISABLED);
-  else
-      lv_obj_clear_state(gui.element.rollerPopup.mBoxRollerButton, LV_STATE_DISABLED);
         
 
          gui.element.rollerPopup.mBoxRollerButtonLabel = lv_label_create(gui.element.rollerPopup.mBoxRollerButton);         

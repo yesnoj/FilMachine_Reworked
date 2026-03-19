@@ -125,6 +125,9 @@ static void process_detail_save(processNode *pn) {
  */
 static void process_detail_run(processNode *pn) {
     LV_LOG_USER("Pressed processRunButton");
+    /* Clear any leftover keyboard context from processDetail to avoid
+       stale focus events interfering with the checkup screen */
+    hideKeyboard(pn->process.processDetails->processDetailParent);
     pn->process.processDetails->checkup->checkupParent = NULL;
     lv_style_reset(&pn->process.processDetails->textAreaStyle);
     checkup(pn);
@@ -165,22 +168,26 @@ static void process_detail_open_roller(processNode *pn, lv_obj_t *target) {
 
     if (target == pd->processTempTextArea) {
         LV_LOG_USER("Set Temperature");
+        pd->tempRollerCtx.textArea = pd->processTempTextArea;
+        pd->tempRollerCtx.saveButton = pd->processSaveButton;
         if (gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP) {
             rollerPopupCreate(gui.element.rollerPopup.tempCelsiusOptions,
-                              tuneTempPopupTitle_text, pd->processTempTextArea,
+                              tuneTempPopupTitle_text, &pd->tempRollerCtx,
                               findRollerStringIndex(lv_textarea_get_text(pd->processTempTextArea),
                                                     gui.element.rollerPopup.tempCelsiusOptions));
         } else {
             rollerPopupCreate(gui.element.rollerPopup.tempFahrenheitOptions,
-                              tuneTempPopupTitle_text, pd->processTempTextArea,
+                              tuneTempPopupTitle_text, &pd->tempRollerCtx,
                               findRollerStringIndex(lv_textarea_get_text(pd->processTempTextArea),
                                                     gui.element.rollerPopup.tempFahrenheitOptions));
         }
     }
     if (target == pd->processToleranceTextArea) {
         LV_LOG_USER("Set Tolerance");
+        pd->toleranceRollerCtx.textArea = pd->processToleranceTextArea;
+        pd->toleranceRollerCtx.saveButton = pd->processSaveButton;
         rollerPopupCreate(gui.element.rollerPopup.tempToleranceOptions,
-                          tuneTolerancePopupTitle_text, pd->processToleranceTextArea,
+                          tuneTolerancePopupTitle_text, &pd->toleranceRollerCtx,
                           findRollerStringIndex(lv_textarea_get_text(pd->processToleranceTextArea),
                                                 gui.element.rollerPopup.tempToleranceOptions));
     }
@@ -282,15 +289,26 @@ if(existingProcess != NULL) {
 
   gui.tempProcessNode->process.processDetails->processesContainer = processContainer;
 
-  /* Local aliases — gui.tempProcessNode is kept in sync for event_keyboard compat */
+  /* Local aliases */
   processNode *pn = gui.tempProcessNode;
   sProcessDetail *pd = pn->process.processDetails;
+
+  memset(&pd->nameKeyboardCtx, 0, sizeof(pd->nameKeyboardCtx));
+  pd->nameKeyboardCtx.owner = KB_OWNER_PROCESS;
+  pd->nameKeyboardCtx.ownerData = pd;
+  memset(&pd->tempRollerCtx, 0, sizeof(pd->tempRollerCtx));
+  pd->tempRollerCtx.owner = ROLLER_OWNER_PROCESS_TEMP;
+  pd->tempRollerCtx.ownerData = pd;
+  memset(&pd->toleranceRollerCtx, 0, sizeof(pd->toleranceRollerCtx));
+  pd->toleranceRollerCtx.owner = ROLLER_OWNER_PROCESS_TOLERANCE;
+  pd->toleranceRollerCtx.ownerData = pd;
 
   LV_LOG_USER("Processes available %"PRIi32"",gui.page.processes.processElementsList.size);
   LV_LOG_USER("Process address 0x%p, with n:%"PRIu16" steps",pn, pd->stepElementsList.size);
 
   pd->processDetailParent = lv_obj_create(NULL);
       lv_scr_load(pd->processDetailParent);
+      pd->nameKeyboardCtx.parentScreen = pd->processDetailParent;
 
   lv_style_init(&pd->textAreaStyle);
 
@@ -328,10 +346,11 @@ if(existingProcess != NULL) {
                   lv_obj_set_width(pd->processDetailNameTextArea, 415);
                   lv_obj_set_style_text_font(pd->processDetailNameTextArea, &lv_font_montserrat_30, 0);
                   lv_obj_align(pd->processDetailNameTextArea, LV_ALIGN_TOP_LEFT, -20, -28);
-                  lv_obj_add_event_cb(pd->processDetailNameTextArea, event_keyboard, LV_EVENT_CLICKED, NULL);
-                  lv_obj_add_event_cb(pd->processDetailNameTextArea, event_keyboard, LV_EVENT_DEFOCUSED, NULL);
-                  lv_obj_add_event_cb(pd->processDetailNameTextArea, event_keyboard, LV_EVENT_CANCEL, NULL);
-                  lv_obj_add_event_cb(pd->processDetailNameTextArea, event_keyboard, LV_EVENT_READY, NULL);
+                  pd->nameKeyboardCtx.textArea = pd->processDetailNameTextArea;
+                  lv_obj_add_event_cb(pd->processDetailNameTextArea, event_keyboard, LV_EVENT_CLICKED, &pd->nameKeyboardCtx);
+                  lv_obj_add_event_cb(pd->processDetailNameTextArea, event_keyboard, LV_EVENT_DEFOCUSED, &pd->nameKeyboardCtx);
+                  lv_obj_add_event_cb(pd->processDetailNameTextArea, event_keyboard, LV_EVENT_CANCEL, &pd->nameKeyboardCtx);
+                  lv_obj_add_event_cb(pd->processDetailNameTextArea, event_keyboard, LV_EVENT_READY, &pd->nameKeyboardCtx);
                   lv_obj_add_state(pd->processDetailNameTextArea, LV_STATE_FOCUSED);
                   lv_obj_set_style_border_opa(pd->processDetailNameTextArea, LV_OPA_TRANSP, 0);
                   lv_textarea_set_max_length(pd->processDetailNameTextArea, MAX_PROC_NAME_LEN);
@@ -554,6 +573,7 @@ if(existingProcess != NULL) {
                   }
 
                   pd->processSaveButton = lv_button_create(pd->processDetailContainer);
+  pd->nameKeyboardCtx.saveButton = pd->processSaveButton;
                   lv_obj_set_size(pd->processSaveButton, BUTTON_PROCESS_WIDTH, BUTTON_PROCESS_HEIGHT);
                   lv_obj_align(pd->processSaveButton, LV_ALIGN_BOTTOM_RIGHT, -103, 10);
                   lv_obj_add_event_cb(pd->processSaveButton, event_processDetail, LV_EVENT_REFRESH, pn);

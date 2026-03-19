@@ -2,7 +2,7 @@
 
 FilMachine is an automated film processing machine designed for photographic film development. It handles the entire process: chemical baths, water rinses, temperature regulation, and motor-driven film agitation — all controlled through a 3.5" color touchscreen display.
 
-The project includes a **desktop simulator** (SDL2 + LVGL) that reproduces the full touchscreen UI on macOS/Linux, enabling rapid development and testing without physical hardware, plus an **automated test suite** with 100+ tests.
+The project includes a **desktop simulator** (SDL2 + LVGL) that reproduces the full touchscreen UI on macOS/Linux, enabling rapid development and testing without physical hardware, plus an **automated test suite** with 141 tests.
 
 ---
 
@@ -242,7 +242,11 @@ The simulator opens a 480x320 window that reproduces the exact touchscreen inter
 - Clean machine with per-container rinse cycles and arc progress
 - Self-check diagnostic wizard with 7-phase hardware test simulation
 - OTA update UI (SD card check + Wi-Fi popup with simulated IP/PIN/progress)
-- Simulated temperature readings with heater model
+- Simulated temperature readings with heater model and calibration offset
+- Persistent alarm sound (SDL audio 880Hz beep, repeats every 10s until dismissed)
+- Drain/fill overlap processing (adjusts step timing based on overlap percentage)
+- Machine statistics persistence (saved in config file, survives restart)
+- Temperature sensor calibration (Tune button calculates and applies offset)
 - Console logging of all system actions (`[SIM] sysAction: ...`)
 
 ### What is simulated (no real hardware)
@@ -285,12 +289,12 @@ Results are displayed in the terminal and saved to `test_results/test_results_YY
 | **Steps** | Step creation, swipe gestures, deletion |
 | **Step CRUD** | Step lifecycle with validation |
 | **Execution** | Process checkup and execution flow |
-| **Persistence** | Config save → reload → verify all fields |
-| **Settings** | Settings UI, default values, slider/switch behavior |
+| **Persistence** | Config save → reload → verify all fields, stats persistence, calibration offset |
+| **Settings** | Settings UI, default values, slider/switch behavior, calibration, alarm |
 | **Filter** | Filter by name, film type, preferred flag |
-| **Tools** | Cleaning, draining, statistics display |
+| **Tools** | Cleaning, draining, statistics display, timer pause/resume, alarm functions |
 | **Edge Cases** | Boundary conditions, max limits, error recovery |
-| **Utilities** | Helper functions, linked list operations |
+| **Utilities** | Helper functions, linked list operations, drain/fill overlap calculation |
 | **Destroy & Lifecycle** | Memory cleanup, object destruction |
 
 The persistence tests verify that every field (process name, temperature, tolerance, film type, preferred flag, step names, durations, types, sources, discard flags) survives a full save-and-reload cycle.
@@ -337,13 +341,13 @@ Open a process and tap Play. The machine walks through pre-flight checks, then e
 |---------|-------------|-------|
 | Temperature unit | °C or °F | — |
 | Water inlet | Automatic water fill if connected | On/Off |
-| Temp sensor calibration | Calibrate against a reference thermometer | Tune button |
+| Temp sensor calibration | Calibrate against a reference thermometer. Short-press Tune to set ambient temp, long-press to reset. | Tune button |
 | Rotation speed | Film agitation motor RPM | 10–100% |
 | Inversion interval | Seconds between motor direction changes | 10–60s |
 | Randomness | Random variation on inversion interval | 0–100% |
 | Persistent alarm | Alarm sounds until acknowledged | On/Off |
 | Process autostart | Auto-start when temperature reached | On/Off |
-| Drain/fill overlap | Overlap between drain and fill operations | 0–100% |
+| Drain/fill overlap | How much of fill/drain time counts as processing time (100% recommended) | 0–100% |
 | Multi-rinse cycle time | Duration of each rinse in multi-rinse steps | 60–180s |
 | Pump speed | Water pump speed percentage | 0–100% |
 | Tank size | Default developing tank size | S (500ml) / M (700ml) / L (1000ml) |
@@ -465,7 +469,7 @@ ESP32-S3-WROOM-1-N16R8 with integrated 3.5" TFT display module.
 
 ## Configuration & Persistence
 
-All data is stored on the SD card in binary format (`FilMachine.cfg`). The file contains the complete machine state: settings, statistics, all processes with their steps.
+All data is stored on the SD card in binary format (`FilMachine.cfg`). The file contains the complete machine state: settings (including calibration offset), all processes with their steps, and machine statistics (completed processes, total processing time, stopped processes, completed cleaning cycles).
 
 **Auto-save triggers:** creating/editing/deleting a process, changing any setting, toggling preferred, duplicating processes or steps.
 

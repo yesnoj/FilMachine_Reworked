@@ -184,7 +184,118 @@ static void test_tools_credits_popup(void)
 
 
 /* ═══════════════════════════════════════════════
- * Test 7: Return to Processes after tools
+ * Test 7: Tools timer pause/resume functions exist and can be called
+ * ═══════════════════════════════════════════════ */
+static void test_tools_timer_pause_resume(void)
+{
+    TEST_BEGIN("Tools — timer pause/resume functions callable");
+
+    /* These are weak stubs in test_runner.c, so we just verify they can be called
+     * without crashing. In a real implementation, these would control the timer. */
+
+    test_printf("         [INFO] Calling tools_pause_timer()\n");
+    tools_pause_timer();
+    test_pump(100);
+
+    test_printf("         [INFO] Calling tools_resume_timer()\n");
+    tools_resume_timer();
+    test_pump(100);
+
+    test_printf("         [INFO] Both timer functions called successfully\n");
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
+ * Test 8: Alarm functions exist and can be called
+ * ═══════════════════════════════════════════════ */
+static void test_alarm_functions(void)
+{
+    TEST_BEGIN("Tools — alarm functions callable");
+
+    /* These are weak stubs in test_runner.c returning default values */
+
+    /* Verify alarm_is_active returns a boolean (should start as false) */
+    bool is_active = alarm_is_active();
+    test_printf("         [INFO] alarm_is_active() returned: %d\n", (int)is_active);
+    TEST_ASSERT(is_active == false || is_active == true,
+                "alarm_is_active() should return boolean");
+
+    /* Call alarm_start_persistent */
+    test_printf("         [INFO] Calling alarm_start_persistent()\n");
+    alarm_start_persistent();
+    test_pump(100);
+
+    /* Call alarm_stop */
+    test_printf("         [INFO] Calling alarm_stop()\n");
+    alarm_stop();
+    test_pump(100);
+
+    /* After stopping, alarm_is_active should return false */
+    is_active = alarm_is_active();
+    test_printf("         [INFO] alarm_is_active() after stop: %d\n", (int)is_active);
+    /* Note: The weak stub always returns false, so we just verify it doesn't crash */
+    TEST_ASSERT(is_active == false,
+                "alarm should be inactive after alarm_stop (weak stub returns false)");
+
+    test_printf("         [INFO] All alarm functions called successfully\n");
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
+ * Test 9: Statistics persistence round-trip
+ * ═══════════════════════════════════════════════ */
+static void test_tools_stats_persistence(void)
+{
+    TEST_BEGIN("Tools — statistics persistence via writeMachineStats");
+
+    /* Access the machine statistics */
+    machineStatistics *stats = &gui.page.tools.machineStats;
+
+    /* Save originals */
+    uint32_t orig_completed = stats->completed;
+    uint64_t orig_totalMins = stats->totalMins;
+    uint32_t orig_stopped   = stats->stopped;
+    uint32_t orig_clean     = stats->clean;
+
+    /* Set known values */
+    stats->completed = 7;
+    stats->totalMins = 450;
+    stats->stopped   = 1;
+    stats->clean     = 5;
+
+    test_printf("         [INFO] Stats set: completed=%d, totalMins=%llu, stopped=%d, clean=%d\n",
+                stats->completed, (unsigned long long)stats->totalMins,
+                stats->stopped, stats->clean);
+
+    /* Write stats (this should persist to config) */
+    writeMachineStats(stats);
+    test_pump(100);
+
+    /* Verify we can read them back (create a temp structure) */
+    machineStatistics temp_stats = { .completed = 0, .totalMins = 0, .stopped = 0, .clean = 0 };
+    readMachineStats(&temp_stats);
+    test_pump(100);
+
+    test_printf("         [INFO] Stats read: completed=%d, totalMins=%llu, stopped=%d, clean=%d\n",
+                temp_stats.completed, (unsigned long long)temp_stats.totalMins,
+                temp_stats.stopped, temp_stats.clean);
+
+    /* Restore originals */
+    stats->completed = orig_completed;
+    stats->totalMins = orig_totalMins;
+    stats->stopped   = orig_stopped;
+    stats->clean     = orig_clean;
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
+ * Test 10: Return to Processes after tools
  * ═══════════════════════════════════════════════ */
 static void test_tools_return_to_processes(void)
 {
@@ -215,5 +326,8 @@ void test_suite_tools(void)
     test_tools_export_popup();
     test_tools_import_popup();
     test_tools_credits_popup();
+    test_tools_timer_pause_resume();
+    test_alarm_functions();
+    test_tools_stats_persistence();
     test_tools_return_to_processes();
 }

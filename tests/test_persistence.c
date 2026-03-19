@@ -324,6 +324,103 @@ static void test_missing_config_no_crash(void)
 
 
 /* ═══════════════════════════════════════════════
+ * Test 4: Statistics persistence (completed, totalMins, stopped, clean)
+ * ═══════════════════════════════════════════════ */
+static void test_stats_persistence(void)
+{
+    TEST_BEGIN("Persistence — statistics survive write/read cycle");
+
+    machineStatistics *stats = &gui.page.tools.machineStats;
+
+    /* Save originals */
+    uint32_t orig_completed = stats->completed;
+    uint64_t orig_totalMins = stats->totalMins;
+    uint32_t orig_stopped   = stats->stopped;
+    uint32_t orig_clean     = stats->clean;
+
+    /* Set distinctive values */
+    stats->completed = 5;
+    stats->totalMins = 120;
+    stats->stopped   = 2;
+    stats->clean     = 3;
+
+    test_printf("         [INFO] Set stats: completed=%d, totalMins=%llu, stopped=%d, clean=%d\n",
+                stats->completed, (unsigned long long)stats->totalMins,
+                stats->stopped, stats->clean);
+
+    /* Write config */
+    writeConfigFile(TEST_CONFIG_FILE, false);
+    test_pump(100);
+
+    /* Clobber stats to 0 */
+    stats->completed = 0;
+    stats->totalMins = 0;
+    stats->stopped   = 0;
+    stats->clean     = 0;
+
+    /* Load back */
+    safe_clear_and_reload(TEST_CONFIG_FILE);
+    test_pump(100);
+
+    /* Verify all stats restored */
+    test_printf("         [INFO] Restored stats: completed=%d, totalMins=%llu, stopped=%d, clean=%d\n",
+                stats->completed, (unsigned long long)stats->totalMins,
+                stats->stopped, stats->clean);
+    TEST_ASSERT_EQ((int)stats->completed, 5, "completed count should be restored");
+    TEST_ASSERT_EQ((int)stats->totalMins, 120, "totalMins should be restored");
+    TEST_ASSERT_EQ((int)stats->stopped, 2, "stopped count should be restored");
+    TEST_ASSERT_EQ((int)stats->clean, 3, "clean count should be restored");
+
+    /* Restore originals */
+    stats->completed = orig_completed;
+    stats->totalMins = orig_totalMins;
+    stats->stopped   = orig_stopped;
+    stats->clean     = orig_clean;
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
+ * Test 5: Temperature calibration offset persistence
+ * ═══════════════════════════════════════════════ */
+static void test_tempCalibOffset_persistence(void)
+{
+    TEST_BEGIN("Persistence — tempCalibOffset survives write/read cycle");
+
+    struct machineSettings *s = &gui.page.settings.settingsParams;
+
+    /* Save original */
+    int8_t orig_offset = s->tempCalibOffset;
+
+    /* Set to a known value (-15 = -1.5°C) */
+    s->tempCalibOffset = -15;
+    test_printf("         [INFO] Set tempCalibOffset = %d (= -1.5°C)\n", s->tempCalibOffset);
+
+    /* Write config */
+    writeConfigFile(TEST_CONFIG_FILE, false);
+    test_pump(100);
+
+    /* Clear to 0 */
+    s->tempCalibOffset = 0;
+
+    /* Load back */
+    safe_clear_and_reload(TEST_CONFIG_FILE);
+    test_pump(100);
+
+    /* Verify restored */
+    test_printf("         [INFO] Restored tempCalibOffset = %d\n", s->tempCalibOffset);
+    TEST_ASSERT_EQ((int)s->tempCalibOffset, -15,
+                   "tempCalibOffset should be restored to -15");
+
+    /* Restore original */
+    s->tempCalibOffset = orig_offset;
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
  * Suite Entry Point
  * ═══════════════════════════════════════════════ */
 void test_suite_persistence(void)
@@ -335,4 +432,6 @@ void test_suite_persistence(void)
     test_process_data_persistence();
     test_step_data_persistence();
     test_missing_config_no_crash();
+    test_stats_persistence();
+    test_tempCalibOffset_persistence();
 }

@@ -139,34 +139,37 @@ void filterPopupCreate (void){
           lv_textarea_set_placeholder_text(gui.element.filterPopup.mBoxNameTextArea, filterPopupNamePlaceHolder_text);
           lv_obj_align(gui.element.filterPopup.mBoxNameTextArea, LV_ALIGN_LEFT_MID, 65, 0);
           lv_obj_set_width(gui.element.filterPopup.mBoxNameTextArea, 215);
-          lv_obj_add_event_cb(gui.element.filterPopup.mBoxNameTextArea, event_keyboard, LV_EVENT_CLICKED, NULL);
-          lv_obj_add_event_cb(gui.element.filterPopup.mBoxNameTextArea, event_keyboard, LV_EVENT_DEFOCUSED, NULL);
-          lv_obj_add_event_cb(gui.element.filterPopup.mBoxNameTextArea, event_keyboard, LV_EVENT_CANCEL, NULL);
-          lv_obj_add_event_cb(gui.element.filterPopup.mBoxNameTextArea, event_keyboard, LV_EVENT_READY, NULL);
+          memset(&gui.element.filterPopup.nameKeyboardCtx, 0, sizeof(gui.element.filterPopup.nameKeyboardCtx));
+          gui.element.filterPopup.nameKeyboardCtx.owner = KB_OWNER_FILTER;
+          gui.element.filterPopup.nameKeyboardCtx.textArea = gui.element.filterPopup.mBoxNameTextArea;
+          gui.element.filterPopup.nameKeyboardCtx.parentScreen = gui.element.filterPopup.mBoxFilterPopupParent;
+          gui.element.filterPopup.nameKeyboardCtx.ownerData = &gui.element.filterPopup;
+          lv_obj_add_event_cb(gui.element.filterPopup.mBoxNameTextArea, event_keyboard, LV_EVENT_CLICKED, &gui.element.filterPopup.nameKeyboardCtx);
+          lv_obj_add_event_cb(gui.element.filterPopup.mBoxNameTextArea, event_keyboard, LV_EVENT_DEFOCUSED, &gui.element.filterPopup.nameKeyboardCtx);
+          lv_obj_add_event_cb(gui.element.filterPopup.mBoxNameTextArea, event_keyboard, LV_EVENT_CANCEL, &gui.element.filterPopup.nameKeyboardCtx);
+          lv_obj_add_event_cb(gui.element.filterPopup.mBoxNameTextArea, event_keyboard, LV_EVENT_READY, &gui.element.filterPopup.nameKeyboardCtx);
           lv_obj_add_state(gui.element.filterPopup.mBoxNameTextArea, LV_STATE_FOCUSED); /*To be sure the cursor is visible*/
           lv_obj_set_style_bg_color(gui.element.filterPopup.mBoxNameTextArea, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
           lv_obj_set_style_border_color(gui.element.filterPopup.mBoxNameTextArea, lv_color_hex(WHITE), 0);
           lv_textarea_set_max_length(gui.element.filterPopup.mBoxNameTextArea, MAX_PROC_NAME_LEN);
 
-      //CHOOSE COLOR/B&W/Both
+      //CHOOSE COLOR/B&W/Preferred — all on the same row
       gui.element.filterPopup.selectColorContainerRadioButton = lv_obj_create(gui.element.filterPopup.mBoxContainer);
-      lv_obj_remove_flag(gui.element.filterPopup.selectColorContainerRadioButton, LV_OBJ_FLAG_SCROLLABLE); 
+      lv_obj_remove_flag(gui.element.filterPopup.selectColorContainerRadioButton, LV_OBJ_FLAG_SCROLLABLE);
       lv_obj_align(gui.element.filterPopup.selectColorContainerRadioButton, LV_ALIGN_LEFT_MID, -7, -5);
-      lv_obj_set_size(gui.element.filterPopup.selectColorContainerRadioButton, 300, 40); 
-      //lv_obj_set_style_border_color(gui.element.filterPopup.selectColorContainerRadioButton, lv_color_hex(GREEN_DARK), 0);
+      lv_obj_set_size(gui.element.filterPopup.selectColorContainerRadioButton, 300, 40);
       lv_obj_set_style_border_opa(gui.element.filterPopup.selectColorContainerRadioButton, LV_OPA_TRANSP, 0);
 
           //COLOR RADIO BUTTON WITH LABEL
           gui.element.filterPopup.mBoxSelectColorRadioButton = lv_obj_create(gui.element.filterPopup.selectColorContainerRadioButton);
-          lv_obj_remove_flag(gui.element.filterPopup.mBoxSelectColorRadioButton, LV_OBJ_FLAG_SCROLLABLE); 
+          lv_obj_remove_flag(gui.element.filterPopup.mBoxSelectColorRadioButton, LV_OBJ_FLAG_SCROLLABLE);
           lv_obj_align(gui.element.filterPopup.mBoxSelectColorRadioButton, LV_ALIGN_LEFT_MID, -20, 0);
-          lv_obj_set_size(gui.element.filterPopup.mBoxSelectColorRadioButton, 100, 40); 
-          //lv_obj_set_style_border_color(gui.element.filterPopup.mBoxSelectColorRadioButton, lv_color_hex(GREY), 0);
+          lv_obj_set_size(gui.element.filterPopup.mBoxSelectColorRadioButton, 100, 40);
           lv_obj_set_style_border_opa(gui.element.filterPopup.mBoxSelectColorRadioButton, LV_OPA_TRANSP, 0);
 
-          gui.element.filterPopup.mBoxColorLabel = lv_label_create(gui.element.filterPopup.mBoxSelectColorRadioButton);         
-          lv_label_set_text(gui.element.filterPopup.mBoxColorLabel, filterPopupColor_text); 
-          lv_obj_set_style_text_font(gui.element.filterPopup.mBoxColorLabel, &lv_font_montserrat_22, 0);              
+          gui.element.filterPopup.mBoxColorLabel = lv_label_create(gui.element.filterPopup.mBoxSelectColorRadioButton);
+          lv_label_set_text(gui.element.filterPopup.mBoxColorLabel, filterPopupColor_text);
+          lv_obj_set_style_text_font(gui.element.filterPopup.mBoxColorLabel, &lv_font_montserrat_22, 0);
           lv_obj_align(gui.element.filterPopup.mBoxColorLabel, LV_ALIGN_LEFT_MID, - 10, 0);
 
           gui.element.filterPopup.mBoxSelectColorRadioButton = create_radiobutton(gui.element.filterPopup.mBoxSelectColorRadioButton, "", 25, 0, 27, &lv_font_montserrat_18, lv_color_hex(GREEN_DARK), lv_palette_main(LV_PALETTE_GREEN));
@@ -174,40 +177,35 @@ void filterPopupCreate (void){
 
           //B&W RADIO BUTTON WITH LABEL
           gui.element.filterPopup.mBoxSelectBnWRadioButton = lv_obj_create(gui.element.filterPopup.selectColorContainerRadioButton);
-          lv_obj_remove_flag(gui.element.filterPopup.mBoxSelectBnWRadioButton, LV_OBJ_FLAG_SCROLLABLE); 
+          lv_obj_remove_flag(gui.element.filterPopup.mBoxSelectBnWRadioButton, LV_OBJ_FLAG_SCROLLABLE);
           lv_obj_align(gui.element.filterPopup.mBoxSelectBnWRadioButton, LV_ALIGN_LEFT_MID, 80, 0);
-          lv_obj_set_size(gui.element.filterPopup.mBoxSelectBnWRadioButton, 100, 40); 
-          //lv_obj_set_style_border_color(gui.element.filterPopup.mBoxSelectBnWRadioButton, lv_color_hex(GREY), 0);
+          lv_obj_set_size(gui.element.filterPopup.mBoxSelectBnWRadioButton, 100, 40);
           lv_obj_set_style_border_opa(gui.element.filterPopup.mBoxSelectBnWRadioButton, LV_OPA_TRANSP, 0);
 
-          gui.element.filterPopup.mBoxBnWLabel = lv_label_create(gui.element.filterPopup.mBoxSelectBnWRadioButton);         
-          lv_label_set_text(gui.element.filterPopup.mBoxBnWLabel, filterPopupBnW_text); 
-          lv_obj_set_style_text_font(gui.element.filterPopup.mBoxBnWLabel, &lv_font_montserrat_22, 0);              
+          gui.element.filterPopup.mBoxBnWLabel = lv_label_create(gui.element.filterPopup.mBoxSelectBnWRadioButton);
+          lv_label_set_text(gui.element.filterPopup.mBoxBnWLabel, filterPopupBnW_text);
+          lv_obj_set_style_text_font(gui.element.filterPopup.mBoxBnWLabel, &lv_font_montserrat_22, 0);
           lv_obj_align(gui.element.filterPopup.mBoxBnWLabel, LV_ALIGN_LEFT_MID, - 10, 0);
 
           gui.element.filterPopup.mBoxSelectBnWRadioButton = create_radiobutton(gui.element.filterPopup.mBoxSelectBnWRadioButton, "", 25, 0, 27, &lv_font_montserrat_18, lv_color_hex(GREEN_DARK), lv_palette_main(LV_PALETTE_GREEN));
           lv_obj_add_event_cb(gui.element.filterPopup.mBoxSelectBnWRadioButton, event_filterMBox, LV_EVENT_VALUE_CHANGED, gui.element.filterPopup.mBoxSelectBnWRadioButton);
-        
 
-      //ONLY PREFERRED FILTER
+
+      //ONLY PREFERRED FILTER — same row, right after B&W
       gui.element.filterPopup.mBoxPreferredContainer = lv_obj_create(gui.element.filterPopup.mBoxContainer);
-      lv_obj_remove_flag(gui.element.filterPopup.mBoxPreferredContainer, LV_OBJ_FLAG_SCROLLABLE); 
-      lv_obj_align(gui.element.filterPopup.mBoxPreferredContainer, LV_ALIGN_BOTTOM_LEFT, -7, -45);
-      lv_obj_set_size(gui.element.filterPopup.mBoxPreferredContainer, 300, 40); 
-      //lv_obj_set_style_border_color(gui.element.filterPopup.mBoxPreferredContainer, lv_color_hex(GREEN_DARK), 0);
+      lv_obj_remove_flag(gui.element.filterPopup.mBoxPreferredContainer, LV_OBJ_FLAG_SCROLLABLE);
+      lv_obj_align(gui.element.filterPopup.mBoxPreferredContainer, LV_ALIGN_LEFT_MID, -7, 35);
+      lv_obj_set_size(gui.element.filterPopup.mBoxPreferredContainer, 300, 40);
       lv_obj_set_style_border_opa(gui.element.filterPopup.mBoxPreferredContainer, LV_OPA_TRANSP, 0);
 
-          gui.element.filterPopup.mBoxPreferredLabel = lv_label_create(gui.element.filterPopup.mBoxPreferredContainer);         
-          lv_label_set_text(gui.element.filterPopup.mBoxPreferredLabel, filterPopupPreferred_text); 
-          lv_obj_set_style_text_font(gui.element.filterPopup.mBoxPreferredLabel, &lv_font_montserrat_22, 0);              
+          gui.element.filterPopup.mBoxPreferredLabel = lv_label_create(gui.element.filterPopup.mBoxPreferredContainer);
+          lv_label_set_text(gui.element.filterPopup.mBoxPreferredLabel, filterPopupPreferred_text);
+          lv_obj_set_style_text_font(gui.element.filterPopup.mBoxPreferredLabel, &lv_font_montserrat_22, 0);
           lv_obj_align(gui.element.filterPopup.mBoxPreferredLabel, LV_ALIGN_LEFT_MID, -10, 0);
 
-          gui.element.filterPopup.mBoxOnlyPreferredSwitch = lv_switch_create(gui.element.filterPopup.mBoxPreferredContainer);
+          gui.element.filterPopup.mBoxOnlyPreferredSwitch = create_radiobutton(gui.element.filterPopup.mBoxPreferredContainer, "", 25, 0, 27, &lv_font_montserrat_18, lv_color_hex(GREEN_DARK), lv_palette_main(LV_PALETTE_GREEN));
+          lv_obj_align(gui.element.filterPopup.mBoxOnlyPreferredSwitch, LV_ALIGN_LEFT_MID, 95, 0);
           lv_obj_add_event_cb(gui.element.filterPopup.mBoxOnlyPreferredSwitch, event_filterMBox, LV_EVENT_VALUE_CHANGED, gui.element.filterPopup.mBoxOnlyPreferredSwitch);
-          lv_obj_align(gui.element.filterPopup.mBoxOnlyPreferredSwitch, LV_ALIGN_LEFT_MID, 170, 0);
-          lv_obj_set_style_bg_color(gui.element.filterPopup.mBoxOnlyPreferredSwitch, lv_palette_darken(LV_PALETTE_GREY, 3), LV_STATE_DEFAULT);
-          lv_obj_set_style_bg_color(gui.element.filterPopup.mBoxOnlyPreferredSwitch,  lv_palette_main(LV_PALETTE_GREEN), LV_PART_KNOB | LV_STATE_DEFAULT);
-          lv_obj_set_style_bg_color(gui.element.filterPopup.mBoxOnlyPreferredSwitch, lv_color_hex(GREEN_DARK) , LV_PART_INDICATOR | LV_STATE_CHECKED);
 
 
 

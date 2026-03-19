@@ -509,6 +509,14 @@ void tools_pause_timer(void)
   if(guiUpdaterTimer != NULL) lv_timer_pause(guiUpdaterTimer);
 }
 
+void tools_resume_timer(void)
+{
+  if(guiUpdaterTimer != NULL) {
+    guiUpdater_timer(guiUpdaterTimer);  /* Immediate refresh */
+    lv_timer_resume(guiUpdaterTimer);
+  }
+}
+
 void tools_delete_timer(void)
 {
   safeTimerDelete(&guiUpdaterTimer);

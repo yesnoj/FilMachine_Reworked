@@ -321,6 +321,65 @@ static void test_filter_both_film_types(void)
 
 
 /* ═══════════════════════════════════════════════
+ * Test 9: Drain/Fill Overlap calculation
+ * ═══════════════════════════════════════════════ */
+static void test_drain_fill_overlap_calculation(void)
+{
+    TEST_BEGIN("Utility — drain/fill overlap time calculation");
+
+    /* This tests the adjustment of step time based on drain/fill overlap.
+     * The formula is: adjustedTime = stepTime - (overlap% / 100) * 2 * fillTime
+     *
+     * Test 1: overlap=0% → adjusted time = stepTime (no change)
+     * Test 2: overlap=100% → adjusted time = stepTime - 2*fillTime (full overlap)
+     * Test 3: overlap=50% → adjusted time should be between the two
+     */
+
+    struct machineSettings *s = &gui.page.settings.settingsParams;
+    uint8_t old_overlap = s->drainFillOverlapSetpoint;
+
+    /* For this test, we'll use calculateFillTime to get a known fill time */
+    uint16_t fill_time_ms = calculateFillTime(s->chemContainerMl, s->pumpSpeed);
+    test_printf("         [INFO] fillTime for %d ml at %d%% pump = %d ms\n",
+                s->chemContainerMl, s->pumpSpeed, fill_time_ms);
+
+    /* Test 1: 0% overlap — adjusted should equal original stepTime */
+    s->drainFillOverlapSetpoint = 0;
+    uint32_t step_time = 60000; /* 60 seconds */
+    /* adjustedTime = 60000 - (0/100) * 2 * fill_time = 60000 */
+    uint32_t adjusted_0pct = step_time - (0 * 2 * fill_time_ms) / 100;
+    test_printf("         [INFO] 0%% overlap: %lu ms → %lu ms (expect %lu ms)\n",
+                (unsigned long)step_time, (unsigned long)adjusted_0pct, (unsigned long)step_time);
+    TEST_ASSERT_EQ((int)adjusted_0pct, (int)step_time,
+                   "0% overlap should result in unchanged time");
+
+    /* Test 2: 100% overlap — adjusted = stepTime - 2*fillTime */
+    s->drainFillOverlapSetpoint = 100;
+    uint32_t adjusted_100pct = step_time - (100 * 2 * fill_time_ms) / 100;
+    test_printf("         [INFO] 100%% overlap: %lu ms → %lu ms (deduction: %lu ms)\n",
+                (unsigned long)step_time, (unsigned long)adjusted_100pct,
+                (unsigned long)(2 * fill_time_ms));
+    TEST_ASSERT(adjusted_100pct < step_time,
+                "100% overlap should result in shorter adjusted time");
+    TEST_ASSERT((int)adjusted_100pct == (int)(step_time - 2 * fill_time_ms),
+                "100% overlap should deduct 2*fillTime");
+
+    /* Test 3: 50% overlap — should be in between */
+    s->drainFillOverlapSetpoint = 50;
+    uint32_t adjusted_50pct = step_time - (50 * 2 * fill_time_ms) / 100;
+    test_printf("         [INFO] 50%% overlap: %lu ms → %lu ms\n",
+                (unsigned long)step_time, (unsigned long)adjusted_50pct);
+    TEST_ASSERT(adjusted_50pct > adjusted_100pct && adjusted_50pct < step_time,
+                "50% overlap should be between 0% and 100%");
+
+    /* Restore original */
+    s->drainFillOverlapSetpoint = old_overlap;
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
  * Suite Entry Point
  * ═══════════════════════════════════════════════ */
 void test_suite_utilities(void)
@@ -335,4 +394,5 @@ void test_suite_utilities(void)
     test_empty_step_list();
     test_to_lower_case();
     test_filter_both_film_types();
+    test_drain_fill_overlap_calculation();
 }

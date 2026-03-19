@@ -82,7 +82,7 @@ void event_tab_switch(lv_event_t * e) {
         }
         if(gui.page.menu.newSelection == TAB_TOOLS){
             lv_obj_set_style_bg_color(gui.page.menu.newTabSelected, lv_color_hex(BLUE_DARK), 0);
-            lv_obj_remove_local_style_prop(gui.page.menu.oldTabSelected, LV_STYLE_BG_COLOR, 0); 
+            lv_obj_remove_local_style_prop(gui.page.menu.oldTabSelected, LV_STYLE_BG_COLOR, 0);
 
             lv_obj_set_style_border_color(gui.page.menu.processesTab, lv_color_hex(GREY), 0);
             lv_obj_set_style_border_opa(gui.page.menu.processesTab, LV_OPA_50, 0);
@@ -93,6 +93,7 @@ void event_tab_switch(lv_event_t * e) {
 
             lv_obj_clear_flag(gui.page.tools.toolsSection, LV_OBJ_FLAG_HIDDEN);
             lv_obj_scroll_to_y(gui.page.tools.toolsSection, 0, LV_ANIM_OFF);
+            tools_resume_timer();
         }
       }
     

@@ -61,6 +61,12 @@ __attribute__((weak)) void pwmLedTest(void) { }
 __attribute__((weak)) void cleanRelayManager(uint8_t a, uint8_t b, uint8_t c, bool d) { }
 __attribute__((weak)) void sendValueToRelay(uint8_t a, uint8_t b, bool c) { }
 __attribute__((weak)) void rebootBoard(void) { }
+__attribute__((weak)) void buzzer_beep(void) { }
+__attribute__((weak)) void alarm_start_persistent(void) { }
+__attribute__((weak)) void alarm_stop(void) { }
+__attribute__((weak)) bool alarm_is_active(void) { return false; }
+__attribute__((weak)) void tools_pause_timer(void) { }
+__attribute__((weak)) void tools_resume_timer(void) { }
 
 /* Temperature control stubs for tests (no simulation needed) */
 float sim_getTemperature(uint8_t sensorIndex) { return 20.0f; }

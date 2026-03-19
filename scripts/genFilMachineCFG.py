@@ -157,7 +157,7 @@ DEFAULT_SETTINGS = {
     "randomSetpoint": 20,
     "isPersistentAlarm": 1,
     "isProcessAutostart": 0,
-    "drainFillOverlapSetpoint": 0,
+    "drainFillOverlapSetpoint": 100,
     "multiRinseTime": 60,
     "tankSize": 2,
     "pumpSpeed": 30,
@@ -277,6 +277,7 @@ def write_settings(f, s):
     f.write(struct.pack('<H', s["chemContainerMl"]))   # uint16_t
     f.write(struct.pack('<H', s["wbContainerMl"]))     # uint16_t
     f.write(struct.pack('<B', s["chemistryVolume"]))    # uint8_t (1=Low, 2=High)
+    f.write(struct.pack('<b', s.get("tempCalibOffset", 0)))  # int8_t (tenths of degree)
 
 def write_process(f, p):
     f.write(p["processNameString"].encode('ASCII').ljust(MAX_PROC_NAME_LEN + 1, b'\x00'))
@@ -299,12 +300,22 @@ def write_step(f, s):
     f.write(struct.pack('<B', s["source"]))           # uint8_t
     f.write(struct.pack('<B', s["discardAfterProc"])) # uint8_t
 
+def write_stats(f, stats=None):
+    """Write machine statistics at the end of the config file"""
+    if stats is None:
+        stats = {"completed": 0, "totalMins": 0, "stopped": 0, "clean": 0}
+    f.write(struct.pack('<I', stats["completed"]))   # uint32_t
+    f.write(struct.pack('<Q', stats["totalMins"]))    # uint64_t
+    f.write(struct.pack('<I', stats["stopped"]))      # uint32_t
+    f.write(struct.pack('<I', stats["clean"]))         # uint32_t
+
 def write_config(filename, settings, processes):
     with open(filename, "wb") as f:
         write_settings(f, settings)
         f.write(struct.pack('<l', len(processes)))    # int32_t (processList.size)
         for p in processes:
             write_process(f, p)
+        write_stats(f)  # Machine statistics (zeroed)
     print(f"  Written: {filename} ({os.path.getsize(filename)} bytes, {len(processes)} processes)")
 
 # ═══════════════════════════════════════════════

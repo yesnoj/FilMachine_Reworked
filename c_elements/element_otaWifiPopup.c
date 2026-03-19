@@ -215,9 +215,11 @@ static void ota_progress_timer_cb(lv_timer_t *timer) {
 
     if (ota_is_running()) {
         lv_obj_set_style_text_color(p->statusLabel, lv_color_hex(ORANGE), 0);
+        lv_obj_add_state(p->closeButton, LV_STATE_DISABLED);
     } else if (pct >= 100) {
         lv_obj_set_style_text_color(p->statusLabel, lv_color_hex(GREEN), 0);
         lv_obj_set_style_text_color(p->percentLabel, lv_color_hex(GREEN), 0);
+        lv_obj_clear_state(p->closeButton, LV_STATE_DISABLED);
     }
 }
 

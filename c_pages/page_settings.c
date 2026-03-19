@@ -89,6 +89,12 @@ void event_settingPopupMBox(lv_event_t * e){
     if(data == gui.page.settings.chemVolumeLabel) {
         messagePopupCreate(messagePopupDetailTitle_text,chemistryVolumeAlertMBox_text,NULL,NULL,NULL);
     }
+    if(data == gui.page.settings.multiRinseTimeLabel) {
+        messagePopupCreate(messagePopupDetailTitle_text,multiRinseTimeAlertMBox_text,NULL,NULL,NULL);
+    }
+    if(data == gui.page.settings.waterInletLabel) {
+        messagePopupCreate(messagePopupDetailTitle_text,waterInletAlertMBox_text,NULL,NULL,NULL);
+    }
 }
 
 
@@ -134,8 +140,12 @@ void event_settings_handler(lv_event_t * e)
           LV_LOG_USER("TUNE short click");
           rollerPopupCreate(gui.element.rollerPopup.tempCelsiusOptions,tuneTempPopupTitle_text,gui.page.settings.tempSensorTuneButton, gui.page.settings.settingsParams.calibratedTemp);
         }
-      if(code == LV_EVENT_LONG_PRESSED_REPEAT) {
-          LV_LOG_USER("TUNE Long click");
+      if(code == LV_EVENT_LONG_PRESSED) {
+          LV_LOG_USER("TUNE Long click - Resetting calibration");
+          gui.page.settings.settingsParams.tempCalibOffset = 0;
+          gui.page.settings.settingsParams.calibratedTemp = 20; /* default */
+          qSysAction(SAVE_PROCESS_CONFIG);
+          messagePopupCreate("Calibration Reset", "Temperature calibration has been reset to default values.", NULL, NULL, NULL);
         }
     }
 
@@ -347,6 +357,8 @@ static void initSettings_switches(lv_obj_t *parent)
         lv_obj_set_style_text_font(gui.page.settings.waterInletLabel, &lv_font_montserrat_20, 0);
         lv_obj_align(gui.page.settings.waterInletLabel, LV_ALIGN_LEFT_MID, -5, 0);
 
+        createQuestionMark(gui.page.settings.waterInletContainer, gui.page.settings.waterInletLabel, event_settingPopupMBox, 2, -3);
+
         gui.page.settings.waterInletSwitch = lv_switch_create(gui.page.settings.waterInletContainer);
         lv_obj_add_event_cb(gui.page.settings.waterInletSwitch, event_settings_handler, LV_EVENT_VALUE_CHANGED, gui.page.settings.waterInletSwitch);
         lv_obj_align(gui.page.settings.waterInletSwitch, LV_ALIGN_RIGHT_MID, 0, 0);
@@ -375,7 +387,7 @@ static void initSettings_switches(lv_obj_t *parent)
         lv_obj_add_event_cb(gui.page.settings.tempSensorTuneButton, event_settings_handler, LV_EVENT_CLICKED, gui.page.settings.tempSensorTuneButton);
         lv_obj_add_event_cb(gui.page.settings.tempSensorTuneButton, event_settings_handler, LV_EVENT_VALUE_CHANGED, gui.page.settings.tempSensorTuneButton);
         lv_obj_add_event_cb(gui.page.settings.tempSensorTuneButton, event_settings_handler, LV_EVENT_SHORT_CLICKED, gui.page.settings.tempSensorTuneButton);
-        lv_obj_add_event_cb(gui.page.settings.tempSensorTuneButton, event_settings_handler, LV_EVENT_LONG_PRESSED_REPEAT, gui.page.settings.tempSensorTuneButton);
+        lv_obj_add_event_cb(gui.page.settings.tempSensorTuneButton, event_settings_handler, LV_EVENT_LONG_PRESSED, gui.page.settings.tempSensorTuneButton);
         lv_obj_add_event_cb(gui.page.settings.tempSensorTuneButton, event_settings_handler, LV_EVENT_RELEASED, gui.page.settings.tempSensorTuneButton);
         lv_obj_set_style_bg_color(gui.page.settings.tempSensorTuneButton, lv_color_hex(ORANGE), LV_PART_MAIN);
 
@@ -564,6 +576,8 @@ gui.page.settings.multiRinseTimeContainer = lv_obj_create(parent);
         lv_label_set_text(gui.page.settings.multiRinseTimeLabel, multiRinseTime_text);
         lv_obj_set_style_text_font(gui.page.settings.multiRinseTimeLabel, &lv_font_montserrat_20, 0);
         lv_obj_align(gui.page.settings.multiRinseTimeLabel, LV_ALIGN_TOP_LEFT, -5, -10);
+
+        createQuestionMark(gui.page.settings.multiRinseTimeContainer, gui.page.settings.multiRinseTimeLabel, event_settingPopupMBox, 2, -3);
 
         gui.page.settings.multiRinseTimeSlider = lv_slider_create(gui.page.settings.multiRinseTimeContainer);
         lv_obj_align(gui.page.settings.multiRinseTimeSlider, LV_ALIGN_TOP_LEFT, 0, 23);
