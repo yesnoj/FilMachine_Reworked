@@ -53,6 +53,7 @@ else()
         main/ds18b20.c
         main/pca9685.c
         main/ota_update.c
+        main/sensors.c
         main/ui_profile.c
         c_pages/page_home.c
         c_pages/page_menu.c
@@ -103,6 +104,48 @@ else()
     )
 
     target_compile_options(filmachine_sim PRIVATE
+        ${SDL2_CFLAGS_OTHER}
+        -Wall
+        -Wno-unused-function
+        -Wno-unused-variable
+        -Wno-missing-field-initializers
+    )
+
+    # ─────────────────────────────────────────────
+    # Test build — same sources but with test runner instead of src/main.c
+    # ─────────────────────────────────────────────
+    file(GLOB TEST_SOURCES tests/test_*.c)
+
+    add_executable(filmachine_test
+        ${TEST_SOURCES}
+        stub/esp_stubs.c
+        stub/fatfs_stubs.c
+        stub/freertos_stubs.c
+        ${FILMACHINE_SOURCES}
+    )
+
+    target_include_directories(filmachine_test PRIVATE
+        ${CMAKE_SOURCE_DIR}/main/include
+        ${CMAKE_SOURCE_DIR}/boards
+        ${CMAKE_SOURCE_DIR}/tests
+        ${CMAKE_SOURCE_DIR}/stub
+        ${CMAKE_SOURCE_DIR}/lvgl_config
+        ${SDL2_INCLUDE_DIRS}
+    )
+
+    target_compile_definitions(filmachine_test PRIVATE
+        BOARD_SIMULATOR
+        TEST_RESULTS_DIR="${CMAKE_SOURCE_DIR}/test_results"
+    )
+
+    target_link_libraries(filmachine_test
+        lvgl
+        ${SDL2_LIBRARIES}
+        m
+        pthread
+    )
+
+    target_compile_options(filmachine_test PRIVATE
         ${SDL2_CFLAGS_OTHER}
         -Wall
         -Wno-unused-function

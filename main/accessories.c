@@ -75,7 +75,7 @@ static void motor_ledc_set_duty(uint8_t duty)
  * Set pump speed via PCA9685 I2C PWM controller.
  * @param duty  0-255 (same 8-bit range as old LEDC approach)
  */
-static void pump_set_duty(uint8_t duty)
+static void __attribute__((unused)) pump_set_duty(uint8_t duty)
 {
     if (!pca_pwm.initialized) return;
     uint16_t duty12 = pca9685_duty_from_8bit(duty);
@@ -745,6 +745,7 @@ void init_Pins_and_Buses( void ) {
     ESP_ERROR_CHECK(gpio_config(&bk_gpio_config));
     gpio_set_level(LCD_BLK, LCD_BK_LIGHT_OFF_LEVEL);
 
+#if defined(DISPLAY_BUS_PARALLEL16)
     ESP_LOGI(TAG, "Set RD Pin High");		/* With out this the Display on the Makerfabs board will not function! */
     gpio_config_t rd_gpio_config = {
         .mode = GPIO_MODE_OUTPUT,
@@ -752,6 +753,7 @@ void init_Pins_and_Buses( void ) {
     };
     ESP_ERROR_CHECK(gpio_config(&rd_gpio_config));
     gpio_set_level(LCD_RD, 1);
+#endif
 
 	if (SD_init()) {
 	    initErrors = INIT_ERROR_SD;
@@ -2162,7 +2164,7 @@ void pwmLedTest(){
    mcp23017_digitalWrite(&mcp, MOTOR_IN1_PIN, 0);
    mcp23017_digitalWrite(&mcp, MOTOR_IN2_PIN, 1);
 
-   for (uint8_t dutyCycle = MOTOR_MIN_ANALOG_VAL; dutyCycle <= MOTOR_MAX_ANALOG_VAL; dutyCycle++) {
+   for (uint16_t dutyCycle = MOTOR_MIN_ANALOG_VAL; dutyCycle <= MOTOR_MAX_ANALOG_VAL; dutyCycle++) {
     motor_ledc_set_duty(dutyCycle);
     LV_LOG_USER("dutyCycle %d", dutyCycle);
     vTaskDelay(pdMS_TO_TICKS(10));

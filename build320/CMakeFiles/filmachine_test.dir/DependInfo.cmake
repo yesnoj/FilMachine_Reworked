@@ -36,6 +36,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/mcp23017.c" "CMakeFiles/filmachine_test.dir/main/mcp23017.c.o" "gcc" "CMakeFiles/filmachine_test.dir/main/mcp23017.c.o.d"
   "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ota_update.c" "CMakeFiles/filmachine_test.dir/main/ota_update.c.o" "gcc" "CMakeFiles/filmachine_test.dir/main/ota_update.c.o.d"
   "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/pca9685.c" "CMakeFiles/filmachine_test.dir/main/pca9685.c.o" "gcc" "CMakeFiles/filmachine_test.dir/main/pca9685.c.o.d"
+  "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/sensors.c" "CMakeFiles/filmachine_test.dir/main/sensors.c.o" "gcc" "CMakeFiles/filmachine_test.dir/main/sensors.c.o.d"
   "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ui_profile.c" "CMakeFiles/filmachine_test.dir/main/ui_profile.c.o" "gcc" "CMakeFiles/filmachine_test.dir/main/ui_profile.c.o.d"
   "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/stub/esp_stubs.c" "CMakeFiles/filmachine_test.dir/stub/esp_stubs.c.o" "gcc" "CMakeFiles/filmachine_test.dir/stub/esp_stubs.c.o.d"
   "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/stub/fatfs_stubs.c" "CMakeFiles/filmachine_test.dir/stub/fatfs_stubs.c.o" "gcc" "CMakeFiles/filmachine_test.dir/stub/fatfs_stubs.c.o.d"
@@ -57,6 +58,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_step_crud.c" "CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o" "gcc" "CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o.d"
   "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_steps.c" "CMakeFiles/filmachine_test.dir/tests/test_steps.c.o" "gcc" "CMakeFiles/filmachine_test.dir/tests/test_steps.c.o.d"
   "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_tools.c" "CMakeFiles/filmachine_test.dir/tests/test_tools.c.o" "gcc" "CMakeFiles/filmachine_test.dir/tests/test_tools.c.o.d"
+  "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_ui_profile.c" "CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.o" "gcc" "CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.o.d"
   "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_utilities.c" "CMakeFiles/filmachine_test.dir/tests/test_utilities.c.o" "gcc" "CMakeFiles/filmachine_test.dir/tests/test_utilities.c.o.d"
   )
 

@@ -65,6 +65,7 @@ set(CMAKE_MAKEFILE_PRODUCTS
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/filmachine_sim.dir/DependInfo.cmake"
+  "CMakeFiles/filmachine_test.dir/DependInfo.cmake"
   "lvgl/CMakeFiles/lvgl.dir/DependInfo.cmake"
   "lvgl/CMakeFiles/lvgl_thorvg.dir/DependInfo.cmake"
   "lvgl/CMakeFiles/lvgl_examples.dir/DependInfo.cmake"

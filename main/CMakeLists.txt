@@ -11,6 +11,7 @@ idf_component_register(
     REQUIRES
         fatfs
         sdmmc
+        driver
     PRIV_REQUIRES
         app_update
         esp_http_server

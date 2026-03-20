@@ -6,16 +6,36 @@
 #include "esp_timer.h"
 #include "esp_lcd_panel_dev.h"
 #include "esp_lcd_panel_ops.h"
-#include "esp_lcd_ili9488.h"
 #include "esp_lcd_touch.h"
-#include "esp_lcd_touch_ft5x06.h"
 #include "esp_err.h"
 #include "esp_log.h"
 #include "lvgl.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+/* FilMachine.h pulls in board.h which defines DISPLAY_DRIVER_xxx
+ * and TOUCH_DRIVER_xxx — must come BEFORE the conditional includes. */
 #include "FilMachine.h"
+
+/* ═══════════════════════════════════════════════
+ * Board-specific display and touch driver includes
+ * ═══════════════════════════════════════════════ */
+#if defined(DISPLAY_DRIVER_ILI9488)
+    #include "esp_lcd_ili9488.h"
+#elif defined(DISPLAY_DRIVER_NV3041A)
+    #include "esp_lcd_nv3041.h"
+    #include "driver/spi_master.h"
+#else
+    #error "No display driver defined — check board.h"
+#endif
+
+#if defined(TOUCH_DRIVER_FT6236)
+    #include "esp_lcd_touch_ft5x06.h"
+#elif defined(TOUCH_DRIVER_GT911)
+    #include "esp_lcd_touch_gt911.h"
+#else
+    #error "No touch driver defined — check board.h"
+#endif
 
 /* Global Stuff */
 struct gui_components gui;
@@ -60,8 +80,11 @@ static void lvgl_touch_cb(lv_indev_t * indev, lv_indev_data_t * data)
     esp_lcd_touch_handle_t tp = lv_indev_get_user_data(indev);
     esp_lcd_touch_read_data(tp);
 
-    /* Get coordinates */
+    /* Get coordinates — still using deprecated API until esp_lcd_touch 2.0 migration */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     bool touchpad_pressed = esp_lcd_touch_get_coordinates(tp, touchpad_x, touchpad_y, NULL, &touchpad_cnt, 1);
+#pragma GCC diagnostic pop
 
     if (touchpad_pressed && touchpad_cnt > 0) {
         data->point.x =  touchpad_x[0] >= LCD_H_RES ? LCD_H_RES-1 : touchpad_x[0]; // The touch driver returns values higher than the resolution sometimes so this stops LVGL errors by limiting the values
@@ -70,6 +93,168 @@ static void lvgl_touch_cb(lv_indev_t * indev, lv_indev_data_t * data)
     } else {
         data->state = LV_INDEV_STATE_RELEASED;
     }
+}
+
+/* ═══════════════════════════════════════════════
+ * Display initialisation — board-specific
+ * ═══════════════════════════════════════════════ */
+
+#if defined(DISPLAY_DRIVER_ILI9488)
+/* ── Makerfabs: ILI9488 16-bit parallel (I80) ── */
+static esp_lcd_panel_handle_t init_display(lv_display_t *our_display)
+{
+    ESP_LOGI(TAG, "Initialise LCD bus — ILI9488 16-bit parallel");
+    esp_lcd_i80_bus_handle_t i80_bus = NULL;
+    esp_lcd_i80_bus_config_t bus_config = {
+        .clk_src = LCD_CLK_SRC_PLL240M,
+        .dc_gpio_num = LCD_RS,
+        .wr_gpio_num = LCD_WR,
+        .data_gpio_nums = {
+            LCD_D0,  LCD_D1,  LCD_D2,  LCD_D3,
+            LCD_D4,  LCD_D5,  LCD_D6,  LCD_D7,
+            LCD_D8,  LCD_D9,  LCD_D10, LCD_D11,
+            LCD_D12, LCD_D13, LCD_D14, LCD_D15,
+        },
+        .bus_width = 16,
+        .max_transfer_bytes = LVGL_BUF_SIZE
+    };
+    ESP_ERROR_CHECK(esp_lcd_new_i80_bus(&bus_config, &i80_bus));
+
+    esp_lcd_panel_io_handle_t io_handle = NULL;
+    esp_lcd_panel_io_i80_config_t io_config = {
+        .cs_gpio_num = LCD_CS,
+        .pclk_hz = LCD_PIXEL_CLOCK_HZ,
+        .trans_queue_depth = 10,
+        .dc_levels = {
+            .dc_idle_level = 0,
+            .dc_cmd_level = 0,
+            .dc_dummy_level = 0,
+            .dc_data_level = 1,
+        },
+        .on_color_trans_done = notify_lvgl_flush_ready,
+        .user_ctx = our_display,
+        .lcd_cmd_bits = LCD_CMD_BITS,
+        .lcd_param_bits = LCD_PARAM_BITS,
+    };
+    ESP_ERROR_CHECK(esp_lcd_new_panel_io_i80(i80_bus, &io_config, &io_handle));
+
+    ESP_LOGI(TAG, "Install ILI9488 panel driver");
+    esp_lcd_panel_handle_t panel_handle = NULL;
+    esp_lcd_panel_dev_config_t panel_config = {
+        .reset_gpio_num = LCD_RST,
+        .color_space = ESP_LCD_COLOR_SPACE_BGR,
+        .bits_per_pixel = 16,
+    };
+    ESP_ERROR_CHECK(esp_lcd_new_panel_ili9488(io_handle, &panel_config, 0, &panel_handle));
+
+    esp_lcd_panel_swap_xy(panel_handle, true);
+    esp_lcd_panel_mirror(panel_handle, true, false);
+    esp_lcd_panel_reset(panel_handle);
+    esp_lcd_panel_init(panel_handle);
+
+    return panel_handle;
+}
+
+#elif defined(DISPLAY_DRIVER_NV3041A)
+/* ── JC4827W543: NV3041A QSPI ── */
+static esp_lcd_panel_handle_t init_display(lv_display_t *our_display)
+{
+    ESP_LOGI(TAG, "Initialise LCD bus — NV3041A QSPI");
+
+    /* QSPI bus: 4 data lines + clock */
+    spi_bus_config_t bus_config = {
+        .sclk_io_num     = LCD_CLK_PIN,
+        .data0_io_num    = LCD_D0_PIN,
+        .data1_io_num    = LCD_D1_PIN,
+        .data2_io_num    = LCD_D2_PIN,
+        .data3_io_num    = LCD_D3_PIN,
+        .max_transfer_sz = LVGL_BUF_SIZE,
+        .flags           = SPICOMMON_BUSFLAG_MASTER | SPICOMMON_BUSFLAG_QUAD,
+    };
+    ESP_ERROR_CHECK(spi_bus_initialize(SPI2_HOST, &bus_config, SPI_DMA_CH_AUTO));
+
+    esp_lcd_panel_io_handle_t io_handle = NULL;
+    esp_lcd_panel_io_spi_config_t io_config = {
+        .cs_gpio_num         = LCD_CS_PIN,
+        .dc_gpio_num         = -1,      /* QSPI: no DC pin — cmd/data in address phase */
+        .spi_mode            = 0,
+        .pclk_hz             = 40 * 1000 * 1000,
+        .trans_queue_depth   = 10,
+        .on_color_trans_done = notify_lvgl_flush_ready,
+        .user_ctx            = our_display,
+        .lcd_cmd_bits        = 32,
+        .lcd_param_bits      = 8,
+        .flags = {
+            .quad_mode = true,
+        },
+    };
+    ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)SPI2_HOST, &io_config, &io_handle));
+
+    ESP_LOGI(TAG, "Install NV3041A panel driver");
+    esp_lcd_panel_handle_t panel_handle = NULL;
+    esp_lcd_panel_dev_config_t panel_config = {
+        .reset_gpio_num = -1,           /* No RST pin on JC4827W543 */
+        .rgb_ele_order  = LCD_RGB_ELEMENT_ORDER_RGB,
+        .bits_per_pixel = 16,
+    };
+    ESP_ERROR_CHECK(esp_lcd_new_panel_nv3041(io_handle, &panel_config, &panel_handle));
+
+    esp_lcd_panel_reset(panel_handle);
+    esp_lcd_panel_init(panel_handle);
+    esp_lcd_panel_disp_on_off(panel_handle, true);
+
+    return panel_handle;
+}
+#endif /* DISPLAY_DRIVER */
+
+/* ═══════════════════════════════════════════════
+ * Touch initialisation — board-specific
+ * ═══════════════════════════════════════════════ */
+static esp_lcd_touch_handle_t init_touch(void)
+{
+    esp_lcd_touch_handle_t tp = NULL;
+    esp_lcd_panel_io_handle_t tp_io_handle = NULL;
+
+#if defined(TOUCH_DRIVER_FT6236)
+    /* ── Makerfabs: FT6236 (FT5x06 family) on shared I2C bus ── */
+    ESP_LOGI(TAG, "Initialize touch controller FT6236 (FT5x06 driver)");
+    esp_lcd_panel_io_i2c_config_t tp_io_config = ESP_LCD_TOUCH_IO_I2C_FT5x06_CONFIG();
+    ESP_ERROR_CHECK(esp_lcd_new_panel_io_i2c((esp_lcd_i2c_bus_handle_t)I2C_NUM, &tp_io_config, &tp_io_handle));
+
+    esp_lcd_touch_config_t tp_cfg = {
+        .x_max = LCD_V_RES,
+        .y_max = LCD_H_RES,
+        .rst_gpio_num = -1,
+        .int_gpio_num = -1,
+        .flags = {
+            .swap_xy  = 1,
+            .mirror_x = 1,
+            .mirror_y = 0,
+        },
+    };
+    ESP_ERROR_CHECK(esp_lcd_touch_new_i2c_ft5x06(tp_io_handle, &tp_cfg, &tp));
+
+#elif defined(TOUCH_DRIVER_GT911)
+    /* ── JC4827W543: GT911 on shared I2C bus ── */
+    ESP_LOGI(TAG, "Initialize touch controller GT911");
+    esp_lcd_panel_io_i2c_config_t tp_io_config = ESP_LCD_TOUCH_IO_I2C_GT911_CONFIG();
+    ESP_ERROR_CHECK(esp_lcd_new_panel_io_i2c((esp_lcd_i2c_bus_handle_t)I2C_NUM, &tp_io_config, &tp_io_handle));
+
+    esp_lcd_touch_config_t tp_cfg = {
+        .x_max = LCD_H_RES,
+        .y_max = LCD_V_RES,
+        .rst_gpio_num = TOUCH_RST_PIN,
+        .int_gpio_num = TOUCH_INT_PIN,
+        .flags = {
+            .swap_xy  = 0,  /* Native landscape — no swap needed */
+            .mirror_x = 0,
+            .mirror_y = 0,
+        },
+    };
+    ESP_ERROR_CHECK(esp_lcd_touch_new_i2c_gt911(tp_io_handle, &tp_cfg, &tp));
+#endif
+
+    return tp;
 }
 
 /* Tasks Stuff Here... */
@@ -197,91 +382,14 @@ ESP_LOGI(TAG, "Initialise LVGL library");
     lv_init();
     our_display = lv_display_create( LCD_H_RES, LCD_V_RES );
 
-    ESP_LOGI(TAG, "Initialise LCD bus");
-    esp_lcd_i80_bus_handle_t i80_bus = NULL;
-    esp_lcd_i80_bus_config_t bus_config = {
-        .clk_src = LCD_CLK_SRC_PLL240M,
-        .dc_gpio_num = LCD_RS,
-        .wr_gpio_num = LCD_WR,
-        .data_gpio_nums = {
-            LCD_D0,
-            LCD_D1,
-            LCD_D2,
-            LCD_D3,
-            LCD_D4,
-            LCD_D5,
-            LCD_D6,
-            LCD_D7,
-            LCD_D8,
-            LCD_D9,
-            LCD_D10,
-            LCD_D11,
-            LCD_D12,
-            LCD_D13,
-            LCD_D14,
-            LCD_D15,
-        },
-        .bus_width = 16,
-        .max_transfer_bytes = LVGL_BUF_SIZE
-    };
-    ESP_ERROR_CHECK(esp_lcd_new_i80_bus(&bus_config, &i80_bus));
-    esp_lcd_panel_io_handle_t io_handle = NULL;
-    esp_lcd_panel_io_i80_config_t io_config = {
-        .cs_gpio_num = LCD_CS,
-        .pclk_hz = LCD_PIXEL_CLOCK_HZ,
-        .trans_queue_depth = 10,
-        .dc_levels = {
-            .dc_idle_level = 0,
-            .dc_cmd_level = 0,
-            .dc_dummy_level = 0,
-            .dc_data_level = 1,
-        },
-        .on_color_trans_done = notify_lvgl_flush_ready,
-        .user_ctx = our_display,
-        .lcd_cmd_bits = LCD_CMD_BITS,
-        .lcd_param_bits = LCD_PARAM_BITS,
-    };
-    ESP_ERROR_CHECK(esp_lcd_new_panel_io_i80(i80_bus, &io_config, &io_handle));
-
-    ESP_LOGI(TAG, "Install driver for ILI9488 in 16-bit parallel mode");
-    esp_lcd_panel_handle_t panel_handle = NULL;
-    esp_lcd_panel_dev_config_t panel_config = {
-        .reset_gpio_num = LCD_RST,
-        .color_space = ESP_LCD_COLOR_SPACE_BGR,
-        .bits_per_pixel = 16,
-    };
-    ESP_ERROR_CHECK(esp_lcd_new_panel_ili9488(io_handle, &panel_config, 0, &panel_handle));
-
-    esp_lcd_panel_swap_xy( panel_handle, true);
-    esp_lcd_panel_mirror( panel_handle, true, false);
-    esp_lcd_panel_reset(panel_handle);
-    esp_lcd_panel_init(panel_handle);
+    /* Board-specific display init */
+    esp_lcd_panel_handle_t panel_handle = init_display(our_display);
 
     ESP_LOGI(TAG, "Turn on LCD backlight");
     gpio_set_level(LCD_BLK, LCD_BK_LIGHT_ON_LEVEL);
 
-    esp_lcd_touch_handle_t tp = NULL;
-    esp_lcd_panel_io_handle_t tp_io_handle = NULL;
-
-    ESP_LOGI(TAG, "Initialize touch controller (I2C)");
-    esp_lcd_panel_io_i2c_config_t tp_io_config = ESP_LCD_TOUCH_IO_I2C_FT5x06_CONFIG();
-    /* Touch IO handle */
-    ESP_ERROR_CHECK(esp_lcd_new_panel_io_i2c((esp_lcd_i2c_bus_handle_t)I2C_NUM, &tp_io_config, &tp_io_handle));
-
-    esp_lcd_touch_config_t tp_cfg = {
-        .x_max = LCD_V_RES,
-        .y_max = LCD_H_RES,
-        .rst_gpio_num = -1,
-        .int_gpio_num = -1,
-        .flags = {
-            .swap_xy = 1,
-            .mirror_x = 1,
-            .mirror_y = 0,
-        },
-    };
-    /* Initialize touch */
-    ESP_LOGI(TAG, "Initialize touch controller FT6236 (uses FT5X06 driver)");
-    ESP_ERROR_CHECK(esp_lcd_touch_new_i2c_ft5x06(tp_io_handle, &tp_cfg, &tp));
+    /* Board-specific touch init */
+    esp_lcd_touch_handle_t tp = init_touch();
 
     // initialize LVGL draw buffers
     lv_display_set_buffers( our_display, lvgl_buf, NULL, LVGL_BUF_SIZE, LV_DISPLAY_RENDER_MODE_PARTIAL);
@@ -310,7 +418,7 @@ lv_indev_set_read_cb( indev, lvgl_touch_cb ); /*This function will be called per
     /* Create task to process external functions which will slow the GUI response */
     xTaskCreatePinnedToCore( sysMan, "sysMan", 4096, NULL, 8,  NULL, tskNO_AFFINITY ); // This can run on any free core
 
-    ESP_LOGI(TAG, "Start LVGL");
+    ESP_LOGI(TAG, "Start LVGL on %s (%dx%d)", BOARD_NAME, LCD_H_RES, LCD_V_RES);
     /* LVGL GUI creation code is called here! */
 create_keyboard();
 homePage();

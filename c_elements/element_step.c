@@ -508,7 +508,6 @@ void event_stepElement(lv_event_t *e) {
     lv_dir_t dir = indev ? lv_indev_get_gesture_dir(indev) : LV_DIR_NONE;
 
     static lv_point_t press_point;
-    static bool ignore_click = false;
 
     if (indev == NULL)
         return;
@@ -518,10 +517,7 @@ void event_stepElement(lv_event_t *e) {
         return;
     }
 
-    lv_obj_t *stepObj = currentNode->step.stepElement;
-
     if (code == LV_EVENT_PRESSED) {
-        ignore_click = false;
         currentNode->step.gestureHandled = false;
         lv_indev_get_point(indev, &press_point);
     }

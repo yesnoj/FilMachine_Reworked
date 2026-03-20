@@ -1,7 +1,7 @@
 #include "FilMachine.h"
 #include "ui_profile.h"
 
-static const ui_profile_t ui_profile_480x320 = {
+static const ui_profile_t ui_profile_480x320 __attribute__((unused)) = {
     .common = {
         .top_margin = 7,
         .sidebar_x = 5,

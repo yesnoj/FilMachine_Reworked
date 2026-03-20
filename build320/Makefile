@@ -175,6 +175,19 @@ filmachine_sim/fast:
 .PHONY : filmachine_sim/fast
 
 #=============================================================================
+# Target rules for targets named filmachine_test
+
+# Build rule for target.
+filmachine_test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 filmachine_test
+.PHONY : filmachine_test
+
+# fast build rule for target.
+filmachine_test/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/build
+.PHONY : filmachine_test/fast
+
+#=============================================================================
 # Target rules for targets named lvgl
 
 # Build rule for target.
@@ -232,6 +245,7 @@ c_elements/element_cleanPopup.o: c_elements/element_cleanPopup.c.o
 # target to build an object file
 c_elements/element_cleanPopup.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_cleanPopup.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_cleanPopup.c.o
 .PHONY : c_elements/element_cleanPopup.c.o
 
 c_elements/element_cleanPopup.i: c_elements/element_cleanPopup.c.i
@@ -240,6 +254,7 @@ c_elements/element_cleanPopup.i: c_elements/element_cleanPopup.c.i
 # target to preprocess a source file
 c_elements/element_cleanPopup.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_cleanPopup.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_cleanPopup.c.i
 .PHONY : c_elements/element_cleanPopup.c.i
 
 c_elements/element_cleanPopup.s: c_elements/element_cleanPopup.c.s
@@ -248,6 +263,7 @@ c_elements/element_cleanPopup.s: c_elements/element_cleanPopup.c.s
 # target to generate assembly for a file
 c_elements/element_cleanPopup.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_cleanPopup.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_cleanPopup.c.s
 .PHONY : c_elements/element_cleanPopup.c.s
 
 c_elements/element_drainPopup.o: c_elements/element_drainPopup.c.o
@@ -256,6 +272,7 @@ c_elements/element_drainPopup.o: c_elements/element_drainPopup.c.o
 # target to build an object file
 c_elements/element_drainPopup.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_drainPopup.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_drainPopup.c.o
 .PHONY : c_elements/element_drainPopup.c.o
 
 c_elements/element_drainPopup.i: c_elements/element_drainPopup.c.i
@@ -264,6 +281,7 @@ c_elements/element_drainPopup.i: c_elements/element_drainPopup.c.i
 # target to preprocess a source file
 c_elements/element_drainPopup.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_drainPopup.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_drainPopup.c.i
 .PHONY : c_elements/element_drainPopup.c.i
 
 c_elements/element_drainPopup.s: c_elements/element_drainPopup.c.s
@@ -272,6 +290,7 @@ c_elements/element_drainPopup.s: c_elements/element_drainPopup.c.s
 # target to generate assembly for a file
 c_elements/element_drainPopup.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_drainPopup.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_drainPopup.c.s
 .PHONY : c_elements/element_drainPopup.c.s
 
 c_elements/element_filterPopup.o: c_elements/element_filterPopup.c.o
@@ -280,6 +299,7 @@ c_elements/element_filterPopup.o: c_elements/element_filterPopup.c.o
 # target to build an object file
 c_elements/element_filterPopup.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_filterPopup.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_filterPopup.c.o
 .PHONY : c_elements/element_filterPopup.c.o
 
 c_elements/element_filterPopup.i: c_elements/element_filterPopup.c.i
@@ -288,6 +308,7 @@ c_elements/element_filterPopup.i: c_elements/element_filterPopup.c.i
 # target to preprocess a source file
 c_elements/element_filterPopup.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_filterPopup.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_filterPopup.c.i
 .PHONY : c_elements/element_filterPopup.c.i
 
 c_elements/element_filterPopup.s: c_elements/element_filterPopup.c.s
@@ -296,6 +317,7 @@ c_elements/element_filterPopup.s: c_elements/element_filterPopup.c.s
 # target to generate assembly for a file
 c_elements/element_filterPopup.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_filterPopup.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_filterPopup.c.s
 .PHONY : c_elements/element_filterPopup.c.s
 
 c_elements/element_messagePopup.o: c_elements/element_messagePopup.c.o
@@ -304,6 +326,7 @@ c_elements/element_messagePopup.o: c_elements/element_messagePopup.c.o
 # target to build an object file
 c_elements/element_messagePopup.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_messagePopup.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_messagePopup.c.o
 .PHONY : c_elements/element_messagePopup.c.o
 
 c_elements/element_messagePopup.i: c_elements/element_messagePopup.c.i
@@ -312,6 +335,7 @@ c_elements/element_messagePopup.i: c_elements/element_messagePopup.c.i
 # target to preprocess a source file
 c_elements/element_messagePopup.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_messagePopup.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_messagePopup.c.i
 .PHONY : c_elements/element_messagePopup.c.i
 
 c_elements/element_messagePopup.s: c_elements/element_messagePopup.c.s
@@ -320,6 +344,7 @@ c_elements/element_messagePopup.s: c_elements/element_messagePopup.c.s
 # target to generate assembly for a file
 c_elements/element_messagePopup.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_messagePopup.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_messagePopup.c.s
 .PHONY : c_elements/element_messagePopup.c.s
 
 c_elements/element_otaWifiPopup.o: c_elements/element_otaWifiPopup.c.o
@@ -328,6 +353,7 @@ c_elements/element_otaWifiPopup.o: c_elements/element_otaWifiPopup.c.o
 # target to build an object file
 c_elements/element_otaWifiPopup.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_otaWifiPopup.c.o
 .PHONY : c_elements/element_otaWifiPopup.c.o
 
 c_elements/element_otaWifiPopup.i: c_elements/element_otaWifiPopup.c.i
@@ -336,6 +362,7 @@ c_elements/element_otaWifiPopup.i: c_elements/element_otaWifiPopup.c.i
 # target to preprocess a source file
 c_elements/element_otaWifiPopup.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_otaWifiPopup.c.i
 .PHONY : c_elements/element_otaWifiPopup.c.i
 
 c_elements/element_otaWifiPopup.s: c_elements/element_otaWifiPopup.c.s
@@ -344,6 +371,7 @@ c_elements/element_otaWifiPopup.s: c_elements/element_otaWifiPopup.c.s
 # target to generate assembly for a file
 c_elements/element_otaWifiPopup.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_otaWifiPopup.c.s
 .PHONY : c_elements/element_otaWifiPopup.c.s
 
 c_elements/element_process.o: c_elements/element_process.c.o
@@ -352,6 +380,7 @@ c_elements/element_process.o: c_elements/element_process.c.o
 # target to build an object file
 c_elements/element_process.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_process.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_process.c.o
 .PHONY : c_elements/element_process.c.o
 
 c_elements/element_process.i: c_elements/element_process.c.i
@@ -360,6 +389,7 @@ c_elements/element_process.i: c_elements/element_process.c.i
 # target to preprocess a source file
 c_elements/element_process.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_process.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_process.c.i
 .PHONY : c_elements/element_process.c.i
 
 c_elements/element_process.s: c_elements/element_process.c.s
@@ -368,6 +398,7 @@ c_elements/element_process.s: c_elements/element_process.c.s
 # target to generate assembly for a file
 c_elements/element_process.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_process.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_process.c.s
 .PHONY : c_elements/element_process.c.s
 
 c_elements/element_rollerPopup.o: c_elements/element_rollerPopup.c.o
@@ -376,6 +407,7 @@ c_elements/element_rollerPopup.o: c_elements/element_rollerPopup.c.o
 # target to build an object file
 c_elements/element_rollerPopup.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_rollerPopup.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_rollerPopup.c.o
 .PHONY : c_elements/element_rollerPopup.c.o
 
 c_elements/element_rollerPopup.i: c_elements/element_rollerPopup.c.i
@@ -384,6 +416,7 @@ c_elements/element_rollerPopup.i: c_elements/element_rollerPopup.c.i
 # target to preprocess a source file
 c_elements/element_rollerPopup.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_rollerPopup.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_rollerPopup.c.i
 .PHONY : c_elements/element_rollerPopup.c.i
 
 c_elements/element_rollerPopup.s: c_elements/element_rollerPopup.c.s
@@ -392,6 +425,7 @@ c_elements/element_rollerPopup.s: c_elements/element_rollerPopup.c.s
 # target to generate assembly for a file
 c_elements/element_rollerPopup.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_rollerPopup.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_rollerPopup.c.s
 .PHONY : c_elements/element_rollerPopup.c.s
 
 c_elements/element_selfcheckPopup.o: c_elements/element_selfcheckPopup.c.o
@@ -400,6 +434,7 @@ c_elements/element_selfcheckPopup.o: c_elements/element_selfcheckPopup.c.o
 # target to build an object file
 c_elements/element_selfcheckPopup.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_selfcheckPopup.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_selfcheckPopup.c.o
 .PHONY : c_elements/element_selfcheckPopup.c.o
 
 c_elements/element_selfcheckPopup.i: c_elements/element_selfcheckPopup.c.i
@@ -408,6 +443,7 @@ c_elements/element_selfcheckPopup.i: c_elements/element_selfcheckPopup.c.i
 # target to preprocess a source file
 c_elements/element_selfcheckPopup.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_selfcheckPopup.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_selfcheckPopup.c.i
 .PHONY : c_elements/element_selfcheckPopup.c.i
 
 c_elements/element_selfcheckPopup.s: c_elements/element_selfcheckPopup.c.s
@@ -416,6 +452,7 @@ c_elements/element_selfcheckPopup.s: c_elements/element_selfcheckPopup.c.s
 # target to generate assembly for a file
 c_elements/element_selfcheckPopup.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_selfcheckPopup.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_selfcheckPopup.c.s
 .PHONY : c_elements/element_selfcheckPopup.c.s
 
 c_elements/element_step.o: c_elements/element_step.c.o
@@ -424,6 +461,7 @@ c_elements/element_step.o: c_elements/element_step.c.o
 # target to build an object file
 c_elements/element_step.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_step.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_step.c.o
 .PHONY : c_elements/element_step.c.o
 
 c_elements/element_step.i: c_elements/element_step.c.i
@@ -432,6 +470,7 @@ c_elements/element_step.i: c_elements/element_step.c.i
 # target to preprocess a source file
 c_elements/element_step.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_step.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_step.c.i
 .PHONY : c_elements/element_step.c.i
 
 c_elements/element_step.s: c_elements/element_step.c.s
@@ -440,6 +479,7 @@ c_elements/element_step.s: c_elements/element_step.c.s
 # target to generate assembly for a file
 c_elements/element_step.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_step.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_step.c.s
 .PHONY : c_elements/element_step.c.s
 
 c_fonts/FilMachineFontIcons_100.o: c_fonts/FilMachineFontIcons_100.c.o
@@ -448,6 +488,7 @@ c_fonts/FilMachineFontIcons_100.o: c_fonts/FilMachineFontIcons_100.c.o
 # target to build an object file
 c_fonts/FilMachineFontIcons_100.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_100.c.o
 .PHONY : c_fonts/FilMachineFontIcons_100.c.o
 
 c_fonts/FilMachineFontIcons_100.i: c_fonts/FilMachineFontIcons_100.c.i
@@ -456,6 +497,7 @@ c_fonts/FilMachineFontIcons_100.i: c_fonts/FilMachineFontIcons_100.c.i
 # target to preprocess a source file
 c_fonts/FilMachineFontIcons_100.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_100.c.i
 .PHONY : c_fonts/FilMachineFontIcons_100.c.i
 
 c_fonts/FilMachineFontIcons_100.s: c_fonts/FilMachineFontIcons_100.c.s
@@ -464,6 +506,7 @@ c_fonts/FilMachineFontIcons_100.s: c_fonts/FilMachineFontIcons_100.c.s
 # target to generate assembly for a file
 c_fonts/FilMachineFontIcons_100.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_100.c.s
 .PHONY : c_fonts/FilMachineFontIcons_100.c.s
 
 c_fonts/FilMachineFontIcons_15.o: c_fonts/FilMachineFontIcons_15.c.o
@@ -472,6 +515,7 @@ c_fonts/FilMachineFontIcons_15.o: c_fonts/FilMachineFontIcons_15.c.o
 # target to build an object file
 c_fonts/FilMachineFontIcons_15.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_15.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_15.c.o
 .PHONY : c_fonts/FilMachineFontIcons_15.c.o
 
 c_fonts/FilMachineFontIcons_15.i: c_fonts/FilMachineFontIcons_15.c.i
@@ -480,6 +524,7 @@ c_fonts/FilMachineFontIcons_15.i: c_fonts/FilMachineFontIcons_15.c.i
 # target to preprocess a source file
 c_fonts/FilMachineFontIcons_15.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_15.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_15.c.i
 .PHONY : c_fonts/FilMachineFontIcons_15.c.i
 
 c_fonts/FilMachineFontIcons_15.s: c_fonts/FilMachineFontIcons_15.c.s
@@ -488,6 +533,7 @@ c_fonts/FilMachineFontIcons_15.s: c_fonts/FilMachineFontIcons_15.c.s
 # target to generate assembly for a file
 c_fonts/FilMachineFontIcons_15.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_15.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_15.c.s
 .PHONY : c_fonts/FilMachineFontIcons_15.c.s
 
 c_fonts/FilMachineFontIcons_20.o: c_fonts/FilMachineFontIcons_20.c.o
@@ -496,6 +542,7 @@ c_fonts/FilMachineFontIcons_20.o: c_fonts/FilMachineFontIcons_20.c.o
 # target to build an object file
 c_fonts/FilMachineFontIcons_20.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_20.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_20.c.o
 .PHONY : c_fonts/FilMachineFontIcons_20.c.o
 
 c_fonts/FilMachineFontIcons_20.i: c_fonts/FilMachineFontIcons_20.c.i
@@ -504,6 +551,7 @@ c_fonts/FilMachineFontIcons_20.i: c_fonts/FilMachineFontIcons_20.c.i
 # target to preprocess a source file
 c_fonts/FilMachineFontIcons_20.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_20.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_20.c.i
 .PHONY : c_fonts/FilMachineFontIcons_20.c.i
 
 c_fonts/FilMachineFontIcons_20.s: c_fonts/FilMachineFontIcons_20.c.s
@@ -512,6 +560,7 @@ c_fonts/FilMachineFontIcons_20.s: c_fonts/FilMachineFontIcons_20.c.s
 # target to generate assembly for a file
 c_fonts/FilMachineFontIcons_20.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_20.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_20.c.s
 .PHONY : c_fonts/FilMachineFontIcons_20.c.s
 
 c_fonts/FilMachineFontIcons_30.o: c_fonts/FilMachineFontIcons_30.c.o
@@ -520,6 +569,7 @@ c_fonts/FilMachineFontIcons_30.o: c_fonts/FilMachineFontIcons_30.c.o
 # target to build an object file
 c_fonts/FilMachineFontIcons_30.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_30.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_30.c.o
 .PHONY : c_fonts/FilMachineFontIcons_30.c.o
 
 c_fonts/FilMachineFontIcons_30.i: c_fonts/FilMachineFontIcons_30.c.i
@@ -528,6 +578,7 @@ c_fonts/FilMachineFontIcons_30.i: c_fonts/FilMachineFontIcons_30.c.i
 # target to preprocess a source file
 c_fonts/FilMachineFontIcons_30.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_30.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_30.c.i
 .PHONY : c_fonts/FilMachineFontIcons_30.c.i
 
 c_fonts/FilMachineFontIcons_30.s: c_fonts/FilMachineFontIcons_30.c.s
@@ -536,6 +587,7 @@ c_fonts/FilMachineFontIcons_30.s: c_fonts/FilMachineFontIcons_30.c.s
 # target to generate assembly for a file
 c_fonts/FilMachineFontIcons_30.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_30.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_30.c.s
 .PHONY : c_fonts/FilMachineFontIcons_30.c.s
 
 c_fonts/FilMachineFontIcons_40.o: c_fonts/FilMachineFontIcons_40.c.o
@@ -544,6 +596,7 @@ c_fonts/FilMachineFontIcons_40.o: c_fonts/FilMachineFontIcons_40.c.o
 # target to build an object file
 c_fonts/FilMachineFontIcons_40.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_40.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_40.c.o
 .PHONY : c_fonts/FilMachineFontIcons_40.c.o
 
 c_fonts/FilMachineFontIcons_40.i: c_fonts/FilMachineFontIcons_40.c.i
@@ -552,6 +605,7 @@ c_fonts/FilMachineFontIcons_40.i: c_fonts/FilMachineFontIcons_40.c.i
 # target to preprocess a source file
 c_fonts/FilMachineFontIcons_40.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_40.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_40.c.i
 .PHONY : c_fonts/FilMachineFontIcons_40.c.i
 
 c_fonts/FilMachineFontIcons_40.s: c_fonts/FilMachineFontIcons_40.c.s
@@ -560,6 +614,7 @@ c_fonts/FilMachineFontIcons_40.s: c_fonts/FilMachineFontIcons_40.c.s
 # target to generate assembly for a file
 c_fonts/FilMachineFontIcons_40.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_40.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_40.c.s
 .PHONY : c_fonts/FilMachineFontIcons_40.c.s
 
 c_graphics/splash.o: c_graphics/splash.c.o
@@ -568,6 +623,7 @@ c_graphics/splash.o: c_graphics/splash.c.o
 # target to build an object file
 c_graphics/splash.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_graphics/splash.c.o
 .PHONY : c_graphics/splash.c.o
 
 c_graphics/splash.i: c_graphics/splash.c.i
@@ -576,6 +632,7 @@ c_graphics/splash.i: c_graphics/splash.c.i
 # target to preprocess a source file
 c_graphics/splash.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_graphics/splash.c.i
 .PHONY : c_graphics/splash.c.i
 
 c_graphics/splash.s: c_graphics/splash.c.s
@@ -584,6 +641,7 @@ c_graphics/splash.s: c_graphics/splash.c.s
 # target to generate assembly for a file
 c_graphics/splash.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_graphics/splash.c.s
 .PHONY : c_graphics/splash.c.s
 
 c_pages/page_checkup.o: c_pages/page_checkup.c.o
@@ -592,6 +650,7 @@ c_pages/page_checkup.o: c_pages/page_checkup.c.o
 # target to build an object file
 c_pages/page_checkup.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_checkup.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_checkup.c.o
 .PHONY : c_pages/page_checkup.c.o
 
 c_pages/page_checkup.i: c_pages/page_checkup.c.i
@@ -600,6 +659,7 @@ c_pages/page_checkup.i: c_pages/page_checkup.c.i
 # target to preprocess a source file
 c_pages/page_checkup.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_checkup.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_checkup.c.i
 .PHONY : c_pages/page_checkup.c.i
 
 c_pages/page_checkup.s: c_pages/page_checkup.c.s
@@ -608,6 +668,7 @@ c_pages/page_checkup.s: c_pages/page_checkup.c.s
 # target to generate assembly for a file
 c_pages/page_checkup.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_checkup.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_checkup.c.s
 .PHONY : c_pages/page_checkup.c.s
 
 c_pages/page_home.o: c_pages/page_home.c.o
@@ -616,6 +677,7 @@ c_pages/page_home.o: c_pages/page_home.c.o
 # target to build an object file
 c_pages/page_home.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_home.c.o
 .PHONY : c_pages/page_home.c.o
 
 c_pages/page_home.i: c_pages/page_home.c.i
@@ -624,6 +686,7 @@ c_pages/page_home.i: c_pages/page_home.c.i
 # target to preprocess a source file
 c_pages/page_home.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_home.c.i
 .PHONY : c_pages/page_home.c.i
 
 c_pages/page_home.s: c_pages/page_home.c.s
@@ -632,6 +695,7 @@ c_pages/page_home.s: c_pages/page_home.c.s
 # target to generate assembly for a file
 c_pages/page_home.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_home.c.s
 .PHONY : c_pages/page_home.c.s
 
 c_pages/page_menu.o: c_pages/page_menu.c.o
@@ -640,6 +704,7 @@ c_pages/page_menu.o: c_pages/page_menu.c.o
 # target to build an object file
 c_pages/page_menu.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_menu.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_menu.c.o
 .PHONY : c_pages/page_menu.c.o
 
 c_pages/page_menu.i: c_pages/page_menu.c.i
@@ -648,6 +713,7 @@ c_pages/page_menu.i: c_pages/page_menu.c.i
 # target to preprocess a source file
 c_pages/page_menu.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_menu.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_menu.c.i
 .PHONY : c_pages/page_menu.c.i
 
 c_pages/page_menu.s: c_pages/page_menu.c.s
@@ -656,6 +722,7 @@ c_pages/page_menu.s: c_pages/page_menu.c.s
 # target to generate assembly for a file
 c_pages/page_menu.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_menu.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_menu.c.s
 .PHONY : c_pages/page_menu.c.s
 
 c_pages/page_processDetail.o: c_pages/page_processDetail.c.o
@@ -664,6 +731,7 @@ c_pages/page_processDetail.o: c_pages/page_processDetail.c.o
 # target to build an object file
 c_pages/page_processDetail.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_processDetail.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_processDetail.c.o
 .PHONY : c_pages/page_processDetail.c.o
 
 c_pages/page_processDetail.i: c_pages/page_processDetail.c.i
@@ -672,6 +740,7 @@ c_pages/page_processDetail.i: c_pages/page_processDetail.c.i
 # target to preprocess a source file
 c_pages/page_processDetail.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_processDetail.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_processDetail.c.i
 .PHONY : c_pages/page_processDetail.c.i
 
 c_pages/page_processDetail.s: c_pages/page_processDetail.c.s
@@ -680,6 +749,7 @@ c_pages/page_processDetail.s: c_pages/page_processDetail.c.s
 # target to generate assembly for a file
 c_pages/page_processDetail.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_processDetail.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_processDetail.c.s
 .PHONY : c_pages/page_processDetail.c.s
 
 c_pages/page_processes.o: c_pages/page_processes.c.o
@@ -688,6 +758,7 @@ c_pages/page_processes.o: c_pages/page_processes.c.o
 # target to build an object file
 c_pages/page_processes.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_processes.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_processes.c.o
 .PHONY : c_pages/page_processes.c.o
 
 c_pages/page_processes.i: c_pages/page_processes.c.i
@@ -696,6 +767,7 @@ c_pages/page_processes.i: c_pages/page_processes.c.i
 # target to preprocess a source file
 c_pages/page_processes.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_processes.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_processes.c.i
 .PHONY : c_pages/page_processes.c.i
 
 c_pages/page_processes.s: c_pages/page_processes.c.s
@@ -704,6 +776,7 @@ c_pages/page_processes.s: c_pages/page_processes.c.s
 # target to generate assembly for a file
 c_pages/page_processes.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_processes.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_processes.c.s
 .PHONY : c_pages/page_processes.c.s
 
 c_pages/page_settings.o: c_pages/page_settings.c.o
@@ -712,6 +785,7 @@ c_pages/page_settings.o: c_pages/page_settings.c.o
 # target to build an object file
 c_pages/page_settings.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_settings.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_settings.c.o
 .PHONY : c_pages/page_settings.c.o
 
 c_pages/page_settings.i: c_pages/page_settings.c.i
@@ -720,6 +794,7 @@ c_pages/page_settings.i: c_pages/page_settings.c.i
 # target to preprocess a source file
 c_pages/page_settings.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_settings.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_settings.c.i
 .PHONY : c_pages/page_settings.c.i
 
 c_pages/page_settings.s: c_pages/page_settings.c.s
@@ -728,6 +803,7 @@ c_pages/page_settings.s: c_pages/page_settings.c.s
 # target to generate assembly for a file
 c_pages/page_settings.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_settings.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_settings.c.s
 .PHONY : c_pages/page_settings.c.s
 
 c_pages/page_stepDetail.o: c_pages/page_stepDetail.c.o
@@ -736,6 +812,7 @@ c_pages/page_stepDetail.o: c_pages/page_stepDetail.c.o
 # target to build an object file
 c_pages/page_stepDetail.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_stepDetail.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_stepDetail.c.o
 .PHONY : c_pages/page_stepDetail.c.o
 
 c_pages/page_stepDetail.i: c_pages/page_stepDetail.c.i
@@ -744,6 +821,7 @@ c_pages/page_stepDetail.i: c_pages/page_stepDetail.c.i
 # target to preprocess a source file
 c_pages/page_stepDetail.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_stepDetail.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_stepDetail.c.i
 .PHONY : c_pages/page_stepDetail.c.i
 
 c_pages/page_stepDetail.s: c_pages/page_stepDetail.c.s
@@ -752,6 +830,7 @@ c_pages/page_stepDetail.s: c_pages/page_stepDetail.c.s
 # target to generate assembly for a file
 c_pages/page_stepDetail.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_stepDetail.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_stepDetail.c.s
 .PHONY : c_pages/page_stepDetail.c.s
 
 c_pages/page_tools.o: c_pages/page_tools.c.o
@@ -760,6 +839,7 @@ c_pages/page_tools.o: c_pages/page_tools.c.o
 # target to build an object file
 c_pages/page_tools.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_tools.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_tools.c.o
 .PHONY : c_pages/page_tools.c.o
 
 c_pages/page_tools.i: c_pages/page_tools.c.i
@@ -768,6 +848,7 @@ c_pages/page_tools.i: c_pages/page_tools.c.i
 # target to preprocess a source file
 c_pages/page_tools.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_tools.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_tools.c.i
 .PHONY : c_pages/page_tools.c.i
 
 c_pages/page_tools.s: c_pages/page_tools.c.s
@@ -776,6 +857,7 @@ c_pages/page_tools.s: c_pages/page_tools.c.s
 # target to generate assembly for a file
 c_pages/page_tools.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_tools.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_tools.c.s
 .PHONY : c_pages/page_tools.c.s
 
 main/accessories.o: main/accessories.c.o
@@ -784,6 +866,7 @@ main/accessories.o: main/accessories.c.o
 # target to build an object file
 main/accessories.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/accessories.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/accessories.c.o
 .PHONY : main/accessories.c.o
 
 main/accessories.i: main/accessories.c.i
@@ -792,6 +875,7 @@ main/accessories.i: main/accessories.c.i
 # target to preprocess a source file
 main/accessories.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/accessories.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/accessories.c.i
 .PHONY : main/accessories.c.i
 
 main/accessories.s: main/accessories.c.s
@@ -800,6 +884,7 @@ main/accessories.s: main/accessories.c.s
 # target to generate assembly for a file
 main/accessories.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/accessories.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/accessories.c.s
 .PHONY : main/accessories.c.s
 
 main/ds18b20.o: main/ds18b20.c.o
@@ -808,6 +893,7 @@ main/ds18b20.o: main/ds18b20.c.o
 # target to build an object file
 main/ds18b20.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/ds18b20.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/ds18b20.c.o
 .PHONY : main/ds18b20.c.o
 
 main/ds18b20.i: main/ds18b20.c.i
@@ -816,6 +902,7 @@ main/ds18b20.i: main/ds18b20.c.i
 # target to preprocess a source file
 main/ds18b20.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/ds18b20.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/ds18b20.c.i
 .PHONY : main/ds18b20.c.i
 
 main/ds18b20.s: main/ds18b20.c.s
@@ -824,6 +911,7 @@ main/ds18b20.s: main/ds18b20.c.s
 # target to generate assembly for a file
 main/ds18b20.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/ds18b20.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/ds18b20.c.s
 .PHONY : main/ds18b20.c.s
 
 main/mcp23017.o: main/mcp23017.c.o
@@ -832,6 +920,7 @@ main/mcp23017.o: main/mcp23017.c.o
 # target to build an object file
 main/mcp23017.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/mcp23017.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/mcp23017.c.o
 .PHONY : main/mcp23017.c.o
 
 main/mcp23017.i: main/mcp23017.c.i
@@ -840,6 +929,7 @@ main/mcp23017.i: main/mcp23017.c.i
 # target to preprocess a source file
 main/mcp23017.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/mcp23017.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/mcp23017.c.i
 .PHONY : main/mcp23017.c.i
 
 main/mcp23017.s: main/mcp23017.c.s
@@ -848,6 +938,7 @@ main/mcp23017.s: main/mcp23017.c.s
 # target to generate assembly for a file
 main/mcp23017.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/mcp23017.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/mcp23017.c.s
 .PHONY : main/mcp23017.c.s
 
 main/ota_update.o: main/ota_update.c.o
@@ -856,6 +947,7 @@ main/ota_update.o: main/ota_update.c.o
 # target to build an object file
 main/ota_update.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/ota_update.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/ota_update.c.o
 .PHONY : main/ota_update.c.o
 
 main/ota_update.i: main/ota_update.c.i
@@ -864,6 +956,7 @@ main/ota_update.i: main/ota_update.c.i
 # target to preprocess a source file
 main/ota_update.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/ota_update.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/ota_update.c.i
 .PHONY : main/ota_update.c.i
 
 main/ota_update.s: main/ota_update.c.s
@@ -872,6 +965,7 @@ main/ota_update.s: main/ota_update.c.s
 # target to generate assembly for a file
 main/ota_update.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/ota_update.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/ota_update.c.s
 .PHONY : main/ota_update.c.s
 
 main/pca9685.o: main/pca9685.c.o
@@ -880,6 +974,7 @@ main/pca9685.o: main/pca9685.c.o
 # target to build an object file
 main/pca9685.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/pca9685.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/pca9685.c.o
 .PHONY : main/pca9685.c.o
 
 main/pca9685.i: main/pca9685.c.i
@@ -888,6 +983,7 @@ main/pca9685.i: main/pca9685.c.i
 # target to preprocess a source file
 main/pca9685.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/pca9685.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/pca9685.c.i
 .PHONY : main/pca9685.c.i
 
 main/pca9685.s: main/pca9685.c.s
@@ -896,7 +992,35 @@ main/pca9685.s: main/pca9685.c.s
 # target to generate assembly for a file
 main/pca9685.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/pca9685.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/pca9685.c.s
 .PHONY : main/pca9685.c.s
+
+main/sensors.o: main/sensors.c.o
+.PHONY : main/sensors.o
+
+# target to build an object file
+main/sensors.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/sensors.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/sensors.c.o
+.PHONY : main/sensors.c.o
+
+main/sensors.i: main/sensors.c.i
+.PHONY : main/sensors.i
+
+# target to preprocess a source file
+main/sensors.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/sensors.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/sensors.c.i
+.PHONY : main/sensors.c.i
+
+main/sensors.s: main/sensors.c.s
+.PHONY : main/sensors.s
+
+# target to generate assembly for a file
+main/sensors.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/sensors.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/sensors.c.s
+.PHONY : main/sensors.c.s
 
 main/ui_profile.o: main/ui_profile.c.o
 .PHONY : main/ui_profile.o
@@ -904,6 +1028,7 @@ main/ui_profile.o: main/ui_profile.c.o
 # target to build an object file
 main/ui_profile.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/ui_profile.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/ui_profile.c.o
 .PHONY : main/ui_profile.c.o
 
 main/ui_profile.i: main/ui_profile.c.i
@@ -912,6 +1037,7 @@ main/ui_profile.i: main/ui_profile.c.i
 # target to preprocess a source file
 main/ui_profile.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/ui_profile.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/ui_profile.c.i
 .PHONY : main/ui_profile.c.i
 
 main/ui_profile.s: main/ui_profile.c.s
@@ -920,6 +1046,7 @@ main/ui_profile.s: main/ui_profile.c.s
 # target to generate assembly for a file
 main/ui_profile.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/ui_profile.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/ui_profile.c.s
 .PHONY : main/ui_profile.c.s
 
 src/main.o: src/main.c.o
@@ -952,6 +1079,7 @@ stub/esp_stubs.o: stub/esp_stubs.c.o
 # target to build an object file
 stub/esp_stubs.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/stub/esp_stubs.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/stub/esp_stubs.c.o
 .PHONY : stub/esp_stubs.c.o
 
 stub/esp_stubs.i: stub/esp_stubs.c.i
@@ -960,6 +1088,7 @@ stub/esp_stubs.i: stub/esp_stubs.c.i
 # target to preprocess a source file
 stub/esp_stubs.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/stub/esp_stubs.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/stub/esp_stubs.c.i
 .PHONY : stub/esp_stubs.c.i
 
 stub/esp_stubs.s: stub/esp_stubs.c.s
@@ -968,6 +1097,7 @@ stub/esp_stubs.s: stub/esp_stubs.c.s
 # target to generate assembly for a file
 stub/esp_stubs.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/stub/esp_stubs.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/stub/esp_stubs.c.s
 .PHONY : stub/esp_stubs.c.s
 
 stub/fatfs_stubs.o: stub/fatfs_stubs.c.o
@@ -976,6 +1106,7 @@ stub/fatfs_stubs.o: stub/fatfs_stubs.c.o
 # target to build an object file
 stub/fatfs_stubs.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/stub/fatfs_stubs.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/stub/fatfs_stubs.c.o
 .PHONY : stub/fatfs_stubs.c.o
 
 stub/fatfs_stubs.i: stub/fatfs_stubs.c.i
@@ -984,6 +1115,7 @@ stub/fatfs_stubs.i: stub/fatfs_stubs.c.i
 # target to preprocess a source file
 stub/fatfs_stubs.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/stub/fatfs_stubs.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/stub/fatfs_stubs.c.i
 .PHONY : stub/fatfs_stubs.c.i
 
 stub/fatfs_stubs.s: stub/fatfs_stubs.c.s
@@ -992,6 +1124,7 @@ stub/fatfs_stubs.s: stub/fatfs_stubs.c.s
 # target to generate assembly for a file
 stub/fatfs_stubs.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/stub/fatfs_stubs.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/stub/fatfs_stubs.c.s
 .PHONY : stub/fatfs_stubs.c.s
 
 stub/freertos_stubs.o: stub/freertos_stubs.c.o
@@ -1000,6 +1133,7 @@ stub/freertos_stubs.o: stub/freertos_stubs.c.o
 # target to build an object file
 stub/freertos_stubs.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/stub/freertos_stubs.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/stub/freertos_stubs.c.o
 .PHONY : stub/freertos_stubs.c.o
 
 stub/freertos_stubs.i: stub/freertos_stubs.c.i
@@ -1008,6 +1142,7 @@ stub/freertos_stubs.i: stub/freertos_stubs.c.i
 # target to preprocess a source file
 stub/freertos_stubs.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/stub/freertos_stubs.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/stub/freertos_stubs.c.i
 .PHONY : stub/freertos_stubs.c.i
 
 stub/freertos_stubs.s: stub/freertos_stubs.c.s
@@ -1016,7 +1151,464 @@ stub/freertos_stubs.s: stub/freertos_stubs.c.s
 # target to generate assembly for a file
 stub/freertos_stubs.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/stub/freertos_stubs.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/stub/freertos_stubs.c.s
 .PHONY : stub/freertos_stubs.c.s
+
+tests/test_destroy_and_lifecycle.o: tests/test_destroy_and_lifecycle.c.o
+.PHONY : tests/test_destroy_and_lifecycle.o
+
+# target to build an object file
+tests/test_destroy_and_lifecycle.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o
+.PHONY : tests/test_destroy_and_lifecycle.c.o
+
+tests/test_destroy_and_lifecycle.i: tests/test_destroy_and_lifecycle.c.i
+.PHONY : tests/test_destroy_and_lifecycle.i
+
+# target to preprocess a source file
+tests/test_destroy_and_lifecycle.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.i
+.PHONY : tests/test_destroy_and_lifecycle.c.i
+
+tests/test_destroy_and_lifecycle.s: tests/test_destroy_and_lifecycle.c.s
+.PHONY : tests/test_destroy_and_lifecycle.s
+
+# target to generate assembly for a file
+tests/test_destroy_and_lifecycle.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.s
+.PHONY : tests/test_destroy_and_lifecycle.c.s
+
+tests/test_edge_cases.o: tests/test_edge_cases.c.o
+.PHONY : tests/test_edge_cases.o
+
+# target to build an object file
+tests/test_edge_cases.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o
+.PHONY : tests/test_edge_cases.c.o
+
+tests/test_edge_cases.i: tests/test_edge_cases.c.i
+.PHONY : tests/test_edge_cases.i
+
+# target to preprocess a source file
+tests/test_edge_cases.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.i
+.PHONY : tests/test_edge_cases.c.i
+
+tests/test_edge_cases.s: tests/test_edge_cases.c.s
+.PHONY : tests/test_edge_cases.s
+
+# target to generate assembly for a file
+tests/test_edge_cases.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.s
+.PHONY : tests/test_edge_cases.c.s
+
+tests/test_execution.o: tests/test_execution.c.o
+.PHONY : tests/test_execution.o
+
+# target to build an object file
+tests/test_execution.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_execution.c.o
+.PHONY : tests/test_execution.c.o
+
+tests/test_execution.i: tests/test_execution.c.i
+.PHONY : tests/test_execution.i
+
+# target to preprocess a source file
+tests/test_execution.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_execution.c.i
+.PHONY : tests/test_execution.c.i
+
+tests/test_execution.s: tests/test_execution.c.s
+.PHONY : tests/test_execution.s
+
+# target to generate assembly for a file
+tests/test_execution.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_execution.c.s
+.PHONY : tests/test_execution.c.s
+
+tests/test_filter.o: tests/test_filter.c.o
+.PHONY : tests/test_filter.o
+
+# target to build an object file
+tests/test_filter.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_filter.c.o
+.PHONY : tests/test_filter.c.o
+
+tests/test_filter.i: tests/test_filter.c.i
+.PHONY : tests/test_filter.i
+
+# target to preprocess a source file
+tests/test_filter.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_filter.c.i
+.PHONY : tests/test_filter.c.i
+
+tests/test_filter.s: tests/test_filter.c.s
+.PHONY : tests/test_filter.s
+
+# target to generate assembly for a file
+tests/test_filter.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_filter.c.s
+.PHONY : tests/test_filter.c.s
+
+tests/test_helpers.o: tests/test_helpers.c.o
+.PHONY : tests/test_helpers.o
+
+# target to build an object file
+tests/test_helpers.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_helpers.c.o
+.PHONY : tests/test_helpers.c.o
+
+tests/test_helpers.i: tests/test_helpers.c.i
+.PHONY : tests/test_helpers.i
+
+# target to preprocess a source file
+tests/test_helpers.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_helpers.c.i
+.PHONY : tests/test_helpers.c.i
+
+tests/test_helpers.s: tests/test_helpers.c.s
+.PHONY : tests/test_helpers.s
+
+# target to generate assembly for a file
+tests/test_helpers.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_helpers.c.s
+.PHONY : tests/test_helpers.c.s
+
+tests/test_navigation.o: tests/test_navigation.c.o
+.PHONY : tests/test_navigation.o
+
+# target to build an object file
+tests/test_navigation.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_navigation.c.o
+.PHONY : tests/test_navigation.c.o
+
+tests/test_navigation.i: tests/test_navigation.c.i
+.PHONY : tests/test_navigation.i
+
+# target to preprocess a source file
+tests/test_navigation.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_navigation.c.i
+.PHONY : tests/test_navigation.c.i
+
+tests/test_navigation.s: tests/test_navigation.c.s
+.PHONY : tests/test_navigation.s
+
+# target to generate assembly for a file
+tests/test_navigation.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_navigation.c.s
+.PHONY : tests/test_navigation.c.s
+
+tests/test_new_settings.o: tests/test_new_settings.c.o
+.PHONY : tests/test_new_settings.o
+
+# target to build an object file
+tests/test_new_settings.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o
+.PHONY : tests/test_new_settings.c.o
+
+tests/test_new_settings.i: tests/test_new_settings.c.i
+.PHONY : tests/test_new_settings.i
+
+# target to preprocess a source file
+tests/test_new_settings.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.i
+.PHONY : tests/test_new_settings.c.i
+
+tests/test_new_settings.s: tests/test_new_settings.c.s
+.PHONY : tests/test_new_settings.s
+
+# target to generate assembly for a file
+tests/test_new_settings.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.s
+.PHONY : tests/test_new_settings.c.s
+
+tests/test_ota.o: tests/test_ota.c.o
+.PHONY : tests/test_ota.o
+
+# target to build an object file
+tests/test_ota.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_ota.c.o
+.PHONY : tests/test_ota.c.o
+
+tests/test_ota.i: tests/test_ota.c.i
+.PHONY : tests/test_ota.i
+
+# target to preprocess a source file
+tests/test_ota.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_ota.c.i
+.PHONY : tests/test_ota.c.i
+
+tests/test_ota.s: tests/test_ota.c.s
+.PHONY : tests/test_ota.s
+
+# target to generate assembly for a file
+tests/test_ota.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_ota.c.s
+.PHONY : tests/test_ota.c.s
+
+tests/test_persistence.o: tests/test_persistence.c.o
+.PHONY : tests/test_persistence.o
+
+# target to build an object file
+tests/test_persistence.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_persistence.c.o
+.PHONY : tests/test_persistence.c.o
+
+tests/test_persistence.i: tests/test_persistence.c.i
+.PHONY : tests/test_persistence.i
+
+# target to preprocess a source file
+tests/test_persistence.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_persistence.c.i
+.PHONY : tests/test_persistence.c.i
+
+tests/test_persistence.s: tests/test_persistence.c.s
+.PHONY : tests/test_persistence.s
+
+# target to generate assembly for a file
+tests/test_persistence.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_persistence.c.s
+.PHONY : tests/test_persistence.c.s
+
+tests/test_process_crud.o: tests/test_process_crud.c.o
+.PHONY : tests/test_process_crud.o
+
+# target to build an object file
+tests/test_process_crud.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o
+.PHONY : tests/test_process_crud.c.o
+
+tests/test_process_crud.i: tests/test_process_crud.c.i
+.PHONY : tests/test_process_crud.i
+
+# target to preprocess a source file
+tests/test_process_crud.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.i
+.PHONY : tests/test_process_crud.c.i
+
+tests/test_process_crud.s: tests/test_process_crud.c.s
+.PHONY : tests/test_process_crud.s
+
+# target to generate assembly for a file
+tests/test_process_crud.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.s
+.PHONY : tests/test_process_crud.c.s
+
+tests/test_processes.o: tests/test_processes.c.o
+.PHONY : tests/test_processes.o
+
+# target to build an object file
+tests/test_processes.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_processes.c.o
+.PHONY : tests/test_processes.c.o
+
+tests/test_processes.i: tests/test_processes.c.i
+.PHONY : tests/test_processes.i
+
+# target to preprocess a source file
+tests/test_processes.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_processes.c.i
+.PHONY : tests/test_processes.c.i
+
+tests/test_processes.s: tests/test_processes.c.s
+.PHONY : tests/test_processes.s
+
+# target to generate assembly for a file
+tests/test_processes.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_processes.c.s
+.PHONY : tests/test_processes.c.s
+
+tests/test_runner.o: tests/test_runner.c.o
+.PHONY : tests/test_runner.o
+
+# target to build an object file
+tests/test_runner.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_runner.c.o
+.PHONY : tests/test_runner.c.o
+
+tests/test_runner.i: tests/test_runner.c.i
+.PHONY : tests/test_runner.i
+
+# target to preprocess a source file
+tests/test_runner.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_runner.c.i
+.PHONY : tests/test_runner.c.i
+
+tests/test_runner.s: tests/test_runner.c.s
+.PHONY : tests/test_runner.s
+
+# target to generate assembly for a file
+tests/test_runner.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_runner.c.s
+.PHONY : tests/test_runner.c.s
+
+tests/test_selfcheck.o: tests/test_selfcheck.c.o
+.PHONY : tests/test_selfcheck.o
+
+# target to build an object file
+tests/test_selfcheck.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.o
+.PHONY : tests/test_selfcheck.c.o
+
+tests/test_selfcheck.i: tests/test_selfcheck.c.i
+.PHONY : tests/test_selfcheck.i
+
+# target to preprocess a source file
+tests/test_selfcheck.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.i
+.PHONY : tests/test_selfcheck.c.i
+
+tests/test_selfcheck.s: tests/test_selfcheck.c.s
+.PHONY : tests/test_selfcheck.s
+
+# target to generate assembly for a file
+tests/test_selfcheck.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.s
+.PHONY : tests/test_selfcheck.c.s
+
+tests/test_settings.o: tests/test_settings.c.o
+.PHONY : tests/test_settings.o
+
+# target to build an object file
+tests/test_settings.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_settings.c.o
+.PHONY : tests/test_settings.c.o
+
+tests/test_settings.i: tests/test_settings.c.i
+.PHONY : tests/test_settings.i
+
+# target to preprocess a source file
+tests/test_settings.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_settings.c.i
+.PHONY : tests/test_settings.c.i
+
+tests/test_settings.s: tests/test_settings.c.s
+.PHONY : tests/test_settings.s
+
+# target to generate assembly for a file
+tests/test_settings.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_settings.c.s
+.PHONY : tests/test_settings.c.s
+
+tests/test_step_crud.o: tests/test_step_crud.c.o
+.PHONY : tests/test_step_crud.o
+
+# target to build an object file
+tests/test_step_crud.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o
+.PHONY : tests/test_step_crud.c.o
+
+tests/test_step_crud.i: tests/test_step_crud.c.i
+.PHONY : tests/test_step_crud.i
+
+# target to preprocess a source file
+tests/test_step_crud.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.i
+.PHONY : tests/test_step_crud.c.i
+
+tests/test_step_crud.s: tests/test_step_crud.c.s
+.PHONY : tests/test_step_crud.s
+
+# target to generate assembly for a file
+tests/test_step_crud.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.s
+.PHONY : tests/test_step_crud.c.s
+
+tests/test_steps.o: tests/test_steps.c.o
+.PHONY : tests/test_steps.o
+
+# target to build an object file
+tests/test_steps.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_steps.c.o
+.PHONY : tests/test_steps.c.o
+
+tests/test_steps.i: tests/test_steps.c.i
+.PHONY : tests/test_steps.i
+
+# target to preprocess a source file
+tests/test_steps.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_steps.c.i
+.PHONY : tests/test_steps.c.i
+
+tests/test_steps.s: tests/test_steps.c.s
+.PHONY : tests/test_steps.s
+
+# target to generate assembly for a file
+tests/test_steps.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_steps.c.s
+.PHONY : tests/test_steps.c.s
+
+tests/test_tools.o: tests/test_tools.c.o
+.PHONY : tests/test_tools.o
+
+# target to build an object file
+tests/test_tools.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_tools.c.o
+.PHONY : tests/test_tools.c.o
+
+tests/test_tools.i: tests/test_tools.c.i
+.PHONY : tests/test_tools.i
+
+# target to preprocess a source file
+tests/test_tools.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_tools.c.i
+.PHONY : tests/test_tools.c.i
+
+tests/test_tools.s: tests/test_tools.c.s
+.PHONY : tests/test_tools.s
+
+# target to generate assembly for a file
+tests/test_tools.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_tools.c.s
+.PHONY : tests/test_tools.c.s
+
+tests/test_ui_profile.o: tests/test_ui_profile.c.o
+.PHONY : tests/test_ui_profile.o
+
+# target to build an object file
+tests/test_ui_profile.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.o
+.PHONY : tests/test_ui_profile.c.o
+
+tests/test_ui_profile.i: tests/test_ui_profile.c.i
+.PHONY : tests/test_ui_profile.i
+
+# target to preprocess a source file
+tests/test_ui_profile.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.i
+.PHONY : tests/test_ui_profile.c.i
+
+tests/test_ui_profile.s: tests/test_ui_profile.c.s
+.PHONY : tests/test_ui_profile.s
+
+# target to generate assembly for a file
+tests/test_ui_profile.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.s
+.PHONY : tests/test_ui_profile.c.s
+
+tests/test_utilities.o: tests/test_utilities.c.o
+.PHONY : tests/test_utilities.o
+
+# target to build an object file
+tests/test_utilities.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_utilities.c.o
+.PHONY : tests/test_utilities.c.o
+
+tests/test_utilities.i: tests/test_utilities.c.i
+.PHONY : tests/test_utilities.i
+
+# target to preprocess a source file
+tests/test_utilities.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_utilities.c.i
+.PHONY : tests/test_utilities.c.i
+
+tests/test_utilities.s: tests/test_utilities.c.s
+.PHONY : tests/test_utilities.s
+
+# target to generate assembly for a file
+tests/test_utilities.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_utilities.c.s
+.PHONY : tests/test_utilities.c.s
 
 # Help Target
 help:
@@ -1031,6 +1623,7 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... filmachine_sim"
+	@echo "... filmachine_test"
 	@echo "... lvgl"
 	@echo "... lvgl_demos"
 	@echo "... lvgl_examples"
@@ -1119,6 +1712,9 @@ help:
 	@echo "... main/pca9685.o"
 	@echo "... main/pca9685.i"
 	@echo "... main/pca9685.s"
+	@echo "... main/sensors.o"
+	@echo "... main/sensors.i"
+	@echo "... main/sensors.s"
 	@echo "... main/ui_profile.o"
 	@echo "... main/ui_profile.i"
 	@echo "... main/ui_profile.s"
@@ -1134,6 +1730,63 @@ help:
 	@echo "... stub/freertos_stubs.o"
 	@echo "... stub/freertos_stubs.i"
 	@echo "... stub/freertos_stubs.s"
+	@echo "... tests/test_destroy_and_lifecycle.o"
+	@echo "... tests/test_destroy_and_lifecycle.i"
+	@echo "... tests/test_destroy_and_lifecycle.s"
+	@echo "... tests/test_edge_cases.o"
+	@echo "... tests/test_edge_cases.i"
+	@echo "... tests/test_edge_cases.s"
+	@echo "... tests/test_execution.o"
+	@echo "... tests/test_execution.i"
+	@echo "... tests/test_execution.s"
+	@echo "... tests/test_filter.o"
+	@echo "... tests/test_filter.i"
+	@echo "... tests/test_filter.s"
+	@echo "... tests/test_helpers.o"
+	@echo "... tests/test_helpers.i"
+	@echo "... tests/test_helpers.s"
+	@echo "... tests/test_navigation.o"
+	@echo "... tests/test_navigation.i"
+	@echo "... tests/test_navigation.s"
+	@echo "... tests/test_new_settings.o"
+	@echo "... tests/test_new_settings.i"
+	@echo "... tests/test_new_settings.s"
+	@echo "... tests/test_ota.o"
+	@echo "... tests/test_ota.i"
+	@echo "... tests/test_ota.s"
+	@echo "... tests/test_persistence.o"
+	@echo "... tests/test_persistence.i"
+	@echo "... tests/test_persistence.s"
+	@echo "... tests/test_process_crud.o"
+	@echo "... tests/test_process_crud.i"
+	@echo "... tests/test_process_crud.s"
+	@echo "... tests/test_processes.o"
+	@echo "... tests/test_processes.i"
+	@echo "... tests/test_processes.s"
+	@echo "... tests/test_runner.o"
+	@echo "... tests/test_runner.i"
+	@echo "... tests/test_runner.s"
+	@echo "... tests/test_selfcheck.o"
+	@echo "... tests/test_selfcheck.i"
+	@echo "... tests/test_selfcheck.s"
+	@echo "... tests/test_settings.o"
+	@echo "... tests/test_settings.i"
+	@echo "... tests/test_settings.s"
+	@echo "... tests/test_step_crud.o"
+	@echo "... tests/test_step_crud.i"
+	@echo "... tests/test_step_crud.s"
+	@echo "... tests/test_steps.o"
+	@echo "... tests/test_steps.i"
+	@echo "... tests/test_steps.s"
+	@echo "... tests/test_tools.o"
+	@echo "... tests/test_tools.i"
+	@echo "... tests/test_tools.s"
+	@echo "... tests/test_ui_profile.o"
+	@echo "... tests/test_ui_profile.i"
+	@echo "... tests/test_ui_profile.s"
+	@echo "... tests/test_utilities.o"
+	@echo "... tests/test_utilities.i"
+	@echo "... tests/test_utilities.s"
 .PHONY : help
 
 

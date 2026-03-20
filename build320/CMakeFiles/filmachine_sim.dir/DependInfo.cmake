@@ -36,6 +36,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/mcp23017.c" "CMakeFiles/filmachine_sim.dir/main/mcp23017.c.o" "gcc" "CMakeFiles/filmachine_sim.dir/main/mcp23017.c.o.d"
   "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ota_update.c" "CMakeFiles/filmachine_sim.dir/main/ota_update.c.o" "gcc" "CMakeFiles/filmachine_sim.dir/main/ota_update.c.o.d"
   "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/pca9685.c" "CMakeFiles/filmachine_sim.dir/main/pca9685.c.o" "gcc" "CMakeFiles/filmachine_sim.dir/main/pca9685.c.o.d"
+  "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/sensors.c" "CMakeFiles/filmachine_sim.dir/main/sensors.c.o" "gcc" "CMakeFiles/filmachine_sim.dir/main/sensors.c.o.d"
   "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ui_profile.c" "CMakeFiles/filmachine_sim.dir/main/ui_profile.c.o" "gcc" "CMakeFiles/filmachine_sim.dir/main/ui_profile.c.o.d"
   "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/src/main.c" "CMakeFiles/filmachine_sim.dir/src/main.c.o" "gcc" "CMakeFiles/filmachine_sim.dir/src/main.c.o.d"
   "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/stub/esp_stubs.c" "CMakeFiles/filmachine_sim.dir/stub/esp_stubs.c.o" "gcc" "CMakeFiles/filmachine_sim.dir/stub/esp_stubs.c.o.d"

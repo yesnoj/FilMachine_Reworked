@@ -17,7 +17,8 @@
 #elif defined(BOARD_SIMULATOR)
     #include "board_simulator.h"
 #else
-    #warning "No BOARD_xxx defined — defaulting to BOARD_MAKERFABS_S3"
+    /* No -DBOARD_xxx flag passed — default to the original board. */
+    #define BOARD_MAKERFABS_S3      1
     #include "board_makerfabs_s3.h"
 #endif
 

@@ -69,24 +69,66 @@ include CMakeFiles/filmachine_test.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/filmachine_test.dir/flags.make
 
-CMakeFiles/filmachine_test.dir/tests/test_runner.c.o: CMakeFiles/filmachine_test.dir/flags.make
-CMakeFiles/filmachine_test.dir/tests/test_runner.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_runner.c
-CMakeFiles/filmachine_test.dir/tests/test_runner.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/filmachine_test.dir/tests/test_runner.c.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_runner.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_runner.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_runner.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_runner.c
+CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o: CMakeFiles/filmachine_test.dir/flags.make
+CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_destroy_and_lifecycle.c
+CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_destroy_and_lifecycle.c
 
-CMakeFiles/filmachine_test.dir/tests/test_runner.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_runner.c.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_runner.c > CMakeFiles/filmachine_test.dir/tests/test_runner.c.i
+CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_destroy_and_lifecycle.c > CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.i
 
-CMakeFiles/filmachine_test.dir/tests/test_runner.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_runner.c.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_runner.c -o CMakeFiles/filmachine_test.dir/tests/test_runner.c.s
+CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_destroy_and_lifecycle.c -o CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.s
+
+CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o: CMakeFiles/filmachine_test.dir/flags.make
+CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_edge_cases.c
+CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_edge_cases.c
+
+CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_edge_cases.c > CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.i
+
+CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_edge_cases.c -o CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.s
+
+CMakeFiles/filmachine_test.dir/tests/test_execution.c.o: CMakeFiles/filmachine_test.dir/flags.make
+CMakeFiles/filmachine_test.dir/tests/test_execution.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_execution.c
+CMakeFiles/filmachine_test.dir/tests/test_execution.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/filmachine_test.dir/tests/test_execution.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_execution.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_execution.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_execution.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_execution.c
+
+CMakeFiles/filmachine_test.dir/tests/test_execution.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_execution.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_execution.c > CMakeFiles/filmachine_test.dir/tests/test_execution.c.i
+
+CMakeFiles/filmachine_test.dir/tests/test_execution.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_execution.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_execution.c -o CMakeFiles/filmachine_test.dir/tests/test_execution.c.s
+
+CMakeFiles/filmachine_test.dir/tests/test_filter.c.o: CMakeFiles/filmachine_test.dir/flags.make
+CMakeFiles/filmachine_test.dir/tests/test_filter.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_filter.c
+CMakeFiles/filmachine_test.dir/tests/test_filter.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/filmachine_test.dir/tests/test_filter.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_filter.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_filter.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_filter.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_filter.c
+
+CMakeFiles/filmachine_test.dir/tests/test_filter.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_filter.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_filter.c > CMakeFiles/filmachine_test.dir/tests/test_filter.c.i
+
+CMakeFiles/filmachine_test.dir/tests/test_filter.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_filter.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_filter.c -o CMakeFiles/filmachine_test.dir/tests/test_filter.c.s
 
 CMakeFiles/filmachine_test.dir/tests/test_helpers.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/tests/test_helpers.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_helpers.c
 CMakeFiles/filmachine_test.dir/tests/test_helpers.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/filmachine_test.dir/tests/test_helpers.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/filmachine_test.dir/tests/test_helpers.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_helpers.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_helpers.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_helpers.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_helpers.c
 
 CMakeFiles/filmachine_test.dir/tests/test_helpers.c.i: cmake_force
@@ -100,7 +142,7 @@ CMakeFiles/filmachine_test.dir/tests/test_helpers.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/tests/test_navigation.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/tests/test_navigation.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_navigation.c
 CMakeFiles/filmachine_test.dir/tests/test_navigation.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/filmachine_test.dir/tests/test_navigation.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/filmachine_test.dir/tests/test_navigation.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_navigation.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_navigation.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_navigation.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_navigation.c
 
 CMakeFiles/filmachine_test.dir/tests/test_navigation.c.i: cmake_force
@@ -111,75 +153,33 @@ CMakeFiles/filmachine_test.dir/tests/test_navigation.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_navigation.c.s"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_navigation.c -o CMakeFiles/filmachine_test.dir/tests/test_navigation.c.s
 
-CMakeFiles/filmachine_test.dir/tests/test_processes.c.o: CMakeFiles/filmachine_test.dir/flags.make
-CMakeFiles/filmachine_test.dir/tests/test_processes.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_processes.c
-CMakeFiles/filmachine_test.dir/tests/test_processes.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/filmachine_test.dir/tests/test_processes.c.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_processes.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_processes.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_processes.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_processes.c
+CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o: CMakeFiles/filmachine_test.dir/flags.make
+CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_new_settings.c
+CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_new_settings.c
 
-CMakeFiles/filmachine_test.dir/tests/test_processes.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_processes.c.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_processes.c > CMakeFiles/filmachine_test.dir/tests/test_processes.c.i
+CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_new_settings.c > CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.i
 
-CMakeFiles/filmachine_test.dir/tests/test_processes.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_processes.c.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_processes.c -o CMakeFiles/filmachine_test.dir/tests/test_processes.c.s
+CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_new_settings.c -o CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.s
 
-CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o: CMakeFiles/filmachine_test.dir/flags.make
-CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_process_crud.c
-CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_process_crud.c
+CMakeFiles/filmachine_test.dir/tests/test_ota.c.o: CMakeFiles/filmachine_test.dir/flags.make
+CMakeFiles/filmachine_test.dir/tests/test_ota.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_ota.c
+CMakeFiles/filmachine_test.dir/tests/test_ota.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building C object CMakeFiles/filmachine_test.dir/tests/test_ota.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_ota.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_ota.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_ota.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_ota.c
 
-CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_process_crud.c > CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.i
+CMakeFiles/filmachine_test.dir/tests/test_ota.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_ota.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_ota.c > CMakeFiles/filmachine_test.dir/tests/test_ota.c.i
 
-CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_process_crud.c -o CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.s
-
-CMakeFiles/filmachine_test.dir/tests/test_steps.c.o: CMakeFiles/filmachine_test.dir/flags.make
-CMakeFiles/filmachine_test.dir/tests/test_steps.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_steps.c
-CMakeFiles/filmachine_test.dir/tests/test_steps.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/filmachine_test.dir/tests/test_steps.c.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_steps.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_steps.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_steps.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_steps.c
-
-CMakeFiles/filmachine_test.dir/tests/test_steps.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_steps.c.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_steps.c > CMakeFiles/filmachine_test.dir/tests/test_steps.c.i
-
-CMakeFiles/filmachine_test.dir/tests/test_steps.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_steps.c.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_steps.c -o CMakeFiles/filmachine_test.dir/tests/test_steps.c.s
-
-CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o: CMakeFiles/filmachine_test.dir/flags.make
-CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_step_crud.c
-CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_step_crud.c
-
-CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_step_crud.c > CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.i
-
-CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_step_crud.c -o CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.s
-
-CMakeFiles/filmachine_test.dir/tests/test_execution.c.o: CMakeFiles/filmachine_test.dir/flags.make
-CMakeFiles/filmachine_test.dir/tests/test_execution.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_execution.c
-CMakeFiles/filmachine_test.dir/tests/test_execution.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building C object CMakeFiles/filmachine_test.dir/tests/test_execution.c.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_execution.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_execution.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_execution.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_execution.c
-
-CMakeFiles/filmachine_test.dir/tests/test_execution.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_execution.c.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_execution.c > CMakeFiles/filmachine_test.dir/tests/test_execution.c.i
-
-CMakeFiles/filmachine_test.dir/tests/test_execution.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_execution.c.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_execution.c -o CMakeFiles/filmachine_test.dir/tests/test_execution.c.s
+CMakeFiles/filmachine_test.dir/tests/test_ota.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_ota.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_ota.c -o CMakeFiles/filmachine_test.dir/tests/test_ota.c.s
 
 CMakeFiles/filmachine_test.dir/tests/test_persistence.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/tests/test_persistence.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_persistence.c
@@ -195,66 +195,52 @@ CMakeFiles/filmachine_test.dir/tests/test_persistence.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_persistence.c.s"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_persistence.c -o CMakeFiles/filmachine_test.dir/tests/test_persistence.c.s
 
-CMakeFiles/filmachine_test.dir/tests/test_settings.c.o: CMakeFiles/filmachine_test.dir/flags.make
-CMakeFiles/filmachine_test.dir/tests/test_settings.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_settings.c
-CMakeFiles/filmachine_test.dir/tests/test_settings.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building C object CMakeFiles/filmachine_test.dir/tests/test_settings.c.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_settings.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_settings.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_settings.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_settings.c
+CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o: CMakeFiles/filmachine_test.dir/flags.make
+CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_process_crud.c
+CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building C object CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_process_crud.c
 
-CMakeFiles/filmachine_test.dir/tests/test_settings.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_settings.c.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_settings.c > CMakeFiles/filmachine_test.dir/tests/test_settings.c.i
+CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_process_crud.c > CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.i
 
-CMakeFiles/filmachine_test.dir/tests/test_settings.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_settings.c.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_settings.c -o CMakeFiles/filmachine_test.dir/tests/test_settings.c.s
+CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_process_crud.c -o CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.s
 
-CMakeFiles/filmachine_test.dir/tests/test_filter.c.o: CMakeFiles/filmachine_test.dir/flags.make
-CMakeFiles/filmachine_test.dir/tests/test_filter.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_filter.c
-CMakeFiles/filmachine_test.dir/tests/test_filter.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building C object CMakeFiles/filmachine_test.dir/tests/test_filter.c.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_filter.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_filter.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_filter.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_filter.c
+CMakeFiles/filmachine_test.dir/tests/test_processes.c.o: CMakeFiles/filmachine_test.dir/flags.make
+CMakeFiles/filmachine_test.dir/tests/test_processes.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_processes.c
+CMakeFiles/filmachine_test.dir/tests/test_processes.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building C object CMakeFiles/filmachine_test.dir/tests/test_processes.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_processes.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_processes.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_processes.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_processes.c
 
-CMakeFiles/filmachine_test.dir/tests/test_filter.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_filter.c.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_filter.c > CMakeFiles/filmachine_test.dir/tests/test_filter.c.i
+CMakeFiles/filmachine_test.dir/tests/test_processes.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_processes.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_processes.c > CMakeFiles/filmachine_test.dir/tests/test_processes.c.i
 
-CMakeFiles/filmachine_test.dir/tests/test_filter.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_filter.c.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_filter.c -o CMakeFiles/filmachine_test.dir/tests/test_filter.c.s
+CMakeFiles/filmachine_test.dir/tests/test_processes.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_processes.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_processes.c -o CMakeFiles/filmachine_test.dir/tests/test_processes.c.s
 
-CMakeFiles/filmachine_test.dir/tests/test_tools.c.o: CMakeFiles/filmachine_test.dir/flags.make
-CMakeFiles/filmachine_test.dir/tests/test_tools.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_tools.c
-CMakeFiles/filmachine_test.dir/tests/test_tools.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building C object CMakeFiles/filmachine_test.dir/tests/test_tools.c.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_tools.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_tools.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_tools.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_tools.c
+CMakeFiles/filmachine_test.dir/tests/test_runner.c.o: CMakeFiles/filmachine_test.dir/flags.make
+CMakeFiles/filmachine_test.dir/tests/test_runner.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_runner.c
+CMakeFiles/filmachine_test.dir/tests/test_runner.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building C object CMakeFiles/filmachine_test.dir/tests/test_runner.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_runner.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_runner.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_runner.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_runner.c
 
-CMakeFiles/filmachine_test.dir/tests/test_tools.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_tools.c.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_tools.c > CMakeFiles/filmachine_test.dir/tests/test_tools.c.i
+CMakeFiles/filmachine_test.dir/tests/test_runner.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_runner.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_runner.c > CMakeFiles/filmachine_test.dir/tests/test_runner.c.i
 
-CMakeFiles/filmachine_test.dir/tests/test_tools.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_tools.c.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_tools.c -o CMakeFiles/filmachine_test.dir/tests/test_tools.c.s
-
-CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o: CMakeFiles/filmachine_test.dir/flags.make
-CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_new_settings.c
-CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building C object CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_new_settings.c
-
-CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_new_settings.c > CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.i
-
-CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_new_settings.c -o CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.s
+CMakeFiles/filmachine_test.dir/tests/test_runner.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_runner.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_runner.c -o CMakeFiles/filmachine_test.dir/tests/test_runner.c.s
 
 CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_selfcheck.c
 CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building C object CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building C object CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_selfcheck.c
 
 CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.i: cmake_force
@@ -265,38 +251,80 @@ CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.s"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_selfcheck.c -o CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.s
 
-CMakeFiles/filmachine_test.dir/tests/test_ota.c.o: CMakeFiles/filmachine_test.dir/flags.make
-CMakeFiles/filmachine_test.dir/tests/test_ota.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_ota.c
-CMakeFiles/filmachine_test.dir/tests/test_ota.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building C object CMakeFiles/filmachine_test.dir/tests/test_ota.c.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_ota.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_ota.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_ota.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_ota.c
+CMakeFiles/filmachine_test.dir/tests/test_settings.c.o: CMakeFiles/filmachine_test.dir/flags.make
+CMakeFiles/filmachine_test.dir/tests/test_settings.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_settings.c
+CMakeFiles/filmachine_test.dir/tests/test_settings.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building C object CMakeFiles/filmachine_test.dir/tests/test_settings.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_settings.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_settings.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_settings.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_settings.c
 
-CMakeFiles/filmachine_test.dir/tests/test_ota.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_ota.c.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_ota.c > CMakeFiles/filmachine_test.dir/tests/test_ota.c.i
+CMakeFiles/filmachine_test.dir/tests/test_settings.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_settings.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_settings.c > CMakeFiles/filmachine_test.dir/tests/test_settings.c.i
 
-CMakeFiles/filmachine_test.dir/tests/test_ota.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_ota.c.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_ota.c -o CMakeFiles/filmachine_test.dir/tests/test_ota.c.s
+CMakeFiles/filmachine_test.dir/tests/test_settings.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_settings.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_settings.c -o CMakeFiles/filmachine_test.dir/tests/test_settings.c.s
 
-CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o: CMakeFiles/filmachine_test.dir/flags.make
-CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_edge_cases.c
-CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building C object CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_edge_cases.c
+CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o: CMakeFiles/filmachine_test.dir/flags.make
+CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_step_crud.c
+CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building C object CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_step_crud.c
 
-CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_edge_cases.c > CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.i
+CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_step_crud.c > CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.i
 
-CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_edge_cases.c -o CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.s
+CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_step_crud.c -o CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.s
+
+CMakeFiles/filmachine_test.dir/tests/test_steps.c.o: CMakeFiles/filmachine_test.dir/flags.make
+CMakeFiles/filmachine_test.dir/tests/test_steps.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_steps.c
+CMakeFiles/filmachine_test.dir/tests/test_steps.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building C object CMakeFiles/filmachine_test.dir/tests/test_steps.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_steps.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_steps.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_steps.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_steps.c
+
+CMakeFiles/filmachine_test.dir/tests/test_steps.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_steps.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_steps.c > CMakeFiles/filmachine_test.dir/tests/test_steps.c.i
+
+CMakeFiles/filmachine_test.dir/tests/test_steps.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_steps.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_steps.c -o CMakeFiles/filmachine_test.dir/tests/test_steps.c.s
+
+CMakeFiles/filmachine_test.dir/tests/test_tools.c.o: CMakeFiles/filmachine_test.dir/flags.make
+CMakeFiles/filmachine_test.dir/tests/test_tools.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_tools.c
+CMakeFiles/filmachine_test.dir/tests/test_tools.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building C object CMakeFiles/filmachine_test.dir/tests/test_tools.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_tools.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_tools.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_tools.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_tools.c
+
+CMakeFiles/filmachine_test.dir/tests/test_tools.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_tools.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_tools.c > CMakeFiles/filmachine_test.dir/tests/test_tools.c.i
+
+CMakeFiles/filmachine_test.dir/tests/test_tools.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_tools.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_tools.c -o CMakeFiles/filmachine_test.dir/tests/test_tools.c.s
+
+CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.o: CMakeFiles/filmachine_test.dir/flags.make
+CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_ui_profile.c
+CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building C object CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_ui_profile.c
+
+CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_ui_profile.c > CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.i
+
+CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_ui_profile.c -o CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.s
 
 CMakeFiles/filmachine_test.dir/tests/test_utilities.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/tests/test_utilities.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_utilities.c
 CMakeFiles/filmachine_test.dir/tests/test_utilities.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building C object CMakeFiles/filmachine_test.dir/tests/test_utilities.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building C object CMakeFiles/filmachine_test.dir/tests/test_utilities.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_utilities.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_utilities.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_utilities.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_utilities.c
 
 CMakeFiles/filmachine_test.dir/tests/test_utilities.c.i: cmake_force
@@ -307,24 +335,10 @@ CMakeFiles/filmachine_test.dir/tests/test_utilities.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_utilities.c.s"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_utilities.c -o CMakeFiles/filmachine_test.dir/tests/test_utilities.c.s
 
-CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o: CMakeFiles/filmachine_test.dir/flags.make
-CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_destroy_and_lifecycle.c
-CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building C object CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o -MF CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o.d -o CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_destroy_and_lifecycle.c
-
-CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_destroy_and_lifecycle.c > CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.i
-
-CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/tests/test_destroy_and_lifecycle.c -o CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.s
-
 CMakeFiles/filmachine_test.dir/stub/esp_stubs.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/stub/esp_stubs.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/stub/esp_stubs.c
 CMakeFiles/filmachine_test.dir/stub/esp_stubs.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building C object CMakeFiles/filmachine_test.dir/stub/esp_stubs.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building C object CMakeFiles/filmachine_test.dir/stub/esp_stubs.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/stub/esp_stubs.c.o -MF CMakeFiles/filmachine_test.dir/stub/esp_stubs.c.o.d -o CMakeFiles/filmachine_test.dir/stub/esp_stubs.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/stub/esp_stubs.c
 
 CMakeFiles/filmachine_test.dir/stub/esp_stubs.c.i: cmake_force
@@ -338,7 +352,7 @@ CMakeFiles/filmachine_test.dir/stub/esp_stubs.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/stub/fatfs_stubs.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/stub/fatfs_stubs.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/stub/fatfs_stubs.c
 CMakeFiles/filmachine_test.dir/stub/fatfs_stubs.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building C object CMakeFiles/filmachine_test.dir/stub/fatfs_stubs.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building C object CMakeFiles/filmachine_test.dir/stub/fatfs_stubs.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/stub/fatfs_stubs.c.o -MF CMakeFiles/filmachine_test.dir/stub/fatfs_stubs.c.o.d -o CMakeFiles/filmachine_test.dir/stub/fatfs_stubs.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/stub/fatfs_stubs.c
 
 CMakeFiles/filmachine_test.dir/stub/fatfs_stubs.c.i: cmake_force
@@ -352,7 +366,7 @@ CMakeFiles/filmachine_test.dir/stub/fatfs_stubs.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/stub/freertos_stubs.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/stub/freertos_stubs.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/stub/freertos_stubs.c
 CMakeFiles/filmachine_test.dir/stub/freertos_stubs.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building C object CMakeFiles/filmachine_test.dir/stub/freertos_stubs.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building C object CMakeFiles/filmachine_test.dir/stub/freertos_stubs.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/stub/freertos_stubs.c.o -MF CMakeFiles/filmachine_test.dir/stub/freertos_stubs.c.o.d -o CMakeFiles/filmachine_test.dir/stub/freertos_stubs.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/stub/freertos_stubs.c
 
 CMakeFiles/filmachine_test.dir/stub/freertos_stubs.c.i: cmake_force
@@ -366,7 +380,7 @@ CMakeFiles/filmachine_test.dir/stub/freertos_stubs.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/main/accessories.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/main/accessories.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/accessories.c
 CMakeFiles/filmachine_test.dir/main/accessories.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building C object CMakeFiles/filmachine_test.dir/main/accessories.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building C object CMakeFiles/filmachine_test.dir/main/accessories.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/main/accessories.c.o -MF CMakeFiles/filmachine_test.dir/main/accessories.c.o.d -o CMakeFiles/filmachine_test.dir/main/accessories.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/accessories.c
 
 CMakeFiles/filmachine_test.dir/main/accessories.c.i: cmake_force
@@ -380,7 +394,7 @@ CMakeFiles/filmachine_test.dir/main/accessories.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/main/mcp23017.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/main/mcp23017.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/mcp23017.c
 CMakeFiles/filmachine_test.dir/main/mcp23017.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building C object CMakeFiles/filmachine_test.dir/main/mcp23017.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building C object CMakeFiles/filmachine_test.dir/main/mcp23017.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/main/mcp23017.c.o -MF CMakeFiles/filmachine_test.dir/main/mcp23017.c.o.d -o CMakeFiles/filmachine_test.dir/main/mcp23017.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/mcp23017.c
 
 CMakeFiles/filmachine_test.dir/main/mcp23017.c.i: cmake_force
@@ -394,7 +408,7 @@ CMakeFiles/filmachine_test.dir/main/mcp23017.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/main/ds18b20.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/main/ds18b20.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ds18b20.c
 CMakeFiles/filmachine_test.dir/main/ds18b20.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building C object CMakeFiles/filmachine_test.dir/main/ds18b20.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building C object CMakeFiles/filmachine_test.dir/main/ds18b20.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/main/ds18b20.c.o -MF CMakeFiles/filmachine_test.dir/main/ds18b20.c.o.d -o CMakeFiles/filmachine_test.dir/main/ds18b20.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ds18b20.c
 
 CMakeFiles/filmachine_test.dir/main/ds18b20.c.i: cmake_force
@@ -408,7 +422,7 @@ CMakeFiles/filmachine_test.dir/main/ds18b20.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/main/pca9685.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/main/pca9685.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/pca9685.c
 CMakeFiles/filmachine_test.dir/main/pca9685.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building C object CMakeFiles/filmachine_test.dir/main/pca9685.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building C object CMakeFiles/filmachine_test.dir/main/pca9685.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/main/pca9685.c.o -MF CMakeFiles/filmachine_test.dir/main/pca9685.c.o.d -o CMakeFiles/filmachine_test.dir/main/pca9685.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/pca9685.c
 
 CMakeFiles/filmachine_test.dir/main/pca9685.c.i: cmake_force
@@ -422,7 +436,7 @@ CMakeFiles/filmachine_test.dir/main/pca9685.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/main/ota_update.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/main/ota_update.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ota_update.c
 CMakeFiles/filmachine_test.dir/main/ota_update.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building C object CMakeFiles/filmachine_test.dir/main/ota_update.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building C object CMakeFiles/filmachine_test.dir/main/ota_update.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/main/ota_update.c.o -MF CMakeFiles/filmachine_test.dir/main/ota_update.c.o.d -o CMakeFiles/filmachine_test.dir/main/ota_update.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ota_update.c
 
 CMakeFiles/filmachine_test.dir/main/ota_update.c.i: cmake_force
@@ -433,10 +447,24 @@ CMakeFiles/filmachine_test.dir/main/ota_update.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/main/ota_update.c.s"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ota_update.c -o CMakeFiles/filmachine_test.dir/main/ota_update.c.s
 
+CMakeFiles/filmachine_test.dir/main/sensors.c.o: CMakeFiles/filmachine_test.dir/flags.make
+CMakeFiles/filmachine_test.dir/main/sensors.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/sensors.c
+CMakeFiles/filmachine_test.dir/main/sensors.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building C object CMakeFiles/filmachine_test.dir/main/sensors.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/main/sensors.c.o -MF CMakeFiles/filmachine_test.dir/main/sensors.c.o.d -o CMakeFiles/filmachine_test.dir/main/sensors.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/sensors.c
+
+CMakeFiles/filmachine_test.dir/main/sensors.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_test.dir/main/sensors.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/sensors.c > CMakeFiles/filmachine_test.dir/main/sensors.c.i
+
+CMakeFiles/filmachine_test.dir/main/sensors.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_test.dir/main/sensors.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/sensors.c -o CMakeFiles/filmachine_test.dir/main/sensors.c.s
+
 CMakeFiles/filmachine_test.dir/main/ui_profile.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/main/ui_profile.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ui_profile.c
 CMakeFiles/filmachine_test.dir/main/ui_profile.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building C object CMakeFiles/filmachine_test.dir/main/ui_profile.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building C object CMakeFiles/filmachine_test.dir/main/ui_profile.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/main/ui_profile.c.o -MF CMakeFiles/filmachine_test.dir/main/ui_profile.c.o.d -o CMakeFiles/filmachine_test.dir/main/ui_profile.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ui_profile.c
 
 CMakeFiles/filmachine_test.dir/main/ui_profile.c.i: cmake_force
@@ -450,7 +478,7 @@ CMakeFiles/filmachine_test.dir/main/ui_profile.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_pages/page_home.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_pages/page_home.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_home.c
 CMakeFiles/filmachine_test.dir/c_pages/page_home.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building C object CMakeFiles/filmachine_test.dir/c_pages/page_home.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building C object CMakeFiles/filmachine_test.dir/c_pages/page_home.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_pages/page_home.c.o -MF CMakeFiles/filmachine_test.dir/c_pages/page_home.c.o.d -o CMakeFiles/filmachine_test.dir/c_pages/page_home.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_home.c
 
 CMakeFiles/filmachine_test.dir/c_pages/page_home.c.i: cmake_force
@@ -464,7 +492,7 @@ CMakeFiles/filmachine_test.dir/c_pages/page_home.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_pages/page_menu.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_pages/page_menu.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_menu.c
 CMakeFiles/filmachine_test.dir/c_pages/page_menu.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building C object CMakeFiles/filmachine_test.dir/c_pages/page_menu.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building C object CMakeFiles/filmachine_test.dir/c_pages/page_menu.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_pages/page_menu.c.o -MF CMakeFiles/filmachine_test.dir/c_pages/page_menu.c.o.d -o CMakeFiles/filmachine_test.dir/c_pages/page_menu.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_menu.c
 
 CMakeFiles/filmachine_test.dir/c_pages/page_menu.c.i: cmake_force
@@ -478,7 +506,7 @@ CMakeFiles/filmachine_test.dir/c_pages/page_menu.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_pages/page_processes.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_pages/page_processes.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_processes.c
 CMakeFiles/filmachine_test.dir/c_pages/page_processes.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building C object CMakeFiles/filmachine_test.dir/c_pages/page_processes.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Building C object CMakeFiles/filmachine_test.dir/c_pages/page_processes.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_pages/page_processes.c.o -MF CMakeFiles/filmachine_test.dir/c_pages/page_processes.c.o.d -o CMakeFiles/filmachine_test.dir/c_pages/page_processes.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_processes.c
 
 CMakeFiles/filmachine_test.dir/c_pages/page_processes.c.i: cmake_force
@@ -492,7 +520,7 @@ CMakeFiles/filmachine_test.dir/c_pages/page_processes.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_pages/page_processDetail.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_pages/page_processDetail.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_processDetail.c
 CMakeFiles/filmachine_test.dir/c_pages/page_processDetail.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building C object CMakeFiles/filmachine_test.dir/c_pages/page_processDetail.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building C object CMakeFiles/filmachine_test.dir/c_pages/page_processDetail.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_pages/page_processDetail.c.o -MF CMakeFiles/filmachine_test.dir/c_pages/page_processDetail.c.o.d -o CMakeFiles/filmachine_test.dir/c_pages/page_processDetail.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_processDetail.c
 
 CMakeFiles/filmachine_test.dir/c_pages/page_processDetail.c.i: cmake_force
@@ -506,7 +534,7 @@ CMakeFiles/filmachine_test.dir/c_pages/page_processDetail.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_pages/page_stepDetail.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_pages/page_stepDetail.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_stepDetail.c
 CMakeFiles/filmachine_test.dir/c_pages/page_stepDetail.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Building C object CMakeFiles/filmachine_test.dir/c_pages/page_stepDetail.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building C object CMakeFiles/filmachine_test.dir/c_pages/page_stepDetail.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_pages/page_stepDetail.c.o -MF CMakeFiles/filmachine_test.dir/c_pages/page_stepDetail.c.o.d -o CMakeFiles/filmachine_test.dir/c_pages/page_stepDetail.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_stepDetail.c
 
 CMakeFiles/filmachine_test.dir/c_pages/page_stepDetail.c.i: cmake_force
@@ -520,7 +548,7 @@ CMakeFiles/filmachine_test.dir/c_pages/page_stepDetail.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_pages/page_settings.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_pages/page_settings.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_settings.c
 CMakeFiles/filmachine_test.dir/c_pages/page_settings.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building C object CMakeFiles/filmachine_test.dir/c_pages/page_settings.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Building C object CMakeFiles/filmachine_test.dir/c_pages/page_settings.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_pages/page_settings.c.o -MF CMakeFiles/filmachine_test.dir/c_pages/page_settings.c.o.d -o CMakeFiles/filmachine_test.dir/c_pages/page_settings.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_settings.c
 
 CMakeFiles/filmachine_test.dir/c_pages/page_settings.c.i: cmake_force
@@ -534,7 +562,7 @@ CMakeFiles/filmachine_test.dir/c_pages/page_settings.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_pages/page_tools.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_pages/page_tools.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_tools.c
 CMakeFiles/filmachine_test.dir/c_pages/page_tools.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building C object CMakeFiles/filmachine_test.dir/c_pages/page_tools.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_36) "Building C object CMakeFiles/filmachine_test.dir/c_pages/page_tools.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_pages/page_tools.c.o -MF CMakeFiles/filmachine_test.dir/c_pages/page_tools.c.o.d -o CMakeFiles/filmachine_test.dir/c_pages/page_tools.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_tools.c
 
 CMakeFiles/filmachine_test.dir/c_pages/page_tools.c.i: cmake_force
@@ -548,7 +576,7 @@ CMakeFiles/filmachine_test.dir/c_pages/page_tools.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_pages/page_checkup.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_pages/page_checkup.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_checkup.c
 CMakeFiles/filmachine_test.dir/c_pages/page_checkup.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Building C object CMakeFiles/filmachine_test.dir/c_pages/page_checkup.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_37) "Building C object CMakeFiles/filmachine_test.dir/c_pages/page_checkup.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_pages/page_checkup.c.o -MF CMakeFiles/filmachine_test.dir/c_pages/page_checkup.c.o.d -o CMakeFiles/filmachine_test.dir/c_pages/page_checkup.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_checkup.c
 
 CMakeFiles/filmachine_test.dir/c_pages/page_checkup.c.i: cmake_force
@@ -562,7 +590,7 @@ CMakeFiles/filmachine_test.dir/c_pages/page_checkup.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_elements/element_process.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_elements/element_process.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_process.c
 CMakeFiles/filmachine_test.dir/c_elements/element_process.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_36) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_process.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_38) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_process.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_elements/element_process.c.o -MF CMakeFiles/filmachine_test.dir/c_elements/element_process.c.o.d -o CMakeFiles/filmachine_test.dir/c_elements/element_process.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_process.c
 
 CMakeFiles/filmachine_test.dir/c_elements/element_process.c.i: cmake_force
@@ -576,7 +604,7 @@ CMakeFiles/filmachine_test.dir/c_elements/element_process.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_elements/element_step.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_elements/element_step.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_step.c
 CMakeFiles/filmachine_test.dir/c_elements/element_step.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_37) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_step.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_39) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_step.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_elements/element_step.c.o -MF CMakeFiles/filmachine_test.dir/c_elements/element_step.c.o.d -o CMakeFiles/filmachine_test.dir/c_elements/element_step.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_step.c
 
 CMakeFiles/filmachine_test.dir/c_elements/element_step.c.i: cmake_force
@@ -590,7 +618,7 @@ CMakeFiles/filmachine_test.dir/c_elements/element_step.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_elements/element_filterPopup.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_elements/element_filterPopup.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_filterPopup.c
 CMakeFiles/filmachine_test.dir/c_elements/element_filterPopup.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_38) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_filterPopup.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_40) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_filterPopup.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_elements/element_filterPopup.c.o -MF CMakeFiles/filmachine_test.dir/c_elements/element_filterPopup.c.o.d -o CMakeFiles/filmachine_test.dir/c_elements/element_filterPopup.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_filterPopup.c
 
 CMakeFiles/filmachine_test.dir/c_elements/element_filterPopup.c.i: cmake_force
@@ -604,7 +632,7 @@ CMakeFiles/filmachine_test.dir/c_elements/element_filterPopup.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_elements/element_messagePopup.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_elements/element_messagePopup.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_messagePopup.c
 CMakeFiles/filmachine_test.dir/c_elements/element_messagePopup.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_39) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_messagePopup.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_41) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_messagePopup.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_elements/element_messagePopup.c.o -MF CMakeFiles/filmachine_test.dir/c_elements/element_messagePopup.c.o.d -o CMakeFiles/filmachine_test.dir/c_elements/element_messagePopup.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_messagePopup.c
 
 CMakeFiles/filmachine_test.dir/c_elements/element_messagePopup.c.i: cmake_force
@@ -618,7 +646,7 @@ CMakeFiles/filmachine_test.dir/c_elements/element_messagePopup.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_elements/element_rollerPopup.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_elements/element_rollerPopup.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_rollerPopup.c
 CMakeFiles/filmachine_test.dir/c_elements/element_rollerPopup.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_40) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_rollerPopup.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_42) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_rollerPopup.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_elements/element_rollerPopup.c.o -MF CMakeFiles/filmachine_test.dir/c_elements/element_rollerPopup.c.o.d -o CMakeFiles/filmachine_test.dir/c_elements/element_rollerPopup.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_rollerPopup.c
 
 CMakeFiles/filmachine_test.dir/c_elements/element_rollerPopup.c.i: cmake_force
@@ -632,7 +660,7 @@ CMakeFiles/filmachine_test.dir/c_elements/element_rollerPopup.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_elements/element_cleanPopup.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_elements/element_cleanPopup.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_cleanPopup.c
 CMakeFiles/filmachine_test.dir/c_elements/element_cleanPopup.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_41) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_cleanPopup.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_43) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_cleanPopup.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_elements/element_cleanPopup.c.o -MF CMakeFiles/filmachine_test.dir/c_elements/element_cleanPopup.c.o.d -o CMakeFiles/filmachine_test.dir/c_elements/element_cleanPopup.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_cleanPopup.c
 
 CMakeFiles/filmachine_test.dir/c_elements/element_cleanPopup.c.i: cmake_force
@@ -646,7 +674,7 @@ CMakeFiles/filmachine_test.dir/c_elements/element_cleanPopup.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_elements/element_drainPopup.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_elements/element_drainPopup.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_drainPopup.c
 CMakeFiles/filmachine_test.dir/c_elements/element_drainPopup.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_42) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_drainPopup.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_44) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_drainPopup.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_elements/element_drainPopup.c.o -MF CMakeFiles/filmachine_test.dir/c_elements/element_drainPopup.c.o.d -o CMakeFiles/filmachine_test.dir/c_elements/element_drainPopup.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_drainPopup.c
 
 CMakeFiles/filmachine_test.dir/c_elements/element_drainPopup.c.i: cmake_force
@@ -660,7 +688,7 @@ CMakeFiles/filmachine_test.dir/c_elements/element_drainPopup.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_elements/element_selfcheckPopup.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_elements/element_selfcheckPopup.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_selfcheckPopup.c
 CMakeFiles/filmachine_test.dir/c_elements/element_selfcheckPopup.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_43) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_selfcheckPopup.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_45) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_selfcheckPopup.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_elements/element_selfcheckPopup.c.o -MF CMakeFiles/filmachine_test.dir/c_elements/element_selfcheckPopup.c.o.d -o CMakeFiles/filmachine_test.dir/c_elements/element_selfcheckPopup.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_selfcheckPopup.c
 
 CMakeFiles/filmachine_test.dir/c_elements/element_selfcheckPopup.c.i: cmake_force
@@ -674,7 +702,7 @@ CMakeFiles/filmachine_test.dir/c_elements/element_selfcheckPopup.c.s: cmake_forc
 CMakeFiles/filmachine_test.dir/c_elements/element_otaWifiPopup.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_elements/element_otaWifiPopup.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_otaWifiPopup.c
 CMakeFiles/filmachine_test.dir/c_elements/element_otaWifiPopup.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_44) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_otaWifiPopup.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_46) "Building C object CMakeFiles/filmachine_test.dir/c_elements/element_otaWifiPopup.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_elements/element_otaWifiPopup.c.o -MF CMakeFiles/filmachine_test.dir/c_elements/element_otaWifiPopup.c.o.d -o CMakeFiles/filmachine_test.dir/c_elements/element_otaWifiPopup.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_otaWifiPopup.c
 
 CMakeFiles/filmachine_test.dir/c_elements/element_otaWifiPopup.c.i: cmake_force
@@ -688,7 +716,7 @@ CMakeFiles/filmachine_test.dir/c_elements/element_otaWifiPopup.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_15.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_15.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_15.c
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_15.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_45) "Building C object CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_15.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_47) "Building C object CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_15.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_15.c.o -MF CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_15.c.o.d -o CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_15.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_15.c
 
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_15.c.i: cmake_force
@@ -702,7 +730,7 @@ CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_15.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_20.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_20.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_20.c
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_20.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_46) "Building C object CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_20.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_48) "Building C object CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_20.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_20.c.o -MF CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_20.c.o.d -o CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_20.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_20.c
 
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_20.c.i: cmake_force
@@ -716,7 +744,7 @@ CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_20.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_30.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_30.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_30.c
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_30.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_47) "Building C object CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_30.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_49) "Building C object CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_30.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_30.c.o -MF CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_30.c.o.d -o CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_30.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_30.c
 
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_30.c.i: cmake_force
@@ -730,7 +758,7 @@ CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_30.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_40.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_40.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_40.c
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_40.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_48) "Building C object CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_40.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_50) "Building C object CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_40.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_40.c.o -MF CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_40.c.o.d -o CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_40.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_40.c
 
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_40.c.i: cmake_force
@@ -744,7 +772,7 @@ CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_40.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_100.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_100.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_100.c
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_100.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_49) "Building C object CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_100.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_51) "Building C object CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_100.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_100.c.o -MF CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_100.c.o.d -o CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_100.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_100.c
 
 CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_100.c.i: cmake_force
@@ -758,7 +786,7 @@ CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_100.c.s: cmake_force
 CMakeFiles/filmachine_test.dir/c_graphics/splash.c.o: CMakeFiles/filmachine_test.dir/flags.make
 CMakeFiles/filmachine_test.dir/c_graphics/splash.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_graphics/splash.c
 CMakeFiles/filmachine_test.dir/c_graphics/splash.c.o: CMakeFiles/filmachine_test.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_50) "Building C object CMakeFiles/filmachine_test.dir/c_graphics/splash.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_52) "Building C object CMakeFiles/filmachine_test.dir/c_graphics/splash.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_test.dir/c_graphics/splash.c.o -MF CMakeFiles/filmachine_test.dir/c_graphics/splash.c.o.d -o CMakeFiles/filmachine_test.dir/c_graphics/splash.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_graphics/splash.c
 
 CMakeFiles/filmachine_test.dir/c_graphics/splash.c.i: cmake_force
@@ -771,24 +799,25 @@ CMakeFiles/filmachine_test.dir/c_graphics/splash.c.s: cmake_force
 
 # Object files for target filmachine_test
 filmachine_test_OBJECTS = \
-"CMakeFiles/filmachine_test.dir/tests/test_runner.c.o" \
+"CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o" \
+"CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o" \
+"CMakeFiles/filmachine_test.dir/tests/test_execution.c.o" \
+"CMakeFiles/filmachine_test.dir/tests/test_filter.c.o" \
 "CMakeFiles/filmachine_test.dir/tests/test_helpers.c.o" \
 "CMakeFiles/filmachine_test.dir/tests/test_navigation.c.o" \
-"CMakeFiles/filmachine_test.dir/tests/test_processes.c.o" \
-"CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o" \
-"CMakeFiles/filmachine_test.dir/tests/test_steps.c.o" \
-"CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o" \
-"CMakeFiles/filmachine_test.dir/tests/test_execution.c.o" \
-"CMakeFiles/filmachine_test.dir/tests/test_persistence.c.o" \
-"CMakeFiles/filmachine_test.dir/tests/test_settings.c.o" \
-"CMakeFiles/filmachine_test.dir/tests/test_filter.c.o" \
-"CMakeFiles/filmachine_test.dir/tests/test_tools.c.o" \
 "CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o" \
-"CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.o" \
 "CMakeFiles/filmachine_test.dir/tests/test_ota.c.o" \
-"CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o" \
+"CMakeFiles/filmachine_test.dir/tests/test_persistence.c.o" \
+"CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o" \
+"CMakeFiles/filmachine_test.dir/tests/test_processes.c.o" \
+"CMakeFiles/filmachine_test.dir/tests/test_runner.c.o" \
+"CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.o" \
+"CMakeFiles/filmachine_test.dir/tests/test_settings.c.o" \
+"CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o" \
+"CMakeFiles/filmachine_test.dir/tests/test_steps.c.o" \
+"CMakeFiles/filmachine_test.dir/tests/test_tools.c.o" \
+"CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.o" \
 "CMakeFiles/filmachine_test.dir/tests/test_utilities.c.o" \
-"CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o" \
 "CMakeFiles/filmachine_test.dir/stub/esp_stubs.c.o" \
 "CMakeFiles/filmachine_test.dir/stub/fatfs_stubs.c.o" \
 "CMakeFiles/filmachine_test.dir/stub/freertos_stubs.c.o" \
@@ -797,6 +826,7 @@ filmachine_test_OBJECTS = \
 "CMakeFiles/filmachine_test.dir/main/ds18b20.c.o" \
 "CMakeFiles/filmachine_test.dir/main/pca9685.c.o" \
 "CMakeFiles/filmachine_test.dir/main/ota_update.c.o" \
+"CMakeFiles/filmachine_test.dir/main/sensors.c.o" \
 "CMakeFiles/filmachine_test.dir/main/ui_profile.c.o" \
 "CMakeFiles/filmachine_test.dir/c_pages/page_home.c.o" \
 "CMakeFiles/filmachine_test.dir/c_pages/page_menu.c.o" \
@@ -825,24 +855,25 @@ filmachine_test_OBJECTS = \
 # External object files for target filmachine_test
 filmachine_test_EXTERNAL_OBJECTS =
 
-filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_runner.c.o
+filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o
+filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o
+filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_execution.c.o
+filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_filter.c.o
 filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_helpers.c.o
 filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_navigation.c.o
-filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_processes.c.o
-filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o
-filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_steps.c.o
-filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o
-filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_execution.c.o
-filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_persistence.c.o
-filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_settings.c.o
-filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_filter.c.o
-filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_tools.c.o
 filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o
-filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.o
 filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_ota.c.o
-filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_edge_cases.c.o
+filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_persistence.c.o
+filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_process_crud.c.o
+filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_processes.c.o
+filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_runner.c.o
+filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_selfcheck.c.o
+filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_settings.c.o
+filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_step_crud.c.o
+filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_steps.c.o
+filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_tools.c.o
+filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.o
 filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_utilities.c.o
-filmachine_test: CMakeFiles/filmachine_test.dir/tests/test_destroy_and_lifecycle.c.o
 filmachine_test: CMakeFiles/filmachine_test.dir/stub/esp_stubs.c.o
 filmachine_test: CMakeFiles/filmachine_test.dir/stub/fatfs_stubs.c.o
 filmachine_test: CMakeFiles/filmachine_test.dir/stub/freertos_stubs.c.o
@@ -851,6 +882,7 @@ filmachine_test: CMakeFiles/filmachine_test.dir/main/mcp23017.c.o
 filmachine_test: CMakeFiles/filmachine_test.dir/main/ds18b20.c.o
 filmachine_test: CMakeFiles/filmachine_test.dir/main/pca9685.c.o
 filmachine_test: CMakeFiles/filmachine_test.dir/main/ota_update.c.o
+filmachine_test: CMakeFiles/filmachine_test.dir/main/sensors.c.o
 filmachine_test: CMakeFiles/filmachine_test.dir/main/ui_profile.c.o
 filmachine_test: CMakeFiles/filmachine_test.dir/c_pages/page_home.c.o
 filmachine_test: CMakeFiles/filmachine_test.dir/c_pages/page_menu.c.o
@@ -878,7 +910,7 @@ filmachine_test: CMakeFiles/filmachine_test.dir/c_graphics/splash.c.o
 filmachine_test: CMakeFiles/filmachine_test.dir/build.make
 filmachine_test: lib/liblvgl.a
 filmachine_test: CMakeFiles/filmachine_test.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_51) "Linking C executable filmachine_test"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles --progress-num=$(CMAKE_PROGRESS_53) "Linking C executable filmachine_test"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/filmachine_test.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

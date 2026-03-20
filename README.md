@@ -2,7 +2,7 @@
 
 FilMachine is an automated film processing machine designed for photographic film development. It handles the entire process: chemical baths, water rinses, temperature regulation, and motor-driven film agitation — all controlled through a 3.5" color touchscreen display.
 
-The project includes a **desktop simulator** (SDL2 + LVGL) that reproduces the full touchscreen UI on macOS/Linux, enabling rapid development and testing without physical hardware, plus an **automated test suite** with 141 tests.
+The project includes a **desktop simulator** (SDL2 + LVGL) that reproduces the full touchscreen UI on macOS/Linux, enabling rapid development and testing without physical hardware, plus an **automated test suite** with 147 tests. Both boards compile from the same codebase with board selection at compile time.
 
 ---
 
@@ -41,8 +41,8 @@ The project has a **dual-target build system** that produces either ESP32-S3 fir
 | Layer | Firmware (ESP32-S3) | Simulator (macOS/Linux) |
 |-------|-------------------|------------------------|
 | **UI Library** | LVGL 9.2.2 | LVGL 9.2.2 (identical) |
-| **Display** | ILI9488 480x320 TFT | SDL2 window 480x320 |
-| **Touch Input** | FT6236 capacitive | SDL2 mouse events |
+| **Display** | ILI9488 480×320 (Makerfabs) / NV3041A 480×272 (JC4827W543) | SDL2 window (either resolution) |
+| **Touch Input** | FT6236 (Makerfabs) / GT911 (JC4827W543) | SDL2 mouse events |
 | **Storage** | FatFS on MicroSD | POSIX file I/O (sd/ directory) |
 | **RTOS** | FreeRTOS (ESP-IDF) | Stub (queues work, tasks are no-ops) |
 | **Temp Sensors** | DS18B20 OneWire | Simulated (20°C ambient, heater model) |
@@ -75,9 +75,11 @@ FilMachine_Simulator_v2/
 │   │   ├── FilMachine.h           #   Main header — all structs, enums, constants, prototypes
 │   │   ├── ds18b20.h              #   Temperature sensor driver API
 │   │   └── pca9685.h              #   PWM controller driver API
-│   ├── FilMachine.c               #   ESP32 entry point (app_main, sysMan task, motorMan task)
+│   ├── FilMachine.c               #   ESP32 entry point — board-conditional display/touch init
 │   ├── accessories.c              #   Utilities — linked lists, deep copy, config I/O, keyboard
 │   ├── ota_update.c               #   OTA firmware update (SD card + Wi-Fi web server)
+│   ├── sensors.c                  #   Additional sensors (flow meter, water level, hall effect)
+│   ├── ui_profile.c               #   Centralized UI layout constants for dual-resolution support
 │   ├── ds18b20.c                  #   DS18B20 OneWire temperature sensor driver
 │   ├── mcp23017.c                 #   MCP23017 I2C GPIO expander driver
 │   └── pca9685.c                  #   PCA9685 I2C PWM controller driver
@@ -176,30 +178,44 @@ LVGL 9.2.2 is automatically cloned from GitHub on the first build if not present
 ### Build the Simulator
 
 ```bash
-mkdir -p build2 && cd build2
-cmake .. -DTARGET=sim
+# 480×320 (default — Makerfabs resolution)
+mkdir -p build320 && cd build320
+cmake ..
+make filmachine_sim
+
+# 480×272 (JC4827W543 resolution)
+mkdir -p build272 && cd build272
+cmake .. -DCMAKE_C_FLAGS="-DSIM_RESOLUTION=272"
 make filmachine_sim
 ```
 
-This produces the `filmachine_sim` executable. On first build, if `sd/FilMachine.cfg` doesn't exist, the Python script `genFilMachineCFG.py` runs automatically to generate sample data.
+This produces the `filmachine_sim` executable.
 
 ### Build the Tests
 
 ```bash
-mkdir -p build2 && cd build2
-cmake .. -DTARGET=sim
+mkdir -p build320 && cd build320
+cmake ..
 make filmachine_test
+./filmachine_test
 ```
 
 ### Build the Firmware (ESP32-S3)
 
 Requires the [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/) toolchain installed and configured.
 
-**Important:** run `idf.py` from the **project root**, not from `build2/`.
+**Important:** run `idf.py` from the **project root**, not from `build320/`.
 
 ```bash
 cd FilMachine_Simulator_v2
+. $HOME/esp/esp-idf/export.sh
+
+# Makerfabs S3 (default board)
 idf.py build
+
+# JC4827W543 (new board)
+idf.py fullclean
+idf.py -D CMAKE_C_FLAGS="-DBOARD_JC4827W543" build
 ```
 
 The firmware binary is produced at `build/FilMachine.bin`. To flash it directly to a connected board:
@@ -309,6 +325,7 @@ Results are displayed in the terminal and saved to `test_results/test_results_YY
 | **Tools** | Cleaning, draining, statistics display, timer pause/resume, alarm functions |
 | **Edge Cases** | Boundary conditions, max limits, error recovery |
 | **Utilities** | Helper functions, linked list operations, drain/fill overlap calculation |
+| **UI Profile & Sensors** | Profile values match original, popup dimensions, font pointers, sensor stubs, board constants |
 | **Destroy & Lifecycle** | Memory cleanup, object destruction |
 
 The persistence tests verify that every field (process name, temperature, tolerance, film type, preferred flag, step names, durations, types, sources, discard flags) survives a full save-and-reload cycle.
@@ -436,18 +453,19 @@ The version displayed in Tools → Software version is read at runtime from the 
 
 ## Hardware Specifications
 
-### Board
+### Supported Boards
 
-ESP32-S3-WROOM-1-N16R8 with integrated 3.5" TFT display module.
+The firmware supports two boards selected at compile time:
+
+**Makerfabs MaTouch ESP32-S3** (original, default) — 3.5" ILI9488 480×320 parallel TFT, FT6236 touch, 16MB flash, 2MB PSRAM.
+
+**Guition JC4827W543C** (new) — 4.3" NV3041A 480×272 IPS QSPI, GT911 touch, 4MB flash, 8MB PSRAM, I2S speaker, flow meter, water level sensor, hall sensor.
 
 | Component | Detail |
 |-----------|--------|
-| **Controller** | ESP32-S3-WROOM-1-N16R8 (PCB antenna) |
-| **Flash** | 16MB |
-| **PSRAM** | 8MB |
-| **Wireless** | Wi-Fi 802.11 b/g/n + Bluetooth 5.0 |
-| **Display** | 3.5" ILI9488 TFT LCD, 480×320, 16-bit parallel interface |
-| **Touch** | FT6236 capacitive touchscreen (I2C) |
+| **Controller** | ESP32-S3-WROOM-1 (both boards) |
+| **Display** | ILI9488 480×320 parallel (Makerfabs) / NV3041A 480×272 QSPI (JC4827W543) |
+| **Touch** | FT6236 (Makerfabs) / GT911 (JC4827W543), both I2C |
 | **Storage** | MicroSD card slot |
 | **USB** | Dual USB Type-C (CP2104 UART-to-USB + native USB) |
 | **I/O Expander** | MCP23017 (I2C) — 8 relay outputs |

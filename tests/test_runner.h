@@ -261,6 +261,9 @@ void test_suite_ota(void);
 /** test_new_settings.c — new settings fields (pump, tank, container, WB, chem volume) */
 void test_suite_new_settings(void);
 
+/** test_ui_profile.c — UI profile values, sensor stubs, board constants */
+void test_suite_ui_profile(void);
+
 
 /* ═══════════════════════════════════════════════
  * External globals (defined in main/src)

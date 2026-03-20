@@ -1295,7 +1295,6 @@ void checkup(processNode *processToCheckup) {
 	char *tmp_checkupStepStatuses[] = checkupStepStatuses;
 	char *tmp_processSourceList[] = processSourceList;
 	char *tmp_processTempControlList[] = processTempControlList;
-	uint16_t tmp_tanksSizesAndTimes[2][3][2] = tanksSizesAndTimes;
 
 	/* Backward compatibility: keep gui.tempProcessNode in sync for other modules */
 	gui.tempProcessNode = processToCheckup;

@@ -55,6 +55,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/filmachine_sim.dir/main/ota_update.c.o.d"
   "CMakeFiles/filmachine_sim.dir/main/pca9685.c.o"
   "CMakeFiles/filmachine_sim.dir/main/pca9685.c.o.d"
+  "CMakeFiles/filmachine_sim.dir/main/sensors.c.o"
+  "CMakeFiles/filmachine_sim.dir/main/sensors.c.o.d"
   "CMakeFiles/filmachine_sim.dir/main/ui_profile.c.o"
   "CMakeFiles/filmachine_sim.dir/main/ui_profile.c.o.d"
   "CMakeFiles/filmachine_sim.dir/src/main.c.o"
