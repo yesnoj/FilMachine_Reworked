@@ -406,41 +406,42 @@ void event_selfcheckPopup(lv_event_t *e) {
  *  UI CREATION
  * ══════════════════════════════════════════════════════════ */
 void selfcheckPopupCreate(void) {
+    const ui_selfcheck_popup_layout_t *ui = &ui_get_profile()->selfcheck_popup;
     struct sSelfcheckPopup *sc = &gui.element.selfcheckPopup;
     if (sc->selfcheckPopupParent != NULL) return;
 
-    createPopupBackdrop(&sc->selfcheckPopupParent, &sc->selfcheckContainer, 440, 290);
+    createPopupBackdrop(&sc->selfcheckPopupParent, &sc->selfcheckContainer, ui_get_profile()->popups.selfcheck_w, ui_get_profile()->popups.selfcheck_h);
 
     /* Title */
     sc->selfcheckTitle = lv_label_create(sc->selfcheckContainer);
     lv_label_set_text(sc->selfcheckTitle, selfCheck_text);
-    lv_obj_set_style_text_font(sc->selfcheckTitle, &lv_font_montserrat_22, 0);
-    lv_obj_align(sc->selfcheckTitle, LV_ALIGN_TOP_MID, 0, -10);
+    lv_obj_set_style_text_font(sc->selfcheckTitle, ui->title_font, 0);
+    lv_obj_align(sc->selfcheckTitle, LV_ALIGN_TOP_MID, 0, ui->title_y);
 
     /* White underline */
     initTitleLineStyle(&sc->style_selfcheckTitleLine, WHITE);
     sc->selfcheckTitleLine = lv_line_create(sc->selfcheckContainer);
     lv_line_set_points(sc->selfcheckTitleLine, sc->titleLinePoints, 2);
     lv_obj_add_style(sc->selfcheckTitleLine, &sc->style_selfcheckTitleLine, 0);
-    lv_obj_align(sc->selfcheckTitleLine, LV_ALIGN_TOP_MID, 0, 23);
+    lv_obj_align(sc->selfcheckTitleLine, LV_ALIGN_TOP_MID, 0, ui->title_line_y);
 
     /* X close button (green, top-right) */
     sc->closeButton = lv_button_create(sc->selfcheckContainer);
     lv_obj_set_size(sc->closeButton, BUTTON_POPUP_CLOSE_WIDTH, BUTTON_POPUP_CLOSE_HEIGHT);
-    lv_obj_align(sc->closeButton, LV_ALIGN_TOP_RIGHT, 7, -10);
+    lv_obj_align(sc->closeButton, LV_ALIGN_TOP_RIGHT, ui->close_x, ui->close_y);
     lv_obj_add_event_cb(sc->closeButton, event_selfcheckPopup, LV_EVENT_CLICKED, NULL);
     lv_obj_set_style_bg_color(sc->closeButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
     lv_obj_move_foreground(sc->closeButton);
 
     sc->closeButtonLabel = lv_label_create(sc->closeButton);
     lv_label_set_text(sc->closeButtonLabel, closePopup_icon);
-    lv_obj_set_style_text_font(sc->closeButtonLabel, &FilMachineFontIcons_20, 0);
+    lv_obj_set_style_text_font(sc->closeButtonLabel, ui->close_icon_font, 0);
     lv_obj_align(sc->closeButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
     /* ── LEFT PANEL ── */
     sc->leftPanel = lv_obj_create(sc->selfcheckContainer);
-    lv_obj_set_pos(sc->leftPanel, -5, 30);
-    lv_obj_set_size(sc->leftPanel, 155, 220);
+    lv_obj_set_pos(sc->leftPanel, ui->left_panel_x, ui->left_panel_y);
+    lv_obj_set_size(sc->leftPanel, ui->left_panel_w, ui->left_panel_h);
     lv_obj_remove_flag(sc->leftPanel, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_style_border_opa(sc->leftPanel, LV_OPA_TRANSP, 0);
     lv_obj_set_style_bg_opa(sc->leftPanel, LV_OPA_TRANSP, 0);
@@ -448,32 +449,32 @@ void selfcheckPopupCreate(void) {
 
     sc->tasksLabel = lv_label_create(sc->leftPanel);
     lv_label_set_text(sc->tasksLabel, selfCheckTasks_text);
-    lv_obj_set_style_text_font(sc->tasksLabel, &lv_font_montserrat_16, 0);
-    lv_obj_set_pos(sc->tasksLabel, 5, 0);
+    lv_obj_set_style_text_font(sc->tasksLabel, ui->tasks_font, 0);
+    lv_obj_set_pos(sc->tasksLabel, ui->tasks_label_x, ui->tasks_label_y);
 
     for (int i = 0; i < SC_NUM_PHASES; i++) {
-        int y = 22 + (i * 27);
+        int y = ui->phase_row_y + (i * ui->phase_row_gap);
         sc->phaseIcon[i] = lv_label_create(sc->leftPanel);
         lv_label_set_text(sc->phaseIcon[i], dotStep_icon);
-        lv_obj_set_style_text_font(sc->phaseIcon[i], &FilMachineFontIcons_15, 0);
+        lv_obj_set_style_text_font(sc->phaseIcon[i], ui->phase_icon_font, 0);
         lv_obj_set_style_text_color(sc->phaseIcon[i], lv_color_hex(WHITE), 0);
-        lv_obj_set_pos(sc->phaseIcon[i], 5, y);
+        lv_obj_set_pos(sc->phaseIcon[i], ui->phase_icon_x, y);
         lv_obj_add_flag(sc->phaseIcon[i], LV_OBJ_FLAG_CLICKABLE);
         lv_obj_add_event_cb(sc->phaseIcon[i], event_selfcheckPopup, LV_EVENT_CLICKED, NULL);
 
         sc->phaseNameLabel[i] = lv_label_create(sc->leftPanel);
         lv_label_set_text(sc->phaseNameLabel[i], phaseNames[i]);
-        lv_obj_set_style_text_font(sc->phaseNameLabel[i], &lv_font_montserrat_14, 0);
+        lv_obj_set_style_text_font(sc->phaseNameLabel[i], ui->phase_name_font, 0);
         lv_obj_set_style_text_color(sc->phaseNameLabel[i], lv_color_hex(WHITE), 0);
-        lv_obj_set_pos(sc->phaseNameLabel[i], 25, y + 1);
+        lv_obj_set_pos(sc->phaseNameLabel[i], ui->phase_name_x, y + 1);
         lv_obj_add_flag(sc->phaseNameLabel[i], LV_OBJ_FLAG_CLICKABLE);
         lv_obj_add_event_cb(sc->phaseNameLabel[i], event_selfcheckPopup, LV_EVENT_CLICKED, NULL);
     }
 
     /* ── RIGHT PANEL ── */
     sc->rightPanel = lv_obj_create(sc->selfcheckContainer);
-    lv_obj_set_pos(sc->rightPanel, 150, 30);
-    lv_obj_set_size(sc->rightPanel, 280, 250);
+    lv_obj_set_pos(sc->rightPanel, ui->right_panel_x, ui->right_panel_y);
+    lv_obj_set_size(sc->rightPanel, ui->right_panel_w, ui->right_panel_h);
     lv_obj_remove_flag(sc->rightPanel, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_style_border_opa(sc->rightPanel, LV_OPA_TRANSP, 0);
     lv_obj_set_style_bg_opa(sc->rightPanel, LV_OPA_TRANSP, 0);
@@ -481,34 +482,34 @@ void selfcheckPopupCreate(void) {
 
     sc->phaseTitle = lv_label_create(sc->rightPanel);
     lv_label_set_text(sc->phaseTitle, phaseNames[0]);
-    lv_obj_set_style_text_font(sc->phaseTitle, &lv_font_montserrat_20, 0);
-    lv_obj_set_width(sc->phaseTitle, 270);
+    lv_obj_set_style_text_font(sc->phaseTitle, ui->phase_title_font, 0);
+    lv_obj_set_width(sc->phaseTitle, ui->phase_title_w);
     lv_label_set_long_mode(sc->phaseTitle, LV_LABEL_LONG_WRAP);
-    lv_obj_set_pos(sc->phaseTitle, 0, 0);
+    lv_obj_set_pos(sc->phaseTitle, 0, ui->phase_title_y);
 
     sc->phaseDescription = lv_label_create(sc->rightPanel);
     lv_label_set_text(sc->phaseDescription, phaseDescriptions[0]);
-    lv_obj_set_style_text_font(sc->phaseDescription, &lv_font_montserrat_14, 0);
-    lv_obj_set_width(sc->phaseDescription, 270);
+    lv_obj_set_style_text_font(sc->phaseDescription, ui->phase_name_font, 0);
+    lv_obj_set_width(sc->phaseDescription, ui->phase_desc_w);
     lv_label_set_long_mode(sc->phaseDescription, LV_LABEL_LONG_WRAP);
-    lv_obj_set_pos(sc->phaseDescription, 0, 28);
+    lv_obj_set_pos(sc->phaseDescription, 0, ui->phase_desc_y);
 
     sc->phaseStatus = lv_label_create(sc->rightPanel);
     lv_label_set_text(sc->phaseStatus, "");
-    lv_obj_set_style_text_font(sc->phaseStatus, &lv_font_montserrat_16, 0);
-    lv_obj_set_width(sc->phaseStatus, 270);
+    lv_obj_set_style_text_font(sc->phaseStatus, ui->tasks_font, 0);
+    lv_obj_set_width(sc->phaseStatus, ui->phase_status_w);
     lv_label_set_long_mode(sc->phaseStatus, LV_LABEL_LONG_WRAP);
-    lv_obj_set_pos(sc->phaseStatus, 0, 80);
+    lv_obj_set_pos(sc->phaseStatus, 0, ui->phase_status_y);
 
     sc->phaseTimer = lv_label_create(sc->rightPanel);
     lv_label_set_text(sc->phaseTimer, "");
-    lv_obj_set_style_text_font(sc->phaseTimer, &lv_font_montserrat_16, 0);
-    lv_obj_set_pos(sc->phaseTimer, 0, 130);
+    lv_obj_set_style_text_font(sc->phaseTimer, ui->tasks_font, 0);
+    lv_obj_set_pos(sc->phaseTimer, 0, ui->phase_timer_y);
 
     /* Progress bar (thick, green, hidden by default) */
     sc->progressBar = lv_bar_create(sc->rightPanel);
-    lv_obj_set_size(sc->progressBar, 260, 25);
-    lv_obj_set_pos(sc->progressBar, 0, 155);
+    lv_obj_set_size(sc->progressBar, ui->progress_w, ui->progress_h);
+    lv_obj_set_pos(sc->progressBar, 0, ui->progress_y);
     lv_bar_set_range(sc->progressBar, 0, 100);
     lv_bar_set_value(sc->progressBar, 0, LV_ANIM_OFF);
     lv_obj_set_style_bg_color(sc->progressBar, lv_palette_darken(LV_PALETTE_GREY, 3), LV_PART_MAIN);
@@ -518,44 +519,41 @@ void selfcheckPopupCreate(void) {
     lv_obj_add_flag(sc->progressBar, LV_OBJ_FLAG_HIDDEN);
 
     /* ── 3 BUTTONS IN ONE ROW ── */
-    #define SC_BTN_W  82
-    #define SC_BTN_H  33
-    #define SC_BTN_Y  195
-
+    
     /* Stop (red) */
     sc->stopButton = lv_button_create(sc->rightPanel);
-    lv_obj_set_size(sc->stopButton, SC_BTN_W, SC_BTN_H);
-    lv_obj_set_pos(sc->stopButton, 0, SC_BTN_Y);
+    lv_obj_set_size(sc->stopButton, ui->button_w, ui->button_h);
+    lv_obj_set_pos(sc->stopButton, ui->stop_button_x, ui->button_y);
     lv_obj_add_event_cb(sc->stopButton, event_selfcheckPopup, LV_EVENT_CLICKED, NULL);
     lv_obj_set_style_bg_color(sc->stopButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
 
     sc->stopButtonLabel = lv_label_create(sc->stopButton);
     lv_label_set_text(sc->stopButtonLabel, buttonStop_text);
-    lv_obj_set_style_text_font(sc->stopButtonLabel, &lv_font_montserrat_18, 0);
+    lv_obj_set_style_text_font(sc->stopButtonLabel, ui->button_font, 0);
     lv_obj_align(sc->stopButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
     /* Start (green) */
     sc->startButton = lv_button_create(sc->rightPanel);
-    lv_obj_set_size(sc->startButton, SC_BTN_W, SC_BTN_H);
-    lv_obj_set_pos(sc->startButton, 90, SC_BTN_Y);
+    lv_obj_set_size(sc->startButton, ui->button_w, ui->button_h);
+    lv_obj_set_pos(sc->startButton, ui->start_button_x, ui->button_y);
     lv_obj_add_event_cb(sc->startButton, event_selfcheckPopup, LV_EVENT_CLICKED, NULL);
     lv_obj_set_style_bg_color(sc->startButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
 
     sc->startButtonLabel = lv_label_create(sc->startButton);
     lv_label_set_text(sc->startButtonLabel, buttonStart_text);
-    lv_obj_set_style_text_font(sc->startButtonLabel, &lv_font_montserrat_18, 0);
+    lv_obj_set_style_text_font(sc->startButtonLabel, ui->button_font, 0);
     lv_obj_align(sc->startButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
     /* Advance (light blue) */
     sc->advanceButton = lv_button_create(sc->rightPanel);
-    lv_obj_set_size(sc->advanceButton, SC_BTN_W, SC_BTN_H);
-    lv_obj_set_pos(sc->advanceButton, 180, SC_BTN_Y);
+    lv_obj_set_size(sc->advanceButton, ui->button_w, ui->button_h);
+    lv_obj_set_pos(sc->advanceButton, ui->advance_button_x, ui->button_y);
     lv_obj_add_event_cb(sc->advanceButton, event_selfcheckPopup, LV_EVENT_CLICKED, NULL);
     lv_obj_set_style_bg_color(sc->advanceButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
 
     sc->advanceButtonLabel = lv_label_create(sc->advanceButton);
     lv_label_set_text(sc->advanceButtonLabel, selfCheckNext_text);
-    lv_obj_set_style_text_font(sc->advanceButtonLabel, &lv_font_montserrat_16, 0);
+    lv_obj_set_style_text_font(sc->advanceButtonLabel, ui->tasks_font, 0);
     lv_obj_align(sc->advanceButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
     /* Initialize */

@@ -477,6 +477,7 @@ void event_messagePopup(lv_event_t *e)
 }
 
 void messagePopupCreate(const char * popupTitleText,const char * popupText,const char * textButton1, const char * textButton2, void * whoCallMe){
+  const ui_message_popup_layout_t *ui = &ui_get_profile()->message_popup;
   /*********************
   *    PAGE HEADER
   *********************/
@@ -489,12 +490,12 @@ void messagePopupCreate(const char * popupTitleText,const char * popupText,const
    gui.element.messagePopup.mBoxPopupButton2 = NULL;
 
    LV_LOG_USER("Message popup create");
-   createPopupBackdrop(&gui.element.messagePopup.mBoxPopupParent, &gui.element.messagePopup.mBoxPopupContainer, 320, 240);
+   createPopupBackdrop(&gui.element.messagePopup.mBoxPopupParent, &gui.element.messagePopup.mBoxPopupContainer, ui_get_profile()->popups.message_w, ui_get_profile()->popups.message_h);
 
          gui.element.messagePopup.mBoxPopupTitle = lv_label_create(gui.element.messagePopup.mBoxPopupContainer);
          lv_label_set_text(gui.element.messagePopup.mBoxPopupTitle, popupTitleText);
-         lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupTitle, &lv_font_montserrat_22, 0);
-         lv_obj_align(gui.element.messagePopup.mBoxPopupTitle, LV_ALIGN_TOP_MID, 0, - 10);
+         lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupTitle, ui->title_font, 0);
+         lv_obj_align(gui.element.messagePopup.mBoxPopupTitle, LV_ALIGN_TOP_MID, 0, -10);
 
 
    /*Create style*/
@@ -513,53 +514,74 @@ void messagePopupCreate(const char * popupTitleText,const char * popupText,const
   *    PAGE ELEMENTS
   *********************/
 
+   /* For popups with bottom buttons (No/Yes), shrink the text area so it
+      fits between the title line and the buttons.  Info popups (close X
+      only) can use the full height. */
+   bool has_bottom_buttons = (g_msg_ctx.type != MSGPOP_OWNER_INFO);
+   int32_t text_area_h = has_bottom_buttons
+       ? (ui->text_container_h - BUTTON_MBOX_HEIGHT)
+       : ui->text_container_h;
+
    gui.element.messagePopup.mBoxPopupTextContainer = lv_obj_create(gui.element.messagePopup.mBoxPopupContainer);
-   lv_obj_align(gui.element.messagePopup.mBoxPopupTextContainer, LV_ALIGN_TOP_MID, 0, 30);
-   lv_obj_set_size(gui.element.messagePopup.mBoxPopupTextContainer, 305, 180);
+   lv_obj_align(gui.element.messagePopup.mBoxPopupTextContainer, LV_ALIGN_TOP_MID, 0, ui->text_container_y);
+   lv_obj_set_size(gui.element.messagePopup.mBoxPopupTextContainer, ui->text_container_w, text_area_h);
    lv_obj_set_style_border_opa(gui.element.messagePopup.mBoxPopupTextContainer, LV_OPA_TRANSP, 0);
+   lv_obj_set_style_pad_all(gui.element.messagePopup.mBoxPopupTextContainer, 0, 0);
    lv_obj_set_scroll_dir(gui.element.messagePopup.mBoxPopupTextContainer, LV_DIR_VER);
+   lv_obj_clear_flag(gui.element.messagePopup.mBoxPopupTextContainer, LV_OBJ_FLAG_SCROLL_ELASTIC);
+   lv_obj_clear_flag(gui.element.messagePopup.mBoxPopupTextContainer, LV_OBJ_FLAG_SCROLL_MOMENTUM);
+   lv_obj_add_flag(gui.element.messagePopup.mBoxPopupTextContainer, LV_OBJ_FLAG_SCROLLABLE);
 
          gui.element.messagePopup.mBoxPopupText = lv_label_create(gui.element.messagePopup.mBoxPopupTextContainer);
          lv_label_set_text(gui.element.messagePopup.mBoxPopupText, popupText);
-         lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupText, &lv_font_montserrat_20, 0);
-         lv_obj_align(gui.element.messagePopup.mBoxPopupText, LV_ALIGN_CENTER, 0, -18);
-         lv_obj_set_size(gui.element.messagePopup.mBoxPopupText, 295, LV_SIZE_CONTENT);
+         lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupText, ui->text_font, 0);
+         lv_obj_set_width(gui.element.messagePopup.mBoxPopupText, ui->text_w);
          lv_label_set_long_mode(gui.element.messagePopup.mBoxPopupText, LV_LABEL_LONG_WRAP);
          lv_obj_set_style_text_align(gui.element.messagePopup.mBoxPopupText , LV_TEXT_ALIGN_CENTER, 0);
+         lv_obj_update_layout(gui.element.messagePopup.mBoxPopupText);
+         int32_t text_h = lv_obj_get_height(gui.element.messagePopup.mBoxPopupText);
+         if (text_h <= text_area_h) {
+             /* Text fits — vertically center it within the container */
+             lv_obj_align(gui.element.messagePopup.mBoxPopupText, LV_ALIGN_CENTER, 0, 0);
+             lv_obj_remove_flag(gui.element.messagePopup.mBoxPopupTextContainer, LV_OBJ_FLAG_SCROLLABLE);
+         } else {
+             /* Text overflows — top-align and let the container scroll */
+             lv_obj_align(gui.element.messagePopup.mBoxPopupText, LV_ALIGN_TOP_MID, 0, 0);
+         }
 
   if(g_msg_ctx.type == MSGPOP_OWNER_INFO){
       gui.element.messagePopup.mBoxPopupButtonClose = lv_button_create(gui.element.messagePopup.mBoxPopupContainer);
       lv_obj_set_size(gui.element.messagePopup.mBoxPopupButtonClose, BUTTON_POPUP_CLOSE_WIDTH, BUTTON_POPUP_CLOSE_HEIGHT);
-      lv_obj_align(gui.element.messagePopup.mBoxPopupButtonClose, LV_ALIGN_TOP_RIGHT, 7 , -10);
+      lv_obj_align(gui.element.messagePopup.mBoxPopupButtonClose, LV_ALIGN_TOP_RIGHT, ui->info_close_x , ui->info_close_y);
       lv_obj_add_event_cb(gui.element.messagePopup.mBoxPopupButtonClose, event_messagePopup, LV_EVENT_CLICKED, NULL);
 
             gui.element.messagePopup.mBoxPopupButtonLabel = lv_label_create(gui.element.messagePopup.mBoxPopupButtonClose);
             lv_label_set_text(gui.element.messagePopup.mBoxPopupButtonLabel, closePopup_icon);
-            lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupButtonLabel, &FilMachineFontIcons_20, 0);
+            lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupButtonLabel, ui->close_icon_font, 0);
             lv_obj_align(gui.element.messagePopup.mBoxPopupButtonLabel, LV_ALIGN_CENTER, 0, 0);
   }
   else{
       gui.element.messagePopup.mBoxPopupButton1 = lv_button_create(gui.element.messagePopup.mBoxPopupContainer);
       lv_obj_set_size(gui.element.messagePopup.mBoxPopupButton1, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
-      lv_obj_align(gui.element.messagePopup.mBoxPopupButton1, LV_ALIGN_BOTTOM_LEFT, 10 , 10);
+      lv_obj_align(gui.element.messagePopup.mBoxPopupButton1, LV_ALIGN_BOTTOM_LEFT, ui->button1_x , ui->button_y);
       lv_obj_add_event_cb(gui.element.messagePopup.mBoxPopupButton1, event_messagePopup, LV_EVENT_CLICKED, NULL);
       lv_obj_set_style_bg_color(gui.element.messagePopup.mBoxPopupButton1, lv_color_hex(RED_DARK), LV_PART_MAIN);
 
           gui.element.messagePopup.mBoxPopupButton1Label = lv_label_create(gui.element.messagePopup.mBoxPopupButton1);
           lv_label_set_text(gui.element.messagePopup.mBoxPopupButton1Label, textButton1);
-          lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupButton1Label, &lv_font_montserrat_24, 0);
+          lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupButton1Label, ui->button_font, 0);
           lv_obj_align(gui.element.messagePopup.mBoxPopupButton1Label, LV_ALIGN_CENTER, 0, 0);
 
 
       gui.element.messagePopup.mBoxPopupButton2 = lv_button_create(gui.element.messagePopup.mBoxPopupContainer);
       lv_obj_set_size(gui.element.messagePopup.mBoxPopupButton2, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
-      lv_obj_align(gui.element.messagePopup.mBoxPopupButton2, LV_ALIGN_BOTTOM_RIGHT, - 10 , 10);
+      lv_obj_align(gui.element.messagePopup.mBoxPopupButton2, LV_ALIGN_BOTTOM_RIGHT, - ui->button2_x , ui->button_y);
       lv_obj_add_event_cb(gui.element.messagePopup.mBoxPopupButton2, event_messagePopup, LV_EVENT_CLICKED, NULL);
       lv_obj_set_style_bg_color(gui.element.messagePopup.mBoxPopupButton2, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
 
             gui.element.messagePopup.mBoxPopupButton2Label = lv_label_create(gui.element.messagePopup.mBoxPopupButton2);
             lv_label_set_text(gui.element.messagePopup.mBoxPopupButton2Label, textButton2);
-            lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupButton2Label, &lv_font_montserrat_24, 0);
+            lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupButton2Label, ui->button_font, 0);
             lv_obj_align(gui.element.messagePopup.mBoxPopupButton2Label, LV_ALIGN_CENTER, 0, 0);
   }
 }

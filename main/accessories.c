@@ -613,16 +613,17 @@ void initGlobals( void ) {
   //gui.page.processes.processElementsList.size  = 0;
 
   // We only need to initialise the non-zero values
-  gui.element.cleanPopup.titleLinePoints[1].x = 200;
-  gui.element.drainPopup.titleLinePoints[1].x = 200;
-  gui.element.selfcheckPopup.titleLinePoints[1].x = 320;
-  gui.element.filterPopup.titleLinePoints[1].x = 200;
-  gui.element.rollerPopup.titleLinePoints[1].x = 200;
-  gui.element.messagePopup.titleLinePoints[1].x = 200;
+  const ui_profile_t *ui = ui_get_profile();
+  gui.element.cleanPopup.titleLinePoints[1].x = ui->popups.clean_title_line_w;
+    gui.element.drainPopup.titleLinePoints[1].x = ui->popups.drain_title_line_w;
+    gui.element.selfcheckPopup.titleLinePoints[1].x = ui->popups.selfcheck_title_line_w;
+    gui.element.filterPopup.titleLinePoints[1].x = ui->popups.filter_title_line_w;
+    gui.element.rollerPopup.titleLinePoints[1].x = ui->popups.roller_title_line_w;
+    gui.element.messagePopup.titleLinePoints[1].x = ui->popups.message_title_line_w;
 
-  gui.page.processes.titleLinePoints[1].x = 310;
-  gui.page.settings.titleLinePoints[1].x = 310;
-  gui.page.tools.titleLinePoints[1].x = 310;
+    gui.page.processes.titleLinePoints[1].x = ui->common.title_line_w;
+    gui.page.settings.titleLinePoints[1].x = ui->common.title_line_w;
+    gui.page.tools.titleLinePoints[1].x = ui->common.title_line_w;
   
   /* Sensible defaults for settings (overridden by config file if present) */
   gui.page.settings.settingsParams.tankSize = 2;           /* Medium */

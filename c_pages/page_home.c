@@ -24,6 +24,8 @@ void event_btn_start(lv_event_t * e) {
 
 void homePage(void) {
 
+    const ui_home_layout_t *ui = &ui_get_profile()->home;
+
 //    lv_obj_del(lv_screen_active());  // Shouldn't be required
 
     gui.page.home.screen_home = lv_obj_create(NULL);
@@ -37,8 +39,8 @@ void homePage(void) {
         //lv_img_set_zoom(logo, 128);
 
         gui.page.home.startButton = lv_obj_create(gui.page.home.screen_home);
-        lv_obj_align(gui.page.home.startButton, LV_ALIGN_BOTTOM_RIGHT, -10 , -7);                  
-        lv_obj_set_size(gui.page.home.startButton, 60, 60);   
+        lv_obj_align(gui.page.home.startButton, LV_ALIGN_BOTTOM_RIGHT, ui->normal_start_x , ui->normal_start_y);                  
+        lv_obj_set_size(gui.page.home.startButton, ui->normal_start_w, ui->normal_start_h);   
         lv_obj_add_event_cb(gui.page.home.startButton, event_btn_start, LV_EVENT_CLICKED, gui.page.home.startButton);
         lv_obj_set_style_bg_opa(gui.page.home.startButton, LV_OPA_TRANSP, 0);
         lv_obj_set_style_border_opa(gui.page.home.startButton, LV_OPA_TRANSP, 0);
@@ -48,8 +50,8 @@ void homePage(void) {
           lv_obj_set_style_bg_color(lv_screen_active(), lv_color_hex(RED), LV_PART_MAIN);
 
           gui.page.home.startButton = lv_obj_create(gui.page.home.screen_home);
-          lv_obj_align(gui.page.home.startButton, LV_ALIGN_CENTER, 0 , -30);                  
-          lv_obj_set_size(gui.page.home.startButton, 150, 150);   
+          lv_obj_align(gui.page.home.startButton, LV_ALIGN_CENTER, 0 , ui->error_start_y);                  
+          lv_obj_set_size(gui.page.home.startButton, ui->error_start_size, ui->error_start_size);   
           lv_obj_add_event_cb(gui.page.home.startButton, event_btn_start, LV_EVENT_CLICKED, gui.page.home.startButton);
           lv_obj_set_style_bg_color(gui.page.home.startButton, lv_color_hex(RED), LV_PART_MAIN);
           lv_obj_set_style_border_opa(gui.page.home.startButton, LV_OPA_TRANSP, 0);
@@ -57,11 +59,11 @@ void homePage(void) {
 
 
           gui.page.home.errorButtonLabel = lv_label_create(gui.page.home.startButton);         
-          lv_obj_set_style_text_font(gui.page.home.errorButtonLabel, &FilMachineFontIcons_100, 0);              
+          lv_obj_set_style_text_font(gui.page.home.errorButtonLabel, ui->error_icon_font, 0);              
           lv_obj_align(gui.page.home.errorButtonLabel, LV_ALIGN_CENTER, 0, 0);
           
           gui.page.home.errorLabel = lv_label_create(gui.page.home.screen_home);
-          lv_obj_align(gui.page.home.errorLabel, LV_ALIGN_CENTER, 0 , 90); 
+          lv_obj_align(gui.page.home.errorLabel, LV_ALIGN_CENTER, 0 , ui->error_label_y); 
 
           if(initErrors == INIT_ERROR_SD && ENABLE_BOOT_ERRORS)
           {
@@ -78,7 +80,7 @@ void homePage(void) {
             lv_label_set_text(gui.page.home.errorButtonLabel, chip_icon);
             lv_label_set_text(gui.page.home.errorLabel, initI2CError_text);
           }  
-          lv_obj_set_style_text_font(gui.page.home.errorLabel, &lv_font_montserrat_20, 0);              
+          lv_obj_set_style_text_font(gui.page.home.errorLabel, ui->error_text_font, 0);              
           lv_obj_set_style_text_align(gui.page.home.errorLabel , LV_TEXT_ALIGN_CENTER, 0);
         }
       }

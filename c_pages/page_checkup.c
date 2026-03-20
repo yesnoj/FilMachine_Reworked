@@ -434,7 +434,7 @@ void tempTimerCallback(lv_timer_t * timer) {
         } else {
             /* Show CONTINUE button for manual advance — widen to fit text */
             if(ckup->checkupSkipButton != NULL)
-                lv_obj_set_width(ckup->checkupSkipButton, 150);
+                lv_obj_set_width(ckup->checkupSkipButton, ui_get_profile()->checkup.continue_button_w);
             if(ckup->checkupSkipButtonLabel != NULL)
                 lv_label_set_text(ckup->checkupSkipButtonLabel, checkupContinue_text);
         }
@@ -792,33 +792,34 @@ void pumpTimer(lv_timer_t *timer) {
  * ═══════════════════════════════════════════════════════════════════════ */
 
 static void checkup_renderPreFlight(processNode *proc) {
+    const ui_checkup_layout_t *ui = &ui_get_profile()->checkup;
     /* processStep 0: Tank size and chemistry volume selection */
     sCheckup *ckup = proc->process.processDetails->checkup;
     if(isStepStatus0created == 0) {
         ckup->checkupSelectTankChemistryContainer = lv_obj_create(ckup->checkupStepContainer);
         lv_obj_remove_flag(ckup->checkupSelectTankChemistryContainer, LV_OBJ_FLAG_SCROLLABLE);
-        lv_obj_align(ckup->checkupSelectTankChemistryContainer, LV_ALIGN_TOP_LEFT, -18, -18);
-        lv_obj_set_size(ckup->checkupSelectTankChemistryContainer, 240, 265);
+        lv_obj_align(ckup->checkupSelectTankChemistryContainer, LV_ALIGN_TOP_LEFT, ui->stage_panel_x, ui->stage_panel_y);
+        lv_obj_set_size(ckup->checkupSelectTankChemistryContainer, ui_get_profile()->checkup.stage_panel_w, ui_get_profile()->checkup.stage_panel_h);
         lv_obj_set_style_border_opa(ckup->checkupSelectTankChemistryContainer, LV_OPA_TRANSP, 0);
         lv_obj_add_event_cb(ckup->checkupSelectTankChemistryContainer, event_checkup, LV_EVENT_CLICKED, proc);
 
         ckup->checkupProcessReadyLabel = lv_label_create(ckup->checkupSelectTankChemistryContainer);
         lv_label_set_text(ckup->checkupProcessReadyLabel, checkupProcessReady_text);
-        lv_obj_set_width(ckup->checkupProcessReadyLabel, 230);
-        lv_obj_set_style_text_font(ckup->checkupProcessReadyLabel, &lv_font_montserrat_22, 0);
-        lv_obj_align(ckup->checkupProcessReadyLabel, LV_ALIGN_TOP_LEFT, -10, -8);
+        lv_obj_set_width(ckup->checkupProcessReadyLabel, ui->stage_title_w);
+        lv_obj_set_style_text_font(ckup->checkupProcessReadyLabel, ui->stage_title_font, 0);
+        lv_obj_align(ckup->checkupProcessReadyLabel, LV_ALIGN_TOP_LEFT, ui->stage_title_x, ui->stage_title_y);
 
         ckup->checkupTankSizeLabel = lv_label_create(ckup->checkupSelectTankChemistryContainer);
         lv_label_set_text(ckup->checkupTankSizeLabel, checkupTankSize_text);
         lv_obj_set_width(ckup->checkupTankSizeLabel, LV_SIZE_CONTENT);
-        lv_obj_set_style_text_font(ckup->checkupTankSizeLabel, &lv_font_montserrat_18, 0);
+        lv_obj_set_style_text_font(ckup->checkupTankSizeLabel, ui->stage_label_font, 0);
         lv_obj_align(ckup->checkupTankSizeLabel, LV_ALIGN_TOP_MID, 0, 30);
 
         ckup->checkupTankSizeTextArea = lv_textarea_create(ckup->checkupSelectTankChemistryContainer);
         lv_textarea_set_one_line(ckup->checkupTankSizeTextArea, true);
         lv_textarea_set_placeholder_text(ckup->checkupTankSizeTextArea, checkupTankSizePlaceHolder_text);
-        lv_obj_align(ckup->checkupTankSizeTextArea, LV_ALIGN_TOP_MID, 0, 55);
-        lv_obj_set_width(ckup->checkupTankSizeTextArea, 100);
+        lv_obj_align(ckup->checkupTankSizeTextArea, LV_ALIGN_TOP_MID, 0, ui->stage_textarea_y1);
+        lv_obj_set_width(ckup->checkupTankSizeTextArea, ui->stage_textarea_w);
 
         lv_obj_set_style_bg_color(ckup->checkupTankSizeTextArea, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
         lv_obj_set_style_text_align(ckup->checkupTankSizeTextArea, LV_TEXT_ALIGN_CENTER, 0);
@@ -839,14 +840,14 @@ static void checkup_renderPreFlight(processNode *proc) {
         ckup->checkupChemistryVolumeLabel = lv_label_create(ckup->checkupSelectTankChemistryContainer);
         lv_label_set_text(ckup->checkupChemistryVolumeLabel, checkupChemistryVolume_text);
         lv_obj_set_width(ckup->checkupChemistryVolumeLabel, LV_SIZE_CONTENT);
-        lv_obj_set_style_text_font(ckup->checkupChemistryVolumeLabel, &lv_font_montserrat_18, 0);
+        lv_obj_set_style_text_font(ckup->checkupChemistryVolumeLabel, ui->stage_label_font, 0);
         lv_obj_align(ckup->checkupChemistryVolumeLabel, LV_ALIGN_TOP_MID, 0, 100);
 
         /* Read-only volume textarea */
         ckup->checkupVolumeTextArea = lv_textarea_create(ckup->checkupSelectTankChemistryContainer);
         lv_textarea_set_one_line(ckup->checkupVolumeTextArea, true);
-        lv_obj_align(ckup->checkupVolumeTextArea, LV_ALIGN_TOP_MID, 0, 125);
-        lv_obj_set_width(ckup->checkupVolumeTextArea, 100);
+        lv_obj_align(ckup->checkupVolumeTextArea, LV_ALIGN_TOP_MID, 0, ui->stage_textarea_y2);
+        lv_obj_set_width(ckup->checkupVolumeTextArea, ui->stage_textarea_w);
         lv_obj_set_style_bg_color(ckup->checkupVolumeTextArea, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
         lv_obj_set_style_text_align(ckup->checkupVolumeTextArea, LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_add_style(ckup->checkupVolumeTextArea, &ckup->textAreaStyleCheckup, LV_PART_MAIN);
@@ -865,19 +866,19 @@ static void checkup_renderPreFlight(processNode *proc) {
 
         ckup->checkupStartButton = lv_button_create(ckup->checkupSelectTankChemistryContainer);
         lv_obj_set_size(ckup->checkupStartButton, BUTTON_PROCESS_WIDTH, BUTTON_PROCESS_HEIGHT);
-        lv_obj_align(ckup->checkupStartButton, LV_ALIGN_BOTTOM_MID, 0, 10);
+        lv_obj_align(ckup->checkupStartButton, LV_ALIGN_BOTTOM_MID, 0, ui->stage_button_y);
         lv_obj_add_event_cb(ckup->checkupStartButton, event_checkup, LV_EVENT_CLICKED, proc);
         lv_obj_set_style_bg_color(ckup->checkupStartButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
         lv_obj_move_foreground(ckup->checkupStartButton);
 
         ckup->checkupStartButtonLabel = lv_label_create(ckup->checkupStartButton);
         lv_label_set_text(ckup->checkupStartButtonLabel, checkupStart_text);
-        lv_obj_set_style_text_font(ckup->checkupStartButtonLabel, &lv_font_montserrat_22, 0);
+        lv_obj_set_style_text_font(ckup->checkupStartButtonLabel, ui->stage_title_font, 0);
         lv_obj_align(ckup->checkupStartButtonLabel, LV_ALIGN_CENTER, 0, 0);
         /* Enable Start immediately if tank/volume are already set from settings */
         if (ckup->data.tankSize > 0 && ckup->data.activeVolume_index > 0 && ckup->data.processStep < 1) {
             lv_obj_clear_state(ckup->checkupStartButton, LV_STATE_DISABLED);
-            LV_LOG_USER("checkup: Start button ENABLED (tank=%d, vol=%d)", ckup->data.tankSize, ckup->data.activeVolume_index);
+            LV_LOG_USER("checkup: Start button ENABLED (tank=%d, vol=%lu)", ckup->data.tankSize, (unsigned long)ckup->data.activeVolume_index);
         } else {
             lv_obj_add_state(ckup->checkupStartButton, LV_STATE_DISABLED);
         }
@@ -887,34 +888,35 @@ static void checkup_renderPreFlight(processNode *proc) {
 }
 
 static void checkup_renderFillWater(processNode *proc) {
+    const ui_checkup_layout_t *ui = &ui_get_profile()->checkup;
     /* processStep 1: Fill water */
     sCheckup *ckup = proc->process.processDetails->checkup;
     if(isStepStatus1created == 0) {
         lv_obj_clean(ckup->checkupStepContainer);
         ckup->checkupFillWaterContainer = lv_obj_create(ckup->checkupStepContainer);
         lv_obj_remove_flag(ckup->checkupFillWaterContainer, LV_OBJ_FLAG_SCROLLABLE);
-        lv_obj_align(ckup->checkupFillWaterContainer, LV_ALIGN_TOP_LEFT, -18, -18);
-        lv_obj_set_size(ckup->checkupFillWaterContainer, 240, 265);
+        lv_obj_align(ckup->checkupFillWaterContainer, LV_ALIGN_TOP_LEFT, ui->stage_panel_x, ui->stage_panel_y);
+        lv_obj_set_size(ckup->checkupFillWaterContainer, ui_get_profile()->checkup.stage_panel_w, ui_get_profile()->checkup.stage_panel_h);
         lv_obj_set_style_border_opa(ckup->checkupFillWaterContainer, LV_OPA_TRANSP, 0);
 
         ckup->checkupFillWaterLabel = lv_label_create(ckup->checkupFillWaterContainer);
         lv_label_set_text(ckup->checkupFillWaterLabel, checkupFillWaterMachine_text);
-        lv_obj_set_style_text_font(ckup->checkupFillWaterLabel, &lv_font_montserrat_18, 0);
-        lv_obj_align(ckup->checkupFillWaterLabel, LV_ALIGN_CENTER, 0, -20);
+        lv_obj_set_style_text_font(ckup->checkupFillWaterLabel, ui->stage_label_font, 0);
+        lv_obj_align(ckup->checkupFillWaterLabel, LV_ALIGN_CENTER, 0, ui->fill_label_y);
         lv_obj_set_style_text_align(ckup->checkupFillWaterLabel, LV_TEXT_ALIGN_CENTER, 0);
         lv_label_set_long_mode(ckup->checkupFillWaterLabel, LV_LABEL_LONG_WRAP);
-        lv_obj_set_size(ckup->checkupFillWaterLabel, 235, LV_SIZE_CONTENT);
+        lv_obj_set_size(ckup->checkupFillWaterLabel, ui->fill_label_w, LV_SIZE_CONTENT);
 
         ckup->checkupSkipButton = lv_button_create(ckup->checkupFillWaterContainer);
         lv_obj_set_size(ckup->checkupSkipButton, BUTTON_PROCESS_WIDTH, BUTTON_PROCESS_HEIGHT);
-        lv_obj_align(ckup->checkupSkipButton, LV_ALIGN_BOTTOM_MID, 0, 10);
+        lv_obj_align(ckup->checkupSkipButton, LV_ALIGN_BOTTOM_MID, 0, ui->stage_button_y);
         lv_obj_add_event_cb(ckup->checkupSkipButton, event_checkup, LV_EVENT_CLICKED, proc);
         lv_obj_set_style_bg_color(ckup->checkupSkipButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
         lv_obj_move_foreground(ckup->checkupSkipButton);
 
         ckup->checkupSkipButtonLabel = lv_label_create(ckup->checkupSkipButton);
         lv_label_set_text(ckup->checkupSkipButtonLabel, checkupSkip_text);
-        lv_obj_set_style_text_font(ckup->checkupSkipButtonLabel, &lv_font_montserrat_22, 0);
+        lv_obj_set_style_text_font(ckup->checkupSkipButtonLabel, ui->stage_title_font, 0);
         lv_obj_align(ckup->checkupSkipButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
         isStepStatus1created = 1;
@@ -922,26 +924,27 @@ static void checkup_renderFillWater(processNode *proc) {
 }
 
 static void checkup_renderReachTemp(processNode *proc) {
+    const ui_checkup_layout_t *ui = &ui_get_profile()->checkup;
     /* processStep 2: Reach temperature */
     sCheckup *ckup = proc->process.processDetails->checkup;
     if(isStepStatus2created == 0) {
         lv_obj_clean(ckup->checkupStepContainer);
         ckup->checkupTargetTempsContainer = lv_obj_create(ckup->checkupStepContainer);
         lv_obj_remove_flag(ckup->checkupTargetTempsContainer, LV_OBJ_FLAG_SCROLLABLE);
-        lv_obj_align(ckup->checkupTargetTempsContainer, LV_ALIGN_TOP_LEFT, -18, -18);
-        lv_obj_set_size(ckup->checkupTargetTempsContainer, 240, 265);
+        lv_obj_align(ckup->checkupTargetTempsContainer, LV_ALIGN_TOP_LEFT, ui->stage_panel_x, ui->stage_panel_y);
+        lv_obj_set_size(ckup->checkupTargetTempsContainer, ui_get_profile()->checkup.stage_panel_w, ui_get_profile()->checkup.stage_panel_h);
         lv_obj_set_style_border_opa(ckup->checkupTargetTempsContainer, LV_OPA_TRANSP, 0);
 
         ckup->checkupTargetTempContainer = lv_obj_create(ckup->checkupStepContainer);
         lv_obj_remove_flag(ckup->checkupTargetTempContainer, LV_OBJ_FLAG_SCROLLABLE);
         lv_obj_align(ckup->checkupTargetTempContainer, LV_ALIGN_TOP_MID, 0, 0);
-        lv_obj_set_size(ckup->checkupTargetTempContainer, 200, 90);
+        lv_obj_set_size(ckup->checkupTargetTempContainer, ui->target_title_w, ui->target_title_h);
         lv_obj_set_style_border_opa(ckup->checkupTargetTempContainer, LV_OPA_TRANSP, 0);
 
         ckup->checkupTargetTempLabel = lv_label_create(ckup->checkupTargetTempContainer);
         lv_label_set_text(ckup->checkupTargetTempLabel, checkupTargetTemp_text);
-        lv_obj_set_style_text_font(ckup->checkupTargetTempLabel, &lv_font_montserrat_20, 0);
-        lv_obj_align(ckup->checkupTargetTempLabel, LV_ALIGN_CENTER, 0, -30);
+        lv_obj_set_style_text_font(ckup->checkupTargetTempLabel, ui->target_title_font, 0);
+        lv_obj_align(ckup->checkupTargetTempLabel, LV_ALIGN_CENTER, 0, ui->target_title_y);
 
         ckup->checkupTargetTempValue = lv_label_create(ckup->checkupTargetTempContainer);
 
@@ -951,8 +954,8 @@ static void checkup_renderReachTemp(processNode *proc) {
             lv_label_set_text_fmt(ckup->checkupTargetTempValue, "%"PRIi32"°F", convertCelsiusToFahrenheit(proc->process.processDetails->data.temp));
         }
 
-        lv_obj_set_style_text_font(ckup->checkupTargetTempValue, &lv_font_montserrat_28, 0);
-        lv_obj_align(ckup->checkupTargetTempValue, LV_ALIGN_CENTER, 0, 5);
+        lv_obj_set_style_text_font(ckup->checkupTargetTempValue, ui->target_value_font, 0);
+        lv_obj_align(ckup->checkupTargetTempValue, LV_ALIGN_CENTER, 0, ui->target_title_value_y);
 
         ckup->checkupTargetToleranceTempValue = lv_label_create(ckup->checkupTargetTempContainer);
         {
@@ -960,19 +963,19 @@ static void checkup_renderReachTemp(processNode *proc) {
             snprintf(buf, sizeof(buf), "%s ~%.1f", checkupTargetToleranceTemp_text, proc->process.processDetails->data.tempTolerance);
             lv_label_set_text(ckup->checkupTargetToleranceTempValue, buf);
         }
-        lv_obj_set_style_text_font(ckup->checkupTargetToleranceTempValue, &lv_font_montserrat_20, 0);
-        lv_obj_align(ckup->checkupTargetToleranceTempValue, LV_ALIGN_CENTER, 0, 30);
+        lv_obj_set_style_text_font(ckup->checkupTargetToleranceTempValue, ui->target_title_font, 0);
+        lv_obj_align(ckup->checkupTargetToleranceTempValue, LV_ALIGN_CENTER, 0, ui->target_tolerance_y);
 
         ckup->checkupTargetWaterTempContainer = lv_obj_create(ckup->checkupStepContainer);
         lv_obj_remove_flag(ckup->checkupTargetWaterTempContainer, LV_OBJ_FLAG_SCROLLABLE);
-        lv_obj_align(ckup->checkupTargetWaterTempContainer, LV_ALIGN_BOTTOM_LEFT, 0, -50);
-        lv_obj_set_size(ckup->checkupTargetWaterTempContainer, 100, 80);
+        lv_obj_align(ckup->checkupTargetWaterTempContainer, LV_ALIGN_BOTTOM_LEFT, ui->target_temp_left_x, ui->target_temp_y);
+        lv_obj_set_size(ckup->checkupTargetWaterTempContainer, ui->target_temp_w, ui->target_temp_h);
         lv_obj_set_style_border_opa(ckup->checkupTargetWaterTempContainer, LV_OPA_TRANSP, 0);
 
         ckup->checkupTargetWaterTempLabel = lv_label_create(ckup->checkupTargetWaterTempContainer);
         lv_label_set_text(ckup->checkupTargetWaterTempLabel, checkupWater_text);
-        lv_obj_set_style_text_font(ckup->checkupTargetWaterTempLabel, &lv_font_montserrat_18, 0);
-        lv_obj_align(ckup->checkupTargetWaterTempLabel, LV_ALIGN_CENTER, 0, -15);
+        lv_obj_set_style_text_font(ckup->checkupTargetWaterTempLabel, ui->stage_label_font, 0);
+        lv_obj_align(ckup->checkupTargetWaterTempLabel, LV_ALIGN_CENTER, 0, ui->target_temp_label_y);
 
         ckup->checkupTargetWaterTempValue = lv_label_create(ckup->checkupTargetWaterTempContainer);
 
@@ -987,19 +990,19 @@ static void checkup_renderReachTemp(processNode *proc) {
             lv_label_set_text(ckup->checkupTargetWaterTempValue, buf);
         }
 
-        lv_obj_set_style_text_font(ckup->checkupTargetWaterTempValue, &lv_font_montserrat_20, 0);
-        lv_obj_align(ckup->checkupTargetWaterTempValue, LV_ALIGN_CENTER, 0, 20);
+        lv_obj_set_style_text_font(ckup->checkupTargetWaterTempValue, ui->stage_value_font, 0);
+        lv_obj_align(ckup->checkupTargetWaterTempValue, LV_ALIGN_CENTER, 0, ui->target_temp_value_y);
 
         ckup->checkupTargetChemistryTempContainer = lv_obj_create(ckup->checkupStepContainer);
         lv_obj_remove_flag(ckup->checkupTargetChemistryTempContainer, LV_OBJ_FLAG_SCROLLABLE);
-        lv_obj_align(ckup->checkupTargetChemistryTempContainer, LV_ALIGN_BOTTOM_RIGHT, 0, -50);
-        lv_obj_set_size(ckup->checkupTargetChemistryTempContainer, 100, 80);
+        lv_obj_align(ckup->checkupTargetChemistryTempContainer, LV_ALIGN_BOTTOM_RIGHT, ui->target_temp_right_x, ui->target_temp_y);
+        lv_obj_set_size(ckup->checkupTargetChemistryTempContainer, ui->target_temp_w, ui->target_temp_h);
         lv_obj_set_style_border_opa(ckup->checkupTargetChemistryTempContainer, LV_OPA_TRANSP, 0);
 
         ckup->checkupTargetChemistryTempLabel = lv_label_create(ckup->checkupTargetChemistryTempContainer);
         lv_label_set_text(ckup->checkupTargetChemistryTempLabel, checkupChemistry_text);
-        lv_obj_set_style_text_font(ckup->checkupTargetChemistryTempLabel, &lv_font_montserrat_18, 0);
-        lv_obj_align(ckup->checkupTargetChemistryTempLabel, LV_ALIGN_CENTER, 0, -15);
+        lv_obj_set_style_text_font(ckup->checkupTargetChemistryTempLabel, ui->stage_label_font, 0);
+        lv_obj_align(ckup->checkupTargetChemistryTempLabel, LV_ALIGN_CENTER, 0, ui->target_temp_label_y);
 
         ckup->checkupTargetChemistryTempValue = lv_label_create(ckup->checkupTargetChemistryTempContainer);
 
@@ -1014,25 +1017,25 @@ static void checkup_renderReachTemp(processNode *proc) {
             lv_label_set_text(ckup->checkupTargetChemistryTempValue, buf);
         }
 
-        lv_obj_set_style_text_font(ckup->checkupTargetChemistryTempValue, &lv_font_montserrat_20, 0);
-        lv_obj_align(ckup->checkupTargetChemistryTempValue, LV_ALIGN_CENTER, 0, 20);
+        lv_obj_set_style_text_font(ckup->checkupTargetChemistryTempValue, ui->stage_value_font, 0);
+        lv_obj_align(ckup->checkupTargetChemistryTempValue, LV_ALIGN_CENTER, 0, ui->target_temp_value_y);
 
         ckup->checkupSkipButton = lv_button_create(ckup->checkupTargetTempsContainer);
         lv_obj_set_size(ckup->checkupSkipButton, BUTTON_PROCESS_WIDTH, BUTTON_PROCESS_HEIGHT);
-        lv_obj_align(ckup->checkupSkipButton, LV_ALIGN_BOTTOM_MID, 0, 10);
+        lv_obj_align(ckup->checkupSkipButton, LV_ALIGN_BOTTOM_MID, 0, ui->stage_button_y);
         lv_obj_add_event_cb(ckup->checkupSkipButton, event_checkup, LV_EVENT_CLICKED, proc);
         lv_obj_set_style_bg_color(ckup->checkupSkipButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
         lv_obj_move_foreground(ckup->checkupSkipButton);
 
         ckup->checkupSkipButtonLabel = lv_label_create(ckup->checkupSkipButton);
         lv_label_set_text(ckup->checkupSkipButtonLabel, checkupSkip_text);
-        lv_obj_set_style_text_font(ckup->checkupSkipButtonLabel, &lv_font_montserrat_22, 0);
+        lv_obj_set_style_text_font(ckup->checkupSkipButtonLabel, ui->stage_title_font, 0);
         lv_obj_align(ckup->checkupSkipButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
         ckup->checkupHeaterStatusLabel = lv_label_create(ckup->checkupTargetTempsContainer);
         lv_label_set_text_fmt(ckup->checkupHeaterStatusLabel, checkupHeaterStatusFmt_text, checkupHeaterOff_text);
-        lv_obj_set_style_text_font(ckup->checkupHeaterStatusLabel, &lv_font_montserrat_16, 0);
-        lv_obj_align(ckup->checkupHeaterStatusLabel, LV_ALIGN_BOTTOM_MID, 0, -35);
+        lv_obj_set_style_text_font(ckup->checkupHeaterStatusLabel, ui->small_font, 0);
+        lv_obj_align(ckup->checkupHeaterStatusLabel, LV_ALIGN_BOTTOM_MID, 0, ui->heater_status_y);
 
         ckup->checkupTempTimeoutLabel = NULL;
 
@@ -1056,58 +1059,59 @@ static void checkup_renderReachTemp(processNode *proc) {
 }
 
 static void checkup_renderCheckFilm(processNode *proc) {
+    const ui_checkup_layout_t *ui = &ui_get_profile()->checkup;
     /* processStep 3: Check film/tank */
     sCheckup *ckup = proc->process.processDetails->checkup;
     if(isStepStatus3created == 0) {
         lv_obj_clean(ckup->checkupStepContainer);
         ckup->checkupFilmRotatingContainer = lv_obj_create(ckup->checkupStepContainer);
         lv_obj_remove_flag(ckup->checkupFilmRotatingContainer, LV_OBJ_FLAG_SCROLLABLE);
-        lv_obj_align(ckup->checkupFilmRotatingContainer, LV_ALIGN_TOP_LEFT, -18, -18);
-        lv_obj_set_size(ckup->checkupFilmRotatingContainer, 240, 265);
+        lv_obj_align(ckup->checkupFilmRotatingContainer, LV_ALIGN_TOP_LEFT, ui->stage_panel_x, ui->stage_panel_y);
+        lv_obj_set_size(ckup->checkupFilmRotatingContainer, ui_get_profile()->checkup.stage_panel_w, ui_get_profile()->checkup.stage_panel_h);
         lv_obj_set_style_border_opa(ckup->checkupFilmRotatingContainer, LV_OPA_TRANSP, 0);
 
         ckup->checkupTankIsPresentContainer = lv_obj_create(ckup->checkupFilmRotatingContainer);
         lv_obj_remove_flag(ckup->checkupTankIsPresentContainer, LV_OBJ_FLAG_SCROLLABLE);
-        lv_obj_align(ckup->checkupTankIsPresentContainer, LV_ALIGN_CENTER, 0, -55);
-        lv_obj_set_size(ckup->checkupTankIsPresentContainer, 200, 80);
+        lv_obj_align(ckup->checkupTankIsPresentContainer, LV_ALIGN_CENTER, 0, ui->film_box1_y);
+        lv_obj_set_size(ckup->checkupTankIsPresentContainer, ui->film_box_w, ui->film_box_h);
         lv_obj_set_style_border_opa(ckup->checkupTankIsPresentContainer, LV_OPA_TRANSP, 0);
 
         ckup->checkupTankIsPresentLabel = lv_label_create(ckup->checkupTankIsPresentContainer);
         lv_label_set_text(ckup->checkupTankIsPresentLabel, checkupTankPosition_text);
-        lv_obj_set_style_text_font(ckup->checkupTankIsPresentLabel, &lv_font_montserrat_20, 0);
-        lv_obj_align(ckup->checkupTankIsPresentLabel, LV_ALIGN_CENTER, 0, -15);
+        lv_obj_set_style_text_font(ckup->checkupTankIsPresentLabel, ui->stage_value_font, 0);
+        lv_obj_align(ckup->checkupTankIsPresentLabel, LV_ALIGN_CENTER, 0, ui->film_label_y);
 
         ckup->checkupTankIsPresentValue = lv_label_create(ckup->checkupTankIsPresentContainer);
         lv_label_set_text(ckup->checkupTankIsPresentValue, checkupYes_text);
-        lv_obj_set_style_text_font(ckup->checkupTankIsPresentValue, &lv_font_montserrat_24, 0);
-        lv_obj_align(ckup->checkupTankIsPresentValue, LV_ALIGN_CENTER, 0, 20);
+        lv_obj_set_style_text_font(ckup->checkupTankIsPresentValue, ui->process_name_font, 0);
+        lv_obj_align(ckup->checkupTankIsPresentValue, LV_ALIGN_CENTER, 0, ui->film_value_y);
 
         ckup->checkupFilmInPositionContainer = lv_obj_create(ckup->checkupFilmRotatingContainer);
         lv_obj_remove_flag(ckup->checkupFilmInPositionContainer, LV_OBJ_FLAG_SCROLLABLE);
-        lv_obj_align(ckup->checkupFilmInPositionContainer, LV_ALIGN_CENTER, 0, 40);
-        lv_obj_set_size(ckup->checkupFilmInPositionContainer, 200, 80);
+        lv_obj_align(ckup->checkupFilmInPositionContainer, LV_ALIGN_CENTER, 0, ui->film_box2_y);
+        lv_obj_set_size(ckup->checkupFilmInPositionContainer, ui->film_box_w, ui->film_box_h);
         lv_obj_set_style_border_opa(ckup->checkupFilmInPositionContainer, LV_OPA_TRANSP, 0);
 
         ckup->checkupFilmRotatingLabel = lv_label_create(ckup->checkupFilmInPositionContainer);
         lv_label_set_text(ckup->checkupFilmRotatingLabel, checkupFilmRotation_text);
-        lv_obj_set_style_text_font(ckup->checkupFilmRotatingLabel, &lv_font_montserrat_20, 0);
-        lv_obj_align(ckup->checkupFilmRotatingLabel, LV_ALIGN_CENTER, 0, -15);
+        lv_obj_set_style_text_font(ckup->checkupFilmRotatingLabel, ui->stage_value_font, 0);
+        lv_obj_align(ckup->checkupFilmRotatingLabel, LV_ALIGN_CENTER, 0, ui->film_label_y);
 
         ckup->checkupFilmRotatingValue = lv_label_create(ckup->checkupFilmInPositionContainer);
         lv_label_set_text(ckup->checkupFilmRotatingValue, checkupChecking_text);
-        lv_obj_set_style_text_font(ckup->checkupFilmRotatingValue, &lv_font_montserrat_24, 0);
-        lv_obj_align(ckup->checkupFilmRotatingValue, LV_ALIGN_CENTER, 0, 20);
+        lv_obj_set_style_text_font(ckup->checkupFilmRotatingValue, ui->process_name_font, 0);
+        lv_obj_align(ckup->checkupFilmRotatingValue, LV_ALIGN_CENTER, 0, ui->film_value_y);
 
         ckup->checkupStartButton = lv_button_create(ckup->checkupFilmRotatingContainer);
         lv_obj_set_size(ckup->checkupStartButton, BUTTON_PROCESS_WIDTH, BUTTON_PROCESS_HEIGHT);
-        lv_obj_align(ckup->checkupStartButton, LV_ALIGN_BOTTOM_MID, 0, 10);
+        lv_obj_align(ckup->checkupStartButton, LV_ALIGN_BOTTOM_MID, 0, ui->stage_button_y);
         lv_obj_add_event_cb(ckup->checkupStartButton, event_checkup, LV_EVENT_CLICKED, proc);
         lv_obj_set_style_bg_color(ckup->checkupStartButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
         lv_obj_move_foreground(ckup->checkupStartButton);
 
         ckup->checkupStartButtonLabel = lv_label_create(ckup->checkupStartButton);
         lv_label_set_text(ckup->checkupStartButtonLabel, checkupStart_text);
-        lv_obj_set_style_text_font(ckup->checkupStartButtonLabel, &lv_font_montserrat_22, 0);
+        lv_obj_set_style_text_font(ckup->checkupStartButtonLabel, ui->stage_title_font, 0);
         lv_obj_align(ckup->checkupStartButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
         isStepStatus3created = 1;
@@ -1115,6 +1119,7 @@ static void checkup_renderCheckFilm(processNode *proc) {
 }
 
 static void checkup_renderProcessing(processNode *proc) {
+    const ui_checkup_layout_t *ui = &ui_get_profile()->checkup;
     /* processStep 4: Main processing */
     sCheckup *ckup = proc->process.processDetails->checkup;
     if(isStepStatus4created == 0) {
@@ -1129,17 +1134,17 @@ static void checkup_renderProcessing(processNode *proc) {
         lv_obj_clean(ckup->checkupStepContainer);
         ckup->checkupProcessingContainer = lv_obj_create(ckup->checkupStepContainer);
         lv_obj_remove_flag(ckup->checkupProcessingContainer, LV_OBJ_FLAG_SCROLLABLE);
-        lv_obj_align(ckup->checkupProcessingContainer, LV_ALIGN_TOP_LEFT, -18, -18);
-        lv_obj_set_size(ckup->checkupProcessingContainer, 240, 265);
+        lv_obj_align(ckup->checkupProcessingContainer, LV_ALIGN_TOP_LEFT, ui->processing_container_x, ui->processing_container_y);
+        lv_obj_set_size(ckup->checkupProcessingContainer, ui->processing_container_w, ui->processing_container_h);
         lv_obj_set_style_border_opa(ckup->checkupProcessingContainer, LV_OPA_TRANSP, 0);
 
         ckup->processArc = lv_arc_create(ckup->checkupProcessingContainer);
-        lv_obj_set_size(ckup->processArc, 220, 220);
+        lv_obj_set_size(ckup->processArc, ui->processing_arc_size, ui->processing_arc_size);
         lv_arc_set_rotation(ckup->processArc, 140);
         lv_arc_set_bg_angles(ckup->processArc, 0, 260);
         lv_arc_set_value(ckup->processArc, 0);
         lv_arc_set_range(ckup->processArc, 0, 100);
-        lv_obj_align(ckup->processArc, LV_ALIGN_CENTER, 0, 2);
+        lv_obj_align(ckup->processArc, LV_ALIGN_CENTER, 0, ui->processing_arc_center_y);
         lv_obj_remove_style(ckup->processArc, NULL, LV_PART_KNOB);
         lv_obj_remove_flag(ckup->processArc, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_set_style_arc_color(ckup->processArc,lv_color_hex(GREEN) , LV_PART_INDICATOR);
@@ -1148,31 +1153,31 @@ static void checkup_renderProcessing(processNode *proc) {
         ckup->checkupProcessTimeLeftValue = lv_label_create(ckup->checkupProcessingContainer);
         lv_label_set_text_fmt(ckup->checkupProcessTimeLeftValue, "%"PRIu32"m%"PRIu8"s",
           proc->process.processDetails->data.timeMins, proc->process.processDetails->data.timeSecs);
-        lv_obj_set_style_text_font(ckup->checkupProcessTimeLeftValue, &lv_font_montserrat_28, 0);
-        lv_obj_align(ckup->checkupProcessTimeLeftValue, LV_ALIGN_CENTER, 0, -60);
+        lv_obj_set_style_text_font(ckup->checkupProcessTimeLeftValue, ui->target_value_font, 0);
+        lv_obj_align(ckup->checkupProcessTimeLeftValue, LV_ALIGN_CENTER, 0, ui->processing_time_y);
 
         ckup->checkupStepNameValue = lv_label_create(ckup->checkupProcessingContainer);
         lv_label_set_text(ckup->checkupStepNameValue, "...");
         lv_obj_set_style_text_align(ckup->checkupStepNameValue, LV_TEXT_ALIGN_CENTER, 0);
-        lv_obj_set_style_text_font(ckup->checkupStepNameValue, &lv_font_montserrat_22, 0);
-        lv_obj_align(ckup->checkupStepNameValue, LV_ALIGN_CENTER, 0, -10);
-        lv_obj_set_width(ckup->checkupStepNameValue, 170);
+        lv_obj_set_style_text_font(ckup->checkupStepNameValue, ui->stage_title_font, 0);
+        lv_obj_align(ckup->checkupStepNameValue, LV_ALIGN_CENTER, 0, ui->processing_step_name_y);
+        lv_obj_set_width(ckup->checkupStepNameValue, ui->processing_step_name_w);
         lv_label_set_long_mode(ckup->checkupStepNameValue, LV_LABEL_LONG_SCROLL_CIRCULAR);
 
         ckup->checkupStepTimeLeftValue = lv_label_create(ckup->checkupProcessingContainer);
         lv_label_set_text_fmt(ckup->checkupStepTimeLeftValue, "%dm%ds",
             proc->process.processDetails->stepElementsList.start->step.stepDetails->data.timeMins,
             proc->process.processDetails->stepElementsList.start->step.stepDetails->data.timeSecs);
-        lv_obj_set_style_text_font(ckup->checkupStepTimeLeftValue, &lv_font_montserrat_22, 0);
-        lv_obj_align(ckup->checkupStepTimeLeftValue, LV_ALIGN_CENTER, 0, 14);
+        lv_obj_set_style_text_font(ckup->checkupStepTimeLeftValue, ui->stage_title_font, 0);
+        lv_obj_align(ckup->checkupStepTimeLeftValue, LV_ALIGN_CENTER, 0, ui->processing_step_time_y);
 
         ckup->stepArc = lv_arc_create(ckup->checkupProcessingContainer);
-        lv_obj_set_size(ckup->stepArc, 220, 220);
+        lv_obj_set_size(ckup->stepArc, ui->processing_step_arc_size, ui->processing_step_arc_size);
         lv_arc_set_rotation(ckup->stepArc, 230);
         lv_arc_set_bg_angles(ckup->stepArc, 0, 80);
         lv_arc_set_value(ckup->stepArc, 0);
         lv_arc_set_range(ckup->stepArc, 0, 100);
-        lv_obj_align(ckup->stepArc, LV_ALIGN_CENTER, 0, 139);
+        lv_obj_align(ckup->stepArc, LV_ALIGN_CENTER, 0, ui->processing_step_arc_center_y);
         lv_obj_remove_style(ckup->stepArc, NULL, LV_PART_KNOB);
         lv_obj_remove_flag(ckup->stepArc, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_set_style_arc_color(ckup->stepArc,lv_color_hex(ORANGE_LIGHT) , LV_PART_INDICATOR);
@@ -1181,16 +1186,16 @@ static void checkup_renderProcessing(processNode *proc) {
 
         ckup->checkupStepKindValue = lv_label_create(ckup->checkupProcessingContainer);
         lv_label_set_text(ckup->checkupStepKindValue, checkupFilling_text);
-        lv_obj_set_style_text_font(ckup->checkupStepKindValue, &lv_font_montserrat_20, 0);
-        lv_obj_align(ckup->checkupStepKindValue, LV_ALIGN_CENTER, 0, 69);
+        lv_obj_set_style_text_font(ckup->checkupStepKindValue, ui->stage_value_font, 0);
+        lv_obj_align(ckup->checkupStepKindValue, LV_ALIGN_CENTER, 0, ui->processing_kind_y);
         lv_obj_add_flag(ckup->checkupStepKindValue, LV_OBJ_FLAG_HIDDEN);
 
         ckup->pumpArc = lv_arc_create(ckup->checkupProcessingContainer);
-        lv_obj_set_size(ckup->pumpArc, 220, 220);
+        lv_obj_set_size(ckup->pumpArc, ui->processing_pump_arc_size, ui->processing_pump_arc_size);
         lv_arc_set_rotation(ckup->pumpArc, 48);
         lv_arc_set_bg_angles(ckup->pumpArc, 0, 84);
         lv_arc_set_range(ckup->pumpArc, 0, 100);
-        lv_obj_align(ckup->pumpArc, LV_ALIGN_CENTER, 0, 2);
+        lv_obj_align(ckup->pumpArc, LV_ALIGN_CENTER, 0, ui->processing_arc_center_y);
         lv_obj_remove_style(ckup->pumpArc, NULL, LV_PART_KNOB);
         lv_obj_remove_flag(ckup->pumpArc, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_set_style_arc_color(ckup->pumpArc,lv_color_hex(LIGHT_BLUE) , LV_PART_INDICATOR);
@@ -1200,8 +1205,8 @@ static void checkup_renderProcessing(processNode *proc) {
 
         ckup->checkupProcessCompleteLabel = lv_label_create(ckup->checkupProcessingContainer);
         lv_obj_set_style_text_align(ckup->checkupProcessCompleteLabel, LV_TEXT_ALIGN_CENTER, 0);
-        lv_obj_set_style_text_font(ckup->checkupProcessCompleteLabel, &lv_font_montserrat_22, 0);
-        lv_obj_align(ckup->checkupProcessCompleteLabel, LV_ALIGN_CENTER, 0, -30);
+        lv_obj_set_style_text_font(ckup->checkupProcessCompleteLabel, ui->stage_title_font, 0);
+        lv_obj_align(ckup->checkupProcessCompleteLabel, LV_ALIGN_CENTER, 0, ui->processing_complete_y);
         lv_obj_add_flag(ckup->checkupProcessCompleteLabel, LV_OBJ_FLAG_HIDDEN);
 
         isStepStatus4created = 1;
@@ -1211,6 +1216,7 @@ static void checkup_renderProcessing(processNode *proc) {
 void initCheckup(processNode *pn)
 {
       sCheckup *ckup = pn->process.processDetails->checkup;
+      const ui_checkup_layout_t *ui = &ui_get_profile()->checkup;
       LV_LOG_USER("Final checks, current on ckup->data.processStep :%d",ckup->data.processStep);
 
       //in this way processDetail is deleted, to free memory and the "checkout" is a standard screen on top
@@ -1241,8 +1247,8 @@ void initCheckup(processNode *pn)
       lv_obj_remove_flag(ckup->checkupContainer, LV_OBJ_FLAG_SCROLLABLE); 
 
             ckup->checkupCloseButton = lv_button_create(ckup->checkupContainer);
-            lv_obj_set_size(ckup->checkupCloseButton, BUTTON_POPUP_CLOSE_WIDTH * 1.2, BUTTON_POPUP_CLOSE_HEIGHT * 1.2);
-            lv_obj_align(ckup->checkupCloseButton, LV_ALIGN_TOP_RIGHT, 7 , -10);
+            lv_obj_set_size(ckup->checkupCloseButton, ui->close_w, ui->close_h);
+            lv_obj_align(ckup->checkupCloseButton, LV_ALIGN_TOP_RIGHT, ui->close_x , ui->close_y);
             lv_obj_add_event_cb(ckup->checkupCloseButton, event_checkup, LV_EVENT_CLICKED, pn);
             lv_obj_set_style_bg_color(ckup->checkupCloseButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
             if(ckup->data.processStep > 0){
@@ -1251,40 +1257,41 @@ void initCheckup(processNode *pn)
 
                   ckup->checkupCloseButtonLabel = lv_label_create(ckup->checkupCloseButton);         
                   lv_label_set_text(ckup->checkupCloseButtonLabel, closePopup_icon); 
-                  lv_obj_set_style_text_font(ckup->checkupCloseButtonLabel, &FilMachineFontIcons_30, 0);              
+                  lv_obj_set_style_text_font(ckup->checkupCloseButtonLabel, ui->close_icon_font, 0);              
                   lv_obj_align(ckup->checkupCloseButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
 
             ckup->checkupProcessNameContainer = lv_obj_create(ckup->checkupContainer);
             lv_obj_remove_flag(ckup->checkupProcessNameContainer, LV_OBJ_FLAG_SCROLLABLE); 
-            lv_obj_align(ckup->checkupProcessNameContainer, LV_ALIGN_TOP_LEFT, -10, -15);
-            lv_obj_set_size(ckup->checkupProcessNameContainer, 420, 50);
+            lv_obj_align(ckup->checkupProcessNameContainer, LV_ALIGN_TOP_LEFT, ui->process_name_x, ui->process_name_y);
+            lv_obj_set_size(ckup->checkupProcessNameContainer, ui->process_name_w, ui->process_name_h);
             lv_obj_set_style_border_opa(ckup->checkupProcessNameContainer, LV_OPA_TRANSP, 0);
 
                   ckup->checkupProcessNameValue = lv_label_create(ckup->checkupProcessNameContainer);
                   lv_label_set_text(ckup->checkupProcessNameValue, pn->process.processDetails->data.processNameString);
-                  lv_obj_set_width(ckup->checkupProcessNameValue, 420);
-                  lv_obj_set_style_text_font(ckup->checkupProcessNameValue, &lv_font_montserrat_30, 0);              
-                  lv_obj_align(ckup->checkupProcessNameValue, LV_ALIGN_TOP_LEFT, -10, -8);
+                  lv_obj_set_width(ckup->checkupProcessNameValue, ui->process_name_label_w);
+                  lv_obj_set_style_text_font(ckup->checkupProcessNameValue, ui->process_name_font, 0);              
+                  lv_obj_align(ckup->checkupProcessNameValue, LV_ALIGN_TOP_LEFT, ui->process_name_label_x, ui->process_name_label_y);
                   lv_label_set_long_mode(ckup->checkupProcessNameValue, LV_LABEL_LONG_SCROLL_CIRCULAR);
 
             //RIGHT GREEN CONTAINER
             ckup->checkupStepContainer = lv_obj_create(ckup->checkupContainer);
             lv_obj_remove_flag(ckup->checkupStepContainer, LV_OBJ_FLAG_SCROLLABLE); 
-            lv_obj_align(ckup->checkupStepContainer, LV_ALIGN_TOP_LEFT, 217, 35);
-            lv_obj_set_size(ckup->checkupStepContainer, 240, 265);
+            lv_obj_align(ckup->checkupStepContainer, LV_ALIGN_TOP_LEFT, ui->step_panel_x, ui->step_panel_y);
+            lv_obj_set_size(ckup->checkupStepContainer, ui->step_panel_w, ui->step_panel_h);
             lv_obj_set_style_border_color(ckup->checkupStepContainer, lv_palette_main(LV_PALETTE_GREEN), 0);
 
             //LEFT WHITE CONTAINER
             ckup->checkupNextStepsContainer = lv_obj_create(ckup->checkupContainer);
             lv_obj_remove_flag(ckup->checkupNextStepsContainer, LV_OBJ_FLAG_SCROLLABLE); 
-            lv_obj_align(ckup->checkupNextStepsContainer, LV_ALIGN_TOP_LEFT, -10, 35);
-            lv_obj_set_size(ckup->checkupNextStepsContainer, 225, 265);
+            lv_obj_align(ckup->checkupNextStepsContainer, LV_ALIGN_TOP_LEFT, ui->left_panel_x, ui->left_panel_y);
+            lv_obj_set_size(ckup->checkupNextStepsContainer, ui->left_panel_w, ui->left_panel_h);
             lv_obj_set_style_border_color(ckup->checkupNextStepsContainer, lv_color_hex(WHITE), 0);
 }
 
 void checkup(processNode *processToCheckup) {
 
+	const ui_checkup_layout_t *ui = &ui_get_profile()->checkup;
 	char *tmp_checkupStepStatuses[] = checkupStepStatuses;
 	char *tmp_processSourceList[] = processSourceList;
 	char *tmp_processTempControlList[] = processTempControlList;
@@ -1328,71 +1335,71 @@ void checkup(processNode *processToCheckup) {
                   ckup->checkupNextStepsLabel = lv_label_create(ckup->checkupNextStepsContainer);         
                   lv_label_set_text(ckup->checkupNextStepsLabel, checkupNexStepsTitle_text); 
                   lv_obj_set_width(ckup->checkupNextStepsLabel, LV_SIZE_CONTENT);
-                  lv_obj_set_style_text_font(ckup->checkupNextStepsLabel, &lv_font_montserrat_22, 0);              
-                  lv_obj_align(ckup->checkupNextStepsLabel, LV_ALIGN_TOP_LEFT, -10, -8);
+                  lv_obj_set_style_text_font(ckup->checkupNextStepsLabel, ui->left_title_font, 0);              
+                  lv_obj_align(ckup->checkupNextStepsLabel, LV_ALIGN_TOP_LEFT, ui->left_title_x, ui->left_title_y);
 
                   ckup->checkupMachineWillDoLabel = lv_label_create(ckup->checkupNextStepsContainer);
                   lv_label_set_text(ckup->checkupMachineWillDoLabel, checkupTheMachineWillDo_text); 
                   lv_obj_set_width(ckup->checkupMachineWillDoLabel, LV_SIZE_CONTENT);
-                  lv_obj_set_style_text_font(ckup->checkupMachineWillDoLabel, &lv_font_montserrat_18, 0);              
-                  lv_obj_align(ckup->checkupMachineWillDoLabel, LV_ALIGN_TOP_LEFT, -10, 17);
+                  lv_obj_set_style_text_font(ckup->checkupMachineWillDoLabel, ui->left_body_font, 0);              
+                  lv_obj_align(ckup->checkupMachineWillDoLabel, LV_ALIGN_TOP_LEFT, ui->left_title_x, ui->left_body_intro_y);
 
                   ckup->checkupWaterFillContainer = lv_obj_create(ckup->checkupNextStepsContainer);
                   lv_obj_remove_flag(ckup->checkupWaterFillContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                  lv_obj_align(ckup->checkupWaterFillContainer, LV_ALIGN_TOP_LEFT, -10, 45);
-                  lv_obj_set_size(ckup->checkupWaterFillContainer, 195, 45);
+                  lv_obj_align(ckup->checkupWaterFillContainer, LV_ALIGN_TOP_LEFT, ui->left_row_x, ui->left_row1_y);
+                  lv_obj_set_size(ckup->checkupWaterFillContainer, ui->left_row_w, ui->left_row_h);
                   lv_obj_set_style_border_opa(ckup->checkupWaterFillContainer, LV_OPA_TRANSP, 0);
 
                   
                           ckup->checkupWaterFillStatusIcon = lv_label_create(ckup->checkupWaterFillContainer);         
                           lv_label_set_text(ckup->checkupWaterFillStatusIcon, tmp_checkupStepStatuses[ckup->data.stepFillWaterStatus]); 
-                          lv_obj_set_style_text_font(ckup->checkupWaterFillStatusIcon, &FilMachineFontIcons_15, 0);              
-                          lv_obj_align(ckup->checkupWaterFillStatusIcon, LV_ALIGN_LEFT_MID, -15, 0);
+                          lv_obj_set_style_text_font(ckup->checkupWaterFillStatusIcon, ui->status_icon_font, 0);              
+                          lv_obj_align(ckup->checkupWaterFillStatusIcon, LV_ALIGN_LEFT_MID, ui->left_status_icon_x, 0);
 
                           ckup->checkupWaterFillLabel = lv_label_create(ckup->checkupWaterFillContainer);         
                           lv_label_set_text(ckup->checkupWaterFillLabel, checkupFillWater_text); 
-                          lv_obj_set_width(ckup->checkupWaterFillLabel, 168);
-                          lv_obj_set_style_text_font(ckup->checkupWaterFillLabel, &lv_font_montserrat_18, 0);              
-                          lv_obj_align(ckup->checkupWaterFillLabel, LV_ALIGN_LEFT_MID, 2, 0);
+                          lv_obj_set_width(ckup->checkupWaterFillLabel, ui->left_status_label_w);
+                          lv_obj_set_style_text_font(ckup->checkupWaterFillLabel, ui->left_body_font, 0);              
+                          lv_obj_align(ckup->checkupWaterFillLabel, LV_ALIGN_LEFT_MID, ui->left_status_label_x, 0);
                           lv_label_set_long_mode(ckup->checkupWaterFillLabel, LV_LABEL_LONG_SCROLL_CIRCULAR);
 
 
                   ckup->checkupReachTempContainer = lv_obj_create(ckup->checkupNextStepsContainer);
                   lv_obj_remove_flag(ckup->checkupReachTempContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                  lv_obj_align(ckup->checkupReachTempContainer, LV_ALIGN_TOP_LEFT, -10, 90);
-                  lv_obj_set_size(ckup->checkupReachTempContainer, 195, 45);
+                  lv_obj_align(ckup->checkupReachTempContainer, LV_ALIGN_TOP_LEFT, ui->left_row_x, ui->left_row2_y);
+                  lv_obj_set_size(ckup->checkupReachTempContainer, ui->left_row_w, ui->left_row_h);
                   lv_obj_set_style_border_opa(ckup->checkupReachTempContainer, LV_OPA_TRANSP, 0);
 
                           ckup->checkupReachTempStatusIcon = lv_label_create(ckup->checkupReachTempContainer);
-                          lv_obj_set_style_text_font(ckup->checkupReachTempStatusIcon, &FilMachineFontIcons_15, 0);              
-                          lv_obj_align(ckup->checkupReachTempStatusIcon, LV_ALIGN_LEFT_MID, -15, 0);
+                          lv_obj_set_style_text_font(ckup->checkupReachTempStatusIcon, ui->status_icon_font, 0);              
+                          lv_obj_align(ckup->checkupReachTempStatusIcon, LV_ALIGN_LEFT_MID, ui->left_status_icon_x, 0);
 
 
                           ckup->checkupReachTempLabel = lv_label_create(ckup->checkupReachTempContainer);         
                           lv_label_set_text(ckup->checkupReachTempLabel, checkupReachTemp_text); 
-                          lv_obj_set_width(ckup->checkupReachTempLabel, 168);
-                          lv_obj_set_style_text_font(ckup->checkupReachTempLabel, &lv_font_montserrat_18, 0);              
-                          lv_obj_align(ckup->checkupReachTempLabel, LV_ALIGN_LEFT_MID, 2, 0);
+                          lv_obj_set_width(ckup->checkupReachTempLabel, ui->left_status_label_w);
+                          lv_obj_set_style_text_font(ckup->checkupReachTempLabel, ui->left_body_font, 0);              
+                          lv_obj_align(ckup->checkupReachTempLabel, LV_ALIGN_LEFT_MID, ui->left_status_label_x, 0);
                           lv_label_set_long_mode(ckup->checkupReachTempLabel, LV_LABEL_LONG_SCROLL_CIRCULAR);
 
 
 
                   ckup->checkupTankAndFilmContainer = lv_obj_create(ckup->checkupNextStepsContainer);
                   lv_obj_remove_flag(ckup->checkupTankAndFilmContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                  lv_obj_align(ckup->checkupTankAndFilmContainer, LV_ALIGN_TOP_LEFT, -10, 135);
-                  lv_obj_set_size(ckup->checkupTankAndFilmContainer, 195, 45);
+                  lv_obj_align(ckup->checkupTankAndFilmContainer, LV_ALIGN_TOP_LEFT, ui->left_row_x, ui->left_row3_y);
+                  lv_obj_set_size(ckup->checkupTankAndFilmContainer, ui->left_row_w, ui->left_row_h);
                   lv_obj_set_style_border_opa(ckup->checkupTankAndFilmContainer, LV_OPA_TRANSP, 0);
 
                           ckup->checkupTankAndFilmStatusIcon = lv_label_create(ckup->checkupTankAndFilmContainer);
-                          lv_obj_set_style_text_font(ckup->checkupTankAndFilmStatusIcon, &FilMachineFontIcons_15, 0);              
-                          lv_obj_align(ckup->checkupTankAndFilmStatusIcon, LV_ALIGN_LEFT_MID, -15, 0);
+                          lv_obj_set_style_text_font(ckup->checkupTankAndFilmStatusIcon, ui->status_icon_font, 0);              
+                          lv_obj_align(ckup->checkupTankAndFilmStatusIcon, LV_ALIGN_LEFT_MID, ui->left_status_icon_x, 0);
 
 
                           ckup->checkupTankAndFilmLabel = lv_label_create(ckup->checkupTankAndFilmContainer);         
                           lv_label_set_text(ckup->checkupTankAndFilmLabel, checkupTankRotation_text); 
-                          lv_obj_set_width(ckup->checkupTankAndFilmLabel, 168);
-                          lv_obj_set_style_text_font(ckup->checkupTankAndFilmLabel, &lv_font_montserrat_18, 0);              
-                          lv_obj_align(ckup->checkupTankAndFilmLabel, LV_ALIGN_LEFT_MID, 2, 0);
+                          lv_obj_set_width(ckup->checkupTankAndFilmLabel, ui->left_status_label_w);
+                          lv_obj_set_style_text_font(ckup->checkupTankAndFilmLabel, ui->left_body_font, 0);              
+                          lv_obj_align(ckup->checkupTankAndFilmLabel, LV_ALIGN_LEFT_MID, ui->left_status_label_x, 0);
                           lv_label_set_long_mode(ckup->checkupTankAndFilmLabel, LV_LABEL_LONG_SCROLL_CIRCULAR);
             
                   isProcessingStatus0created = 1;
@@ -1408,60 +1415,60 @@ void checkup(processNode *processToCheckup) {
                   ckup->checkupNextStepsLabel = lv_label_create(ckup->checkupNextStepsContainer);         
                   lv_label_set_text(ckup->checkupNextStepsLabel, checkupProcessingTitle_text); 
                   lv_obj_set_width(ckup->checkupNextStepsLabel, LV_SIZE_CONTENT);
-                  lv_obj_set_style_text_font(ckup->checkupNextStepsLabel, &lv_font_montserrat_22, 0);              
-                  lv_obj_align(ckup->checkupNextStepsLabel, LV_ALIGN_TOP_LEFT, -10, -8);
+                  lv_obj_set_style_text_font(ckup->checkupNextStepsLabel, ui->left_title_font, 0);              
+                  lv_obj_align(ckup->checkupNextStepsLabel, LV_ALIGN_TOP_LEFT, ui->left_title_x, ui->left_title_y);
 
 
                   ckup->checkupStepSourceContainer = lv_obj_create(ckup->checkupNextStepsContainer);
                   lv_obj_remove_flag(ckup->checkupStepSourceContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                  lv_obj_align(ckup->checkupStepSourceContainer, LV_ALIGN_TOP_LEFT, -10, 17);
-                  lv_obj_set_size(ckup->checkupStepSourceContainer, 215, 45);
+                  lv_obj_align(ckup->checkupStepSourceContainer, LV_ALIGN_TOP_LEFT, ui->left_row_x, ui->processing_row1_y);
+                  lv_obj_set_size(ckup->checkupStepSourceContainer, ui->processing_row_w, ui->left_row_h);
                   lv_obj_set_style_border_opa(ckup->checkupStepSourceContainer, LV_OPA_TRANSP, 0);
 
 
                           ckup->checkupStepSourceLabel = lv_label_create(ckup->checkupStepSourceContainer);         
                           lv_label_set_text(ckup->checkupStepSourceLabel, checkupStepSource_text); 
-                          lv_obj_set_style_text_font(ckup->checkupStepSourceLabel, &lv_font_montserrat_18, 0);              
-                          lv_obj_align(ckup->checkupStepSourceLabel, LV_ALIGN_LEFT_MID, -15, 0);
+                          lv_obj_set_style_text_font(ckup->checkupStepSourceLabel, ui->left_body_font, 0);              
+                          lv_obj_align(ckup->checkupStepSourceLabel, LV_ALIGN_LEFT_MID, ui->left_status_icon_x, 0);
 
                           ckup->checkupStepSourceValue = lv_label_create(ckup->checkupStepSourceContainer);         
                           lv_label_set_text(ckup->checkupStepSourceValue, tmp_processSourceList[processToCheckup->process.processDetails->stepElementsList.start->step.stepDetails->data.source]); //THIS NEED TO BE ALIGNED WITH THE ACTUAL STEP OF THE PROCESS!
                           lv_obj_set_width(ckup->checkupStepSourceValue, LV_SIZE_CONTENT);
-                          lv_obj_set_style_text_font(ckup->checkupStepSourceValue, &lv_font_montserrat_20, 0);              
-                          lv_obj_align(ckup->checkupStepSourceValue, LV_ALIGN_RIGHT_MID, 10, 0);
+                          lv_obj_set_style_text_font(ckup->checkupStepSourceValue, ui->left_value_font, 0);              
+                          lv_obj_align(ckup->checkupStepSourceValue, LV_ALIGN_RIGHT_MID, ui->processing_value_x, 0);
 
 
                   ckup->checkupTempControlContainer = lv_obj_create(ckup->checkupNextStepsContainer);
                   lv_obj_remove_flag(ckup->checkupTempControlContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                  lv_obj_align(ckup->checkupTempControlContainer, LV_ALIGN_TOP_LEFT, -10, 62);
-                  lv_obj_set_size(ckup->checkupTempControlContainer, 215, 45);
+                  lv_obj_align(ckup->checkupTempControlContainer, LV_ALIGN_TOP_LEFT, ui->left_row_x, ui->processing_row2_y);
+                  lv_obj_set_size(ckup->checkupTempControlContainer, ui->processing_row_w, ui->left_row_h);
                   lv_obj_set_style_border_opa(ckup->checkupTempControlContainer, LV_OPA_TRANSP, 0);
 
 
                           ckup->checkupTempControlLabel = lv_label_create(ckup->checkupTempControlContainer);         
                           lv_label_set_text(ckup->checkupTempControlLabel, checkupTempControl_text); 
-                          lv_obj_set_style_text_font(ckup->checkupTempControlLabel, &lv_font_montserrat_18, 0);              
-                          lv_obj_align(ckup->checkupTempControlLabel, LV_ALIGN_LEFT_MID, -15, 0);
+                          lv_obj_set_style_text_font(ckup->checkupTempControlLabel, ui->left_body_font, 0);              
+                          lv_obj_align(ckup->checkupTempControlLabel, LV_ALIGN_LEFT_MID, ui->left_status_icon_x, 0);
 
                           ckup->checkupTempControlValue = lv_label_create(ckup->checkupTempControlContainer);         
                           lv_label_set_text(ckup->checkupTempControlValue, tmp_processTempControlList[processToCheckup->process.processDetails->data.isTempControlled]);
                           lv_obj_set_width(ckup->checkupTempControlValue, LV_SIZE_CONTENT);
-                          lv_obj_set_style_text_font(ckup->checkupTempControlValue, &lv_font_montserrat_20, 0);              
-                          lv_obj_align(ckup->checkupTempControlValue, LV_ALIGN_RIGHT_MID, 10, 0);
+                          lv_obj_set_style_text_font(ckup->checkupTempControlValue, ui->left_value_font, 0);              
+                          lv_obj_align(ckup->checkupTempControlValue, LV_ALIGN_RIGHT_MID, ui->processing_value_x, 0);
 
 
 
                   ckup->checkupWaterTempContainer = lv_obj_create(ckup->checkupNextStepsContainer);
                   lv_obj_remove_flag(ckup->checkupWaterTempContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                  lv_obj_align(ckup->checkupWaterTempContainer, LV_ALIGN_TOP_LEFT, -10, 107);
-                  lv_obj_set_size(ckup->checkupWaterTempContainer, 215, 45);
+                  lv_obj_align(ckup->checkupWaterTempContainer, LV_ALIGN_TOP_LEFT, ui->left_row_x, ui->processing_row3_y);
+                  lv_obj_set_size(ckup->checkupWaterTempContainer, ui->processing_row_w, ui->left_row_h);
                   lv_obj_set_style_border_opa(ckup->checkupWaterTempContainer, LV_OPA_TRANSP, 0);
 
 
                           ckup->checkupWaterTempLabel = lv_label_create(ckup->checkupWaterTempContainer);         
                           lv_label_set_text(ckup->checkupWaterTempLabel, checkupWaterTemp_text); 
-                          lv_obj_set_style_text_font(ckup->checkupWaterTempLabel, &lv_font_montserrat_18, 0);              
-                          lv_obj_align(ckup->checkupWaterTempLabel, LV_ALIGN_LEFT_MID, -15, 0);
+                          lv_obj_set_style_text_font(ckup->checkupWaterTempLabel, ui->left_body_font, 0);              
+                          lv_obj_align(ckup->checkupWaterTempLabel, LV_ALIGN_LEFT_MID, ui->left_status_icon_x, 0);
 
                           ckup->checkupWaterTempValue = lv_label_create(ckup->checkupWaterTempContainer);         
 
@@ -1477,22 +1484,22 @@ void checkup(processNode *processToCheckup) {
                           }
 
                           lv_obj_set_width(ckup->checkupWaterTempValue, LV_SIZE_CONTENT);
-                          lv_obj_set_style_text_font(ckup->checkupWaterTempValue, &lv_font_montserrat_20, 0);              
-                          lv_obj_align(ckup->checkupWaterTempValue, LV_ALIGN_RIGHT_MID, 10, 0);
+                          lv_obj_set_style_text_font(ckup->checkupWaterTempValue, ui->left_value_font, 0);              
+                          lv_obj_align(ckup->checkupWaterTempValue, LV_ALIGN_RIGHT_MID, ui->processing_value_x, 0);
 
 
 
                   ckup->checkupNextStepContainer = lv_obj_create(ckup->checkupNextStepsContainer);
                   lv_obj_remove_flag(ckup->checkupNextStepContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                  lv_obj_align(ckup->checkupNextStepContainer, LV_ALIGN_TOP_LEFT, -10, 152);
-                  lv_obj_set_size(ckup->checkupNextStepContainer, 215, 45);
+                  lv_obj_align(ckup->checkupNextStepContainer, LV_ALIGN_TOP_LEFT, ui->left_row_x, ui->processing_row4_y);
+                  lv_obj_set_size(ckup->checkupNextStepContainer, ui->processing_row_w, ui->left_row_h);
                   lv_obj_set_style_border_opa(ckup->checkupNextStepContainer, LV_OPA_TRANSP, 0);
 
 
                           ckup->checkupNextStepLabel = lv_label_create(ckup->checkupNextStepContainer);         
                           lv_label_set_text(ckup->checkupNextStepLabel, checkupNextStep_text); 
-                          lv_obj_set_style_text_font(ckup->checkupNextStepLabel, &lv_font_montserrat_18, 0);              
-                          lv_obj_align(ckup->checkupNextStepLabel, LV_ALIGN_LEFT_MID, -15, 0);
+                          lv_obj_set_style_text_font(ckup->checkupNextStepLabel, ui->left_body_font, 0);              
+                          lv_obj_align(ckup->checkupNextStepLabel, LV_ALIGN_LEFT_MID, ui->left_status_icon_x, 0);
 
                           ckup->checkupNextStepValue = lv_label_create(ckup->checkupNextStepContainer);
                           //if(ckup->currentStep->next != NULL)
@@ -1500,15 +1507,15 @@ void checkup(processNode *processToCheckup) {
                           //else
                               lv_label_set_text(ckup->checkupNextStepValue, ckup->currentStep->step.stepDetails->data.stepNameString);
 
-                          lv_obj_set_width(ckup->checkupNextStepValue, 105);
-                          lv_obj_set_style_text_font(ckup->checkupNextStepValue, &lv_font_montserrat_20, 0);
-                          lv_obj_align(ckup->checkupNextStepValue, LV_ALIGN_RIGHT_MID, 10, 0);
+                          lv_obj_set_width(ckup->checkupNextStepValue, ui->processing_next_step_w);
+                          lv_obj_set_style_text_font(ckup->checkupNextStepValue, ui->left_value_font, 0);
+                          lv_obj_align(ckup->checkupNextStepValue, LV_ALIGN_RIGHT_MID, ui->processing_value_x, 0);
                           lv_label_set_long_mode(ckup->checkupNextStepValue, LV_LABEL_LONG_SCROLL_CIRCULAR);
 
 
                   ckup->checkupStopNowButton = lv_button_create(ckup->checkupNextStepsContainer);
                   lv_obj_set_size(ckup->checkupStopNowButton, BUTTON_PROCESS_WIDTH, BUTTON_PROCESS_HEIGHT);
-                  lv_obj_align(ckup->checkupStopNowButton, LV_ALIGN_BOTTOM_LEFT, -10, 10);
+                  lv_obj_align(ckup->checkupStopNowButton, LV_ALIGN_BOTTOM_LEFT, ui->processing_stop_left_x, ui->processing_stop_y);
                   lv_obj_add_event_cb(ckup->checkupStopNowButton, event_checkup, LV_EVENT_CLICKED, processToCheckup);
                   lv_obj_set_style_bg_color(ckup->checkupStopNowButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
                   lv_obj_move_foreground(ckup->checkupStopNowButton);
@@ -1516,13 +1523,13 @@ void checkup(processNode *processToCheckup) {
 
                           ckup->checkupStopNowButtonLabel = lv_label_create(ckup->checkupStopNowButton);         
                           lv_label_set_text(ckup->checkupStopNowButtonLabel, checkupStopNow_text); 
-                          lv_obj_set_style_text_font(ckup->checkupStopNowButtonLabel, &lv_font_montserrat_16, 0);              
+                          lv_obj_set_style_text_font(ckup->checkupStopNowButtonLabel, ui->button_font, 0);              
                           lv_obj_align(ckup->checkupStopNowButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
                   
                   ckup->checkupStopAfterButton = lv_button_create(ckup->checkupNextStepsContainer);
                   lv_obj_set_size(ckup->checkupStopAfterButton, BUTTON_PROCESS_WIDTH, BUTTON_PROCESS_HEIGHT);
-                  lv_obj_align(ckup->checkupStopAfterButton, LV_ALIGN_BOTTOM_RIGHT, 10, 10);
+                  lv_obj_align(ckup->checkupStopAfterButton, LV_ALIGN_BOTTOM_RIGHT, ui->processing_stop_right_x, ui->processing_stop_y);
                   lv_obj_add_event_cb(ckup->checkupStopAfterButton, event_checkup, LV_EVENT_CLICKED, processToCheckup);
                   lv_obj_set_style_bg_color(ckup->checkupStopAfterButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
                   lv_obj_move_foreground(ckup->checkupStopAfterButton);
@@ -1532,7 +1539,7 @@ void checkup(processNode *processToCheckup) {
 
                           ckup->checkupStopAfterButtonLabel = lv_label_create(ckup->checkupStopAfterButton);         
                           lv_label_set_text(ckup->checkupStopAfterButtonLabel, checkupStopAfter_text); 
-                          lv_obj_set_style_text_font(ckup->checkupStopAfterButtonLabel, &lv_font_montserrat_16, 0);              
+                          lv_obj_set_style_text_font(ckup->checkupStopAfterButtonLabel, ui->button_font, 0);              
                           lv_obj_align(ckup->checkupStopAfterButtonLabel, LV_ALIGN_CENTER, 0, 0);
         
             isProcessingStatus1created = 1;

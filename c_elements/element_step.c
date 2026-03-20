@@ -15,6 +15,7 @@ static lv_point_t drag_last_point;
 static bool drag_active = false;
 static int drag_slot = -1;
 static int drag_original_slot = -1;
+static bool drag_moved = false;
 
 //ACCESSORY INCLUDES
 
@@ -392,6 +393,7 @@ static void stepElement_handleLongPress(stepNode *currentNode, lv_obj_t *obj, pr
     stepNode *tmp = data->process.processDetails->stepElementsList.start;
     while(tmp && tmp != currentNode) { drag_slot++; tmp = tmp->next; }
     drag_original_slot = drag_slot;
+    drag_moved = false;
     LV_LOG_USER("DRAG START drag_slot=%d step_y=%"PRIi32"", drag_slot, lv_obj_get_y_aligned(stepObj));
 }
 
@@ -413,6 +415,10 @@ static void stepElement_handleDrag(stepNode *currentNode, lv_obj_t *obj, process
             lv_indev_get_point(indev, &current_point);
 
             lv_coord_t dy = current_point.y - drag_last_point.y;
+
+            if(dy != 0) {
+                drag_moved = true;
+            }
 
             lv_obj_set_pos(stepObj, lv_obj_get_x_aligned(stepObj),
                            lv_obj_get_y_aligned(stepObj) + dy);
@@ -530,15 +536,18 @@ void event_stepElement(lv_event_t *e) {
             if (drag_active) {
                 drag_active = false;
 
-                /* Remove drag shadow */
+                /* Remove drag shadow / red highlight immediately */
                 lv_style_set_shadow_spread(&currentNode->step.stepStyle, 0);
+                lv_obj_report_style_change(&currentNode->step.stepStyle);
+                lv_obj_invalidate(currentNode->step.stepElementSummary);
+                lv_obj_invalidate(currentNode->step.stepElement);
 
                 /* Re-enable scrolling on the container */
                 lv_obj_t *container = lv_obj_get_parent(currentNode->step.stepElement);
                 lv_obj_add_flag(container, LV_OBJ_FLAG_SCROLLABLE);
 
-                /* Reorder the linked list if position changed */
-                if (drag_slot != drag_original_slot && drag_slot >= 0) {
+                /* Reorder the linked list only if the user actually moved the step */
+                if (drag_moved && drag_slot != drag_original_slot && drag_slot >= 0) {
                     stepList *list = &data->process.processDetails->stepElementsList;
 
                     /* Remove node from current position */
@@ -599,6 +608,7 @@ void event_stepElement(lv_event_t *e) {
 
                 drag_slot = -1;
                 drag_original_slot = -1;
+                drag_moved = false;
                 return;
             }
         }

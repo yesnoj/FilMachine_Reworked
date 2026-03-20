@@ -222,6 +222,20 @@ idf.py size
 
 ## Running the Simulator
 
+### Simulator UI debug overlay
+
+The simulator includes a built-in UI inspection mode to speed up layout tuning.
+
+- Press **F2** to enable or disable the overlay.
+- When enabled, moving the mouse over the UI shows:
+  - the resolved component name when available (for example `gui.page.processes.newProcessButton`)
+  - the object position (`x`, `y`)
+  - the object size (`w`, `h`)
+- While the overlay is enabled, **right click** dumps the hovered object to the terminal/console.
+
+This is especially useful when adjusting coordinates inside `ui_profile.c`, because you can identify the exact widget and immediately see its current geometry in the simulator.
+
+
 ```bash
 cd build2
 ./filmachine_sim

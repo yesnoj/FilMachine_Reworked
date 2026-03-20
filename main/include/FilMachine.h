@@ -11,91 +11,46 @@
 #include "freertos/FreeRTOS.h"
 #include "lvgl.h"
 
+/* ═══════════════════════════════════════════════
+ * Board-specific hardware definitions
+ * All pin assignments, resolution, display/touch driver selection,
+ * and sensor availability come from the active board header.
+ * Select board at compile time: -DBOARD_MAKERFABS_S3, -DBOARD_JC4827W543, or -DBOARD_SIMULATOR
+ * ═══════════════════════════════════════════════ */
+#include "board.h"
+#include "ui_profile.h"
+
+#ifdef BOARD_SIMULATOR
+void sim_ui_debug_tag(lv_obj_t *obj, const char *name);
+#else
+#define sim_ui_debug_tag(obj, name) ((void)0)
+#endif
+
 #define FILM_USE_LOG				1
 
-//Digital input for relays
-#define RELAY_NUMBER				8
-#define HEATER_RLY					0 // Don't use NULL for 0 NULL is defined as (void*)0 which is a pointer type and will cause problems!
-#define C1_RLY						1
-#define C2_RLY						2
-#define C3_RLY						3
-#define WB_RLY						4
-#define WASTE_RLY					5
-#define PUMP_IN_RLY					6
-#define PUMP_OUT_RLY				7
-#define INVALID_RELAY				255
-
-//MOTORS PIN
-#define MOTOR_PIN_NUMBER			3
-#define MAX_MOTOR_SPD				200 //need to be tested, but is max 255
-#define MOTOR_ENA_PIN				18
-#define MOTOR_IN1_PIN				8
-#define MOTOR_IN2_PIN				9
+/* Motor speed limits (independent of board) */
+#define MAX_MOTOR_SPD				200
 #define MOTOR_MIN_ANALOG_VAL		150
 #define MOTOR_MAX_ANALOG_VAL		255
 
-//TEMPERATURE SENSORS (DS18B20 OneWire — both on same bus)
-#define TEMPERATURE_BUS_PIN			17		// Shared OneWire bus for all DS18B20
-#define TEMPERATURE_SENSOR_BATH		0		// Sensor index 0 = bath (discovery order)
-#define TEMPERATURE_SENSOR_CHEMICAL	1		// Sensor index 1 = chemical
+/* PCA9685 I2C PWM controller (same on all boards) */
+#define PCA9685_ADDR				0x40
+#define PCA9685_PWM_FREQ			1000
 
-//PUMP PWM — via PCA9685 I2C PWM controller (daisy-chained through Adafruit 6318)
-#define PCA9685_ADDR				0x40	// Default I2C address
-#define PCA9685_PWM_FREQ			1000	// 1 kHz PWM for pump speed control
-#define PUMP_PCA9685_CHANNEL		0		// PCA9685 channel 0 = pump ENA
-
-#define TEST_PIN					15
-
-/* SD Card */
-#define SDSPI_HOST_ID				SPI3_HOST
-#define SD_CS						GPIO_NUM_1
-#define SD_MOSI						GPIO_NUM_2
-#define SD_MISO						GPIO_NUM_41 
-#define SD_SCLK						GPIO_NUM_42
-
-/* LCD defines */
-#define LCD_BLK						GPIO_NUM_45
-#define LCD_WR						GPIO_NUM_35
-#define LCD_RD						GPIO_NUM_48
-#define LCD_RS						GPIO_NUM_36
-#define LCD_CS						GPIO_NUM_37
-#define LCD_RST						GPIO_NUM_NC
-#define LCD_BSY						GPIO_NUM_NC
-#define LCD_D0						GPIO_NUM_47
-#define LCD_D1						GPIO_NUM_21
-#define LCD_D2						GPIO_NUM_14
-#define LCD_D3						GPIO_NUM_13
-#define LCD_D4						GPIO_NUM_12
-#define LCD_D5						GPIO_NUM_11
-#define LCD_D6						GPIO_NUM_10
-#define LCD_D7						GPIO_NUM_9
-#define LCD_D8						GPIO_NUM_3
-#define LCD_D9						GPIO_NUM_8
-#define LCD_D10						GPIO_NUM_16
-#define LCD_D11						GPIO_NUM_15
-#define LCD_D12						GPIO_NUM_7
-#define LCD_D13						GPIO_NUM_6
-#define LCD_D14						GPIO_NUM_5
-#define LCD_D15						GPIO_NUM_4
+/* LCD timing (used by parallel-bus boards, ignored by QSPI/simulator) */
+#ifndef LCD_PIXEL_CLOCK_HZ
 #define LCD_PIXEL_CLOCK_HZ			(40000000)
+#endif
 #define LCD_BK_LIGHT_ON_LEVEL		1
 #define LCD_BK_LIGHT_OFF_LEVEL		!LCD_BK_LIGHT_ON_LEVEL
 #define LCD_CMD_BITS				8
 #define LCD_PARAM_BITS				8
 
-/* LVGL Defines */
-#define BYTES_PER_PIXEL				(LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB565)) /*will be 2 for BGR565 */
-#define LVGL_BUF_SIZE				LCD_H_RES * (LCD_V_RES / 10) * BYTES_PER_PIXEL	/* 10% of screen size */	
-#define LCD_H_RES					480
-#define LCD_V_RES					320
+/* LVGL timing */
 #define LVGL_TICK_PERIOD_MS			2
 
-/* I2C Defines */
-#define I2C_INT						GPIO_NUM_40
-#define I2C_NUM						0		// I2C instance number
-#define I2C_SDA						GPIO_NUM_38
-#define I2C_SCL						GPIO_NUM_39
-#define TOUCH_I2C_ADR				0x38	// Just for reference
+/* I2C instance (shared across touch, MCP23017, PCA9685) */
+#define I2C_NUM						0
 
 /* System defines */
 #define FILENAME_SAVE				"/FilMachine.cfg"

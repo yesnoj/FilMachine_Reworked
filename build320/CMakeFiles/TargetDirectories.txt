@@ -1,0 +1,17 @@
+/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles/filmachine_sim.dir
+/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles/edit_cache.dir
+/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles/rebuild_cache.dir
+/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles/list_install_components.dir
+/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles/install.dir
+/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles/install/local.dir
+/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/CMakeFiles/install/strip.dir
+/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/lvgl/CMakeFiles/lvgl.dir
+/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/lvgl/CMakeFiles/lvgl_thorvg.dir
+/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/lvgl/CMakeFiles/lvgl_examples.dir
+/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/lvgl/CMakeFiles/lvgl_demos.dir
+/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/lvgl/CMakeFiles/edit_cache.dir
+/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/lvgl/CMakeFiles/rebuild_cache.dir
+/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/lvgl/CMakeFiles/list_install_components.dir
+/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/lvgl/CMakeFiles/install.dir
+/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/lvgl/CMakeFiles/install/local.dir
+/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build320/lvgl/CMakeFiles/install/strip.dir
