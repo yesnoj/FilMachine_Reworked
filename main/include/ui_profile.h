@@ -68,6 +68,7 @@ typedef struct {
     int row_w;
     int textarea_w;
     int textarea_h;
+    int label_x;
     int section_label_x;
     int section_label_y;
     int section_line_y;
@@ -122,10 +123,24 @@ typedef struct {
     int info_h;
     int info_inner_x;
     int temp_ctrl_y;
+    int temp_ctrl_switch_x;
+    int temp_row_y;
     int temp_row_h;
     int temp_label_x;
     int temp_ta_x;
+    int temp_ta_w;
     int temp_unit_x;
+    int tolerance_row_y;
+    int total_time_y;
+    int total_time_h;
+    int info_pad;
+    int color_container_x;
+    int color_container_y;
+    int color_container_w;
+    int color_container_h;
+    int color_label_x;
+    int bnw_label_x;
+    int new_step_scale_pct;
     int total_label_x;
     int preferred_x;
     int preferred_y;
@@ -162,6 +177,9 @@ typedef struct {
     int min_ta_x;
     int sec_ta_x;
     int time_ta_w;
+    int label_x;
+    int dropdown_h;
+    int source_row_extra_w;
     int type_dd_x;
     int type_dd_w;
     int type_icon_x;
@@ -231,6 +249,8 @@ typedef struct {
     int stage_title_w;
     int stage_title_x;
     int stage_title_y;
+    int tank_size_label_y;
+    int chem_volume_label_y;
     int stage_textarea_y1;
     int stage_textarea_y2;
     int stage_textarea_w;
@@ -341,6 +361,7 @@ typedef struct {
     int button_y;
     const lv_font_t *title_font;
     const lv_font_t *button_font;
+    const lv_font_t *wheel_font;
 } ui_roller_popup_layout_t;
 
 typedef struct {
@@ -369,6 +390,7 @@ typedef struct {
     int drain_container_w;
     int drain_label_x;
     int drain_switch_x;
+    int drain_switch_extra_x;
     int run_button_x;
     int run_button_y;
     int cancel_button_x;
@@ -448,12 +470,14 @@ typedef struct {
     int option_radio_x;
     int option_radio_size;
     int preferred_switch_x;
+    int option_label_offset_x;
     int button_y;
     int button_x;
     const lv_font_t *title_font;
     const lv_font_t *label_font;
     const lv_font_t *button_font;
     const lv_font_t *close_icon_font;
+    const lv_font_t *radio_font;
 } ui_filter_popup_layout_t;
 
 typedef struct {
@@ -722,6 +746,11 @@ typedef struct {
     ui_keyboard_layout_t keyboard;
     int clean_drain_container_h;       /* was hardcoded 40 in cleanPopup */
     int clean_spinbox_btn_offset;      /* was hardcoded 5 in cleanPopup */
+    int title_line_width;              /* common line width for title separators (was 2) */
+    int element_border_width;          /* border width for process/step elements (was 4) */
+    int element_shadow_width;          /* shadow width for step elements (was 5) */
+    int element_shadow_spread;         /* shadow spread for step hover (was 3) */
+    int selfcheck_progress_radius;     /* progress bar radius in selfcheck (was 4) */
 } ui_profile_t;
 
 const ui_profile_t *ui_get_profile(void);

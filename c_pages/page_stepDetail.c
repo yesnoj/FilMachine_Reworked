@@ -280,7 +280,7 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
 
 
                           lv_style_init(&sd->style_mBoxStepPopupTitleLine);
-                          lv_style_set_line_width(&sd->style_mBoxStepPopupTitleLine, 2);
+                          lv_style_set_line_width(&sd->style_mBoxStepPopupTitleLine, ui_get_profile()->title_line_width);
                           lv_style_set_line_color(&sd->style_mBoxStepPopupTitleLine, lv_palette_main(LV_PALETTE_GREEN));
                           lv_style_set_line_rounded(&sd->style_mBoxStepPopupTitleLine, true);
 
@@ -301,7 +301,7 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
                   sd->stepDetailNamelLabel = lv_label_create(sd->stepDetailNameContainer);
                   lv_label_set_text(sd->stepDetailNamelLabel, stepDetailName_text);
                   lv_obj_set_style_text_font(sd->stepDetailNamelLabel, ui->label_font, 0);
-                  lv_obj_align(sd->stepDetailNamelLabel, LV_ALIGN_LEFT_MID, -10, 0);
+                  lv_obj_align(sd->stepDetailNamelLabel, LV_ALIGN_LEFT_MID, ui->label_x, 0);
 
                   sd->stepDetailNameTextArea = lv_textarea_create(sd->stepDetailNameContainer);
                   lv_textarea_set_one_line(sd->stepDetailNameTextArea, true);
@@ -330,7 +330,7 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
                   sd->stepDurationLabel = lv_label_create(sd->stepDurationContainer);
                   lv_label_set_text(sd->stepDurationLabel, stepDetailDuration_text);
                   lv_obj_set_style_text_font(sd->stepDurationLabel, ui->label_font, 0);
-                  lv_obj_align(sd->stepDurationLabel, LV_ALIGN_LEFT_MID, -10, 0);
+                  lv_obj_align(sd->stepDurationLabel, LV_ALIGN_LEFT_MID, ui->label_x, 0);
 
                   sd->stepDetailMinTextArea = lv_textarea_create(sd->stepDurationContainer);
                   lv_textarea_set_one_line(sd->stepDetailMinTextArea, true);
@@ -380,14 +380,14 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
                   sd->stepTypeLabel = lv_label_create(sd->stepTypeContainer);
                   lv_label_set_text(sd->stepTypeLabel, stepDetailType_text);
                   lv_obj_set_style_text_font(sd->stepTypeLabel, ui->label_font, 0);
-                  lv_obj_align(sd->stepTypeLabel, LV_ALIGN_LEFT_MID, -10, 0);
+                  lv_obj_align(sd->stepTypeLabel, LV_ALIGN_LEFT_MID, ui->label_x, 0);
 
 
                   sd->stepTypeDropDownList = lv_dropdown_create(sd->stepTypeContainer);
                   lv_obj_set_style_border_opa(sd->stepTypeDropDownList, LV_OPA_TRANSP, 0);
                   lv_dropdown_set_options(sd->stepTypeDropDownList, stepTypeList);
                   lv_obj_align(sd->stepTypeDropDownList, LV_ALIGN_LEFT_MID, ui->type_dd_x, 2);
-                  lv_obj_set_size(sd->stepTypeDropDownList, ui->type_dd_w, 50);
+                  lv_obj_set_size(sd->stepTypeDropDownList, ui->type_dd_w, ui->dropdown_h);
                   lv_obj_add_event_cb(sd->stepTypeDropDownList, event_stepDetail, LV_EVENT_VALUE_CHANGED, sn);
                   lv_obj_set_style_bg_color(lv_dropdown_get_list(sd->stepTypeDropDownList), lv_palette_main(LV_PALETTE_GREEN), LV_PART_SELECTED | LV_STATE_CHECKED);
                   lv_dropdown_set_selected(sd->stepTypeDropDownList, sd->data.type);
@@ -402,21 +402,21 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
             sd->stepSourceContainer = lv_obj_create(sd->stepDetailContainer);
             lv_obj_remove_flag(sd->stepSourceContainer, LV_OBJ_FLAG_SCROLLABLE);
             lv_obj_align(sd->stepSourceContainer, LV_ALIGN_TOP_LEFT, ui->row_x, ui->source_y);
-            lv_obj_set_size(sd->stepSourceContainer, ui->row_w + 15, ui->row_h);
+            lv_obj_set_size(sd->stepSourceContainer, ui->row_w + ui->source_row_extra_w, ui->row_h);
             lv_obj_set_style_border_opa(sd->stepSourceContainer, LV_OPA_TRANSP, 0);
 
 
                   sd->stepSourceLabel = lv_label_create(sd->stepSourceContainer);
                   lv_label_set_text(sd->stepSourceLabel, stepDetailSource_text);
                   lv_obj_set_style_text_font(sd->stepSourceLabel, ui->label_font, 0);
-                  lv_obj_align(sd->stepSourceLabel, LV_ALIGN_LEFT_MID, -10, 0);
+                  lv_obj_align(sd->stepSourceLabel, LV_ALIGN_LEFT_MID, ui->label_x, 0);
 
 
                   sd->stepSourceDropDownList = lv_dropdown_create(sd->stepSourceContainer);
                   lv_obj_set_style_border_opa(sd->stepSourceDropDownList, LV_OPA_TRANSP, 0);
                   lv_dropdown_set_options(sd->stepSourceDropDownList, stepSourceList);
                   lv_obj_align(sd->stepSourceDropDownList, LV_ALIGN_LEFT_MID, ui->source_dd_x, 2);
-                  lv_obj_set_size(sd->stepSourceDropDownList, ui->source_dd_w, 50);
+                  lv_obj_set_size(sd->stepSourceDropDownList, ui->source_dd_w, ui->dropdown_h);
                   lv_obj_add_event_cb(sd->stepSourceDropDownList, event_stepDetail, LV_EVENT_VALUE_CHANGED, sn);
                   lv_obj_set_style_bg_color(lv_dropdown_get_list(sd->stepSourceDropDownList), lv_palette_main(LV_PALETTE_GREEN), LV_PART_SELECTED | LV_STATE_CHECKED);
                   lv_dropdown_set_selected(sd->stepSourceDropDownList, sd->data.source);
@@ -449,7 +449,7 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
             sd->stepDiscardAfterContainer = lv_obj_create(sd->stepDetailContainer);
             lv_obj_remove_flag(sd->stepDiscardAfterContainer, LV_OBJ_FLAG_SCROLLABLE);
             lv_obj_align(sd->stepDiscardAfterContainer, LV_ALIGN_TOP_LEFT, ui->row_x, ui->discard_y);
-            lv_obj_set_size(sd->stepDiscardAfterContainer, ui->row_w - 10, ui->row_h);
+            lv_obj_set_size(sd->stepDiscardAfterContainer, ui->row_w - ui->source_row_extra_w, ui->row_h);
             lv_obj_set_style_border_opa(sd->stepDiscardAfterContainer, LV_OPA_TRANSP, 0);
 
 

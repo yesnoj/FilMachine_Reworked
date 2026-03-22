@@ -341,7 +341,7 @@ static void initSettings_tempUnit(lv_obj_t *parent)
         gui.page.settings.tempUnitLabel = lv_label_create(gui.page.settings.tempUnitContainer);
         lv_label_set_text(gui.page.settings.tempUnitLabel, tempUnit_text);
         lv_obj_set_style_text_font(gui.page.settings.tempUnitLabel, UI_SETTINGS->label_font, 0);
-        lv_obj_align(gui.page.settings.tempUnitLabel, LV_ALIGN_LEFT_MID, -5, 0);
+        lv_obj_align(gui.page.settings.tempUnitLabel, LV_ALIGN_LEFT_MID, UI_SETTINGS->label_x, 0);
 }
 
 
@@ -764,7 +764,7 @@ void initSettings(void){
 
   /*Create style*/
   lv_style_init(&gui.page.settings.style_sectionTitleLine);
-  lv_style_set_line_width(&gui.page.settings.style_sectionTitleLine, 2);
+  lv_style_set_line_width(&gui.page.settings.style_sectionTitleLine, ui_get_profile()->title_line_width);
   lv_style_set_line_color(&gui.page.settings.style_sectionTitleLine, lv_palette_main(LV_PALETTE_ORANGE));
   lv_style_set_line_rounded(&gui.page.settings.style_sectionTitleLine, true);
 

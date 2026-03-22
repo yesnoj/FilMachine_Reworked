@@ -427,7 +427,7 @@ void createPopupBackdrop(lv_obj_t **parent, lv_obj_t **container, int32_t width,
 
 void initTitleLineStyle(lv_style_t *style, uint32_t color) {
     lv_style_init(style);
-    lv_style_set_line_width(style, 2);
+    lv_style_set_line_width(style, ui_get_profile()->title_line_width);
     lv_style_set_line_color(style, lv_color_hex(color));
     lv_style_set_line_rounded(style, true);
 }
@@ -1257,11 +1257,11 @@ void updateProcessElement(processNode *process){
       if(process->process.processDetails->data.isTempControlled == false) {
           lv_obj_add_flag(process->process.processTempIcon, LV_OBJ_FLAG_HIDDEN);
           lv_obj_add_flag(process->process.processTemp, LV_OBJ_FLAG_HIDDEN);
-          lv_obj_align(process->process.processTimeIcon, LV_ALIGN_LEFT_MID, -10, 17);
-          lv_obj_align(process->process.processTime, LV_ALIGN_LEFT_MID, 12, 17);
+          lv_obj_align(process->process.processTimeIcon, LV_ALIGN_LEFT_MID, ui_get_profile()->process_element.time_icon_no_temp_x, ui_get_profile()->process_element.time_icon_y);
+          lv_obj_align(process->process.processTime, LV_ALIGN_LEFT_MID, ui_get_profile()->process_element.time_value_no_temp_x, ui_get_profile()->process_element.time_value_y);
        } else {
-            lv_obj_align(process->process.processTime, LV_ALIGN_LEFT_MID, 87, 17);
-            lv_obj_align(process->process.processTimeIcon, LV_ALIGN_LEFT_MID, 65, 17);
+            lv_obj_align(process->process.processTime, LV_ALIGN_LEFT_MID, ui_get_profile()->process_element.time_value_x, ui_get_profile()->process_element.time_value_y);
+            lv_obj_align(process->process.processTimeIcon, LV_ALIGN_LEFT_MID, ui_get_profile()->process_element.time_icon_x, ui_get_profile()->process_element.time_icon_y);
             lv_obj_clear_flag(process->process.processTempIcon, LV_OBJ_FLAG_HIDDEN);
             lv_obj_clear_flag(process->process.processTemp, LV_OBJ_FLAG_HIDDEN);
        }

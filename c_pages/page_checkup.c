@@ -813,7 +813,7 @@ static void checkup_renderPreFlight(processNode *proc) {
         lv_label_set_text(ckup->checkupTankSizeLabel, checkupTankSize_text);
         lv_obj_set_width(ckup->checkupTankSizeLabel, LV_SIZE_CONTENT);
         lv_obj_set_style_text_font(ckup->checkupTankSizeLabel, ui->stage_label_font, 0);
-        lv_obj_align(ckup->checkupTankSizeLabel, LV_ALIGN_TOP_MID, 0, 30);
+        lv_obj_align(ckup->checkupTankSizeLabel, LV_ALIGN_TOP_MID, 0, ui->tank_size_label_y);
 
         ckup->checkupTankSizeTextArea = lv_textarea_create(ckup->checkupSelectTankChemistryContainer);
         lv_textarea_set_one_line(ckup->checkupTankSizeTextArea, true);
@@ -841,7 +841,7 @@ static void checkup_renderPreFlight(processNode *proc) {
         lv_label_set_text(ckup->checkupChemistryVolumeLabel, checkupChemistryVolume_text);
         lv_obj_set_width(ckup->checkupChemistryVolumeLabel, LV_SIZE_CONTENT);
         lv_obj_set_style_text_font(ckup->checkupChemistryVolumeLabel, ui->stage_label_font, 0);
-        lv_obj_align(ckup->checkupChemistryVolumeLabel, LV_ALIGN_TOP_MID, 0, 100);
+        lv_obj_align(ckup->checkupChemistryVolumeLabel, LV_ALIGN_TOP_MID, 0, ui->chem_volume_label_y);
 
         /* Read-only volume textarea */
         ckup->checkupVolumeTextArea = lv_textarea_create(ckup->checkupSelectTankChemistryContainer);

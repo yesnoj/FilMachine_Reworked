@@ -659,7 +659,7 @@ void cleanPopup (void){
 
                           gui.element.cleanPopup.cleanDrainWaterSwitch = lv_switch_create(gui.element.cleanPopup.cleanDrainWaterLabelContainer);
                           lv_obj_add_event_cb(gui.element.cleanPopup.cleanDrainWaterSwitch , event_cleanPopup, LV_EVENT_VALUE_CHANGED, gui.element.cleanPopup.cleanDrainWaterSwitch);
-                          lv_obj_align(gui.element.cleanPopup.cleanDrainWaterSwitch , LV_ALIGN_LEFT_MID, ui->drain_switch_x + 108, 0);
+                          lv_obj_align(gui.element.cleanPopup.cleanDrainWaterSwitch , LV_ALIGN_LEFT_MID, ui->drain_switch_x + ui->drain_switch_extra_x, 0);
                           lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanDrainWaterSwitch, lv_palette_darken(LV_PALETTE_GREY, 3), LV_STATE_DEFAULT);
                           lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanDrainWaterSwitch,  lv_palette_main(LV_PALETTE_BLUE), LV_PART_KNOB | LV_STATE_DEFAULT);
                           lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanDrainWaterSwitch, lv_color_hex(BLUE_DARK) , LV_PART_INDICATOR | LV_STATE_CHECKED);

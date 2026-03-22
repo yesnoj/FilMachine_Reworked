@@ -99,7 +99,7 @@ void filterPopupCreate (void){
 
       /*Create style*/
       lv_style_init(&gui.element.filterPopup.style_mBoxTitleLine);
-      lv_style_set_line_width(&gui.element.filterPopup.style_mBoxTitleLine, 2);
+      lv_style_set_line_width(&gui.element.filterPopup.style_mBoxTitleLine, ui_get_profile()->title_line_width);
       lv_style_set_line_color(&gui.element.filterPopup.style_mBoxTitleLine, lv_palette_main(LV_PALETTE_GREEN));
       lv_style_set_line_rounded(&gui.element.filterPopup.style_mBoxTitleLine, true);
 
@@ -171,9 +171,9 @@ void filterPopupCreate (void){
           gui.element.filterPopup.mBoxColorLabel = lv_label_create(gui.element.filterPopup.mBoxSelectColorRadioButton);
           lv_label_set_text(gui.element.filterPopup.mBoxColorLabel, filterPopupColor_text);
           lv_obj_set_style_text_font(gui.element.filterPopup.mBoxColorLabel, ui->title_font, 0);
-          lv_obj_align(gui.element.filterPopup.mBoxColorLabel, LV_ALIGN_LEFT_MID, - 10, 0);
+          lv_obj_align(gui.element.filterPopup.mBoxColorLabel, LV_ALIGN_LEFT_MID, ui->option_label_offset_x, 0);
 
-          gui.element.filterPopup.mBoxSelectColorRadioButton = create_radiobutton(gui.element.filterPopup.mBoxSelectColorRadioButton, "", ui->option_radio_x, 0, ui->option_radio_size, &lv_font_montserrat_18, lv_color_hex(GREEN_DARK), lv_palette_main(LV_PALETTE_GREEN));
+          gui.element.filterPopup.mBoxSelectColorRadioButton = create_radiobutton(gui.element.filterPopup.mBoxSelectColorRadioButton, "", ui->option_radio_x, 0, ui->option_radio_size, ui->radio_font, lv_color_hex(GREEN_DARK), lv_palette_main(LV_PALETTE_GREEN));
           lv_obj_add_event_cb(gui.element.filterPopup.mBoxSelectColorRadioButton, event_filterMBox, LV_EVENT_VALUE_CHANGED, gui.element.filterPopup.mBoxSelectColorRadioButton);
 
           //B&W RADIO BUTTON WITH LABEL
@@ -186,9 +186,9 @@ void filterPopupCreate (void){
           gui.element.filterPopup.mBoxBnWLabel = lv_label_create(gui.element.filterPopup.mBoxSelectBnWRadioButton);
           lv_label_set_text(gui.element.filterPopup.mBoxBnWLabel, filterPopupBnW_text);
           lv_obj_set_style_text_font(gui.element.filterPopup.mBoxBnWLabel, ui->title_font, 0);
-          lv_obj_align(gui.element.filterPopup.mBoxBnWLabel, LV_ALIGN_LEFT_MID, - 10, 0);
+          lv_obj_align(gui.element.filterPopup.mBoxBnWLabel, LV_ALIGN_LEFT_MID, ui->option_label_offset_x, 0);
 
-          gui.element.filterPopup.mBoxSelectBnWRadioButton = create_radiobutton(gui.element.filterPopup.mBoxSelectBnWRadioButton, "", ui->option_radio_x, 0, ui->option_radio_size, &lv_font_montserrat_18, lv_color_hex(GREEN_DARK), lv_palette_main(LV_PALETTE_GREEN));
+          gui.element.filterPopup.mBoxSelectBnWRadioButton = create_radiobutton(gui.element.filterPopup.mBoxSelectBnWRadioButton, "", ui->option_radio_x, 0, ui->option_radio_size, ui->radio_font, lv_color_hex(GREEN_DARK), lv_palette_main(LV_PALETTE_GREEN));
           lv_obj_add_event_cb(gui.element.filterPopup.mBoxSelectBnWRadioButton, event_filterMBox, LV_EVENT_VALUE_CHANGED, gui.element.filterPopup.mBoxSelectBnWRadioButton);
 
 

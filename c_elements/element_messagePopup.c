@@ -421,6 +421,7 @@ static void message_popup_button2_clicked(lv_obj_t *mboxCont)
                 if (addProcessElement(duplicatedNode) != NULL) {
                     LV_LOG_USER("Create GUI entry");
                     processElementCreate(duplicatedNode, -1);
+                    lv_obj_scroll_to_view(duplicatedNode->process.processElement, LV_ANIM_ON);
                     qSysAction(SAVE_PROCESS_CONFIG);
                 }
             } else {
@@ -518,7 +519,7 @@ void messagePopupCreate(const char * popupTitleText,const char * popupText,const
 
    /*Create style*/
    lv_style_init(&gui.element.messagePopup.style_mBoxPopupTitleLine);
-   lv_style_set_line_width(&gui.element.messagePopup.style_mBoxPopupTitleLine, 2);
+   lv_style_set_line_width(&gui.element.messagePopup.style_mBoxPopupTitleLine, ui_get_profile()->title_line_width);
    lv_style_set_line_rounded(&gui.element.messagePopup.style_mBoxPopupTitleLine, true);
 
    /*Create a line and apply the new style*/

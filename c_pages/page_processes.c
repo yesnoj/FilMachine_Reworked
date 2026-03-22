@@ -113,7 +113,7 @@ static void initProcesses(void){
   //CREATE STYLE AND LINE FOR THE TITLE
   /*Create style*/
   lv_style_init(&gui.page.processes.style_sectionTitleLine);
-  lv_style_set_line_width(&gui.page.processes.style_sectionTitleLine, 2);
+  lv_style_set_line_width(&gui.page.processes.style_sectionTitleLine, ui_get_profile()->title_line_width);
   lv_style_set_line_color(&gui.page.processes.style_sectionTitleLine, lv_palette_main(LV_PALETTE_GREEN));
   lv_style_set_line_rounded(&gui.page.processes.style_sectionTitleLine, true);
 

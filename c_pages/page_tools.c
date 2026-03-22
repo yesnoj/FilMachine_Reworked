@@ -209,7 +209,7 @@ static void initTools_utilities(lv_obj_t *parent) {
   lv_obj_set_style_text_font(gui.page.tools.toolsUtilitiesLabel, ui->section_font, 0);
   lv_obj_align(gui.page.tools.toolsUtilitiesLabel, LV_ALIGN_TOP_LEFT, ui->section_label_x, ui->section_title_y_utilities);
 
-  lv_style_set_line_width(&gui.page.tools.style_sectionTitleLine, 2);
+  lv_style_set_line_width(&gui.page.tools.style_sectionTitleLine, ui_get_profile()->title_line_width);
   lv_style_set_line_color(&gui.page.tools.style_sectionTitleLine, lv_color_hex(LIGHT_BLUE));
   lv_style_set_line_rounded(&gui.page.tools.style_sectionTitleLine, true);
 
@@ -276,7 +276,7 @@ static void initTools_statistics(lv_obj_t *parent) {
   lv_obj_set_style_text_font(gui.page.tools.toolsStatisticsLabel, ui->section_font, 0);
   lv_obj_align(gui.page.tools.toolsStatisticsLabel, LV_ALIGN_TOP_LEFT, ui->section_label_x, ui->section_title_y_statistics);
 
-  lv_style_set_line_width(&gui.page.tools.style_sectionTitleLine, 2);
+  lv_style_set_line_width(&gui.page.tools.style_sectionTitleLine, ui_get_profile()->title_line_width);
   lv_style_set_line_color(&gui.page.tools.style_sectionTitleLine, lv_color_hex(LIGHT_BLUE));
   lv_style_set_line_rounded(&gui.page.tools.style_sectionTitleLine, true);
 
@@ -361,7 +361,7 @@ static void initTools_software(lv_obj_t *parent) {
   lv_obj_set_style_text_font(gui.page.tools.toolsSoftwareLabel, ui->section_font, 0);
   lv_obj_align(gui.page.tools.toolsSoftwareLabel, LV_ALIGN_TOP_LEFT, ui->section_label_x, ui->section_title_y_software);
 
-  lv_style_set_line_width(&gui.page.tools.style_sectionTitleLine, 2);
+  lv_style_set_line_width(&gui.page.tools.style_sectionTitleLine, ui_get_profile()->title_line_width);
   lv_style_set_line_color(&gui.page.tools.style_sectionTitleLine, lv_color_hex(LIGHT_BLUE));
   lv_style_set_line_rounded(&gui.page.tools.style_sectionTitleLine, true);
 

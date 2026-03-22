@@ -216,8 +216,9 @@ void reorderStepElements(processNode *data) {
 
 bool hasListChanged(processNode *data) {
 
+    const ui_step_element_layout_t *se = &ui_get_profile()->step_element;
     stepNode *current = data->process.processDetails->stepElementsList.start;
-    lv_coord_t original_y = -13; /* Must match reorderStepElements starting y_offset */
+    lv_coord_t original_y = se->y_start;
     lv_coord_t current_y = 0;  /* Current Y position */
 
     while (current) {
@@ -387,7 +388,7 @@ static void stepElement_handleLongPress(stepNode *currentNode, lv_obj_t *obj, pr
     LV_LOG_USER("LV_EVENT_LONG_PRESSED");
     lv_obj_move_foreground(stepObj);
     lv_indev_get_point(indev, &drag_last_point);
-    lv_style_set_shadow_spread(&currentNode->step.stepStyle, 3);
+    lv_style_set_shadow_spread(&currentNode->step.stepStyle, ui_get_profile()->element_shadow_spread);
     lv_obj_remove_flag(lv_obj_get_parent(stepObj), LV_OBJ_FLAG_SCROLLABLE);
     drag_active = true;
     drag_slot = 0;
@@ -585,23 +586,8 @@ void event_stepElement(lv_event_t *e) {
                     lv_obj_send_event(data->process.processDetails->processSaveButton, LV_EVENT_REFRESH, NULL);
                 }
 
-                /* Snap all steps to their correct positions with animation */
-                int slot = 0;
-                stepNode *n = data->process.processDetails->stepElementsList.start;
-                while (n) {
-                    lv_coord_t target_y = STEP_Y_START + slot * STEP_HEIGHT;
-                    lv_anim_t a;
-                    lv_anim_init(&a);
-                    lv_anim_set_var(&a, n->step.stepElement);
-                    lv_anim_set_values(&a, lv_obj_get_y_aligned(n->step.stepElement), target_y);
-                    lv_anim_set_duration(&a, 150);
-                    lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)lv_obj_set_y);
-                    lv_anim_set_path_cb(&a, lv_anim_path_ease_out);
-                    lv_anim_start(&a);
-                    n->step.container_y = target_y;
-                    slot++;
-                    n = n->next;
-                }
+                /* Snap all steps to their correct positions and update container */
+                reorderStepElements(data);
 
                 drag_slot = -1;
                 drag_original_slot = -1;
@@ -659,15 +645,15 @@ void stepElementCreate(stepNode * newStep,processNode * processReference, int8_t
   LV_LOG_USER("Step element created with address 0x%p", newStep);
   LV_LOG_USER("Process element associated with address 0x%p", processReference);
 
-	if( newStep->step.stepStyle.values_and_props == NULL ) {		//Only initialise the style once! 
+	if( newStep->step.stepStyle.values_and_props == NULL ) {		//Only initialise the style once!
 		lv_style_init(&newStep->step.stepStyle);
 
     lv_style_set_bg_color(&newStep->step.stepStyle, lv_color_hex(GREY));
     lv_style_set_border_color(&newStep->step.stepStyle, lv_color_hex(GREEN_DARK));
-    lv_style_set_border_width(&newStep->step.stepStyle, 4);
+    lv_style_set_border_width(&newStep->step.stepStyle, ui_get_profile()->element_border_width);
     lv_style_set_border_opa(&newStep->step.stepStyle, LV_OPA_50);
     lv_style_set_border_side(&newStep->step.stepStyle, LV_BORDER_SIDE_BOTTOM | LV_BORDER_SIDE_RIGHT);
-    lv_style_set_shadow_width(&newStep->step.stepStyle, 5);
+    lv_style_set_shadow_width(&newStep->step.stepStyle, ui_get_profile()->element_shadow_width);
     lv_style_set_shadow_spread(&newStep->step.stepStyle, 0);
     lv_style_set_shadow_color(&newStep->step.stepStyle, lv_palette_main(LV_PALETTE_RED));
 		LV_LOG_USER("First call to processElementCreate style now initialised");

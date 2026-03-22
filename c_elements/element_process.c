@@ -250,7 +250,7 @@ void processElementCreate(processNode *newProcess, int32_t tempSize) {
 
 		lv_style_set_bg_color(&newProcess->process.processStyle, lv_color_hex(GREY));
 		lv_style_set_border_color(&newProcess->process.processStyle, lv_color_hex(GREEN_DARK));
-		lv_style_set_border_width(&newProcess->process.processStyle, 4);
+		lv_style_set_border_width(&newProcess->process.processStyle, ui_get_profile()->element_border_width);
 		lv_style_set_border_opa(&newProcess->process.processStyle, LV_OPA_50);
 		lv_style_set_border_side(&newProcess->process.processStyle, LV_BORDER_SIDE_BOTTOM | LV_BORDER_SIDE_RIGHT);
 		LV_LOG_USER("First call to processElementCreate style now initialised");

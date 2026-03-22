@@ -358,7 +358,7 @@ void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *w
 
    /*Create style*/
    lv_style_init(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
-   lv_style_set_line_width(&gui.element.rollerPopup.style_mBoxRollerTitleLine, 2);
+   lv_style_set_line_width(&gui.element.rollerPopup.style_mBoxRollerTitleLine, ui_get_profile()->title_line_width);
    lv_style_set_line_rounded(&gui.element.rollerPopup.style_mBoxRollerTitleLine, true);
 
    /*Create a line and apply the new style*/
@@ -380,9 +380,9 @@ void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *w
 
   
   lv_style_init(&gui.element.rollerPopup.style_roller);
-  lv_style_set_text_font(&gui.element.rollerPopup.style_roller, &lv_font_montserrat_30);
+  lv_style_set_text_font(&gui.element.rollerPopup.style_roller, ui->wheel_font);
   lv_style_set_bg_color(&gui.element.rollerPopup.style_roller, lv_color_hex(accentColor));
-  lv_style_set_border_width(&gui.element.rollerPopup.style_roller, 2);
+  lv_style_set_border_width(&gui.element.rollerPopup.style_roller, ui_get_profile()->title_line_width);
   lv_style_set_border_color(&gui.element.rollerPopup.style_roller, lv_color_hex(accentColor));
   
   gui.element.rollerPopup.roller = lv_roller_create(gui.element.rollerPopup.mBoxRollerRollerContainer);

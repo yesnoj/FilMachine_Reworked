@@ -514,8 +514,8 @@ void selfcheckPopupCreate(void) {
     lv_bar_set_value(sc->progressBar, 0, LV_ANIM_OFF);
     lv_obj_set_style_bg_color(sc->progressBar, lv_palette_darken(LV_PALETTE_GREY, 3), LV_PART_MAIN);
     lv_obj_set_style_bg_color(sc->progressBar, lv_color_hex(GREEN), LV_PART_INDICATOR);
-    lv_obj_set_style_radius(sc->progressBar, 4, LV_PART_MAIN);
-    lv_obj_set_style_radius(sc->progressBar, 4, LV_PART_INDICATOR);
+    lv_obj_set_style_radius(sc->progressBar, ui_get_profile()->selfcheck_progress_radius, LV_PART_MAIN);
+    lv_obj_set_style_radius(sc->progressBar, ui_get_profile()->selfcheck_progress_radius, LV_PART_INDICATOR);
     lv_obj_add_flag(sc->progressBar, LV_OBJ_FLAG_HIDDEN);
 
     /* ── 3 BUTTONS IN ONE ROW ── */
