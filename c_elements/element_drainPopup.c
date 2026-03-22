@@ -101,6 +101,10 @@ static void drain_timer_cb(lv_timer_t *timer) {
             lv_label_set_text(dp->drainStopButtonLabel, buttonClose_text);
             lv_obj_set_style_bg_color(dp->drainStopButton,
                                       lv_color_hex(GREEN_DARK), LV_PART_MAIN);
+
+            /* Start persistent alarm after all containers are drained */
+            alarm_start_persistent();
+
             LV_LOG_USER("Drain complete – all containers drained");
         } else {
             /* ── Start next tank ── */
@@ -116,6 +120,9 @@ static void drain_timer_cb(lv_timer_t *timer) {
 /* ── Reset UI to initial (confirm) state ─────────────── */
 static void drain_reset(void) {
     struct sDrainPopup *dp = &gui.element.drainPopup;
+
+    /* Stop alarm if it was ringing */
+    alarm_stop();
 
     /* Stop timer & relays if still active */
     if (dp->isDraining) {

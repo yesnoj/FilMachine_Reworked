@@ -339,8 +339,7 @@ void processTimer(lv_timer_t * timer) {
           gui.page.tools.machineStats.totalMins += pn->process.processDetails->data.timeMins;
           qSysAction( SAVE_MACHINE_STATS );
 
-          /* Start persistent alarm for process completion */
-          alarm_start_persistent();
+          /* Alarm moved to after last draining completes (handleIntermediateOrLastStep) */
 
           safeTimerDelete(&ckup->processTimer);
           lv_timer_resume(ckup->pumpTimer);
@@ -523,6 +522,9 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
             lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
             lv_obj_clear_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
             safeTimerDelete(&checkup->pumpTimer);
+
+            /* Start persistent alarm only after last draining is fully complete */
+            alarm_start_persistent();
         }
     } else {
         LV_LOG_USER("Intermediate step");
@@ -633,6 +635,8 @@ void handleStopNow(processNode *pn) {
         lv_obj_clear_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
         safeTimerDelete(&checkup->pumpTimer);
 
+        /* Start persistent alarm after stop-now draining is fully complete */
+        alarm_start_persistent();
     }
 }
 
@@ -705,6 +709,9 @@ void handleStopAfter(processNode *pn) {
             lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
             lv_obj_clear_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
             safeTimerDelete(&checkup->pumpTimer);
+
+            /* Start persistent alarm after stop-after draining is fully complete */
+            alarm_start_persistent();
         }
     }
 }
@@ -745,6 +752,9 @@ void handleStopNowAfterStopAfter(processNode *pn) {
         lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
         lv_obj_clear_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
         safeTimerDelete(&checkup->pumpTimer);
+
+        /* Start persistent alarm after stop-now-after-stop-after draining is fully complete */
+        alarm_start_persistent();
     }
 }
 

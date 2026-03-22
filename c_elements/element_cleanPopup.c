@@ -218,6 +218,9 @@ void cleanPumpTimer(lv_timer_t * timer) {
             cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
             gui.page.tools.machineStats.clean++;
             qSysAction(SAVE_MACHINE_STATS);
+
+            /* Start persistent alarm after stop-now clean draining is complete */
+            alarm_start_persistent();
             return;
         }
     } else {
