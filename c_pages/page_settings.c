@@ -139,14 +139,14 @@ void event_settings_handler(lv_event_t * e)
     if(act_cb == gui.page.settings.tempSensorTuneButton){
       if(code == LV_EVENT_SHORT_CLICKED) {
           LV_LOG_USER("TUNE short click");
-          rollerPopupCreate(gui.element.rollerPopup.tempCelsiusOptions,tuneTempPopupTitle_text,gui.page.settings.tempSensorTuneButton, gui.page.settings.settingsParams.calibratedTemp);
+          rollerPopupCreate(gui.element.rollerPopup.tempCelsiusOptions,tuneTempPopupTitle_text,gui.page.settings.tempSensorTuneButton, gui.page.settings.settingsParams.calibratedTemp, ORANGE);
         }
       if(code == LV_EVENT_LONG_PRESSED) {
           LV_LOG_USER("TUNE Long click - Resetting calibration");
           gui.page.settings.settingsParams.tempCalibOffset = 0;
           gui.page.settings.settingsParams.calibratedTemp = 20; /* default */
           qSysAction(SAVE_PROCESS_CONFIG);
-          messagePopupCreate("Calibration Reset", "Temperature calibration has been reset to default values.", NULL, NULL, NULL);
+          messagePopupCreate(calibrationResetPopupTitle_text, calibrationResetPopupBody_text, NULL, NULL, NULL);
         }
     }
 
@@ -266,7 +266,7 @@ void event_settings_handler(lv_event_t * e)
         if(code == LV_EVENT_FOCUSED) {
             if(gui.element.rollerPopup.mBoxRollerParent != NULL) return;
             LV_LOG_USER("Set Tank Size from Settings");
-            rollerPopupCreate(checkupTankSizesList, checkupTankSize_text, act_cb, gui.page.settings.tankSize_active_index);
+            rollerPopupCreate(checkupTankSizesList, checkupTankSize_text, act_cb, gui.page.settings.tankSize_active_index, ORANGE);
         }
     }
 
@@ -294,7 +294,7 @@ void event_settings_handler(lv_event_t * e)
             uint32_t idx = 0;
             uint16_t vals[] = {250, 500, 750, 1000, 1250, 1500};
             for(int i = 0; i < 6; i++) { if(vals[i] == val) { idx = i; break; } }
-            rollerPopupCreate(chemContainerMlList, chemContainerMl_text, act_cb, idx);
+            rollerPopupCreate(chemContainerMlList, chemContainerMl_text, act_cb, idx, ORANGE);
         }
     }
 
@@ -306,7 +306,7 @@ void event_settings_handler(lv_event_t * e)
             uint32_t idx = 0;
             uint16_t vals[] = {1000, 1500, 2000, 2500, 3000, 3500, 4000, 5000};
             for(int i = 0; i < 8; i++) { if(vals[i] == val) { idx = i; break; } }
-            rollerPopupCreate(wbContainerMlList, wbContainerMl_text, act_cb, idx);
+            rollerPopupCreate(wbContainerMlList, wbContainerMl_text, act_cb, idx, ORANGE);
         }
     }
 
@@ -315,7 +315,7 @@ void event_settings_handler(lv_event_t * e)
             if(gui.element.rollerPopup.mBoxRollerParent != NULL) return;
             LV_LOG_USER("Set Chemistry Volume");
             uint32_t idx = gui.page.settings.settingsParams.chemistryVolume >= 2 ? 1 : 0;
-            rollerPopupCreate(chemistryVolumeList, chemistryVolume_text, act_cb, idx);
+            rollerPopupCreate(chemistryVolumeList, chemistryVolume_text, act_cb, idx, ORANGE);
         }
     }
 

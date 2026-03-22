@@ -130,7 +130,7 @@ static void step_detail_open_roller(stepNode *sn, lv_obj_t *focusedWidget) {
                           &sd->minRollerCtx,
                           findRollerStringIndex(
                               lv_textarea_get_text(sd->stepDetailMinTextArea),
-                              gui.element.rollerPopup.minutesOptions));
+                              gui.element.rollerPopup.minutesOptions), GREEN_DARK);
     }
     if (focusedWidget == sd->stepDetailSecTextArea) {
         LV_LOG_USER("Set seconds");
@@ -141,7 +141,7 @@ static void step_detail_open_roller(stepNode *sn, lv_obj_t *focusedWidget) {
                           &sd->secRollerCtx,
                           findRollerStringIndex(
                               lv_textarea_get_text(sd->stepDetailSecTextArea),
-                              gui.element.rollerPopup.secondsOptions));
+                              gui.element.rollerPopup.secondsOptions), GREEN_DARK);
     }
 }
 

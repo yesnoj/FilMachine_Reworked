@@ -50,23 +50,37 @@ static processNode *message_popup_find_process_node(void *ptr)
     return NULL;
 }
 
+static bool message_popup_find_step_in_process(void *ptr, processNode *process, processNode **out_process, stepNode **out_step)
+{
+    if (process == NULL || process->process.processDetails == NULL)
+        return false;
+
+    stepNode *step = process->process.processDetails->stepElementsList.start;
+    while (step != NULL) {
+        if ((void *)step == ptr) {
+            if (out_process) *out_process = process;
+            if (out_step) *out_step = step;
+            return true;
+        }
+        step = step->next;
+    }
+    return false;
+}
+
 static bool message_popup_find_step_owner(void *ptr, processNode **out_process, stepNode **out_step)
 {
+    /* First search the saved process list */
     processNode *process = gui.page.processes.processElementsList.start;
-
     while (process != NULL) {
-        if (process->process.processDetails != NULL) {
-            stepNode *step = process->process.processDetails->stepElementsList.start;
-            while (step != NULL) {
-                if ((void *)step == ptr) {
-                    if (out_process) *out_process = process;
-                    if (out_step) *out_step = step;
-                    return true;
-                }
-                step = step->next;
-            }
-        }
+        if (message_popup_find_step_in_process(ptr, process, out_process, out_step))
+            return true;
         process = process->next;
+    }
+
+    /* Also check the currently-edited (possibly unsaved) process */
+    if (gui.tempProcessNode != NULL) {
+        if (message_popup_find_step_in_process(ptr, gui.tempProcessNode, out_process, out_step))
+            return true;
     }
 
     return false;
@@ -299,6 +313,8 @@ static void message_popup_button1_clicked(lv_obj_t *mboxCont)
             break;
 
         default:
+            LV_LOG_USER("button1: unhandled type %d — closing popup", g_msg_ctx.type);
+            message_popup_close(mboxCont);
             break;
     }
 }
@@ -313,7 +329,7 @@ static void message_popup_button2_clicked(lv_obj_t *mboxCont)
         case MSGPOP_OWNER_STEP:
             if (sn != NULL && sn->step.swipedLeft == false && sn->step.swipedRight == true) {
                 LV_LOG_USER("Cancel delete step element!");
-                uint32_t x = lv_obj_get_x_aligned(sn->step.stepElement) - 50;
+                uint32_t x = lv_obj_get_x_aligned(sn->step.stepElement) - ui_get_profile()->step_element.swipe_offset;
                 uint32_t y = lv_obj_get_y_aligned(sn->step.stepElement);
                 lv_obj_set_pos(sn->step.stepElement, x, y);
                 sn->step.swipedLeft = false;
@@ -368,7 +384,7 @@ static void message_popup_button2_clicked(lv_obj_t *mboxCont)
         case MSGPOP_OWNER_PROCESS:
             if (pn != NULL && pn->process.swipedRight == true && pn->process.swipedLeft == false) {
                 LV_LOG_USER("Cancel delete process element!");
-                uint32_t x = lv_obj_get_x_aligned(pn->process.processElement) - 50;
+                uint32_t x = lv_obj_get_x_aligned(pn->process.processElement) - ui_get_profile()->process_element.swipe_offset;
                 uint32_t y = lv_obj_get_y_aligned(pn->process.processElement);
                 lv_obj_set_pos(pn->process.processElement, x, y);
                 pn->process.swipedLeft = true;
@@ -442,6 +458,8 @@ static void message_popup_button2_clicked(lv_obj_t *mboxCont)
             break;
 
         default:
+            LV_LOG_USER("button2: unhandled type %d — closing popup", g_msg_ctx.type);
+            message_popup_close(mboxCont);
             break;
     }
 }
@@ -495,7 +513,7 @@ void messagePopupCreate(const char * popupTitleText,const char * popupText,const
          gui.element.messagePopup.mBoxPopupTitle = lv_label_create(gui.element.messagePopup.mBoxPopupContainer);
          lv_label_set_text(gui.element.messagePopup.mBoxPopupTitle, popupTitleText);
          lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupTitle, ui->title_font, 0);
-         lv_obj_align(gui.element.messagePopup.mBoxPopupTitle, LV_ALIGN_TOP_MID, 0, -10);
+         lv_obj_align(gui.element.messagePopup.mBoxPopupTitle, LV_ALIGN_TOP_MID, 0, ui->title_y);
 
 
    /*Create style*/
@@ -507,7 +525,7 @@ void messagePopupCreate(const char * popupTitleText,const char * popupText,const
    gui.element.messagePopup.mBoxPopupTitleLine = lv_line_create(gui.element.messagePopup.mBoxPopupContainer);
    lv_line_set_points(gui.element.messagePopup.mBoxPopupTitleLine, gui.element.messagePopup.titleLinePoints, 2);
    lv_obj_add_style(gui.element.messagePopup.mBoxPopupTitleLine, &gui.element.messagePopup.style_mBoxPopupTitleLine, 0);
-   lv_obj_align(gui.element.messagePopup.mBoxPopupTitleLine, LV_ALIGN_TOP_MID, 0, 23);
+   lv_obj_align(gui.element.messagePopup.mBoxPopupTitleLine, LV_ALIGN_TOP_MID, 0, ui->title_line_y);
 
 
   /*********************

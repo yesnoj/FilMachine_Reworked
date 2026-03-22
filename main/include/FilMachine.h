@@ -99,13 +99,15 @@ typedef enum {
 #define TAB_SETTINGS				4
 #define TAB_TOOLS					5
 
-/* UI Layout Constants (non-button) */
-#define STEP_HEIGHT					70
-#define STEP_Y_START				(-13)
-#define PROCESS_ELEMENT_HEIGHT		70
-#define PROCESS_Y_START				(-10)
-#define POPUP_WIDTH					320
-#define POPUP_HEIGHT				240
+/* UI Layout Constants — resolved from ui_profile at runtime.
+   These macros keep backward compatibility with existing code while
+   routing through the profile so values adapt to the active board. */
+#define STEP_HEIGHT					(ui_get_profile()->step_element.item_h)
+#define STEP_Y_START				(ui_get_profile()->step_element.y_start)
+#define PROCESS_ELEMENT_HEIGHT		(ui_get_profile()->process_element.item_h)
+#define PROCESS_Y_START				(ui_get_profile()->process_element.y_start)
+#define POPUP_WIDTH					(ui_get_profile()->popups.message_w)
+#define POPUP_HEIGHT				(ui_get_profile()->popups.message_h)
 
 /* Icon Characters */
 #define plusplus_icon2				"\xC2\xB1"
@@ -373,6 +375,9 @@ typedef enum {
 #define softwareSerialNumValue_text 				"1234567890"
 #define softwareCredits_text 						"Credits"
 #define softwareCreditsValue_text 					"Credit to Frank P. \nand \nPete B."
+#define calibrationPopupTitle_text					"Calibration"
+#define calibrationResetPopupTitle_text				"Calibration Reset"
+#define calibrationResetPopupBody_text				"Temperature calibration has been reset to default values."
 
 /* OTA update strings */
 #define otaUpdate_text								"Update"
@@ -416,19 +421,19 @@ typedef enum {
 #define stepDetailCancel_text						"Cancel"
 #define stepDetailCurrentTemp_text			   		"Now:"
 
-/* Button sizes */
-#define BUTTON_PROCESS_HEIGHT						40
-#define BUTTON_PROCESS_WIDTH						95
-#define BUTTON_START_HEIGHT							90
-#define BUTTON_START_WIDTH							140
-#define BUTTON_MBOX_HEIGHT							45
-#define BUTTON_MBOX_WIDTH							110
-#define BUTTON_POPUP_CLOSE_HEIGHT					30
-#define BUTTON_POPUP_CLOSE_WIDTH					30
-#define BUTTON_TUNE_HEIGHT							35
-#define BUTTON_TUNE_WIDTH							80
-#define LOGO_HEIGHT									89
-#define LOGO_WIDTH									102
+/* Button sizes — resolved from ui_profile at runtime */
+#define BUTTON_PROCESS_HEIGHT						(ui_get_profile()->buttons.process_h)
+#define BUTTON_PROCESS_WIDTH						(ui_get_profile()->buttons.process_w)
+#define BUTTON_START_HEIGHT							(ui_get_profile()->buttons.start_h)
+#define BUTTON_START_WIDTH							(ui_get_profile()->buttons.start_w)
+#define BUTTON_MBOX_HEIGHT							(ui_get_profile()->buttons.mbox_h)
+#define BUTTON_MBOX_WIDTH							(ui_get_profile()->buttons.mbox_w)
+#define BUTTON_POPUP_CLOSE_HEIGHT					(ui_get_profile()->buttons.popup_close_h)
+#define BUTTON_POPUP_CLOSE_WIDTH					(ui_get_profile()->buttons.popup_close_w)
+#define BUTTON_TUNE_HEIGHT							(ui_get_profile()->buttons.tune_h)
+#define BUTTON_TUNE_WIDTH							(ui_get_profile()->buttons.tune_w)
+#define LOGO_HEIGHT									(ui_get_profile()->buttons.logo_h)
+#define LOGO_WIDTH									(ui_get_profile()->buttons.logo_w)
 
 #define checkupTankSizesList						"500ml\n700ml\n1000ml"
 #define checkupStepStatuses 						{ dotStep_icon, arrowStep_icon, checkStep_icon }
@@ -1444,7 +1449,7 @@ processNode *getProcElementEntryByObject( lv_obj_t *obj );
 processNode *addProcessElement(processNode	*processToAdd);
 // @file element_rollerPopup.c
 void event_Roller(lv_event_t *e);
-void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *whoCallMe, uint32_t currentVal);
+void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *whoCallMe, uint32_t currentVal, uint32_t accentColor);
 // @file element_step.c
 void event_stepElement(lv_event_t *e);
 void stepElementCreate(stepNode * newStep,processNode * processReference, int8_t tempSize);

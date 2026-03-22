@@ -632,13 +632,13 @@ void cleanPopup (void){
 
                                       gui.element.cleanPopup.cleanSpinBoxPlusButton = lv_button_create(gui.element.cleanPopup.cleanSpinBoxContainer);
                                       lv_obj_set_size(gui.element.cleanPopup.cleanSpinBoxPlusButton, lv_obj_get_height(gui.element.cleanPopup.cleanSpinBox), lv_obj_get_height(gui.element.cleanPopup.cleanSpinBox));
-                                      lv_obj_align_to(gui.element.cleanPopup.cleanSpinBoxPlusButton, gui.element.cleanPopup.cleanSpinBox, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
+                                      lv_obj_align_to(gui.element.cleanPopup.cleanSpinBoxPlusButton, gui.element.cleanPopup.cleanSpinBox, LV_ALIGN_OUT_RIGHT_MID, ui_get_profile()->clean_spinbox_btn_offset, 0);
                                       lv_obj_set_style_bg_image_src(gui.element.cleanPopup.cleanSpinBoxPlusButton, LV_SYMBOL_PLUS, 0);
                                       lv_obj_add_event_cb(gui.element.cleanPopup.cleanSpinBoxPlusButton, event_cleanPopup, LV_EVENT_ALL,  NULL);
 
                                       gui.element.cleanPopup.cleanSpinBoxMinusButton = lv_button_create(gui.element.cleanPopup.cleanSpinBoxContainer);
                                       lv_obj_set_size(gui.element.cleanPopup.cleanSpinBoxMinusButton, lv_obj_get_height(gui.element.cleanPopup.cleanSpinBox), lv_obj_get_height(gui.element.cleanPopup.cleanSpinBox));
-                                      lv_obj_align_to(gui.element.cleanPopup.cleanSpinBoxMinusButton, gui.element.cleanPopup.cleanSpinBox, LV_ALIGN_OUT_LEFT_MID, -5, 0);
+                                      lv_obj_align_to(gui.element.cleanPopup.cleanSpinBoxMinusButton, gui.element.cleanPopup.cleanSpinBox, LV_ALIGN_OUT_LEFT_MID, -ui_get_profile()->clean_spinbox_btn_offset, 0);
                                       lv_obj_set_style_bg_image_src(gui.element.cleanPopup.cleanSpinBoxMinusButton, LV_SYMBOL_MINUS, 0);
                                       lv_obj_add_event_cb(gui.element.cleanPopup.cleanSpinBoxMinusButton, event_cleanPopup, LV_EVENT_ALL, NULL);
 
@@ -648,7 +648,7 @@ void cleanPopup (void){
                       gui.element.cleanPopup.cleanDrainWaterLabelContainer = lv_obj_create(gui.element.cleanPopup.cleanSettingsContainer);
                       lv_obj_remove_flag(gui.element.cleanPopup.cleanDrainWaterLabelContainer , LV_OBJ_FLAG_SCROLLABLE); 
                       lv_obj_align(gui.element.cleanPopup.cleanDrainWaterLabelContainer, LV_ALIGN_CENTER, 0, ui->drain_container_y);
-                      lv_obj_set_size(gui.element.cleanPopup.cleanDrainWaterLabelContainer, ui->drain_container_w, 40); 
+                      lv_obj_set_size(gui.element.cleanPopup.cleanDrainWaterLabelContainer, ui->drain_container_w, ui_get_profile()->clean_drain_container_h);
                       lv_obj_set_style_border_opa(gui.element.cleanPopup.cleanDrainWaterLabelContainer , LV_OPA_TRANSP, 0);
 
 

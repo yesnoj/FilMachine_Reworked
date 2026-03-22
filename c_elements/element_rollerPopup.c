@@ -131,7 +131,7 @@ void event_Roller(lv_event_t * e)
                 static char calMsg[80];
                 float offsetVal = gui.page.settings.settingsParams.tempCalibOffset / 10.0f;
                 snprintf(calMsg, sizeof(calMsg), "Calibration complete.\nOffset: %+.1f C", offsetVal);
-                messagePopupCreate("Calibration", calMsg, NULL, NULL, NULL);
+                messagePopupCreate(calibrationPopupTitle_text, calMsg, NULL, NULL, NULL);
               }
               return;
             }
@@ -335,7 +335,7 @@ void event_Roller(lv_event_t * e)
     
 }       
 
-void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *whoCallMe, uint32_t currentVal){
+void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *whoCallMe, uint32_t currentVal, uint32_t accentColor){
    const ui_roller_popup_layout_t *ui = &ui_get_profile()->roller_popup;
   /*********************
   *    PAGE HEADER
@@ -381,9 +381,9 @@ void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *w
   
   lv_style_init(&gui.element.rollerPopup.style_roller);
   lv_style_set_text_font(&gui.element.rollerPopup.style_roller, &lv_font_montserrat_30);
-  lv_style_set_bg_color(&gui.element.rollerPopup.style_roller, lv_color_hex(LIGHT_BLUE));
+  lv_style_set_bg_color(&gui.element.rollerPopup.style_roller, lv_color_hex(accentColor));
   lv_style_set_border_width(&gui.element.rollerPopup.style_roller, 2);
-  lv_style_set_border_color(&gui.element.rollerPopup.style_roller, lv_color_hex(LIGHT_BLUE_DARK));
+  lv_style_set_border_color(&gui.element.rollerPopup.style_roller, lv_color_hex(accentColor));
   
   gui.element.rollerPopup.roller = lv_roller_create(gui.element.rollerPopup.mBoxRollerRollerContainer);
 

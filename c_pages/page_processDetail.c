@@ -174,12 +174,12 @@ static void process_detail_open_roller(processNode *pn, lv_obj_t *target) {
             rollerPopupCreate(gui.element.rollerPopup.tempCelsiusOptions,
                               tuneTempPopupTitle_text, &pd->tempRollerCtx,
                               findRollerStringIndex(lv_textarea_get_text(pd->processTempTextArea),
-                                                    gui.element.rollerPopup.tempCelsiusOptions));
+                                                    gui.element.rollerPopup.tempCelsiusOptions), GREEN_DARK);
         } else {
             rollerPopupCreate(gui.element.rollerPopup.tempFahrenheitOptions,
                               tuneTempPopupTitle_text, &pd->tempRollerCtx,
                               findRollerStringIndex(lv_textarea_get_text(pd->processTempTextArea),
-                                                    gui.element.rollerPopup.tempFahrenheitOptions));
+                                                    gui.element.rollerPopup.tempFahrenheitOptions), GREEN_DARK);
         }
     }
     if (target == pd->processToleranceTextArea) {
@@ -189,7 +189,7 @@ static void process_detail_open_roller(processNode *pn, lv_obj_t *target) {
         rollerPopupCreate(gui.element.rollerPopup.tempToleranceOptions,
                           tuneTolerancePopupTitle_text, &pd->toleranceRollerCtx,
                           findRollerStringIndex(lv_textarea_get_text(pd->processToleranceTextArea),
-                                                gui.element.rollerPopup.tempToleranceOptions));
+                                                gui.element.rollerPopup.tempToleranceOptions), GREEN_DARK);
     }
 }
 

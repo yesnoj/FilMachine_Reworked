@@ -184,13 +184,14 @@ void insertStepElementAfter(processNode *data, stepNode *afterNode, stepNode *no
 }
 
 void reorderStepElements(processNode *data) {
-	
-    int y_offset = -13;
+
+    const ui_step_element_layout_t *se = &ui_get_profile()->step_element;
+    int y_offset = se->y_start;
     uint32_t child_idx = 0;
     stepNode *current = data->process.processDetails->stepElementsList.start;
     while (current) {
-        /* Reset X to default position (-63) and set correct Y */
-        lv_obj_set_pos(current->step.stepElement, -63, y_offset);
+        /* Reset X to default position (item_x - swipe_offset) and set correct Y */
+        lv_obj_set_pos(current->step.stepElement, se->item_x - se->swipe_offset, y_offset);
         current->step.container_y = y_offset;
         /* Restore LVGL child index to match linked list order.
            This fixes Z-order without triggering spurious events
@@ -263,7 +264,7 @@ static void stepElement_handleGesture(stepNode *currentNode, lv_obj_t *obj, lv_d
         case LV_DIR_RIGHT:
             if (currentNode->step.swipedLeft == false && currentNode->step.swipedRight == false) {
                 LV_LOG_USER("Right gesture for delete");
-                x = lv_obj_get_x_aligned(currentNode->step.stepElement) + 50;
+                x = lv_obj_get_x_aligned(currentNode->step.stepElement) + ui_get_profile()->step_element.swipe_offset;
                 lv_obj_set_pos(currentNode->step.stepElement, x, lv_obj_get_y_aligned(currentNode->step.stepElement));
                 currentNode->step.swipedRight = true;
                 currentNode->step.swipedLeft = false;
@@ -299,7 +300,7 @@ static void stepElement_handleClick(stepNode *currentNode, lv_obj_t *obj, proces
         && obj != currentNode->step.editButton
         && obj != currentNode->step.editButtonLabel) {
         LV_LOG_USER("Tap to close panel");
-        x = lv_obj_get_x_aligned(currentNode->step.stepElement) - 50;
+        x = lv_obj_get_x_aligned(currentNode->step.stepElement) - ui_get_profile()->step_element.swipe_offset;
         lv_obj_set_pos(currentNode->step.stepElement, x, lv_obj_get_y_aligned(currentNode->step.stepElement));
         currentNode->step.swipedLeft = false;
         currentNode->step.swipedRight = false;
@@ -362,7 +363,7 @@ static void stepElement_handleClick(stepNode *currentNode, lv_obj_t *obj, proces
         lv_obj_scroll_to_view(newStep->step.stepElement, LV_ANIM_ON);
 
         lv_obj_set_pos(currentNode->step.stepElement,
-            lv_obj_get_x_aligned(currentNode->step.stepElement) - 50,
+            lv_obj_get_x_aligned(currentNode->step.stepElement) - ui_get_profile()->step_element.swipe_offset,
             lv_obj_get_y_aligned(currentNode->step.stepElement));
         currentNode->step.swipedRight = false;
         lv_obj_add_flag(currentNode->step.deleteButton, LV_OBJ_FLAG_HIDDEN);
@@ -640,6 +641,7 @@ void event_stepElement(lv_event_t *e) {
 
 
 void stepElementCreate(stepNode * newStep,processNode * processReference, int8_t tempSize){
+  const ui_step_element_layout_t *se = &ui_get_profile()->step_element;
 
 	char *tmp_processSourceList[] = processSourceList;
 
@@ -679,14 +681,14 @@ void stepElementCreate(stepNode * newStep,processNode * processReference, int8_t
   
   if(tempSize == -1){
 		LV_LOG_USER("New Step");
-    newStep->step.container_y = -13 + ((processReference->process.processDetails->stepElementsList.size - 1) * 70);
+    newStep->step.container_y = se->y_start + ((processReference->process.processDetails->stepElementsList.size - 1) * se->item_h);
   }
   else{
 		LV_LOG_USER("Previous Step");
-    newStep->step.container_y = -13 + ((tempSize-1) * 70);
+    newStep->step.container_y = se->y_start + ((tempSize-1) * se->item_h);
   }
-  lv_obj_set_pos(newStep->step.stepElement, -13, newStep->step.container_y);        
-  lv_obj_set_size(newStep->step.stepElement, 340, 70);
+  lv_obj_set_pos(newStep->step.stepElement, se->item_x, newStep->step.container_y);
+  lv_obj_set_size(newStep->step.stepElement, se->item_w, se->item_h);
   lv_obj_remove_flag(newStep->step.stepElement, LV_OBJ_FLAG_SCROLLABLE); 
   lv_obj_set_style_border_opa(newStep->step.stepElement, LV_OPA_TRANSP, 0);
   lv_obj_remove_flag(newStep->step.stepElement, LV_OBJ_FLAG_GESTURE_BUBBLE);
@@ -700,7 +702,7 @@ void stepElementCreate(stepNode * newStep,processNode * processReference, int8_t
   lv_obj_add_event_cb(newStep->step.stepElement, event_stepElement, LV_EVENT_PRESSED, processReference);
 
 
-  lv_obj_set_pos(newStep->step.stepElement,lv_obj_get_x_aligned(newStep->step.stepElement) - 50,lv_obj_get_y_aligned(newStep->step.stepElement));
+  lv_obj_set_pos(newStep->step.stepElement,lv_obj_get_x_aligned(newStep->step.stepElement) - se->swipe_offset,lv_obj_get_y_aligned(newStep->step.stepElement));
 
   /*********************
   *    PAGE ELEMENTS
@@ -709,36 +711,36 @@ void stepElementCreate(stepNode * newStep,processNode * processReference, int8_t
 
         newStep->step.deleteButton = lv_obj_create(newStep->step.stepElement);
         lv_obj_set_style_bg_color(newStep->step.deleteButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
-        lv_obj_set_size(newStep->step.deleteButton, 60, 70);
-        lv_obj_align(newStep->step.deleteButton, LV_ALIGN_TOP_LEFT, -16, -18);
+        lv_obj_set_size(newStep->step.deleteButton, se->delete_btn_w, se->delete_btn_h);
+        lv_obj_align(newStep->step.deleteButton, LV_ALIGN_TOP_LEFT, se->delete_btn_x, se->delete_btn_y);
         lv_obj_add_flag(newStep->step.deleteButton, LV_OBJ_FLAG_HIDDEN);
         lv_obj_remove_flag(newStep->step.deleteButton, LV_OBJ_FLAG_SCROLLABLE);
         lv_obj_add_event_cb(newStep->step.deleteButton, event_stepElement, LV_EVENT_SHORT_CLICKED, processReference);
         lv_obj_add_flag(newStep->step.deleteButton, LV_OBJ_FLAG_CLICKABLE);
 
-                newStep->step.deleteButtonLabel = lv_label_create(newStep->step.deleteButton);         
-                lv_label_set_text(newStep->step.deleteButtonLabel, trash_icon); 
-                lv_obj_set_style_text_font(newStep->step.deleteButtonLabel, &FilMachineFontIcons_30, 0);              
-                lv_obj_align(newStep->step.deleteButtonLabel, LV_ALIGN_CENTER, -5 , 0);
+                newStep->step.deleteButtonLabel = lv_label_create(newStep->step.deleteButton);
+                lv_label_set_text(newStep->step.deleteButtonLabel, trash_icon);
+                lv_obj_set_style_text_font(newStep->step.deleteButtonLabel, se->delete_icon_font, 0);
+                lv_obj_align(newStep->step.deleteButtonLabel, LV_ALIGN_CENTER, se->delete_icon_x, 0);
 
         //Duplicate button - shown on swipe right alongside delete
         newStep->step.editButton = lv_obj_create(newStep->step.stepElement);
         lv_obj_set_style_bg_color(newStep->step.editButton, lv_color_hex(LIGHT_BLUE_DARK), LV_PART_MAIN);
-        lv_obj_set_size(newStep->step.editButton, 60, 70);
-        lv_obj_align(newStep->step.editButton, LV_ALIGN_TOP_LEFT, 260, -18);
+        lv_obj_set_size(newStep->step.editButton, se->edit_btn_w, se->edit_btn_h);
+        lv_obj_align(newStep->step.editButton, LV_ALIGN_TOP_LEFT, se->edit_btn_x, se->edit_btn_y);
         lv_obj_add_flag(newStep->step.editButton, LV_OBJ_FLAG_HIDDEN);
         lv_obj_remove_flag(newStep->step.editButton, LV_OBJ_FLAG_SCROLLABLE);
         lv_obj_add_event_cb(newStep->step.editButton, event_stepElement, LV_EVENT_SHORT_CLICKED, processReference);
         lv_obj_add_flag(newStep->step.editButton, LV_OBJ_FLAG_CLICKABLE);
 
-                newStep->step.editButtonLabel = lv_label_create(newStep->step.editButton);         
-                lv_label_set_text(newStep->step.editButtonLabel, newProcess_icon); 
-                lv_obj_set_style_text_font(newStep->step.editButtonLabel, &FilMachineFontIcons_30, 0);              
-                lv_obj_align(newStep->step.editButtonLabel, LV_ALIGN_CENTER, 5, 0);
+                newStep->step.editButtonLabel = lv_label_create(newStep->step.editButton);
+                lv_label_set_text(newStep->step.editButtonLabel, newProcess_icon);
+                lv_obj_set_style_text_font(newStep->step.editButtonLabel, se->edit_icon_font, 0);
+                lv_obj_align(newStep->step.editButtonLabel, LV_ALIGN_CENTER, se->edit_icon_x, 0);
 
         newStep->step.stepElementSummary = lv_obj_create(newStep->step.stepElement);
-        lv_obj_set_size(newStep->step.stepElementSummary, 235, 66);
-        lv_obj_align(newStep->step.stepElementSummary, LV_ALIGN_TOP_LEFT, 34, -16);
+        lv_obj_set_size(newStep->step.stepElementSummary, se->summary_w, se->summary_h);
+        lv_obj_align(newStep->step.stepElementSummary, LV_ALIGN_TOP_LEFT, se->summary_x, se->summary_y);
         lv_obj_remove_flag(newStep->step.stepElementSummary, LV_OBJ_FLAG_SCROLLABLE);  
         lv_obj_add_style(newStep->step.stepElementSummary, &newStep->step.stepStyle, 0);
         lv_obj_add_flag(newStep->step.stepElementSummary, LV_OBJ_FLAG_EVENT_BUBBLE);
@@ -752,39 +754,39 @@ void stepElementCreate(stepNode * newStep,processNode * processReference, int8_t
                 if(newStep->step.stepDetails->data.type == MULTI_RINSE)
                     lv_label_set_text(newStep->step.stepTypeIcon, multiRinse_icon); 
 
-                lv_obj_set_style_text_font(newStep->step.stepTypeIcon, &FilMachineFontIcons_20, 0);              
-                lv_obj_align(newStep->step.stepTypeIcon, LV_ALIGN_LEFT_MID, -9, -12);
+                lv_obj_set_style_text_font(newStep->step.stepTypeIcon, se->type_icon_font, 0);
+                lv_obj_align(newStep->step.stepTypeIcon, LV_ALIGN_LEFT_MID, se->type_icon_x, se->type_icon_y);
 
 
                 newStep->step.stepName = lv_label_create(newStep->step.stepElementSummary);         
                 lv_label_set_text(newStep->step.stepName, newStep->step.stepDetails->data.stepNameString); 
-                lv_obj_set_style_text_font(newStep->step.stepName, &lv_font_montserrat_22, 0);      
+                lv_obj_set_style_text_font(newStep->step.stepName, se->name_font, 0);
                 lv_label_set_long_mode(newStep->step.stepName, LV_LABEL_LONG_SCROLL_CIRCULAR);
-                lv_obj_set_width(newStep->step.stepName, 175);        
-                lv_obj_align(newStep->step.stepName, LV_ALIGN_LEFT_MID, 12, -12);
+                lv_obj_set_width(newStep->step.stepName, se->name_w);
+                lv_obj_align(newStep->step.stepName, LV_ALIGN_LEFT_MID, se->name_x, se->name_y);
                 lv_obj_remove_flag(newStep->step.stepName, LV_OBJ_FLAG_SCROLLABLE); 
 
                 newStep->step.stepTimeIcon = lv_label_create(newStep->step.stepElementSummary);
                 lv_label_set_text(newStep->step.stepTimeIcon, clock_icon);
-                lv_obj_set_style_text_font(newStep->step.stepTimeIcon, &FilMachineFontIcons_20, 0);
-                lv_obj_align(newStep->step.stepTimeIcon, LV_ALIGN_LEFT_MID, -10, 17);
+                lv_obj_set_style_text_font(newStep->step.stepTimeIcon, se->icon_font, 0);
+                lv_obj_align(newStep->step.stepTimeIcon, LV_ALIGN_LEFT_MID, se->time_icon_x, se->time_icon_y);
                 
                 newStep->step.stepTime = lv_label_create(newStep->step.stepElementSummary);    
                 lv_label_set_text_fmt(newStep->step.stepTime, "%dm%ds", newStep->step.stepDetails->data.timeMins, newStep->step.stepDetails->data.timeSecs); 
-                lv_obj_set_style_text_font(newStep->step.stepTime, &lv_font_montserrat_18, 0);              
-                lv_obj_align(newStep->step.stepTime, LV_ALIGN_LEFT_MID, 12, 17);
+                lv_obj_set_style_text_font(newStep->step.stepTime, se->detail_font, 0);
+                lv_obj_align(newStep->step.stepTime, LV_ALIGN_LEFT_MID, se->time_value_x, se->time_value_y);
 
                 newStep->step.sourceLabel = lv_label_create(newStep->step.stepElementSummary); 
                 lv_label_set_text_fmt(newStep->step.sourceLabel, "From:%s", tmp_processSourceList[newStep->step.stepDetails->data.source]); 
-                lv_obj_set_style_text_font(newStep->step.sourceLabel, &lv_font_montserrat_18, 0);      
-                lv_obj_set_width(newStep->step.sourceLabel, 120);        
-                lv_obj_align(newStep->step.sourceLabel, LV_ALIGN_LEFT_MID, 85, 17);
+                lv_obj_set_style_text_font(newStep->step.sourceLabel, se->detail_font, 0);
+                lv_obj_set_width(newStep->step.sourceLabel, se->source_w);
+                lv_obj_align(newStep->step.sourceLabel, LV_ALIGN_LEFT_MID, se->source_x, se->source_y);
                 lv_obj_remove_flag(newStep->step.sourceLabel, LV_OBJ_FLAG_SCROLLABLE); 
 
                 newStep->step.discardAfterIcon = lv_label_create(newStep->step.stepElementSummary);        
                 lv_label_set_text(newStep->step.discardAfterIcon, discardAfter_icon); 
-                lv_obj_set_style_text_font(newStep->step.discardAfterIcon, &FilMachineFontIcons_20, 0);            
-                lv_obj_align(newStep->step.discardAfterIcon, LV_ALIGN_RIGHT_MID, 13, 17);
+                lv_obj_set_style_text_font(newStep->step.discardAfterIcon, se->icon_font, 0);
+                lv_obj_align(newStep->step.discardAfterIcon, LV_ALIGN_RIGHT_MID, se->discard_icon_x, se->discard_icon_y);
 
                 if(newStep->step.stepDetails->data.discardAfterProc){
                     lv_obj_set_style_text_color(newStep->step.discardAfterIcon, lv_color_hex(WHITE), LV_PART_MAIN);

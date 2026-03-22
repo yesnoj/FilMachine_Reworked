@@ -542,11 +542,120 @@ typedef struct {
     int button1_x;
     int button2_x;
     int button_y;
+    int title_y;           /* was hardcoded -10 */
+    int title_line_y;      /* was hardcoded 23  */
     const lv_font_t *title_font;
     const lv_font_t *text_font;
     const lv_font_t *button_font;
     const lv_font_t *close_icon_font;
 } ui_message_popup_layout_t;
+
+/* ── Process list element layout (was in element_process.c magic numbers) ── */
+typedef struct {
+    int item_w;
+    int item_h;
+    int item_x;
+    int y_start;
+    int swipe_offset;
+    int delete_btn_w;
+    int delete_btn_h;
+    int delete_btn_x;
+    int delete_btn_y;
+    int delete_icon_x;
+    int summary_w;
+    int summary_h;
+    int summary_x;
+    int summary_y;
+    int name_w;
+    int name_x;
+    int name_y;
+    int temp_icon_x;
+    int temp_icon_y;
+    int temp_value_x;
+    int temp_value_y;
+    int time_icon_x;
+    int time_icon_y;
+    int time_value_x;
+    int time_value_y;
+    int time_icon_no_temp_x;
+    int time_value_no_temp_x;
+    int type_icon_x;
+    int preferred_icon_x;
+    const lv_font_t *name_font;
+    const lv_font_t *detail_font;
+    const lv_font_t *icon_font;
+    const lv_font_t *type_icon_font;
+    const lv_font_t *delete_icon_font;
+} ui_process_element_layout_t;
+
+/* ── Step list element layout (was in element_step.c magic numbers) ── */
+typedef struct {
+    int item_w;
+    int item_h;
+    int item_x;
+    int y_start;
+    int swipe_offset;
+    int delete_btn_w;
+    int delete_btn_h;
+    int delete_btn_x;
+    int delete_btn_y;
+    int delete_icon_x;
+    int edit_btn_w;
+    int edit_btn_h;
+    int edit_btn_x;
+    int edit_btn_y;
+    int edit_icon_x;
+    int summary_w;
+    int summary_h;
+    int summary_x;
+    int summary_y;
+    int type_icon_x;
+    int type_icon_y;
+    int name_w;
+    int name_x;
+    int name_y;
+    int time_icon_x;
+    int time_icon_y;
+    int time_value_x;
+    int time_value_y;
+    int source_w;
+    int source_x;
+    int source_y;
+    int discard_icon_x;
+    int discard_icon_y;
+    const lv_font_t *name_font;
+    const lv_font_t *detail_font;
+    const lv_font_t *icon_font;
+    const lv_font_t *type_icon_font;
+    const lv_font_t *delete_icon_font;
+    const lv_font_t *edit_icon_font;
+} ui_step_element_layout_t;
+
+/* ── Button sizes (was in FilMachine.h #defines) ── */
+typedef struct {
+    int process_h;
+    int process_w;
+    int start_h;
+    int start_w;
+    int mbox_h;
+    int mbox_w;
+    int popup_close_h;
+    int popup_close_w;
+    int tune_h;
+    int tune_w;
+    int logo_h;
+    int logo_w;
+} ui_button_sizes_t;
+
+/* ── Keyboard popup layout (was in accessories.c magic numbers) ── */
+typedef struct {
+    int textarea_y;
+    int textarea_h;
+    const lv_font_t *keyboard_font;
+    const lv_font_t *textarea_font;
+} ui_keyboard_layout_t;
+
+/* ── Clean popup extras (drain container height was hardcoded) ── */
 
 typedef struct {
     int message_w;
@@ -607,6 +716,12 @@ typedef struct {
     ui_selfcheck_popup_layout_t selfcheck_popup;
     ui_ota_popup_layout_t ota_popup;
     ui_message_popup_layout_t message_popup;
+    ui_process_element_layout_t process_element;
+    ui_step_element_layout_t step_element;
+    ui_button_sizes_t buttons;
+    ui_keyboard_layout_t keyboard;
+    int clean_drain_container_h;       /* was hardcoded 40 in cleanPopup */
+    int clean_spinbox_btn_offset;      /* was hardcoded 5 in cleanPopup */
 } ui_profile_t;
 
 const ui_profile_t *ui_get_profile(void);
