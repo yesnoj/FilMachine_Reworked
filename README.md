@@ -2,7 +2,7 @@
 
 FilMachine is an automated film processing machine designed for photographic film development. It handles the entire process: chemical baths, water rinses, temperature regulation, and motor-driven film agitation — all controlled through a 3.5" color touchscreen display.
 
-The project includes a **desktop simulator** (SDL2 + LVGL) that reproduces the full touchscreen UI on macOS/Linux, enabling rapid development and testing without physical hardware, plus an **automated test suite** with 147 tests. Both boards compile from the same codebase with board selection at compile time.
+The project includes a **desktop simulator** (SDL2 + LVGL) that reproduces the full touchscreen UI on macOS/Linux, enabling rapid development and testing without physical hardware, plus an **automated test suite** with 147 tests. All three supported boards compile from the same codebase with board selection at compile time.
 
 ---
 
@@ -34,22 +34,24 @@ It supports both **color negative** (C41, E6) and **black & white** film develop
 
 ## Project Architecture
 
-The project has a **dual-target build system** that produces either ESP32-S3 firmware or a native desktop application from the same codebase.
+The project has a **multi-target build system** that produces ESP32-S3 firmware, ESP32-P4 firmware, or a native desktop application from the same codebase.
 
 ### Technology Stack
 
-| Layer | Firmware (ESP32-S3) | Simulator (macOS/Linux) |
-|-------|-------------------|------------------------|
-| **UI Library** | LVGL 9.2.2 | LVGL 9.2.2 (identical) |
-| **Display** | ILI9488 480×320 (Makerfabs) / NV3041A 480×272 (JC4827W543) | SDL2 window (either resolution) |
-| **Touch Input** | FT6236 (Makerfabs) / GT911 (JC4827W543) | SDL2 mouse events |
-| **Storage** | FatFS on MicroSD | POSIX file I/O (sd/ directory) |
-| **RTOS** | FreeRTOS (ESP-IDF) | Stub (queues work, tasks are no-ops) |
-| **Temp Sensors** | DS18B20 OneWire | Simulated (20°C ambient, heater model) |
-| **Motor/Relays** | GPIO + MCP23017 I2C | printf stubs |
-| **OTA Updates** | esp_ota_ops + esp_http_server | Simulated (progress timer) |
-| **Build Tool** | ESP-IDF (`idf.py`) | CMake + Make |
-| **Compiler** | xtensa-esp32s3-elf-gcc | Native cc/gcc/clang |
+| Layer | Firmware (ESP32-S3) | Firmware (ESP32-P4) | Simulator (macOS/Linux) |
+|-------|-------------------|-------------------|------------------------|
+| **UI Library** | LVGL 9.2.2 | LVGL 9.2.2 (identical) | LVGL 9.2.2 (identical) |
+| **Display** | ILI9488 480×320 (Makerfabs) / NV3041A 480×272 (JC4827W543) | ST7701S 480×800 MIPI-DSI → landscape 480×320 via PPA (JC4880P433) | SDL2 window (any resolution) |
+| **Touch Input** | FT6236 (Makerfabs) / GT911 (JC4827W543) | GT911 (physical 480×800 → remapped to 480×320) | SDL2 mouse events |
+| **Storage** | FatFS on MicroSD (SPI) | FatFS on MicroSD (SDMMC 4-bit, ~10× faster) | POSIX file I/O (sd/ directory) |
+| **RTOS** | FreeRTOS (ESP-IDF) | FreeRTOS (ESP-IDF) | Stub (queues work, tasks are no-ops) |
+| **2D Acceleration** | — (CPU only) | PPA hardware engine (rotate, scale, blend, fill) | — |
+| **Audio** | — (Makerfabs) / I2S speaker (JC4827W543) | ES8311 codec via I2S + power amplifier | — |
+| **Temp Sensors** | DS18B20 OneWire | DS18B20 OneWire | Simulated (20°C ambient, heater model) |
+| **Motor/Relays** | GPIO + MCP23017 I2C | GPIO + MCP23017 I2C | printf stubs |
+| **OTA Updates** | esp_ota_ops + esp_http_server | esp_ota_ops + esp_http_server | Simulated (progress timer) |
+| **Build Tool** | ESP-IDF (`idf.py`) | ESP-IDF (`idf.py`) | CMake + Make |
+| **Compiler** | xtensa-esp32s3-elf-gcc | riscv32-esp-elf-gcc | Native cc/gcc/clang |
 
 ### How the Simulator Works
 
@@ -108,6 +110,10 @@ FilMachine_Simulator_v2/
 ├── c_fonts/                       # Custom icon fonts (5 sizes: 15/20/30/40/100px)
 ├── c_graphics/                    # Splash screen image data
 │
+├── components/                    # ESP32-P4 specific hardware drivers
+│   ├── st7701_lcd/                #   ST7701S MIPI-DSI LCD driver (480×800)
+│   └── ppa_engine/                #   PPA hardware 2D accelerator (rotate, scale, fill, blend)
+│
 ├── src/
 │   └── main.c                     # Simulator entry point (SDL2 display, main loop,
 │                                  #   demo data generator, system queue drain)
@@ -149,8 +155,9 @@ FilMachine_Simulator_v2/
 │   └── genFilMachineCFG.py        # Config generator (realistic film recipes)
 ├── resources/                     # Hardware datasheets & font usage docs
 │
-├── CMakeLists.txt                 # Dual-purpose build (ESP-IDF + simulator + tests)
+├── CMakeLists.txt                 # Multi-target build (ESP-IDF S3/P4 + simulator + tests)
 ├── sdkconfig                      # ESP-IDF configuration (partition table, Wi-Fi, etc.)
+├── sdkconfig.defaults.esp32p4     # ESP-IDF defaults for ESP32-P4 target
 ├── setup.sh                       # Project initialization script
 ├── flash.sh                       # Flash firmware to ESP32 board
 ├── ANALISI_PROGETTO.md            # Technical analysis (Italian)
@@ -200,23 +207,42 @@ make filmachine_test
 ./filmachine_test
 ```
 
-### Build the Firmware (ESP32-S3)
+### Build the Firmware
 
-Requires the [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/) toolchain installed and configured.
+Requires the [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/) toolchain installed and configured. ESP32-S3 boards require ESP-IDF 5.x; the ESP32-P4 board requires **ESP-IDF 5.5.x** or later.
 
 **Important:** run `idf.py` from the **project root**, not from `build320/`.
+
+#### ESP32-S3 boards (Makerfabs / JC4827W543)
 
 ```bash
 cd FilMachine_Simulator_v2
 . $HOME/esp/esp-idf/export.sh
 
-# Makerfabs S3 (default board)
+# Makerfabs S3 (default board — ILI9488 480×320)
 idf.py build
 
-# JC4827W543 (new board)
+# JC4827W543 (NV3041A 480×272)
 idf.py fullclean
 idf.py -D CMAKE_C_FLAGS="-DBOARD_JC4827W543" build
 ```
+
+#### ESP32-P4 board (JC4880P433)
+
+```bash
+cd FilMachine_Simulator_v2
+. $HOME/esp/esp-idf-v5.5/export.sh     # Must be ESP-IDF 5.5.x or later
+
+# First-time setup: set target to esp32p4 (creates sdkconfig from defaults)
+idf.py set-target esp32p4
+
+# Build with P4 board flag
+idf.py -D CMAKE_C_FLAGS="-DBOARD_JC4880P433" build
+```
+
+Note: switching between ESP32-S3 and ESP32-P4 targets requires `idf.py fullclean` because the toolchains are different (Xtensa vs RISC-V).
+
+#### Flash and monitor
 
 The firmware binary is produced at `build/FilMachine.bin`. To flash it directly to a connected board:
 
@@ -228,6 +254,8 @@ Or use the helper script:
 ```bash
 ./flash.sh
 ```
+
+**P4 note:** the bootloader offset on ESP32-P4 is `0x2000` (different from ESP32-S3's `0x0`). This is handled automatically by `idf.py` when the target is set correctly.
 
 To check the firmware size (useful for verifying OTA partition fit):
 ```bash
@@ -455,28 +483,52 @@ The version displayed in Tools → Software version is read at runtime from the 
 
 ### Supported Boards
 
-The firmware supports two boards selected at compile time:
+The firmware supports three boards selected at compile time via `-DBOARD_xxx`:
 
-**Makerfabs MaTouch ESP32-S3** (original, default) — 3.5" ILI9488 480×320 parallel TFT, FT6236 touch, 16MB flash, 2MB PSRAM.
+**Makerfabs MaTouch ESP32-S3** (`-DBOARD_MAKERFABS_S3`, default) — 3.5" ILI9488 480×320 parallel TFT, FT6236 touch, 16MB flash, 2MB PSRAM. The original board.
 
-**Guition JC4827W543C** (new) — 4.3" NV3041A 480×272 IPS QSPI, GT911 touch, 4MB flash, 8MB PSRAM, I2S speaker, flow meter, water level sensor, hall sensor.
+**Guition JC4827W543C** (`-DBOARD_JC4827W543`) — 4.3" NV3041A 480×272 IPS QSPI, GT911 touch, 4MB flash, 8MB PSRAM, I2S speaker, flow meter, water level sensor, hall sensor.
+
+**Guition JC4880P433** (`-DBOARD_JC4880P433`) — 4.3" ST7701S 480×800 IPS via MIPI-DSI, GT911 touch, 16MB flash, 32MB PSRAM, ES8311 audio codec, SDMMC 4-bit SD, PPA hardware accelerator. Uses the **ESP32-P4** (RISC-V dual-core @ 400 MHz), a significant step up in processing power and memory.
+
+### Board Comparison
+
+| Feature | Makerfabs S3 | JC4827W543 (S3) | JC4880P433 (P4) |
+|---------|-------------|-----------------|-----------------|
+| **MCU** | ESP32-S3 (Xtensa, 240 MHz) | ESP32-S3 (Xtensa, 240 MHz) | ESP32-P4 (RISC-V, 400 MHz) |
+| **Flash / PSRAM** | 16 MB / 2 MB | 4 MB / 8 MB | 16 MB / 32 MB |
+| **Display** | ILI9488 3.5" 480×320 | NV3041A 4.3" 480×272 | ST7701S 4.3" 480×800 |
+| **Display bus** | 16-bit parallel (I80) | QSPI | MIPI-DSI (2-lane) |
+| **LVGL resolution** | 480×320 (native) | 480×272 (native) | 480×320 (PPA rotated+scaled) |
+| **Touch** | FT6236 (I2C) | GT911 (I2C) | GT911 (I2C) |
+| **SD card** | SPI (~4 MB/s) | SPI (~4 MB/s) | SDMMC 4-bit (~40 MB/s) |
+| **Audio** | — | I2S speaker (3 pins) | ES8311 codec + PA |
+| **2D accelerator** | — | — | PPA (rotate, scale, blend, fill) |
+| **Sensors** | — | Flow, water level, hall | Flow, water level, hall |
+| **Compile flag** | `BOARD_MAKERFABS_S3` | `BOARD_JC4827W543` | `BOARD_JC4880P433` |
+| **ESP-IDF version** | 5.x | 5.x | 5.5.x+ |
+
+### P4 Landscape Mode
+
+The JC4880P433's physical display is 480×800 in portrait orientation. FilMachine uses it in **landscape mode at 480×320**, matching the original Makerfabs resolution. The display pipeline works as follows:
+
+1. LVGL renders the UI into a 480×320 framebuffer (identical to the Makerfabs S3)
+2. The PPA hardware engine rotates the buffer 90° → 320×480
+3. PPA scales ×1.5 → 480×720
+4. The scaled image is drawn centred on the 480×800 panel (40 px border top and bottom)
+
+Touch coordinates from the GT911 (which reports in 480×800 portrait) are inverse-mapped back to 480×320 LVGL coordinates. All of this is transparent to the UI code — the same `ui_profile_480x320` profile is used.
+
+### Shared Peripherals (all boards)
 
 | Component | Detail |
 |-----------|--------|
-| **Controller** | ESP32-S3-WROOM-1 (both boards) |
-| **Display** | ILI9488 480×320 parallel (Makerfabs) / NV3041A 480×272 QSPI (JC4827W543) |
-| **Touch** | FT6236 (Makerfabs) / GT911 (JC4827W543), both I2C |
-| **Storage** | MicroSD card slot |
-| **USB** | Dual USB Type-C (CP2104 UART-to-USB + native USB) |
 | **I/O Expander** | MCP23017 (I2C) — 8 relay outputs |
 | **PWM Controller** | PCA9685 (I2C) — pump speed control |
 | **Temperature** | 2× DS18B20 OneWire sensors (chemical bath + water bath) |
-| **Motor** | DC motor with H-bridge (GPIO 8/9), PWM speed (GPIO 18) |
+| **Motor** | DC motor with H-bridge, PWM speed control |
 | **Relays** | Heater, 3 chemical valves (C1/C2/C3), water bath, waste, pump in, pump out |
-| **Mabee Interface** | 1× I2C, 1× GPIO |
-| **Power** | USB Type-C 5.0V (4.0V–5.25V) |
-| **Operating Temp** | -40°C to +85°C |
-| **Dimensions** | 66mm × 84.3mm × 12mm |
+| **Power** | USB Type-C 5.0V |
 
 ### Chemical Container Layout
 
@@ -544,12 +596,21 @@ make filmachine_test             # Build tests
 
 # ── Firmware (ESP32-S3) ──────────────────────────────────
 cd FilMachine_Simulator_v2       # Must be in project root!
-idf.py build                     # Build firmware → build/FilMachine.bin
+idf.py build                     # Makerfabs S3 (default)
+idf.py -D CMAKE_C_FLAGS="-DBOARD_JC4827W543" build  # JC4827W543
 idf.py flash                     # Flash to connected board
 idf.py flash monitor             # Flash + open serial monitor
 idf.py monitor                   # Serial monitor only (Ctrl+] to exit)
 idf.py size                      # Show firmware size breakdown
-idf.py menuconfig                # Edit sdkconfig (partition table, Wi-Fi, etc.)
+
+# ── Firmware (ESP32-P4) ──────────────────────────────────
+idf.py set-target esp32p4       # First time: set RISC-V target
+idf.py -D CMAKE_C_FLAGS="-DBOARD_JC4880P433" build
+idf.py flash                     # Flash (bootloader offset 0x2000)
+
+# ── Switching between S3 and P4 ─────────────────────────
+idf.py fullclean                 # Required when switching target
+idf.py set-target esp32s3        # Back to S3 (or esp32p4 for P4)
 ```
 
 ### Rebuilding After Code Changes

@@ -16,6 +16,9 @@
 #include "ff.h"
 #include "sdmmc_cmd.h"
 #include "driver/i2c.h"
+#if defined(BOARD_JC4880P433)
+    #include "driver/i2c_master.h"
+#endif
 #include "driver/gpio.h"
 #include "driver/ledc.h"
 #include "esp_vfs_fat.h"
@@ -695,11 +698,42 @@ void my_print( lv_log_level_t level, const char * buf )
 #endif
 
 uint8_t SD_init() {
-	
-	sdmmc_host_t				host = SDSPI_HOST_DEFAULT();
-	sdmmc_card_t 				*card;
-	
-	host.slot = SDSPI_HOST_ID;
+
+    sdmmc_card_t *card;
+    esp_vfs_fat_sdmmc_mount_config_t mount = {
+        .format_if_mount_failed = false,
+        .max_files = 5,
+    };
+    LV_LOG_USER("Initialise SD Card");
+
+#if defined(SD_BUS_SDMMC)
+    /* ── P4: SDMMC 4-bit bus (much faster than SPI) ── */
+    sdmmc_host_t host = SDMMC_HOST_DEFAULT();
+    host.max_freq_khz = SDMMC_FREQ_HIGHSPEED;
+
+    sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
+    slot_config.clk = SD_MMC_CLK;
+    slot_config.cmd = SD_MMC_CMD;
+    slot_config.d0  = SD_MMC_D0;
+    slot_config.d1  = SD_MMC_D1;
+    slot_config.d2  = SD_MMC_D2;
+    slot_config.d3  = SD_MMC_D3;
+    slot_config.width = 4;          /* 4-bit bus */
+    slot_config.cd  = SDMMC_SLOT_NO_CD;
+    slot_config.wp  = SDMMC_SLOT_NO_WP;
+    slot_config.flags |= SDMMC_SLOT_FLAG_INTERNAL_PULLUP;
+
+    ESP_LOGI(TAG, "Mounting filesystem (SDMMC 4-bit)");
+    if (esp_vfs_fat_sdmmc_mount("/sd", &host, &slot_config, &mount, &card) != ESP_OK) {
+        LV_LOG_USER("Card Mount Failed (SDMMC)");
+        return ESP_FAIL;
+    }
+
+#else
+    /* ── S3: SPI SD card ── */
+    sdmmc_host_t host = SDSPI_HOST_DEFAULT();
+    host.slot = SDSPI_HOST_ID;
+
     spi_bus_config_t bus_cfg = {
         .mosi_io_num = SD_MOSI,
         .miso_io_num = SD_MISO,
@@ -708,29 +742,23 @@ uint8_t SD_init() {
         .quadhd_io_num = -1,
         .max_transfer_sz = 4000,
     };
-	esp_vfs_fat_sdmmc_mount_config_t mount = {
-	        .format_if_mount_failed = false,
-	        .max_files = 5,
-	};
-    LV_LOG_USER("Initialise SD Card");
 
-    if( spi_bus_initialize(host.slot, &bus_cfg, SDSPI_DEFAULT_DMA) != ESP_OK ) {
-        ESP_LOGE(TAG, "Failed to initialise bus.");
+    if (spi_bus_initialize(host.slot, &bus_cfg, SDSPI_DEFAULT_DMA) != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialise SPI bus.");
         return ESP_FAIL;
     }
 
-    // This initializes the slot without card detect (CD) and write protect (WP) signals.
-    // Modify slot_config.gpio_cd and slot_config.gpio_wp if your board has these signals.
     sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
     slot_config.gpio_cs = SD_CS;
     slot_config.host_id = host.slot;
 
-    ESP_LOGI(TAG, "Mounting filesystem");
-    if( esp_vfs_fat_sdspi_mount( "/sd", &host, &slot_config, &mount, &card) != ESP_OK ) {
+    ESP_LOGI(TAG, "Mounting filesystem (SPI)");
+    if (esp_vfs_fat_sdspi_mount("/sd", &host, &slot_config, &mount, &card) != ESP_OK) {
         LV_LOG_USER("Card Mount Failed");
         return ESP_FAIL;
     }
- 
+#endif
+
     LV_LOG_USER("SD init okay.");
     sdmmc_card_print_info(stdout, card);
     return ESP_OK;
@@ -765,7 +793,22 @@ void init_Pins_and_Buses( void ) {
 	}
 
     /* Initialize I2C */
-    ESP_LOGI(TAG, "Initialize I2C");
+    ESP_LOGI(TAG, "Initialize I2C bus %d (SDA=%d, SCL=%d)", I2C_NUM, I2C_SDA, I2C_SCL);
+#if defined(BOARD_JC4880P433)
+    /* ESP32-P4: use the new I2C master driver (old API deprecated on P4).
+     * The GT911 managed component and MCP23017/PCA9685 still work via
+     * the legacy-compatible i2c_master_get_bus_handle() bridge. */
+    i2c_master_bus_config_t i2c_bus_cfg = {
+        .i2c_port = I2C_NUM,
+        .sda_io_num = I2C_SDA,
+        .scl_io_num = I2C_SCL,
+        .clk_source = I2C_CLK_SRC_DEFAULT,
+        .glitch_ignore_cnt = 7,
+        .flags.enable_internal_pullup = true,
+    };
+    i2c_master_bus_handle_t i2c_bus_handle;
+    ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_bus_cfg, &i2c_bus_handle));
+#else
     const i2c_config_t i2c_conf = {
         .mode = I2C_MODE_MASTER,
         .sda_io_num = I2C_SDA,
@@ -776,6 +819,7 @@ void init_Pins_and_Buses( void ) {
     };
     ESP_ERROR_CHECK(i2c_param_config(I2C_NUM, &i2c_conf));
     ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM, i2c_conf.mode, 0, 0, 0));
+#endif
 
     /* Initialize MCP23017 I/O expander */
     if (mcp23017_init(&mcp, I2C_NUM, MCP23017_DEFAULT_ADDR) != ESP_OK) {

@@ -15,7 +15,7 @@
  * Board-specific hardware definitions
  * All pin assignments, resolution, display/touch driver selection,
  * and sensor availability come from the active board header.
- * Select board at compile time: -DBOARD_MAKERFABS_S3, -DBOARD_JC4827W543, or -DBOARD_SIMULATOR
+ * Select board at compile time: -DBOARD_MAKERFABS_S3, -DBOARD_JC4827W543, -DBOARD_JC4880P433, or -DBOARD_SIMULATOR
  * ═══════════════════════════════════════════════ */
 #include "board.h"
 #include "ui_profile.h"

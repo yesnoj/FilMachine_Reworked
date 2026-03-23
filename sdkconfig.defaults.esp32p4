@@ -1,0 +1,53 @@
+# ═══════════════════════════════════════════════════════════════
+# sdkconfig defaults for ESP32-P4 target (GUITION JC4880P433)
+#
+# Usage:  idf.py -DBOARD_JC4880P433=1 set-target esp32p4
+#         idf.py build
+#
+# ESP-IDF automatically loads this file when the target is esp32p4.
+# ═══════════════════════════════════════════════════════════════
+
+# ── Target ──
+CONFIG_IDF_TARGET="esp32p4"
+
+# ── Flash ──
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+
+# ── PSRAM (32 MB HEX mode) ──
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_HEX=y
+CONFIG_SPIRAM_SPEED_200M=y
+CONFIG_SPIRAM_BOOT_INIT=y
+
+# ── MIPI-DSI (ST7701S) ──
+CONFIG_SOC_MIPI_DSI_SUPPORTED=y
+
+# ── PPA (Pixel Processing Accelerator) ──
+CONFIG_SOC_PPA_SUPPORTED=y
+
+# ── FreeRTOS ──
+CONFIG_FREERTOS_HZ=1000
+
+# ── LVGL (managed component) ──
+CONFIG_LV_COLOR_DEPTH_16=y
+CONFIG_LV_MEM_CUSTOM=y
+CONFIG_LV_MEM_SIZE_KILOBYTES=64
+
+# ── SD/MMC ──
+CONFIG_SOC_SDMMC_HOST_SUPPORTED=y
+
+# ── I2C (new master driver for GT911 + peripherals) ──
+CONFIG_I2C_ISR_IRAM_SAFE=y
+
+# ── Partition table ──
+# Bootloader offset on P4 is 0x2000 (different from S3's 0x0)
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+
+# ── Logging ──
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+
+# ── Compiler ──
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
