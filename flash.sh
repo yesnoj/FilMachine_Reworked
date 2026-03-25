@@ -7,7 +7,7 @@ REPO="/Users/francescoprochilo/Documents/GitHub/FilMachine_Pete"
 PORT="/dev/cu.usbserial-02454091"
 
 echo "=== Copying sources to firmware repo ==="
-cp -r "$SIM"/{main,c_pages,c_elements,c_fonts,c_graphics} "$REPO/"
+cp -r "$SIM"/{main,c_pages,c_elements,c_fonts,drivers} "$REPO/"
 
 echo "=== Building and flashing ==="
 cd "$REPO"

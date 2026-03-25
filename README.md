@@ -108,7 +108,12 @@ FilMachine_Simulator_v2/
 │   └── element_otaWifiPopup.c     #   Wi-Fi OTA update popup (IP + PIN + progress)
 │
 ├── c_fonts/                       # Custom icon fonts (5 sizes: 15/20/30/40/100px)
-├── c_graphics/                    # Splash screen image data
+├── drivers/                       # Custom peripheral drivers (MCP23017, PCA9685, DS18B20, sensors)
+│   ├── include/                   #   Driver headers
+│   ├── mcp23017.c                 #   I2C 16-bit I/O expander (relay control)
+│   ├── pca9685.c                  #   I2C PWM controller (pump speed)
+│   ├── ds18b20.c                  #   OneWire temperature sensor
+│   └── sensors.c                  #   Flow meter, water level, hall effect sensors
 │
 ├── components/                    # ESP32-P4 specific hardware drivers
 │   ├── st7701_lcd/                #   ST7701S MIPI-DSI LCD driver (480×800)
@@ -185,7 +190,7 @@ LVGL 9.2.2 is automatically cloned from GitHub on the first build if not present
 ### Build the Simulator
 
 ```bash
-# 480×320 (default — Makerfabs resolution)
+# 480×320 (default — Makerfabs S3 and JC4880P433 P4)
 mkdir -p build320 && cd build320
 cmake ..
 make filmachine_sim
@@ -194,7 +199,14 @@ make filmachine_sim
 mkdir -p build272 && cd build272
 cmake .. -DCMAKE_C_FLAGS="-DSIM_RESOLUTION=272"
 make filmachine_sim
+
+# 800×480 landscape (JC4880P433 physical panel — layout exploration)
+mkdir -p build800 && cd build800
+cmake .. -DCMAKE_C_FLAGS="-DSIM_RESOLUTION=800"
+make filmachine_sim
 ```
+
+The first two resolution modes match the two distinct LVGL resolutions used across the three boards. The JC4880P433 (ESP32-P4) has a 480×800 physical panel used in **landscape (800×480)**. On real hardware the PPA engine rotates and scales the 480×320 LVGL framebuffer to fill the panel; that pipeline doesn't exist in the simulator, so both the Makerfabs and the P4 map to the default 320 build. The 800 mode opens a full 800×480 landscape window matching the physical panel, useful for designing a native-resolution layout — the current UI renders on the left and the empty space to the right shows how much room is available for expansion.
 
 This produces the `filmachine_sim` executable.
 

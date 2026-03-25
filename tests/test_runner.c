@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 
 #include "test_runner.h"
+#include "page_splash.h"
 #include "lvgl.h"
 
 /* Need access to gesture fields on the SDL mouse indev */
@@ -237,8 +238,9 @@ int main(int argc, char *argv[])
     /* Create shared keyboard */
     create_keyboard();
 
-    /* Launch the home page */
-    homePage();
+    /* Launch splash screen (play callback → menu) */
+    lv_obj_t *splash = splash_screen_create();
+    lv_scr_load(splash);
 
     /* Load saved configuration */
     readConfigFile(FILENAME_SAVE, false);

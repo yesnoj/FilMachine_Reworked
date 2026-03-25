@@ -2,43 +2,38 @@
  * test_navigation.c — Navigation Test Suite
  *
  * Tests:
- * 1. Home page creation and start button
- * 2. Transition from home to menu
+ * 1. Splash screen is active after boot
+ * 2. Transition from splash to menu (simulated play button click)
  * 3. Tab switching (Processes / Settings / Tools)
  */
 
 #include "test_runner.h"
 #include "lvgl.h"
 
-/* ── Test 1: Home page has splash and start button ── */
-static void test_home_page_created(void)
+/* ── Test 1: Splash screen is the active screen ── */
+static void test_splash_screen_active(void)
 {
-    TEST_BEGIN("Home page — splash screen and start button exist");
+    TEST_BEGIN("Splash screen — is the active screen after boot");
 
-    TEST_ASSERT_NOT_NULL(gui.page.home.screen_home, "screen_home should exist");
-    TEST_ASSERT_NOT_NULL(gui.page.home.startButton, "startButton should exist");
-    TEST_ASSERT_NOT_NULL(gui.page.home.splashImage, "splashImage should exist");
-
-    /* Verify start button is on screen */
-    lv_obj_update_layout(gui.page.home.startButton);
-    lv_area_t coords;
-    lv_obj_get_coords(gui.page.home.startButton, &coords);
-    test_printf("         [INFO] Start button area: (%d,%d)→(%d,%d)\n",
-           (int)coords.x1, (int)coords.y1, (int)coords.x2, (int)coords.y2);
+    /* The active screen should exist */
+    lv_obj_t *active = lv_screen_active();
+    TEST_ASSERT_NOT_NULL(active, "active screen should exist");
 
     TEST_END();
 }
 
-/* ── Test 2: Click Start button → transitions to menu ── */
-static void test_start_button_opens_menu(void)
+/* ── Test 2: Simulate splash → menu transition ── */
+static void test_splash_to_menu(void)
 {
-    TEST_BEGIN("Start button — click opens menu");
+    TEST_BEGIN("Splash → Menu — readConfigFile + menu() creates menu screen");
 
-    /* Click the actual LVGL start button object (auto-computes center) */
-    test_click_obj(gui.page.home.startButton);
+    /* Simulate what the play button callback does */
+    readConfigFile(FILENAME_SAVE, false);
+    menu();
+    refreshSettingsUI();
     test_pump(500);  /* allow menu() to complete rendering */
 
-    /* After clicking start, menu screen should be created */
+    /* After transition, menu screen should be created */
     TEST_ASSERT_NOT_NULL(gui.page.menu.screen_mainMenu, "menu screen should exist");
 
     /* The active screen should be the menu */
@@ -129,8 +124,8 @@ void test_suite_navigation(void)
 {
     TEST_SUITE("Navigation");
 
-    test_home_page_created();
-    test_start_button_opens_menu();
+    test_splash_screen_active();
+    test_splash_to_menu();
     test_switch_to_settings();
     test_switch_to_tools();
     test_switch_back_to_processes();

@@ -186,12 +186,12 @@ void insertStepElementAfter(processNode *data, stepNode *afterNode, stepNode *no
 void reorderStepElements(processNode *data) {
 
     const ui_step_element_layout_t *se = &ui_get_profile()->step_element;
-    int y_offset = se->y_start;
+    int y_offset = se->list_start_y;
     uint32_t child_idx = 0;
     stepNode *current = data->process.processDetails->stepElementsList.start;
     while (current) {
         /* Reset X to default position (item_x - swipe_offset) and set correct Y */
-        lv_obj_set_pos(current->step.stepElement, se->item_x - se->swipe_offset, y_offset);
+        lv_obj_set_pos(current->step.stepElement, se->card_x - se->swipe_offset, y_offset);
         current->step.container_y = y_offset;
         /* Restore LVGL child index to match linked list order.
            This fixes Z-order without triggering spurious events
@@ -218,7 +218,7 @@ bool hasListChanged(processNode *data) {
 
     const ui_step_element_layout_t *se = &ui_get_profile()->step_element;
     stepNode *current = data->process.processDetails->stepElementsList.start;
-    lv_coord_t original_y = se->y_start;
+    lv_coord_t original_y = se->list_start_y;
     lv_coord_t current_y = 0;  /* Current Y position */
 
     while (current) {
@@ -243,13 +243,18 @@ bool hasListChanged(processNode *data) {
 static void stepElement_handleGesture(stepNode *currentNode, lv_obj_t *obj, lv_dir_t dir, processNode *data) {
     int8_t x;
 
-    if (currentNode->step.swipedRight == true) {
-        return;
-    }
     currentNode->step.gestureHandled = true;
     switch (dir) {
         case LV_DIR_LEFT:
-            if (currentNode->step.swipedLeft == false && currentNode->step.swipedRight == false) {
+            if (currentNode->step.swipedRight == true) {
+                LV_LOG_USER("Left gesture to return");
+                x = lv_obj_get_x_aligned(currentNode->step.stepElement) - ui_get_profile()->step_element.swipe_offset;
+                lv_obj_set_pos(currentNode->step.stepElement, x, lv_obj_get_y_aligned(currentNode->step.stepElement));
+                currentNode->step.swipedRight = false;
+                currentNode->step.swipedLeft = false;
+                lv_obj_add_flag(currentNode->step.deleteButton, LV_OBJ_FLAG_HIDDEN);
+            }
+            else if (currentNode->step.swipedLeft == false && currentNode->step.swipedRight == false) {
                 LV_LOG_USER("Left gesture for duplicate popup");
                 if (data->process.processDetails->stepElementsList.size >= MAX_STEP_ELEMENTS) {
                     messagePopupCreate(warningPopupTitle_text, maxNumberEntryStepsPopupBody_text, NULL, NULL, NULL);
@@ -667,14 +672,14 @@ void stepElementCreate(stepNode * newStep,processNode * processReference, int8_t
   
   if(tempSize == -1){
 		LV_LOG_USER("New Step");
-    newStep->step.container_y = se->y_start + ((processReference->process.processDetails->stepElementsList.size - 1) * se->item_h);
+    newStep->step.container_y = se->list_start_y + ((processReference->process.processDetails->stepElementsList.size - 1) * se->card_h);
   }
   else{
 		LV_LOG_USER("Previous Step");
-    newStep->step.container_y = se->y_start + ((tempSize-1) * se->item_h);
+    newStep->step.container_y = se->list_start_y + ((tempSize-1) * se->card_h);
   }
-  lv_obj_set_pos(newStep->step.stepElement, se->item_x, newStep->step.container_y);
-  lv_obj_set_size(newStep->step.stepElement, se->item_w, se->item_h);
+  lv_obj_set_pos(newStep->step.stepElement, se->card_x, newStep->step.container_y);
+  lv_obj_set_size(newStep->step.stepElement, se->card_w, se->card_h);
   lv_obj_remove_flag(newStep->step.stepElement, LV_OBJ_FLAG_SCROLLABLE); 
   lv_obj_set_style_border_opa(newStep->step.stepElement, LV_OPA_TRANSP, 0);
   lv_obj_remove_flag(newStep->step.stepElement, LV_OBJ_FLAG_GESTURE_BUBBLE);
@@ -725,8 +730,8 @@ void stepElementCreate(stepNode * newStep,processNode * processReference, int8_t
                 lv_obj_align(newStep->step.editButtonLabel, LV_ALIGN_CENTER, se->edit_icon_x, 0);
 
         newStep->step.stepElementSummary = lv_obj_create(newStep->step.stepElement);
-        lv_obj_set_size(newStep->step.stepElementSummary, se->summary_w, se->summary_h);
-        lv_obj_align(newStep->step.stepElementSummary, LV_ALIGN_TOP_LEFT, se->summary_x, se->summary_y);
+        lv_obj_set_size(newStep->step.stepElementSummary, se->card_content_w, se->card_content_h);
+        lv_obj_align(newStep->step.stepElementSummary, LV_ALIGN_TOP_LEFT, se->card_content_x, se->card_content_y);
         lv_obj_remove_flag(newStep->step.stepElementSummary, LV_OBJ_FLAG_SCROLLABLE);  
         lv_obj_add_style(newStep->step.stepElementSummary, &newStep->step.stepStyle, 0);
         lv_obj_add_flag(newStep->step.stepElementSummary, LV_OBJ_FLAG_EVENT_BUBBLE);
@@ -754,7 +759,7 @@ void stepElementCreate(stepNode * newStep,processNode * processReference, int8_t
 
                 newStep->step.stepTimeIcon = lv_label_create(newStep->step.stepElementSummary);
                 lv_label_set_text(newStep->step.stepTimeIcon, clock_icon);
-                lv_obj_set_style_text_font(newStep->step.stepTimeIcon, se->icon_font, 0);
+                lv_obj_set_style_text_font(newStep->step.stepTimeIcon, se->detail_icon_font, 0);
                 lv_obj_align(newStep->step.stepTimeIcon, LV_ALIGN_LEFT_MID, se->time_icon_x, se->time_icon_y);
                 
                 newStep->step.stepTime = lv_label_create(newStep->step.stepElementSummary);    
@@ -771,7 +776,7 @@ void stepElementCreate(stepNode * newStep,processNode * processReference, int8_t
 
                 newStep->step.discardAfterIcon = lv_label_create(newStep->step.stepElementSummary);        
                 lv_label_set_text(newStep->step.discardAfterIcon, discardAfter_icon); 
-                lv_obj_set_style_text_font(newStep->step.discardAfterIcon, se->icon_font, 0);
+                lv_obj_set_style_text_font(newStep->step.discardAfterIcon, se->detail_icon_font, 0);
                 lv_obj_align(newStep->step.discardAfterIcon, LV_ALIGN_RIGHT_MID, se->discard_icon_x, se->discard_icon_y);
 
                 if(newStep->step.stepDetails->data.discardAfterProc){

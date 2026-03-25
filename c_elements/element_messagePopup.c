@@ -571,7 +571,7 @@ void messagePopupCreate(const char * popupTitleText,const char * popupText,const
   if(g_msg_ctx.type == MSGPOP_OWNER_INFO){
       gui.element.messagePopup.mBoxPopupButtonClose = lv_button_create(gui.element.messagePopup.mBoxPopupContainer);
       lv_obj_set_size(gui.element.messagePopup.mBoxPopupButtonClose, BUTTON_POPUP_CLOSE_WIDTH, BUTTON_POPUP_CLOSE_HEIGHT);
-      lv_obj_align(gui.element.messagePopup.mBoxPopupButtonClose, LV_ALIGN_TOP_RIGHT, ui->info_close_x , ui->info_close_y);
+      lv_obj_align(gui.element.messagePopup.mBoxPopupButtonClose, LV_ALIGN_TOP_RIGHT, ui->close_btn_x , ui->close_btn_y);
       lv_obj_add_event_cb(gui.element.messagePopup.mBoxPopupButtonClose, event_messagePopup, LV_EVENT_CLICKED, NULL);
 
             gui.element.messagePopup.mBoxPopupButtonLabel = lv_label_create(gui.element.messagePopup.mBoxPopupButtonClose);
@@ -582,7 +582,7 @@ void messagePopupCreate(const char * popupTitleText,const char * popupText,const
   else{
       gui.element.messagePopup.mBoxPopupButton1 = lv_button_create(gui.element.messagePopup.mBoxPopupContainer);
       lv_obj_set_size(gui.element.messagePopup.mBoxPopupButton1, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
-      lv_obj_align(gui.element.messagePopup.mBoxPopupButton1, LV_ALIGN_BOTTOM_LEFT, ui->button1_x , ui->button_y);
+      lv_obj_align(gui.element.messagePopup.mBoxPopupButton1, LV_ALIGN_BOTTOM_LEFT, ui->secondary_btn_x , ui->action_btn_y);
       lv_obj_add_event_cb(gui.element.messagePopup.mBoxPopupButton1, event_messagePopup, LV_EVENT_CLICKED, NULL);
       lv_obj_set_style_bg_color(gui.element.messagePopup.mBoxPopupButton1, lv_color_hex(RED_DARK), LV_PART_MAIN);
 
@@ -594,7 +594,7 @@ void messagePopupCreate(const char * popupTitleText,const char * popupText,const
 
       gui.element.messagePopup.mBoxPopupButton2 = lv_button_create(gui.element.messagePopup.mBoxPopupContainer);
       lv_obj_set_size(gui.element.messagePopup.mBoxPopupButton2, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
-      lv_obj_align(gui.element.messagePopup.mBoxPopupButton2, LV_ALIGN_BOTTOM_RIGHT, - ui->button2_x , ui->button_y);
+      lv_obj_align(gui.element.messagePopup.mBoxPopupButton2, LV_ALIGN_BOTTOM_RIGHT, - ui->primary_btn_x , ui->action_btn_y);
       lv_obj_add_event_cb(gui.element.messagePopup.mBoxPopupButton2, event_messagePopup, LV_EVENT_CLICKED, NULL);
       lv_obj_set_style_bg_color(gui.element.messagePopup.mBoxPopupButton2, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
 

@@ -42,6 +42,8 @@ static mcp23017_t           mcp;                /* MCP23017 I/O expander handle 
 static ds18b20_bus_t        ds_bus;             /* DS18B20 shared OneWire bus (both sensors) */
 static pca9685_t            pca_pwm;            /* PCA9685 I2C PWM controller (pump speed) */
 
+static void process_list_set_time_label(processNode *process);
+
 /* ═══════════════════════════════════════════════
  * Utility Helpers
  * ═══════════════════════════════════════════════ */
@@ -405,13 +407,22 @@ lv_obj_t * create_switch(lv_obj_t * parent, const char * icon, const char * txt,
 }
 
 
-void createQuestionMark(lv_obj_t * parent,lv_obj_t * element,lv_event_cb_t e, const int32_t x, const int32_t y) {
-
+void createQuestionMark(lv_obj_t * parent, lv_obj_t * element, lv_event_cb_t e, const int32_t x, const int32_t y)
+{
     lv_obj_t *questionMark = lv_label_create(parent);
-    lv_obj_set_size(questionMark, lv_font_get_line_height(&FilMachineFontIcons_15) * 1.5, lv_font_get_line_height(&FilMachineFontIcons_15) * 1.5);
+
+    #if (LCD_H_RES == 480) && (LCD_V_RES == 320)
+        const lv_font_t *qm_font = &FilMachineFontIcons_15;
+    #else
+        const lv_font_t *qm_font = &FilMachineFontIcons_30;
+    #endif
+
+    lv_coord_t sz = (lv_coord_t)((lv_font_get_line_height(qm_font) * 3) / 2);
+
+    lv_obj_set_size(questionMark, sz, sz);
     lv_label_set_text(questionMark, questionMark_icon);
     lv_obj_add_event_cb(questionMark, e, LV_EVENT_CLICKED, element);
-    lv_obj_set_style_text_font(questionMark, &FilMachineFontIcons_15, 0);
+    lv_obj_set_style_text_font(questionMark, qm_font, 0);
     lv_obj_align_to(questionMark, element, LV_ALIGN_OUT_RIGHT_MID, x, y);
     lv_obj_add_flag(questionMark, LV_OBJ_FLAG_CLICKABLE);
 }
@@ -869,6 +880,21 @@ void init_Pins_and_Buses( void ) {
   }
 }
 
+/* ── Read ONLY the machineSettings blob (no processes, no stats).
+ *    Used at boot to know splash preferences before the full UI is ready. ── */
+void readSettingsOnly(const char *path) {
+    FIL file, *fp = &file;
+    unsigned int br;
+    if (f_open(fp, path, FA_READ | FA_OPEN_EXISTING) == FR_OK) {
+        if (f_read(fp, &gui.page.settings.settingsParams,
+                   sizeof(gui.page.settings.settingsParams), &br) == FR_OK) {
+            LV_LOG_USER("readSettingsOnly: loaded %u bytes (splashRandom=%d)",
+                        (unsigned)br, gui.page.settings.settingsParams.splashRandom);
+        }
+        f_close(fp);
+    }
+}
+
 void readConfigFile(const char *path, bool enableLog) {
 	
 	FIL				file, *fp;
@@ -1291,8 +1317,7 @@ void updateProcessElement(processNode *process){
   if(existingProcess != NULL) {
       LV_LOG_USER("Updating process element in list");
       //Update time
-      lv_label_set_text_fmt(existingProcess->process.processTime, "%"PRIu32"m%"PRIu8"s", process->process.processDetails->data.timeMins, 
-        process->process.processDetails->data.timeSecs); 
+      process_list_set_time_label(existingProcess);
       
       //Update temp
       lv_obj_send_event(existingProcess->process.processElement, LV_EVENT_REFRESH, NULL);
@@ -1303,9 +1328,11 @@ void updateProcessElement(processNode *process){
           lv_obj_add_flag(process->process.processTemp, LV_OBJ_FLAG_HIDDEN);
           lv_obj_align(process->process.processTimeIcon, LV_ALIGN_LEFT_MID, ui_get_profile()->process_element.time_icon_no_temp_x, ui_get_profile()->process_element.time_icon_y);
           lv_obj_align(process->process.processTime, LV_ALIGN_LEFT_MID, ui_get_profile()->process_element.time_value_no_temp_x, ui_get_profile()->process_element.time_value_y);
+          lv_obj_set_width(process->process.processTime, ui_get_profile()->process_element.card_content_w - ui_get_profile()->process_element.time_value_no_temp_x - 18);
        } else {
             lv_obj_align(process->process.processTime, LV_ALIGN_LEFT_MID, ui_get_profile()->process_element.time_value_x, ui_get_profile()->process_element.time_value_y);
             lv_obj_align(process->process.processTimeIcon, LV_ALIGN_LEFT_MID, ui_get_profile()->process_element.time_icon_x, ui_get_profile()->process_element.time_icon_y);
+            lv_obj_set_width(process->process.processTime, ui_get_profile()->process_element.card_content_w - ui_get_profile()->process_element.time_value_x - 18);
             lv_obj_clear_flag(process->process.processTempIcon, LV_OBJ_FLAG_HIDDEN);
             lv_obj_clear_flag(process->process.processTemp, LV_OBJ_FLAG_HIDDEN);
        }
@@ -2256,4 +2283,55 @@ uint16_t getWbFillTime(void) {
     if (ml == 0) ml = 2000;
     if (spd == 0) spd = 30;
     return calculateFillTime(ml, spd);
+}
+
+static uint16_t process_list_fill_time_seconds(void) {
+    uint8_t volume_index = gui.page.settings.settingsParams.chemistryVolume;
+    uint8_t tank_size = gui.page.settings.settingsParams.tankSize;
+    uint16_t table[2][3][2] = tanksSizesAndTimes;
+
+    if(volume_index < 1 || volume_index > 2) volume_index = 2;
+    if(tank_size < 1 || tank_size > 3) tank_size = 2;
+
+    return table[volume_index - 1][tank_size - 1][1];
+}
+
+static uint32_t process_list_overlap_credit_seconds(uint16_t fill_time_seconds) {
+    uint32_t overlap_pct = gui.page.settings.settingsParams.drainFillOverlapSetpoint;
+    if (overlap_pct > 100U) overlap_pct = 100U;
+    return (((uint32_t)fill_time_seconds * 2U) * overlap_pct) / 100U;
+}
+
+static uint32_t process_list_adjusted_processing_seconds(const stepNode *step, uint16_t fill_time_seconds) {
+    if(step == NULL || step->step.stepDetails == NULL) return 0U;
+
+    uint32_t recipe_seconds = ((uint32_t)step->step.stepDetails->data.timeMins * 60U) +
+                              (uint32_t)step->step.stepDetails->data.timeSecs;
+    uint32_t overlap_credit = process_list_overlap_credit_seconds(fill_time_seconds);
+    return (recipe_seconds > overlap_credit) ? (recipe_seconds - overlap_credit) : 0U;
+}
+
+static uint32_t process_list_estimated_runtime_seconds(const processNode *process) {
+    if(process == NULL || process->process.processDetails == NULL) return 0U;
+
+    uint16_t fill_time_seconds = process_list_fill_time_seconds();
+    uint32_t total_seconds = 0U;
+
+    for(stepNode *step = process->process.processDetails->stepElementsList.start; step != NULL; step = step->next) {
+        total_seconds += ((uint32_t)fill_time_seconds * 2U);
+        total_seconds += process_list_adjusted_processing_seconds(step, fill_time_seconds);
+    }
+
+    return total_seconds;
+}
+
+static void process_list_set_time_label(processNode *process) {
+    if(process == NULL || process->process.processTime == NULL || process->process.processDetails == NULL) return;
+
+    uint32_t estimated_seconds = process_list_estimated_runtime_seconds(process);
+    lv_label_set_text_fmt(process->process.processTime, "%" PRIu32 "m%" PRIu8 "s / ~%" PRIu32 "m%" PRIu32 "s",
+        process->process.processDetails->data.timeMins,
+        process->process.processDetails->data.timeSecs,
+        estimated_seconds / 60U,
+        estimated_seconds % 60U);
 }

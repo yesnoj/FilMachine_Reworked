@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 
+#include "page_splash.h"
 #include "esp_timer.h"
 #include "esp_lcd_panel_dev.h"
 #include "esp_lcd_panel_ops.h"
@@ -389,7 +390,7 @@ static esp_lcd_touch_handle_t init_touch(void)
         },
     };
 #else
-    /* JC4827W543: Native landscape 480×272 — no remapping needed */
+    /* Default GT911: Native landscape — no remapping needed */
     esp_lcd_touch_config_t tp_cfg = {
         .x_max = LCD_H_RES,
         .y_max = LCD_V_RES,
@@ -587,10 +588,13 @@ lv_indev_set_read_cb( indev, lvgl_touch_cb ); /*This function will be called per
     ESP_LOGI(TAG, "Start LVGL on %s (%dx%d)", BOARD_NAME, LCD_H_RES, LCD_V_RES);
     /* LVGL GUI creation code is called here! */
 create_keyboard();
-homePage();
 
-readConfigFile(FILENAME_SAVE, false);
-refreshSettingsUI();
+    /* Pre-load settings so splash knows if random mode is enabled */
+    readSettingsOnly(FILENAME_SAVE);
+
+    /* Show splash screen — play button calls readConfigFile → menu → refreshSettingsUI */
+    lv_obj_t * splash = splash_screen_create();
+    lv_scr_load(splash);
 
     while (1) {
         // raise the task priority of LVGL and/or reduce the handler period can improve the performance

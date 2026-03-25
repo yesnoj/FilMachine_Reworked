@@ -131,7 +131,7 @@ void otaWifiPopupCreate(void) {
 
     /* X close button */
     p->closeButton = lv_button_create(p->popupContainer);
-    lv_obj_set_size(p->closeButton, BUTTON_POPUP_CLOSE_WIDTH, BUTTON_POPUP_CLOSE_HEIGHT);
+    lv_obj_set_size(p->closeButton, ui->close_w, ui->close_h);
     lv_obj_align(p->closeButton, LV_ALIGN_TOP_RIGHT, ui->close_x, ui->close_y);
     lv_obj_add_event_cb(p->closeButton, event_otaWifiPopup, LV_EVENT_CLICKED, NULL);
     lv_obj_set_style_bg_color(p->closeButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
@@ -147,10 +147,10 @@ void otaWifiPopupCreate(void) {
     lv_label_set_text(p->ipLabel, "Connecting...");
     lv_obj_set_style_text_font(p->ipLabel, ui->ip_font, 0);
     lv_obj_set_style_text_color(p->ipLabel, lv_color_hex(LIGHT_BLUE), 0);
-    lv_obj_set_width(p->ipLabel, ui->ip_w);
+    lv_obj_set_width(p->ipLabel, ui->ip_label_w);
     lv_obj_set_style_text_align(p->ipLabel, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_long_mode(p->ipLabel, LV_LABEL_LONG_WRAP);
-    lv_obj_align(p->ipLabel, LV_ALIGN_TOP_MID, 0, ui->ip_y);
+    lv_obj_align(p->ipLabel, LV_ALIGN_TOP_MID, 0, ui->ip_label_y);
 
     /* PIN label */
     char pin_buf[32];
@@ -160,18 +160,18 @@ void otaWifiPopupCreate(void) {
     lv_obj_set_style_text_font(p->pinLabel, ui->pin_font, 0);
     lv_obj_set_style_text_color(p->pinLabel, lv_color_hex(GREEN), 0);
     lv_obj_set_style_text_align(p->pinLabel, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_set_width(p->pinLabel, ui->pin_w);
-    lv_obj_align(p->pinLabel, LV_ALIGN_TOP_MID, 0, ui->pin_y);
+    lv_obj_set_width(p->pinLabel, ui->pin_label_w);
+    lv_obj_align(p->pinLabel, LV_ALIGN_TOP_MID, 0, ui->pin_label_y);
 
     /* Status label */
     p->statusLabel = lv_label_create(p->popupContainer);
     lv_label_set_text(p->statusLabel, "Starting server...");
     lv_obj_set_style_text_font(p->statusLabel, ui->status_font, 0);
     lv_obj_set_style_text_color(p->statusLabel, lv_color_hex(WHITE), 0);
-    lv_obj_set_width(p->statusLabel, ui->status_w);
+    lv_obj_set_width(p->statusLabel, ui->status_label_w);
     lv_obj_set_style_text_align(p->statusLabel, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_long_mode(p->statusLabel, LV_LABEL_LONG_WRAP);
-    lv_obj_align(p->statusLabel, LV_ALIGN_TOP_MID, 0, ui->status_y);
+    lv_obj_align(p->statusLabel, LV_ALIGN_TOP_MID, 0, ui->status_label_y);
 
     /* Progress bar (hidden until upload starts) */
     p->progressBar = lv_bar_create(p->popupContainer);
@@ -275,7 +275,7 @@ void otaProgressPopupCreate(const char *title) {
 
     /* X close button */
     p->closeButton = lv_button_create(p->popupContainer);
-    lv_obj_set_size(p->closeButton, BUTTON_POPUP_CLOSE_WIDTH, BUTTON_POPUP_CLOSE_HEIGHT);
+    lv_obj_set_size(p->closeButton, ui->close_w, ui->close_h);
     lv_obj_align(p->closeButton, LV_ALIGN_TOP_RIGHT, ui->close_x, ui->close_y);
     lv_obj_add_event_cb(p->closeButton, event_otaProgressPopup, LV_EVENT_CLICKED, NULL);
     lv_obj_set_style_bg_color(p->closeButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
@@ -299,7 +299,7 @@ void otaProgressPopupCreate(const char *title) {
     /* Progress bar */
     p->progressBar = lv_bar_create(p->popupContainer);
     lv_obj_set_size(p->progressBar, ui_get_profile()->popups.ota_progress_bar_w, ui_get_profile()->popups.ota_progress_bar_h);
-    lv_obj_align(p->progressBar, LV_ALIGN_TOP_MID, 0, ui->progress_bar_y);
+    lv_obj_align(p->progressBar, LV_ALIGN_TOP_MID, 0, ui->progress_y);
     lv_bar_set_range(p->progressBar, 0, 100);
     lv_bar_set_value(p->progressBar, 0, LV_ANIM_OFF);
     lv_obj_set_style_bg_color(p->progressBar, lv_palette_darken(LV_PALETTE_GREY, 3), LV_PART_MAIN);

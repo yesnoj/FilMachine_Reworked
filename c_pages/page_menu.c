@@ -116,7 +116,7 @@ void menu(void) {
     
     gui.page.menu.processesTab = lv_obj_create(gui.page.menu.screen_mainMenu);
     const ui_profile_t *ui = ui_get_profile();
-    lv_obj_set_pos(gui.page.menu.processesTab, ui->common.sidebar_x, ui->menu.tab1_y);
+    lv_obj_set_pos(gui.page.menu.processesTab, ui->common.sidebar_x, ui->menu.tab_processes_y);
     lv_obj_set_size(gui.page.menu.processesTab, ui->menu.tab_w, ui->menu.tab_h);
     lv_obj_add_event_cb(gui.page.menu.processesTab, event_tab_switch, LV_EVENT_CLICKED, gui.page.menu.processesTab);
     lv_obj_add_event_cb(gui.page.menu.processesTab, event_tab_switch, LV_EVENT_LONG_PRESSED, gui.page.menu.processesTab);
@@ -126,20 +126,20 @@ void menu(void) {
 
           gui.page.menu.iconLabel = lv_label_create(gui.page.menu.processesTab);          
           lv_label_set_text(gui.page.menu.iconLabel, tabProcess_icon);                  
-          lv_obj_set_style_text_font(gui.page.menu.iconLabel, ui->menu.icon_font, 0);
+          lv_obj_set_style_text_font(gui.page.menu.iconLabel, ui->menu.tab_icon_font, 0);
           lv_obj_align(gui.page.menu.iconLabel, LV_ALIGN_CENTER, 0, ui->menu.tab_icon_offset_y);
 
 
           gui.page.menu.label = lv_label_create(gui.page.menu.processesTab);         
           lv_label_set_text(gui.page.menu.label, tabProcess_label); 
-          lv_obj_set_style_text_font(gui.page.menu.label, ui->menu.label_font, 0);              
+          lv_obj_set_style_text_font(gui.page.menu.label, ui->menu.tab_label_font, 0);              
           lv_obj_align(gui.page.menu.label, LV_ALIGN_CENTER, 0, ui->menu.tab_label_offset_y);
           lv_obj_send_event(gui.page.menu.processesTab, LV_EVENT_CLICKED, gui.page.menu.processesTab);
 
 
 
     gui.page.menu.settingsTab = lv_obj_create(gui.page.menu.screen_mainMenu);
-    lv_obj_set_pos(gui.page.menu.settingsTab, ui->common.sidebar_x, ui->menu.tab2_y);
+    lv_obj_set_pos(gui.page.menu.settingsTab, ui->common.sidebar_x, ui->menu.tab_settings_y);
     lv_obj_set_size(gui.page.menu.settingsTab, ui->menu.tab_w, ui->menu.tab_h);   
     lv_obj_add_event_cb(gui.page.menu.settingsTab, event_tab_switch, LV_EVENT_CLICKED, gui.page.menu.settingsTab);
     lv_obj_set_style_border_color(gui.page.menu.settingsTab, lv_color_hex(GREY), 0);
@@ -148,18 +148,18 @@ void menu(void) {
 
           gui.page.menu.iconLabel = lv_label_create(gui.page.menu.settingsTab);          
           lv_label_set_text(gui.page.menu.iconLabel, tabSetting_icon);                  
-          lv_obj_set_style_text_font(gui.page.menu.iconLabel, ui->menu.icon_font, 0);
+          lv_obj_set_style_text_font(gui.page.menu.iconLabel, ui->menu.tab_icon_font, 0);
           lv_obj_align(gui.page.menu.iconLabel, LV_ALIGN_CENTER, 0, ui->menu.tab_icon_offset_y);
 
           gui.page.menu.label = lv_label_create(gui.page.menu.settingsTab);         
           lv_label_set_text(gui.page.menu.label, tabSetting_label); 
-          lv_obj_set_style_text_font(gui.page.menu.label, ui->menu.label_font, 0);              
+          lv_obj_set_style_text_font(gui.page.menu.label, ui->menu.tab_label_font, 0);              
           lv_obj_align(gui.page.menu.label, LV_ALIGN_CENTER, 0, ui->menu.tab_label_offset_y);
 
 
 
     gui.page.menu.toolsTab = lv_obj_create(gui.page.menu.screen_mainMenu);
-    lv_obj_set_pos(gui.page.menu.toolsTab, ui->common.sidebar_x, ui->menu.tab3_y);
+    lv_obj_set_pos(gui.page.menu.toolsTab, ui->common.sidebar_x, ui->menu.tab_tools_y);
     lv_obj_set_size(gui.page.menu.toolsTab, ui->menu.tab_w, ui->menu.tab_h);   
     lv_obj_add_event_cb(gui.page.menu.toolsTab, event_tab_switch, LV_EVENT_CLICKED, gui.page.menu.toolsTab);
     lv_obj_set_style_border_color(gui.page.menu.toolsTab, lv_color_hex(GREY), 0);
@@ -168,13 +168,13 @@ void menu(void) {
 
           gui.page.menu.iconLabel = lv_label_create(gui.page.menu.toolsTab);          
           lv_label_set_text(gui.page.menu.iconLabel, tabTools_icon);                  
-          lv_obj_set_style_text_font(gui.page.menu.iconLabel, ui->menu.icon_font, 0);
+          lv_obj_set_style_text_font(gui.page.menu.iconLabel, ui->menu.tab_icon_font, 0);
           lv_obj_align(gui.page.menu.iconLabel, LV_ALIGN_CENTER, 0, ui->menu.tab_icon_offset_y);
 
 
           gui.page.menu.label = lv_label_create(gui.page.menu.toolsTab);         
           lv_label_set_text(gui.page.menu.label, tabTools_label); 
-          lv_obj_set_style_text_font(gui.page.menu.label, ui->menu.label_font, 0);              
+          lv_obj_set_style_text_font(gui.page.menu.label, ui->menu.tab_label_font, 0);              
           lv_obj_align(gui.page.menu.label, LV_ALIGN_CENTER, 0, ui->menu.tab_label_offset_y);
 }
 

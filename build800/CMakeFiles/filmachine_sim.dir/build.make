@@ -142,52 +142,10 @@ CMakeFiles/filmachine_sim.dir/main/accessories.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/main/accessories.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/accessories.c -o CMakeFiles/filmachine_sim.dir/main/accessories.c.s
 
-CMakeFiles/filmachine_sim.dir/main/mcp23017.c.o: CMakeFiles/filmachine_sim.dir/flags.make
-CMakeFiles/filmachine_sim.dir/main/mcp23017.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/mcp23017.c
-CMakeFiles/filmachine_sim.dir/main/mcp23017.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/filmachine_sim.dir/main/mcp23017.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/main/mcp23017.c.o -MF CMakeFiles/filmachine_sim.dir/main/mcp23017.c.o.d -o CMakeFiles/filmachine_sim.dir/main/mcp23017.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/mcp23017.c
-
-CMakeFiles/filmachine_sim.dir/main/mcp23017.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/main/mcp23017.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/mcp23017.c > CMakeFiles/filmachine_sim.dir/main/mcp23017.c.i
-
-CMakeFiles/filmachine_sim.dir/main/mcp23017.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/main/mcp23017.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/mcp23017.c -o CMakeFiles/filmachine_sim.dir/main/mcp23017.c.s
-
-CMakeFiles/filmachine_sim.dir/main/ds18b20.c.o: CMakeFiles/filmachine_sim.dir/flags.make
-CMakeFiles/filmachine_sim.dir/main/ds18b20.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ds18b20.c
-CMakeFiles/filmachine_sim.dir/main/ds18b20.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/filmachine_sim.dir/main/ds18b20.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/main/ds18b20.c.o -MF CMakeFiles/filmachine_sim.dir/main/ds18b20.c.o.d -o CMakeFiles/filmachine_sim.dir/main/ds18b20.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ds18b20.c
-
-CMakeFiles/filmachine_sim.dir/main/ds18b20.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/main/ds18b20.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ds18b20.c > CMakeFiles/filmachine_sim.dir/main/ds18b20.c.i
-
-CMakeFiles/filmachine_sim.dir/main/ds18b20.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/main/ds18b20.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ds18b20.c -o CMakeFiles/filmachine_sim.dir/main/ds18b20.c.s
-
-CMakeFiles/filmachine_sim.dir/main/pca9685.c.o: CMakeFiles/filmachine_sim.dir/flags.make
-CMakeFiles/filmachine_sim.dir/main/pca9685.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/pca9685.c
-CMakeFiles/filmachine_sim.dir/main/pca9685.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building C object CMakeFiles/filmachine_sim.dir/main/pca9685.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/main/pca9685.c.o -MF CMakeFiles/filmachine_sim.dir/main/pca9685.c.o.d -o CMakeFiles/filmachine_sim.dir/main/pca9685.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/pca9685.c
-
-CMakeFiles/filmachine_sim.dir/main/pca9685.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/main/pca9685.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/pca9685.c > CMakeFiles/filmachine_sim.dir/main/pca9685.c.i
-
-CMakeFiles/filmachine_sim.dir/main/pca9685.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/main/pca9685.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/pca9685.c -o CMakeFiles/filmachine_sim.dir/main/pca9685.c.s
-
 CMakeFiles/filmachine_sim.dir/main/ota_update.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/main/ota_update.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ota_update.c
 CMakeFiles/filmachine_sim.dir/main/ota_update.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building C object CMakeFiles/filmachine_sim.dir/main/ota_update.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/filmachine_sim.dir/main/ota_update.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/main/ota_update.c.o -MF CMakeFiles/filmachine_sim.dir/main/ota_update.c.o.d -o CMakeFiles/filmachine_sim.dir/main/ota_update.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ota_update.c
 
 CMakeFiles/filmachine_sim.dir/main/ota_update.c.i: cmake_force
@@ -198,24 +156,10 @@ CMakeFiles/filmachine_sim.dir/main/ota_update.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/main/ota_update.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ota_update.c -o CMakeFiles/filmachine_sim.dir/main/ota_update.c.s
 
-CMakeFiles/filmachine_sim.dir/main/sensors.c.o: CMakeFiles/filmachine_sim.dir/flags.make
-CMakeFiles/filmachine_sim.dir/main/sensors.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/sensors.c
-CMakeFiles/filmachine_sim.dir/main/sensors.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building C object CMakeFiles/filmachine_sim.dir/main/sensors.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/main/sensors.c.o -MF CMakeFiles/filmachine_sim.dir/main/sensors.c.o.d -o CMakeFiles/filmachine_sim.dir/main/sensors.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/sensors.c
-
-CMakeFiles/filmachine_sim.dir/main/sensors.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/main/sensors.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/sensors.c > CMakeFiles/filmachine_sim.dir/main/sensors.c.i
-
-CMakeFiles/filmachine_sim.dir/main/sensors.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/main/sensors.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/sensors.c -o CMakeFiles/filmachine_sim.dir/main/sensors.c.s
-
 CMakeFiles/filmachine_sim.dir/main/ui_profile.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/main/ui_profile.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ui_profile.c
 CMakeFiles/filmachine_sim.dir/main/ui_profile.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building C object CMakeFiles/filmachine_sim.dir/main/ui_profile.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/filmachine_sim.dir/main/ui_profile.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/main/ui_profile.c.o -MF CMakeFiles/filmachine_sim.dir/main/ui_profile.c.o.d -o CMakeFiles/filmachine_sim.dir/main/ui_profile.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ui_profile.c
 
 CMakeFiles/filmachine_sim.dir/main/ui_profile.c.i: cmake_force
@@ -226,24 +170,66 @@ CMakeFiles/filmachine_sim.dir/main/ui_profile.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/main/ui_profile.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/main/ui_profile.c -o CMakeFiles/filmachine_sim.dir/main/ui_profile.c.s
 
-CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.o: CMakeFiles/filmachine_sim.dir/flags.make
-CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_home.c
-CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.o -MF CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.o.d -o CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_home.c
+CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.o: CMakeFiles/filmachine_sim.dir/flags.make
+CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/drivers/mcp23017.c
+CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building C object CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.o -MF CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.o.d -o CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/drivers/mcp23017.c
 
-CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_home.c > CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.i
+CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/drivers/mcp23017.c > CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.i
 
-CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_home.c -o CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.s
+CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/drivers/mcp23017.c -o CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.s
+
+CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.o: CMakeFiles/filmachine_sim.dir/flags.make
+CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/drivers/ds18b20.c
+CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building C object CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.o -MF CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.o.d -o CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/drivers/ds18b20.c
+
+CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/drivers/ds18b20.c > CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.i
+
+CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/drivers/ds18b20.c -o CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.s
+
+CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.o: CMakeFiles/filmachine_sim.dir/flags.make
+CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/drivers/pca9685.c
+CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building C object CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.o -MF CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.o.d -o CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/drivers/pca9685.c
+
+CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/drivers/pca9685.c > CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.i
+
+CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/drivers/pca9685.c -o CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.s
+
+CMakeFiles/filmachine_sim.dir/drivers/sensors.c.o: CMakeFiles/filmachine_sim.dir/flags.make
+CMakeFiles/filmachine_sim.dir/drivers/sensors.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/drivers/sensors.c
+CMakeFiles/filmachine_sim.dir/drivers/sensors.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building C object CMakeFiles/filmachine_sim.dir/drivers/sensors.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/drivers/sensors.c.o -MF CMakeFiles/filmachine_sim.dir/drivers/sensors.c.o.d -o CMakeFiles/filmachine_sim.dir/drivers/sensors.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/drivers/sensors.c
+
+CMakeFiles/filmachine_sim.dir/drivers/sensors.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/drivers/sensors.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/drivers/sensors.c > CMakeFiles/filmachine_sim.dir/drivers/sensors.c.i
+
+CMakeFiles/filmachine_sim.dir/drivers/sensors.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/drivers/sensors.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/drivers/sensors.c -o CMakeFiles/filmachine_sim.dir/drivers/sensors.c.s
 
 CMakeFiles/filmachine_sim.dir/c_pages/page_menu.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_pages/page_menu.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_menu.c
 CMakeFiles/filmachine_sim.dir/c_pages/page_menu.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_menu.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_menu.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_pages/page_menu.c.o -MF CMakeFiles/filmachine_sim.dir/c_pages/page_menu.c.o.d -o CMakeFiles/filmachine_sim.dir/c_pages/page_menu.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_menu.c
 
 CMakeFiles/filmachine_sim.dir/c_pages/page_menu.c.i: cmake_force
@@ -257,7 +243,7 @@ CMakeFiles/filmachine_sim.dir/c_pages/page_menu.c.s: cmake_force
 CMakeFiles/filmachine_sim.dir/c_pages/page_processes.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_pages/page_processes.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_processes.c
 CMakeFiles/filmachine_sim.dir/c_pages/page_processes.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_processes.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_processes.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_pages/page_processes.c.o -MF CMakeFiles/filmachine_sim.dir/c_pages/page_processes.c.o.d -o CMakeFiles/filmachine_sim.dir/c_pages/page_processes.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_processes.c
 
 CMakeFiles/filmachine_sim.dir/c_pages/page_processes.c.i: cmake_force
@@ -271,7 +257,7 @@ CMakeFiles/filmachine_sim.dir/c_pages/page_processes.c.s: cmake_force
 CMakeFiles/filmachine_sim.dir/c_pages/page_processDetail.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_pages/page_processDetail.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_processDetail.c
 CMakeFiles/filmachine_sim.dir/c_pages/page_processDetail.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_processDetail.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_processDetail.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_pages/page_processDetail.c.o -MF CMakeFiles/filmachine_sim.dir/c_pages/page_processDetail.c.o.d -o CMakeFiles/filmachine_sim.dir/c_pages/page_processDetail.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_processDetail.c
 
 CMakeFiles/filmachine_sim.dir/c_pages/page_processDetail.c.i: cmake_force
@@ -285,7 +271,7 @@ CMakeFiles/filmachine_sim.dir/c_pages/page_processDetail.c.s: cmake_force
 CMakeFiles/filmachine_sim.dir/c_pages/page_stepDetail.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_pages/page_stepDetail.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_stepDetail.c
 CMakeFiles/filmachine_sim.dir/c_pages/page_stepDetail.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_stepDetail.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_stepDetail.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_pages/page_stepDetail.c.o -MF CMakeFiles/filmachine_sim.dir/c_pages/page_stepDetail.c.o.d -o CMakeFiles/filmachine_sim.dir/c_pages/page_stepDetail.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_stepDetail.c
 
 CMakeFiles/filmachine_sim.dir/c_pages/page_stepDetail.c.i: cmake_force
@@ -299,7 +285,7 @@ CMakeFiles/filmachine_sim.dir/c_pages/page_stepDetail.c.s: cmake_force
 CMakeFiles/filmachine_sim.dir/c_pages/page_settings.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_pages/page_settings.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_settings.c
 CMakeFiles/filmachine_sim.dir/c_pages/page_settings.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_settings.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_settings.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_pages/page_settings.c.o -MF CMakeFiles/filmachine_sim.dir/c_pages/page_settings.c.o.d -o CMakeFiles/filmachine_sim.dir/c_pages/page_settings.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_settings.c
 
 CMakeFiles/filmachine_sim.dir/c_pages/page_settings.c.i: cmake_force
@@ -313,7 +299,7 @@ CMakeFiles/filmachine_sim.dir/c_pages/page_settings.c.s: cmake_force
 CMakeFiles/filmachine_sim.dir/c_pages/page_tools.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_pages/page_tools.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_tools.c
 CMakeFiles/filmachine_sim.dir/c_pages/page_tools.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_tools.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_tools.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_pages/page_tools.c.o -MF CMakeFiles/filmachine_sim.dir/c_pages/page_tools.c.o.d -o CMakeFiles/filmachine_sim.dir/c_pages/page_tools.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_tools.c
 
 CMakeFiles/filmachine_sim.dir/c_pages/page_tools.c.i: cmake_force
@@ -327,7 +313,7 @@ CMakeFiles/filmachine_sim.dir/c_pages/page_tools.c.s: cmake_force
 CMakeFiles/filmachine_sim.dir/c_pages/page_checkup.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_pages/page_checkup.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_checkup.c
 CMakeFiles/filmachine_sim.dir/c_pages/page_checkup.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_checkup.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_checkup.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_pages/page_checkup.c.o -MF CMakeFiles/filmachine_sim.dir/c_pages/page_checkup.c.o.d -o CMakeFiles/filmachine_sim.dir/c_pages/page_checkup.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_checkup.c
 
 CMakeFiles/filmachine_sim.dir/c_pages/page_checkup.c.i: cmake_force
@@ -341,7 +327,7 @@ CMakeFiles/filmachine_sim.dir/c_pages/page_checkup.c.s: cmake_force
 CMakeFiles/filmachine_sim.dir/c_elements/element_process.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_elements/element_process.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_process.c
 CMakeFiles/filmachine_sim.dir/c_elements/element_process.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_process.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_process.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_elements/element_process.c.o -MF CMakeFiles/filmachine_sim.dir/c_elements/element_process.c.o.d -o CMakeFiles/filmachine_sim.dir/c_elements/element_process.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_process.c
 
 CMakeFiles/filmachine_sim.dir/c_elements/element_process.c.i: cmake_force
@@ -355,7 +341,7 @@ CMakeFiles/filmachine_sim.dir/c_elements/element_process.c.s: cmake_force
 CMakeFiles/filmachine_sim.dir/c_elements/element_step.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_elements/element_step.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_step.c
 CMakeFiles/filmachine_sim.dir/c_elements/element_step.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_step.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_step.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_elements/element_step.c.o -MF CMakeFiles/filmachine_sim.dir/c_elements/element_step.c.o.d -o CMakeFiles/filmachine_sim.dir/c_elements/element_step.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_step.c
 
 CMakeFiles/filmachine_sim.dir/c_elements/element_step.c.i: cmake_force
@@ -369,7 +355,7 @@ CMakeFiles/filmachine_sim.dir/c_elements/element_step.c.s: cmake_force
 CMakeFiles/filmachine_sim.dir/c_elements/element_filterPopup.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_elements/element_filterPopup.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_filterPopup.c
 CMakeFiles/filmachine_sim.dir/c_elements/element_filterPopup.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_filterPopup.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_filterPopup.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_elements/element_filterPopup.c.o -MF CMakeFiles/filmachine_sim.dir/c_elements/element_filterPopup.c.o.d -o CMakeFiles/filmachine_sim.dir/c_elements/element_filterPopup.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_filterPopup.c
 
 CMakeFiles/filmachine_sim.dir/c_elements/element_filterPopup.c.i: cmake_force
@@ -383,7 +369,7 @@ CMakeFiles/filmachine_sim.dir/c_elements/element_filterPopup.c.s: cmake_force
 CMakeFiles/filmachine_sim.dir/c_elements/element_messagePopup.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_elements/element_messagePopup.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_messagePopup.c
 CMakeFiles/filmachine_sim.dir/c_elements/element_messagePopup.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_messagePopup.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_messagePopup.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_elements/element_messagePopup.c.o -MF CMakeFiles/filmachine_sim.dir/c_elements/element_messagePopup.c.o.d -o CMakeFiles/filmachine_sim.dir/c_elements/element_messagePopup.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_messagePopup.c
 
 CMakeFiles/filmachine_sim.dir/c_elements/element_messagePopup.c.i: cmake_force
@@ -397,7 +383,7 @@ CMakeFiles/filmachine_sim.dir/c_elements/element_messagePopup.c.s: cmake_force
 CMakeFiles/filmachine_sim.dir/c_elements/element_rollerPopup.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_elements/element_rollerPopup.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_rollerPopup.c
 CMakeFiles/filmachine_sim.dir/c_elements/element_rollerPopup.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_rollerPopup.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_rollerPopup.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_elements/element_rollerPopup.c.o -MF CMakeFiles/filmachine_sim.dir/c_elements/element_rollerPopup.c.o.d -o CMakeFiles/filmachine_sim.dir/c_elements/element_rollerPopup.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_rollerPopup.c
 
 CMakeFiles/filmachine_sim.dir/c_elements/element_rollerPopup.c.i: cmake_force
@@ -411,7 +397,7 @@ CMakeFiles/filmachine_sim.dir/c_elements/element_rollerPopup.c.s: cmake_force
 CMakeFiles/filmachine_sim.dir/c_elements/element_cleanPopup.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_elements/element_cleanPopup.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_cleanPopup.c
 CMakeFiles/filmachine_sim.dir/c_elements/element_cleanPopup.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_cleanPopup.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_cleanPopup.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_elements/element_cleanPopup.c.o -MF CMakeFiles/filmachine_sim.dir/c_elements/element_cleanPopup.c.o.d -o CMakeFiles/filmachine_sim.dir/c_elements/element_cleanPopup.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_cleanPopup.c
 
 CMakeFiles/filmachine_sim.dir/c_elements/element_cleanPopup.c.i: cmake_force
@@ -425,7 +411,7 @@ CMakeFiles/filmachine_sim.dir/c_elements/element_cleanPopup.c.s: cmake_force
 CMakeFiles/filmachine_sim.dir/c_elements/element_drainPopup.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_elements/element_drainPopup.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_drainPopup.c
 CMakeFiles/filmachine_sim.dir/c_elements/element_drainPopup.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_drainPopup.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_drainPopup.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_elements/element_drainPopup.c.o -MF CMakeFiles/filmachine_sim.dir/c_elements/element_drainPopup.c.o.d -o CMakeFiles/filmachine_sim.dir/c_elements/element_drainPopup.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_drainPopup.c
 
 CMakeFiles/filmachine_sim.dir/c_elements/element_drainPopup.c.i: cmake_force
@@ -439,7 +425,7 @@ CMakeFiles/filmachine_sim.dir/c_elements/element_drainPopup.c.s: cmake_force
 CMakeFiles/filmachine_sim.dir/c_elements/element_selfcheckPopup.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_elements/element_selfcheckPopup.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_selfcheckPopup.c
 CMakeFiles/filmachine_sim.dir/c_elements/element_selfcheckPopup.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_selfcheckPopup.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_selfcheckPopup.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_elements/element_selfcheckPopup.c.o -MF CMakeFiles/filmachine_sim.dir/c_elements/element_selfcheckPopup.c.o.d -o CMakeFiles/filmachine_sim.dir/c_elements/element_selfcheckPopup.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_selfcheckPopup.c
 
 CMakeFiles/filmachine_sim.dir/c_elements/element_selfcheckPopup.c.i: cmake_force
@@ -453,7 +439,7 @@ CMakeFiles/filmachine_sim.dir/c_elements/element_selfcheckPopup.c.s: cmake_force
 CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_otaWifiPopup.c
 CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.o -MF CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.o.d -o CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_otaWifiPopup.c
 
 CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.i: cmake_force
@@ -463,6 +449,20 @@ CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.i: cmake_force
 CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_otaWifiPopup.c -o CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.s
+
+CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.o: CMakeFiles/filmachine_sim.dir/flags.make
+CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_splashPopup.c
+CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building C object CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.o -MF CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.o.d -o CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_splashPopup.c
+
+CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_splashPopup.c > CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.i
+
+CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_elements/element_splashPopup.c -o CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.s
 
 CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_15.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_15.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_15.c
@@ -520,10 +520,38 @@ CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_40.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_40.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_40.c -o CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_40.c.s
 
+CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.o: CMakeFiles/filmachine_sim.dir/flags.make
+CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_50.c
+CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building C object CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.o -MF CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.o.d -o CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_50.c
+
+CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_50.c > CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.i
+
+CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_50.c -o CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.s
+
+CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.o: CMakeFiles/filmachine_sim.dir/flags.make
+CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_60.c
+CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building C object CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.o -MF CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.o.d -o CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_60.c
+
+CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_60.c > CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.i
+
+CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_60.c -o CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.s
+
 CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_100.c
 CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building C object CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Building C object CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.o -MF CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.o.d -o CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_100.c
 
 CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.i: cmake_force
@@ -534,19 +562,33 @@ CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/FilMachineFontIcons_100.c -o CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.s
 
-CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.o: CMakeFiles/filmachine_sim.dir/flags.make
-CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_graphics/splash.c
-CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building C object CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.o -MF CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.o.d -o CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_graphics/splash.c
+CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.o: CMakeFiles/filmachine_sim.dir/flags.make
+CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/lv_font_montserrat_64.c
+CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_36) "Building C object CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.o -MF CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.o.d -o CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/lv_font_montserrat_64.c
 
-CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_graphics/splash.c > CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.i
+CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/lv_font_montserrat_64.c > CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.i
 
-CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_graphics/splash.c -o CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.s
+CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/lv_font_montserrat_64.c -o CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.s
+
+CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o: CMakeFiles/filmachine_sim.dir/flags.make
+CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_splash.c
+CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_37) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o -MF CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o.d -o CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_splash.c
+
+CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_splash.c > CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.i
+
+CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_splash.c -o CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.s
 
 # Object files for target filmachine_sim
 filmachine_sim_OBJECTS = \
@@ -555,13 +597,12 @@ filmachine_sim_OBJECTS = \
 "CMakeFiles/filmachine_sim.dir/stub/fatfs_stubs.c.o" \
 "CMakeFiles/filmachine_sim.dir/stub/freertos_stubs.c.o" \
 "CMakeFiles/filmachine_sim.dir/main/accessories.c.o" \
-"CMakeFiles/filmachine_sim.dir/main/mcp23017.c.o" \
-"CMakeFiles/filmachine_sim.dir/main/ds18b20.c.o" \
-"CMakeFiles/filmachine_sim.dir/main/pca9685.c.o" \
 "CMakeFiles/filmachine_sim.dir/main/ota_update.c.o" \
-"CMakeFiles/filmachine_sim.dir/main/sensors.c.o" \
 "CMakeFiles/filmachine_sim.dir/main/ui_profile.c.o" \
-"CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.o" \
+"CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.o" \
+"CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.o" \
+"CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.o" \
+"CMakeFiles/filmachine_sim.dir/drivers/sensors.c.o" \
 "CMakeFiles/filmachine_sim.dir/c_pages/page_menu.c.o" \
 "CMakeFiles/filmachine_sim.dir/c_pages/page_processes.c.o" \
 "CMakeFiles/filmachine_sim.dir/c_pages/page_processDetail.c.o" \
@@ -578,12 +619,16 @@ filmachine_sim_OBJECTS = \
 "CMakeFiles/filmachine_sim.dir/c_elements/element_drainPopup.c.o" \
 "CMakeFiles/filmachine_sim.dir/c_elements/element_selfcheckPopup.c.o" \
 "CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.o" \
+"CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.o" \
 "CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_15.c.o" \
 "CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_20.c.o" \
 "CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_30.c.o" \
 "CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_40.c.o" \
+"CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.o" \
+"CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.o" \
 "CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.o" \
-"CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.o"
+"CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.o" \
+"CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o"
 
 # External object files for target filmachine_sim
 filmachine_sim_EXTERNAL_OBJECTS =
@@ -593,13 +638,12 @@ filmachine_sim: CMakeFiles/filmachine_sim.dir/stub/esp_stubs.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/stub/fatfs_stubs.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/stub/freertos_stubs.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/main/accessories.c.o
-filmachine_sim: CMakeFiles/filmachine_sim.dir/main/mcp23017.c.o
-filmachine_sim: CMakeFiles/filmachine_sim.dir/main/ds18b20.c.o
-filmachine_sim: CMakeFiles/filmachine_sim.dir/main/pca9685.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/main/ota_update.c.o
-filmachine_sim: CMakeFiles/filmachine_sim.dir/main/sensors.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/main/ui_profile.c.o
-filmachine_sim: CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.o
+filmachine_sim: CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.o
+filmachine_sim: CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.o
+filmachine_sim: CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.o
+filmachine_sim: CMakeFiles/filmachine_sim.dir/drivers/sensors.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/c_pages/page_menu.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/c_pages/page_processes.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/c_pages/page_processDetail.c.o
@@ -616,16 +660,20 @@ filmachine_sim: CMakeFiles/filmachine_sim.dir/c_elements/element_cleanPopup.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/c_elements/element_drainPopup.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/c_elements/element_selfcheckPopup.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/c_elements/element_otaWifiPopup.c.o
+filmachine_sim: CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_15.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_20.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_30.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_40.c.o
+filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.o
+filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.o
-filmachine_sim: CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.o
+filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.o
+filmachine_sim: CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/build.make
 filmachine_sim: lib/liblvgl.a
 filmachine_sim: CMakeFiles/filmachine_sim.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Linking C executable filmachine_sim"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_38) "Linking C executable filmachine_sim"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/filmachine_sim.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

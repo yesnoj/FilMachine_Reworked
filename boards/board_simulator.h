@@ -7,8 +7,8 @@
  * relay numbers) so the application code compiles identically.
  *
  * The active resolution can be switched at compile time:
- *   -DSIM_RESOLUTION=320   → 480×320 (old board layout)
- *   -DSIM_RESOLUTION=272   → 480×272 (new board layout)
+ *   -DSIM_RESOLUTION=320   → 480×320 (Makerfabs S3 / JC4880P433 LVGL resolution)
+ *   -DSIM_RESOLUTION=800   → 800×480 landscape (JC4880P433 physical panel)
  * Default is 320 for backward compatibility.
  */
 
@@ -24,8 +24,14 @@
     #define SIM_RESOLUTION          320     /* default: old board layout */
 #endif
 
-#define LCD_H_RES                   480
-#define LCD_V_RES                   SIM_RESOLUTION
+#if SIM_RESOLUTION == 800
+    /* JC4880P433 physical panel in landscape: 800×480 */
+    #define LCD_H_RES               800
+    #define LCD_V_RES               480
+#else
+    #define LCD_H_RES               480
+    #define LCD_V_RES               SIM_RESOLUTION
+#endif
 
 /* ═══════════════════════════════════════════════
  * Display — simulated via SDL2 (no real driver)

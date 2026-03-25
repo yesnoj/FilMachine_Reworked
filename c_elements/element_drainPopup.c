@@ -154,6 +154,8 @@ static void drain_reset(void) {
 
     /* Show confirm, hide process */
     lv_obj_remove_flag(dp->drainConfirmContainer, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_remove_flag(dp->drainStartButton, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_remove_flag(dp->drainCancelButton, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(dp->drainProcessContainer, LV_OBJ_FLAG_HIDDEN);
 }
 
@@ -176,6 +178,8 @@ static void drain_start(void) {
 
     /* Switch view */
     lv_obj_add_flag(dp->drainConfirmContainer, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(dp->drainStartButton, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(dp->drainCancelButton, LV_OBJ_FLAG_HIDDEN);
     lv_obj_remove_flag(dp->drainProcessContainer, LV_OBJ_FLAG_HIDDEN);
 
     /* Initial labels */
@@ -279,15 +283,15 @@ void drainPopupCreate(void) {
                                ui->info_font, 0);
     lv_obj_set_style_text_align(dp->drainInfoLabel,
                                 LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_set_width(dp->drainInfoLabel, ui->info_w);
+    lv_obj_set_width(dp->drainInfoLabel, ui->confirm_info_w);
     lv_label_set_long_mode(dp->drainInfoLabel, LV_LABEL_LONG_WRAP);
-    lv_obj_align(dp->drainInfoLabel, LV_ALIGN_TOP_MID, 0, ui->info_y);
+    lv_obj_align(dp->drainInfoLabel, LV_ALIGN_TOP_MID, 0, ui->confirm_info_y);
 
     /* Start button (green, bottom-right) */
-    dp->drainStartButton = lv_button_create(dp->drainConfirmContainer);
+    dp->drainStartButton = lv_button_create(dp->drainContainer);
     lv_obj_set_size(dp->drainStartButton,
-                    BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
-    lv_obj_align(dp->drainStartButton, LV_ALIGN_BOTTOM_RIGHT, -ui->button_x, ui->button_y);
+                    ui->action_btn_w, ui->action_btn_h);
+    lv_obj_align(dp->drainStartButton, LV_ALIGN_BOTTOM_RIGHT, -ui->start_cancel_btn_x, ui->start_cancel_btn_y);
     lv_obj_add_event_cb(dp->drainStartButton,
                         event_drainPopup, LV_EVENT_CLICKED, NULL);
     lv_obj_set_style_bg_color(dp->drainStartButton,
@@ -300,10 +304,10 @@ void drainPopupCreate(void) {
     lv_obj_align(dp->drainStartButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
     /* Cancel button (red, bottom-left) */
-    dp->drainCancelButton = lv_button_create(dp->drainConfirmContainer);
+    dp->drainCancelButton = lv_button_create(dp->drainContainer);
     lv_obj_set_size(dp->drainCancelButton,
-                    BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
-    lv_obj_align(dp->drainCancelButton, LV_ALIGN_BOTTOM_LEFT, ui->button_x, ui->button_y);
+                    ui->action_btn_w, ui->action_btn_h);
+    lv_obj_align(dp->drainCancelButton, LV_ALIGN_BOTTOM_LEFT, ui->start_cancel_btn_x, ui->start_cancel_btn_y);
     lv_obj_add_event_cb(dp->drainCancelButton,
                         event_drainPopup, LV_EVENT_CLICKED, NULL);
     lv_obj_set_style_bg_color(dp->drainCancelButton,
@@ -319,18 +323,18 @@ void drainPopupCreate(void) {
      *  PHASE 2 – PROCESS CONTAINER  (hidden initially)
      * ═══════════════════════════════════════════════════════ */
     dp->drainProcessContainer = lv_obj_create(dp->drainPopupParent);
-    lv_obj_align(dp->drainProcessContainer, LV_ALIGN_TOP_MID, 0, ui->process_y);
+    lv_obj_align(dp->drainProcessContainer, LV_ALIGN_TOP_MID, 0, ui->progress_container_y);
     lv_obj_set_size(dp->drainProcessContainer, ui_get_profile()->popups.drain_process_w, ui_get_profile()->popups.drain_process_h);
     lv_obj_remove_flag(dp->drainProcessContainer, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(dp->drainProcessContainer, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_style_border_opa(dp->drainProcessContainer,
                                 LV_OPA_TRANSP, 0);
-    lv_obj_set_style_pad_all(dp->drainProcessContainer, ui->process_pad, 0);
+    lv_obj_set_style_pad_all(dp->drainProcessContainer, ui->progress_container_pad, 0);
 
     /* ── Tank bars ─────────────────────────────────────── */
-    const int bar_w = ui->bar_w, bar_h = ui->bar_h, gap = ui->bar_gap;
+    const int bar_w = ui->tank_bar_w, bar_h = ui->tank_bar_h, gap = ui->tank_bar_gap;
     const int total_w = NUM_TANKS * bar_w + (NUM_TANKS - 1) * gap;
-    const int start_x = (ui->bars_area_w - total_w) / 2;
+    const int start_x = (ui->tank_bars_area_w - total_w) / 2;
 
     for (int i = 0; i < NUM_TANKS; i++) {
         int x = start_x + i * (bar_w + gap);
@@ -340,17 +344,17 @@ void drainPopupCreate(void) {
         lv_obj_set_size(dp->tankBar[i], bar_w, bar_h);
         lv_bar_set_range(dp->tankBar[i], 0, 100);
         lv_bar_set_value(dp->tankBar[i], 100, LV_ANIM_OFF);
-        lv_obj_set_pos(dp->tankBar[i], x, ui->bar_y);
+        lv_obj_set_pos(dp->tankBar[i], x, ui->tank_bar_y);
 
         /* Indicator colour (filled) */
         lv_obj_set_style_bg_color(dp->tankBar[i],
             lv_color_hex(tankColor[i]), LV_PART_INDICATOR);
-        lv_obj_set_style_radius(dp->tankBar[i], ui->bar_radius, LV_PART_INDICATOR);
+        lv_obj_set_style_radius(dp->tankBar[i], ui->tank_bar_radius, LV_PART_INDICATOR);
 
         /* Background colour (empty) */
         lv_obj_set_style_bg_color(dp->tankBar[i],
             lv_palette_darken(LV_PALETTE_GREY, 3), LV_PART_MAIN);
-        lv_obj_set_style_radius(dp->tankBar[i], ui->bar_radius, LV_PART_MAIN);
+        lv_obj_set_style_radius(dp->tankBar[i], ui->tank_bar_radius, LV_PART_MAIN);
 
         /* Subtle coloured border */
         lv_obj_set_style_border_color(dp->tankBar[i],
@@ -367,7 +371,7 @@ void drainPopupCreate(void) {
         lv_obj_set_width(dp->tankLabel[i], bar_w);
         lv_obj_set_style_text_align(dp->tankLabel[i],
                                     LV_TEXT_ALIGN_CENTER, 0);
-        lv_obj_set_pos(dp->tankLabel[i], x, bar_h + ui->label_y);
+        lv_obj_set_pos(dp->tankLabel[i], x, bar_h + ui->tank_label_y);
     }
 
     /* ── Status labels (below bars) ────────────────────── */
@@ -375,34 +379,34 @@ void drainPopupCreate(void) {
     lv_label_set_text(dp->drainStatusLabel, "");
     lv_obj_set_style_text_font(dp->drainStatusLabel,
                                ui->status_font, 0);
-    lv_obj_set_width(dp->drainStatusLabel, ui->status_w);
+    lv_obj_set_width(dp->drainStatusLabel, ui->drain_status_w);
     lv_obj_set_style_text_align(dp->drainStatusLabel,
                                 LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_align(dp->drainStatusLabel, LV_ALIGN_TOP_MID, 0, ui->status_y);
+    lv_obj_align(dp->drainStatusLabel, LV_ALIGN_TOP_MID, 0, ui->drain_status_y);
 
     dp->drainWasteLabel = lv_label_create(dp->drainProcessContainer);
     lv_label_set_text(dp->drainWasteLabel, "");
     lv_obj_set_style_text_font(dp->drainWasteLabel,
                                ui->secondary_font, 0);
-    lv_obj_set_width(dp->drainWasteLabel, ui->status_w);
+    lv_obj_set_width(dp->drainWasteLabel, ui->drain_status_w);
     lv_obj_set_style_text_align(dp->drainWasteLabel,
                                 LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_align(dp->drainWasteLabel, LV_ALIGN_TOP_MID, 0, ui->waste_y);
+    lv_obj_align(dp->drainWasteLabel, LV_ALIGN_TOP_MID, 0, ui->waste_label_y);
 
     dp->drainTimeLabel = lv_label_create(dp->drainProcessContainer);
     lv_label_set_text(dp->drainTimeLabel, "");
     lv_obj_set_style_text_font(dp->drainTimeLabel,
                                ui->secondary_font, 0);
-    lv_obj_set_width(dp->drainTimeLabel, ui->status_w);
+    lv_obj_set_width(dp->drainTimeLabel, ui->drain_status_w);
     lv_obj_set_style_text_align(dp->drainTimeLabel,
                                 LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_align(dp->drainTimeLabel, LV_ALIGN_TOP_MID, 0, ui->time_y);
+    lv_obj_align(dp->drainTimeLabel, LV_ALIGN_TOP_MID, 0, ui->remaining_time_y);
 
     /* ── Stop / Close button ───────────────────────────── */
     dp->drainStopButton = lv_button_create(dp->drainProcessContainer);
     lv_obj_set_size(dp->drainStopButton,
-                    BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
-    lv_obj_align(dp->drainStopButton, LV_ALIGN_TOP_MID, 0, ui->stop_y);
+                    ui->stop_btn_w, ui->stop_btn_h);
+    lv_obj_align(dp->drainStopButton, LV_ALIGN_TOP_MID, 0, ui->stop_btn_y);
     lv_obj_add_event_cb(dp->drainStopButton,
                         event_drainPopup, LV_EVENT_CLICKED, NULL);
     lv_obj_set_style_bg_color(dp->drainStopButton,

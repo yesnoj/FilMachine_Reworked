@@ -15,7 +15,7 @@
  * Board-specific hardware definitions
  * All pin assignments, resolution, display/touch driver selection,
  * and sensor availability come from the active board header.
- * Select board at compile time: -DBOARD_MAKERFABS_S3, -DBOARD_JC4827W543, -DBOARD_JC4880P433, or -DBOARD_SIMULATOR
+ * Select board at compile time: -DBOARD_MAKERFABS_S3, -DBOARD_JC4880P433, or -DBOARD_SIMULATOR
  * ═══════════════════════════════════════════════ */
 #include "board.h"
 #include "ui_profile.h"
@@ -102,10 +102,10 @@ typedef enum {
 /* UI Layout Constants — resolved from ui_profile at runtime.
    These macros keep backward compatibility with existing code while
    routing through the profile so values adapt to the active board. */
-#define STEP_HEIGHT					(ui_get_profile()->step_element.item_h)
-#define STEP_Y_START				(ui_get_profile()->step_element.y_start)
-#define PROCESS_ELEMENT_HEIGHT		(ui_get_profile()->process_element.item_h)
-#define PROCESS_Y_START				(ui_get_profile()->process_element.y_start)
+#define STEP_HEIGHT					(ui_get_profile()->step_element.card_h)
+#define STEP_Y_START				(ui_get_profile()->step_element.list_start_y)
+#define PROCESS_ELEMENT_HEIGHT		(ui_get_profile()->process_element.card_h)
+#define PROCESS_Y_START				(ui_get_profile()->process_element.list_start_y)
 #define POPUP_WIDTH					(ui_get_profile()->popups.message_w)
 #define POPUP_HEIGHT				(ui_get_profile()->popups.message_h)
 
@@ -129,7 +129,7 @@ typedef enum {
 #define save_icon					"\xEF\x83\x87"
 #define trash_icon					"\xEF\x8B\xAD"
 #define chemical_icon				"\xEF\x83\x83"
-#define rinse_icon					"\xEF\x81\x83"
+#define rinse_icon                  "\xEF\x8B\x8C"
 #define multiRinse_icon				"\xEF\x86\xB8"
 #define edit_icon					"\xEF\x81\x84"
 #define checkStep_icon				"\xEF\x80\x8C"
@@ -426,8 +426,8 @@ typedef enum {
 #define BUTTON_PROCESS_WIDTH						(ui_get_profile()->buttons.process_w)
 #define BUTTON_START_HEIGHT							(ui_get_profile()->buttons.start_h)
 #define BUTTON_START_WIDTH							(ui_get_profile()->buttons.start_w)
-#define BUTTON_MBOX_HEIGHT							(ui_get_profile()->buttons.mbox_h)
-#define BUTTON_MBOX_WIDTH							(ui_get_profile()->buttons.mbox_w)
+#define BUTTON_MBOX_HEIGHT							(ui_get_profile()->buttons.msgbox_btn_h)
+#define BUTTON_MBOX_WIDTH							(ui_get_profile()->buttons.msgbox_btn_w)
 #define BUTTON_POPUP_CLOSE_HEIGHT					(ui_get_profile()->buttons.popup_close_h)
 #define BUTTON_POPUP_CLOSE_WIDTH					(ui_get_profile()->buttons.popup_close_w)
 #define BUTTON_TUNE_HEIGHT							(ui_get_profile()->buttons.tune_h)
@@ -481,6 +481,13 @@ struct __attribute__ ((packed)) machineSettings {
 	uint16_t				wbContainerMl;      // Water bath capacity in ml (1000-5000)
 	uint8_t					chemistryVolume;    // 1=Low, 2=High
 	int8_t					tempCalibOffset;    /* Calibration offset in tenths of degree (e.g., -15 = -1.5°C) */
+	/* ── Splash screen settings ── */
+	bool					splashRandom;       /* true = randomize palette/shape/complexity/seed each boot */
+	uint8_t					splashPalette;      /* 0–9 palette index */
+	uint8_t					splashShapeStyle;   /* 0–5 shape style index */
+	uint8_t					splashComplexity;   /* 20–100 shape count (step 20) */
+	uint32_t				splashSeed;         /* (reserved, auto-generated from tick) */
+	bool					splashDefault;      /* true = use standard Deep Ocean splash */
 };
 
 
@@ -939,6 +946,7 @@ struct sFilterPopup {
 	lv_obj_t	      		*mBoxNameContainer;
 	lv_obj_t	      		*mBoxNameLabel;
 	lv_obj_t	      		*selectColorContainerRadioButton;
+	lv_obj_t	      		*selectBnWContainerRadioButton;
 	lv_obj_t	      		*mBoxColorLabel;
 	lv_obj_t	      		*mBoxBnWLabel;
 	lv_obj_t	      		*mBoxPreferredContainer;
@@ -1107,19 +1115,6 @@ struct sMessagePopup {
 };
 
 
-/*********************
-* HOME PAGE STRUCT
-*********************/
-struct sHome {
-    /* LVGL objects */
-	lv_obj_t *screen_home;
-  lv_obj_t *startButton;
-  lv_obj_t *splashImage;
-  lv_obj_t *errorButtonLabel;
-  lv_obj_t *errorLabel;
-	/* Params objects */
-};
-
 
 /*********************
 * MENU STRUCT
@@ -1241,6 +1236,12 @@ struct sSettings {
 	lv_obj_t                *chemVolumeLabel;
 	lv_obj_t                *chemVolumeTextArea;
 
+	/* Splash screen settings row */
+	lv_obj_t                *splashContainer;
+	lv_obj_t                *splashLabel;
+	lv_obj_t                *splashButton;
+	lv_obj_t                *splashButtonLabel;
+
 	/* OTA / Wi-Fi settings */
 	/* OTA / Wi-Fi settings */
 	lv_obj_t                *otaSectionLabel;
@@ -1341,6 +1342,28 @@ struct sKeyboardPopup {
 	lv_obj_t			    *keyboardTextArea;
 };
 
+struct sSplashPopup {
+	lv_obj_t			*splashPopupParent;
+	lv_obj_t			*splashContainer;
+	lv_obj_t			*splashTitle;
+	lv_obj_t			*splashTitleLine;
+	lv_style_t			 style_titleLine;
+	lv_point_precise_t	 titleLinePoints[2];
+	lv_obj_t			*defaultSwitch;
+	lv_obj_t			*defaultLabel;
+	lv_obj_t			*randomSwitch;
+	lv_obj_t			*randomLabel;
+	lv_obj_t			*optionsContainer;
+	lv_obj_t			*paletteLabel;
+	lv_obj_t			*paletteTextArea;
+	lv_obj_t			*shapeLabel;
+	lv_obj_t			*shapeTextArea;
+	lv_obj_t			*complexityLabel;
+	lv_obj_t			*complexitySlider;
+	lv_obj_t			*closeButton;
+	lv_obj_t			*closeButtonLabel;
+};
+
 
 /*********************
 * ELEMENTS STRUCT
@@ -1355,6 +1378,7 @@ struct sElements {
 	struct sMessagePopup 		messagePopup;
 	struct sRollerPopup			rollerPopup;
   struct sKeyboardPopup   keyboardPopup;
+  struct sSplashPopup     splashPopup;
 };
 
 
@@ -1362,7 +1386,6 @@ struct sElements {
 * PAGES STRUCT
 *********************/
 struct sPages {
-	struct sHome				  home;
 	struct sMenu				  menu;
 	struct sProcesses			processes;
 	struct sSettings			settings;
@@ -1415,10 +1438,10 @@ LV_FONT_DECLARE(FilMachineFontIcons_15);
 LV_FONT_DECLARE(FilMachineFontIcons_20);
 LV_FONT_DECLARE(FilMachineFontIcons_30);
 LV_FONT_DECLARE(FilMachineFontIcons_40);
+LV_FONT_DECLARE(FilMachineFontIcons_50);
+LV_FONT_DECLARE(FilMachineFontIcons_60);
 LV_FONT_DECLARE(FilMachineFontIcons_100);
-
-/* Our Images */
-LV_IMG_DECLARE(splash_img);
+LV_FONT_DECLARE(lv_font_montserrat_64);
 
 /* HELPER UTILITIES Function Prototypes */
 // @file accessories.c
@@ -1441,6 +1464,8 @@ void drainPopupCreate(void);
 // @file element_selfcheckPopup.c
 void event_selfcheckPopup(lv_event_t *e);
 void selfcheckPopupCreate(void);
+// @file element_splashPopup.c
+void splashPopupCreate(void);
 // @file element_process.c
 void event_processElement(lv_event_t *e);
 void processElementCreate(processNode *newProcess, int32_t tempSize);
@@ -1463,9 +1488,6 @@ void initGlobals( void );
 // @file page_checkup.c
 void event_checkup(lv_event_t *e);
 void checkup(processNode *referenceProcess);
-// @file page_home.c
-void event_btn_start(lv_event_t *e);
-void homePage(void);
 // @file page_menu.c
 void event_tab_switch(lv_event_t *e);
 void menu(void);
@@ -1594,6 +1616,7 @@ uint8_t getRandomRotationInterval();
 uint8_t mapPercentageToValue(uint8_t percentage, uint8_t minPercent, uint8_t maxPercent);
 void pwmLedTest();
 void readConfigFile(const char *path, bool enableLog);
+void readSettingsOnly(const char *path);  /* Read just machineSettings — for splash boot */
 void writeConfigFile( const char *path, bool enableLog );
 bool copyAndRenameFile( const char* sourceFile, const char* destFile );
 uint16_t calculateFillTime(uint16_t capacityMl, uint8_t pumpSpeedPercent);

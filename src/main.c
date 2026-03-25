@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "page_splash.h"
 #include "SDL2/SDL.h"
 #include "FilMachine.h"
 #include "src/indev/lv_indev_private.h"   /* access gesture_limit / gesture_min_velocity */
@@ -560,6 +561,70 @@ static const char *sim_debug_dynamic_name(lv_obj_t *obj)
         }
     }
 
+    /* ---- Check the temporary step node (New Step popup, not yet in list) ---- */
+    if(gui.tempStepNode != NULL) {
+        sStepDetail *sd = gui.tempStepNode->step.stepDetails;
+        if(sd != NULL && sd->stepDetailParent != NULL) {
+            /* Determine process index for the label */
+            int tmp_proc_idx = 0;
+            processNode *tmp_parent = sd->parentProcess;
+            if(tmp_parent != NULL) {
+                int idx = 0;
+                for(processNode *p = gui.page.processes.processElementsList.start; p != NULL; p = p->next, ++idx) {
+                    if(p == tmp_parent) { tmp_proc_idx = idx; break; }
+                }
+            }
+            /* Check whether this temp node is already in the step list (edit mode).
+               If so, the loop above already handled it – skip to avoid duplicates. */
+            bool already_in_list = false;
+            if(tmp_parent != NULL && tmp_parent->process.processDetails != NULL) {
+                for(stepNode *s = tmp_parent->process.processDetails->stepElementsList.start; s != NULL; s = s->next) {
+                    if(s == gui.tempStepNode) { already_in_list = true; break; }
+                }
+            }
+            if(!already_in_list) {
+                const char *prefix_fmt = "process[%d].newStep.details.";
+                char prefix[80];
+                snprintf(prefix, sizeof(prefix), prefix_fmt, tmp_proc_idx);
+
+                #define TEMP_STEP_CHECK(member, label) \
+                    if(sd->member == obj) { snprintf(name_buf, sizeof(name_buf), "%s%s", prefix, label); return name_buf; }
+
+                TEMP_STEP_CHECK(stepDetailParent, "stepDetailParent")
+                TEMP_STEP_CHECK(mBoxStepPopupTitleLine, "mBoxStepPopupTitleLine")
+                TEMP_STEP_CHECK(stepDetailContainer, "stepDetailContainer")
+                TEMP_STEP_CHECK(stepDetailNameContainer, "stepDetailNameContainer")
+                TEMP_STEP_CHECK(stepDurationContainer, "stepDurationContainer")
+                TEMP_STEP_CHECK(stepTypeContainer, "stepTypeContainer")
+                TEMP_STEP_CHECK(stepSourceContainer, "stepSourceContainer")
+                TEMP_STEP_CHECK(stepDiscardAfterContainer, "stepDiscardAfterContainer")
+                TEMP_STEP_CHECK(stepDetailLabel, "stepDetailLabel")
+                TEMP_STEP_CHECK(stepDetailNamelLabel, "stepDetailNamelLabel")
+                TEMP_STEP_CHECK(stepDurationLabel, "stepDurationLabel")
+                TEMP_STEP_CHECK(stepDurationMinLabel, "stepDurationMinLabel")
+                TEMP_STEP_CHECK(stepSaveLabel, "stepSaveLabel")
+                TEMP_STEP_CHECK(stepCancelLabel, "stepCancelLabel")
+                TEMP_STEP_CHECK(stepTypeLabel, "stepTypeLabel")
+                TEMP_STEP_CHECK(stepSourceLabel, "stepSourceLabel")
+                TEMP_STEP_CHECK(stepTypeHelpIcon, "stepTypeHelpIcon")
+                TEMP_STEP_CHECK(stepSourceTempLabel, "stepSourceTempLabel")
+                TEMP_STEP_CHECK(stepDiscardAfterLabel, "stepDiscardAfterLabel")
+                TEMP_STEP_CHECK(stepSourceTempHelpIcon, "stepSourceTempHelpIcon")
+                TEMP_STEP_CHECK(stepSourceTempValue, "stepSourceTempValue")
+                TEMP_STEP_CHECK(stepDiscardAfterSwitch, "stepDiscardAfterSwitch")
+                TEMP_STEP_CHECK(stepSaveButton, "stepSaveButton")
+                TEMP_STEP_CHECK(stepCancelButton, "stepCancelButton")
+                TEMP_STEP_CHECK(stepSourceDropDownList, "stepSourceDropDownList")
+                TEMP_STEP_CHECK(stepTypeDropDownList, "stepTypeDropDownList")
+                TEMP_STEP_CHECK(stepDetailSecTextArea, "stepDetailSecTextArea")
+                TEMP_STEP_CHECK(stepDetailMinTextArea, "stepDetailMinTextArea")
+                TEMP_STEP_CHECK(stepDetailNameTextArea, "stepDetailNameTextArea")
+
+                #undef TEMP_STEP_CHECK
+            }
+        }
+    }
+
     return NULL;
 }
 
@@ -749,7 +814,9 @@ static void sim_debug_dump_obj(lv_obj_t *obj)
     lv_obj_get_coords(obj, &a);
     printf("\n[SIM-UI-DEBUG] %s\n", path);
     printf("  ptr=%p parent=%p class=%p\n", (void *)obj, (void *)lv_obj_get_parent(obj), (void *)lv_obj_get_class(obj));
-    printf("  x=%ld y=%ld w=%ld h=%ld\n", (long)a.x1, (long)a.y1,
+    int32_t rel_x = lv_obj_get_x(obj);
+    int32_t rel_y = lv_obj_get_y(obj);
+    printf("  x=%ld y=%ld w=%ld h=%ld\n", (long)rel_x, (long)rel_y,
            (long)(a.x2 - a.x1 + 1), (long)(a.y2 - a.y1 + 1));
     fflush(stdout);
 }
@@ -781,9 +848,11 @@ static void sim_debug_update_overlay(lv_display_t *display)
         lv_area_t a;
         sim_debug_build_path(sim_debug_hovered_obj, path, sizeof(path));
         lv_obj_get_coords(sim_debug_hovered_obj, &a);
+        int32_t rel_x = lv_obj_get_x(sim_debug_hovered_obj);
+        int32_t rel_y = lv_obj_get_y(sim_debug_hovered_obj);
         snprintf(info, sizeof(info), "%s\nx=%ld y=%ld w=%ld h=%ld",
                  path,
-                 (long)a.x1, (long)a.y1,
+                 (long)rel_x, (long)rel_y,
                  (long)(a.x2 - a.x1 + 1),
                  (long)(a.y2 - a.y1 + 1));
         lv_label_set_text(sim_debug_hover_label, info);
@@ -863,14 +932,12 @@ int main(int argc, char *argv[]) {
     /* Create shared keyboard */
     create_keyboard();
 
-    /* Launch the home page — the real FilMachine GUI! */
-    homePage();
+    /* Pre-load settings so splash knows if random mode is enabled */
+    readSettingsOnly(FILENAME_SAVE);
 
-    /* Load saved configuration from sd/FilMachine.cfg */
-    readConfigFile(FILENAME_SAVE, false);
-
-    /* Sync settings widgets with the values just loaded from config */
-    refreshSettingsUI();
+    /* Show splash screen — play button calls readConfigFile → menu → refreshSettingsUI */
+    lv_obj_t * splash = splash_screen_create();
+    lv_scr_load(splash);
 
     /* If no processes were loaded (missing or corrupt config), generate demo data */
     if (gui.page.processes.processElementsList.size == 0) {

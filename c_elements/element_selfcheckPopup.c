@@ -427,7 +427,7 @@ void selfcheckPopupCreate(void) {
 
     /* X close button (green, top-right) */
     sc->closeButton = lv_button_create(sc->selfcheckContainer);
-    lv_obj_set_size(sc->closeButton, BUTTON_POPUP_CLOSE_WIDTH, BUTTON_POPUP_CLOSE_HEIGHT);
+    lv_obj_set_size(sc->closeButton, ui->close_w, ui->close_h);
     lv_obj_align(sc->closeButton, LV_ALIGN_TOP_RIGHT, ui->close_x, ui->close_y);
     lv_obj_add_event_cb(sc->closeButton, event_selfcheckPopup, LV_EVENT_CLICKED, NULL);
     lv_obj_set_style_bg_color(sc->closeButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
@@ -449,26 +449,26 @@ void selfcheckPopupCreate(void) {
 
     sc->tasksLabel = lv_label_create(sc->leftPanel);
     lv_label_set_text(sc->tasksLabel, selfCheckTasks_text);
-    lv_obj_set_style_text_font(sc->tasksLabel, ui->tasks_font, 0);
+    lv_obj_set_style_text_font(sc->tasksLabel, ui->phase_title_font, 0);
     lv_obj_set_pos(sc->tasksLabel, ui->tasks_label_x, ui->tasks_label_y);
 
     for (int i = 0; i < SC_NUM_PHASES; i++) {
         int y = ui->phase_row_y + (i * ui->phase_row_gap);
-        sc->phaseIcon[i] = lv_label_create(sc->leftPanel);
-        lv_label_set_text(sc->phaseIcon[i], dotStep_icon);
-        lv_obj_set_style_text_font(sc->phaseIcon[i], ui->phase_icon_font, 0);
-        lv_obj_set_style_text_color(sc->phaseIcon[i], lv_color_hex(WHITE), 0);
-        lv_obj_set_pos(sc->phaseIcon[i], ui->phase_icon_x, y);
-        lv_obj_add_flag(sc->phaseIcon[i], LV_OBJ_FLAG_CLICKABLE);
-        lv_obj_add_event_cb(sc->phaseIcon[i], event_selfcheckPopup, LV_EVENT_CLICKED, NULL);
-
         sc->phaseNameLabel[i] = lv_label_create(sc->leftPanel);
         lv_label_set_text(sc->phaseNameLabel[i], phaseNames[i]);
         lv_obj_set_style_text_font(sc->phaseNameLabel[i], ui->phase_name_font, 0);
         lv_obj_set_style_text_color(sc->phaseNameLabel[i], lv_color_hex(WHITE), 0);
-        lv_obj_set_pos(sc->phaseNameLabel[i], ui->phase_name_x, y + 1);
+        lv_obj_set_pos(sc->phaseNameLabel[i], ui->phase_name_x, y);
         lv_obj_add_flag(sc->phaseNameLabel[i], LV_OBJ_FLAG_CLICKABLE);
         lv_obj_add_event_cb(sc->phaseNameLabel[i], event_selfcheckPopup, LV_EVENT_CLICKED, NULL);
+
+        sc->phaseIcon[i] = lv_label_create(sc->leftPanel);
+        lv_label_set_text(sc->phaseIcon[i], dotStep_icon);
+        lv_obj_set_style_text_font(sc->phaseIcon[i], ui->phase_icon_font, 0);
+        lv_obj_set_style_text_color(sc->phaseIcon[i], lv_color_hex(WHITE), 0);
+        lv_obj_align_to(sc->phaseIcon[i], sc->phaseNameLabel[i], LV_ALIGN_OUT_LEFT_MID, -6, 0);
+        lv_obj_add_flag(sc->phaseIcon[i], LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_add_event_cb(sc->phaseIcon[i], event_selfcheckPopup, LV_EVENT_CLICKED, NULL);
     }
 
     /* ── RIGHT PANEL ── */
@@ -508,8 +508,8 @@ void selfcheckPopupCreate(void) {
 
     /* Progress bar (thick, green, hidden by default) */
     sc->progressBar = lv_bar_create(sc->rightPanel);
-    lv_obj_set_size(sc->progressBar, ui->progress_w, ui->progress_h);
-    lv_obj_set_pos(sc->progressBar, 0, ui->progress_y);
+    lv_obj_set_size(sc->progressBar, ui->progress_bar_w, ui->progress_bar_h);
+    lv_obj_set_pos(sc->progressBar, 0, ui->progress_bar_y);
     lv_bar_set_range(sc->progressBar, 0, 100);
     lv_bar_set_value(sc->progressBar, 0, LV_ANIM_OFF);
     lv_obj_set_style_bg_color(sc->progressBar, lv_palette_darken(LV_PALETTE_GREY, 3), LV_PART_MAIN);
@@ -522,38 +522,38 @@ void selfcheckPopupCreate(void) {
     
     /* Stop (red) */
     sc->stopButton = lv_button_create(sc->rightPanel);
-    lv_obj_set_size(sc->stopButton, ui->button_w, ui->button_h);
-    lv_obj_set_pos(sc->stopButton, ui->stop_button_x, ui->button_y);
+    lv_obj_set_size(sc->stopButton, ui->control_btn_w, ui->control_btn_h);
+    lv_obj_set_pos(sc->stopButton, ui->stop_button_x, ui->control_btn_y);
     lv_obj_add_event_cb(sc->stopButton, event_selfcheckPopup, LV_EVENT_CLICKED, NULL);
     lv_obj_set_style_bg_color(sc->stopButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
 
     sc->stopButtonLabel = lv_label_create(sc->stopButton);
     lv_label_set_text(sc->stopButtonLabel, buttonStop_text);
-    lv_obj_set_style_text_font(sc->stopButtonLabel, ui->button_font, 0);
+    lv_obj_set_style_text_font(sc->stopButtonLabel, ui->control_btn_font, 0);
     lv_obj_align(sc->stopButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
     /* Start (green) */
     sc->startButton = lv_button_create(sc->rightPanel);
-    lv_obj_set_size(sc->startButton, ui->button_w, ui->button_h);
-    lv_obj_set_pos(sc->startButton, ui->start_button_x, ui->button_y);
+    lv_obj_set_size(sc->startButton, ui->control_btn_w, ui->control_btn_h);
+    lv_obj_set_pos(sc->startButton, ui->start_button_x, ui->control_btn_y);
     lv_obj_add_event_cb(sc->startButton, event_selfcheckPopup, LV_EVENT_CLICKED, NULL);
     lv_obj_set_style_bg_color(sc->startButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
 
     sc->startButtonLabel = lv_label_create(sc->startButton);
     lv_label_set_text(sc->startButtonLabel, buttonStart_text);
-    lv_obj_set_style_text_font(sc->startButtonLabel, ui->button_font, 0);
+    lv_obj_set_style_text_font(sc->startButtonLabel, ui->control_btn_font, 0);
     lv_obj_align(sc->startButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
     /* Advance (light blue) */
     sc->advanceButton = lv_button_create(sc->rightPanel);
-    lv_obj_set_size(sc->advanceButton, ui->button_w, ui->button_h);
-    lv_obj_set_pos(sc->advanceButton, ui->advance_button_x, ui->button_y);
+    lv_obj_set_size(sc->advanceButton, ui->control_btn_w, ui->control_btn_h);
+    lv_obj_set_pos(sc->advanceButton, ui->advance_button_x, ui->control_btn_y);
     lv_obj_add_event_cb(sc->advanceButton, event_selfcheckPopup, LV_EVENT_CLICKED, NULL);
     lv_obj_set_style_bg_color(sc->advanceButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
 
     sc->advanceButtonLabel = lv_label_create(sc->advanceButton);
     lv_label_set_text(sc->advanceButtonLabel, selfCheckNext_text);
-    lv_obj_set_style_text_font(sc->advanceButtonLabel, ui->tasks_font, 0);
+    lv_obj_set_style_text_font(sc->advanceButtonLabel, ui->advance_button_font, 0);
     lv_obj_align(sc->advanceButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
     /* Initialize */

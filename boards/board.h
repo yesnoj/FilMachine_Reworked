@@ -12,8 +12,6 @@
 
 #if defined(BOARD_JC4880P433)
     #include "board_jc4880p433.h"
-#elif defined(BOARD_JC4827W543)
-    #include "board_jc4827w543.h"
 #elif defined(BOARD_MAKERFABS_S3)
     #include "board_makerfabs_s3.h"
 #elif defined(BOARD_SIMULATOR)

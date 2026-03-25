@@ -11,6 +11,57 @@ extern struct gui_components gui;
 
 //ACCESSORY INCLUDES
 
+static uint16_t process_card_fill_time_seconds(void) {
+    uint8_t volume_index = gui.page.settings.settingsParams.chemistryVolume;
+    uint8_t tank_size = gui.page.settings.settingsParams.tankSize;
+    uint16_t table[2][3][2] = tanksSizesAndTimes;
+
+    if(volume_index < 1 || volume_index > 2) volume_index = 2;
+    if(tank_size < 1 || tank_size > 3) tank_size = 2;
+
+    return table[volume_index - 1][tank_size - 1][1];
+}
+
+static uint32_t process_card_overlap_credit_seconds(uint16_t fill_time_seconds) {
+    uint32_t overlap_pct = gui.page.settings.settingsParams.drainFillOverlapSetpoint;
+    if (overlap_pct > 100U) overlap_pct = 100U;
+    return (((uint32_t)fill_time_seconds * 2U) * overlap_pct) / 100U;
+}
+
+static uint32_t process_card_adjusted_processing_seconds(const stepNode *step, uint16_t fill_time_seconds) {
+    if(step == NULL || step->step.stepDetails == NULL) return 0U;
+
+    uint32_t recipe_seconds = ((uint32_t)step->step.stepDetails->data.timeMins * 60U) +
+                              (uint32_t)step->step.stepDetails->data.timeSecs;
+    uint32_t overlap_credit = process_card_overlap_credit_seconds(fill_time_seconds);
+
+    return (recipe_seconds > overlap_credit) ? (recipe_seconds - overlap_credit) : 0U;
+}
+
+static uint32_t process_card_estimated_runtime_seconds(const processNode *process) {
+    if(process == NULL || process->process.processDetails == NULL) return 0U;
+
+    uint16_t fill_time_seconds = process_card_fill_time_seconds();
+    uint32_t total_seconds = 0U;
+
+    for(stepNode *step = process->process.processDetails->stepElementsList.start; step != NULL; step = step->next) {
+        total_seconds += ((uint32_t)fill_time_seconds * 2U);
+        total_seconds += process_card_adjusted_processing_seconds(step, fill_time_seconds);
+    }
+
+    return total_seconds;
+}
+
+static void process_card_set_time_label(processNode *process) {
+    if(process == NULL || process->process.processTime == NULL || process->process.processDetails == NULL) return;
+
+    uint32_t estimated_seconds = process_card_estimated_runtime_seconds(process);
+    lv_label_set_text_fmt(process->process.processTime, "%" PRIu32 "m%" PRIu8 "s / ~%" PRIu32 "m%" PRIu32 "s",
+        process->process.processDetails->data.timeMins,
+        process->process.processDetails->data.timeSecs,
+        estimated_seconds / 60U,
+        estimated_seconds % 60U);
+}
 
 
 /******************************
@@ -233,6 +284,7 @@ void event_processElement(lv_event_t *e) {
       } else{
 			lv_label_set_text_fmt(currentNode->process.processTemp, "%"PRIi32"°F", convertCelsiusToFahrenheit(currentNode->process.processDetails->data.temp)); 
       }
+      process_card_set_time_label(currentNode);
     }
 
     if (code == LV_EVENT_DELETE) {
@@ -269,9 +321,9 @@ void processElementCreate(processNode *newProcess, int32_t tempSize) {
   newProcess->process.gestureHandled = false;
 
 	newProcess->process.processElement = lv_obj_create(gui.page.processes.processesListContainer);
-	newProcess->process.container_y = pe->y_start + ((positionIndex - 1) * pe->item_h);
-	lv_obj_set_pos(newProcess->process.processElement, pe->item_x, newProcess->process.container_y);
-  lv_obj_set_size(newProcess->process.processElement, pe->item_w, pe->item_h);
+	newProcess->process.container_y = pe->list_start_y + ((positionIndex - 1) * pe->card_h);
+	lv_obj_set_pos(newProcess->process.processElement, pe->card_x, newProcess->process.container_y);
+  lv_obj_set_size(newProcess->process.processElement, pe->card_w, pe->card_h);
 	lv_obj_remove_flag(newProcess->process.processElement, LV_OBJ_FLAG_SCROLLABLE);
 	lv_obj_set_style_border_opa(newProcess->process.processElement, LV_OPA_TRANSP, 0);
   lv_obj_add_event_cb(newProcess->process.processElement, event_processElement, LV_EVENT_GESTURE, newProcess);
@@ -303,8 +355,8 @@ void processElementCreate(processNode *newProcess, int32_t tempSize) {
 
         newProcess->process.processElementSummary = lv_obj_create(newProcess->process.processElement);
         //lv_obj_set_style_border_color(proc_ptr->process.processElementSummary, lv_color_hex(LV_PALETTE_ORANGE), 0);
-        lv_obj_set_size(newProcess->process.processElementSummary, pe->summary_w, pe->summary_h);
-        lv_obj_align(newProcess->process.processElementSummary, LV_ALIGN_TOP_LEFT, pe->summary_x, pe->summary_y);
+        lv_obj_set_size(newProcess->process.processElementSummary, pe->card_content_w, pe->card_content_h);
+        lv_obj_align(newProcess->process.processElementSummary, LV_ALIGN_TOP_LEFT, pe->card_content_x, pe->card_content_y);
         lv_obj_remove_flag(newProcess->process.processElementSummary, LV_OBJ_FLAG_SCROLLABLE);
         lv_obj_add_flag(newProcess->process.processElementSummary, LV_OBJ_FLAG_EVENT_BUBBLE);
         lv_obj_add_style(newProcess->process.processElementSummary, &newProcess->process.processStyle, 0);
@@ -319,7 +371,7 @@ void processElementCreate(processNode *newProcess, int32_t tempSize) {
 
         newProcess->process.processTempIcon = lv_label_create(newProcess->process.processElementSummary);
         lv_label_set_text(newProcess->process.processTempIcon, temp_icon);
-        lv_obj_set_style_text_font(newProcess->process.processTempIcon, pe->icon_font, 0);
+        lv_obj_set_style_text_font(newProcess->process.processTempIcon, pe->detail_icon_font, 0);
         //lv_obj_set_style_text_color(newProcess->process.tempIcon, lv_color_hex(GREY), LV_PART_MAIN);
         lv_obj_align(newProcess->process.processTempIcon, LV_ALIGN_LEFT_MID, pe->temp_icon_x, pe->temp_icon_y);
 
@@ -336,15 +388,16 @@ void processElementCreate(processNode *newProcess, int32_t tempSize) {
 
         newProcess->process.processTimeIcon = lv_label_create(newProcess->process.processElementSummary);
         lv_label_set_text(newProcess->process.processTimeIcon, clock_icon);
-        lv_obj_set_style_text_font(newProcess->process.processTimeIcon, pe->icon_font, 0);
+        lv_obj_set_style_text_font(newProcess->process.processTimeIcon, pe->detail_icon_font, 0);
         //lv_obj_set_style_text_color(newStep->step.stepTimeIcon, lv_color_hex(GREY), LV_PART_MAIN);
         lv_obj_align(newProcess->process.processTimeIcon, LV_ALIGN_LEFT_MID, pe->time_icon_x, pe->time_icon_y);
 
         newProcess->process.processTime = lv_label_create(newProcess->process.processElementSummary);    
-        lv_label_set_text_fmt(newProcess->process.processTime, "%"PRIu32"m%"PRIu8"s", newProcess->process.processDetails->data.timeMins, 
-          newProcess->process.processDetails->data.timeSecs); 
         lv_obj_set_style_text_font(newProcess->process.processTime, pe->detail_font, 0);
+        lv_obj_set_width(newProcess->process.processTime, pe->card_content_w - pe->time_value_x - 18);
+        lv_label_set_long_mode(newProcess->process.processTime, LV_LABEL_LONG_CLIP);
         lv_obj_align(newProcess->process.processTime, LV_ALIGN_LEFT_MID, pe->time_value_x, pe->time_value_y);
+        process_card_set_time_label(newProcess);
 
         newProcess->process.processTypeIcon = lv_label_create(newProcess->process.processElementSummary);
         lv_label_set_text(newProcess->process.processTypeIcon, newProcess->process.processDetails->data.filmType == BLACK_AND_WHITE_FILM ? blackwhite_icon : colorpalette_icon);
@@ -359,6 +412,7 @@ void processElementCreate(processNode *newProcess, int32_t tempSize) {
             lv_obj_add_flag(newProcess->process.processTemp, LV_OBJ_FLAG_HIDDEN);
             lv_obj_align(newProcess->process.processTimeIcon, LV_ALIGN_LEFT_MID, pe->time_icon_no_temp_x, pe->time_icon_y);
             lv_obj_align(newProcess->process.processTime, LV_ALIGN_LEFT_MID, pe->time_value_no_temp_x, pe->time_value_y);
+            lv_obj_set_width(newProcess->process.processTime, pe->card_content_w - pe->time_value_no_temp_x - 18);
           }
 
 

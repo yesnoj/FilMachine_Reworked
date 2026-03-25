@@ -3,10 +3,11 @@ idf_component_register(
         ../c_fonts
         ../c_elements
         ../c_pages
-        ../c_graphics
+        ../drivers
         ../main
     INCLUDE_DIRS
         include
+        ../drivers/include
         ../boards
     REQUIRES
         fatfs

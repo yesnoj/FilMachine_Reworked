@@ -70,27 +70,27 @@ static void initProcesses(void){
   *********************/
   //ADD NEW PROCESS BUTTON
   gui.page.processes.newProcessButton = lv_obj_create(gui.page.processes.processesSection);
-  lv_obj_align(gui.page.processes.newProcessButton, LV_ALIGN_TOP_LEFT, -20, ui->processes.header_btn_y);
-  lv_obj_set_size(gui.page.processes.newProcessButton, ui->processes.header_btn_w, ui->processes.header_btn_h); 
+  lv_obj_align(gui.page.processes.newProcessButton, LV_ALIGN_TOP_LEFT, ui->processes.add_btn_x, ui->processes.add_btn_y);
+  lv_obj_set_size(gui.page.processes.newProcessButton, ui->processes.add_btn_w, ui->processes.add_btn_h); 
   lv_obj_remove_flag(gui.page.processes.newProcessButton, LV_OBJ_FLAG_SCROLLABLE); 
   lv_obj_set_style_border_opa(gui.page.processes.newProcessButton, LV_OPA_TRANSP, 0);
   lv_obj_add_event_cb(gui.page.processes.newProcessButton, event_tabProcesses, LV_EVENT_CLICKED, gui.page.processes.newProcessButton);
 
-      //PROCESSES LABEL
-      gui.page.processes.processesLabel = lv_label_create(gui.page.processes.newProcessButton);         
-      lv_label_set_text(gui.page.processes.processesLabel, Processes_text); 
-      lv_obj_set_style_text_font(gui.page.processes.processesLabel, ui->processes.title_font, 0);              
-      lv_obj_align(gui.page.processes.processesLabel, LV_ALIGN_LEFT_MID, -5, 0);
+      //PROCESSES LABEL (direct child of section, like Settings/Tools)
+      gui.page.processes.processesLabel = lv_label_create(gui.page.processes.processesSection);
+      lv_label_set_text(gui.page.processes.processesLabel, Processes_text);
+      lv_obj_set_style_text_font(gui.page.processes.processesLabel, ui->processes.title_font, 0);
+      lv_obj_align(gui.page.processes.processesLabel, LV_ALIGN_TOP_LEFT, ui->processes.title_label_x, ui->processes.title_label_y);
 
       gui.page.processes.iconNewProcessLabel = lv_label_create(gui.page.processes.newProcessButton);          
       lv_label_set_text(gui.page.processes.iconNewProcessLabel, newProcess_icon);                  
-      lv_obj_set_style_text_font(gui.page.processes.iconNewProcessLabel, ui->processes.icon_font, 0);
-      lv_obj_align(gui.page.processes.iconNewProcessLabel, LV_ALIGN_RIGHT_MID, 5, 0);
+      lv_obj_set_style_text_font(gui.page.processes.iconNewProcessLabel, ui->processes.header_icon_font, 0);
+      lv_obj_align(gui.page.processes.iconNewProcessLabel, LV_ALIGN_RIGHT_MID, ui->processes.add_icon_x, 0);
 
 
   //FILTER BUTTON CONTAINER
   gui.page.processes.processFilterButton = lv_obj_create(gui.page.processes.processesSection);
-  lv_obj_align(gui.page.processes.processFilterButton, LV_ALIGN_TOP_RIGHT, 10, ui->processes.header_btn_y);
+  lv_obj_align(gui.page.processes.processFilterButton, LV_ALIGN_TOP_RIGHT, ui->processes.filter_btn_x, ui->processes.add_btn_y);
   lv_obj_set_size(gui.page.processes.processFilterButton, ui->processes.filter_btn_size, ui->processes.filter_btn_size); 
   lv_obj_remove_flag(gui.page.processes.processFilterButton, LV_OBJ_FLAG_SCROLLABLE); 
   lv_obj_set_style_border_opa(gui.page.processes.processFilterButton, LV_OPA_TRANSP, 0);
@@ -99,7 +99,7 @@ static void initProcesses(void){
       //FILTER BUTTON ICON
       gui.page.processes.iconFilterLabel = lv_label_create(gui.page.processes.processFilterButton);          
       lv_label_set_text(gui.page.processes.iconFilterLabel, funnel_icon);                  
-      lv_obj_set_style_text_font(gui.page.processes.iconFilterLabel, ui->processes.icon_font, 0);
+      lv_obj_set_style_text_font(gui.page.processes.iconFilterLabel, ui->processes.header_icon_font, 0);
       lv_obj_align(gui.page.processes.iconFilterLabel, LV_ALIGN_CENTER, 0, 0);
 
 
@@ -127,9 +127,10 @@ static void initProcesses(void){
 
   //lv_obj_update_layout(gui.page.processes.processesSection);
 
-  /* Ensure buttons and title line stay on top of the list container (Z-order) */
+  /* Ensure buttons, title label and title line stay on top of the list container (Z-order) */
   lv_obj_move_foreground(gui.page.processes.newProcessButton);
   lv_obj_move_foreground(gui.page.processes.processFilterButton);
+  lv_obj_move_foreground(gui.page.processes.processesLabel);
   lv_obj_move_foreground(gui.page.processes.sectionTitleLine);
 }
 

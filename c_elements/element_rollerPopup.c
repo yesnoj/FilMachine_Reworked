@@ -261,6 +261,9 @@ void event_Roller(lv_event_t * e)
               lv_msgbox_close(gui.element.rollerPopup.mBoxRollerParent);
               gui.element.rollerPopup.mBoxRollerParent = NULL;
               qSysAction(SAVE_PROCESS_CONFIG);
+              for(uint32_t i = 0; gui.page.processes.processesListContainer != NULL && i < lv_obj_get_child_cnt(gui.page.processes.processesListContainer); i++) {
+                  lv_obj_send_event(lv_obj_get_child(gui.page.processes.processesListContainer, i), LV_EVENT_REFRESH, NULL);
+              }
               return;
             }
             /* ── Settings Chemistry Container Capacity roller ── */
@@ -303,6 +306,43 @@ void event_Roller(lv_event_t * e)
               LV_LOG_USER("SET Chemistry Volume: %s (value=%lu)", vols[sel], (unsigned long)(sel + 1));
               gui.page.settings.settingsParams.chemistryVolume = sel + 1;
               lv_textarea_set_text(gui.page.settings.chemVolumeTextArea, vols[sel]);
+              isScrolled = false;
+              lv_style_reset(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
+              lv_style_reset(&gui.element.rollerPopup.style_roller);
+              lv_msgbox_close(gui.element.rollerPopup.mBoxRollerParent);
+              gui.element.rollerPopup.mBoxRollerParent = NULL;
+              qSysAction(SAVE_PROCESS_CONFIG);
+              for(uint32_t i = 0; gui.page.processes.processesListContainer != NULL && i < lv_obj_get_child_cnt(gui.page.processes.processesListContainer); i++) {
+                  lv_obj_send_event(lv_obj_get_child(gui.page.processes.processesListContainer, i), LV_EVENT_REFRESH, NULL);
+              }
+              return;
+            }
+            /* ── Splash Popup: Palette roller ── */
+            if((lv_obj_t *)data == gui.element.splashPopup.paletteTextArea) {
+              extern const char * const palette_display[];
+              uint32_t sel = isScrolled ? rollerSelected : lv_roller_get_selected(gui.element.rollerPopup.roller);
+              if(sel > 9) sel = 0;
+              LV_LOG_USER("SET Splash Palette: %lu", (unsigned long)sel);
+              gui.page.settings.settingsParams.splashPalette = (uint8_t)sel;
+              lv_textarea_set_text(gui.element.splashPopup.paletteTextArea, palette_display[sel]);
+              lv_textarea_set_cursor_pos(gui.element.splashPopup.paletteTextArea, 0);
+              isScrolled = false;
+              lv_style_reset(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
+              lv_style_reset(&gui.element.rollerPopup.style_roller);
+              lv_msgbox_close(gui.element.rollerPopup.mBoxRollerParent);
+              gui.element.rollerPopup.mBoxRollerParent = NULL;
+              qSysAction(SAVE_PROCESS_CONFIG);
+              return;
+            }
+            /* ── Splash Popup: Shape Style roller ── */
+            if((lv_obj_t *)data == gui.element.splashPopup.shapeTextArea) {
+              extern const char * const shape_display[];
+              uint32_t sel = isScrolled ? rollerSelected : lv_roller_get_selected(gui.element.rollerPopup.roller);
+              if(sel > 5) sel = 0;
+              LV_LOG_USER("SET Splash Shape: %lu", (unsigned long)sel);
+              gui.page.settings.settingsParams.splashShapeStyle = (uint8_t)sel;
+              lv_textarea_set_text(gui.element.splashPopup.shapeTextArea, shape_display[sel]);
+              lv_textarea_set_cursor_pos(gui.element.splashPopup.shapeTextArea, 0);
               isScrolled = false;
               lv_style_reset(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
               lv_style_reset(&gui.element.rollerPopup.style_roller);
@@ -373,10 +413,11 @@ void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *w
   *********************/
 
   gui.element.rollerPopup.mBoxRollerRollerContainer = lv_obj_create(gui.element.rollerPopup.mBoxRollerContainer);
-  lv_obj_align(gui.element.rollerPopup.mBoxRollerRollerContainer, LV_ALIGN_TOP_MID, 0, ui->inner_y);
-  lv_obj_set_size(gui.element.rollerPopup.mBoxRollerRollerContainer, ui_get_profile()->popups.roller_inner_w, ui_get_profile()->popups.roller_inner_h);
+  lv_obj_align(gui.element.rollerPopup.mBoxRollerRollerContainer, LV_ALIGN_TOP_MID, 0, ui->wheel_container_y);
+  lv_obj_set_size(gui.element.rollerPopup.mBoxRollerRollerContainer, ui_get_profile()->popups.roller_content_w, ui_get_profile()->popups.roller_content_h);
   lv_obj_set_style_border_opa(gui.element.rollerPopup.mBoxRollerRollerContainer, LV_OPA_TRANSP, 0);
   lv_obj_remove_flag(gui.element.rollerPopup.mBoxRollerContainer, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_remove_flag(gui.element.rollerPopup.mBoxRollerRollerContainer, LV_OBJ_FLAG_SCROLLABLE);
 
   
   lv_style_init(&gui.element.rollerPopup.style_roller);
@@ -394,20 +435,21 @@ void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *w
   lv_obj_set_height(gui.element.rollerPopup.roller, ui_get_profile()->popups.roller_wheel_h);
   lv_obj_align(gui.element.rollerPopup.roller, LV_ALIGN_CENTER, 0, ui_get_profile()->popups.roller_wheel_y);
   lv_obj_add_event_cb(gui.element.rollerPopup.roller, event_Roller, LV_EVENT_VALUE_CHANGED, NULL);
-  lv_obj_add_style(gui.element.rollerPopup.roller, &gui.element.rollerPopup.style_roller, LV_PART_SELECTED);  
+  lv_obj_add_style(gui.element.rollerPopup.roller, &gui.element.rollerPopup.style_roller, LV_PART_SELECTED);
+  lv_obj_set_style_text_font(gui.element.rollerPopup.roller, ui->wheel_normal_font, LV_PART_MAIN);
   lv_obj_set_style_border_color(gui.element.rollerPopup.roller, lv_color_hex(WHITE), LV_PART_MAIN);
 
 
    gui.element.rollerPopup.mBoxRollerButton = lv_button_create(gui.element.rollerPopup.mBoxRollerRollerContainer);
-   lv_obj_set_size(gui.element.rollerPopup.mBoxRollerButton, BUTTON_TUNE_WIDTH, BUTTON_TUNE_HEIGHT);
-   lv_obj_align(gui.element.rollerPopup.mBoxRollerButton, LV_ALIGN_BOTTOM_MID, 0 , ui->button_y);
+   lv_obj_set_size(gui.element.rollerPopup.mBoxRollerButton, ui->confirm_btn_w, ui->confirm_btn_h);
+   lv_obj_align(gui.element.rollerPopup.mBoxRollerButton, LV_ALIGN_BOTTOM_MID, 0 , ui->confirm_btn_y);
    lv_obj_add_event_cb(gui.element.rollerPopup.mBoxRollerButton, event_Roller, LV_EVENT_CLICKED, gui.element.rollerPopup.whoCallMe);
    lv_roller_set_selected(gui.element.rollerPopup.roller, currentVal, LV_ANIM_OFF);
         
 
          gui.element.rollerPopup.mBoxRollerButtonLabel = lv_label_create(gui.element.rollerPopup.mBoxRollerButton);         
          lv_label_set_text(gui.element.rollerPopup.mBoxRollerButtonLabel, tuneRollerButton_text); 
-         lv_obj_set_style_text_font(gui.element.rollerPopup.mBoxRollerButtonLabel, ui->button_font, 0);              
+         lv_obj_set_style_text_font(gui.element.rollerPopup.mBoxRollerButtonLabel, ui->confirm_btn_font, 0);              
          lv_obj_align(gui.element.rollerPopup.mBoxRollerButtonLabel, LV_ALIGN_CENTER, 0, 0);
 }
 

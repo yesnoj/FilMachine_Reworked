@@ -455,6 +455,33 @@ c_elements/element_selfcheckPopup.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_selfcheckPopup.c.s
 .PHONY : c_elements/element_selfcheckPopup.c.s
 
+c_elements/element_splashPopup.o: c_elements/element_splashPopup.c.o
+.PHONY : c_elements/element_splashPopup.o
+
+# target to build an object file
+c_elements/element_splashPopup.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_splashPopup.c.o
+.PHONY : c_elements/element_splashPopup.c.o
+
+c_elements/element_splashPopup.i: c_elements/element_splashPopup.c.i
+.PHONY : c_elements/element_splashPopup.i
+
+# target to preprocess a source file
+c_elements/element_splashPopup.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_splashPopup.c.i
+.PHONY : c_elements/element_splashPopup.c.i
+
+c_elements/element_splashPopup.s: c_elements/element_splashPopup.c.s
+.PHONY : c_elements/element_splashPopup.s
+
+# target to generate assembly for a file
+c_elements/element_splashPopup.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_splashPopup.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_splashPopup.c.s
+.PHONY : c_elements/element_splashPopup.c.s
+
 c_elements/element_step.o: c_elements/element_step.c.o
 .PHONY : c_elements/element_step.o
 
@@ -617,32 +644,86 @@ c_fonts/FilMachineFontIcons_40.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_40.c.s
 .PHONY : c_fonts/FilMachineFontIcons_40.c.s
 
-c_graphics/splash.o: c_graphics/splash.c.o
-.PHONY : c_graphics/splash.o
+c_fonts/FilMachineFontIcons_50.o: c_fonts/FilMachineFontIcons_50.c.o
+.PHONY : c_fonts/FilMachineFontIcons_50.o
 
 # target to build an object file
-c_graphics/splash.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_graphics/splash.c.o
-.PHONY : c_graphics/splash.c.o
+c_fonts/FilMachineFontIcons_50.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_50.c.o
+.PHONY : c_fonts/FilMachineFontIcons_50.c.o
 
-c_graphics/splash.i: c_graphics/splash.c.i
-.PHONY : c_graphics/splash.i
+c_fonts/FilMachineFontIcons_50.i: c_fonts/FilMachineFontIcons_50.c.i
+.PHONY : c_fonts/FilMachineFontIcons_50.i
 
 # target to preprocess a source file
-c_graphics/splash.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_graphics/splash.c.i
-.PHONY : c_graphics/splash.c.i
+c_fonts/FilMachineFontIcons_50.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_50.c.i
+.PHONY : c_fonts/FilMachineFontIcons_50.c.i
 
-c_graphics/splash.s: c_graphics/splash.c.s
-.PHONY : c_graphics/splash.s
+c_fonts/FilMachineFontIcons_50.s: c_fonts/FilMachineFontIcons_50.c.s
+.PHONY : c_fonts/FilMachineFontIcons_50.s
 
 # target to generate assembly for a file
-c_graphics/splash.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_graphics/splash.c.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_graphics/splash.c.s
-.PHONY : c_graphics/splash.c.s
+c_fonts/FilMachineFontIcons_50.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_50.c.s
+.PHONY : c_fonts/FilMachineFontIcons_50.c.s
+
+c_fonts/FilMachineFontIcons_60.o: c_fonts/FilMachineFontIcons_60.c.o
+.PHONY : c_fonts/FilMachineFontIcons_60.o
+
+# target to build an object file
+c_fonts/FilMachineFontIcons_60.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_60.c.o
+.PHONY : c_fonts/FilMachineFontIcons_60.c.o
+
+c_fonts/FilMachineFontIcons_60.i: c_fonts/FilMachineFontIcons_60.c.i
+.PHONY : c_fonts/FilMachineFontIcons_60.i
+
+# target to preprocess a source file
+c_fonts/FilMachineFontIcons_60.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_60.c.i
+.PHONY : c_fonts/FilMachineFontIcons_60.c.i
+
+c_fonts/FilMachineFontIcons_60.s: c_fonts/FilMachineFontIcons_60.c.s
+.PHONY : c_fonts/FilMachineFontIcons_60.s
+
+# target to generate assembly for a file
+c_fonts/FilMachineFontIcons_60.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_60.c.s
+.PHONY : c_fonts/FilMachineFontIcons_60.c.s
+
+c_fonts/lv_font_montserrat_64.o: c_fonts/lv_font_montserrat_64.c.o
+.PHONY : c_fonts/lv_font_montserrat_64.o
+
+# target to build an object file
+c_fonts/lv_font_montserrat_64.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/lv_font_montserrat_64.c.o
+.PHONY : c_fonts/lv_font_montserrat_64.c.o
+
+c_fonts/lv_font_montserrat_64.i: c_fonts/lv_font_montserrat_64.c.i
+.PHONY : c_fonts/lv_font_montserrat_64.i
+
+# target to preprocess a source file
+c_fonts/lv_font_montserrat_64.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/lv_font_montserrat_64.c.i
+.PHONY : c_fonts/lv_font_montserrat_64.c.i
+
+c_fonts/lv_font_montserrat_64.s: c_fonts/lv_font_montserrat_64.c.s
+.PHONY : c_fonts/lv_font_montserrat_64.s
+
+# target to generate assembly for a file
+c_fonts/lv_font_montserrat_64.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/lv_font_montserrat_64.c.s
+.PHONY : c_fonts/lv_font_montserrat_64.c.s
 
 c_pages/page_checkup.o: c_pages/page_checkup.c.o
 .PHONY : c_pages/page_checkup.o
@@ -670,33 +751,6 @@ c_pages/page_checkup.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_checkup.c.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_checkup.c.s
 .PHONY : c_pages/page_checkup.c.s
-
-c_pages/page_home.o: c_pages/page_home.c.o
-.PHONY : c_pages/page_home.o
-
-# target to build an object file
-c_pages/page_home.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_home.c.o
-.PHONY : c_pages/page_home.c.o
-
-c_pages/page_home.i: c_pages/page_home.c.i
-.PHONY : c_pages/page_home.i
-
-# target to preprocess a source file
-c_pages/page_home.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_home.c.i
-.PHONY : c_pages/page_home.c.i
-
-c_pages/page_home.s: c_pages/page_home.c.s
-.PHONY : c_pages/page_home.s
-
-# target to generate assembly for a file
-c_pages/page_home.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_home.c.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_home.c.s
-.PHONY : c_pages/page_home.c.s
 
 c_pages/page_menu.o: c_pages/page_menu.c.o
 .PHONY : c_pages/page_menu.o
@@ -806,6 +860,33 @@ c_pages/page_settings.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_settings.c.s
 .PHONY : c_pages/page_settings.c.s
 
+c_pages/page_splash.o: c_pages/page_splash.c.o
+.PHONY : c_pages/page_splash.o
+
+# target to build an object file
+c_pages/page_splash.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_splash.c.o
+.PHONY : c_pages/page_splash.c.o
+
+c_pages/page_splash.i: c_pages/page_splash.c.i
+.PHONY : c_pages/page_splash.i
+
+# target to preprocess a source file
+c_pages/page_splash.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_splash.c.i
+.PHONY : c_pages/page_splash.c.i
+
+c_pages/page_splash.s: c_pages/page_splash.c.s
+.PHONY : c_pages/page_splash.s
+
+# target to generate assembly for a file
+c_pages/page_splash.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_splash.c.s
+.PHONY : c_pages/page_splash.c.s
+
 c_pages/page_stepDetail.o: c_pages/page_stepDetail.c.o
 .PHONY : c_pages/page_stepDetail.o
 
@@ -860,6 +941,114 @@ c_pages/page_tools.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_pages/page_tools.c.s
 .PHONY : c_pages/page_tools.c.s
 
+drivers/ds18b20.o: drivers/ds18b20.c.o
+.PHONY : drivers/ds18b20.o
+
+# target to build an object file
+drivers/ds18b20.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/drivers/ds18b20.c.o
+.PHONY : drivers/ds18b20.c.o
+
+drivers/ds18b20.i: drivers/ds18b20.c.i
+.PHONY : drivers/ds18b20.i
+
+# target to preprocess a source file
+drivers/ds18b20.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/drivers/ds18b20.c.i
+.PHONY : drivers/ds18b20.c.i
+
+drivers/ds18b20.s: drivers/ds18b20.c.s
+.PHONY : drivers/ds18b20.s
+
+# target to generate assembly for a file
+drivers/ds18b20.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/drivers/ds18b20.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/drivers/ds18b20.c.s
+.PHONY : drivers/ds18b20.c.s
+
+drivers/mcp23017.o: drivers/mcp23017.c.o
+.PHONY : drivers/mcp23017.o
+
+# target to build an object file
+drivers/mcp23017.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/drivers/mcp23017.c.o
+.PHONY : drivers/mcp23017.c.o
+
+drivers/mcp23017.i: drivers/mcp23017.c.i
+.PHONY : drivers/mcp23017.i
+
+# target to preprocess a source file
+drivers/mcp23017.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/drivers/mcp23017.c.i
+.PHONY : drivers/mcp23017.c.i
+
+drivers/mcp23017.s: drivers/mcp23017.c.s
+.PHONY : drivers/mcp23017.s
+
+# target to generate assembly for a file
+drivers/mcp23017.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/drivers/mcp23017.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/drivers/mcp23017.c.s
+.PHONY : drivers/mcp23017.c.s
+
+drivers/pca9685.o: drivers/pca9685.c.o
+.PHONY : drivers/pca9685.o
+
+# target to build an object file
+drivers/pca9685.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/drivers/pca9685.c.o
+.PHONY : drivers/pca9685.c.o
+
+drivers/pca9685.i: drivers/pca9685.c.i
+.PHONY : drivers/pca9685.i
+
+# target to preprocess a source file
+drivers/pca9685.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/drivers/pca9685.c.i
+.PHONY : drivers/pca9685.c.i
+
+drivers/pca9685.s: drivers/pca9685.c.s
+.PHONY : drivers/pca9685.s
+
+# target to generate assembly for a file
+drivers/pca9685.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/drivers/pca9685.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/drivers/pca9685.c.s
+.PHONY : drivers/pca9685.c.s
+
+drivers/sensors.o: drivers/sensors.c.o
+.PHONY : drivers/sensors.o
+
+# target to build an object file
+drivers/sensors.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/drivers/sensors.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/drivers/sensors.c.o
+.PHONY : drivers/sensors.c.o
+
+drivers/sensors.i: drivers/sensors.c.i
+.PHONY : drivers/sensors.i
+
+# target to preprocess a source file
+drivers/sensors.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/drivers/sensors.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/drivers/sensors.c.i
+.PHONY : drivers/sensors.c.i
+
+drivers/sensors.s: drivers/sensors.c.s
+.PHONY : drivers/sensors.s
+
+# target to generate assembly for a file
+drivers/sensors.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/drivers/sensors.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/drivers/sensors.c.s
+.PHONY : drivers/sensors.c.s
+
 main/accessories.o: main/accessories.c.o
 .PHONY : main/accessories.o
 
@@ -887,60 +1076,6 @@ main/accessories.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/accessories.c.s
 .PHONY : main/accessories.c.s
 
-main/ds18b20.o: main/ds18b20.c.o
-.PHONY : main/ds18b20.o
-
-# target to build an object file
-main/ds18b20.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/ds18b20.c.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/ds18b20.c.o
-.PHONY : main/ds18b20.c.o
-
-main/ds18b20.i: main/ds18b20.c.i
-.PHONY : main/ds18b20.i
-
-# target to preprocess a source file
-main/ds18b20.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/ds18b20.c.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/ds18b20.c.i
-.PHONY : main/ds18b20.c.i
-
-main/ds18b20.s: main/ds18b20.c.s
-.PHONY : main/ds18b20.s
-
-# target to generate assembly for a file
-main/ds18b20.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/ds18b20.c.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/ds18b20.c.s
-.PHONY : main/ds18b20.c.s
-
-main/mcp23017.o: main/mcp23017.c.o
-.PHONY : main/mcp23017.o
-
-# target to build an object file
-main/mcp23017.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/mcp23017.c.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/mcp23017.c.o
-.PHONY : main/mcp23017.c.o
-
-main/mcp23017.i: main/mcp23017.c.i
-.PHONY : main/mcp23017.i
-
-# target to preprocess a source file
-main/mcp23017.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/mcp23017.c.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/mcp23017.c.i
-.PHONY : main/mcp23017.c.i
-
-main/mcp23017.s: main/mcp23017.c.s
-.PHONY : main/mcp23017.s
-
-# target to generate assembly for a file
-main/mcp23017.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/mcp23017.c.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/mcp23017.c.s
-.PHONY : main/mcp23017.c.s
-
 main/ota_update.o: main/ota_update.c.o
 .PHONY : main/ota_update.o
 
@@ -967,60 +1102,6 @@ main/ota_update.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/ota_update.c.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/ota_update.c.s
 .PHONY : main/ota_update.c.s
-
-main/pca9685.o: main/pca9685.c.o
-.PHONY : main/pca9685.o
-
-# target to build an object file
-main/pca9685.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/pca9685.c.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/pca9685.c.o
-.PHONY : main/pca9685.c.o
-
-main/pca9685.i: main/pca9685.c.i
-.PHONY : main/pca9685.i
-
-# target to preprocess a source file
-main/pca9685.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/pca9685.c.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/pca9685.c.i
-.PHONY : main/pca9685.c.i
-
-main/pca9685.s: main/pca9685.c.s
-.PHONY : main/pca9685.s
-
-# target to generate assembly for a file
-main/pca9685.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/pca9685.c.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/pca9685.c.s
-.PHONY : main/pca9685.c.s
-
-main/sensors.o: main/sensors.c.o
-.PHONY : main/sensors.o
-
-# target to build an object file
-main/sensors.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/sensors.c.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/sensors.c.o
-.PHONY : main/sensors.c.o
-
-main/sensors.i: main/sensors.c.i
-.PHONY : main/sensors.i
-
-# target to preprocess a source file
-main/sensors.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/sensors.c.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/sensors.c.i
-.PHONY : main/sensors.c.i
-
-main/sensors.s: main/sensors.c.s
-.PHONY : main/sensors.s
-
-# target to generate assembly for a file
-main/sensors.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/sensors.c.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/sensors.c.s
-.PHONY : main/sensors.c.s
 
 main/ui_profile.o: main/ui_profile.c.o
 .PHONY : main/ui_profile.o
@@ -1652,6 +1733,9 @@ help:
 	@echo "... c_elements/element_selfcheckPopup.o"
 	@echo "... c_elements/element_selfcheckPopup.i"
 	@echo "... c_elements/element_selfcheckPopup.s"
+	@echo "... c_elements/element_splashPopup.o"
+	@echo "... c_elements/element_splashPopup.i"
+	@echo "... c_elements/element_splashPopup.s"
 	@echo "... c_elements/element_step.o"
 	@echo "... c_elements/element_step.i"
 	@echo "... c_elements/element_step.s"
@@ -1670,15 +1754,18 @@ help:
 	@echo "... c_fonts/FilMachineFontIcons_40.o"
 	@echo "... c_fonts/FilMachineFontIcons_40.i"
 	@echo "... c_fonts/FilMachineFontIcons_40.s"
-	@echo "... c_graphics/splash.o"
-	@echo "... c_graphics/splash.i"
-	@echo "... c_graphics/splash.s"
+	@echo "... c_fonts/FilMachineFontIcons_50.o"
+	@echo "... c_fonts/FilMachineFontIcons_50.i"
+	@echo "... c_fonts/FilMachineFontIcons_50.s"
+	@echo "... c_fonts/FilMachineFontIcons_60.o"
+	@echo "... c_fonts/FilMachineFontIcons_60.i"
+	@echo "... c_fonts/FilMachineFontIcons_60.s"
+	@echo "... c_fonts/lv_font_montserrat_64.o"
+	@echo "... c_fonts/lv_font_montserrat_64.i"
+	@echo "... c_fonts/lv_font_montserrat_64.s"
 	@echo "... c_pages/page_checkup.o"
 	@echo "... c_pages/page_checkup.i"
 	@echo "... c_pages/page_checkup.s"
-	@echo "... c_pages/page_home.o"
-	@echo "... c_pages/page_home.i"
-	@echo "... c_pages/page_home.s"
 	@echo "... c_pages/page_menu.o"
 	@echo "... c_pages/page_menu.i"
 	@echo "... c_pages/page_menu.s"
@@ -1691,30 +1778,33 @@ help:
 	@echo "... c_pages/page_settings.o"
 	@echo "... c_pages/page_settings.i"
 	@echo "... c_pages/page_settings.s"
+	@echo "... c_pages/page_splash.o"
+	@echo "... c_pages/page_splash.i"
+	@echo "... c_pages/page_splash.s"
 	@echo "... c_pages/page_stepDetail.o"
 	@echo "... c_pages/page_stepDetail.i"
 	@echo "... c_pages/page_stepDetail.s"
 	@echo "... c_pages/page_tools.o"
 	@echo "... c_pages/page_tools.i"
 	@echo "... c_pages/page_tools.s"
+	@echo "... drivers/ds18b20.o"
+	@echo "... drivers/ds18b20.i"
+	@echo "... drivers/ds18b20.s"
+	@echo "... drivers/mcp23017.o"
+	@echo "... drivers/mcp23017.i"
+	@echo "... drivers/mcp23017.s"
+	@echo "... drivers/pca9685.o"
+	@echo "... drivers/pca9685.i"
+	@echo "... drivers/pca9685.s"
+	@echo "... drivers/sensors.o"
+	@echo "... drivers/sensors.i"
+	@echo "... drivers/sensors.s"
 	@echo "... main/accessories.o"
 	@echo "... main/accessories.i"
 	@echo "... main/accessories.s"
-	@echo "... main/ds18b20.o"
-	@echo "... main/ds18b20.i"
-	@echo "... main/ds18b20.s"
-	@echo "... main/mcp23017.o"
-	@echo "... main/mcp23017.i"
-	@echo "... main/mcp23017.s"
 	@echo "... main/ota_update.o"
 	@echo "... main/ota_update.i"
 	@echo "... main/ota_update.s"
-	@echo "... main/pca9685.o"
-	@echo "... main/pca9685.i"
-	@echo "... main/pca9685.s"
-	@echo "... main/sensors.o"
-	@echo "... main/sensors.i"
-	@echo "... main/sensors.s"
 	@echo "... main/ui_profile.o"
 	@echo "... main/ui_profile.i"
 	@echo "... main/ui_profile.s"

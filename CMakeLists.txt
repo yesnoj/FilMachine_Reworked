@@ -49,13 +49,12 @@ else()
 
     set(FILMACHINE_SOURCES
         main/accessories.c
-        main/mcp23017.c
-        main/ds18b20.c
-        main/pca9685.c
         main/ota_update.c
-        main/sensors.c
         main/ui_profile.c
-        c_pages/page_home.c
+        drivers/mcp23017.c
+        drivers/ds18b20.c
+        drivers/pca9685.c
+        drivers/sensors.c
         c_pages/page_menu.c
         c_pages/page_processes.c
         c_pages/page_processDetail.c
@@ -72,12 +71,16 @@ else()
         c_elements/element_drainPopup.c
         c_elements/element_selfcheckPopup.c
         c_elements/element_otaWifiPopup.c
+        c_elements/element_splashPopup.c
         c_fonts/FilMachineFontIcons_15.c
         c_fonts/FilMachineFontIcons_20.c
         c_fonts/FilMachineFontIcons_30.c
         c_fonts/FilMachineFontIcons_40.c
+        c_fonts/FilMachineFontIcons_50.c
+        c_fonts/FilMachineFontIcons_60.c
         c_fonts/FilMachineFontIcons_100.c
-        c_graphics/splash.c
+        c_fonts/lv_font_montserrat_64.c
+        c_pages/page_splash.c
     )
 
     add_executable(filmachine_sim
@@ -87,6 +90,7 @@ else()
 
     target_include_directories(filmachine_sim PRIVATE
         ${CMAKE_SOURCE_DIR}/main/include
+        ${CMAKE_SOURCE_DIR}/drivers/include
         ${CMAKE_SOURCE_DIR}/boards
         ${CMAKE_SOURCE_DIR}/src
         ${CMAKE_SOURCE_DIR}/stub
@@ -126,6 +130,7 @@ else()
 
     target_include_directories(filmachine_test PRIVATE
         ${CMAKE_SOURCE_DIR}/main/include
+        ${CMAKE_SOURCE_DIR}/drivers/include
         ${CMAKE_SOURCE_DIR}/boards
         ${CMAKE_SOURCE_DIR}/tests
         ${CMAKE_SOURCE_DIR}/stub

@@ -50,16 +50,17 @@ static void test_profile_values_match_original(void)
     /* Menu */
     TEST_ASSERT_EQ(ui->menu.tab_w, 130, "tab_w should be 130");
     TEST_ASSERT_EQ(ui->menu.tab_h, 97,  "tab_h should be 97");
-    TEST_ASSERT_EQ(ui->menu.tab1_y, 7,   "tab1_y should be 7");
-    TEST_ASSERT_EQ(ui->menu.tab2_y, 110, "tab2_y should be 110");
-    TEST_ASSERT_EQ(ui->menu.tab3_y, 213, "tab3_y should be 213");
+    TEST_ASSERT_EQ(ui->menu.tab_processes_y, 7,   "tab1_y should be 7");
+    TEST_ASSERT_EQ(ui->menu.tab_settings_y, 110, "tab2_y should be 110");
+    TEST_ASSERT_EQ(ui->menu.tab_tools_y, 213, "tab3_y should be 213");
     TEST_ASSERT_EQ(ui->menu.tab_label_offset_y, 29, "tab_label_offset_y should be 29 (original)");
 
     /* Process detail — values fixed during this session */
     TEST_ASSERT_EQ(ui->process_detail.steps_label_y, 25, "steps_label_y should be 25 (original)");
     TEST_ASSERT_EQ(ui->process_detail.info_label_y, 25,  "info_label_y should be 25 (original)");
     TEST_ASSERT_EQ(ui->process_detail.temp_ctrl_y, -17,  "temp_ctrl_y should be -17 (original)");
-    TEST_ASSERT_EQ(ui->process_detail.close_scale_pct, 120, "close_scale_pct should be 120 (original 1.2x)");
+    TEST_ASSERT_EQ(ui->process_detail.close_w, 36, "close_w should be 36 (was close_scale_pct 120% of 30)");
+    TEST_ASSERT_EQ(ui->process_detail.close_h, 36, "close_h should be 36 (was close_scale_pct 120% of 30)");
 
     /* Step detail */
     TEST_ASSERT(ui->step_detail.label_font != NULL, "step_detail.label_font must not be NULL");
@@ -108,8 +109,8 @@ static void test_profile_fonts_not_null(void)
 
     TEST_ASSERT_NOT_NULL(ui->home.error_icon_font, "home.error_icon_font");
     TEST_ASSERT_NOT_NULL(ui->home.error_text_font, "home.error_text_font");
-    TEST_ASSERT_NOT_NULL(ui->menu.icon_font, "menu.icon_font");
-    TEST_ASSERT_NOT_NULL(ui->menu.label_font, "menu.label_font");
+    TEST_ASSERT_NOT_NULL(ui->menu.tab_icon_font, "menu.tab_icon_font");
+    TEST_ASSERT_NOT_NULL(ui->menu.tab_label_font, "menu.tab_label_font");
     TEST_ASSERT_NOT_NULL(ui->processes.title_font, "processes.title_font");
     TEST_ASSERT_NOT_NULL(ui->settings.section_title_font, "settings.section_title_font");
     TEST_ASSERT_NOT_NULL(ui->process_detail.name_font, "process_detail.name_font");
@@ -171,9 +172,9 @@ static void test_board_constants(void)
     TEST_BEGIN("Board — constants are consistent");
 
     /* LCD resolution should match what we expect */
-    TEST_ASSERT(LCD_H_RES == 480, "LCD_H_RES should be 480");
-    TEST_ASSERT(LCD_V_RES == 320 || LCD_V_RES == 272,
-                "LCD_V_RES should be 320 or 272");
+    TEST_ASSERT(LCD_H_RES == 480 || LCD_H_RES == 800, "LCD_H_RES should be 480 or 800");
+    TEST_ASSERT(LCD_V_RES == 320 || LCD_V_RES == 480,
+                "LCD_V_RES should be 320 or 480");
 
     /* LVGL buffer size should be correct */
     int expected_buf = LCD_H_RES * (LCD_V_RES / 10) * 2;
