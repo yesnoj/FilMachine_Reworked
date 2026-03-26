@@ -163,7 +163,13 @@ DEFAULT_SETTINGS = {
     "pumpSpeed": 30,
     "chemContainerMl": 500,
     "wbContainerMl": 2000,
-    "chemistryVolume": 2
+    "chemistryVolume": 2,
+    "splashRandom": 0,
+    "splashPalette": 3,       # Deep Ocean
+    "splashShapeStyle": 0,
+    "splashComplexity": 40,
+    "splashSeed": 0,
+    "splashDefault": 1        # Use default splash
 }
 
 def random_settings():
@@ -182,7 +188,13 @@ def random_settings():
         "pumpSpeed": random.randrange(10, 101, 10),
         "chemContainerMl": random.choice([250, 500, 750, 1000, 1250, 1500]),
         "wbContainerMl": random.choice([1000, 1500, 2000, 2500, 3000]),
-        "chemistryVolume": random.randint(1, 2)
+        "chemistryVolume": random.randint(1, 2),
+        "splashRandom": random.randint(0, 1),
+        "splashPalette": random.randint(0, 9),
+        "splashShapeStyle": random.randint(0, 5),
+        "splashComplexity": random.randrange(20, 101, 20),
+        "splashSeed": random.randint(1, 0xFFFFFFFF),
+        "splashDefault": random.randint(0, 1)
     }
 
 # ═══════════════════════════════════════════════
@@ -278,6 +290,13 @@ def write_settings(f, s):
     f.write(struct.pack('<H', s["wbContainerMl"]))     # uint16_t
     f.write(struct.pack('<B', s["chemistryVolume"]))    # uint8_t (1=Low, 2=High)
     f.write(struct.pack('<b', s.get("tempCalibOffset", 0)))  # int8_t (tenths of degree)
+    # ── Splash screen settings ──
+    f.write(struct.pack('<B', s.get("splashRandom", 0)))      # bool
+    f.write(struct.pack('<B', s.get("splashPalette", 3)))     # uint8_t (0–9, default 3 = Deep Ocean)
+    f.write(struct.pack('<B', s.get("splashShapeStyle", 0)))  # uint8_t (0–5)
+    f.write(struct.pack('<B', s.get("splashComplexity", 40))) # uint8_t (20–100)
+    f.write(struct.pack('<L', s.get("splashSeed", 0)))        # uint32_t
+    f.write(struct.pack('<B', s.get("splashDefault", 1)))     # bool (default = true)
 
 def write_process(f, p):
     f.write(p["processNameString"].encode('ASCII').ljust(MAX_PROC_NAME_LEN + 1, b'\x00'))
