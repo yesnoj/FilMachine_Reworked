@@ -112,12 +112,13 @@ typedef enum {
 /* Splash screen strings */
 #define splashTitle_text						"FILMACHINE"
 #define splashSubtitle_text						"Digital Film Developer"
-#define splashVersion_text						"v2.1.0"
+#define splashVersion_text						softwareVersionValue_text
 
 /* Splash popup strings */
 #define splashPopupTitle_text					"Splash Screen"
 #define splashPopupUseDefault_text				"Use Default"
-#define splashPopupRandom_text					"Random"
+#define splashPopupRandom_text					"Random next boot"
+#define splashPopupRandomBtn_text				LV_SYMBOL_SHUFFLE " Random"
 #define splashPopupPalette_text					"Palette"
 #define splashPopupShapeStyle_text				"Shape Style"
 #define splashPopupComplexity_text				"Complexity"
@@ -247,6 +248,7 @@ typedef enum {
 #define wbContainerMl_text                  "Water bath size"
 #define wbContainerMlAlertMBox_text         "Set the water bath size\nin milliliters."
 #define chemistryVolume_text                "Chemistry size"
+#define splashScreenAlertMBox_text          "Customize the boot splash screen.\n\nUse Default: shows the standard\nDeep Ocean splash.\n\nRandom next boot: generates a\nnew random splash each boot.\n\nBoth off: choose Palette, Shape\nStyle and Complexity manually.\nPress Random to shuffle."
 #define chemistryVolumeAlertMBox_text       "Low: uses half the chemistry.\nHigh: fills the tank completely."
 #define chemistryVolumeList                 "Low\nHigh"
 #define chemContainerMlList                 "250\n500\n750\n1000\n1250\n1500"
@@ -1381,6 +1383,8 @@ struct sKeyboardPopup {
 struct sSplashPopup {
 	lv_obj_t			*splashPopupParent;
 	lv_obj_t			*splashContainer;
+	lv_obj_t			*previewContainer;      /* background preview of splash shapes */
+	lv_obj_t			*overlayRect;           /* semi-transparent dark overlay for readability */
 	lv_obj_t			*splashTitle;
 	lv_obj_t			*splashTitleLine;
 	lv_style_t			 style_titleLine;
@@ -1396,8 +1400,10 @@ struct sSplashPopup {
 	lv_obj_t			*shapeTextArea;
 	lv_obj_t			*complexityLabel;
 	lv_obj_t			*complexitySlider;
-	lv_obj_t			*closeButton;
-	lv_obj_t			*closeButtonLabel;
+	lv_obj_t			*randomButton;          /* bottom button — regenerate random splash */
+	lv_obj_t			*randomButtonLabel;
+	lv_obj_t			*xCloseButton;          /* X button top-right */
+	lv_obj_t			*xCloseButtonLabel;
 };
 
 
@@ -1479,6 +1485,16 @@ LV_FONT_DECLARE(FilMachineFontIcons_60);
 LV_FONT_DECLARE(FilMachineFontIcons_100);
 LV_FONT_DECLARE(lv_font_montserrat_64);
 
+/* Custom splash title fonts */
+LV_FONT_DECLARE(font_air_americana_48);
+LV_FONT_DECLARE(font_decaying_felt_pen_48);
+LV_FONT_DECLARE(font_ds_digital_48);
+LV_FONT_DECLARE(font_evanescent_48);
+LV_FONT_DECLARE(font_nerdropol_lattice_48);
+LV_FONT_DECLARE(font_retrolight_48);
+LV_FONT_DECLARE(font_tropical_leaves_48);
+LV_FONT_DECLARE(font_wishful_melisande_48);
+
 /* HELPER UTILITIES Function Prototypes */
 // @file accessories.c
 int32_t roundToStep(int32_t value, int32_t step);
@@ -1502,6 +1518,12 @@ void event_selfcheckPopup(lv_event_t *e);
 void selfcheckPopupCreate(void);
 // @file element_splashPopup.c
 void splashPopupCreate(void);
+void splashPopupRefreshPreview(void);
+// @file page_splash.c
+void splash_preview_generate(lv_obj_t *parent, uint32_t seed,
+                              uint8_t palette_idx, uint8_t shape_style,
+                              uint8_t complexity);
+void splash_standard_preview_generate(lv_obj_t *parent);
 // @file element_process.c
 void event_processElement(lv_event_t *e);
 void processElementCreate(processNode *newProcess, int32_t tempSize);

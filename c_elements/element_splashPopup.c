@@ -1,14 +1,23 @@
 /**
  * @file element_splashPopup.c
- * @brief Splash Screen configuration popup
+ * @brief Splash Screen configuration popup with live background preview
+ *
+ * Layout:
+ *   [X] close button                    (top-right, always visible)
+ *   Title "Splash Screen" + orange line
+ *   [Use Default]  switch
+ *   [Random next boot] switch           (hidden when Default ON)
+ *   Palette / Shape Style / Complexity  (hidden when Default ON or Random ON)
+ *   [Random] button                     (bottom-center, hidden when Default ON or Random ON)
+ *
+ * Background: live preview of splash shapes behind a dark overlay.
  *
  * Logic:
- *   - "Use Default" switch ON  → standard Deep Ocean splash, options hidden
- *   - "Random" switch ON       → randomize palette/shape/complexity/seed each boot,
- *                                 options hidden, Default switch disabled
- *   - Both OFF                 → user manually picks palette, shape, complexity
- *
- * Palette and Shape use the standard roller-popup pattern (same as Tank Size etc.)
+ *   - Default ON  → Random hidden, options hidden; preview = Deep Ocean
+ *   - Default OFF, Random ON  → options hidden; preview = random shapes (new seed each open)
+ *   - Default OFF, Random OFF → options+button visible; preview = custom params live
+ *   - Toggling Default ON forces Random OFF
+ *   - Toggling Random ON forces Default OFF
  */
 
 #include "FilMachine.h"
@@ -52,33 +61,69 @@ const char * const shape_display[] = {
 /* ── Forward declarations ── */
 static void event_splashPopup(lv_event_t * e);
 static void update_ui_state(void);
+static void refresh_preview_internal(void);
 
 /* ═══════════════════════════════════════════════
- * Update UI state based on Default / Random switches
+ * Regenerate preview background (shapes only)
+ * ═══════════════════════════════════════════════ */
+static void refresh_preview_internal(void)
+{
+    lv_obj_t *prev = gui.element.splashPopup.previewContainer;
+    if (!prev) return;
+
+    /* Delete old shapes */
+    lv_obj_clean(prev);
+
+    if (gui.page.settings.settingsParams.splashDefault) {
+        splash_standard_preview_generate(prev);
+    } else {
+        uint32_t seed = gui.page.settings.settingsParams.splashSeed;
+        if (seed == 0) seed = 1;
+        splash_preview_generate(
+            prev, seed,
+            gui.page.settings.settingsParams.splashPalette,
+            gui.page.settings.settingsParams.splashShapeStyle,
+            gui.page.settings.settingsParams.splashComplexity
+        );
+    }
+}
+
+/* Public wrapper — called by roller popup after palette/shape change */
+void splashPopupRefreshPreview(void)
+{
+    uint32_t tick = lv_tick_get();
+    gui.page.settings.settingsParams.splashSeed =
+        tick * 1103515245u + 12345u;
+    refresh_preview_internal();
+}
+
+/* ═══════════════════════════════════════════════
+ * Update visibility based on Default/Random state
+ *
+ *  Default ON  → hide Random row, hide options, hide random button
+ *  Default OFF, Random ON  → show Random row, hide options, hide random button
+ *  Default OFF, Random OFF → show Random row, show options, show random button
  * ═══════════════════════════════════════════════ */
 static void update_ui_state(void)
 {
     bool isDefault = gui.page.settings.settingsParams.splashDefault;
     bool isRandom  = gui.page.settings.settingsParams.splashRandom;
 
-    /* If Random is ON, force Default OFF and disable it */
-    if (isRandom) {
-        if (isDefault) {
-            gui.page.settings.settingsParams.splashDefault = false;
-            lv_obj_remove_state(gui.element.splashPopup.defaultSwitch, LV_STATE_CHECKED);
-        }
-        lv_obj_add_state(gui.element.splashPopup.defaultSwitch, LV_STATE_DISABLED);
-        lv_obj_add_flag(gui.element.splashPopup.optionsContainer, LV_OBJ_FLAG_HIDDEN);
+    /* Random switch row (= parent of randomSwitch): visible when Default is OFF */
+    lv_obj_t *rnd_row = lv_obj_get_parent(gui.element.splashPopup.randomSwitch);
+    if (isDefault) {
+        lv_obj_add_flag(rnd_row, LV_OBJ_FLAG_HIDDEN);
     } else {
-        lv_obj_remove_state(gui.element.splashPopup.defaultSwitch, LV_STATE_DISABLED);
+        lv_obj_remove_flag(rnd_row, LV_OBJ_FLAG_HIDDEN);
+    }
 
-        if (isDefault) {
-            /* Default ON → hide options */
-            lv_obj_add_flag(gui.element.splashPopup.optionsContainer, LV_OBJ_FLAG_HIDDEN);
-        } else {
-            /* Both OFF → show options for manual pick */
-            lv_obj_remove_flag(gui.element.splashPopup.optionsContainer, LV_OBJ_FLAG_HIDDEN);
-        }
+    /* Options + random button: visible when Default OFF AND Random OFF */
+    if (isDefault || isRandom) {
+        lv_obj_add_flag(gui.element.splashPopup.optionsContainer, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(gui.element.splashPopup.randomButton, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_remove_flag(gui.element.splashPopup.optionsContainer, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_remove_flag(gui.element.splashPopup.randomButton, LV_OBJ_FLAG_HIDDEN);
     }
 }
 
@@ -92,17 +137,57 @@ static void event_splashPopup(lv_event_t * e)
 
     /* ── Default switch toggled ── */
     if (target == gui.element.splashPopup.defaultSwitch && code == LV_EVENT_VALUE_CHANGED) {
-        gui.page.settings.settingsParams.splashDefault =
-            lv_obj_has_state(target, LV_STATE_CHECKED);
+        bool checked = lv_obj_has_state(target, LV_STATE_CHECKED);
+        gui.page.settings.settingsParams.splashDefault = checked;
+        /* Default ON → force Random OFF */
+        if (checked) {
+            gui.page.settings.settingsParams.splashRandom = false;
+            lv_obj_remove_state(gui.element.splashPopup.randomSwitch, LV_STATE_CHECKED);
+        }
         update_ui_state();
+        refresh_preview_internal();
         qSysAction(SAVE_PROCESS_CONFIG);
     }
 
     /* ── Random switch toggled ── */
     if (target == gui.element.splashPopup.randomSwitch && code == LV_EVENT_VALUE_CHANGED) {
-        gui.page.settings.settingsParams.splashRandom =
-            lv_obj_has_state(target, LV_STATE_CHECKED);
+        bool checked = lv_obj_has_state(target, LV_STATE_CHECKED);
+        gui.page.settings.settingsParams.splashRandom = checked;
+        /* Random ON → force Default OFF */
+        if (checked) {
+            gui.page.settings.settingsParams.splashDefault = false;
+            lv_obj_remove_state(gui.element.splashPopup.defaultSwitch, LV_STATE_CHECKED);
+        }
         update_ui_state();
+        refresh_preview_internal();
+        qSysAction(SAVE_PROCESS_CONFIG);
+    }
+
+    /* ── Random button clicked → randomise params for custom mode ── */
+    if (target == gui.element.splashPopup.randomButton && code == LV_EVENT_CLICKED) {
+        uint32_t tick = lv_tick_get();
+        uint32_t rng  = tick * 1103515245u + 12345u;
+
+        uint8_t rpal = (uint8_t)(rng % PALETTE_DISPLAY_COUNT);
+        rng = rng * 1103515245u + 12345u;
+        uint8_t rsty = (uint8_t)(rng % SHAPE_DISPLAY_COUNT);
+        rng = rng * 1103515245u + 12345u;
+        uint8_t rcmx = (uint8_t)(((rng % 5) + 1) * 20);  /* 20,40,60,80,100 */
+        rng = rng * 1103515245u + 12345u;
+
+        gui.page.settings.settingsParams.splashPalette    = rpal;
+        gui.page.settings.settingsParams.splashShapeStyle = rsty;
+        gui.page.settings.settingsParams.splashComplexity = rcmx;
+        gui.page.settings.settingsParams.splashSeed       = rng;
+
+        /* Update UI controls */
+        if (rpal < PALETTE_DISPLAY_COUNT)
+            lv_textarea_set_text(gui.element.splashPopup.paletteTextArea, palette_display[rpal]);
+        if (rsty < SHAPE_DISPLAY_COUNT)
+            lv_textarea_set_text(gui.element.splashPopup.shapeTextArea, shape_display[rsty]);
+        lv_slider_set_value(gui.element.splashPopup.complexitySlider, rcmx, LV_ANIM_OFF);
+
+        refresh_preview_internal();
         qSysAction(SAVE_PROCESS_CONFIG);
     }
 
@@ -122,23 +207,27 @@ static void event_splashPopup(lv_event_t * e)
                           gui.page.settings.settingsParams.splashShapeStyle, ORANGE);
     }
 
-    /* ── Complexity slider (20–100, step 20) ── */
+    /* ── Complexity slider ── */
     if (target == gui.element.splashPopup.complexitySlider) {
         if (code == LV_EVENT_VALUE_CHANGED) {
             int32_t val = lv_slider_get_value(target);
             val = roundToStep(val, 20);
-            if (val < 20) val = 20;
+            if (val < 20)  val = 20;
             if (val > 100) val = 100;
             lv_slider_set_value(target, val, LV_ANIM_OFF);
             gui.page.settings.settingsParams.splashComplexity = (uint8_t)val;
         }
         if (code == LV_EVENT_RELEASED) {
+            uint32_t tick = lv_tick_get();
+            gui.page.settings.settingsParams.splashSeed =
+                tick * 1103515245u + 12345u;
+            refresh_preview_internal();
             qSysAction(SAVE_PROCESS_CONFIG);
         }
     }
 
-    /* ── Close button ── */
-    if (target == gui.element.splashPopup.closeButton && code == LV_EVENT_CLICKED) {
+    /* ── X close button (top-right) ── */
+    if (target == gui.element.splashPopup.xCloseButton && code == LV_EVENT_CLICKED) {
         lv_obj_add_flag(gui.element.splashPopup.splashPopupParent, LV_OBJ_FLAG_HIDDEN);
     }
 }
@@ -153,15 +242,59 @@ void splashPopupCreate(void)
 
     if (gui.element.splashPopup.splashPopupParent != NULL) return;
 
+    /* Ensure valid defaults for preview */
+    if (gui.page.settings.settingsParams.splashSeed == 0 &&
+        !gui.page.settings.settingsParams.splashDefault) {
+        gui.page.settings.settingsParams.splashSeed =
+            lv_tick_get() * 1103515245u + 12345u;
+    }
+    if (gui.page.settings.settingsParams.splashComplexity == 0) {
+        gui.page.settings.settingsParams.splashComplexity = 40;
+    }
+
+    int popup_w = ui_get_profile()->popups.splash_w;
+    int popup_h = ui_get_profile()->popups.splash_h;
+
     /* ── Backdrop + main container ── */
     createPopupBackdrop(
         &gui.element.splashPopup.splashPopupParent,
         &gui.element.splashPopup.splashContainer,
-        ui_get_profile()->popups.splash_w,
-        ui_get_profile()->popups.splash_h
+        popup_w, popup_h
     );
 
     lv_obj_t *cont = gui.element.splashPopup.splashContainer;
+
+    /* Clip children to the rounded corners */
+    lv_obj_set_style_clip_corner(cont, true, 0);
+
+    /* Get the default padding applied by the theme — preview/overlay
+     * use negative offsets to extend into this padding area so the
+     * background fills the entire popup including rounded corners,
+     * while all UI elements keep their existing positions. */
+    int pad_l = lv_obj_get_style_pad_left(cont, 0);
+    int pad_t = lv_obj_get_style_pad_top(cont, 0);
+
+    /* ── Preview container (fills entire popup, first child = lowest z-order) ── */
+    gui.element.splashPopup.previewContainer = lv_obj_create(cont);
+    lv_obj_remove_style_all(gui.element.splashPopup.previewContainer);
+    lv_obj_set_size(gui.element.splashPopup.previewContainer, popup_w, popup_h);
+    lv_obj_set_pos(gui.element.splashPopup.previewContainer, -pad_l, -pad_t);
+    lv_obj_remove_flag(gui.element.splashPopup.previewContainer, LV_OBJ_FLAG_SCROLLABLE);
+
+    /* Generate initial preview */
+    refresh_preview_internal();
+
+    /* ── Dark overlay for readability ── */
+    gui.element.splashPopup.overlayRect = lv_obj_create(cont);
+    lv_obj_remove_style_all(gui.element.splashPopup.overlayRect);
+    lv_obj_set_size(gui.element.splashPopup.overlayRect, popup_w, popup_h);
+    lv_obj_set_pos(gui.element.splashPopup.overlayRect, -pad_l, -pad_t);
+    lv_obj_set_style_bg_color(gui.element.splashPopup.overlayRect,
+                              lv_color_hex(0x000000), 0);
+    lv_obj_set_style_bg_opa(gui.element.splashPopup.overlayRect,
+                            (uint8_t)ui->overlay_opa, 0);
+    lv_obj_remove_flag(gui.element.splashPopup.overlayRect, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_remove_flag(gui.element.splashPopup.overlayRect, LV_OBJ_FLAG_CLICKABLE);
 
     /* ── Title ── */
     gui.element.splashPopup.splashTitle = lv_label_create(cont);
@@ -205,26 +338,25 @@ void splashPopupCreate(void)
                               lv_color_hex(ORANGE), LV_PART_KNOB | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(gui.element.splashPopup.defaultSwitch,
                               lv_color_hex(ORANGE_DARK), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    if (gui.page.settings.settingsParams.splashDefault) {
+    if (gui.page.settings.settingsParams.splashDefault)
         lv_obj_add_state(gui.element.splashPopup.defaultSwitch, LV_STATE_CHECKED);
-    }
     lv_obj_add_event_cb(gui.element.splashPopup.defaultSwitch,
                         event_splashPopup, LV_EVENT_VALUE_CHANGED,
                         gui.element.splashPopup.defaultSwitch);
 
     /* ── Random switch row ── */
-    lv_obj_t *sw_row = lv_obj_create(cont);
-    lv_obj_remove_style_all(sw_row);
-    lv_obj_set_size(sw_row, ui->switch_row_w, ui->row_h);
-    lv_obj_align(sw_row, LV_ALIGN_TOP_MID, ui->switch_row_x, ui->random_switch_y);
-    lv_obj_remove_flag(sw_row, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_t *rnd_row = lv_obj_create(cont);
+    lv_obj_remove_style_all(rnd_row);
+    lv_obj_set_size(rnd_row, ui->switch_row_w, ui->row_h);
+    lv_obj_align(rnd_row, LV_ALIGN_TOP_MID, ui->switch_row_x, ui->random_switch_y);
+    lv_obj_remove_flag(rnd_row, LV_OBJ_FLAG_SCROLLABLE);
 
-    gui.element.splashPopup.randomLabel = lv_label_create(sw_row);
+    gui.element.splashPopup.randomLabel = lv_label_create(rnd_row);
     lv_label_set_text(gui.element.splashPopup.randomLabel, splashPopupRandom_text);
     lv_obj_set_style_text_font(gui.element.splashPopup.randomLabel, ui->label_font, 0);
     lv_obj_align(gui.element.splashPopup.randomLabel, LV_ALIGN_LEFT_MID, ui->label_x, ui->switch_label_y);
 
-    gui.element.splashPopup.randomSwitch = lv_switch_create(sw_row);
+    gui.element.splashPopup.randomSwitch = lv_switch_create(rnd_row);
     lv_obj_set_size(gui.element.splashPopup.randomSwitch,
                     ui_s->toggle_switch_w, ui_s->toggle_switch_h);
     lv_obj_align(gui.element.splashPopup.randomSwitch, LV_ALIGN_RIGHT_MID, ui->switch_x, ui->switch_y);
@@ -234,14 +366,13 @@ void splashPopupCreate(void)
                               lv_color_hex(ORANGE), LV_PART_KNOB | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(gui.element.splashPopup.randomSwitch,
                               lv_color_hex(ORANGE_DARK), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    if (gui.page.settings.settingsParams.splashRandom) {
+    if (gui.page.settings.settingsParams.splashRandom)
         lv_obj_add_state(gui.element.splashPopup.randomSwitch, LV_STATE_CHECKED);
-    }
     lv_obj_add_event_cb(gui.element.splashPopup.randomSwitch,
                         event_splashPopup, LV_EVENT_VALUE_CHANGED,
                         gui.element.splashPopup.randomSwitch);
 
-    /* ── Options container (visible only when Random=OFF and Default=OFF) ── */
+    /* ── Options container (Palette / Shape Style / Complexity) ── */
     gui.element.splashPopup.optionsContainer = lv_obj_create(cont);
     lv_obj_set_size(gui.element.splashPopup.optionsContainer, ui->options_w, ui->options_h);
     lv_obj_align(gui.element.splashPopup.optionsContainer,
@@ -254,7 +385,7 @@ void splashPopupCreate(void)
     lv_obj_t *opts = gui.element.splashPopup.optionsContainer;
     int y = 0;
 
-    /* ── Row 1: Palette (text area → opens roller popup) ── */
+    /* ── Row 1: Palette ── */
     gui.element.splashPopup.paletteLabel = lv_label_create(opts);
     lv_label_set_text(gui.element.splashPopup.paletteLabel, splashPopupPalette_text);
     lv_obj_set_style_text_font(gui.element.splashPopup.paletteLabel, ui->label_font, 0);
@@ -272,11 +403,12 @@ void splashPopupCreate(void)
     lv_obj_set_style_border_color(gui.element.splashPopup.paletteTextArea,
                                   lv_color_hex(ORANGE), 0);
     lv_obj_set_style_opa(gui.element.splashPopup.paletteTextArea, LV_OPA_TRANSP, LV_PART_CURSOR);
+    lv_obj_set_style_width(gui.element.splashPopup.paletteTextArea, 0, LV_PART_CURSOR);
     {
         uint8_t idx = gui.page.settings.settingsParams.splashPalette;
         if (idx >= PALETTE_DISPLAY_COUNT) idx = 0;
         lv_textarea_set_text(gui.element.splashPopup.paletteTextArea, palette_display[idx]);
-        lv_textarea_set_cursor_pos(gui.element.splashPopup.paletteTextArea, 0);
+        lv_textarea_set_cursor_pos(gui.element.splashPopup.paletteTextArea, LV_TEXTAREA_CURSOR_LAST);
     }
     lv_obj_add_event_cb(gui.element.splashPopup.paletteTextArea,
                         event_splashPopup, LV_EVENT_FOCUSED,
@@ -284,7 +416,7 @@ void splashPopupCreate(void)
 
     y += ui->row_h + ui->row_gap;
 
-    /* ── Row 2: Shape Style (text area → opens roller popup) ── */
+    /* ── Row 2: Shape Style ── */
     gui.element.splashPopup.shapeLabel = lv_label_create(opts);
     lv_label_set_text(gui.element.splashPopup.shapeLabel, splashPopupShapeStyle_text);
     lv_obj_set_style_text_font(gui.element.splashPopup.shapeLabel, ui->label_font, 0);
@@ -302,11 +434,12 @@ void splashPopupCreate(void)
     lv_obj_set_style_border_color(gui.element.splashPopup.shapeTextArea,
                                   lv_color_hex(ORANGE), 0);
     lv_obj_set_style_opa(gui.element.splashPopup.shapeTextArea, LV_OPA_TRANSP, LV_PART_CURSOR);
+    lv_obj_set_style_width(gui.element.splashPopup.shapeTextArea, 0, LV_PART_CURSOR);
     {
         uint8_t idx = gui.page.settings.settingsParams.splashShapeStyle;
         if (idx >= SHAPE_DISPLAY_COUNT) idx = 0;
         lv_textarea_set_text(gui.element.splashPopup.shapeTextArea, shape_display[idx]);
-        lv_textarea_set_cursor_pos(gui.element.splashPopup.shapeTextArea, 0);
+        lv_textarea_set_cursor_pos(gui.element.splashPopup.shapeTextArea, LV_TEXTAREA_CURSOR_LAST);
     }
     lv_obj_add_event_cb(gui.element.splashPopup.shapeTextArea,
                         event_splashPopup, LV_EVENT_FOCUSED,
@@ -327,7 +460,7 @@ void splashPopupCreate(void)
     {
         int32_t val = gui.page.settings.settingsParams.splashComplexity;
         val = roundToStep(val, 20);
-        if (val < 20) val = 20;
+        if (val < 20)  val = 20;
         if (val > 100) val = 100;
         lv_slider_set_value(gui.element.splashPopup.complexitySlider, val, LV_ANIM_OFF);
     }
@@ -344,22 +477,39 @@ void splashPopupCreate(void)
                         event_splashPopup, LV_EVENT_RELEASED,
                         gui.element.splashPopup.complexitySlider);
 
-    /* ── Close button ── */
-    gui.element.splashPopup.closeButton = lv_button_create(cont);
-    lv_obj_set_size(gui.element.splashPopup.closeButton, ui->close_btn_w, ui->close_btn_h);
-    lv_obj_align(gui.element.splashPopup.closeButton,
-                 LV_ALIGN_BOTTOM_MID, ui->close_btn_x, -(ui->close_btn_y));
-    lv_obj_set_style_bg_color(gui.element.splashPopup.closeButton,
-                              lv_color_hex(ORANGE), LV_PART_MAIN);
-    lv_obj_add_event_cb(gui.element.splashPopup.closeButton,
+    /* ── X close button (top-right, like other popups) ── */
+    gui.element.splashPopup.xCloseButton = lv_button_create(cont);
+    lv_obj_set_size(gui.element.splashPopup.xCloseButton, ui->x_close_w, ui->x_close_h);
+    lv_obj_align(gui.element.splashPopup.xCloseButton,
+                 LV_ALIGN_TOP_RIGHT, ui->x_close_x, ui->x_close_y);
+    lv_obj_add_event_cb(gui.element.splashPopup.xCloseButton,
                         event_splashPopup, LV_EVENT_CLICKED,
-                        gui.element.splashPopup.closeButton);
+                        gui.element.splashPopup.xCloseButton);
+    lv_obj_set_style_bg_color(gui.element.splashPopup.xCloseButton,
+                              lv_color_hex(ORANGE), LV_PART_MAIN);
+    lv_obj_move_foreground(gui.element.splashPopup.xCloseButton);
 
-    gui.element.splashPopup.closeButtonLabel = lv_label_create(gui.element.splashPopup.closeButton);
-    lv_label_set_text(gui.element.splashPopup.closeButtonLabel, buttonClose_text);
-    lv_obj_set_style_text_font(gui.element.splashPopup.closeButtonLabel, ui->button_font, 0);
-    lv_obj_center(gui.element.splashPopup.closeButtonLabel);
+    gui.element.splashPopup.xCloseButtonLabel = lv_label_create(gui.element.splashPopup.xCloseButton);
+    lv_label_set_text(gui.element.splashPopup.xCloseButtonLabel, closePopup_icon);
+    lv_obj_set_style_text_font(gui.element.splashPopup.xCloseButtonLabel, ui->close_icon_font, 0);
+    lv_obj_align(gui.element.splashPopup.xCloseButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
-    /* ── Initial visibility ── */
+    /* ── Random button (bottom-center, replaces old Close) ── */
+    gui.element.splashPopup.randomButton = lv_button_create(cont);
+    lv_obj_set_size(gui.element.splashPopup.randomButton, ui->close_btn_w, ui->close_btn_h);
+    lv_obj_align(gui.element.splashPopup.randomButton,
+                 LV_ALIGN_BOTTOM_MID, ui->close_btn_x, -(ui->close_btn_y));
+    lv_obj_set_style_bg_color(gui.element.splashPopup.randomButton,
+                              lv_color_hex(ORANGE), LV_PART_MAIN);
+    lv_obj_add_event_cb(gui.element.splashPopup.randomButton,
+                        event_splashPopup, LV_EVENT_CLICKED,
+                        gui.element.splashPopup.randomButton);
+
+    gui.element.splashPopup.randomButtonLabel = lv_label_create(gui.element.splashPopup.randomButton);
+    lv_label_set_text(gui.element.splashPopup.randomButtonLabel, splashPopupRandomBtn_text);
+    lv_obj_set_style_text_font(gui.element.splashPopup.randomButtonLabel, ui->button_font, 0);
+    lv_obj_center(gui.element.splashPopup.randomButtonLabel);
+
+    /* ── Apply initial visibility ── */
     update_ui_state();
 }

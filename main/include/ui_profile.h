@@ -899,37 +899,43 @@ typedef struct {
     int title_y;
     int title_line_y;
     int default_switch_y;
-    int random_switch_y;
-    int switch_row_w;       /* width of switch rows (Default / Random) */
+    int random_switch_y;        /* kept for legacy, unused in new layout */
+    int switch_row_w;           /* width of switch rows (Default) */
     int options_x;
     int options_y;
     int options_h;
-    int options_w;          /* width of options container */
+    int options_w;              /* width of options container */
     int row_h;
     int row_gap;
     int label_x;
-    int label_y_offset;     /* vertical offset for labels inside a row */
+    int label_y_offset;         /* vertical offset for labels inside a row */
     int roller_x;
     int roller_w;
     int roller_h;
     int roller_visible_rows;
     int slider_w;
     int slider_x;
-    int slider_y_offset;    /* vertical offset for slider inside its row */
-    int title_x;            /* x offset for title label */
-    int title_line_x;       /* x offset for title underline */
-    int switch_row_x;       /* x offset for Default / Random switch rows */
-    int switch_x;           /* x offset for switch inside its row */
-    int switch_y;           /* y offset for switch inside its row */
-    int close_btn_x;        /* x offset for close button */
-    int close_btn_w;
-    int close_btn_h;
-    int close_btn_y;
-    int switch_label_y;      /* y offset for switch row labels (LEFT_MID) */
+    int slider_y_offset;        /* vertical offset for slider inside its row */
+    int title_x;                /* x offset for title label */
+    int title_line_x;           /* x offset for title underline */
+    int switch_row_x;           /* x offset for Default switch row */
+    int switch_x;               /* x offset for switch inside its row */
+    int switch_y;               /* y offset for switch inside its row */
+    int close_btn_x;            /* x offset for bottom random button (BOTTOM_MID) */
+    int close_btn_w;            /* bottom random button width */
+    int close_btn_h;            /* bottom random button height */
+    int close_btn_y;            /* bottom random button y offset */
+    int switch_label_y;          /* y offset for switch row labels (LEFT_MID) */
+    int x_close_w;              /* X close button width (top-right) */
+    int x_close_h;              /* X close button height (top-right) */
+    int x_close_x;              /* X close button x offset (TOP_RIGHT) */
+    int x_close_y;              /* X close button y offset (TOP_RIGHT) */
+    int overlay_opa;             /* dark overlay opacity (0–255) */
     const lv_font_t *title_font;
     const lv_font_t *label_font;
     const lv_font_t *button_font;
     const lv_font_t *value_font;
+    const lv_font_t *close_icon_font;   /* font for X close icon */
 } ui_splash_popup_layout_t;
 
 typedef struct {

@@ -304,12 +304,16 @@ UI_DEBUG_ENTRY(gui.element.keyboardPopup.keyboardTextArea, "gui.element.keyboard
 
 UI_DEBUG_ENTRY(gui.element.splashPopup.splashPopupParent, "gui.element.splashPopup.splashPopupParent");
 UI_DEBUG_ENTRY(gui.element.splashPopup.splashContainer, "gui.element.splashPopup.splashContainer");
+UI_DEBUG_ENTRY(gui.element.splashPopup.previewContainer, "gui.element.splashPopup.previewContainer");
+UI_DEBUG_ENTRY(gui.element.splashPopup.overlayRect, "gui.element.splashPopup.overlayRect");
 UI_DEBUG_ENTRY(gui.element.splashPopup.splashTitle, "gui.element.splashPopup.splashTitle");
 UI_DEBUG_ENTRY(gui.element.splashPopup.splashTitleLine, "gui.element.splashPopup.splashTitleLine");
 UI_DEBUG_ENTRY(gui.element.splashPopup.defaultSwitch, "gui.element.splashPopup.defaultSwitch");
 UI_DEBUG_ENTRY(gui.element.splashPopup.defaultLabel, "gui.element.splashPopup.defaultLabel");
 UI_DEBUG_ENTRY(gui.element.splashPopup.randomSwitch, "gui.element.splashPopup.randomSwitch");
 UI_DEBUG_ENTRY(gui.element.splashPopup.randomLabel, "gui.element.splashPopup.randomLabel");
+UI_DEBUG_ENTRY(gui.element.splashPopup.randomButton, "gui.element.splashPopup.randomButton");
+UI_DEBUG_ENTRY(gui.element.splashPopup.randomButtonLabel, "gui.element.splashPopup.randomButtonLabel");
 UI_DEBUG_ENTRY(gui.element.splashPopup.optionsContainer, "gui.element.splashPopup.optionsContainer");
 UI_DEBUG_ENTRY(gui.element.splashPopup.paletteLabel, "gui.element.splashPopup.paletteLabel");
 UI_DEBUG_ENTRY(gui.element.splashPopup.paletteTextArea, "gui.element.splashPopup.paletteTextArea");
@@ -317,8 +321,8 @@ UI_DEBUG_ENTRY(gui.element.splashPopup.shapeLabel, "gui.element.splashPopup.shap
 UI_DEBUG_ENTRY(gui.element.splashPopup.shapeTextArea, "gui.element.splashPopup.shapeTextArea");
 UI_DEBUG_ENTRY(gui.element.splashPopup.complexityLabel, "gui.element.splashPopup.complexityLabel");
 UI_DEBUG_ENTRY(gui.element.splashPopup.complexitySlider, "gui.element.splashPopup.complexitySlider");
-UI_DEBUG_ENTRY(gui.element.splashPopup.closeButton, "gui.element.splashPopup.closeButton");
-UI_DEBUG_ENTRY(gui.element.splashPopup.closeButtonLabel, "gui.element.splashPopup.closeButtonLabel");
+UI_DEBUG_ENTRY(gui.element.splashPopup.xCloseButton, "gui.element.splashPopup.xCloseButton");
+UI_DEBUG_ENTRY(gui.element.splashPopup.xCloseButtonLabel, "gui.element.splashPopup.xCloseButtonLabel");
 
 UI_DEBUG_ENTRY(gui.page.settings.splashContainer, "gui.page.settings.splashContainer");
 UI_DEBUG_ENTRY(gui.page.settings.splashLabel, "gui.page.settings.splashLabel");

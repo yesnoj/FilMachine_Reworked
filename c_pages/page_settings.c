@@ -106,6 +106,9 @@ void event_settingPopupMBox(lv_event_t * e){
     if(data == gui.page.settings.waterInletLabel) {
         messagePopupCreate(messagePopupDetailTitle_text,waterInletAlertMBox_text,NULL,NULL,NULL);
     }
+    if(data == gui.page.settings.splashLabel) {
+        messagePopupCreate(messagePopupDetailTitle_text,splashScreenAlertMBox_text,NULL,NULL,NULL);
+    }
 }
 
 
@@ -776,6 +779,8 @@ gui.page.settings.chemVolumeContainer = lv_obj_create(parent);
         lv_label_set_text(gui.page.settings.splashLabel, settingsSplashScreen_text);
         lv_obj_set_style_text_font(gui.page.settings.splashLabel, UI_SETTINGS->label_font, 0);
         lv_obj_align(gui.page.settings.splashLabel, LV_ALIGN_LEFT_MID, UI_SETTINGS->row_label_x, UI_SETTINGS->row_label_y);
+
+        createQuestionMark(gui.page.settings.splashContainer, gui.page.settings.splashLabel, event_settingPopupMBox, UI_SETTINGS->help_icon_x, UI_SETTINGS->help_icon_y);
 
         gui.page.settings.splashButton = lv_button_create(gui.page.settings.splashContainer);
         lv_obj_set_size(gui.page.settings.splashButton, BUTTON_TUNE_WIDTH, BUTTON_TUNE_HEIGHT);

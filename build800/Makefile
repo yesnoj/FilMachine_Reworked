@@ -698,6 +698,222 @@ c_fonts/FilMachineFontIcons_60.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/FilMachineFontIcons_60.c.s
 .PHONY : c_fonts/FilMachineFontIcons_60.c.s
 
+c_fonts/font_air_americana_48.o: c_fonts/font_air_americana_48.c.o
+.PHONY : c_fonts/font_air_americana_48.o
+
+# target to build an object file
+c_fonts/font_air_americana_48.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_air_americana_48.c.o
+.PHONY : c_fonts/font_air_americana_48.c.o
+
+c_fonts/font_air_americana_48.i: c_fonts/font_air_americana_48.c.i
+.PHONY : c_fonts/font_air_americana_48.i
+
+# target to preprocess a source file
+c_fonts/font_air_americana_48.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_air_americana_48.c.i
+.PHONY : c_fonts/font_air_americana_48.c.i
+
+c_fonts/font_air_americana_48.s: c_fonts/font_air_americana_48.c.s
+.PHONY : c_fonts/font_air_americana_48.s
+
+# target to generate assembly for a file
+c_fonts/font_air_americana_48.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_air_americana_48.c.s
+.PHONY : c_fonts/font_air_americana_48.c.s
+
+c_fonts/font_decaying_felt_pen_48.o: c_fonts/font_decaying_felt_pen_48.c.o
+.PHONY : c_fonts/font_decaying_felt_pen_48.o
+
+# target to build an object file
+c_fonts/font_decaying_felt_pen_48.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_decaying_felt_pen_48.c.o
+.PHONY : c_fonts/font_decaying_felt_pen_48.c.o
+
+c_fonts/font_decaying_felt_pen_48.i: c_fonts/font_decaying_felt_pen_48.c.i
+.PHONY : c_fonts/font_decaying_felt_pen_48.i
+
+# target to preprocess a source file
+c_fonts/font_decaying_felt_pen_48.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_decaying_felt_pen_48.c.i
+.PHONY : c_fonts/font_decaying_felt_pen_48.c.i
+
+c_fonts/font_decaying_felt_pen_48.s: c_fonts/font_decaying_felt_pen_48.c.s
+.PHONY : c_fonts/font_decaying_felt_pen_48.s
+
+# target to generate assembly for a file
+c_fonts/font_decaying_felt_pen_48.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_decaying_felt_pen_48.c.s
+.PHONY : c_fonts/font_decaying_felt_pen_48.c.s
+
+c_fonts/font_ds_digital_48.o: c_fonts/font_ds_digital_48.c.o
+.PHONY : c_fonts/font_ds_digital_48.o
+
+# target to build an object file
+c_fonts/font_ds_digital_48.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_ds_digital_48.c.o
+.PHONY : c_fonts/font_ds_digital_48.c.o
+
+c_fonts/font_ds_digital_48.i: c_fonts/font_ds_digital_48.c.i
+.PHONY : c_fonts/font_ds_digital_48.i
+
+# target to preprocess a source file
+c_fonts/font_ds_digital_48.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_ds_digital_48.c.i
+.PHONY : c_fonts/font_ds_digital_48.c.i
+
+c_fonts/font_ds_digital_48.s: c_fonts/font_ds_digital_48.c.s
+.PHONY : c_fonts/font_ds_digital_48.s
+
+# target to generate assembly for a file
+c_fonts/font_ds_digital_48.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_ds_digital_48.c.s
+.PHONY : c_fonts/font_ds_digital_48.c.s
+
+c_fonts/font_evanescent_48.o: c_fonts/font_evanescent_48.c.o
+.PHONY : c_fonts/font_evanescent_48.o
+
+# target to build an object file
+c_fonts/font_evanescent_48.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_evanescent_48.c.o
+.PHONY : c_fonts/font_evanescent_48.c.o
+
+c_fonts/font_evanescent_48.i: c_fonts/font_evanescent_48.c.i
+.PHONY : c_fonts/font_evanescent_48.i
+
+# target to preprocess a source file
+c_fonts/font_evanescent_48.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_evanescent_48.c.i
+.PHONY : c_fonts/font_evanescent_48.c.i
+
+c_fonts/font_evanescent_48.s: c_fonts/font_evanescent_48.c.s
+.PHONY : c_fonts/font_evanescent_48.s
+
+# target to generate assembly for a file
+c_fonts/font_evanescent_48.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_evanescent_48.c.s
+.PHONY : c_fonts/font_evanescent_48.c.s
+
+c_fonts/font_nerdropol_lattice_48.o: c_fonts/font_nerdropol_lattice_48.c.o
+.PHONY : c_fonts/font_nerdropol_lattice_48.o
+
+# target to build an object file
+c_fonts/font_nerdropol_lattice_48.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_nerdropol_lattice_48.c.o
+.PHONY : c_fonts/font_nerdropol_lattice_48.c.o
+
+c_fonts/font_nerdropol_lattice_48.i: c_fonts/font_nerdropol_lattice_48.c.i
+.PHONY : c_fonts/font_nerdropol_lattice_48.i
+
+# target to preprocess a source file
+c_fonts/font_nerdropol_lattice_48.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_nerdropol_lattice_48.c.i
+.PHONY : c_fonts/font_nerdropol_lattice_48.c.i
+
+c_fonts/font_nerdropol_lattice_48.s: c_fonts/font_nerdropol_lattice_48.c.s
+.PHONY : c_fonts/font_nerdropol_lattice_48.s
+
+# target to generate assembly for a file
+c_fonts/font_nerdropol_lattice_48.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_nerdropol_lattice_48.c.s
+.PHONY : c_fonts/font_nerdropol_lattice_48.c.s
+
+c_fonts/font_retrolight_48.o: c_fonts/font_retrolight_48.c.o
+.PHONY : c_fonts/font_retrolight_48.o
+
+# target to build an object file
+c_fonts/font_retrolight_48.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_retrolight_48.c.o
+.PHONY : c_fonts/font_retrolight_48.c.o
+
+c_fonts/font_retrolight_48.i: c_fonts/font_retrolight_48.c.i
+.PHONY : c_fonts/font_retrolight_48.i
+
+# target to preprocess a source file
+c_fonts/font_retrolight_48.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_retrolight_48.c.i
+.PHONY : c_fonts/font_retrolight_48.c.i
+
+c_fonts/font_retrolight_48.s: c_fonts/font_retrolight_48.c.s
+.PHONY : c_fonts/font_retrolight_48.s
+
+# target to generate assembly for a file
+c_fonts/font_retrolight_48.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_retrolight_48.c.s
+.PHONY : c_fonts/font_retrolight_48.c.s
+
+c_fonts/font_tropical_leaves_48.o: c_fonts/font_tropical_leaves_48.c.o
+.PHONY : c_fonts/font_tropical_leaves_48.o
+
+# target to build an object file
+c_fonts/font_tropical_leaves_48.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_tropical_leaves_48.c.o
+.PHONY : c_fonts/font_tropical_leaves_48.c.o
+
+c_fonts/font_tropical_leaves_48.i: c_fonts/font_tropical_leaves_48.c.i
+.PHONY : c_fonts/font_tropical_leaves_48.i
+
+# target to preprocess a source file
+c_fonts/font_tropical_leaves_48.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_tropical_leaves_48.c.i
+.PHONY : c_fonts/font_tropical_leaves_48.c.i
+
+c_fonts/font_tropical_leaves_48.s: c_fonts/font_tropical_leaves_48.c.s
+.PHONY : c_fonts/font_tropical_leaves_48.s
+
+# target to generate assembly for a file
+c_fonts/font_tropical_leaves_48.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_tropical_leaves_48.c.s
+.PHONY : c_fonts/font_tropical_leaves_48.c.s
+
+c_fonts/font_wishful_melisande_48.o: c_fonts/font_wishful_melisande_48.c.o
+.PHONY : c_fonts/font_wishful_melisande_48.o
+
+# target to build an object file
+c_fonts/font_wishful_melisande_48.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_wishful_melisande_48.c.o
+.PHONY : c_fonts/font_wishful_melisande_48.c.o
+
+c_fonts/font_wishful_melisande_48.i: c_fonts/font_wishful_melisande_48.c.i
+.PHONY : c_fonts/font_wishful_melisande_48.i
+
+# target to preprocess a source file
+c_fonts/font_wishful_melisande_48.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_wishful_melisande_48.c.i
+.PHONY : c_fonts/font_wishful_melisande_48.c.i
+
+c_fonts/font_wishful_melisande_48.s: c_fonts/font_wishful_melisande_48.c.s
+.PHONY : c_fonts/font_wishful_melisande_48.s
+
+# target to generate assembly for a file
+c_fonts/font_wishful_melisande_48.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_fonts/font_wishful_melisande_48.c.s
+.PHONY : c_fonts/font_wishful_melisande_48.c.s
+
 c_fonts/lv_font_montserrat_64.o: c_fonts/lv_font_montserrat_64.c.o
 .PHONY : c_fonts/lv_font_montserrat_64.o
 
@@ -1760,6 +1976,30 @@ help:
 	@echo "... c_fonts/FilMachineFontIcons_60.o"
 	@echo "... c_fonts/FilMachineFontIcons_60.i"
 	@echo "... c_fonts/FilMachineFontIcons_60.s"
+	@echo "... c_fonts/font_air_americana_48.o"
+	@echo "... c_fonts/font_air_americana_48.i"
+	@echo "... c_fonts/font_air_americana_48.s"
+	@echo "... c_fonts/font_decaying_felt_pen_48.o"
+	@echo "... c_fonts/font_decaying_felt_pen_48.i"
+	@echo "... c_fonts/font_decaying_felt_pen_48.s"
+	@echo "... c_fonts/font_ds_digital_48.o"
+	@echo "... c_fonts/font_ds_digital_48.i"
+	@echo "... c_fonts/font_ds_digital_48.s"
+	@echo "... c_fonts/font_evanescent_48.o"
+	@echo "... c_fonts/font_evanescent_48.i"
+	@echo "... c_fonts/font_evanescent_48.s"
+	@echo "... c_fonts/font_nerdropol_lattice_48.o"
+	@echo "... c_fonts/font_nerdropol_lattice_48.i"
+	@echo "... c_fonts/font_nerdropol_lattice_48.s"
+	@echo "... c_fonts/font_retrolight_48.o"
+	@echo "... c_fonts/font_retrolight_48.i"
+	@echo "... c_fonts/font_retrolight_48.s"
+	@echo "... c_fonts/font_tropical_leaves_48.o"
+	@echo "... c_fonts/font_tropical_leaves_48.i"
+	@echo "... c_fonts/font_tropical_leaves_48.s"
+	@echo "... c_fonts/font_wishful_melisande_48.o"
+	@echo "... c_fonts/font_wishful_melisande_48.i"
+	@echo "... c_fonts/font_wishful_melisande_48.s"
 	@echo "... c_fonts/lv_font_montserrat_64.o"
 	@echo "... c_fonts/lv_font_montserrat_64.i"
 	@echo "... c_fonts/lv_font_montserrat_64.s"

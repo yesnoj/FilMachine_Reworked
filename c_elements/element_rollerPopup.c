@@ -331,6 +331,7 @@ void event_Roller(lv_event_t * e)
               lv_style_reset(&gui.element.rollerPopup.style_roller);
               lv_msgbox_close(gui.element.rollerPopup.mBoxRollerParent);
               gui.element.rollerPopup.mBoxRollerParent = NULL;
+              splashPopupRefreshPreview();
               qSysAction(SAVE_PROCESS_CONFIG);
               return;
             }
@@ -348,6 +349,7 @@ void event_Roller(lv_event_t * e)
               lv_style_reset(&gui.element.rollerPopup.style_roller);
               lv_msgbox_close(gui.element.rollerPopup.mBoxRollerParent);
               gui.element.rollerPopup.mBoxRollerParent = NULL;
+              splashPopupRefreshPreview();
               qSysAction(SAVE_PROCESS_CONFIG);
               return;
             }

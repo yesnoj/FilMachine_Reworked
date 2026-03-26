@@ -87,7 +87,9 @@ FilMachine_Simulator_v2/
 │   └── pca9685.c                  #   PCA9685 I2C PWM controller driver
 │
 ├── c_pages/                       # UI pages (screens)
-│   ├── page_home.c                #   Splash screen & boot error display
+│   ├── page_splash.c              #   Splash screen — standard, random, and custom modes with
+│   │                              #     10 palettes, 6 shape styles, 9 title fonts, PRNG engine
+│   ├── page_home.c                #   Home screen & boot error display
 │   ├── page_menu.c                #   Tab bar navigation (Processes / Settings / Tools)
 │   ├── page_processes.c           #   Process list with filtering
 │   ├── page_processDetail.c       #   Process creation & editing
@@ -104,10 +106,12 @@ FilMachine_Simulator_v2/
 │   ├── element_rollerPopup.c      #   Numeric selector (roller) widget
 │   ├── element_cleanPopup.c       #   Cleaning process UI with timer
 │   ├── element_drainPopup.c       #   Drain process UI with animated tank bars
+│   ├── element_splashPopup.c      #   Splash screen config popup with live preview
 │   ├── element_selfcheckPopup.c   #   Self-check diagnostic wizard (7-phase hardware test)
 │   └── element_otaWifiPopup.c     #   Wi-Fi OTA update popup (IP + PIN + progress)
 │
 ├── c_fonts/                       # Custom icon fonts (5 sizes: 15/20/30/40/100px)
+│   │                              #   + 8 custom splash title fonts (size 48px each)
 ├── drivers/                       # Custom peripheral drivers (MCP23017, PCA9685, DS18B20, sensors)
 │   ├── include/                   #   Driver headers
 │   ├── mcp23017.c                 #   I2C 16-bit I/O expander (relay control)
@@ -302,6 +306,7 @@ The simulator opens a 480x320 window that reproduces the exact touchscreen inter
 ### What works in the simulator
 
 - Full UI navigation (all pages, popups, dialogs)
+- Splash screen with live preview popup, 10 palettes, 6 shape styles, 9 custom fonts
 - Process creation, editing, duplication, deletion
 - Step management with swipe gestures
 - Settings with slider/switch/radio controls
@@ -406,10 +411,41 @@ Open a process and tap Play. The machine walks through pre-flight checks, then e
 
 **Stopping:** "Stop now!" halts immediately (potentially unsafe). "Stop after!" waits for the current step to finish — the safer choice.
 
+### Splash Screen
+
+The splash screen appears at boot and supports three modes, configured via Settings → Splash Screen:
+
+**Use Default** — The built-in "Deep Ocean" splash: a hand-tuned composition with a teal-to-navy gradient, geometric shapes, and the "FILMACHINE" title in Montserrat 48. This is the factory default.
+
+**Random next boot** — Each boot generates a completely new splash from scratch using a tick-derived seed. The PRNG (xorshift32) deterministically selects a palette, shape style, complexity, title position, and title font — producing a unique visual identity every time the machine starts.
+
+**Custom** — Fine-tune the splash parameters manually: Palette (10 options), Shape Style (6 options), and Complexity (20–100 in steps of 20). The popup shows a live preview of the current configuration as the background behind its own controls, with a dark overlay for readability. Press the Random button to regenerate all parameters at once; if you like the result, it will be applied at next boot. The preview shows only the shape background (no title or play button) so you can evaluate the pattern clearly.
+
+**Title fonts** — In Random and Custom modes, the title "FILMACHINE" is rendered with one of 9 fonts selected by the PRNG:
+
+| Index | Font Name | Style |
+|-------|-----------|-------|
+| 0 | Montserrat 48 | Default sans-serif (same as Deep Ocean) |
+| 1 | Air Americana | Bold italic display |
+| 2 | Decaying Felt Pen | Hand-drawn brush effect |
+| 3 | DS Digital | LED/LCD digital display |
+| 4 | Evanescent | Ethereal and elegant |
+| 5 | Nerdropol Lattice | Geometric/tech |
+| 6 | Retrolight | Retro/vintage |
+| 7 | Tropical Leaves | Decorative botanical |
+| 8 | Wishful Melisande | Calligraphic script |
+
+All fonts are converted from TTF/OTF to LVGL `.c` bitmap arrays using `lv_font_conv` with `--no-compress --bpp 4 --range 0x20-0x7F` (ASCII only, ~20–40KB each in flash).
+
+**Palettes** — Cyberpunk, Aurora, Lava, Deep Ocean, Forest, Sunset, Machinery, Arctic, Neon, Pastel. Each defines a top/bottom gradient, 3 shape accent colors, and text/accent colors for the title.
+
+**Shape Styles** — Overlapping Rects, Circles & Arcs, Mixed Shapes, Diagonal Bands, Grid Blocks, Radial Arcs.
+
 ### The Settings Tab
 
 | Setting | Description | Range |
 |---------|-------------|-------|
+| Splash Screen | Opens a popup to configure the boot splash (see above) | Default / Random / Custom |
 | Temperature unit | °C or °F | — |
 | Water inlet | Automatic water fill if connected | On/Off |
 | Temp sensor calibration | Calibrate against a reference thermometer. Short-press Tune to set ambient temp, long-press to reset. | Tune button |
@@ -437,7 +473,7 @@ All settings are saved automatically to the SD card when changed. Slider values 
 - **Self-check** — Guided hardware diagnostic wizard that tests all machine components in 7 phases: temperature sensors (5s), water pump (20s), heater (30s), valves (10s), and the three containers C1/C2/C3 (10s each). The UI is split in two panels: a task list on the left showing icons per phase (check for done, dot for pending/skipped/stopped) and a detail panel on the right with phase description, real-time sensor data, countdown timer, and a progress bar. Three buttons control the flow: Stop (halts current phase), Start/Re-run (begins or repeats a phase), and Next (skips to the next phase). Each phase's state (done, skipped, stopped) is saved and visible when revisiting. When all phases complete successfully the title shows "Self-check complete!" in green; if any were skipped or stopped it shows "Self-check finished" in orange.
 - **Import/Export** — Backup and restore configuration to SD card
 - **Statistics** — Completed processes, total time, cleaning cycles, stopped processes
-- **Software info** — Firmware version (read from the running binary) and serial number
+- **Software info** — Firmware version (read from the running binary, also shown on the splash screen) and serial number
 - **Update from SD** — Firmware OTA update from a `.bin` file on the SD card. The system reads the firmware version from the binary header, asks for confirmation, then writes it to the secondary OTA partition. After completion, a reboot applies the new firmware. If the update fails, the bootloader automatically rolls back to the previous version.
 - **Wi-Fi update** — Starts a local web server on the board. A popup shows the board's IP address (e.g. `http://192.168.1.42`) and a randomly generated 5-digit PIN for security. The user opens the URL in any browser on the same network and sees a drag-and-drop upload page styled with the FilMachine branding. After uploading the `.bin` firmware file, it is streamed directly to the OTA partition. The board reboots automatically when complete. Wi-Fi credentials (SSID/password) are configured in the Settings tab.
 
@@ -565,7 +601,7 @@ Touch coordinates from the GT911 (which reports in 480×800 portrait) are invers
 
 ## Configuration & Persistence
 
-All data is stored on the SD card in binary format (`FilMachine.cfg`). The file contains the complete machine state: settings (including calibration offset), all processes with their steps, and machine statistics (completed processes, total processing time, stopped processes, completed cleaning cycles).
+All data is stored on the SD card in binary format (`FilMachine.cfg`). The file contains the complete machine state: settings (including calibration offset and splash screen configuration — default/random flags, palette, shape style, complexity, seed), all processes with their steps, and machine statistics (completed processes, total processing time, stopped processes, completed cleaning cycles).
 
 **Auto-save triggers:** creating/editing/deleting a process, changing any setting, toggling preferred, duplicating processes or steps.
 

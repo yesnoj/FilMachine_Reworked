@@ -4,7 +4,7 @@
  *
  * When splashDefault == true  (or uninitialised): shows the fixed Deep Ocean splash.
  * When splashRandom  == true:  generates random shapes each boot.
- * Otherwise:                   uses user-chosen palette, style, complexity, seed.
+ * Otherwise:                   uses saved palette, style, complexity, seed.
  *
  * 10 palettes, 6 shape styles — matches the JSX generator.
  * LVGL 9.x — zero images, pure native objects.
@@ -228,11 +228,30 @@ static const title_pos_t title_positions[TITLE_POS_COUNT] = {
 };
 
 /* ═══════════════════════════════════════════════
+ * Custom splash title fonts array
+ * ═══════════════════════════════════════════════ */
+static const lv_font_t * const splash_title_fonts[] = {
+    &lv_font_montserrat_48,         /* 0 – default Montserrat */
+    &font_air_americana_48,         /* 1 */
+    &font_decaying_felt_pen_48,     /* 2 */
+    &font_ds_digital_48,            /* 3 */
+    &font_evanescent_48,            /* 4 */
+    &font_nerdropol_lattice_48,     /* 5 */
+    &font_retrolight_48,            /* 6 */
+    &font_tropical_leaves_48,       /* 7 */
+    &font_wishful_melisande_48,     /* 8 */
+};
+#define SPLASH_TITLE_FONT_COUNT  (sizeof(splash_title_fonts) / sizeof(splash_title_fonts[0]))
+
+/* ═══════════════════════════════════════════════
  * Add title, subtitle, version & play button
  * pos_idx: 0–5 title position (see table above), <0 = default bottom-left (5)
+ * title_font: NULL = use default (montserrat_48)
  * ═══════════════════════════════════════════════ */
-static void add_title_and_play(lv_obj_t *scr, uint32_t text_color, uint32_t accent_color, int pos_idx)
+static void add_title_and_play(lv_obj_t *scr, uint32_t text_color, uint32_t accent_color,
+                                int pos_idx, const lv_font_t *title_font)
 {
+    if (!title_font) title_font = &lv_font_montserrat_48;
     if (pos_idx < 0 || pos_idx >= TITLE_POS_COUNT) pos_idx = 5; /* default bottom-left */
     const title_pos_t *tp = &title_positions[pos_idx];
 
@@ -242,13 +261,10 @@ static void add_title_and_play(lv_obj_t *scr, uint32_t text_color, uint32_t acce
 
     lv_obj_t *lbl_title = lv_label_create(scr);
     lv_label_set_text(lbl_title, splashTitle_text);
-    lv_obj_set_style_text_font(lbl_title, &lv_font_montserrat_48, 0);
+    lv_obj_set_style_text_font(lbl_title, title_font, 0);
     lv_obj_set_style_text_color(lbl_title, lv_color_hex(text_color), 0);
     lv_obj_set_style_text_align(lbl_title, tp->text_align, 0);
     lv_obj_align(lbl_title, tp->align, x_off, y_off);
-    lv_obj_set_style_shadow_color(lbl_title, lv_color_hex(0x000000), 0);
-    lv_obj_set_style_shadow_width(lbl_title, 19, 0);
-    lv_obj_set_style_shadow_opa(lbl_title, 180, 0);
 
     lv_obj_t *lbl_sub = lv_label_create(scr);
     lv_label_set_text(lbl_sub, splashSubtitle_text);
@@ -327,7 +343,7 @@ static void create_standard_splash(lv_obj_t *scr)
     create_arc(scr, 511, 130, 244, 8, 65, 229, 0x030637, 130);
     create_arc(scr, 400, 252, 66, 18, 76, 352, 0x80DEEA, 129);
 
-    add_title_and_play(scr, 0xE0F7FA, 0x42A5F5, 5); /* default: bottom-left */
+    add_title_and_play(scr, 0xE0F7FA, 0x42A5F5, 5, NULL); /* default: bottom-left, default font */
 }
 
 /* ═══════════════════════════════════════════════
@@ -404,9 +420,10 @@ static void gen_line_shape(lv_obj_t *scr, const splash_palette_t *pal)
 }
 
 /* ═══════════════════════════════════════════════
- * RANDOM splash generation
+ * RANDOM splash — shapes only (no title/play)
+ * Used by both the real splash and the popup preview.
  * ═══════════════════════════════════════════════ */
-static void create_random_splash(lv_obj_t *scr, uint32_t seed,
+static void create_random_shapes(lv_obj_t *scr, uint32_t seed,
                                   uint8_t palette_idx,
                                   uint8_t shape_style,
                                   uint8_t complexity)
@@ -475,10 +492,22 @@ static void create_random_splash(lv_obj_t *scr, uint32_t seed,
                 break;
         }
     }
+}
 
-    /* Random title position using PRNG */
+/* Full random splash: shapes + title + play button */
+static void create_random_splash(lv_obj_t *scr, uint32_t seed,
+                                  uint8_t palette_idx,
+                                  uint8_t shape_style,
+                                  uint8_t complexity)
+{
+    if (palette_idx >= PALETTE_COUNT) palette_idx = 0;
+    const splash_palette_t *pal = &palettes[palette_idx];
+    create_random_shapes(scr, seed, palette_idx, shape_style, complexity);
+    /* Random title position and font using PRNG (state continues from shapes) */
     int title_pos = (int)(prng_next() % TITLE_POS_COUNT);
-    add_title_and_play(scr, pal->text, pal->accent, title_pos);
+    uint8_t font_idx = (uint8_t)(prng_next() % SPLASH_TITLE_FONT_COUNT);
+    const lv_font_t *title_font = splash_title_fonts[font_idx];
+    add_title_and_play(scr, pal->text, pal->accent, title_pos, title_font);
 }
 
 /* ═══════════════════════════════════════════════
@@ -496,28 +525,30 @@ lv_obj_t * splash_screen_create(void)
         /* Default mode or uninitialised config → standard Deep Ocean */
         create_standard_splash(splash_scr);
     } else if (gui.page.settings.settingsParams.splashRandom) {
-        /* Random mode → generate random params from LVGL tick */
+        /* Random mode → generate fresh random params from LVGL tick */
         uint32_t tick = lv_tick_get();
         uint32_t rng  = tick * 1103515245u + 12345u;
         uint8_t  rpal = (uint8_t)(rng % PALETTE_COUNT);
         rng = rng * 1103515245u + 12345u;
-        uint8_t  rsty = (uint8_t)(rng % 6);   /* 6 styles now */
+        uint8_t  rsty = (uint8_t)(rng % 6);
         rng = rng * 1103515245u + 12345u;
         uint8_t  rcmx = 2 + (uint8_t)(rng % 29);  /* 2–30 */
         rng = rng * 1103515245u + 12345u;
         LV_LOG_USER("SPLASH RANDOM: tick=%"PRIu32" seed=%"PRIu32" pal=%d style=%d cmx=%d",
                      tick, rng, rpal, rsty, rcmx);
+        line_pts_idx = 0;
         create_random_splash(splash_scr, rng, rpal, rsty, rcmx);
         LV_LOG_USER("SPLASH RANDOM: creation OK");
     } else {
-        /* Custom mode → user-chosen params, seed from tick */
-        uint32_t tick = lv_tick_get();
-        uint32_t seed = tick * 1103515245u + 12345u;
-        LV_LOG_USER("SPLASH CUSTOM: tick=%"PRIu32" seed=%"PRIu32" pal=%d style=%d cmx=%d",
-                     tick, seed,
+        /* Custom mode → use saved params (palette, style, complexity, seed) */
+        uint32_t seed = gui.page.settings.settingsParams.splashSeed;
+        if (seed == 0) seed = lv_tick_get() * 1103515245u + 12345u;
+        LV_LOG_USER("SPLASH CUSTOM: seed=%"PRIu32" pal=%d style=%d cmx=%d",
+                     seed,
                      gui.page.settings.settingsParams.splashPalette,
                      gui.page.settings.settingsParams.splashShapeStyle,
                      gui.page.settings.settingsParams.splashComplexity);
+        line_pts_idx = 0;
         create_random_splash(
             splash_scr,
             seed,
@@ -537,4 +568,31 @@ void splash_screen_delete(void)
         lv_obj_delete(splash_scr);
         splash_scr = NULL;
     }
+}
+
+/* ═══════════════════════════════════════════════
+ * Public preview API for the splash popup
+ *
+ * Generates shapes inside `parent` using the same
+ * engine as the full splash screen.  Caller should
+ * create an lv_obj container, pass it here, then
+ * overlay a semi-transparent rect on top for
+ * readability.
+ *
+ * To regenerate: delete all children of `parent`,
+ * then call again.
+ * ═══════════════════════════════════════════════ */
+void splash_preview_generate(lv_obj_t *parent, uint32_t seed,
+                              uint8_t palette_idx, uint8_t shape_style,
+                              uint8_t complexity)
+{
+    /* Cap complexity for preview to avoid crash with too many objects */
+    if (complexity > 30) complexity = 30;
+    line_pts_idx = 0;
+    create_random_shapes(parent, seed, palette_idx, shape_style, complexity);
+}
+
+void splash_standard_preview_generate(lv_obj_t *parent)
+{
+    create_standard_splash(parent);
 }

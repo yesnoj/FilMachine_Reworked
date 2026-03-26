@@ -576,10 +576,122 @@ CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/lv_font_montserrat_64.c -o CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.s
 
+CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.o: CMakeFiles/filmachine_sim.dir/flags.make
+CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_air_americana_48.c
+CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_37) "Building C object CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.o -MF CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.o.d -o CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_air_americana_48.c
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_air_americana_48.c > CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.i
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_air_americana_48.c -o CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.s
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.o: CMakeFiles/filmachine_sim.dir/flags.make
+CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_decaying_felt_pen_48.c
+CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_38) "Building C object CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.o -MF CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.o.d -o CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_decaying_felt_pen_48.c
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_decaying_felt_pen_48.c > CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.i
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_decaying_felt_pen_48.c -o CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.s
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.o: CMakeFiles/filmachine_sim.dir/flags.make
+CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_ds_digital_48.c
+CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_39) "Building C object CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.o -MF CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.o.d -o CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_ds_digital_48.c
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_ds_digital_48.c > CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.i
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_ds_digital_48.c -o CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.s
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.o: CMakeFiles/filmachine_sim.dir/flags.make
+CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_evanescent_48.c
+CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_40) "Building C object CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.o -MF CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.o.d -o CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_evanescent_48.c
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_evanescent_48.c > CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.i
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_evanescent_48.c -o CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.s
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.o: CMakeFiles/filmachine_sim.dir/flags.make
+CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_nerdropol_lattice_48.c
+CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_41) "Building C object CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.o -MF CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.o.d -o CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_nerdropol_lattice_48.c
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_nerdropol_lattice_48.c > CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.i
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_nerdropol_lattice_48.c -o CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.s
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.o: CMakeFiles/filmachine_sim.dir/flags.make
+CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_retrolight_48.c
+CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_42) "Building C object CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.o -MF CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.o.d -o CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_retrolight_48.c
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_retrolight_48.c > CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.i
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_retrolight_48.c -o CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.s
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.o: CMakeFiles/filmachine_sim.dir/flags.make
+CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_tropical_leaves_48.c
+CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_43) "Building C object CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.o -MF CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.o.d -o CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_tropical_leaves_48.c
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_tropical_leaves_48.c > CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.i
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_tropical_leaves_48.c -o CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.s
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.o: CMakeFiles/filmachine_sim.dir/flags.make
+CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_wishful_melisande_48.c
+CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_44) "Building C object CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.o -MF CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.o.d -o CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_wishful_melisande_48.c
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_wishful_melisande_48.c > CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.i
+
+CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_fonts/font_wishful_melisande_48.c -o CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.s
+
 CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o: CMakeFiles/filmachine_sim.dir/flags.make
 CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_splash.c
 CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o: CMakeFiles/filmachine_sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_37) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_45) "Building C object CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o -MF CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o.d -o CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o -c /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/c_pages/page_splash.c
 
 CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.i: cmake_force
@@ -628,6 +740,14 @@ filmachine_sim_OBJECTS = \
 "CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.o" \
 "CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.o" \
 "CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.o" \
+"CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.o" \
+"CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.o" \
+"CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.o" \
+"CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.o" \
+"CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.o" \
+"CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.o" \
+"CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.o" \
+"CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.o" \
 "CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o"
 
 # External object files for target filmachine_sim
@@ -669,11 +789,19 @@ filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_50.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_60.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/FilMachineFontIcons_100.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/lv_font_montserrat_64.c.o
+filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/font_air_americana_48.c.o
+filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/font_decaying_felt_pen_48.c.o
+filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/font_ds_digital_48.c.o
+filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/font_evanescent_48.c.o
+filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/font_nerdropol_lattice_48.c.o
+filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/font_retrolight_48.c.o
+filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/font_tropical_leaves_48.c.o
+filmachine_sim: CMakeFiles/filmachine_sim.dir/c_fonts/font_wishful_melisande_48.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/c_pages/page_splash.c.o
 filmachine_sim: CMakeFiles/filmachine_sim.dir/build.make
 filmachine_sim: lib/liblvgl.a
 filmachine_sim: CMakeFiles/filmachine_sim.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_38) "Linking C executable filmachine_sim"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles --progress-num=$(CMAKE_PROGRESS_46) "Linking C executable filmachine_sim"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/filmachine_sim.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

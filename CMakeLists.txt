@@ -80,6 +80,14 @@ else()
         c_fonts/FilMachineFontIcons_60.c
         c_fonts/FilMachineFontIcons_100.c
         c_fonts/lv_font_montserrat_64.c
+        c_fonts/font_air_americana_48.c
+        c_fonts/font_decaying_felt_pen_48.c
+        c_fonts/font_ds_digital_48.c
+        c_fonts/font_evanescent_48.c
+        c_fonts/font_nerdropol_lattice_48.c
+        c_fonts/font_retrolight_48.c
+        c_fonts/font_tropical_leaves_48.c
+        c_fonts/font_wishful_melisande_48.c
         c_pages/page_splash.c
     )
 
