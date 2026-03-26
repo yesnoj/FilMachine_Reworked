@@ -269,14 +269,14 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
 
 
             sd->stepDetailContainer = lv_obj_create(sd->stepDetailParent);
-            lv_obj_align(sd->stepDetailContainer, LV_ALIGN_CENTER, 0, 0);
+            lv_obj_align(sd->stepDetailContainer, LV_ALIGN_CENTER, ui->container_x, ui->container_y);
             lv_obj_set_size(sd->stepDetailContainer, ui->modal_w, ui->modal_h);
             lv_obj_remove_flag(sd->stepDetailContainer, LV_OBJ_FLAG_SCROLLABLE);
 
                     sd->stepDetailLabel = lv_label_create(sd->stepDetailContainer);
                     lv_label_set_text(sd->stepDetailLabel, stepDetailTitle_text);
                     lv_obj_set_style_text_font(sd->stepDetailLabel, ui->title_font, 0);
-                    lv_obj_align(sd->stepDetailLabel, LV_ALIGN_TOP_MID, 0, ui->title_y);
+                    lv_obj_align(sd->stepDetailLabel, LV_ALIGN_TOP_MID, ui->title_x, ui->title_y);
 
 
                           lv_style_init(&sd->style_mBoxStepPopupTitleLine);
@@ -289,7 +289,7 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
                     sd->titleLinePoints[1].x = ui->title_line_w;
                     lv_line_set_points(sd->mBoxStepPopupTitleLine, sd->titleLinePoints, 2);
                     lv_obj_add_style(sd->mBoxStepPopupTitleLine, &sd->style_mBoxStepPopupTitleLine, 0);
-                    lv_obj_align(sd->mBoxStepPopupTitleLine, LV_ALIGN_TOP_MID, 0, ui->title_line_y);
+                    lv_obj_align(sd->mBoxStepPopupTitleLine, LV_ALIGN_TOP_MID, ui->title_line_x, ui->title_line_y);
 
 
             sd->stepDetailNameContainer = lv_obj_create(sd->stepDetailContainer);
@@ -301,12 +301,12 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
                   sd->stepDetailNamelLabel = lv_label_create(sd->stepDetailNameContainer);
                   lv_label_set_text(sd->stepDetailNamelLabel, stepDetailName_text);
                   lv_obj_set_style_text_font(sd->stepDetailNamelLabel, ui->label_font, 0);
-                  lv_obj_align(sd->stepDetailNamelLabel, LV_ALIGN_LEFT_MID, ui->row_label_x, 0);
+                  lv_obj_align(sd->stepDetailNamelLabel, LV_ALIGN_LEFT_MID, ui->row_label_x, ui->row_label_y);
 
                   sd->stepDetailNameTextArea = lv_textarea_create(sd->stepDetailNameContainer);
                   lv_textarea_set_one_line(sd->stepDetailNameTextArea, true);
                   lv_textarea_set_placeholder_text(sd->stepDetailNameTextArea, stepDetailPlaceHolder_text);
-                  lv_obj_align(sd->stepDetailNameTextArea, LV_ALIGN_LEFT_MID, ui->name_textarea_x, 0);
+                  lv_obj_align(sd->stepDetailNameTextArea, LV_ALIGN_LEFT_MID, ui->name_textarea_x, ui->row_label_y);
                   lv_obj_set_width(sd->stepDetailNameTextArea, ui->name_textarea_w);
                   lv_obj_set_style_text_font(sd->stepDetailNameTextArea, ui->value_font, 0);
                   sd->nameKeyboardCtx.textArea = sd->stepDetailNameTextArea;
@@ -331,12 +331,12 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
                   sd->stepDurationLabel = lv_label_create(sd->stepDurationContainer);
                   lv_label_set_text(sd->stepDurationLabel, stepDetailDuration_text);
                   lv_obj_set_style_text_font(sd->stepDurationLabel, ui->label_font, 0);
-                  lv_obj_align(sd->stepDurationLabel, LV_ALIGN_LEFT_MID, ui->row_label_x, 0);
+                  lv_obj_align(sd->stepDurationLabel, LV_ALIGN_LEFT_MID, ui->row_label_x, ui->row_label_y);
 
                   sd->stepDetailMinTextArea = lv_textarea_create(sd->stepDurationContainer);
                   lv_textarea_set_one_line(sd->stepDetailMinTextArea, true);
                   lv_textarea_set_placeholder_text(sd->stepDetailMinTextArea, stepDetailDurationMinPlaceHolder_text);
-                  lv_obj_align(sd->stepDetailMinTextArea, LV_ALIGN_LEFT_MID, ui->minutes_textarea_x, 0);
+                  lv_obj_align(sd->stepDetailMinTextArea, LV_ALIGN_LEFT_MID, ui->minutes_textarea_x, ui->row_label_y);
                   lv_obj_set_width(sd->stepDetailMinTextArea, ui->time_textarea_w);
                   lv_obj_set_style_text_font(sd->stepDetailMinTextArea, ui->value_font, 0);
 
@@ -356,7 +356,7 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
 //                  lv_textarea_set_cursor_hidden(sd->stepDetailSecTextArea, true);
                   lv_textarea_set_one_line(sd->stepDetailSecTextArea, true);
                   lv_textarea_set_placeholder_text(sd->stepDetailSecTextArea, stepDetailDurationSecPlaceHolder_text);
-                  lv_obj_align(sd->stepDetailSecTextArea, LV_ALIGN_LEFT_MID, ui->seconds_textarea_x, 0);
+                  lv_obj_align(sd->stepDetailSecTextArea, LV_ALIGN_LEFT_MID, ui->seconds_textarea_x, ui->row_label_y);
                   lv_obj_set_width(sd->stepDetailSecTextArea, ui->time_textarea_w);
                   lv_obj_set_style_text_font(sd->stepDetailSecTextArea, ui->value_font, 0);
 
@@ -383,7 +383,7 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
                   sd->stepTypeLabel = lv_label_create(sd->stepTypeContainer);
                   lv_label_set_text(sd->stepTypeLabel, stepDetailType_text);
                   lv_obj_set_style_text_font(sd->stepTypeLabel, ui->label_font, 0);
-                  lv_obj_align(sd->stepTypeLabel, LV_ALIGN_LEFT_MID, ui->row_label_x, 0);
+                  lv_obj_align(sd->stepTypeLabel, LV_ALIGN_LEFT_MID, ui->row_label_x, ui->row_label_y);
 
 
                   sd->stepTypeDropDownList = lv_dropdown_create(sd->stepTypeContainer);
@@ -400,7 +400,7 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
                   sd->stepTypeHelpIcon = lv_label_create(sd->stepTypeContainer);
                   lv_label_set_text(sd->stepTypeHelpIcon, chemical_icon);
                   lv_obj_set_style_text_font(sd->stepTypeHelpIcon, ui->info_icon_font, 0);
-                  lv_obj_align(sd->stepTypeHelpIcon, LV_ALIGN_LEFT_MID, ui->type_icon_x, 0);
+                  lv_obj_align(sd->stepTypeHelpIcon, LV_ALIGN_LEFT_MID, ui->type_icon_x, ui->row_label_y);
 
 
 
@@ -414,7 +414,7 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
                   sd->stepSourceLabel = lv_label_create(sd->stepSourceContainer);
                   lv_label_set_text(sd->stepSourceLabel, stepDetailSource_text);
                   lv_obj_set_style_text_font(sd->stepSourceLabel, ui->label_font, 0);
-                  lv_obj_align(sd->stepSourceLabel, LV_ALIGN_LEFT_MID, ui->row_label_x, 0);
+                  lv_obj_align(sd->stepSourceLabel, LV_ALIGN_LEFT_MID, ui->row_label_x, ui->row_label_y);
 
 
                   sd->stepSourceDropDownList = lv_dropdown_create(sd->stepSourceContainer);
@@ -431,12 +431,12 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
                   sd->stepSourceTempLabel = lv_label_create(sd->stepSourceContainer);
                   lv_label_set_text(sd->stepSourceTempLabel, stepDetailCurrentTemp_text);
                   lv_obj_set_style_text_font(sd->stepSourceTempLabel, ui->value_font, 0);
-                  lv_obj_align(sd->stepSourceTempLabel, LV_ALIGN_LEFT_MID, ui->source_temp_label_x, 0);
+                  lv_obj_align(sd->stepSourceTempLabel, LV_ALIGN_LEFT_MID, ui->source_temp_label_x, ui->row_label_y);
 
                   sd->stepSourceTempHelpIcon = lv_label_create(sd->stepSourceContainer);
                   lv_label_set_text(sd->stepSourceTempHelpIcon, temp_icon);
                   lv_obj_set_style_text_font(sd->stepSourceTempHelpIcon, ui->info_icon_font, 0);
-                  lv_obj_align(sd->stepSourceTempHelpIcon, LV_ALIGN_LEFT_MID, ui->source_temp_icon_x, 0);
+                  lv_obj_align(sd->stepSourceTempHelpIcon, LV_ALIGN_LEFT_MID, ui->source_temp_icon_x, ui->row_label_y);
 
                   sd->stepSourceTempValue = lv_label_create(sd->stepSourceContainer);
                   {
@@ -463,13 +463,13 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
                   sd->stepDiscardAfterLabel = lv_label_create(sd->stepDiscardAfterContainer);
                   lv_label_set_text(sd->stepDiscardAfterLabel, stepDetailDiscardAfter_text);
                   lv_obj_set_style_text_font(sd->stepDiscardAfterLabel, ui->label_font, 0);
-                  lv_obj_align(sd->stepDiscardAfterLabel, LV_ALIGN_LEFT_MID, ui->discard_label_x, 0);
+                  lv_obj_align(sd->stepDiscardAfterLabel, LV_ALIGN_LEFT_MID, ui->discard_label_x, ui->row_label_y);
 
 
                   sd->stepDiscardAfterSwitch = lv_switch_create(sd->stepDiscardAfterContainer);
                   lv_obj_set_size(sd->stepDiscardAfterSwitch, ui->discard_switch_w, ui->discard_switch_h);
                   lv_obj_add_event_cb(sd->stepDiscardAfterSwitch, event_stepDetail, LV_EVENT_VALUE_CHANGED, sn);
-                  lv_obj_align(sd->stepDiscardAfterSwitch, LV_ALIGN_LEFT_MID, ui->discard_switch_x, 0);
+                  lv_obj_align(sd->stepDiscardAfterSwitch, LV_ALIGN_LEFT_MID, ui->discard_switch_x, ui->row_label_y);
                   lv_obj_set_style_bg_color(sd->stepDiscardAfterSwitch, lv_palette_darken(LV_PALETTE_GREY, 3), LV_STATE_DEFAULT);
                   lv_obj_set_style_bg_color(sd->stepDiscardAfterSwitch,  lv_palette_main(LV_PALETTE_GREEN), LV_PART_KNOB | LV_STATE_DEFAULT);
                   lv_obj_set_style_bg_color(sd->stepDiscardAfterSwitch, lv_color_hex(GREEN_DARK) , LV_PART_INDICATOR | LV_STATE_CHECKED);

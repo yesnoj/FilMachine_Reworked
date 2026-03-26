@@ -282,7 +282,7 @@ void cleanPumpTimer(lv_timer_t * timer) {
         LV_LOG_USER("Cycle Percentage: %d", cyclePercentage);
         LV_LOG_USER("Process Percentage: %d", processPercentage);
 
-        lv_label_set_text_fmt(gui.element.cleanPopup.cleanNowCleaningValue, "%s cycle:%d", tmp_processSourceList[containerIndex], currentCycle);
+        lv_label_set_text_fmt(gui.element.cleanPopup.cleanNowCleaningValue, cleanCycleFmt_text, tmp_processSourceList[containerIndex], currentCycle);
 
         /* Progress check */
         if (processPercentage < 100) {
@@ -433,7 +433,7 @@ void event_cleanPopup(lv_event_t * e) {
             LV_LOG_USER("Process totalMin: %"PRIu32" totalSecs: %"PRIu32"",gui.element.cleanPopup.totalMins,gui.element.cleanPopup.totalSecs);
             
             lv_obj_remove_flag(gui.element.cleanPopup.cleanNowCleaningValue, LV_OBJ_FLAG_HIDDEN);
-            lv_label_set_text_fmt(gui.element.cleanPopup.cleanNowCleaningValue, "%s cycle:%d",tmp_processSourceList[firstContainerIndex],currentCycle);
+            lv_label_set_text_fmt(gui.element.cleanPopup.cleanNowCleaningValue, cleanCycleFmt_text, tmp_processSourceList[firstContainerIndex], currentCycle);
 
             gui.element.cleanPopup.pumpTimer = lv_timer_create(cleanPumpTimer, 1000,  NULL);
             LV_LOG_USER("Started pumpTimer");
@@ -544,7 +544,7 @@ void cleanPopup (void){
               gui.element.cleanPopup.cleanTitle = lv_label_create(gui.element.cleanPopup.cleanContainer);         
               lv_label_set_text(gui.element.cleanPopup.cleanTitle, cleanPopupTitle_text); 
               lv_obj_set_style_text_font(gui.element.cleanPopup.cleanTitle, ui->title_font, 0);              
-              lv_obj_align(gui.element.cleanPopup.cleanTitle, LV_ALIGN_TOP_MID, 0, ui->title_y);
+              lv_obj_align(gui.element.cleanPopup.cleanTitle, LV_ALIGN_TOP_MID, ui->title_x, ui->title_y);
 
               /*Create style*/
               initTitleLineStyle(&gui.element.cleanPopup.style_cleanTitleLine, WHITE);
@@ -553,10 +553,10 @@ void cleanPopup (void){
               gui.element.cleanPopup.cleanPopupTitleLine = lv_line_create(gui.element.cleanPopup.cleanContainer);
               lv_line_set_points(gui.element.cleanPopup.cleanPopupTitleLine, gui.element.cleanPopup.titleLinePoints, 2);
               lv_obj_add_style(gui.element.cleanPopup.cleanPopupTitleLine, &gui.element.cleanPopup.style_cleanTitleLine, 0);
-              lv_obj_align(gui.element.cleanPopup.cleanPopupTitleLine, LV_ALIGN_TOP_MID, 0, ui->title_line_y);
+              lv_obj_align(gui.element.cleanPopup.cleanPopupTitleLine, LV_ALIGN_TOP_MID, ui->title_line_x, ui->title_line_y);
 
               gui.element.cleanPopup.cleanSettingsContainer = lv_obj_create(gui.element.cleanPopup.cleanPopupParent);
-              lv_obj_align(gui.element.cleanPopup.cleanSettingsContainer, LV_ALIGN_TOP_MID, 0, ui->settings_y);
+              lv_obj_align(gui.element.cleanPopup.cleanSettingsContainer, LV_ALIGN_TOP_MID, ui->settings_x, ui->settings_y);
               lv_obj_set_size(gui.element.cleanPopup.cleanSettingsContainer, ui_get_profile()->popups.clean_settings_w, ui_get_profile()->popups.clean_settings_h); 
               lv_obj_remove_flag(gui.element.cleanPopup.cleanSettingsContainer, LV_OBJ_FLAG_SCROLLABLE); 
               lv_obj_set_style_border_opa(gui.element.cleanPopup.cleanSettingsContainer , LV_OPA_TRANSP, 0);
@@ -564,7 +564,7 @@ void cleanPopup (void){
                           gui.element.cleanPopup.cleanSubTitleLabel = lv_label_create(gui.element.cleanPopup.cleanSettingsContainer);         
                           lv_label_set_text(gui.element.cleanPopup.cleanSubTitleLabel, cleanPopupSubTitle_text); 
                           lv_obj_set_style_text_font(gui.element.cleanPopup.cleanSubTitleLabel, ui->subtitle_font, 0);              
-                          lv_obj_align(gui.element.cleanPopup.cleanSubTitleLabel, LV_ALIGN_TOP_MID, 0, ui->subtitle_y);
+                          lv_obj_align(gui.element.cleanPopup.cleanSubTitleLabel, LV_ALIGN_TOP_MID, ui->subtitle_x, ui->subtitle_y);
                         
                           
                           gui.element.cleanPopup.cleanChemicalTanksContainer = lv_obj_create(gui.element.cleanPopup.cleanSettingsContainer);
@@ -577,14 +577,14 @@ void cleanPopup (void){
                                   //Container checkboxes
                                   gui.element.cleanPopup.cleanSelectC1CheckBox = lv_obj_create(gui.element.cleanPopup.cleanChemicalTanksContainer);
                                   lv_obj_remove_flag(gui.element.cleanPopup.cleanSelectC1CheckBox, LV_OBJ_FLAG_SCROLLABLE); 
-                                  lv_obj_align(gui.element.cleanPopup.cleanSelectC1CheckBox, LV_ALIGN_LEFT_MID, ui->chem_c1_checkbox_x, 0);
+                                  lv_obj_align(gui.element.cleanPopup.cleanSelectC1CheckBox, LV_ALIGN_LEFT_MID, ui->chem_c1_checkbox_x, ui->checkbox_y);
                                   lv_obj_set_size(gui.element.cleanPopup.cleanSelectC1CheckBox, ui->checkbox_w, ui->checkbox_h); 
                                   lv_obj_set_style_border_opa(gui.element.cleanPopup.cleanSelectC1CheckBox, LV_OPA_TRANSP, 0);
 
                                         gui.element.cleanPopup.cleanC1CheckBoxLabel = lv_label_create(gui.element.cleanPopup.cleanSelectC1CheckBox);         
                                         lv_label_set_text(gui.element.cleanPopup.cleanC1CheckBoxLabel, tmp_processSourceList[0]); 
                                         lv_obj_set_style_text_font(gui.element.cleanPopup.cleanC1CheckBoxLabel, ui->label_font, 0);              
-                                        lv_obj_align(gui.element.cleanPopup.cleanC1CheckBoxLabel, LV_ALIGN_LEFT_MID, ui->checkbox_label_x, 0);
+                                        lv_obj_align(gui.element.cleanPopup.cleanC1CheckBoxLabel, LV_ALIGN_LEFT_MID, ui->checkbox_label_x, ui->checkbox_label_y);
 
                                         gui.element.cleanPopup.cleanSelectC1CheckBox = create_radiobutton(gui.element.cleanPopup.cleanSelectC1CheckBox, "", 0, 0, ui->checkbox_radio_size, ui->subtitle_font, lv_color_hex(WHITE), lv_palette_main(LV_PALETTE_BLUE));
                                         lv_obj_add_event_cb(gui.element.cleanPopup.cleanSelectC1CheckBox, event_cleanPopup, LV_EVENT_VALUE_CHANGED, gui.element.cleanPopup.cleanSelectC1CheckBox);
@@ -592,14 +592,14 @@ void cleanPopup (void){
 
                                   gui.element.cleanPopup.cleanSelectC2CheckBox = lv_obj_create(gui.element.cleanPopup.cleanChemicalTanksContainer);
                                   lv_obj_remove_flag(gui.element.cleanPopup.cleanSelectC2CheckBox, LV_OBJ_FLAG_SCROLLABLE); 
-                                  lv_obj_align(gui.element.cleanPopup.cleanSelectC2CheckBox, LV_ALIGN_LEFT_MID, ui->chem_c2_checkbox_x, 0);
+                                  lv_obj_align(gui.element.cleanPopup.cleanSelectC2CheckBox, LV_ALIGN_LEFT_MID, ui->chem_c2_checkbox_x, ui->checkbox_y);
                                   lv_obj_set_size(gui.element.cleanPopup.cleanSelectC2CheckBox, ui->checkbox_w, ui->checkbox_h); 
                                   lv_obj_set_style_border_opa(gui.element.cleanPopup.cleanSelectC2CheckBox, LV_OPA_TRANSP, 0);
 
                                         gui.element.cleanPopup.cleanC2CheckBoxLabel = lv_label_create(gui.element.cleanPopup.cleanSelectC2CheckBox);         
                                         lv_label_set_text(gui.element.cleanPopup.cleanC2CheckBoxLabel, tmp_processSourceList[1]); 
                                         lv_obj_set_style_text_font(gui.element.cleanPopup.cleanC2CheckBoxLabel, ui->label_font, 0);              
-                                        lv_obj_align(gui.element.cleanPopup.cleanC2CheckBoxLabel, LV_ALIGN_LEFT_MID, ui->checkbox_label_x, 0);
+                                        lv_obj_align(gui.element.cleanPopup.cleanC2CheckBoxLabel, LV_ALIGN_LEFT_MID, ui->checkbox_label_x, ui->checkbox_label_y);
 
                                         gui.element.cleanPopup.cleanSelectC2CheckBox = create_radiobutton(gui.element.cleanPopup.cleanSelectC2CheckBox, "", 0, 0, ui->checkbox_radio_size, ui->subtitle_font, lv_color_hex(WHITE), lv_palette_main(LV_PALETTE_BLUE));
                                         lv_obj_add_event_cb(gui.element.cleanPopup.cleanSelectC2CheckBox, event_cleanPopup, LV_EVENT_VALUE_CHANGED, gui.element.cleanPopup.cleanSelectC2CheckBox);
@@ -607,14 +607,14 @@ void cleanPopup (void){
 
                                   gui.element.cleanPopup.cleanSelectC3CheckBox = lv_obj_create(gui.element.cleanPopup.cleanChemicalTanksContainer);
                                   lv_obj_remove_flag(gui.element.cleanPopup.cleanSelectC3CheckBox, LV_OBJ_FLAG_SCROLLABLE); 
-                                  lv_obj_align(gui.element.cleanPopup.cleanSelectC3CheckBox, LV_ALIGN_LEFT_MID, ui->chem_c3_checkbox_x, 0);
+                                  lv_obj_align(gui.element.cleanPopup.cleanSelectC3CheckBox, LV_ALIGN_LEFT_MID, ui->chem_c3_checkbox_x, ui->checkbox_y);
                                   lv_obj_set_size(gui.element.cleanPopup.cleanSelectC3CheckBox, ui->checkbox_w, ui->checkbox_h); 
                                   lv_obj_set_style_border_opa(gui.element.cleanPopup.cleanSelectC3CheckBox, LV_OPA_TRANSP, 0);
 
                                         gui.element.cleanPopup.cleanC3CheckBoxLabel = lv_label_create(gui.element.cleanPopup.cleanSelectC3CheckBox);         
                                         lv_label_set_text(gui.element.cleanPopup.cleanC3CheckBoxLabel, tmp_processSourceList[2]); 
                                         lv_obj_set_style_text_font(gui.element.cleanPopup.cleanC3CheckBoxLabel, ui->label_font, 0);              
-                                        lv_obj_align(gui.element.cleanPopup.cleanC3CheckBoxLabel, LV_ALIGN_LEFT_MID, ui->checkbox_label_x, 0);
+                                        lv_obj_align(gui.element.cleanPopup.cleanC3CheckBoxLabel, LV_ALIGN_LEFT_MID, ui->checkbox_label_x, ui->checkbox_label_y);
 
                                         gui.element.cleanPopup.cleanSelectC3CheckBox = create_radiobutton(gui.element.cleanPopup.cleanSelectC3CheckBox, "", 0, 0, ui->checkbox_radio_size, ui->subtitle_font, lv_color_hex(WHITE), lv_palette_main(LV_PALETTE_BLUE));
                                         lv_obj_add_event_cb(gui.element.cleanPopup.cleanSelectC3CheckBox, event_cleanPopup, LV_EVENT_VALUE_CHANGED, gui.element.cleanPopup.cleanSelectC3CheckBox);  
@@ -623,7 +623,7 @@ void cleanPopup (void){
                           
                           gui.element.cleanPopup.cleanSpinBoxContainer = lv_obj_create(gui.element.cleanPopup.cleanSettingsContainer);
                           lv_obj_remove_flag(gui.element.cleanPopup.cleanSpinBoxContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                          lv_obj_align(gui.element.cleanPopup.cleanSpinBoxContainer, LV_ALIGN_CENTER, 0, ui->spinbox_container_y);
+                          lv_obj_align(gui.element.cleanPopup.cleanSpinBoxContainer, LV_ALIGN_CENTER, ui->spinbox_container_x, ui->spinbox_container_y);
                           lv_obj_set_size(gui.element.cleanPopup.cleanSpinBoxContainer, ui->spinbox_container_w, ui->spinbox_container_h); 
                           lv_obj_set_style_border_opa(gui.element.cleanPopup.cleanSpinBoxContainer, LV_OPA_TRANSP, 0);
 
@@ -632,14 +632,14 @@ void cleanPopup (void){
                                 lv_spinbox_set_range(gui.element.cleanPopup.cleanSpinBox, 1, 5);
                                 lv_spinbox_set_digit_format(gui.element.cleanPopup.cleanSpinBox, 1, 0);
                                 lv_obj_set_width(gui.element.cleanPopup.cleanSpinBox, ui->spinbox_w);
-                                lv_obj_align(gui.element.cleanPopup.cleanSpinBox, LV_ALIGN_LEFT_MID, ui->spinbox_x, 0);
+                                lv_obj_align(gui.element.cleanPopup.cleanSpinBox, LV_ALIGN_LEFT_MID, ui->spinbox_x, ui->spinbox_y);
                                 lv_obj_set_style_bg_opa(gui.element.cleanPopup.cleanSpinBox, 0, LV_PART_CURSOR);
 
 
                                       gui.element.cleanPopup.cleanRepeatTimesLabel = lv_label_create(gui.element.cleanPopup.cleanSpinBoxContainer);         
                                       lv_label_set_text(gui.element.cleanPopup.cleanRepeatTimesLabel, cleanRoller_text); 
                                       lv_obj_set_style_text_font(gui.element.cleanPopup.cleanRepeatTimesLabel, ui->label_font, 0);              
-                                      lv_obj_align(gui.element.cleanPopup.cleanRepeatTimesLabel, LV_ALIGN_LEFT_MID, ui->repeat_label_x, 0);
+                                      lv_obj_align(gui.element.cleanPopup.cleanRepeatTimesLabel, LV_ALIGN_LEFT_MID, ui->repeat_label_x, ui->repeat_label_y);
 
                                       gui.element.cleanPopup.cleanSpinBoxPlusButton = lv_button_create(gui.element.cleanPopup.cleanSpinBoxContainer);
                                       lv_obj_set_size(gui.element.cleanPopup.cleanSpinBoxPlusButton, lv_obj_get_height(gui.element.cleanPopup.cleanSpinBox), lv_obj_get_height(gui.element.cleanPopup.cleanSpinBox));
@@ -658,7 +658,7 @@ void cleanPopup (void){
 
                       gui.element.cleanPopup.cleanDrainWaterLabelContainer = lv_obj_create(gui.element.cleanPopup.cleanSettingsContainer);
                       lv_obj_remove_flag(gui.element.cleanPopup.cleanDrainWaterLabelContainer , LV_OBJ_FLAG_SCROLLABLE); 
-                      lv_obj_align(gui.element.cleanPopup.cleanDrainWaterLabelContainer, LV_ALIGN_CENTER, 0, ui->drain_container_y);
+                      lv_obj_align(gui.element.cleanPopup.cleanDrainWaterLabelContainer, LV_ALIGN_CENTER, ui->drain_container_x, ui->drain_container_y);
                       lv_obj_set_size(gui.element.cleanPopup.cleanDrainWaterLabelContainer, ui->drain_container_w, ui_get_profile()->clean_drain_container_h);
                       lv_obj_set_style_border_opa(gui.element.cleanPopup.cleanDrainWaterLabelContainer , LV_OPA_TRANSP, 0);
 
@@ -666,12 +666,12 @@ void cleanPopup (void){
                           gui.element.cleanPopup.cleanDrainWaterLabel = lv_label_create(gui.element.cleanPopup.cleanDrainWaterLabelContainer);         
                           lv_label_set_text(gui.element.cleanPopup.cleanDrainWaterLabel, cleanDrainWater_text); 
                           lv_obj_set_style_text_font(gui.element.cleanPopup.cleanDrainWaterLabel, ui->label_font, 0);              
-                          lv_obj_align(gui.element.cleanPopup.cleanDrainWaterLabel, LV_ALIGN_LEFT_MID, ui->checkbox_label_x, 0);
+                          lv_obj_align(gui.element.cleanPopup.cleanDrainWaterLabel, LV_ALIGN_LEFT_MID, ui->checkbox_label_x, ui->drain_label_y);
 
                           gui.element.cleanPopup.cleanDrainWaterSwitch = lv_switch_create(gui.element.cleanPopup.cleanDrainWaterLabelContainer);
                           lv_obj_set_size(gui.element.cleanPopup.cleanDrainWaterSwitch, ui_get_profile()->settings.toggle_switch_w, ui_get_profile()->settings.toggle_switch_h);
                           lv_obj_add_event_cb(gui.element.cleanPopup.cleanDrainWaterSwitch , event_cleanPopup, LV_EVENT_VALUE_CHANGED, gui.element.cleanPopup.cleanDrainWaterSwitch);
-                          lv_obj_align(gui.element.cleanPopup.cleanDrainWaterSwitch , LV_ALIGN_LEFT_MID, ui->drain_switch_x + ui->drain_switch_extra_x, 0);
+                          lv_obj_align(gui.element.cleanPopup.cleanDrainWaterSwitch , LV_ALIGN_LEFT_MID, ui->drain_switch_x + ui->drain_switch_extra_x, ui->drain_switch_y);
                           lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanDrainWaterSwitch, lv_palette_darken(LV_PALETTE_GREY, 3), LV_STATE_DEFAULT);
                           lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanDrainWaterSwitch,  lv_palette_main(LV_PALETTE_BLUE), LV_PART_KNOB | LV_STATE_DEFAULT);
                           lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanDrainWaterSwitch, lv_color_hex(BLUE_DARK) , LV_PART_INDICATOR | LV_STATE_CHECKED);
@@ -707,7 +707,7 @@ void cleanPopup (void){
         
 
         gui.element.cleanPopup.cleanProcessContainer = lv_obj_create(gui.element.cleanPopup.cleanPopupParent);
-        lv_obj_align(gui.element.cleanPopup.cleanProcessContainer, LV_ALIGN_TOP_MID, 0, ui->settings_y);
+        lv_obj_align(gui.element.cleanPopup.cleanProcessContainer, LV_ALIGN_TOP_MID, ui->settings_x, ui->settings_y);
         lv_obj_set_size(gui.element.cleanPopup.cleanProcessContainer, ui_get_profile()->popups.clean_process_w, ui_get_profile()->popups.clean_process_h);  
         lv_obj_remove_flag(gui.element.cleanPopup.cleanProcessContainer, LV_OBJ_FLAG_SCROLLABLE); 
         lv_obj_set_style_border_opa(gui.element.cleanPopup.cleanProcessContainer , LV_OPA_TRANSP, 0);
@@ -721,7 +721,7 @@ void cleanPopup (void){
               lv_arc_set_bg_angles(gui.element.cleanPopup.cleanProcessArc, 0, 260);
               lv_arc_set_value(gui.element.cleanPopup.cleanProcessArc, 0);
               lv_arc_set_range(gui.element.cleanPopup.cleanProcessArc, 0, 100);
-              lv_obj_align(gui.element.cleanPopup.cleanProcessArc, LV_ALIGN_CENTER, 0, ui->process_arc_y);
+              lv_obj_align(gui.element.cleanPopup.cleanProcessArc, LV_ALIGN_CENTER, ui->process_arc_x, ui->process_arc_y);
               lv_obj_remove_style(gui.element.cleanPopup.cleanProcessArc, NULL, LV_PART_KNOB);
               lv_obj_remove_flag(gui.element.cleanPopup.cleanProcessArc, LV_OBJ_FLAG_CLICKABLE);
               lv_obj_set_style_arc_color(gui.element.cleanPopup.cleanProcessArc,lv_color_hex(LIGHT_BLUE) , LV_PART_INDICATOR);
@@ -738,7 +738,7 @@ void cleanPopup (void){
               lv_arc_set_bg_angles(gui.element.cleanPopup.cleanCycleArc, 0, 260);
               lv_arc_set_value(gui.element.cleanPopup.cleanCycleArc, 0);
               lv_arc_set_range(gui.element.cleanPopup.cleanCycleArc, 0, 100);
-              lv_obj_align(gui.element.cleanPopup.cleanCycleArc, LV_ALIGN_CENTER, 0, ui->process_arc_y);
+              lv_obj_align(gui.element.cleanPopup.cleanCycleArc, LV_ALIGN_CENTER, ui->process_arc_x, ui->process_arc_y);
               lv_obj_remove_style(gui.element.cleanPopup.cleanCycleArc, NULL, LV_PART_KNOB);
               lv_obj_remove_flag(gui.element.cleanPopup.cleanCycleArc, LV_OBJ_FLAG_CLICKABLE);
               lv_obj_set_style_arc_color(gui.element.cleanPopup.cleanCycleArc,lv_color_hex(GREEN_LIGHT) , LV_PART_INDICATOR);
@@ -755,7 +755,7 @@ void cleanPopup (void){
               lv_arc_set_bg_angles(gui.element.cleanPopup.cleanPumpArc, 0, 260);
               lv_arc_set_value(gui.element.cleanPopup.cleanPumpArc, 0);
               lv_arc_set_range(gui.element.cleanPopup.cleanPumpArc, 0, 100);
-              lv_obj_align(gui.element.cleanPopup.cleanPumpArc, LV_ALIGN_CENTER, 0, ui->process_arc_y);
+              lv_obj_align(gui.element.cleanPopup.cleanPumpArc, LV_ALIGN_CENTER, ui->process_arc_x, ui->process_arc_y);
               lv_obj_remove_style(gui.element.cleanPopup.cleanPumpArc, NULL, LV_PART_KNOB);
               lv_obj_remove_flag(gui.element.cleanPopup.cleanPumpArc, LV_OBJ_FLAG_CLICKABLE);
               lv_obj_set_style_arc_color(gui.element.cleanPopup.cleanPumpArc,lv_color_hex(ORANGE_LIGHT) , LV_PART_INDICATOR);
@@ -767,27 +767,27 @@ void cleanPopup (void){
 
               gui.element.cleanPopup.cleanRemainingTimeValue = lv_label_create(gui.element.cleanPopup.cleanProcessContainer);         
               lv_obj_set_style_text_font(gui.element.cleanPopup.cleanRemainingTimeValue, ui->time_font, 0);              
-              lv_obj_align(gui.element.cleanPopup.cleanRemainingTimeValue, LV_ALIGN_CENTER, 0, ui->remaining_time_y);
+              lv_obj_align(gui.element.cleanPopup.cleanRemainingTimeValue, LV_ALIGN_CENTER, ui->remaining_time_x, ui->remaining_time_y);
 
               gui.element.cleanPopup.cleanNowCleaningLabel = lv_label_create(gui.element.cleanPopup.cleanProcessContainer);         
               lv_obj_set_style_text_font(gui.element.cleanPopup.cleanNowCleaningLabel, ui->value_font, 0);              
-              lv_obj_align(gui.element.cleanPopup.cleanNowCleaningLabel, LV_ALIGN_CENTER, 0, ui->now_cleaning_label_y);
+              lv_obj_align(gui.element.cleanPopup.cleanNowCleaningLabel, LV_ALIGN_CENTER, ui->now_cleaning_label_x, ui->now_cleaning_label_y);
               lv_label_set_text(gui.element.cleanPopup.cleanNowCleaningLabel, cleanCurrentClean_text); 
 
               gui.element.cleanPopup.cleanNowCleaningValue = lv_label_create(gui.element.cleanPopup.cleanProcessContainer);          
               lv_obj_set_style_text_font(gui.element.cleanPopup.cleanNowCleaningValue, ui->value_font, 0);              
-              lv_obj_align(gui.element.cleanPopup.cleanNowCleaningValue, LV_ALIGN_CENTER, 0, ui->now_cleaning_value_y);
+              lv_obj_align(gui.element.cleanPopup.cleanNowCleaningValue, LV_ALIGN_CENTER, ui->now_cleaning_value_x, ui->now_cleaning_value_y);
 
 
               gui.element.cleanPopup.cleanNowStepLabelValue = lv_label_create(gui.element.cleanPopup.cleanProcessContainer);          
               lv_obj_set_style_text_font(gui.element.cleanPopup.cleanNowStepLabelValue, ui->step_font, 0); 
               //lv_label_set_text(gui.element.cleanPopup.cleanNowStepLabelValue,cleanFilling_text);             
-              lv_obj_align(gui.element.cleanPopup.cleanNowStepLabelValue, LV_ALIGN_CENTER, 0, ui->now_step_y);
+              lv_obj_align(gui.element.cleanPopup.cleanNowStepLabelValue, LV_ALIGN_CENTER, ui->now_step_x, ui->now_step_y);
 
 
               gui.element.cleanPopup.cleanStopButton = lv_button_create(gui.element.cleanPopup.cleanProcessContainer);
               lv_obj_set_size(gui.element.cleanPopup.cleanStopButton, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
-              lv_obj_align(gui.element.cleanPopup.cleanStopButton, LV_ALIGN_BOTTOM_MID, 0 , ui->stop_button_y);
+              lv_obj_align(gui.element.cleanPopup.cleanStopButton, LV_ALIGN_BOTTOM_MID, ui->stop_button_x , ui->stop_button_y);
               lv_obj_add_event_cb(gui.element.cleanPopup.cleanStopButton, event_cleanPopup, LV_EVENT_RELEASED, NULL);
               lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanStopButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
 

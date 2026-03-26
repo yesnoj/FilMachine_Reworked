@@ -165,9 +165,9 @@ void splashPopupCreate(void)
 
     /* ── Title ── */
     gui.element.splashPopup.splashTitle = lv_label_create(cont);
-    lv_label_set_text(gui.element.splashPopup.splashTitle, "Splash Screen");
+    lv_label_set_text(gui.element.splashPopup.splashTitle, splashPopupTitle_text);
     lv_obj_set_style_text_font(gui.element.splashPopup.splashTitle, ui->title_font, 0);
-    lv_obj_align(gui.element.splashPopup.splashTitle, LV_ALIGN_TOP_MID, 0, ui->title_y);
+    lv_obj_align(gui.element.splashPopup.splashTitle, LV_ALIGN_TOP_MID, ui->title_x, ui->title_y);
 
     /* ── Title line ── */
     initTitleLineStyle(&gui.element.splashPopup.style_titleLine, ORANGE);
@@ -181,24 +181,24 @@ void splashPopupCreate(void)
     lv_obj_add_style(gui.element.splashPopup.splashTitleLine,
                      &gui.element.splashPopup.style_titleLine, 0);
     lv_obj_align(gui.element.splashPopup.splashTitleLine,
-                 LV_ALIGN_TOP_MID, 0, ui->title_line_y);
+                 LV_ALIGN_TOP_MID, ui->title_line_x, ui->title_line_y);
 
     /* ── Default switch row ── */
     lv_obj_t *def_row = lv_obj_create(cont);
     lv_obj_remove_style_all(def_row);
-    lv_obj_set_size(def_row, lv_pct(90), ui->row_h);
-    lv_obj_align(def_row, LV_ALIGN_TOP_MID, 0, ui->default_switch_y);
+    lv_obj_set_size(def_row, ui->switch_row_w, ui->row_h);
+    lv_obj_align(def_row, LV_ALIGN_TOP_MID, ui->switch_row_x, ui->default_switch_y);
     lv_obj_remove_flag(def_row, LV_OBJ_FLAG_SCROLLABLE);
 
     gui.element.splashPopup.defaultLabel = lv_label_create(def_row);
-    lv_label_set_text(gui.element.splashPopup.defaultLabel, "Use Default");
+    lv_label_set_text(gui.element.splashPopup.defaultLabel, splashPopupUseDefault_text);
     lv_obj_set_style_text_font(gui.element.splashPopup.defaultLabel, ui->label_font, 0);
-    lv_obj_align(gui.element.splashPopup.defaultLabel, LV_ALIGN_LEFT_MID, ui->label_x, 0);
+    lv_obj_align(gui.element.splashPopup.defaultLabel, LV_ALIGN_LEFT_MID, ui->label_x, ui->switch_label_y);
 
     gui.element.splashPopup.defaultSwitch = lv_switch_create(def_row);
     lv_obj_set_size(gui.element.splashPopup.defaultSwitch,
                     ui_s->toggle_switch_w, ui_s->toggle_switch_h);
-    lv_obj_align(gui.element.splashPopup.defaultSwitch, LV_ALIGN_RIGHT_MID, 0, 0);
+    lv_obj_align(gui.element.splashPopup.defaultSwitch, LV_ALIGN_RIGHT_MID, ui->switch_x, ui->switch_y);
     lv_obj_set_style_bg_color(gui.element.splashPopup.defaultSwitch,
                               lv_palette_darken(LV_PALETTE_GREY, 3), LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(gui.element.splashPopup.defaultSwitch,
@@ -215,19 +215,19 @@ void splashPopupCreate(void)
     /* ── Random switch row ── */
     lv_obj_t *sw_row = lv_obj_create(cont);
     lv_obj_remove_style_all(sw_row);
-    lv_obj_set_size(sw_row, lv_pct(90), ui->row_h);
-    lv_obj_align(sw_row, LV_ALIGN_TOP_MID, 0, ui->random_switch_y);
+    lv_obj_set_size(sw_row, ui->switch_row_w, ui->row_h);
+    lv_obj_align(sw_row, LV_ALIGN_TOP_MID, ui->switch_row_x, ui->random_switch_y);
     lv_obj_remove_flag(sw_row, LV_OBJ_FLAG_SCROLLABLE);
 
     gui.element.splashPopup.randomLabel = lv_label_create(sw_row);
-    lv_label_set_text(gui.element.splashPopup.randomLabel, "Random");
+    lv_label_set_text(gui.element.splashPopup.randomLabel, splashPopupRandom_text);
     lv_obj_set_style_text_font(gui.element.splashPopup.randomLabel, ui->label_font, 0);
-    lv_obj_align(gui.element.splashPopup.randomLabel, LV_ALIGN_LEFT_MID, ui->label_x, 0);
+    lv_obj_align(gui.element.splashPopup.randomLabel, LV_ALIGN_LEFT_MID, ui->label_x, ui->switch_label_y);
 
     gui.element.splashPopup.randomSwitch = lv_switch_create(sw_row);
     lv_obj_set_size(gui.element.splashPopup.randomSwitch,
                     ui_s->toggle_switch_w, ui_s->toggle_switch_h);
-    lv_obj_align(gui.element.splashPopup.randomSwitch, LV_ALIGN_RIGHT_MID, 0, 0);
+    lv_obj_align(gui.element.splashPopup.randomSwitch, LV_ALIGN_RIGHT_MID, ui->switch_x, ui->switch_y);
     lv_obj_set_style_bg_color(gui.element.splashPopup.randomSwitch,
                               lv_palette_darken(LV_PALETTE_GREY, 3), LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(gui.element.splashPopup.randomSwitch,
@@ -243,9 +243,9 @@ void splashPopupCreate(void)
 
     /* ── Options container (visible only when Random=OFF and Default=OFF) ── */
     gui.element.splashPopup.optionsContainer = lv_obj_create(cont);
-    lv_obj_set_size(gui.element.splashPopup.optionsContainer, lv_pct(92), ui->options_h);
+    lv_obj_set_size(gui.element.splashPopup.optionsContainer, ui->options_w, ui->options_h);
     lv_obj_align(gui.element.splashPopup.optionsContainer,
-                 LV_ALIGN_TOP_MID, 0, ui->options_y);
+                 LV_ALIGN_TOP_MID, ui->options_x, ui->options_y);
     lv_obj_remove_flag(gui.element.splashPopup.optionsContainer, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_style_border_opa(gui.element.splashPopup.optionsContainer, LV_OPA_TRANSP, 0);
     lv_obj_set_style_bg_opa(gui.element.splashPopup.optionsContainer, LV_OPA_TRANSP, 0);
@@ -256,9 +256,9 @@ void splashPopupCreate(void)
 
     /* ── Row 1: Palette (text area → opens roller popup) ── */
     gui.element.splashPopup.paletteLabel = lv_label_create(opts);
-    lv_label_set_text(gui.element.splashPopup.paletteLabel, "Palette");
+    lv_label_set_text(gui.element.splashPopup.paletteLabel, splashPopupPalette_text);
     lv_obj_set_style_text_font(gui.element.splashPopup.paletteLabel, ui->label_font, 0);
-    lv_obj_align(gui.element.splashPopup.paletteLabel, LV_ALIGN_TOP_LEFT, ui->label_x, y + 6);
+    lv_obj_align(gui.element.splashPopup.paletteLabel, LV_ALIGN_TOP_LEFT, ui->label_x, y + ui->label_y_offset);
 
     gui.element.splashPopup.paletteTextArea = lv_textarea_create(opts);
     lv_obj_set_size(gui.element.splashPopup.paletteTextArea, ui->roller_w, ui->roller_h);
@@ -271,6 +271,7 @@ void splashPopupCreate(void)
     lv_obj_set_style_text_font(gui.element.splashPopup.paletteTextArea, ui->value_font, 0);
     lv_obj_set_style_border_color(gui.element.splashPopup.paletteTextArea,
                                   lv_color_hex(ORANGE), 0);
+    lv_obj_set_style_opa(gui.element.splashPopup.paletteTextArea, LV_OPA_TRANSP, LV_PART_CURSOR);
     {
         uint8_t idx = gui.page.settings.settingsParams.splashPalette;
         if (idx >= PALETTE_DISPLAY_COUNT) idx = 0;
@@ -285,9 +286,9 @@ void splashPopupCreate(void)
 
     /* ── Row 2: Shape Style (text area → opens roller popup) ── */
     gui.element.splashPopup.shapeLabel = lv_label_create(opts);
-    lv_label_set_text(gui.element.splashPopup.shapeLabel, "Shape Style");
+    lv_label_set_text(gui.element.splashPopup.shapeLabel, splashPopupShapeStyle_text);
     lv_obj_set_style_text_font(gui.element.splashPopup.shapeLabel, ui->label_font, 0);
-    lv_obj_align(gui.element.splashPopup.shapeLabel, LV_ALIGN_TOP_LEFT, ui->label_x, y + 6);
+    lv_obj_align(gui.element.splashPopup.shapeLabel, LV_ALIGN_TOP_LEFT, ui->label_x, y + ui->label_y_offset);
 
     gui.element.splashPopup.shapeTextArea = lv_textarea_create(opts);
     lv_obj_set_size(gui.element.splashPopup.shapeTextArea, ui->roller_w, ui->roller_h);
@@ -300,6 +301,7 @@ void splashPopupCreate(void)
     lv_obj_set_style_text_font(gui.element.splashPopup.shapeTextArea, ui->value_font, 0);
     lv_obj_set_style_border_color(gui.element.splashPopup.shapeTextArea,
                                   lv_color_hex(ORANGE), 0);
+    lv_obj_set_style_opa(gui.element.splashPopup.shapeTextArea, LV_OPA_TRANSP, LV_PART_CURSOR);
     {
         uint8_t idx = gui.page.settings.settingsParams.splashShapeStyle;
         if (idx >= SHAPE_DISPLAY_COUNT) idx = 0;
@@ -314,13 +316,13 @@ void splashPopupCreate(void)
 
     /* ── Row 3: Complexity (20–100, step 20) ── */
     gui.element.splashPopup.complexityLabel = lv_label_create(opts);
-    lv_label_set_text(gui.element.splashPopup.complexityLabel, "Complexity");
+    lv_label_set_text(gui.element.splashPopup.complexityLabel, splashPopupComplexity_text);
     lv_obj_set_style_text_font(gui.element.splashPopup.complexityLabel, ui->label_font, 0);
-    lv_obj_align(gui.element.splashPopup.complexityLabel, LV_ALIGN_TOP_LEFT, ui->label_x, y + 6);
+    lv_obj_align(gui.element.splashPopup.complexityLabel, LV_ALIGN_TOP_LEFT, ui->label_x, y + ui->label_y_offset);
 
     gui.element.splashPopup.complexitySlider = lv_slider_create(opts);
     lv_obj_set_width(gui.element.splashPopup.complexitySlider, ui->slider_w);
-    lv_obj_align(gui.element.splashPopup.complexitySlider, LV_ALIGN_TOP_RIGHT, ui->slider_x, y + 10);
+    lv_obj_align(gui.element.splashPopup.complexitySlider, LV_ALIGN_TOP_RIGHT, ui->slider_x, y + ui->slider_y_offset);
     lv_slider_set_range(gui.element.splashPopup.complexitySlider, 20, 100);
     {
         int32_t val = gui.page.settings.settingsParams.splashComplexity;
@@ -346,7 +348,7 @@ void splashPopupCreate(void)
     gui.element.splashPopup.closeButton = lv_button_create(cont);
     lv_obj_set_size(gui.element.splashPopup.closeButton, ui->close_btn_w, ui->close_btn_h);
     lv_obj_align(gui.element.splashPopup.closeButton,
-                 LV_ALIGN_BOTTOM_MID, 0, -(ui->close_btn_y));
+                 LV_ALIGN_BOTTOM_MID, ui->close_btn_x, -(ui->close_btn_y));
     lv_obj_set_style_bg_color(gui.element.splashPopup.closeButton,
                               lv_color_hex(ORANGE), LV_PART_MAIN);
     lv_obj_add_event_cb(gui.element.splashPopup.closeButton,
@@ -354,7 +356,7 @@ void splashPopupCreate(void)
                         gui.element.splashPopup.closeButton);
 
     gui.element.splashPopup.closeButtonLabel = lv_label_create(gui.element.splashPopup.closeButton);
-    lv_label_set_text(gui.element.splashPopup.closeButtonLabel, "Close");
+    lv_label_set_text(gui.element.splashPopup.closeButtonLabel, buttonClose_text);
     lv_obj_set_style_text_font(gui.element.splashPopup.closeButtonLabel, ui->button_font, 0);
     lv_obj_center(gui.element.splashPopup.closeButtonLabel);
 

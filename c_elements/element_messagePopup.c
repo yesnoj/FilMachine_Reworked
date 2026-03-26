@@ -514,7 +514,7 @@ void messagePopupCreate(const char * popupTitleText,const char * popupText,const
          gui.element.messagePopup.mBoxPopupTitle = lv_label_create(gui.element.messagePopup.mBoxPopupContainer);
          lv_label_set_text(gui.element.messagePopup.mBoxPopupTitle, popupTitleText);
          lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupTitle, ui->title_font, 0);
-         lv_obj_align(gui.element.messagePopup.mBoxPopupTitle, LV_ALIGN_TOP_MID, 0, ui->title_y);
+         lv_obj_align(gui.element.messagePopup.mBoxPopupTitle, LV_ALIGN_TOP_MID, ui->title_x, ui->title_y);
 
 
    /*Create style*/
@@ -526,7 +526,7 @@ void messagePopupCreate(const char * popupTitleText,const char * popupText,const
    gui.element.messagePopup.mBoxPopupTitleLine = lv_line_create(gui.element.messagePopup.mBoxPopupContainer);
    lv_line_set_points(gui.element.messagePopup.mBoxPopupTitleLine, gui.element.messagePopup.titleLinePoints, 2);
    lv_obj_add_style(gui.element.messagePopup.mBoxPopupTitleLine, &gui.element.messagePopup.style_mBoxPopupTitleLine, 0);
-   lv_obj_align(gui.element.messagePopup.mBoxPopupTitleLine, LV_ALIGN_TOP_MID, 0, ui->title_line_y);
+   lv_obj_align(gui.element.messagePopup.mBoxPopupTitleLine, LV_ALIGN_TOP_MID, ui->title_line_x, ui->title_line_y);
 
 
   /*********************
@@ -542,7 +542,7 @@ void messagePopupCreate(const char * popupTitleText,const char * popupText,const
        : ui->text_container_h;
 
    gui.element.messagePopup.mBoxPopupTextContainer = lv_obj_create(gui.element.messagePopup.mBoxPopupContainer);
-   lv_obj_align(gui.element.messagePopup.mBoxPopupTextContainer, LV_ALIGN_TOP_MID, 0, ui->text_container_y);
+   lv_obj_align(gui.element.messagePopup.mBoxPopupTextContainer, LV_ALIGN_TOP_MID, ui->text_container_x, ui->text_container_y);
    lv_obj_set_size(gui.element.messagePopup.mBoxPopupTextContainer, ui->text_container_w, text_area_h);
    lv_obj_set_style_border_opa(gui.element.messagePopup.mBoxPopupTextContainer, LV_OPA_TRANSP, 0);
    lv_obj_set_style_pad_all(gui.element.messagePopup.mBoxPopupTextContainer, 0, 0);

@@ -82,10 +82,10 @@ static void initProcesses(void){
       lv_obj_set_style_text_font(gui.page.processes.processesLabel, ui->processes.title_font, 0);
       lv_obj_align(gui.page.processes.processesLabel, LV_ALIGN_TOP_LEFT, ui->processes.title_label_x, ui->processes.title_label_y);
 
-      gui.page.processes.iconNewProcessLabel = lv_label_create(gui.page.processes.newProcessButton);          
-      lv_label_set_text(gui.page.processes.iconNewProcessLabel, newProcess_icon);                  
+      gui.page.processes.iconNewProcessLabel = lv_label_create(gui.page.processes.newProcessButton);
+      lv_label_set_text(gui.page.processes.iconNewProcessLabel, newProcess_icon);
       lv_obj_set_style_text_font(gui.page.processes.iconNewProcessLabel, ui->processes.header_icon_font, 0);
-      lv_obj_align(gui.page.processes.iconNewProcessLabel, LV_ALIGN_RIGHT_MID, ui->processes.add_icon_x, 0);
+      lv_obj_align(gui.page.processes.iconNewProcessLabel, LV_ALIGN_RIGHT_MID, ui->processes.add_icon_x, ui->processes.add_icon_y);
 
 
   //FILTER BUTTON CONTAINER
@@ -123,7 +123,7 @@ static void initProcesses(void){
   lv_obj_add_style(gui.page.processes.sectionTitleLine, &gui.page.processes.style_sectionTitleLine, 0);
   gui.page.processes.titleLinePoints[1].x = ui->common.title_line_w;
   lv_line_set_points(gui.page.processes.sectionTitleLine, gui.page.processes.titleLinePoints, 2);
-  lv_obj_align(gui.page.processes.sectionTitleLine, LV_ALIGN_TOP_MID, 0, ui->common.title_line_y);
+  lv_obj_align(gui.page.processes.sectionTitleLine, LV_ALIGN_TOP_MID, ui->common.title_line_x, ui->common.title_line_y);
 
   //lv_obj_update_layout(gui.page.processes.processesSection);
 

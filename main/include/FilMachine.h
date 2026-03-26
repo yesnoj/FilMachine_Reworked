@@ -109,6 +109,28 @@ typedef enum {
 #define POPUP_WIDTH					(ui_get_profile()->popups.message_w)
 #define POPUP_HEIGHT				(ui_get_profile()->popups.message_h)
 
+/* Splash screen strings */
+#define splashTitle_text						"FILMACHINE"
+#define splashSubtitle_text						"Digital Film Developer"
+#define splashVersion_text						"v2.1.0"
+
+/* Splash popup strings */
+#define splashPopupTitle_text					"Splash Screen"
+#define splashPopupUseDefault_text				"Use Default"
+#define splashPopupRandom_text					"Random"
+#define splashPopupPalette_text					"Palette"
+#define splashPopupShapeStyle_text				"Shape Style"
+#define splashPopupComplexity_text				"Complexity"
+
+/* Settings row strings */
+#define settingsSplashScreen_text				"Splash Screen"
+
+/* Checkup placeholder */
+#define checkupEllipsis_text					"..."
+
+/* Step source format */
+#define stepSourceFmt_text						"From:%s"
+
 /* Icon Characters */
 #define plusplus_icon2				"\xC2\xB1"
 #define tabProcess_label			"Process list"
@@ -289,6 +311,7 @@ typedef enum {
 #define cleanRunButton_text							"Run"
 #define cleanStopButton_text						"Stop"
 #define cleanCloseButton_text						"Close"
+#define cleanCycleFmt_text							"%s cycle:%d"
 #define cleanCurrentClean_text						"Cleaning"
 #define cleanCompleteClean_text						"COMPLETE"
 #define cleanWaste_text								"Waste"
@@ -299,6 +322,8 @@ typedef enum {
 #define drainStopped_text                       "Drain stopped"
 #define drainComplete_text                      "Drain complete!"
 #define drainWasteIndicator_text                ">> WASTE <<"
+#define drainDrainingFmt_text                   "Draining: %s"
+#define drainDrainingC1_text                    "Draining: C1"
 
 /* Self-check popup texts */
 #define selfCheck_text                          "Self-check"
@@ -316,6 +341,13 @@ typedef enum {
 #define selfCheckFinished_text                  "Self-check finished"
 #define selfCheckSkip_text                      "Skip"
 #define selfCheckNext_text                      "Next"
+#define selfCheckRerun_text                     "Re-run"
+#define selfCheckStopped_text                   "Stopped"
+#define selfCheckSkipped_text                   "Skipped"
+#define selfCheckPumpRunning_text               "Pump running..."
+#define selfCheckTimeFmt_text                   "Time: %lds"
+#define selfCheckTempFmt_text                   "Temp: %d.%d C"
+#define selfCheckValveFmt_text                  "Valve: %s"
 
 /* Common button texts */
 #define buttonClose_text                        "Close"
@@ -380,6 +412,10 @@ typedef enum {
 #define calibrationResetPopupBody_text				"Temperature calibration has been reset to default values."
 
 /* OTA update strings */
+#define otaConnecting_text							"Connecting..."
+#define otaStartingServer_text						"Starting server..."
+#define otaStarting_text							"Starting..."
+#define otaZeroPercent_text							"0%"
 #define otaUpdate_text								"Update"
 #define otaUpdateFromSD_text						"Update from SD"
 #define otaUpdateFromSDMBox_text					"Update firmware from\nSD card file."

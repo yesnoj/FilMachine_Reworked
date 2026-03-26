@@ -96,7 +96,7 @@ void filterPopupCreate (void){
       gui.element.filterPopup.mBoxTitle = lv_label_create(gui.element.filterPopup.mBoxContainer);         
       lv_label_set_text(gui.element.filterPopup.mBoxTitle, filterPopupTitle_text); 
       lv_obj_set_style_text_font(gui.element.filterPopup.mBoxTitle, ui->title_font, 0);              
-      lv_obj_align(gui.element.filterPopup.mBoxTitle, LV_ALIGN_TOP_MID, 0, ui->title_y);
+      lv_obj_align(gui.element.filterPopup.mBoxTitle, LV_ALIGN_TOP_MID, ui->title_x, ui->title_y);
 
       /*Create style*/
       lv_style_init(&gui.element.filterPopup.style_mBoxTitleLine);
@@ -108,7 +108,7 @@ void filterPopupCreate (void){
       gui.element.filterPopup.mBoxStepPopupTitleLine = lv_line_create(gui.element.filterPopup.mBoxContainer);
       lv_line_set_points(gui.element.filterPopup.mBoxStepPopupTitleLine, gui.element.filterPopup.titleLinePoints, 2);
       lv_obj_add_style(gui.element.filterPopup.mBoxStepPopupTitleLine, &gui.element.filterPopup.style_mBoxTitleLine, 0);
-      lv_obj_align(gui.element.filterPopup.mBoxStepPopupTitleLine, LV_ALIGN_TOP_MID, 0, ui->title_line_y);
+      lv_obj_align(gui.element.filterPopup.mBoxStepPopupTitleLine, LV_ALIGN_TOP_MID, ui->title_line_x, ui->title_line_y);
 
       //CLOSE BUTTON
       gui.element.filterPopup.mBoxCloseButton = lv_button_create(gui.element.filterPopup.mBoxContainer);
@@ -136,12 +136,12 @@ void filterPopupCreate (void){
           gui.element.filterPopup.mBoxNameLabel = lv_label_create(gui.element.filterPopup.mBoxNameContainer);         
           lv_label_set_text(gui.element.filterPopup.mBoxNameLabel, filterPopupName_text); 
           lv_obj_set_style_text_font(gui.element.filterPopup.mBoxNameLabel, ui->title_font, 0);              
-          lv_obj_align(gui.element.filterPopup.mBoxNameLabel, LV_ALIGN_LEFT_MID, ui->name_label_x, 0);
+          lv_obj_align(gui.element.filterPopup.mBoxNameLabel, LV_ALIGN_LEFT_MID, ui->name_label_x, ui->name_label_y);
       
           gui.element.filterPopup.mBoxNameTextArea = lv_textarea_create(gui.element.filterPopup.mBoxNameContainer);
           lv_textarea_set_one_line(gui.element.filterPopup.mBoxNameTextArea, true);
           lv_textarea_set_placeholder_text(gui.element.filterPopup.mBoxNameTextArea, filterPopupNamePlaceHolder_text);
-          lv_obj_align(gui.element.filterPopup.mBoxNameTextArea, LV_ALIGN_LEFT_MID, ui->name_textarea_x, 0);
+          lv_obj_align(gui.element.filterPopup.mBoxNameTextArea, LV_ALIGN_LEFT_MID, ui->name_textarea_x, ui->name_textarea_y);
           lv_obj_set_width(gui.element.filterPopup.mBoxNameTextArea, ui->name_textarea_w);
           lv_obj_set_style_text_font(gui.element.filterPopup.mBoxNameTextArea, ui->textarea_font, 0);
           memset(&gui.element.filterPopup.nameKeyboardCtx, 0, sizeof(gui.element.filterPopup.nameKeyboardCtx));
@@ -169,7 +169,7 @@ void filterPopupCreate (void){
           gui.element.filterPopup.mBoxColorLabel = lv_label_create(gui.element.filterPopup.selectColorContainerRadioButton);
           lv_label_set_text(gui.element.filterPopup.mBoxColorLabel, filterPopupColor_text);
           lv_obj_set_style_text_font(gui.element.filterPopup.mBoxColorLabel, ui->title_font, 0);
-          lv_obj_align(gui.element.filterPopup.mBoxColorLabel, LV_ALIGN_LEFT_MID, ui->filter_label_offset_x, 0);
+          lv_obj_align(gui.element.filterPopup.mBoxColorLabel, LV_ALIGN_LEFT_MID, ui->filter_label_offset_x, ui->filter_label_offset_y);
 
           gui.element.filterPopup.mBoxSelectColorRadioButton = create_radiobutton(gui.element.filterPopup.selectColorContainerRadioButton, "", ui->color_radio_x, 0, ui->option_radio_size, ui->radio_font, lv_color_hex(GREEN_DARK), lv_palette_main(LV_PALETTE_GREEN));
           lv_obj_add_event_cb(gui.element.filterPopup.mBoxSelectColorRadioButton, event_filterMBox, LV_EVENT_VALUE_CHANGED, gui.element.filterPopup.mBoxSelectColorRadioButton);
@@ -185,7 +185,7 @@ void filterPopupCreate (void){
           gui.element.filterPopup.mBoxBnWLabel = lv_label_create(gui.element.filterPopup.selectBnWContainerRadioButton);
           lv_label_set_text(gui.element.filterPopup.mBoxBnWLabel, filterPopupBnW_text);
           lv_obj_set_style_text_font(gui.element.filterPopup.mBoxBnWLabel, ui->title_font, 0);
-          lv_obj_align(gui.element.filterPopup.mBoxBnWLabel, LV_ALIGN_LEFT_MID, ui->filter_label_offset_x, 0);
+          lv_obj_align(gui.element.filterPopup.mBoxBnWLabel, LV_ALIGN_LEFT_MID, ui->filter_label_offset_x, ui->filter_label_offset_y);
 
           gui.element.filterPopup.mBoxSelectBnWRadioButton = create_radiobutton(gui.element.filterPopup.selectBnWContainerRadioButton, "", ui->bw_radio_x, 0, ui->option_radio_size, ui->radio_font, lv_color_hex(GREEN_DARK), lv_palette_main(LV_PALETTE_GREEN));
           lv_obj_add_event_cb(gui.element.filterPopup.mBoxSelectBnWRadioButton, event_filterMBox, LV_EVENT_VALUE_CHANGED, gui.element.filterPopup.mBoxSelectBnWRadioButton);
@@ -201,7 +201,7 @@ void filterPopupCreate (void){
           gui.element.filterPopup.mBoxPreferredLabel = lv_label_create(gui.element.filterPopup.mBoxPreferredContainer);
           lv_label_set_text(gui.element.filterPopup.mBoxPreferredLabel, filterPopupPreferred_text);
           lv_obj_set_style_text_font(gui.element.filterPopup.mBoxPreferredLabel, ui->title_font, 0);
-          lv_obj_align(gui.element.filterPopup.mBoxPreferredLabel, LV_ALIGN_LEFT_MID, ui->filter_label_offset_x, 0);
+          lv_obj_align(gui.element.filterPopup.mBoxPreferredLabel, LV_ALIGN_LEFT_MID, ui->filter_label_offset_x, ui->filter_label_offset_y);
 
           gui.element.filterPopup.mBoxOnlyPreferredSwitch = create_radiobutton(gui.element.filterPopup.mBoxPreferredContainer, "", ui->preferred_radio_x, 0, ui->option_radio_size, ui->radio_font, lv_color_hex(GREEN_DARK), lv_palette_main(LV_PALETTE_GREEN));
           lv_obj_add_event_cb(gui.element.filterPopup.mBoxOnlyPreferredSwitch, event_filterMBox, LV_EVENT_VALUE_CHANGED, gui.element.filterPopup.mBoxOnlyPreferredSwitch);

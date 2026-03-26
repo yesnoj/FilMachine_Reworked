@@ -16,6 +16,7 @@ typedef struct {
     int content_y;
     int content_w;
     int content_h;
+    int title_line_x;
     int title_line_w;
     int title_line_y;
 } ui_common_layout_t;
@@ -28,7 +29,9 @@ typedef struct {
     int tab_processes_y;
     int tab_settings_y;
     int tab_tools_y;
+    int tab_icon_offset_x;
     int tab_icon_offset_y;
+    int tab_label_offset_x;
     int tab_label_offset_y;
     const lv_font_t *tab_icon_font;
     const lv_font_t *tab_label_font;
@@ -42,6 +45,7 @@ typedef struct {
     int title_label_x;
     int title_label_y;
     int add_icon_x;
+    int add_icon_y;
     int filter_btn_size;
     int filter_btn_x;
     int list_x;
@@ -63,8 +67,13 @@ typedef struct {
     int textarea_w;
     int textarea_h;
     int row_label_x;
+    int row_label_y;         /* y offset for row labels (LEFT_MID) */
+    int switch_x;            /* x offset for switches (RIGHT_MID) */
+    int switch_y;            /* y offset for switches (RIGHT_MID) */
+    int slider_x_offset;     /* x offset for sliders in row (TOP_LEFT) */
     int section_label_x;
     int section_label_y;
+    int section_line_x;
     int section_line_y;
     int scroll_x;
     int scroll_y;
@@ -155,6 +164,11 @@ typedef struct {
     int run_y;
     int run_w;
     int run_h;
+    int title_x;             /* x offset for title label (TOP_MID) */
+    int title_line_x;        /* x offset for title underline (TOP_MID) */
+    int form_label_y;        /* y offset for form labels/values (LEFT_MID/RIGHT_MID) */
+    int container_x;         /* x offset for modal container (CENTER) */
+    int container_y;         /* y offset for modal container (CENTER) */
     const lv_font_t *title_font;
     const lv_font_t *name_font;
     const lv_font_t *section_font;
@@ -186,6 +200,7 @@ typedef struct {
     int seconds_textarea_x;
     int time_textarea_w;
     int row_label_x;
+    int row_label_y;        /* y offset for form row labels (LEFT_MID) */
     int dropdown_list_h;
     int source_row_extra_w;
     int type_dropdown_x;
@@ -211,6 +226,10 @@ typedef struct {
     int cancel_y;
     int cancel_w;
     int cancel_h;
+    int title_x;             /* x offset for title label (TOP_MID) */
+    int title_line_x;        /* x offset for title underline (TOP_MID) */
+    int container_x;         /* x offset for modal container (CENTER) */
+    int container_y;         /* y offset for modal container (CENTER) */
     const lv_font_t *title_font;
     const lv_font_t *label_font;
     const lv_font_t *value_font;
@@ -223,6 +242,7 @@ typedef struct {
     int stage_panel_h;
     int stage_panel_x;
     int stage_panel_y;
+    int stage_panel_inset;  /* negative inset for stage containers (e.g. -22) */
     int close_btn_w;
     int close_btn_h;
     int close_x;
@@ -267,20 +287,31 @@ typedef struct {
     int stage_title_w;
     int stage_title_x;
     int stage_title_y;
+    int tank_size_label_x;
     int tank_size_label_y;
+    int chem_volume_label_x;
     int chem_volume_label_y;
+    int stage_tank_size_textarea_x;
     int stage_tank_size_textarea_y;
+    int stage_chem_volume_textarea_x;
     int stage_chem_volume_textarea_y;
     int stage_textarea_w;
+    int stage_button_x;
     int stage_button_y;
+    int fill_label_x;
     int fill_label_w;
     int fill_label_y;
     int reach_title_w;
     int reach_title_y;
+    int target_temp_container_x;
+    int target_temp_container_y;
     int target_title_w;
     int target_title_h;
+    int target_title_x;
     int target_title_y;
+    int target_title_value_x;
     int target_title_value_y;
+    int target_tolerance_x;
     int target_tolerance_y;
     int continue_button_w;
     int target_temp_y;
@@ -288,14 +319,21 @@ typedef struct {
     int target_temp_h;
     int target_temp_left_x;
     int target_temp_right_x;
+    int target_temp_label_x;
     int target_temp_label_y;
+    int target_temp_value_x;
     int target_temp_value_y;
+    int heater_status_x;
     int heater_status_y;
     int film_box_w;
     int film_box_h;
+    int film_tank_present_box_x;
     int film_tank_present_box_y;
+    int film_rotating_box_x;
     int film_rotating_box_y;
+    int film_label_x;
     int film_label_y;
+    int film_value_x;
     int film_value_y;
     int processing_container_x;
     int processing_container_y;
@@ -303,16 +341,25 @@ typedef struct {
     int processing_container_h;
     int processing_arc_size;
     int processing_arc_width;
+    int processing_arc_center_x;
     int processing_arc_center_y;
+    int processing_time_x;
     int processing_time_y;
+    int processing_step_name_x;
     int processing_step_name_y;
     int processing_step_name_w;
     int processing_step_time_y;
     int processing_step_arc_size;
+    int processing_step_arc_center_x;
     int processing_step_arc_center_y;
+    int processing_step_kind_x;
     int processing_step_kind_y;
     int processing_pump_arc_size;
+    int processing_complete_x;
     int processing_complete_y;
+    int left_status_icon_y;
+    int left_status_label_y;
+    int processing_row_value_y;
     int action_btn_w;
     int action_btn_h;
     const lv_font_t *close_icon_font;
@@ -348,6 +395,7 @@ typedef struct {
     int action_row_h;
     int stat_row_h;
     int item_label_x;
+    int item_label_y;       /* y offset for item labels/values (LEFT_MID/RIGHT_MID) */
     int item_btn_x;
     int maintenance_clean_y;
     int maintenance_drain_y;
@@ -370,6 +418,7 @@ typedef struct {
     int action_btn_h;
     int credit_button_h;
     int credit_button_w;
+    int section_line_x;      /* x offset for section lines (TOP_MID) */
     const lv_font_t *section_font;
     const lv_font_t *item_font;
     const lv_font_t *button_icon_font;
@@ -378,11 +427,16 @@ typedef struct {
 
 
 typedef struct {
+    int title_x;
     int title_y;
+    int title_line_x;
     int title_line_y;
+    int wheel_container_x;
     int wheel_container_y;
+    int wheel_x;
     int wheel_w;
     int wheel_visible_rows;
+    int confirm_btn_x;
     int confirm_btn_y;
     const lv_font_t *title_font;
     const lv_font_t *confirm_btn_font;
@@ -393,10 +447,28 @@ typedef struct {
 } ui_roller_popup_layout_t;
 
 typedef struct {
+    int title_x;
     int title_y;
+    int title_line_x;
     int title_line_y;
+    int settings_x;
     int settings_y;
+    int subtitle_x;
     int subtitle_y;
+    int checkbox_y;         /* y offset for checkboxes in LEFT_MID rows */
+    int checkbox_label_y;   /* y offset for checkbox labels in LEFT_MID rows */
+    int spinbox_container_x;
+    int spinbox_y;
+    int repeat_label_y;
+    int drain_container_x;
+    int drain_label_y;
+    int drain_switch_y;
+    int process_arc_x;
+    int remaining_time_x;
+    int now_cleaning_label_x;
+    int now_cleaning_value_x;
+    int now_step_x;
+    int stop_button_x;
     int chem_container_x;
     int chem_container_y;
     int chem_container_w;
@@ -449,11 +521,20 @@ typedef struct {
 } ui_clean_popup_layout_t;
 
 typedef struct {
+    int title_x;
     int title_y;
+    int title_line_x;
     int title_line_y;
+    int confirm_x;
     int confirm_y;
+    int confirm_info_x;
     int confirm_info_w;
     int confirm_info_y;
+    int progress_container_x;
+    int drain_status_x;
+    int waste_label_x;
+    int remaining_time_x;
+    int stop_btn_x;
     int start_cancel_btn_x;
     int start_cancel_btn_y;
     int action_btn_w;
@@ -483,7 +564,9 @@ typedef struct {
 } ui_drain_popup_layout_t;
 
 typedef struct {
+    int title_x;
     int title_y;
+    int title_line_x;
     int title_line_y;
     int close_x;
     int close_y;
@@ -495,8 +578,11 @@ typedef struct {
     int name_container_w;
     int name_container_h;
     int name_label_x;
+    int name_label_y;
     int name_textarea_x;
+    int name_textarea_y;
     int name_textarea_w;
+    int filter_label_offset_y;
     int color_row_y;
     int bw_row_y;
     int preferred_row_y;
@@ -533,7 +619,9 @@ typedef struct {
 } ui_filter_popup_layout_t;
 
 typedef struct {
+    int title_x;
     int title_y;
+    int title_line_x;
     int title_line_y;
     int close_x;
     int close_y;
@@ -554,13 +642,18 @@ typedef struct {
     int right_panel_y;
     int right_panel_w;
     int right_panel_h;
+    int phase_title_x;
     int phase_title_w;
     int phase_title_y;
+    int phase_desc_x;
     int phase_desc_w;
     int phase_desc_y;
+    int phase_status_x;
     int phase_status_w;
     int phase_status_y;
+    int phase_timer_x;
     int phase_timer_y;
+    int progress_bar_x;
     int progress_bar_w;
     int progress_bar_h;
     int progress_bar_y;
@@ -583,24 +676,32 @@ typedef struct {
 } ui_selfcheck_popup_layout_t;
 
 typedef struct {
+    int title_x;
     int title_y;
+    int title_line_x;
     int title_line_y;
     int close_x;
     int close_y;
     int close_w;
     int close_h;
     int close_icon_size;
+    int ip_label_x;
     int ip_label_w;
     int ip_label_y;
+    int pin_label_x;
     int pin_label_w;
     int pin_label_y;
+    int status_label_x;
     int status_label_w;
     int status_label_y;
+    int progress_x;
     int progress_h;
     int progress_y;
     int progress_radius;
+    int progress_status_x;
     int progress_status_y;
     int progress_bar_y;
+    int percent_x;
     int percent_y;
     int progress_popup_radius;
     const lv_font_t *title_font;
@@ -613,6 +714,11 @@ typedef struct {
 } ui_ota_popup_layout_t;
 
 typedef struct {
+    int title_x;
+    int title_y;
+    int title_line_x;
+    int title_line_y;
+    int text_container_x;
     int text_container_y;
     int text_container_w;
     int text_container_h;
@@ -626,8 +732,6 @@ typedef struct {
     int action_btn_y;
     int action_btn_w;
     int action_btn_h;
-    int title_y;           /* was hardcoded -10 */
-    int title_line_y;      /* was hardcoded 23  */
     const lv_font_t *title_font;
     const lv_font_t *text_font;
     const lv_font_t *button_font;
@@ -664,7 +768,11 @@ typedef struct {
     int time_icon_no_temp_x;
     int time_value_no_temp_x;
     int type_icon_x;
+    int type_icon_y;
     int preferred_icon_x;
+    int preferred_icon_y;
+    int delete_icon_y;
+    int time_width_margin;      /* right-side margin subtracted from time label width */
     const lv_font_t *name_font;
     const lv_font_t *detail_font;
     const lv_font_t *detail_icon_font;
@@ -684,11 +792,13 @@ typedef struct {
     int delete_btn_x;
     int delete_btn_y;
     int delete_icon_x;
+    int delete_icon_y;
     int edit_btn_w;
     int edit_btn_h;
     int edit_btn_x;
     int edit_btn_y;
     int edit_icon_x;
+    int edit_icon_y;
     int card_content_w;
     int card_content_h;
     int card_content_x;
@@ -790,25 +900,50 @@ typedef struct {
     int title_line_y;
     int default_switch_y;
     int random_switch_y;
+    int switch_row_w;       /* width of switch rows (Default / Random) */
+    int options_x;
     int options_y;
     int options_h;
+    int options_w;          /* width of options container */
     int row_h;
     int row_gap;
     int label_x;
+    int label_y_offset;     /* vertical offset for labels inside a row */
     int roller_x;
     int roller_w;
     int roller_h;
     int roller_visible_rows;
     int slider_w;
     int slider_x;
+    int slider_y_offset;    /* vertical offset for slider inside its row */
+    int title_x;            /* x offset for title label */
+    int title_line_x;       /* x offset for title underline */
+    int switch_row_x;       /* x offset for Default / Random switch rows */
+    int switch_x;           /* x offset for switch inside its row */
+    int switch_y;           /* y offset for switch inside its row */
+    int close_btn_x;        /* x offset for close button */
     int close_btn_w;
     int close_btn_h;
     int close_btn_y;
+    int switch_label_y;      /* y offset for switch row labels (LEFT_MID) */
     const lv_font_t *title_font;
     const lv_font_t *label_font;
     const lv_font_t *button_font;
     const lv_font_t *value_font;
 } ui_splash_popup_layout_t;
+
+typedef struct {
+    int subtitle_x;         /* x offset for subtitle relative to title */
+    int subtitle_y;         /* y gap between title and subtitle */
+    int version_x;          /* version label x offset (bottom-right) */
+    int version_y;          /* version label y offset (bottom-right) */
+    int play_icon_x;        /* play icon x offset (bottom-right) */
+    int play_icon_y;        /* play icon y offset (bottom-right) */
+    int play_hit_w;         /* play button hit area width */
+    int play_hit_h;         /* play button hit area height */
+    int play_hit_x;         /* play button hit area x offset (bottom-right) */
+    int play_hit_y;         /* play button hit area y offset (bottom-right) */
+} ui_splash_screen_layout_t;
 
 typedef struct {
     ui_common_layout_t common;
@@ -828,6 +963,7 @@ typedef struct {
     ui_ota_popup_layout_t ota_popup;
     ui_message_popup_layout_t message_popup;
     ui_splash_popup_layout_t splash_popup;
+    ui_splash_screen_layout_t splash_screen;
     ui_process_element_layout_t process_element;
     ui_step_element_layout_t step_element;
     ui_button_sizes_t buttons;

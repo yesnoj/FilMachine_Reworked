@@ -393,7 +393,7 @@ void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *w
          gui.element.rollerPopup.mBoxRollerTitle = lv_label_create(gui.element.rollerPopup.mBoxRollerContainer);         
          lv_label_set_text(gui.element.rollerPopup.mBoxRollerTitle, popupTitle); 
          lv_obj_set_style_text_font(gui.element.rollerPopup.mBoxRollerTitle, ui->title_font, 0);              
-         lv_obj_align(gui.element.rollerPopup.mBoxRollerTitle, LV_ALIGN_TOP_MID, 0, ui->title_y);
+         lv_obj_align(gui.element.rollerPopup.mBoxRollerTitle, LV_ALIGN_TOP_MID, ui->title_x, ui->title_y);
 
 
    /*Create style*/
@@ -405,7 +405,7 @@ void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *w
    gui.element.rollerPopup.mBoxRollerTitleLine = lv_line_create(gui.element.rollerPopup.mBoxRollerContainer);
    lv_line_set_points(gui.element.rollerPopup.mBoxRollerTitleLine, gui.element.rollerPopup.titleLinePoints, 2);
    lv_obj_add_style(gui.element.rollerPopup.mBoxRollerTitleLine, &gui.element.rollerPopup.style_mBoxRollerTitleLine, 0);
-   lv_obj_align(gui.element.rollerPopup.mBoxRollerTitleLine, LV_ALIGN_TOP_MID, 0, ui->title_line_y);
+   lv_obj_align(gui.element.rollerPopup.mBoxRollerTitleLine, LV_ALIGN_TOP_MID, ui->title_line_x, ui->title_line_y);
 
 
   /*********************
@@ -413,7 +413,7 @@ void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *w
   *********************/
 
   gui.element.rollerPopup.mBoxRollerRollerContainer = lv_obj_create(gui.element.rollerPopup.mBoxRollerContainer);
-  lv_obj_align(gui.element.rollerPopup.mBoxRollerRollerContainer, LV_ALIGN_TOP_MID, 0, ui->wheel_container_y);
+  lv_obj_align(gui.element.rollerPopup.mBoxRollerRollerContainer, LV_ALIGN_TOP_MID, ui->wheel_container_x, ui->wheel_container_y);
   lv_obj_set_size(gui.element.rollerPopup.mBoxRollerRollerContainer, ui_get_profile()->popups.roller_content_w, ui_get_profile()->popups.roller_content_h);
   lv_obj_set_style_border_opa(gui.element.rollerPopup.mBoxRollerRollerContainer, LV_OPA_TRANSP, 0);
   lv_obj_remove_flag(gui.element.rollerPopup.mBoxRollerContainer, LV_OBJ_FLAG_SCROLLABLE);
@@ -433,7 +433,7 @@ void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *w
   lv_roller_set_visible_row_count(gui.element.rollerPopup.roller, ui->wheel_visible_rows);
   lv_obj_set_width(gui.element.rollerPopup.roller, ui->wheel_w);
   lv_obj_set_height(gui.element.rollerPopup.roller, ui_get_profile()->popups.roller_wheel_h);
-  lv_obj_align(gui.element.rollerPopup.roller, LV_ALIGN_CENTER, 0, ui_get_profile()->popups.roller_wheel_y);
+  lv_obj_align(gui.element.rollerPopup.roller, LV_ALIGN_CENTER, ui->wheel_x, ui_get_profile()->popups.roller_wheel_y);
   lv_obj_add_event_cb(gui.element.rollerPopup.roller, event_Roller, LV_EVENT_VALUE_CHANGED, NULL);
   lv_obj_add_style(gui.element.rollerPopup.roller, &gui.element.rollerPopup.style_roller, LV_PART_SELECTED);
   lv_obj_set_style_text_font(gui.element.rollerPopup.roller, ui->wheel_normal_font, LV_PART_MAIN);
@@ -442,7 +442,7 @@ void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *w
 
    gui.element.rollerPopup.mBoxRollerButton = lv_button_create(gui.element.rollerPopup.mBoxRollerRollerContainer);
    lv_obj_set_size(gui.element.rollerPopup.mBoxRollerButton, ui->confirm_btn_w, ui->confirm_btn_h);
-   lv_obj_align(gui.element.rollerPopup.mBoxRollerButton, LV_ALIGN_BOTTOM_MID, 0 , ui->confirm_btn_y);
+   lv_obj_align(gui.element.rollerPopup.mBoxRollerButton, LV_ALIGN_BOTTOM_MID, ui->confirm_btn_x , ui->confirm_btn_y);
    lv_obj_add_event_cb(gui.element.rollerPopup.mBoxRollerButton, event_Roller, LV_EVENT_CLICKED, gui.element.rollerPopup.whoCallMe);
    lv_roller_set_selected(gui.element.rollerPopup.roller, currentVal, LV_ANIM_OFF);
         

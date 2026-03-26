@@ -888,8 +888,14 @@ void readSettingsOnly(const char *path) {
     if (f_open(fp, path, FA_READ | FA_OPEN_EXISTING) == FR_OK) {
         if (f_read(fp, &gui.page.settings.settingsParams,
                    sizeof(gui.page.settings.settingsParams), &br) == FR_OK) {
-            LV_LOG_USER("readSettingsOnly: loaded %u bytes (splashRandom=%d)",
-                        (unsigned)br, gui.page.settings.settingsParams.splashRandom);
+            LV_LOG_USER("readSettingsOnly: loaded %u bytes (splashDefault=%d splashRandom=%d pal=%d style=%d cmx=%d seed=%"PRIu32")",
+                        (unsigned)br,
+                        gui.page.settings.settingsParams.splashDefault,
+                        gui.page.settings.settingsParams.splashRandom,
+                        gui.page.settings.settingsParams.splashPalette,
+                        gui.page.settings.settingsParams.splashShapeStyle,
+                        gui.page.settings.settingsParams.splashComplexity,
+                        gui.page.settings.settingsParams.splashSeed);
         }
         f_close(fp);
     }
@@ -1366,7 +1372,7 @@ void updateStepElement(processNode *referenceProcess, stepNode *step){
 
         //Update source
         char *temp[] = processSourceList;
-         lv_label_set_text_fmt(existingStep->step.sourceLabel, "From:%s", temp[step->step.stepDetails->data.source]); 
+         lv_label_set_text_fmt(existingStep->step.sourceLabel, stepSourceFmt_text, temp[step->step.stepDetails->data.source]); 
 
         //Update discard after icon
          if(step->step.stepDetails->data.discardAfterProc){

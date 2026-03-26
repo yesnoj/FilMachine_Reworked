@@ -160,11 +160,9 @@ static void create_rect(lv_obj_t *parent, int32_t x, int32_t y,
     lv_obj_set_style_radius(r, radius, 0);
     lv_obj_set_style_border_width(r, 0, 0);
     lv_obj_remove_flag(r, LV_OBJ_FLAG_SCROLLABLE);
-    if (rotation_deg10 != 0) {
-        lv_obj_set_style_transform_rotation(r, rotation_deg10, 0);
-        lv_obj_set_style_transform_pivot_x(r, w / 2, 0);
-        lv_obj_set_style_transform_pivot_y(r, h / 2, 0);
-    }
+    /* Rotation disabled — causes intermittent LVGL 9.2 rendering crash
+     * on certain seed/size combos.  Re-enable once root-caused. */
+    (void)rotation_deg10;
 }
 
 /* ═══════════════════════════════════════════════
@@ -243,7 +241,7 @@ static void add_title_and_play(lv_obj_t *scr, uint32_t text_color, uint32_t acce
     if (tp->y_neg) y_off = -y_off;
 
     lv_obj_t *lbl_title = lv_label_create(scr);
-    lv_label_set_text(lbl_title, "FILMACHINE");
+    lv_label_set_text(lbl_title, splashTitle_text);
     lv_obj_set_style_text_font(lbl_title, &lv_font_montserrat_48, 0);
     lv_obj_set_style_text_color(lbl_title, lv_color_hex(text_color), 0);
     lv_obj_set_style_text_align(lbl_title, tp->text_align, 0);
@@ -253,31 +251,36 @@ static void add_title_and_play(lv_obj_t *scr, uint32_t text_color, uint32_t acce
     lv_obj_set_style_shadow_opa(lbl_title, 180, 0);
 
     lv_obj_t *lbl_sub = lv_label_create(scr);
-    lv_label_set_text(lbl_sub, "Digital Film Engine");
+    lv_label_set_text(lbl_sub, splashSubtitle_text);
     lv_obj_set_style_text_font(lbl_sub, &lv_font_montserrat_20, 0);
     lv_obj_set_style_text_color(lbl_sub, lv_color_hex(text_color), 0);
     lv_obj_set_style_text_opa(lbl_sub, 180, 0);
-    lv_obj_align_to(lbl_sub, lbl_title, tp->sub_align, 0, 8);
+    const ui_splash_screen_layout_t *ss = &ui_get_profile()->splash_screen;
+    lv_obj_align_to(lbl_sub, lbl_title, tp->sub_align, ss->subtitle_x, ss->subtitle_y);
 
     lv_obj_t *lbl_ver = lv_label_create(scr);
-    lv_label_set_text(lbl_ver, "v2.1.0");
+    lv_label_set_text(lbl_ver, splashVersion_text);
     lv_obj_set_style_text_font(lbl_ver, &lv_font_montserrat_12, 0);
     lv_obj_set_style_text_color(lbl_ver, lv_color_hex(text_color), 0);
     lv_obj_set_style_text_opa(lbl_ver, 100, 0);
-    lv_obj_align(lbl_ver, LV_ALIGN_BOTTOM_RIGHT, -10, -6);
+    lv_obj_align(lbl_ver, LV_ALIGN_BOTTOM_RIGHT, ss->version_x, ss->version_y);
 
-    /* Play button */
+    /* Play button – 2× scaled, equal distance from bottom & right
+     * transform_scale 512 = 2×, but LVGL aligns on the original 48×48 box.
+     * The visual extends ~24px beyond each side of the box,
+     * so offset must be (desired_margin + 24) to keep icon fully visible. */
     lv_obj_t *play = lv_label_create(scr);
     lv_label_set_text(play, LV_SYMBOL_PLAY);
     lv_obj_set_style_text_font(play, &lv_font_montserrat_48, 0);
     lv_obj_set_style_text_color(play, lv_color_hex(accent_color), 0);
     lv_obj_set_style_text_opa(play, 200, 0);
-    lv_obj_align(play, LV_ALIGN_BOTTOM_RIGHT, -30, -50);
+    lv_obj_set_style_transform_scale(play, 512, 0);  /* 256 = 1×, 512 = 2× */
+    lv_obj_align(play, LV_ALIGN_BOTTOM_RIGHT, ss->play_icon_x, ss->play_icon_y);
 
     lv_obj_t *play_btn = lv_button_create(scr);
     lv_obj_remove_style_all(play_btn);
-    lv_obj_set_size(play_btn, 90, 90);
-    lv_obj_align(play_btn, LV_ALIGN_BOTTOM_RIGHT, -15, -30);
+    lv_obj_set_size(play_btn, ss->play_hit_w, ss->play_hit_h);
+    lv_obj_align(play_btn, LV_ALIGN_BOTTOM_RIGHT, ss->play_hit_x, ss->play_hit_y);
     lv_obj_set_style_bg_opa(play_btn, LV_OPA_TRANSP, 0);
     lv_obj_add_flag(play_btn, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(play_btn, splash_play_event_cb, LV_EVENT_CLICKED, NULL);
@@ -502,11 +505,19 @@ lv_obj_t * splash_screen_create(void)
         rng = rng * 1103515245u + 12345u;
         uint8_t  rcmx = 2 + (uint8_t)(rng % 29);  /* 2–30 */
         rng = rng * 1103515245u + 12345u;
+        LV_LOG_USER("SPLASH RANDOM: tick=%"PRIu32" seed=%"PRIu32" pal=%d style=%d cmx=%d",
+                     tick, rng, rpal, rsty, rcmx);
         create_random_splash(splash_scr, rng, rpal, rsty, rcmx);
+        LV_LOG_USER("SPLASH RANDOM: creation OK");
     } else {
         /* Custom mode → user-chosen params, seed from tick */
         uint32_t tick = lv_tick_get();
         uint32_t seed = tick * 1103515245u + 12345u;
+        LV_LOG_USER("SPLASH CUSTOM: tick=%"PRIu32" seed=%"PRIu32" pal=%d style=%d cmx=%d",
+                     tick, seed,
+                     gui.page.settings.settingsParams.splashPalette,
+                     gui.page.settings.settingsParams.splashShapeStyle,
+                     gui.page.settings.settingsParams.splashComplexity);
         create_random_splash(
             splash_scr,
             seed,
@@ -514,6 +525,7 @@ lv_obj_t * splash_screen_create(void)
             gui.page.settings.settingsParams.splashShapeStyle,
             gui.page.settings.settingsParams.splashComplexity
         );
+        LV_LOG_USER("SPLASH CUSTOM: creation OK");
     }
 
     return splash_scr;

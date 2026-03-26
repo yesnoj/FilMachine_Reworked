@@ -315,7 +315,7 @@ if(existingProcess != NULL) {
 
 
       pd->processDetailContainer = lv_obj_create(pd->processDetailParent);
-      lv_obj_align(pd->processDetailContainer, LV_ALIGN_CENTER, 0, 0);
+      lv_obj_align(pd->processDetailContainer, LV_ALIGN_CENTER, ui->container_x, ui->container_y);
       lv_obj_set_size(pd->processDetailContainer, LV_PCT(100), LV_PCT(100));
       lv_obj_remove_flag(pd->processDetailContainer, LV_OBJ_FLAG_SCROLLABLE);
 
@@ -405,12 +405,12 @@ if(existingProcess != NULL) {
                           pd->processTempControlLabel = lv_label_create(pd->processTempControlContainer);
                           lv_label_set_text(pd->processTempControlLabel, processDetailIsTempControl_text);
                           lv_obj_set_style_text_font(pd->processTempControlLabel, ui->label_font, 0);
-                          lv_obj_align(pd->processTempControlLabel, LV_ALIGN_LEFT_MID, ui->temp_label_x, 0);
+                          lv_obj_align(pd->processTempControlLabel, LV_ALIGN_LEFT_MID, ui->temp_label_x, ui->form_label_y);
 
                           pd->processTempControlSwitch = lv_switch_create(pd->processTempControlContainer);
                           lv_obj_set_size(pd->processTempControlSwitch, ui->temp_switch_w, ui->temp_switch_h);
                           lv_obj_add_event_cb(pd->processTempControlSwitch, event_processDetail, LV_EVENT_VALUE_CHANGED, pn);
-                          lv_obj_align(pd->processTempControlSwitch, LV_ALIGN_RIGHT_MID, ui->temp_ctrl_switch_x, 0);
+                          lv_obj_align(pd->processTempControlSwitch, LV_ALIGN_RIGHT_MID, ui->temp_ctrl_switch_x, ui->form_label_y);
                           lv_obj_set_style_bg_color(pd->processTempControlSwitch, lv_palette_darken(LV_PALETTE_GREY, 3), LV_STATE_DEFAULT);
                           lv_obj_set_style_bg_color(pd->processTempControlSwitch,  lv_palette_main(LV_PALETTE_GREEN), LV_PART_KNOB | LV_STATE_DEFAULT);
                           lv_obj_set_style_bg_color(pd->processTempControlSwitch, lv_color_hex(GREEN_DARK) , LV_PART_INDICATOR | LV_STATE_CHECKED);
@@ -425,12 +425,12 @@ if(existingProcess != NULL) {
                           pd->processTempLabel = lv_label_create(pd->processTempContainer);
                           lv_label_set_text(pd->processTempLabel, processDetailTemp_text);
                           lv_obj_set_style_text_font(pd->processTempLabel, ui->label_font, 0);
-                          lv_obj_align(pd->processTempLabel, LV_ALIGN_LEFT_MID, ui->temp_label_x, 0);
+                          lv_obj_align(pd->processTempLabel, LV_ALIGN_LEFT_MID, ui->temp_label_x, ui->form_label_y);
 
                           pd->processTempTextArea = lv_textarea_create(pd->processTempContainer);
                           lv_textarea_set_one_line(pd->processTempTextArea, true);
                           lv_textarea_set_placeholder_text(pd->processTempTextArea, processDetailTempPlaceHolder_text);
-                          lv_obj_align(pd->processTempTextArea, LV_ALIGN_LEFT_MID, ui->temp_textarea_x, 0);
+                          lv_obj_align(pd->processTempTextArea, LV_ALIGN_LEFT_MID, ui->temp_textarea_x, ui->form_label_y);
                           lv_obj_set_width(pd->processTempTextArea, ui->temp_textarea_w);
                           lv_obj_add_event_cb(pd->processTempTextArea, event_processDetail, LV_EVENT_CLICKED, pn);
                           lv_obj_add_event_cb(pd->processTempTextArea, event_processDetail, LV_EVENT_REFRESH, pn);
@@ -456,7 +456,7 @@ if(existingProcess != NULL) {
                           }
 
                           lv_obj_set_style_text_font(pd->processTempUnitLabel, ui->value_font, 0);
-                          lv_obj_align(pd->processTempUnitLabel, LV_ALIGN_LEFT_MID, ui->temp_unit_x, 0);
+                          lv_obj_align(pd->processTempUnitLabel, LV_ALIGN_LEFT_MID, ui->temp_unit_x, ui->form_label_y);
 
 
                   pd->processToleranceContainer = lv_obj_create(pd->processInfoContainer);
@@ -468,12 +468,12 @@ if(existingProcess != NULL) {
                           pd->processToleranceLabel = lv_label_create(pd->processToleranceContainer);
                           lv_label_set_text(pd->processToleranceLabel, processDetailTempTolerance_text);
                           lv_obj_set_style_text_font(pd->processToleranceLabel, ui->label_font, 0);
-                          lv_obj_align(pd->processToleranceLabel, LV_ALIGN_LEFT_MID, ui->temp_label_x, 0);
+                          lv_obj_align(pd->processToleranceLabel, LV_ALIGN_LEFT_MID, ui->temp_label_x, ui->form_label_y);
 
                           pd->processToleranceTextArea = lv_textarea_create(pd->processToleranceContainer);
                           lv_textarea_set_one_line(pd->processToleranceTextArea, true);
                           lv_textarea_set_placeholder_text(pd->processToleranceTextArea, processDetailTempPlaceHolder_text);
-                          lv_obj_align(pd->processToleranceTextArea, LV_ALIGN_LEFT_MID, ui->temp_textarea_x, 0);
+                          lv_obj_align(pd->processToleranceTextArea, LV_ALIGN_LEFT_MID, ui->temp_textarea_x, ui->form_label_y);
                           lv_obj_set_width(pd->processToleranceTextArea, ui->temp_textarea_w);
                           lv_obj_set_style_border_opa(pd->processToleranceTextArea, LV_OPA_TRANSP, LV_PART_CURSOR);
 
@@ -493,7 +493,7 @@ if(existingProcess != NULL) {
                           pd->processTempUnitLabel = lv_label_create(pd->processToleranceContainer);
                           lv_label_set_text(pd->processTempUnitLabel, celsius_text);
                           lv_obj_set_style_text_font(pd->processTempUnitLabel, ui->value_font, 0);
-                          lv_obj_align(pd->processTempUnitLabel, LV_ALIGN_LEFT_MID, ui->temp_unit_x, 0);
+                          lv_obj_align(pd->processTempUnitLabel, LV_ALIGN_LEFT_MID, ui->temp_unit_x, ui->form_label_y);
 
                           if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
                               lv_label_set_text(pd->processTempUnitLabel, celsius_text);
@@ -518,11 +518,11 @@ if(existingProcess != NULL) {
                           pd->processTotalTimeLabel = lv_label_create(pd->processTotalTimeContainer);
                           lv_label_set_text(pd->processTotalTimeLabel, processDetailTotalTime_text);
                           lv_obj_set_style_text_font(pd->processTotalTimeLabel, ui->label_font, 0);
-                          lv_obj_align(pd->processTotalTimeLabel, LV_ALIGN_LEFT_MID, ui->temp_label_x, 0);
+                          lv_obj_align(pd->processTotalTimeLabel, LV_ALIGN_LEFT_MID, ui->temp_label_x, ui->form_label_y);
 
                           pd->processTotalTimeValue = lv_label_create(pd->processTotalTimeContainer);
                           lv_obj_set_style_text_font(pd->processTotalTimeValue, ui->value_font, 0);
-                          lv_obj_align(pd->processTotalTimeValue, LV_ALIGN_LEFT_MID, ui->temp_textarea_x, 0);
+                          lv_obj_align(pd->processTotalTimeValue, LV_ALIGN_LEFT_MID, ui->temp_textarea_x, ui->form_label_y);
                           lv_label_set_text_fmt(pd->processTotalTimeValue, "%"PRIu32"m%"PRIu8"s",
                             pd->data.timeMins, pd->data.timeSecs);
 
@@ -537,7 +537,7 @@ if(existingProcess != NULL) {
                           pd->processColorLabel = lv_label_create(pd->processColorOrBnWContainer);
                           lv_label_set_text(pd->processColorLabel, colorpalette_icon);
                           lv_obj_set_style_text_font(pd->processColorLabel, ui->film_icon_font, 0);
-                          lv_obj_align(pd->processColorLabel, LV_ALIGN_LEFT_MID, ui->color_label_x, 0);
+                          lv_obj_align(pd->processColorLabel, LV_ALIGN_LEFT_MID, ui->color_label_x, ui->form_label_y);
                           lv_obj_add_flag(pd->processColorLabel, LV_OBJ_FLAG_CLICKABLE);
                           lv_obj_add_event_cb(pd->processColorLabel, event_processDetail, LV_EVENT_CLICKED, pn);
 
@@ -545,7 +545,7 @@ if(existingProcess != NULL) {
                           pd->processBnWLabel = lv_label_create(pd->processColorOrBnWContainer);
                           lv_label_set_text(pd->processBnWLabel, blackwhite_icon);
                           lv_obj_set_style_text_font(pd->processBnWLabel, ui->film_icon_font, 0);
-                          lv_obj_align(pd->processBnWLabel, LV_ALIGN_LEFT_MID, ui->bw_icon_x, 0);
+                          lv_obj_align(pd->processBnWLabel, LV_ALIGN_LEFT_MID, ui->bw_icon_x, ui->form_label_y);
                           lv_obj_add_flag(pd->processBnWLabel, LV_OBJ_FLAG_CLICKABLE);
                           lv_obj_add_event_cb(pd->processBnWLabel, event_processDetail, LV_EVENT_CLICKED, pn);
                           if(pd->data.filmType == COLOR_FILM){

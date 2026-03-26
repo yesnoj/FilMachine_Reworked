@@ -350,7 +350,7 @@ void processElementCreate(processNode *newProcess, int32_t tempSize) {
                 newProcess->process.deleteButtonLabel = lv_label_create(newProcess->process.deleteButton);
                 lv_label_set_text(newProcess->process.deleteButtonLabel, trash_icon);
                 lv_obj_set_style_text_font(newProcess->process.deleteButtonLabel, pe->delete_icon_font, 0);
-                lv_obj_align(newProcess->process.deleteButtonLabel, LV_ALIGN_CENTER, pe->delete_icon_x, 0);
+                lv_obj_align(newProcess->process.deleteButtonLabel, LV_ALIGN_CENTER, pe->delete_icon_x, pe->delete_icon_y);
 
 
         newProcess->process.processElementSummary = lv_obj_create(newProcess->process.processElement);
@@ -394,7 +394,7 @@ void processElementCreate(processNode *newProcess, int32_t tempSize) {
 
         newProcess->process.processTime = lv_label_create(newProcess->process.processElementSummary);    
         lv_obj_set_style_text_font(newProcess->process.processTime, pe->detail_font, 0);
-        lv_obj_set_width(newProcess->process.processTime, pe->card_content_w - pe->time_value_x - 18);
+        lv_obj_set_width(newProcess->process.processTime, pe->card_content_w - pe->time_value_x - pe->time_width_margin);
         lv_label_set_long_mode(newProcess->process.processTime, LV_LABEL_LONG_CLIP);
         lv_obj_align(newProcess->process.processTime, LV_ALIGN_LEFT_MID, pe->time_value_x, pe->time_value_y);
         process_card_set_time_label(newProcess);
@@ -403,7 +403,7 @@ void processElementCreate(processNode *newProcess, int32_t tempSize) {
         lv_label_set_text(newProcess->process.processTypeIcon, newProcess->process.processDetails->data.filmType == BLACK_AND_WHITE_FILM ? blackwhite_icon : colorpalette_icon);
         newProcess->process.processDetails->data.filmType = newProcess->process.processDetails->data.filmType;
         lv_obj_set_style_text_font(newProcess->process.processTypeIcon, pe->type_icon_font, 0);
-        lv_obj_align(newProcess->process.processTypeIcon, LV_ALIGN_RIGHT_MID, pe->type_icon_x, 0);
+        lv_obj_align(newProcess->process.processTypeIcon, LV_ALIGN_RIGHT_MID, pe->type_icon_x, pe->type_icon_y);
         
 
         if(newProcess->process.processDetails->data.isTempControlled == false)
@@ -412,7 +412,7 @@ void processElementCreate(processNode *newProcess, int32_t tempSize) {
             lv_obj_add_flag(newProcess->process.processTemp, LV_OBJ_FLAG_HIDDEN);
             lv_obj_align(newProcess->process.processTimeIcon, LV_ALIGN_LEFT_MID, pe->time_icon_no_temp_x, pe->time_icon_y);
             lv_obj_align(newProcess->process.processTime, LV_ALIGN_LEFT_MID, pe->time_value_no_temp_x, pe->time_value_y);
-            lv_obj_set_width(newProcess->process.processTime, pe->card_content_w - pe->time_value_no_temp_x - 18);
+            lv_obj_set_width(newProcess->process.processTime, pe->card_content_w - pe->time_value_no_temp_x - pe->time_width_margin);
           }
 
 
@@ -421,7 +421,7 @@ void processElementCreate(processNode *newProcess, int32_t tempSize) {
         lv_obj_add_flag(newProcess->process.preferredIcon, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_set_style_text_font(newProcess->process.preferredIcon, pe->type_icon_font, 0);
         lv_obj_set_style_text_color(newProcess->process.preferredIcon, lv_color_hex(WHITE), LV_PART_MAIN);
-        lv_obj_align(newProcess->process.preferredIcon, LV_ALIGN_RIGHT_MID, pe->preferred_icon_x, 0);
+        lv_obj_align(newProcess->process.preferredIcon, LV_ALIGN_RIGHT_MID, pe->preferred_icon_x, pe->preferred_icon_y);
         
         if(newProcess->process.processDetails->data.isPreferred == true){
             lv_obj_set_style_text_color(newProcess->process.preferredIcon, lv_color_hex(RED), LV_PART_MAIN);

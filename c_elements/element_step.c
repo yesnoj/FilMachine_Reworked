@@ -712,7 +712,7 @@ void stepElementCreate(stepNode * newStep,processNode * processReference, int8_t
                 newStep->step.deleteButtonLabel = lv_label_create(newStep->step.deleteButton);
                 lv_label_set_text(newStep->step.deleteButtonLabel, trash_icon);
                 lv_obj_set_style_text_font(newStep->step.deleteButtonLabel, se->delete_icon_font, 0);
-                lv_obj_align(newStep->step.deleteButtonLabel, LV_ALIGN_CENTER, se->delete_icon_x, 0);
+                lv_obj_align(newStep->step.deleteButtonLabel, LV_ALIGN_CENTER, se->delete_icon_x, se->delete_icon_y);
 
         //Duplicate button - shown on swipe right alongside delete
         newStep->step.editButton = lv_obj_create(newStep->step.stepElement);
@@ -727,7 +727,7 @@ void stepElementCreate(stepNode * newStep,processNode * processReference, int8_t
                 newStep->step.editButtonLabel = lv_label_create(newStep->step.editButton);
                 lv_label_set_text(newStep->step.editButtonLabel, newProcess_icon);
                 lv_obj_set_style_text_font(newStep->step.editButtonLabel, se->edit_icon_font, 0);
-                lv_obj_align(newStep->step.editButtonLabel, LV_ALIGN_CENTER, se->edit_icon_x, 0);
+                lv_obj_align(newStep->step.editButtonLabel, LV_ALIGN_CENTER, se->edit_icon_x, se->edit_icon_y);
 
         newStep->step.stepElementSummary = lv_obj_create(newStep->step.stepElement);
         lv_obj_set_size(newStep->step.stepElementSummary, se->card_content_w, se->card_content_h);
@@ -767,8 +767,8 @@ void stepElementCreate(stepNode * newStep,processNode * processReference, int8_t
                 lv_obj_set_style_text_font(newStep->step.stepTime, se->detail_font, 0);
                 lv_obj_align(newStep->step.stepTime, LV_ALIGN_LEFT_MID, se->time_value_x, se->time_value_y);
 
-                newStep->step.sourceLabel = lv_label_create(newStep->step.stepElementSummary); 
-                lv_label_set_text_fmt(newStep->step.sourceLabel, "From:%s", tmp_processSourceList[newStep->step.stepDetails->data.source]); 
+                newStep->step.sourceLabel = lv_label_create(newStep->step.stepElementSummary);
+                lv_label_set_text_fmt(newStep->step.sourceLabel, stepSourceFmt_text, tmp_processSourceList[newStep->step.stepDetails->data.source]); 
                 lv_obj_set_style_text_font(newStep->step.sourceLabel, se->detail_font, 0);
                 lv_obj_set_width(newStep->step.sourceLabel, se->source_w);
                 lv_obj_align(newStep->step.sourceLabel, LV_ALIGN_LEFT_MID, se->source_x, se->source_y);

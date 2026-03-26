@@ -139,7 +139,7 @@ static void sc_update_buttons(void) {
         }
 
         if (st == SC_DONE || st == SC_SKIPPED || st == SC_STOPPED) {
-            lv_label_set_text(sc->startButtonLabel, "Re-run");
+            lv_label_set_text(sc->startButtonLabel, selfCheckRerun_text);
             lv_obj_clear_state(sc->startButton, LV_STATE_DISABLED);
         } else {
             lv_label_set_text(sc->startButtonLabel, buttonStart_text);
@@ -164,10 +164,10 @@ static void sc_select_phase(uint8_t phase) {
         lv_label_set_text(sc->phaseStatus, phaseSavedStatus[phase]);
         lv_obj_set_style_text_color(sc->phaseStatus, lv_color_hex(GREEN), 0);
     } else if (st == SC_STOPPED) {
-        lv_label_set_text(sc->phaseStatus, "Stopped");
+        lv_label_set_text(sc->phaseStatus, selfCheckStopped_text);
         lv_obj_set_style_text_color(sc->phaseStatus, lv_color_hex(SC_STOPPED_COLOR), 0);
     } else if (st == SC_SKIPPED) {
-        lv_label_set_text(sc->phaseStatus, "Skipped");
+        lv_label_set_text(sc->phaseStatus, selfCheckSkipped_text);
         lv_obj_set_style_text_color(sc->phaseStatus, lv_color_hex(ORANGE), 0);
     } else {
         lv_label_set_text(sc->phaseStatus, "");
@@ -219,7 +219,7 @@ static void sc_timer_cb(lv_timer_t *timer) {
     int32_t rem = dur - sc->phaseElapsed;
     if (rem < 0) rem = 0;
 
-    lv_label_set_text_fmt(sc->phaseTimer, "Time: %lds", (long)rem);
+    lv_label_set_text_fmt(sc->phaseTimer, selfCheckTimeFmt_text, (long)rem);
 
     /* Progress bar for ALL phases */
     {
@@ -243,12 +243,12 @@ static void sc_timer_cb(lv_timer_t *timer) {
             break;
         }
         case 1:
-            lv_label_set_text(sc->phaseStatus, "Pump running...");
+            lv_label_set_text(sc->phaseStatus, selfCheckPumpRunning_text);
             snprintf(phaseSavedStatus[phase], sizeof(phaseSavedStatus[phase]), "Pump OK");
             break;
         case 2: {
             int t = 200 + (sc->phaseElapsed * 15);
-            lv_label_set_text_fmt(sc->phaseStatus, "Temp: %d.%d C", t / 10, t % 10);
+            lv_label_set_text_fmt(sc->phaseStatus, selfCheckTempFmt_text, t / 10, t % 10);
             snprintf(phaseSavedStatus[phase], sizeof(phaseSavedStatus[phase]),
                 "Final: %d.%d C", t / 10, t % 10);
             break;
@@ -257,7 +257,7 @@ static void sc_timer_cb(lv_timer_t *timer) {
             const char *valves[] = {"C1", "C2", "C3", "WB", "WASTE"};
             int vi = sc->phaseElapsed / 2;
             if (vi >= 5) vi = 4;
-            lv_label_set_text_fmt(sc->phaseStatus, "Valve: %s", valves[vi]);
+            lv_label_set_text_fmt(sc->phaseStatus, selfCheckValveFmt_text, valves[vi]);
             snprintf(phaseSavedStatus[phase], sizeof(phaseSavedStatus[phase]), "All valves OK");
             break;
         }
@@ -348,7 +348,7 @@ void event_selfcheckPopup(lv_event_t *e) {
             safeTimerDelete(&sc->checkTimer);
             sc->isRunning = false;
             phaseState[sc->currentPhase] = SC_STOPPED;
-            lv_label_set_text(sc->phaseStatus, "Stopped");
+            lv_label_set_text(sc->phaseStatus, selfCheckStopped_text);
             lv_obj_set_style_text_color(sc->phaseStatus, lv_color_hex(SC_STOPPED_COLOR), 0);
             lv_label_set_text(sc->phaseTimer, "");
             sc_update_left_icons();
@@ -416,14 +416,14 @@ void selfcheckPopupCreate(void) {
     sc->selfcheckTitle = lv_label_create(sc->selfcheckContainer);
     lv_label_set_text(sc->selfcheckTitle, selfCheck_text);
     lv_obj_set_style_text_font(sc->selfcheckTitle, ui->title_font, 0);
-    lv_obj_align(sc->selfcheckTitle, LV_ALIGN_TOP_MID, 0, ui->title_y);
+    lv_obj_align(sc->selfcheckTitle, LV_ALIGN_TOP_MID, ui->title_x, ui->title_y);
 
     /* White underline */
     initTitleLineStyle(&sc->style_selfcheckTitleLine, WHITE);
     sc->selfcheckTitleLine = lv_line_create(sc->selfcheckContainer);
     lv_line_set_points(sc->selfcheckTitleLine, sc->titleLinePoints, 2);
     lv_obj_add_style(sc->selfcheckTitleLine, &sc->style_selfcheckTitleLine, 0);
-    lv_obj_align(sc->selfcheckTitleLine, LV_ALIGN_TOP_MID, 0, ui->title_line_y);
+    lv_obj_align(sc->selfcheckTitleLine, LV_ALIGN_TOP_MID, ui->title_line_x, ui->title_line_y);
 
     /* X close button (green, top-right) */
     sc->closeButton = lv_button_create(sc->selfcheckContainer);
@@ -485,31 +485,31 @@ void selfcheckPopupCreate(void) {
     lv_obj_set_style_text_font(sc->phaseTitle, ui->phase_title_font, 0);
     lv_obj_set_width(sc->phaseTitle, ui->phase_title_w);
     lv_label_set_long_mode(sc->phaseTitle, LV_LABEL_LONG_WRAP);
-    lv_obj_set_pos(sc->phaseTitle, 0, ui->phase_title_y);
+    lv_obj_set_pos(sc->phaseTitle, ui->phase_title_x, ui->phase_title_y);
 
     sc->phaseDescription = lv_label_create(sc->rightPanel);
     lv_label_set_text(sc->phaseDescription, phaseDescriptions[0]);
     lv_obj_set_style_text_font(sc->phaseDescription, ui->phase_name_font, 0);
     lv_obj_set_width(sc->phaseDescription, ui->phase_desc_w);
     lv_label_set_long_mode(sc->phaseDescription, LV_LABEL_LONG_WRAP);
-    lv_obj_set_pos(sc->phaseDescription, 0, ui->phase_desc_y);
+    lv_obj_set_pos(sc->phaseDescription, ui->phase_desc_x, ui->phase_desc_y);
 
     sc->phaseStatus = lv_label_create(sc->rightPanel);
     lv_label_set_text(sc->phaseStatus, "");
     lv_obj_set_style_text_font(sc->phaseStatus, ui->tasks_font, 0);
     lv_obj_set_width(sc->phaseStatus, ui->phase_status_w);
     lv_label_set_long_mode(sc->phaseStatus, LV_LABEL_LONG_WRAP);
-    lv_obj_set_pos(sc->phaseStatus, 0, ui->phase_status_y);
+    lv_obj_set_pos(sc->phaseStatus, ui->phase_status_x, ui->phase_status_y);
 
     sc->phaseTimer = lv_label_create(sc->rightPanel);
     lv_label_set_text(sc->phaseTimer, "");
     lv_obj_set_style_text_font(sc->phaseTimer, ui->tasks_font, 0);
-    lv_obj_set_pos(sc->phaseTimer, 0, ui->phase_timer_y);
+    lv_obj_set_pos(sc->phaseTimer, ui->phase_timer_x, ui->phase_timer_y);
 
     /* Progress bar (thick, green, hidden by default) */
     sc->progressBar = lv_bar_create(sc->rightPanel);
     lv_obj_set_size(sc->progressBar, ui->progress_bar_w, ui->progress_bar_h);
-    lv_obj_set_pos(sc->progressBar, 0, ui->progress_bar_y);
+    lv_obj_set_pos(sc->progressBar, ui->progress_bar_x, ui->progress_bar_y);
     lv_bar_set_range(sc->progressBar, 0, 100);
     lv_bar_set_value(sc->progressBar, 0, LV_ANIM_OFF);
     lv_obj_set_style_bg_color(sc->progressBar, lv_palette_darken(LV_PALETTE_GREY, 3), LV_PART_MAIN);
