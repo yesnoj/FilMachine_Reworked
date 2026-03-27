@@ -72,13 +72,19 @@ UI_DEBUG_ENTRY(gui.page.settings.wbContainerMlTextArea, "gui.page.settings.wbCon
 UI_DEBUG_ENTRY(gui.page.settings.chemVolumeContainer, "gui.page.settings.chemVolumeContainer");
 UI_DEBUG_ENTRY(gui.page.settings.chemVolumeLabel, "gui.page.settings.chemVolumeLabel");
 UI_DEBUG_ENTRY(gui.page.settings.chemVolumeTextArea, "gui.page.settings.chemVolumeTextArea");
-UI_DEBUG_ENTRY(gui.page.settings.otaSectionLabel, "gui.page.settings.otaSectionLabel");
-UI_DEBUG_ENTRY(gui.page.settings.otaWifiSSIDContainer, "gui.page.settings.otaWifiSSIDContainer");
-UI_DEBUG_ENTRY(gui.page.settings.otaWifiSSIDLabel, "gui.page.settings.otaWifiSSIDLabel");
-UI_DEBUG_ENTRY(gui.page.settings.otaWifiSSIDTextArea, "gui.page.settings.otaWifiSSIDTextArea");
-UI_DEBUG_ENTRY(gui.page.settings.otaWifiPasswordContainer, "gui.page.settings.otaWifiPasswordContainer");
-UI_DEBUG_ENTRY(gui.page.settings.otaWifiPasswordLabel, "gui.page.settings.otaWifiPasswordLabel");
-UI_DEBUG_ENTRY(gui.page.settings.otaWifiPasswordTextArea, "gui.page.settings.otaWifiPasswordTextArea");
+UI_DEBUG_ENTRY(gui.page.settings.wifiContainer, "gui.page.settings.wifiContainer");
+UI_DEBUG_ENTRY(gui.page.settings.wifiLabel, "gui.page.settings.wifiLabel");
+UI_DEBUG_ENTRY(gui.page.settings.wifiButton, "gui.page.settings.wifiButton");
+UI_DEBUG_ENTRY(gui.page.settings.wifiButtonLabel, "gui.page.settings.wifiButtonLabel");
+UI_DEBUG_ENTRY(gui.element.wifiPopup.popupParent, "gui.element.wifiPopup.popupParent");
+UI_DEBUG_ENTRY(gui.element.wifiPopup.popupContainer, "gui.element.wifiPopup.popupContainer");
+UI_DEBUG_ENTRY(gui.element.wifiPopup.titleLabel, "gui.element.wifiPopup.titleLabel");
+UI_DEBUG_ENTRY(gui.element.wifiPopup.closeButton, "gui.element.wifiPopup.closeButton");
+UI_DEBUG_ENTRY(gui.element.wifiPopup.statusLabel, "gui.element.wifiPopup.statusLabel");
+UI_DEBUG_ENTRY(gui.element.wifiPopup.scanButton, "gui.element.wifiPopup.scanButton");
+UI_DEBUG_ENTRY(gui.element.wifiPopup.listContainer, "gui.element.wifiPopup.listContainer");
+UI_DEBUG_ENTRY(gui.element.wifiPopup.connectButton, "gui.element.wifiPopup.connectButton");
+UI_DEBUG_ENTRY(gui.element.wifiPopup.autoConnectSwitch, "gui.element.wifiPopup.autoConnectSwitch");
 
 UI_DEBUG_ENTRY(gui.page.tools.toolsSection, "gui.page.tools.toolsSection");
 UI_DEBUG_ENTRY(gui.page.tools.sectionTitleLine, "gui.page.tools.sectionTitleLine");

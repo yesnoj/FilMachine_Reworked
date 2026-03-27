@@ -128,6 +128,61 @@ bool ota_wifi_server_stop(void) {
     return true;
 }
 
+/* ── Wi-Fi scan stubs (simulator) ──────────────────────────── */
+static bool sim_wifi_connected = false;
+static char sim_connected_ssid[33] = "";
+
+int wifi_scan_start(void) {
+    LV_LOG_USER("[WiFi-Sim] Scan started");
+    return 0;
+}
+
+int wifi_scan_get_results(wifiScanResult_t *results, int max_results) {
+    /* Return fake scan results for testing */
+    const struct { const char *ssid; int8_t rssi; bool open; } fake[] = {
+        {"HomeNetwork_5G",    -42, false},
+        {"HomeNetwork_2.4G",  -55, false},
+        {"Neighbor_WiFi",     -68, false},
+        {"CafePublic",        -75, true},
+        {"IoT_Network",       -80, false},
+    };
+    int count = sizeof(fake) / sizeof(fake[0]);
+    if(count > max_results) count = max_results;
+
+    for(int i = 0; i < count; i++) {
+        snprintf(results[i].ssid, sizeof(results[i].ssid), "%s", fake[i].ssid);
+        results[i].rssi = fake[i].rssi;
+        results[i].open = fake[i].open;
+    }
+    LV_LOG_USER("[WiFi-Sim] Scan returned %d results", count);
+    return count;
+}
+
+bool wifi_connect(const char *ssid, const char *password) {
+    LV_LOG_USER("[WiFi-Sim] Connecting to '%s' with password '%s'", ssid, password);
+    sim_wifi_connected = true;
+    snprintf(sim_connected_ssid, sizeof(sim_connected_ssid), "%s", ssid);
+    return true;
+}
+
+void wifi_disconnect(void) {
+    LV_LOG_USER("[WiFi-Sim] Disconnected");
+    sim_wifi_connected = false;
+    sim_connected_ssid[0] = '\0';
+}
+
+bool wifi_is_connected(void) {
+    return sim_wifi_connected;
+}
+
+const char *wifi_get_connected_ssid(void) {
+    return sim_wifi_connected ? sim_connected_ssid : NULL;
+}
+
+const char *wifi_get_ip_address(void) {
+    return sim_wifi_connected ? "192.168.1.42" : NULL;
+}
+
 #else
 /* ═══════════════════════════════════════════════════════════════
  *  REAL ESP32 IMPLEMENTATION
@@ -454,11 +509,12 @@ bool ota_wifi_server_start(void) {
 
     /* Configure with credentials from settings */
     wifi_config_t wifi_config = {0};
+    /* Use persistent Wi-Fi credentials from machineSettings */
     strncpy((char *)wifi_config.sta.ssid,
-            gui.page.settings.otaWifiSSID,
+            gui.page.settings.settingsParams.wifiSSID,
             sizeof(wifi_config.sta.ssid) - 1);
     strncpy((char *)wifi_config.sta.password,
-            gui.page.settings.otaWifiPassword,
+            gui.page.settings.settingsParams.wifiPassword,
             sizeof(wifi_config.sta.password) - 1);
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
@@ -466,7 +522,7 @@ bool ota_wifi_server_start(void) {
     ESP_ERROR_CHECK(esp_wifi_start());
     ESP_ERROR_CHECK(esp_wifi_connect());
 
-    ESP_LOGI(TAG, "Wi-Fi connecting to '%s'...", gui.page.settings.otaWifiSSID);
+    ESP_LOGI(TAG, "Wi-Fi connecting to '%s'...", gui.page.settings.settingsParams.wifiSSID);
     return true;
 }
 
@@ -623,6 +679,48 @@ bool ota_start_sd(void) {
     bool ok = ota_write_from_stream(sd_read_fn, &ctx, total_size);
     f_close(&ctx.file);
     return ok;
+}
+
+/* ── Wi-Fi scan API (real firmware) ──────────────────────────── */
+static bool fw_wifi_connected = false;
+static char fw_connected_ssid[33] = "";
+
+int wifi_scan_start(void) {
+    /* TODO: Implement with esp_wifi_scan_start() */
+    ESP_LOGI(TAG, "[WiFi] Scan not yet implemented on real firmware");
+    return 0;
+}
+
+int wifi_scan_get_results(wifiScanResult_t *results, int max_results) {
+    /* TODO: Implement with esp_wifi_scan_get_ap_records() */
+    (void)results; (void)max_results;
+    return 0;
+}
+
+bool wifi_connect(const char *ssid, const char *password) {
+    /* TODO: Implement with esp_wifi_connect() */
+    ESP_LOGI(TAG, "[WiFi] Connect to '%s'", ssid);
+    fw_wifi_connected = true;
+    snprintf(fw_connected_ssid, sizeof(fw_connected_ssid), "%s", ssid);
+    return true;
+}
+
+void wifi_disconnect(void) {
+    /* TODO: Implement with esp_wifi_disconnect() */
+    fw_wifi_connected = false;
+    fw_connected_ssid[0] = '\0';
+}
+
+bool wifi_is_connected(void) {
+    return fw_wifi_connected;
+}
+
+const char *wifi_get_connected_ssid(void) {
+    return fw_wifi_connected ? fw_connected_ssid : NULL;
+}
+
+const char *wifi_get_ip_address(void) {
+    return fw_wifi_connected ? "0.0.0.0" : NULL;
 }
 
 #endif /* SIMULATOR_BUILD */

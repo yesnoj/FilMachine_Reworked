@@ -187,6 +187,7 @@ static const char *kb_owner_name(kbOwnerType owner) {
         case KB_OWNER_FILTER: return "filter";
         case KB_OWNER_PROCESS: return "process";
         case KB_OWNER_STEP: return "step";
+        case KB_OWNER_SETTINGS: return "settings";
         default: return "unknown";
     }
 }
@@ -221,6 +222,13 @@ static void kb_commit_text(const char *kbText) {
                 snprintf(sd->data.stepNameString, sizeof(sd->data.stepNameString), "%s", kbText);
                 sd->data.somethingChanged = true;
             }
+            break;
+
+        case KB_OWNER_SETTINGS:
+            /* Wi-Fi password entered from popup */
+            LV_LOG_USER("Wi-Fi password entered from keyboard");
+            snprintf(gui.element.wifiPopup.pendingPassword,
+                     sizeof(gui.element.wifiPopup.pendingPassword), "%s", kbText);
             break;
 
         default:
@@ -262,6 +270,9 @@ void event_keyboard(lv_event_t* e) {
       if(ctx != NULL && ctx->textArea == obj) {
           LV_LOG_USER("LV_EVENT_FOCUSED on keyboard-managed textarea");
           kbCtx = *ctx;
+          /* Set max length for the keyboard textarea (0 = use default) */
+          uint32_t maxLen = kbCtx.maxLength > 0 ? kbCtx.maxLength : MAX_PROC_NAME_LEN;
+          lv_textarea_set_max_length(gui.element.keyboardPopup.keyboardTextArea, maxLen);
           showKeyboard(kbCtx.parentScreen, kbCtx.textArea);
       }
       return;
@@ -911,10 +922,17 @@ void readConfigFile(const char *path, bool enableLog) {
 	
   	if( (res = f_open( fp, path, FA_READ | FA_OPEN_EXISTING )) == FR_OK ) {
 	    // Load Machine Settings
+	    /* Zero the struct first so new fields (Wi-Fi etc.) get safe defaults
+	     * when reading an older, shorter config file */
+	    memset(&gui.page.settings.settingsParams, 0, sizeof(gui.page.settings.settingsParams));
 	    if( (res = f_read( fp, &gui.page.settings.settingsParams, sizeof(gui.page.settings.settingsParams), &bytes_read ) ) !=  FR_OK ) {
 	      f_close( fp );
 	      LV_LOG_USER("Configuration file error aborting load err: %d", res );
 	      return;
+	    }
+	    if(bytes_read < sizeof(gui.page.settings.settingsParams)) {
+	        LV_LOG_USER("Config file shorter than expected (%u < %u) — new fields use defaults",
+	                     bytes_read, (unsigned)sizeof(gui.page.settings.settingsParams));
 	    }
 
 	    if(enableLog) {
@@ -2341,3 +2359,57 @@ static void process_list_set_time_label(processNode *process) {
         estimated_seconds / 60U,
         estimated_seconds % 60U);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  Alarm  (moved from alarm.c)
+ *  The simulator keeps its own implementation in src/main.c.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+#ifndef SIMULATOR_BUILD
+
+static lv_timer_t *s_alarm_timer = NULL;
+
+void buzzer_beep(void)
+{
+    /*
+     * Hardware buzzer implementation is not wired here yet.
+     * Keep this as a safe no-op so alarm logic links and runs.
+     */
+}
+
+static void alarm_timer_cb(lv_timer_t *t)
+{
+    (void)t;
+    buzzer_beep();
+}
+
+void alarm_start_persistent(void)
+{
+    buzzer_beep();
+
+    if (gui.page.settings.settingsParams.isPersistentAlarm)
+    {
+        if (s_alarm_timer == NULL)
+        {
+            s_alarm_timer = lv_timer_create(alarm_timer_cb, 10000, NULL);
+        }
+        else
+        {
+            lv_timer_resume(s_alarm_timer);
+        }
+    }
+}
+
+void alarm_stop(void)
+{
+    if (s_alarm_timer != NULL)
+    {
+        lv_timer_pause(s_alarm_timer);
+    }
+}
+
+bool alarm_is_active(void)
+{
+    return (s_alarm_timer != NULL) && (lv_timer_get_paused(s_alarm_timer) == false);
+}
+
+#endif /* SIMULATOR_BUILD */

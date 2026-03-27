@@ -509,6 +509,33 @@ c_elements/element_step.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_step.c.s
 .PHONY : c_elements/element_step.c.s
 
+c_elements/element_wifiPopup.o: c_elements/element_wifiPopup.c.o
+.PHONY : c_elements/element_wifiPopup.o
+
+# target to build an object file
+c_elements/element_wifiPopup.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_wifiPopup.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_wifiPopup.c.o
+.PHONY : c_elements/element_wifiPopup.c.o
+
+c_elements/element_wifiPopup.i: c_elements/element_wifiPopup.c.i
+.PHONY : c_elements/element_wifiPopup.i
+
+# target to preprocess a source file
+c_elements/element_wifiPopup.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_wifiPopup.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_wifiPopup.c.i
+.PHONY : c_elements/element_wifiPopup.c.i
+
+c_elements/element_wifiPopup.s: c_elements/element_wifiPopup.c.s
+.PHONY : c_elements/element_wifiPopup.s
+
+# target to generate assembly for a file
+c_elements/element_wifiPopup.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/c_elements/element_wifiPopup.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/c_elements/element_wifiPopup.c.s
+.PHONY : c_elements/element_wifiPopup.c.s
+
 c_fonts/FilMachineFontIcons_100.o: c_fonts/FilMachineFontIcons_100.c.o
 .PHONY : c_fonts/FilMachineFontIcons_100.o
 
@@ -1346,6 +1373,33 @@ main/ui_profile.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/ui_profile.c.s
 .PHONY : main/ui_profile.c.s
 
+main/ws_server.o: main/ws_server.c.o
+.PHONY : main/ws_server.o
+
+# target to build an object file
+main/ws_server.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/ws_server.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/ws_server.c.o
+.PHONY : main/ws_server.c.o
+
+main/ws_server.i: main/ws_server.c.i
+.PHONY : main/ws_server.i
+
+# target to preprocess a source file
+main/ws_server.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/ws_server.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/ws_server.c.i
+.PHONY : main/ws_server.c.i
+
+main/ws_server.s: main/ws_server.c.s
+.PHONY : main/ws_server.s
+
+# target to generate assembly for a file
+main/ws_server.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_sim.dir/build.make CMakeFiles/filmachine_sim.dir/main/ws_server.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/main/ws_server.c.s
+.PHONY : main/ws_server.c.s
+
 src/main.o: src/main.c.o
 .PHONY : src/main.o
 
@@ -1955,6 +2009,9 @@ help:
 	@echo "... c_elements/element_step.o"
 	@echo "... c_elements/element_step.i"
 	@echo "... c_elements/element_step.s"
+	@echo "... c_elements/element_wifiPopup.o"
+	@echo "... c_elements/element_wifiPopup.i"
+	@echo "... c_elements/element_wifiPopup.s"
 	@echo "... c_fonts/FilMachineFontIcons_100.o"
 	@echo "... c_fonts/FilMachineFontIcons_100.i"
 	@echo "... c_fonts/FilMachineFontIcons_100.s"
@@ -2048,6 +2105,9 @@ help:
 	@echo "... main/ui_profile.o"
 	@echo "... main/ui_profile.i"
 	@echo "... main/ui_profile.s"
+	@echo "... main/ws_server.o"
+	@echo "... main/ws_server.i"
+	@echo "... main/ws_server.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

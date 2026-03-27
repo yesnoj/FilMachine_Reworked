@@ -19,6 +19,7 @@ idf_component_register(
         esp_wifi
         esp_netif
         esp_event
+        mdns
 )
 
 # ── ESP32-P4 (JC4880P433): link ST7701 LCD and PPA engine components ──

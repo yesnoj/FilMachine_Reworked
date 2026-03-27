@@ -19,6 +19,11 @@ void event_tab_switch(lv_event_t * e) {
       messagePopupCreate(deleteAllProcessPopupTitle_text,deleteAllProcessPopupBody_text, deleteButton_text, stepDetailCancel_text, &gui);
   }
 
+  if(gui.page.menu.newSelection == TAB_SETTINGS && code == LV_EVENT_LONG_PRESSED){
+      LV_LOG_USER("LONG PRESS Settings -> Wi-Fi popup");
+      wifiPopupCreate();
+  }
+
 
   if(code == LV_EVENT_CLICKED) {
     if(gui.page.menu.newTabSelected == NULL && gui.page.menu.oldTabSelected == NULL){
@@ -142,6 +147,7 @@ void menu(void) {
     lv_obj_set_pos(gui.page.menu.settingsTab, ui->common.sidebar_x, ui->menu.tab_settings_y);
     lv_obj_set_size(gui.page.menu.settingsTab, ui->menu.tab_w, ui->menu.tab_h);   
     lv_obj_add_event_cb(gui.page.menu.settingsTab, event_tab_switch, LV_EVENT_CLICKED, gui.page.menu.settingsTab);
+    lv_obj_add_event_cb(gui.page.menu.settingsTab, event_tab_switch, LV_EVENT_LONG_PRESSED, gui.page.menu.settingsTab);
     lv_obj_set_style_border_color(gui.page.menu.settingsTab, lv_color_hex(GREY), 0);
     lv_obj_set_style_border_opa(gui.page.menu.settingsTab, LV_OPA_50, 0);
     lv_obj_remove_flag(gui.page.menu.settingsTab, LV_OBJ_FLAG_SCROLLABLE);      
@@ -156,7 +162,14 @@ void menu(void) {
           lv_obj_set_style_text_font(gui.page.menu.label, ui->menu.tab_label_font, 0);
           lv_obj_align(gui.page.menu.label, LV_ALIGN_CENTER, ui->menu.tab_label_offset_x, ui->menu.tab_label_offset_y);
 
-
+          /* Wi-Fi connected indicator — top-left corner, hidden by default */
+          gui.page.menu.wifiStatusIcon = lv_label_create(gui.page.menu.settingsTab);
+          lv_label_set_text(gui.page.menu.wifiStatusIcon, LV_SYMBOL_WIFI);
+          lv_obj_set_style_text_font(gui.page.menu.wifiStatusIcon, ui->menu.wifi_icon_font, 0);
+          lv_obj_set_style_text_color(gui.page.menu.wifiStatusIcon, lv_color_hex(GREEN), 0);
+          lv_obj_set_style_transform_rotation(gui.page.menu.wifiStatusIcon, 1350, 0);
+          lv_obj_align(gui.page.menu.wifiStatusIcon, LV_ALIGN_TOP_LEFT, ui->menu.wifi_icon_x, ui->menu.wifi_icon_y);
+          lv_obj_add_flag(gui.page.menu.wifiStatusIcon, LV_OBJ_FLAG_HIDDEN);
 
     gui.page.menu.toolsTab = lv_obj_create(gui.page.menu.screen_mainMenu);
     lv_obj_set_pos(gui.page.menu.toolsTab, ui->common.sidebar_x, ui->menu.tab_tools_y);

@@ -35,6 +35,9 @@ typedef struct {
     int tab_label_offset_y;
     const lv_font_t *tab_icon_font;
     const lv_font_t *tab_label_font;
+    int wifi_icon_x;
+    int wifi_icon_y;
+    const lv_font_t *wifi_icon_font;
 } ui_menu_layout_t;
 
 typedef struct {
@@ -714,6 +717,30 @@ typedef struct {
 } ui_ota_popup_layout_t;
 
 typedef struct {
+    int status_y;
+    int scan_btn_w;
+    int scan_btn_h;
+    int scan_btn_y;
+    int list_y;
+    int list_h;
+    int autoconnect_container_w_pct;
+    int autoconnect_container_h;
+    int autoconnect_container_x;
+    int autoconnect_container_y;
+    int autoconnect_switch_gap;
+    int connect_btn_w;
+    int connect_btn_h;
+    int connect_btn_x;
+    int connect_btn_y;
+    int list_item_h;
+    const lv_font_t *status_font;
+    const lv_font_t *list_font;
+    const lv_font_t *scan_btn_font;
+    const lv_font_t *connect_btn_font;
+    const lv_font_t *autoconnect_font;
+} ui_wifi_popup_layout_t;
+
+typedef struct {
     int title_x;
     int title_y;
     int title_line_x;
@@ -967,6 +994,7 @@ typedef struct {
     ui_filter_popup_layout_t filter_popup;
     ui_selfcheck_popup_layout_t selfcheck_popup;
     ui_ota_popup_layout_t ota_popup;
+    ui_wifi_popup_layout_t wifi_popup;
     ui_message_popup_layout_t message_popup;
     ui_splash_popup_layout_t splash_popup;
     ui_splash_screen_layout_t splash_screen;

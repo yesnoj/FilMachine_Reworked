@@ -40,6 +40,7 @@ uint8_t analogVal_rotationSpeedPercent;
 #define Y_WB_CONTAINER_ML            (Y_CHEM_CONTAINER_ML + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #define Y_CHEM_VOLUME                (Y_WB_CONTAINER_ML + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #define Y_SPLASH_SCREEN              (Y_CHEM_VOLUME + SETTINGS_H_ROW + SETTINGS_GAP_Y)
+#define Y_WIFI_ROW                   (Y_SPLASH_SCREEN + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 
 //ACCESSORY INCLUDES
 
@@ -122,7 +123,7 @@ void event_settings_handler(lv_event_t * e)
 
     /*Do nothing if the container was clicked*/
 
-    if(act_cb == cont && cont != gui.page.settings.waterInletSwitch && cont != gui.page.settings.tempSensorTuneButton && cont != gui.page.settings.filmRotationSpeedSlider && cont != gui.page.settings.filmRotationInversionIntervalSlider && cont != gui.page.settings.filmRandomSlider && cont != gui.page.settings.persistentAlarmSwitch && cont != gui.page.settings.autostartSwitch && cont != gui.page.settings.drainFillTimeSlider && cont != gui.page.settings.multiRinseTimeSlider && cont != gui.page.settings.tankSizeTextArea && cont != gui.page.settings.pumpSpeedSlider && cont != gui.page.settings.chemContainerMlTextArea && cont != gui.page.settings.wbContainerMlTextArea && cont != gui.page.settings.chemVolumeTextArea && cont != gui.page.settings.splashButton)
+    if(act_cb == cont && cont != gui.page.settings.waterInletSwitch && cont != gui.page.settings.tempSensorTuneButton && cont != gui.page.settings.filmRotationSpeedSlider && cont != gui.page.settings.filmRotationInversionIntervalSlider && cont != gui.page.settings.filmRandomSlider && cont != gui.page.settings.persistentAlarmSwitch && cont != gui.page.settings.autostartSwitch && cont != gui.page.settings.drainFillTimeSlider && cont != gui.page.settings.multiRinseTimeSlider && cont != gui.page.settings.tankSizeTextArea && cont != gui.page.settings.pumpSpeedSlider && cont != gui.page.settings.chemContainerMlTextArea && cont != gui.page.settings.wbContainerMlTextArea && cont != gui.page.settings.chemVolumeTextArea && cont != gui.page.settings.splashButton && cont != gui.page.settings.wifiButton)
       return;
 
     if(act_cb == gui.page.settings.tempUnitCelsiusRadioButton || act_cb == gui.page.settings.tempUnitFahrenheitRadioButton){
@@ -327,6 +328,14 @@ void event_settings_handler(lv_event_t * e)
             LV_LOG_USER("Set Chemistry Volume");
             uint32_t idx = gui.page.settings.settingsParams.chemistryVolume >= 2 ? 1 : 0;
             rollerPopupCreate(chemistryVolumeList, chemistryVolume_text, act_cb, idx, ORANGE);
+        }
+    }
+
+    /* ── Wi-Fi button → open popup ── */
+    if(act_cb == gui.page.settings.wifiButton) {
+        if(code == LV_EVENT_CLICKED) {
+            LV_LOG_USER("PRESSED wifiButton");
+            wifiPopupCreate();
         }
     }
 
@@ -792,6 +801,29 @@ gui.page.settings.chemVolumeContainer = lv_obj_create(parent);
         lv_label_set_text(gui.page.settings.splashButtonLabel, LV_SYMBOL_SETTINGS);
         lv_obj_set_style_text_font(gui.page.settings.splashButtonLabel, UI_SETTINGS->button_font, 0);
         lv_obj_align(gui.page.settings.splashButtonLabel, LV_ALIGN_CENTER, 0, 0);
+
+  /* ── Wi-Fi ── */
+  gui.page.settings.wifiContainer = lv_obj_create(parent);
+  lv_obj_align(gui.page.settings.wifiContainer, LV_ALIGN_TOP_LEFT, SETTINGS_LEFT_X, Y_WIFI_ROW);
+  lv_obj_set_size(gui.page.settings.wifiContainer, UI_SETTINGS->row_w, SETTINGS_H_ROW);
+  lv_obj_remove_flag(gui.page.settings.wifiContainer, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_style_border_opa(gui.page.settings.wifiContainer, LV_OPA_TRANSP, 0);
+
+        gui.page.settings.wifiLabel = lv_label_create(gui.page.settings.wifiContainer);
+        lv_label_set_text(gui.page.settings.wifiLabel, settingsWifi_text);
+        lv_obj_set_style_text_font(gui.page.settings.wifiLabel, UI_SETTINGS->label_font, 0);
+        lv_obj_align(gui.page.settings.wifiLabel, LV_ALIGN_LEFT_MID, UI_SETTINGS->row_label_x, UI_SETTINGS->row_label_y);
+
+        gui.page.settings.wifiButton = lv_button_create(gui.page.settings.wifiContainer);
+        lv_obj_set_size(gui.page.settings.wifiButton, BUTTON_TUNE_WIDTH, BUTTON_TUNE_HEIGHT);
+        lv_obj_align(gui.page.settings.wifiButton, LV_ALIGN_RIGHT_MID, UI_SETTINGS->tune_button_x, UI_SETTINGS->tune_button_y);
+        lv_obj_add_event_cb(gui.page.settings.wifiButton, event_settings_handler, LV_EVENT_CLICKED, gui.page.settings.wifiButton);
+        lv_obj_set_style_bg_color(gui.page.settings.wifiButton, lv_color_hex(ORANGE), LV_PART_MAIN);
+
+        gui.page.settings.wifiButtonLabel = lv_label_create(gui.page.settings.wifiButton);
+        lv_label_set_text(gui.page.settings.wifiButtonLabel, LV_SYMBOL_WIFI);
+        lv_obj_set_style_text_font(gui.page.settings.wifiButtonLabel, UI_SETTINGS->button_font, 0);
+        lv_obj_align(gui.page.settings.wifiButtonLabel, LV_ALIGN_CENTER, 0, 0);
 }
 
 

@@ -126,6 +126,19 @@ typedef enum {
 /* Settings row strings */
 #define settingsSplashScreen_text				"Splash Screen"
 
+/* Wi-Fi / Remote control section strings */
+#define settingsWifi_text                       "Wi-Fi"
+#define wifiPopupTitle_text                     "Wi-Fi"
+#define wifiScan_text                           "Scan"
+#define wifiConnect_text                        "Connect"
+#define wifiDisconnect_text                     "Disconnect"
+#define wifiConnected_text                      "Connected to:"
+#define wifiDisconnected_text                   "Not connected"
+#define wifiScanning_text                       "Scanning..."
+#define wifiAutoConnect_text                    "Auto-connect"
+#define wifiEnterPassword_text                  "Enter password"
+#define wifiNoNetworks_text                     "No networks found"
+
 /* Checkup placeholder */
 #define checkupEllipsis_text					"..."
 
@@ -526,11 +539,15 @@ struct __attribute__ ((packed)) machineSettings {
 	uint8_t					splashComplexity;   /* 20–100 shape count (step 20) */
 	uint32_t				splashSeed;         /* (reserved, auto-generated from tick) */
 	bool					splashDefault;      /* true = use standard Deep Ocean splash */
+	/* ── Wi-Fi / Remote control settings ── */
+	bool					wifiEnabled;        /* true = connect to Wi-Fi on boot & run WebSocket server */
+	char					wifiSSID[33];       /* SSID (max 32 chars + NUL) */
+	char					wifiPassword[65];   /* Password (max 64 chars + NUL) */
 };
 
 
 
-typedef enum kbOwnerType { KB_OWNER_NONE, KB_OWNER_FILTER, KB_OWNER_PROCESS, KB_OWNER_STEP } kbOwnerType;
+typedef enum kbOwnerType { KB_OWNER_NONE, KB_OWNER_FILTER, KB_OWNER_PROCESS, KB_OWNER_STEP, KB_OWNER_SETTINGS } kbOwnerType;
 
 typedef struct sKeyboardOwnerContext {
     kbOwnerType         owner;
@@ -538,6 +555,7 @@ typedef struct sKeyboardOwnerContext {
     lv_obj_t           *parentScreen;
     lv_obj_t           *saveButton;
     void               *ownerData;
+    uint32_t            maxLength;      /* 0 = use default MAX_PROC_NAME_LEN */
 } sKeyboardOwnerContext;
 
 typedef enum rollerOwnerType {
@@ -1127,6 +1145,41 @@ struct sOtaWifiPopup {
 	char				 otaPin[6]; /* 5 digits + null */
 };
 
+/* ── Wi-Fi configuration scan results ── */
+#define MAX_WIFI_SCAN_RESULTS 15
+
+typedef struct {
+	char ssid[33];
+	int8_t rssi;
+	bool open;  /* true = no password needed */
+} wifiScanResult_t;
+
+struct sWifiPopup {
+	lv_obj_t            *popupParent;
+	lv_obj_t            *popupContainer;
+	lv_obj_t            *titleLabel;
+	lv_obj_t            *titleLine;
+	lv_style_t           style_titleLine;
+	lv_point_precise_t   titleLinePoints[2];
+	lv_obj_t            *closeButton;
+	lv_obj_t            *closeButtonLabel;
+	lv_obj_t            *statusLabel;
+	lv_obj_t            *scanButton;
+	lv_obj_t            *scanButtonLabel;
+	lv_obj_t            *listContainer;      /* scrollable list of scan results */
+	lv_obj_t            *connectButton;
+	lv_obj_t            *connectButtonLabel;
+	lv_obj_t            *autoConnectContainer;
+	lv_obj_t            *autoConnectLabel;
+	lv_obj_t            *autoConnectSwitch;
+	/* Scan state */
+	wifiScanResult_t     scanResults[MAX_WIFI_SCAN_RESULTS];
+	int                  scanCount;
+	int                  selectedIndex;       /* -1 = none */
+	char                 pendingPassword[65];
+	sKeyboardOwnerContext wifiPasswordKbCtx;
+};
+
 struct sMessagePopup {
 	/* LVGL objects */
 	lv_obj_t			      *mBoxPopupParent;
@@ -1167,6 +1220,7 @@ struct sMenu {
 	lv_obj_t			*toolsTab;
 	lv_obj_t			*iconLabel;
 	lv_obj_t			*label;
+	lv_obj_t			*wifiStatusIcon;
 
 	/* Params objects */
 	uint8_t				oldSelection;
@@ -1280,17 +1334,11 @@ struct sSettings {
 	lv_obj_t                *splashButton;
 	lv_obj_t                *splashButtonLabel;
 
-	/* OTA / Wi-Fi settings */
-	/* OTA / Wi-Fi settings */
-	lv_obj_t                *otaSectionLabel;
-	lv_obj_t                *otaWifiSSIDContainer;
-	lv_obj_t                *otaWifiSSIDLabel;
-	lv_obj_t                *otaWifiSSIDTextArea;
-	lv_obj_t                *otaWifiPasswordContainer;
-	lv_obj_t                *otaWifiPasswordLabel;
-	lv_obj_t                *otaWifiPasswordTextArea;
-	char                     otaWifiSSID[33];
-	char                     otaWifiPassword[65];
+	/* Wi-Fi settings row */
+	lv_obj_t                *wifiContainer;
+	lv_obj_t                *wifiLabel;
+	lv_obj_t                *wifiButton;
+	lv_obj_t                *wifiButtonLabel;
 
   /* Params objects */
   struct machineSettings   settingsParams;
@@ -1421,6 +1469,7 @@ struct sElements {
 	struct sRollerPopup			rollerPopup;
   struct sKeyboardPopup   keyboardPopup;
   struct sSplashPopup     splashPopup;
+  struct sWifiPopup       wifiPopup;
 };
 
 
@@ -1590,6 +1639,17 @@ void otaWifiPopupCreate(void);
 void event_otaWifiPopup(lv_event_t *e);
 void otaProgressPopupCreate(const char *title);
 void event_otaProgressPopup(lv_event_t *e);
+// @file element_wifiPopup.c
+void wifiPopupCreate(void);
+void event_wifiPopup(lv_event_t *e);
+// Wi-Fi scan API
+int  wifi_scan_start(void);
+int  wifi_scan_get_results(wifiScanResult_t *results, int max_results);
+bool wifi_connect(const char *ssid, const char *password);
+void wifi_disconnect(void);
+bool wifi_is_connected(void);
+const char *wifi_get_connected_ssid(void);
+const char *wifi_get_ip_address(void);
 // @file FilMachine.c
 void stopMotorTask(void);
 void runMotorTask(void);

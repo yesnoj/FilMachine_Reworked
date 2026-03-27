@@ -50,6 +50,7 @@ else()
     set(FILMACHINE_SOURCES
         main/accessories.c
         main/ota_update.c
+        main/ws_server.c
         main/ui_profile.c
         drivers/mcp23017.c
         drivers/ds18b20.c
@@ -71,6 +72,7 @@ else()
         c_elements/element_drainPopup.c
         c_elements/element_selfcheckPopup.c
         c_elements/element_otaWifiPopup.c
+        c_elements/element_wifiPopup.c
         c_elements/element_splashPopup.c
         c_fonts/FilMachineFontIcons_15.c
         c_fonts/FilMachineFontIcons_20.c
