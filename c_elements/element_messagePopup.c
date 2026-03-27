@@ -335,7 +335,6 @@ static void message_popup_button2_clicked(lv_obj_t *mboxCont)
                 sn->step.swipedLeft = false;
                 sn->step.swipedRight = false;
                 lv_obj_add_flag(sn->step.deleteButton, LV_OBJ_FLAG_HIDDEN);
-                lv_obj_add_flag(sn->step.editButton, LV_OBJ_FLAG_HIDDEN);
                 sn->step.longPressHandled = false;
             }
 

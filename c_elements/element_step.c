@@ -117,8 +117,6 @@ stepNode *getStepElementEntryByObject(lv_obj_t *obj, processNode *processReferen
         obj == currentNode->step.sourceLabel ||
         obj == currentNode->step.deleteButton ||
         obj == currentNode->step.deleteButtonLabel ||
-        obj == currentNode->step.editButton ||   
-        obj == currentNode->step.editButtonLabel ||
         obj == (lv_obj_t*)currentNode ) {
            break;
     }
@@ -202,7 +200,6 @@ void reorderStepElements(processNode *data) {
         current->step.swipedRight = false;
         current->step.gestureHandled = false;
         lv_obj_add_flag(current->step.deleteButton, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(current->step.editButton, LV_OBJ_FLAG_HIDDEN);
         y_offset += lv_obj_get_height(current->step.stepElement);
         child_idx++;
         current = current->next;
@@ -287,9 +284,7 @@ static void stepElement_handleClick(stepNode *currentNode, lv_obj_t *obj, proces
     int8_t x;
 
     bool is_action_button = (obj == currentNode->step.deleteButton ||
-                             obj == currentNode->step.deleteButtonLabel ||
-                             obj == currentNode->step.editButton ||
-                             obj == currentNode->step.editButtonLabel);
+                             obj == currentNode->step.deleteButtonLabel);
     if (!is_action_button) {
         lv_point_t release_point;
         lv_indev_get_point(indev, &release_point);
@@ -302,16 +297,13 @@ static void stepElement_handleClick(stepNode *currentNode, lv_obj_t *obj, proces
     }
 
     if (currentNode->step.swipedRight == true && obj != currentNode->step.deleteButton
-        && obj != currentNode->step.deleteButtonLabel
-        && obj != currentNode->step.editButton
-        && obj != currentNode->step.editButtonLabel) {
+        && obj != currentNode->step.deleteButtonLabel) {
         LV_LOG_USER("Tap to close panel");
         x = lv_obj_get_x_aligned(currentNode->step.stepElement) - ui_get_profile()->step_element.swipe_offset;
         lv_obj_set_pos(currentNode->step.stepElement, x, lv_obj_get_y_aligned(currentNode->step.stepElement));
         currentNode->step.swipedLeft = false;
         currentNode->step.swipedRight = false;
         lv_obj_add_flag(currentNode->step.deleteButton, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(currentNode->step.editButton, LV_OBJ_FLAG_HIDDEN);
         return;
     }
     if (obj == currentNode->step.stepElementSummary && currentNode->step.swipedLeft == false && currentNode->step.swipedRight == false && currentNode->step.gestureHandled == false) {
@@ -326,58 +318,6 @@ static void stepElement_handleClick(stepNode *currentNode, lv_obj_t *obj, proces
             messagePopupCreate(deletePopupTitle_text, deletePopupBody_text, deleteButton_text, stepDetailCancel_text, gui.tempStepNode);
             return;
         }
-    }
-    if ((obj == currentNode->step.editButton || obj == currentNode->step.editButtonLabel) && currentNode->step.swipedRight == true) {
-        LV_LOG_USER("Click Duplicate button step address %p", currentNode);
-
-        if (data->process.processDetails->stepElementsList.size >= MAX_STEP_ELEMENTS) {
-            messagePopupCreate(warningPopupTitle_text, maxNumberEntryStepsPopupBody_text, NULL, NULL, NULL);
-            return;
-        }
-
-        stepNode *newStep = (stepNode *)allocateAndInitializeNode(STEP_NODE);
-        if (newStep == NULL) {
-            LV_LOG_USER("Failed to allocate memory for duplicate step");
-            return;
-        }
-        /* Zero UI pointers, copy only business data */
-        memset(newStep->step.stepDetails, 0, sizeof(sStepDetail));
-        newStep->step.stepDetails->data = currentNode->step.stepDetails->data;
-
-        size_t nameLen = strlen(newStep->step.stepDetails->data.stepNameString);
-        if (nameLen + 2 <= MAX_PROC_NAME_LEN) {
-            strcat(newStep->step.stepDetails->data.stepNameString, "_c");
-        } else if (nameLen > 0) {
-            newStep->step.stepDetails->data.stepNameString[MAX_PROC_NAME_LEN - 2] = '_';
-            newStep->step.stepDetails->data.stepNameString[MAX_PROC_NAME_LEN - 1] = 'c';
-            newStep->step.stepDetails->data.stepNameString[MAX_PROC_NAME_LEN] = '\0';
-        }
-
-        newStep->step.stepElement = NULL;
-        newStep->step.stepStyle.values_and_props = NULL;
-        newStep->next = NULL;
-        newStep->prev = NULL;
-
-        addStepElement(newStep, data);
-
-        LV_LOG_USER("Duplicate step created at %p, process now has %d steps", newStep, data->process.processDetails->stepElementsList.size);
-
-        stepElementCreate(newStep, data, -1);
-
-        reorderStepElements(data);
-
-        lv_obj_scroll_to_view(newStep->step.stepElement, LV_ANIM_ON);
-
-        lv_obj_set_pos(currentNode->step.stepElement,
-            lv_obj_get_x_aligned(currentNode->step.stepElement) - ui_get_profile()->step_element.swipe_offset,
-            lv_obj_get_y_aligned(currentNode->step.stepElement));
-        currentNode->step.swipedRight = false;
-        lv_obj_add_flag(currentNode->step.deleteButton, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(currentNode->step.editButton, LV_OBJ_FLAG_HIDDEN);
-
-        calculateTotalTime(data);
-
-        return;
     }
 }
 
@@ -714,20 +654,8 @@ void stepElementCreate(stepNode * newStep,processNode * processReference, int8_t
                 lv_obj_set_style_text_font(newStep->step.deleteButtonLabel, se->delete_icon_font, 0);
                 lv_obj_align(newStep->step.deleteButtonLabel, LV_ALIGN_CENTER, se->delete_icon_x, se->delete_icon_y);
 
-        //Duplicate button - shown on swipe right alongside delete
-        newStep->step.editButton = lv_obj_create(newStep->step.stepElement);
-        lv_obj_set_style_bg_color(newStep->step.editButton, lv_color_hex(LIGHT_BLUE_DARK), LV_PART_MAIN);
-        lv_obj_set_size(newStep->step.editButton, se->edit_btn_w, se->edit_btn_h);
-        lv_obj_align(newStep->step.editButton, LV_ALIGN_TOP_LEFT, se->edit_btn_x, se->edit_btn_y);
-        lv_obj_add_flag(newStep->step.editButton, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_remove_flag(newStep->step.editButton, LV_OBJ_FLAG_SCROLLABLE);
-        lv_obj_add_event_cb(newStep->step.editButton, event_stepElement, LV_EVENT_SHORT_CLICKED, processReference);
-        lv_obj_add_flag(newStep->step.editButton, LV_OBJ_FLAG_CLICKABLE);
-
-                newStep->step.editButtonLabel = lv_label_create(newStep->step.editButton);
-                lv_label_set_text(newStep->step.editButtonLabel, newProcess_icon);
-                lv_obj_set_style_text_font(newStep->step.editButtonLabel, se->edit_icon_font, 0);
-                lv_obj_align(newStep->step.editButtonLabel, LV_ALIGN_CENTER, se->edit_icon_x, se->edit_icon_y);
+        newStep->step.editButton = NULL;
+        newStep->step.editButtonLabel = NULL;
 
         newStep->step.stepElementSummary = lv_obj_create(newStep->step.stepElement);
         lv_obj_set_size(newStep->step.stepElementSummary, se->card_content_w, se->card_content_h);

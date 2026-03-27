@@ -202,7 +202,6 @@ void event_processElement(lv_event_t *e) {
             currentNode->process.gestureHandled = false;
             return;
         }
-        ignore_click = false;  // Reset ignore click flag on release
     }
 
     if (code == LV_EVENT_GESTURE && currentNode->process.longPressHandled == false) {
@@ -238,8 +237,23 @@ void event_processElement(lv_event_t *e) {
         }
     }
 
-    if (code == LV_EVENT_SHORT_CLICKED && currentNode->process.longPressHandled == false && !ignore_click) {
+    if (code == LV_EVENT_SHORT_CLICKED && currentNode->process.longPressHandled == false) {
+        if (ignore_click) {
+            ignore_click = false;
+            return;
+        }
         LV_LOG_USER("LV_EVENT_CLICKED");
+
+        if (currentNode->process.swipedRight == true && obj != currentNode->process.deleteButton) {
+            LV_LOG_USER("Tap to close panel");
+            lv_obj_t *pe = currentNode->process.processElement;
+            x = lv_obj_get_x_aligned(pe) - ui_get_profile()->process_element.swipe_offset;
+            lv_obj_set_pos(pe, x, lv_obj_get_y_aligned(pe));
+            currentNode->process.swipedRight = false;
+            currentNode->process.swipedLeft = true;
+            lv_obj_add_flag(currentNode->process.deleteButton, LV_OBJ_FLAG_HIDDEN);
+            return;
+        }
 
         if (obj == currentNode->process.preferredIcon) {
             if (lv_color_eq(lv_obj_get_style_text_color(currentNode->process.preferredIcon, LV_PART_MAIN), lv_color_hex(RED))) {

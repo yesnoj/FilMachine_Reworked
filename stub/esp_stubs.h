@@ -203,7 +203,9 @@ static inline void esp_restart(void) { printf("[SIM] esp_restart() — ignoring\
 #endif
 
 /* Misc */
+#ifndef LV_UNUSED
 #define LV_UNUSED(x) ((void)(x))
+#endif
 #ifndef random
 #define random() rand()
 #endif

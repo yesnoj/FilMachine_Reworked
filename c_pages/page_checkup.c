@@ -801,7 +801,10 @@ void pumpTimer(lv_timer_t *timer) {
 
     sCheckup *checkup = pn->process.processDetails->checkup;
 
-    checkup_tick_process_elapsed();
+    /* Only advance process elapsed time when NOT in stop/drain phase */
+    if (!checkup->data.stopAfter && !checkup->data.stopNow) {
+        checkup_tick_process_elapsed();
+    }
 
     if (!checkup->data.stopAfter) {
         if (!checkup->data.stopNow) {
@@ -825,7 +828,9 @@ void pumpTimer(lv_timer_t *timer) {
         }
     }
 
-    if(checkup->checkupProcessTimeLeftValue != NULL) {
+    /* Only refresh process arc/time when NOT in stop/drain phase */
+    if(checkup->checkupProcessTimeLeftValue != NULL
+       && !checkup->data.stopAfter && !checkup->data.stopNow) {
         checkup_refresh_process_ui(pn, checkup);
     }
 }
