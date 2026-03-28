@@ -135,6 +135,9 @@ static void checkup_refresh_process_ui(processNode *pn, sCheckup *ckup) {
     if (percentage_u32 > 100U) percentage_u32 = 100U;
     processPercentage = (uint8_t)percentage_u32;
 
+    minutesProcessLeft = remaining_minutes;
+    secondsProcessLeft = (uint8_t)remaining_secs_only;
+
     lv_label_set_text_fmt(ckup->checkupProcessTimeLeftValue, "%" PRIu32 "m%" PRIu32 "s",
         remaining_minutes, remaining_secs_only);
     lv_arc_set_value(ckup->processArc, processPercentage);
@@ -306,6 +309,8 @@ void processTimer(lv_timer_t * timer) {
         (adjusted_step_seconds - elapsed_step_seconds) : 0U;
     uint32_t remaining_step_mins = remaining_step_seconds / 60U;
     uint32_t remaining_step_secs_only = remaining_step_seconds % 60U;
+    minutesStepLeft = remaining_step_mins;
+    secondsStepLeft = (uint8_t)remaining_step_secs_only;
 
     if(ckup->currentStep != NULL) {
         if(ckup->data.stopAfter == true && remaining_step_seconds == 0U){
@@ -321,6 +326,7 @@ void processTimer(lv_timer_t * timer) {
             lv_arc_set_value(ckup->stepArc, 100);
 
             lv_timer_pause(ckup->processTimer);
+            ckup->data.isDeveloping = false;
             lv_timer_resume(ckup->pumpTimer);
         }
         else{
@@ -355,6 +361,7 @@ void processTimer(lv_timer_t * timer) {
                 lv_label_set_text(ckup->checkupStepNameValue, checkupEllipsis_text);
                 lv_arc_set_value(ckup->stepArc, stepPercentage);
                 lv_timer_pause(ckup->processTimer);
+                ckup->data.isDeveloping = false;
                 lv_timer_resume(ckup->pumpTimer);
             }
         }
@@ -421,9 +428,12 @@ void tempTimerCallback(lv_timer_t * timer) {
     /* Safety timeout counter (logged to terminal only) */
     ckup->data.tempTimeoutCounter++;
 
-    /* Check if temperature reached (water temp within target ± tolerance) */
-    bool tempReached = (ckup->data.currentWaterTemp >= targetTemp - tolerance) &&
-                       (ckup->data.currentWaterTemp <= targetTemp + tolerance);
+    /* Check if temperature reached (water temp within target ± tolerance).
+       Use a minimum effective tolerance of 1.0°C so the simulator's discrete
+       temperature steps (0.5°C per tick) can actually satisfy the condition. */
+    float effectiveTolerance = (tolerance > 1.0f) ? tolerance : 1.0f;
+    bool tempReached = (ckup->data.currentWaterTemp >= targetTemp - effectiveTolerance) &&
+                       (ckup->data.currentWaterTemp <= targetTemp + effectiveTolerance);
 
     if(tempReached) {
         LV_LOG_USER("Temperature reached! Water=%.1f Target=%"PRIu32" Tol=%.1f",
@@ -448,6 +458,8 @@ void tempTimerCallback(lv_timer_t * timer) {
             ckup->data.stepCheckFilmStatus = 1;
             checkup(pn);
         } else {
+            /* Mark temp as reached so Flutter shows "Continue" instead of "Skip" */
+            ckup->data.stepReachTempStatus = 2;
             /* Show CONTINUE button for manual advance — widen to fit text */
             if(ckup->checkupSkipButton != NULL)
                 lv_obj_set_width(ckup->checkupSkipButton, ui_get_profile()->checkup.continue_button_w);
@@ -503,6 +515,7 @@ void handleFirstStep(processNode *pn) {
         tankPercentage = 0;
         tankTimeElapsed = 0;
         checkup->data.isFilling = false;
+        checkup->data.isDeveloping = true;  /* Set immediately to avoid brief "draining" state */
 
         lv_timer_pause(checkup->pumpTimer);
 
@@ -522,6 +535,9 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
             if (checkup->data.isAlreadyPumping == false) {
                 sendValueToRelay(pumpFrom, pumpDir, true);
                 checkup->data.isAlreadyPumping = true;
+                /* Disable stop buttons — last step is already draining */
+                lv_obj_add_state(checkup->checkupStopAfterButton, LV_STATE_DISABLED);
+                lv_obj_add_state(checkup->checkupStopNowButton, LV_STATE_DISABLED);
             }
 
             lv_arc_set_value(checkup->pumpArc, 100 - tankPercentage);
@@ -579,7 +595,6 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
             } else {
                 LV_LOG_USER("Middle step FILLING COMPLETE");
 
-
                 sendValueToRelay(pumpFrom, pumpDir, false);
                 checkup->data.isAlreadyPumping = false;
 
@@ -589,6 +604,7 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
                 tankPercentage = 0;
                 tankTimeElapsed = 0;
                 checkup->data.isFilling = false;
+                checkup->data.isDeveloping = true;  /* Set immediately to avoid brief "draining" state */
 
                 lv_timer_pause(checkup->pumpTimer);
                 lv_timer_resume(checkup->processTimer);
@@ -629,7 +645,11 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
 
 void handleStopNow(processNode *pn) {
     sCheckup* checkup = pn->process.processDetails->checkup;
-    pumpFrom = getValueForChemicalSource(checkup->currentStep->step.stepDetails->data.source);
+    /* currentStep is NULL during last-step draining — use waste in that case */
+    if (checkup->currentStep != NULL)
+        pumpFrom = getValueForChemicalSource(checkup->currentStep->step.stepDetails->data.source);
+    else
+        pumpFrom = getValueForChemicalSource(WASTE);
     pumpDir = PUMP_OUT_RLY;
 
     if (!checkup->data.isFilling && tankPercentage == 0) {
@@ -693,7 +713,6 @@ void handleStopAfter(processNode *pn) {
         } else {
             LV_LOG_USER("STOP AFTER step FILLING COMPLETE");
 
-
             sendValueToRelay(pumpFrom, pumpDir, false);
             checkup->data.isAlreadyPumping = false;
 
@@ -703,6 +722,7 @@ void handleStopAfter(processNode *pn) {
             tankPercentage = 0;
             tankTimeElapsed = 0;
             checkup->data.isFilling = false;
+            checkup->data.isDeveloping = true;  /* Set immediately to avoid brief "draining" state */
 
             lv_timer_pause(checkup->pumpTimer);
             if(checkup->processTimer != NULL)
@@ -751,7 +771,11 @@ void handleStopAfter(processNode *pn) {
 
 void handleStopNowAfterStopAfter(processNode *pn) {
     sCheckup* checkup = pn->process.processDetails->checkup;
-    pumpFrom = getValueForChemicalSource(checkup->currentStep->step.stepDetails->data.source);
+    /* currentStep is NULL during last-step draining — use waste in that case */
+    if (checkup->currentStep != NULL)
+        pumpFrom = getValueForChemicalSource(checkup->currentStep->step.stepDetails->data.source);
+    else
+        pumpFrom = getValueForChemicalSource(WASTE);
     pumpDir = PUMP_OUT_RLY;
 
     if (!checkup->data.isFilling && tankPercentage == 0) {
@@ -1293,7 +1317,10 @@ void initCheckup(processNode *pn)
       LV_LOG_USER("Final checks, current on ckup->data.processStep :%d",ckup->data.processStep);
 
       //in this way processDetail is deleted, to free memory and the "checkout" is a standard screen on top
-      lv_obj_del(pn->process.processDetails->processDetailParent);
+      if(pn->process.processDetails->processDetailParent != NULL) {
+          lv_obj_del(pn->process.processDetails->processDetailParent);
+          pn->process.processDetails->processDetailParent = NULL;
+      }
       ckup->checkupParent = lv_obj_create(NULL);
       lv_scr_load(ckup->checkupParent);
 
@@ -1638,3 +1665,35 @@ void checkup(processNode *processToCheckup) {
                 checkup_renderProcessing(processToCheckup);
             }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+ *  Public getters for WebSocket server (ws_server.c)
+ * ══════════════════════════════════════════════════════════════════ */
+
+processNode *checkup_find_active_process(void) {
+    processNode *node = gui.page.processes.processElementsList.start;
+    while (node) {
+        if (node->process.processDetails &&
+            node->process.processDetails->checkup &&
+            node->process.processDetails->checkup->data.isProcessing) {
+            return node;
+        }
+        node = node->next;
+    }
+    return NULL;
+}
+
+void     checkup_reset_state(void)            { resetStuffBeforeNextProcess(); }
+uint8_t  checkup_get_step_percentage(void)   { return stepPercentage; }
+uint8_t  checkup_get_process_percentage(void){ return processPercentage; }
+uint8_t  checkup_get_tank_percentage(void)   { return tankPercentage; }
+
+uint32_t checkup_get_step_elapsed_mins(void) { return minutesStepElapsed; }
+uint8_t  checkup_get_step_elapsed_secs(void) { return secondsStepElapsed; }
+uint32_t checkup_get_step_left_mins(void)    { return minutesStepLeft; }
+uint8_t  checkup_get_step_left_secs(void)    { return secondsStepLeft; }
+
+uint32_t checkup_get_process_left_mins(void) { return minutesProcessLeft; }
+uint8_t  checkup_get_process_left_secs(void) { return secondsProcessLeft; }
+uint32_t checkup_get_process_elapsed_mins(void) { return minutesProcessElapsed; }
+uint8_t  checkup_get_process_elapsed_secs(void) { return secondsProcessElapsed; }

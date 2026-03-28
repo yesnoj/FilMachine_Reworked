@@ -11,6 +11,7 @@
  */
 
 #include "FilMachine.h"
+#include "ws_server.h"
 
 extern struct gui_components gui;
 
@@ -98,6 +99,9 @@ static void splash_play_event_cb(lv_event_t * e)
     readConfigFile(FILENAME_SAVE, false);
     menu();
     refreshSettingsUI();
+    /* Start WS server only after real processes are loaded — prevents
+       Flutter from ever seeing the demo fallback list. */
+    ws_server_start(WS_SERVER_PORT);
 }
 
 /* ═══════════════════════════════════════════════

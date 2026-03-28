@@ -1595,6 +1595,20 @@ void initGlobals( void );
 // @file page_checkup.c
 void event_checkup(lv_event_t *e);
 void checkup(processNode *referenceProcess);
+/* Runtime getters for WebSocket server */
+processNode *checkup_find_active_process(void);
+void     checkup_reset_state(void);
+uint8_t  checkup_get_step_percentage(void);
+uint8_t  checkup_get_process_percentage(void);
+uint8_t  checkup_get_tank_percentage(void);
+uint32_t checkup_get_step_elapsed_mins(void);
+uint8_t  checkup_get_step_elapsed_secs(void);
+uint32_t checkup_get_step_left_mins(void);
+uint8_t  checkup_get_step_left_secs(void);
+uint32_t checkup_get_process_left_mins(void);
+uint8_t  checkup_get_process_left_secs(void);
+uint32_t checkup_get_process_elapsed_mins(void);
+uint8_t  checkup_get_process_elapsed_secs(void);
 // @file page_menu.c
 void event_tab_switch(lv_event_t *e);
 void menu(void);

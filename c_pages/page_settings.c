@@ -46,11 +46,15 @@ uint8_t analogVal_rotationSpeedPercent;
 
 static void settings_refresh_process_cards(void)
 {
-    if(gui.page.processes.processesListContainer == NULL) return;
-
-    uint32_t child_cnt = lv_obj_get_child_cnt(gui.page.processes.processesListContainer);
-    for(uint32_t i = 0; i < child_cnt; i++) {
-        lv_obj_send_event(lv_obj_get_child(gui.page.processes.processesListContainer, i), LV_EVENT_REFRESH, NULL);
+    /* Iterate the process linked list directly — safer than iterating
+       container children, which may include non-process-card objects
+       after CRUD operations or filtering. */
+    processNode *node = gui.page.processes.processElementsList.start;
+    while (node) {
+        if (node->process.processElement) {
+            lv_obj_send_event(node->process.processElement, LV_EVENT_REFRESH, NULL);
+        }
+        node = node->next;
     }
 }
 

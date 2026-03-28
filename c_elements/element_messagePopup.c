@@ -194,6 +194,7 @@ static void message_popup_handle_stop_now(void)
 
     ckup->data.stopNow = true;
     ckup->data.stopAfter = false;
+    ckup->data.isDeveloping = false;
     lv_obj_add_state(ckup->checkupStopAfterButton, LV_STATE_DISABLED);
     lv_obj_add_state(ckup->checkupStopNowButton, LV_STATE_DISABLED);
 
@@ -205,7 +206,7 @@ static void message_popup_handle_stop_now(void)
 
     gui.page.tools.machineStats.stopped++;
     safeTimerDelete(&ckup->processTimer);
-    lv_timer_resume(ckup->pumpTimer);
+    if (ckup->pumpTimer) lv_timer_resume(ckup->pumpTimer);
     qSysAction(SAVE_MACHINE_STATS);
 }
 

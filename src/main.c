@@ -18,6 +18,7 @@
 #include "page_splash.h"
 #include "SDL2/SDL.h"
 #include "FilMachine.h"
+#include "ws_server.h"
 #include "src/indev/lv_indev_private.h"   /* access gesture_limit / gesture_min_velocity */
 
 /* ═══════════════════════════════════════════════
@@ -939,14 +940,7 @@ int main(int argc, char *argv[]) {
     lv_obj_t * splash = splash_screen_create();
     lv_scr_load(splash);
 
-    /* If no processes were loaded (missing or corrupt config), generate demo data */
-    if (gui.page.processes.processElementsList.size == 0) {
-        printf("[SIM] No config file found — generating demo processes\n");
-        sim_generate_demo_data();
-    } else {
-        printf("[SIM] Loaded %d processes from config\n",
-               (int)gui.page.processes.processElementsList.size);
-    }
+    /* WS server starts after splash Play — see splash_play_event_cb() */
 
     printf("[SIM] GUI initialized — entering main loop\n");
     printf("[SIM] Press F2 to enable/disable UI debug overlay\n[SIM] When enabled: hover highlights widgets, right click dumps details\n");

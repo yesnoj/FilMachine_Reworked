@@ -1,0 +1,1814 @@
+╔══════════════════════════════════════════╗
+║   FilMachine Automated Test Runner       ║
+║   Resolution: 480x320                    ║
+╚══════════════════════════════════════════╝
+
+[TEST] Input device initialized
+[SIM] f_open OK: sd/FilMachine.cfg (988 bytes, mode: rb)
+[User]	(0.096, +96)	 readConfigFile: Loaded stats: completed=7 totalMins=450 stopped=1 clean=5 accessories.c:1096
+[TEST] Loaded 4 processes from config
+[TEST] Setup complete — running test suites
+
+
+══════════════════════════════════════
+  Suite: Navigation
+══════════════════════════════════════
+  [RUN ] Splash screen — is the active screen after boot
+  [PASS] Splash screen — is the active screen after boot
+  [RUN ] Splash → Menu — readConfigFile + menu() creates menu screen
+[SIM] f_open OK: sd/FilMachine.cfg (988 bytes, mode: rb)
+[User]	(0.130, +34)	 readConfigFile: Loaded stats: completed=7 totalMins=450 stopped=1 clean=5 accessories.c:1096
+[User]	(0.130, +0)	 initProcesses: Processes Creation page_processes.c:60
+[User]	(0.130, +0)	 processElementCreate: First call to processElementCreate style now initialised element_process.c:322
+[User]	(0.130, +0)	 processElementCreate: Process size :4 element_process.c:331
+[User]	(0.130, +0)	 processElementCreate: First call to processElementCreate style now initialised element_process.c:322
+[User]	(0.130, +0)	 processElementCreate: Process size :4 element_process.c:331
+[User]	(0.131, +1)	 processElementCreate: First call to processElementCreate style now initialised element_process.c:322
+[User]	(0.131, +0)	 processElementCreate: Process size :4 element_process.c:331
+[User]	(0.131, +0)	 processElementCreate: First call to processElementCreate style now initialised element_process.c:322
+[User]	(0.131, +0)	 processElementCreate: Process size :4 element_process.c:331
+[User]	(0.131, +0)	 initSettings: Settings Creation page_settings.c:834
+[User]	(0.133, +2)	 initTools: Tools Creation page_tools.c:487
+[User]	(0.134, +1)	 event_tab_switch: FIRST TIME page_menu.c:34
+[User]	(0.134, +0)	 event_tab_switch: OLD PRESSED 3 page_menu.c:105
+[User]	(0.134, +0)	 event_tab_switch: NEW PRESSED 3 page_menu.c:106
+[User]	(0.135, +1)	 refreshSettingsUI: Settings UI refreshed from config page_settings.c:1001
+  [PASS] Splash → Menu — readConfigFile + menu() creates menu screen
+  [RUN ] Tab switch — click Settings tab
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305f278
+[User]	(0.135, +0)	 event_tab_switch: NEXT TIME page_menu.c:41
+[User]	(0.135, +0)	 event_tab_switch: OLD PRESSED 3 page_menu.c:105
+[User]	(0.135, +0)	 event_tab_switch: NEW PRESSED 4 page_menu.c:106
+  [PASS] Tab switch — click Settings tab
+  [RUN ] Tab switch — click Tools tab
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305f860
+[User]	(0.135, +0)	 event_tab_switch: NEXT TIME page_menu.c:41
+[User]	(0.135, +0)	 event_tab_switch: OLD PRESSED 4 page_menu.c:105
+[User]	(0.135, +0)	 event_tab_switch: NEW PRESSED 5 page_menu.c:106
+  [PASS] Tab switch — click Tools tab
+  [RUN ] Tab switch — return to Processes tab
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305ed90
+[User]	(0.135, +0)	 event_tab_switch: NEXT TIME page_menu.c:41
+[User]	(0.135, +0)	 event_tab_switch: OLD PRESSED 5 page_menu.c:105
+[User]	(0.135, +0)	 event_tab_switch: NEW PRESSED 3 page_menu.c:106
+  [PASS] Tab switch — return to Processes tab
+
+══════════════════════════════════════
+  Suite: Processes
+══════════════════════════════════════
+  [RUN ] Process list — populated from config/generated data
+         [INFO] Process list size: 4
+         [INFO] Processes with UI elements: 4 / 4
+  [PASS] Process list — populated from config/generated data
+  [RUN ] New process — click new process button opens detail
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10304e3f8
+[User]	(0.136, +1)	 processDetail: Processes available 4 page_processDetail.c:307
+[User]	(0.136, +0)	 processDetail: Process address 0x0x9eac038e0, with n:0 steps page_processDetail.c:308
+[User]	(0.136, +0)	 event_tabProcesses: New Process Creation popup page_processes.c:49
+         [INFO] New process detail opened at 0x10305f230
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305ff00
+[User]	(0.136, +0)	 process_detail_close: Close Process Detail page_processDetail.c:45
+  [PASS] New process — click new process button opens detail
+  [RUN ] Process click — opens process detail page
+         [DBG] Sending SHORT_CLICKED to processElementSummary 0x10304ad08
+[User]	(0.137, +1)	 event_processElement: LV_EVENT_CLICKED element_process.c:245
+[User]	(0.137, +0)	 event_processElement: Process Element Details address 0x9eac03e80 element_process.c:281
+[User]	(0.137, +0)	 processDetail: Process already present page_processDetail.c:277
+[User]	(0.137, +0)	 processDetail: Processes available 4 page_processDetail.c:307
+[User]	(0.137, +0)	 processDetail: Process address 0x0x9eac03e80, with n:10 steps page_processDetail.c:308
+[User]	(0.138, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.138, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.138, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.138, +0)	 stepElementCreate: Step element created with address 0x0x9eb15d040 element_step.c:590
+[User]	(0.138, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.138, +0)	 stepElementCreate: First call to processElementCreate style now initialised element_step.c:604
+[User]	(0.138, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.138, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.138, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.138, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.138, +0)	 stepElementCreate: Step element created with address 0x0x9eb15cfa0 element_step.c:590
+[User]	(0.138, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.138, +0)	 stepElementCreate: First call to processElementCreate style now initialised element_step.c:604
+[User]	(0.138, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.138, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.138, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.138, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.138, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f840 element_step.c:590
+[User]	(0.138, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.138, +0)	 stepElementCreate: First call to processElementCreate style now initialised element_step.c:604
+[User]	(0.138, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.138, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.138, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.138, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.138, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f8e0 element_step.c:590
+[User]	(0.138, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.138, +0)	 stepElementCreate: First call to processElementCreate style now initialised element_step.c:604
+[User]	(0.138, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.138, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.138, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.138, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.138, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f980 element_step.c:590
+[User]	(0.138, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.138, +0)	 stepElementCreate: First call to processElementCreate style now initialised element_step.c:604
+[User]	(0.138, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.138, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.138, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.138, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.138, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fa20 element_step.c:590
+[User]	(0.138, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.138, +0)	 stepElementCreate: First call to processElementCreate style now initialised element_step.c:604
+[User]	(0.138, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.138, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.138, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.138, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.138, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fac0 element_step.c:590
+[User]	(0.138, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.138, +0)	 stepElementCreate: First call to processElementCreate style now initialised element_step.c:604
+[User]	(0.138, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.139, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.139, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.139, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.139, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fb60 element_step.c:590
+[User]	(0.139, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.139, +0)	 stepElementCreate: First call to processElementCreate style now initialised element_step.c:604
+[User]	(0.139, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.139, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.139, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.139, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.139, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fc00 element_step.c:590
+[User]	(0.139, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.139, +0)	 stepElementCreate: First call to processElementCreate style now initialised element_step.c:604
+[User]	(0.139, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.139, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.139, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.139, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.139, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fca0 element_step.c:590
+[User]	(0.139, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.139, +0)	 stepElementCreate: First call to processElementCreate style now initialised element_step.c:604
+[User]	(0.139, +0)	 stepElementCreate: Previous Step element_step.c:618
+  [PASS] Process click — opens process detail page
+  [RUN ] Process detail — UI elements exist
+  [PASS] Process detail — UI elements exist
+  [RUN ] Process detail — close button returns to list
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305ff00
+[User]	(0.139, +0)	 process_detail_close: Close Process Detail page_processDetail.c:45
+  [PASS] Process detail — close button returns to list
+
+══════════════════════════════════════
+  Suite: Process CRUD
+══════════════════════════════════════
+  [RUN ] Create process — full flow with name + step + save
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10304e3f8
+[User]	(0.139, +0)	 processDetail: Processes available 4 page_processDetail.c:307
+[User]	(0.139, +0)	 processDetail: Process address 0x0x9eac03b60, with n:0 steps page_processDetail.c:308
+[User]	(0.140, +1)	 event_tabProcesses: New Process Creation popup page_processes.c:49
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306d178
+[User]	(0.141, +1)	 event_processDetail: Pressed processNewStepButton page_processDetail.c:238
+[User]	(0.141, +0)	 stepDetail: New stepNode created at address 0x0x9eb9245a0 page_stepDetail.c:240
+[User]	(0.141, +0)	 stepDetail: Step detail creation page_stepDetail.c:251
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103069b48
+[User]	(0.142, +1)	 step_detail_save: Pressed stepSaveButton page_stepDetail.c:45
+[User]	(0.142, +0)	 addStepElement: stepElementsList.size: 1 element_step.c:46
+[User]	(0.143, +1)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+[User]	(0.143, +0)	 addStepElement: Process address 0x0x9eac03b60, with n:1 steps element_step.c:51
+[User]	(0.143, +0)	 step_detail_save: Step 0x9eb9245a0 element created!Now process 0x9eac03b60 has n: 1 steps page_stepDetail.c:53
+[User]	(0.143, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.143, +0)	 calculateTotalTime: Process 0x9eac03b60 has a total tilme of 5min:30sec accessories.c:1320
+[User]	(0.143, +0)	 stepElementCreate: Step element created with address 0x0x9eb9245a0 element_step.c:590
+[User]	(0.143, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03b60 element_step.c:591
+[User]	(0.143, +0)	 stepElementCreate: First call to processElementCreate style now initialised element_step.c:604
+[User]	(0.143, +0)	 stepElementCreate: New Step element_step.c:614
+[User]	(0.143, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+[User]	(0.143, +0)	 calculateTotalTime: Process 0x9eac03b60 has a total tilme of 5min:30sec accessories.c:1320
+[User]	(0.143, +0)	 updateStepElement: Updating element element in list accessories.c:1391
+[User]	(0.143, +0)	 event_stepDetail: Delete Styles page_stepDetail.c:183
+[User]	(0.143, +0)	 event_stepDetail: Delete Styles page_stepDetail.c:183
+         [INFO] Steps in new process: 1
+[User]	(0.143, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103067d10
+[User]	(0.143, +0)	 process_detail_save: Process not in list page_processDetail.c:99
+[User]	(0.143, +0)	 addProcessElement: Processes available 4 first element_process.c:77
+[User]	(0.143, +0)	 addProcessElement: Processes available 4 after element_process.c:89
+[User]	(0.143, +0)	 process_detail_save: Create GUI entry page_processDetail.c:101
+[User]	(0.143, +0)	 processElementCreate: First call to processElementCreate style now initialised element_process.c:322
+[User]	(0.143, +0)	 processElementCreate: Process size :5 element_process.c:331
+[User]	(0.143, +0)	 updateProcessElement: Updating process element in list accessories.c:1347
+[User]	(0.143, +0)	 process_detail_save: Pressed processSaveButton page_processDetail.c:114
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305ff00
+[User]	(0.143, +0)	 process_detail_close: Close Process Detail page_processDetail.c:45
+         [INFO] List size: before=4, after=5
+  [PASS] Create process — full flow with name + step + save
+  [RUN ] Modify process — change name and save
+[User]	(0.143, +0)	 event_processElement: LV_EVENT_CLICKED element_process.c:245
+[User]	(0.143, +0)	 event_processElement: Process Element Details address 0x9eac03e80 element_process.c:281
+[User]	(0.143, +0)	 processDetail: Process already present page_processDetail.c:277
+[User]	(0.143, +0)	 processDetail: Processes available 5 page_processDetail.c:307
+[User]	(0.143, +0)	 processDetail: Process address 0x0x9eac03e80, with n:10 steps page_processDetail.c:308
+[User]	(0.144, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.144, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.144, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.144, +0)	 stepElementCreate: Step element created with address 0x0x9eb15d040 element_step.c:590
+[User]	(0.144, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.144, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.144, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.144, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.144, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.144, +0)	 stepElementCreate: Step element created with address 0x0x9eb15cfa0 element_step.c:590
+[User]	(0.144, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.144, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.144, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.144, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.144, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.144, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f840 element_step.c:590
+[User]	(0.144, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.144, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.145, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.145, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.145, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.145, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f8e0 element_step.c:590
+[User]	(0.145, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.145, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.145, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.145, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.145, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.145, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f980 element_step.c:590
+[User]	(0.145, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.145, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.145, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.145, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.145, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.145, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fa20 element_step.c:590
+[User]	(0.145, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.145, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.145, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.145, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.145, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.145, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fac0 element_step.c:590
+[User]	(0.145, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.145, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.145, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.145, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.145, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.145, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fb60 element_step.c:590
+[User]	(0.145, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.145, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.145, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.145, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.145, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.145, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fc00 element_step.c:590
+[User]	(0.145, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.145, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.145, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.145, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.145, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.145, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fca0 element_step.c:590
+[User]	(0.145, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.145, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.147, +2)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103065e60
+[User]	(0.147, +0)	 process_detail_save: Process element exists so edited page_processDetail.c:107
+[User]	(0.147, +0)	 updateProcessElement: Updating process element in list accessories.c:1347
+[User]	(0.147, +0)	 process_detail_save: Pressed processSaveButton page_processDetail.c:114
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306b450
+[User]	(0.147, +0)	 process_detail_close: Close Process Detail page_processDetail.c:45
+  [PASS] Modify process — change name and save
+  [RUN ] Modify process — change film type
+[User]	(0.147, +0)	 event_processElement: LV_EVENT_CLICKED element_process.c:245
+[User]	(0.147, +0)	 event_processElement: Process Element Details address 0x9eac03e80 element_process.c:281
+[User]	(0.147, +0)	 processDetail: Process already present page_processDetail.c:277
+[User]	(0.147, +0)	 processDetail: Processes available 5 page_processDetail.c:307
+[User]	(0.147, +0)	 processDetail: Process address 0x0x9eac03e80, with n:10 steps page_processDetail.c:308
+[User]	(0.148, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.148, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.148, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.148, +0)	 stepElementCreate: Step element created with address 0x0x9eb15d040 element_step.c:590
+[User]	(0.148, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.148, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.148, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.148, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.148, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.148, +0)	 stepElementCreate: Step element created with address 0x0x9eb15cfa0 element_step.c:590
+[User]	(0.148, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.148, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.148, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.148, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.148, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.148, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f840 element_step.c:590
+[User]	(0.148, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.148, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.148, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.148, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.148, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.148, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f8e0 element_step.c:590
+[User]	(0.148, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.148, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.149, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.149, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.149, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.149, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f980 element_step.c:590
+[User]	(0.149, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.149, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.149, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.149, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.149, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.149, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fa20 element_step.c:590
+[User]	(0.149, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.149, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.149, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.149, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.149, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.149, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fac0 element_step.c:590
+[User]	(0.149, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.149, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.149, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.149, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.149, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.149, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fb60 element_step.c:590
+[User]	(0.149, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.149, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.149, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.149, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.149, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.149, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fc00 element_step.c:590
+[User]	(0.149, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.149, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.149, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.149, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.149, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.149, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fca0 element_step.c:590
+[User]	(0.149, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.149, +0)	 stepElementCreate: Previous Step element_step.c:618
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103065750
+[User]	(0.149, +0)	 process_detail_set_film_type: Pressed processColorLabel 1 page_processDetail.c:59
+[User]	(0.149, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+         [INFO] Film type: 0 → 1
+[User]	(0.149, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103065d00
+[User]	(0.149, +0)	 process_detail_save: Process element exists so edited page_processDetail.c:107
+[User]	(0.149, +0)	 updateProcessElement: Updating process element in list accessories.c:1347
+[User]	(0.149, +0)	 process_detail_save: Pressed processSaveButton page_processDetail.c:114
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306b450
+[User]	(0.150, +1)	 process_detail_close: Close Process Detail page_processDetail.c:45
+  [PASS] Modify process — change film type
+  [RUN ] Modify process — toggle preferred
+[User]	(0.150, +0)	 event_processElement: LV_EVENT_CLICKED element_process.c:245
+[User]	(0.150, +0)	 event_processElement: Process Element Details address 0x9eac03e80 element_process.c:281
+[User]	(0.150, +0)	 processDetail: Process already present page_processDetail.c:277
+[User]	(0.150, +0)	 processDetail: Processes available 5 page_processDetail.c:307
+[User]	(0.150, +0)	 processDetail: Process address 0x0x9eac03e80, with n:10 steps page_processDetail.c:308
+[User]	(0.151, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.151, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.151, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.151, +0)	 stepElementCreate: Step element created with address 0x0x9eb15d040 element_step.c:590
+[User]	(0.151, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.151, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.151, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.151, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.151, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.151, +0)	 stepElementCreate: Step element created with address 0x0x9eb15cfa0 element_step.c:590
+[User]	(0.151, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.151, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.151, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.151, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.151, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.151, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f840 element_step.c:590
+[User]	(0.151, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.151, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.151, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.151, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.151, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.151, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f8e0 element_step.c:590
+[User]	(0.151, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.151, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.151, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.151, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.151, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.151, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f980 element_step.c:590
+[User]	(0.151, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.151, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.151, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.151, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.151, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.151, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fa20 element_step.c:590
+[User]	(0.151, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.151, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.151, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.151, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.151, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.151, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fac0 element_step.c:590
+[User]	(0.151, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.151, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.151, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.151, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.151, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.151, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fb60 element_step.c:590
+[User]	(0.151, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.151, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.152, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.152, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.152, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.152, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fc00 element_step.c:590
+[User]	(0.152, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.152, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.152, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.152, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.152, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.152, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fca0 element_step.c:590
+[User]	(0.152, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.152, +0)	 stepElementCreate: Previous Step element_step.c:618
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103065b68
+[User]	(0.152, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+         [INFO] Preferred: 0 → 1
+[User]	(0.152, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103065d00
+[User]	(0.152, +0)	 process_detail_save: Process element exists so edited page_processDetail.c:107
+[User]	(0.152, +0)	 updateProcessElement: Updating process element in list accessories.c:1347
+[User]	(0.152, +0)	 process_detail_save: Pressed processSaveButton page_processDetail.c:114
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306b450
+[User]	(0.152, +0)	 process_detail_close: Close Process Detail page_processDetail.c:45
+  [PASS] Modify process — toggle preferred
+  [RUN ] Delete process — confirm deletion via popup
+[User]	(0.153, +1)	 event_processElement: LV_EVENT_CLICKED element_process.c:245
+[User]	(0.153, +0)	 event_processElement: Process Element click for popup delete element_process.c:274
+[User]	(0.153, +0)	 messagePopupCreate: Message popup create element_messagePopup.c:511
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103066620
+[User]	(0.153, +0)	 event_messagePopup: Pressed gui.element.messagePopup.mBoxPopupButton1 element_messagePopup.c:486
+[User]	(0.153, +0)	 message_popup_button1_clicked: Delete process! element_messagePopup.c:237
+[User]	(0.153, +0)	 deleteProcessElement: Processes available 4 element_process.c:142
+[User]	(0.153, +0)	 message_popup_button1_clicked: Delete process element instance at address 0x0x9eac03b60 element_messagePopup.c:242
+         [INFO] List size: before=5, after=4
+  [PASS] Delete process — confirm deletion via popup
+  [RUN ] Delete process — cancel keeps process
+[User]	(0.153, +0)	 event_processElement: LV_EVENT_CLICKED element_process.c:245
+[User]	(0.153, +0)	 event_processElement: Process Element click for popup delete element_process.c:274
+[User]	(0.153, +0)	 messagePopupCreate: Message popup create element_messagePopup.c:511
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306b330
+[User]	(0.153, +0)	 event_messagePopup: Pressed gui.element.messagePopup.mBoxPopupButton2 element_messagePopup.c:492
+[User]	(0.153, +0)	 message_popup_button2_clicked: Cancel delete process element! element_messagePopup.c:386
+  [PASS] Delete process — cancel keeps process
+  [RUN ] Duplicate process — via popup confirmation
+[User]	(0.153, +0)	 messagePopupCreate: Message popup create element_messagePopup.c:511
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306b330
+[User]	(0.153, +0)	 event_messagePopup: Pressed gui.element.messagePopup.mBoxPopupButton2 element_messagePopup.c:492
+[User]	(0.153, +0)	 message_popup_button2_clicked: Duplicate process element_messagePopup.c:397
+[User]	(0.153, +0)	 message_popup_button2_clicked: New name Modified Name_002 element_messagePopup.c:399
+[User]	(0.153, +0)	 addProcessElement: Processes available 4 first element_process.c:77
+[User]	(0.153, +0)	 addProcessElement: Processes available 4 after element_process.c:89
+[User]	(0.153, +0)	 message_popup_button2_clicked: Create GUI entry element_messagePopup.c:422
+[User]	(0.153, +0)	 processElementCreate: First call to processElementCreate style now initialised element_process.c:322
+[User]	(0.153, +0)	 processElementCreate: Process size :5 element_process.c:331
+         [INFO] List size: before=4, after=5
+  [PASS] Duplicate process — via popup confirmation
+  [RUN ] Create process — no steps prevents save to list
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10304e3f8
+[User]	(0.154, +1)	 processDetail: Processes available 5 page_processDetail.c:307
+[User]	(0.154, +0)	 processDetail: Process address 0x0x9eac03b60, with n:0 steps page_processDetail.c:308
+[User]	(0.155, +1)	 event_tabProcesses: New Process Creation popup page_processes.c:49
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x1030670b0
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306aa28
+[User]	(0.155, +0)	 process_detail_close: Close Process Detail page_processDetail.c:45
+  [PASS] Create process — no steps prevents save to list
+
+══════════════════════════════════════
+  Suite: Steps
+══════════════════════════════════════
+  [RUN ] Add step — click New Step button
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305ed90
+[User]	(0.155, +0)	 event_tab_switch: NEXT TIME page_menu.c:41
+[User]	(0.155, +0)	 event_tab_switch: OLD PRESSED 3 page_menu.c:105
+[User]	(0.155, +0)	 event_tab_switch: NEW PRESSED 3 page_menu.c:106
+[User]	(0.155, +0)	 event_processElement: LV_EVENT_CLICKED element_process.c:245
+[User]	(0.155, +0)	 event_processElement: Process Element Details address 0x9eac03e80 element_process.c:281
+[User]	(0.155, +0)	 processDetail: Process already present page_processDetail.c:277
+[User]	(0.155, +0)	 processDetail: Processes available 5 page_processDetail.c:307
+[User]	(0.155, +0)	 processDetail: Process address 0x0x9eac03e80, with n:10 steps page_processDetail.c:308
+[User]	(0.156, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.156, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.156, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.156, +0)	 stepElementCreate: Step element created with address 0x0x9eb15d040 element_step.c:590
+[User]	(0.156, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.156, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.156, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.156, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.156, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.156, +0)	 stepElementCreate: Step element created with address 0x0x9eb15cfa0 element_step.c:590
+[User]	(0.156, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.156, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.156, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.156, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.156, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.156, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f840 element_step.c:590
+[User]	(0.156, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.156, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.156, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.156, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.156, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.156, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f8e0 element_step.c:590
+[User]	(0.156, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.156, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.157, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.157, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.157, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.157, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f980 element_step.c:590
+[User]	(0.157, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.157, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.157, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.157, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.157, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.157, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fa20 element_step.c:590
+[User]	(0.157, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.157, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.157, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.157, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.157, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.157, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fac0 element_step.c:590
+[User]	(0.157, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.157, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.157, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.157, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.157, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.157, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fb60 element_step.c:590
+[User]	(0.157, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.157, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.157, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.157, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.157, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.157, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fc00 element_step.c:590
+[User]	(0.157, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.157, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.157, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:10 steps page_processDetail.c:615
+[User]	(0.157, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.157, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.157, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fca0 element_step.c:590
+[User]	(0.157, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.157, +0)	 stepElementCreate: Previous Step element_step.c:618
+         [INFO] Steps before: 10
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103064fd8
+[User]	(0.158, +1)	 event_processDetail: Pressed processNewStepButton page_processDetail.c:238
+[User]	(0.158, +0)	 stepDetail: New stepNode created at address 0x0x9eb924c80 page_stepDetail.c:240
+[User]	(0.158, +0)	 stepDetail: Step detail creation page_stepDetail.c:251
+         [INFO] Steps after: 10
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103072d38
+[User]	(0.158, +0)	 step_detail_save: Pressed stepSaveButton page_stepDetail.c:45
+[User]	(0.158, +0)	 addStepElement: stepElementsList.size: 11 element_step.c:46
+[User]	(0.158, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+[User]	(0.158, +0)	 addStepElement: Process address 0x0x9eac03e80, with n:11 steps element_step.c:51
+[User]	(0.158, +0)	 step_detail_save: Step 0x9eb924c80 element created!Now process 0x9eac03e80 has n: 11 steps page_stepDetail.c:53
+[User]	(0.158, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.158, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.158, +0)	 stepElementCreate: Step element created with address 0x0x9eb924c80 element_step.c:590
+[User]	(0.158, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.158, +0)	 stepElementCreate: First call to processElementCreate style now initialised element_step.c:604
+[User]	(0.158, +0)	 stepElementCreate: New Step element_step.c:614
+[User]	(0.158, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+[User]	(0.158, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.158, +0)	 updateStepElement: Updating element element in list accessories.c:1391
+[User]	(0.158, +0)	 event_stepDetail: Delete Styles page_stepDetail.c:183
+[User]	(0.159, +1)	 event_stepDetail: Delete Styles page_stepDetail.c:183
+  [PASS] Add step — click New Step button
+  [RUN ] Steps list — steps have LVGL elements
+         [INFO] Total steps: 11
+         [INFO] Steps with UI elements: 11
+  [PASS] Steps list — steps have LVGL elements
+  [RUN ] Swipe left — triggers duplicate popup
+         [INFO] Step element at: (-37,78)->(302,147), center=(132,112)
+         [INFO] Popup appeared: no
+         [SKIP] Popup did not appear — swipe may need tuning
+  [PASS] Swipe left — triggers duplicate popup
+  [RUN ] Close process detail — after step operations
+         [INFO] Saving process before close (somethingChanged=true)
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306d230
+[User]	(0.160, +1)	 process_detail_save: Process element exists so edited page_processDetail.c:107
+[User]	(0.160, +0)	 updateProcessElement: Updating process element in list accessories.c:1347
+[User]	(0.160, +0)	 process_detail_save: Pressed processSaveButton page_processDetail.c:114
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306aa28
+[User]	(0.160, +0)	 process_detail_close: Close Process Detail page_processDetail.c:45
+  [PASS] Close process detail — after step operations
+
+══════════════════════════════════════
+  Suite: Step CRUD
+══════════════════════════════════════
+  [RUN ] Create step — full details (name, time, type, source)
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305ed90
+[User]	(0.160, +0)	 event_tab_switch: NEXT TIME page_menu.c:41
+[User]	(0.160, +0)	 event_tab_switch: OLD PRESSED 3 page_menu.c:105
+[User]	(0.160, +0)	 event_tab_switch: NEW PRESSED 3 page_menu.c:106
+[User]	(0.160, +0)	 event_processElement: LV_EVENT_CLICKED element_process.c:245
+[User]	(0.160, +0)	 event_processElement: Process Element Details address 0x9eac03e80 element_process.c:281
+[User]	(0.160, +0)	 processDetail: Process already present page_processDetail.c:277
+[User]	(0.160, +0)	 processDetail: Processes available 5 page_processDetail.c:307
+[User]	(0.160, +0)	 processDetail: Process address 0x0x9eac03e80, with n:11 steps page_processDetail.c:308
+[User]	(0.161, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.161, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.161, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.161, +0)	 stepElementCreate: Step element created with address 0x0x9eb15d040 element_step.c:590
+[User]	(0.161, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.161, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.161, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.161, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.161, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.161, +0)	 stepElementCreate: Step element created with address 0x0x9eb15cfa0 element_step.c:590
+[User]	(0.161, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.161, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.161, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.161, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.161, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.161, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f840 element_step.c:590
+[User]	(0.161, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.161, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.161, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.161, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.161, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.161, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f8e0 element_step.c:590
+[User]	(0.161, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.161, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.161, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.161, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.161, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.161, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f980 element_step.c:590
+[User]	(0.161, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.161, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.162, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.162, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.162, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.162, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fa20 element_step.c:590
+[User]	(0.162, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.162, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.162, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.162, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.162, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.162, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fac0 element_step.c:590
+[User]	(0.162, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.162, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.162, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.162, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.162, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.162, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fb60 element_step.c:590
+[User]	(0.162, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.162, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.162, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.162, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.162, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.162, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fc00 element_step.c:590
+[User]	(0.162, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.162, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.162, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.162, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.162, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.162, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fca0 element_step.c:590
+[User]	(0.162, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.162, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.162, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.162, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.162, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.162, +0)	 stepElementCreate: Step element created with address 0x0x9eb924c80 element_step.c:590
+[User]	(0.162, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.162, +0)	 stepElementCreate: Previous Step element_step.c:618
+         [INFO] Steps before: 11
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103064fd8
+[User]	(0.165, +3)	 event_processDetail: Pressed processNewStepButton page_processDetail.c:238
+[User]	(0.165, +0)	 stepDetail: New stepNode created at address 0x0x9eb924d20 page_stepDetail.c:240
+[User]	(0.165, +0)	 stepDetail: Step detail creation page_stepDetail.c:251
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x1030735a8
+[User]	(0.166, +1)	 step_detail_save: Pressed stepSaveButton page_stepDetail.c:45
+[User]	(0.166, +0)	 addStepElement: stepElementsList.size: 12 element_step.c:46
+[User]	(0.166, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+[User]	(0.166, +0)	 addStepElement: Process address 0x0x9eac03e80, with n:12 steps element_step.c:51
+[User]	(0.166, +0)	 step_detail_save: Step 0x9eb924d20 element created!Now process 0x9eac03e80 has n: 12 steps page_stepDetail.c:53
+[User]	(0.166, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.166, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.166, +0)	 stepElementCreate: Step element created with address 0x0x9eb924d20 element_step.c:590
+[User]	(0.166, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.166, +0)	 stepElementCreate: First call to processElementCreate style now initialised element_step.c:604
+[User]	(0.166, +0)	 stepElementCreate: New Step element_step.c:614
+[User]	(0.166, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+[User]	(0.166, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.166, +0)	 updateStepElement: Updating element element in list accessories.c:1391
+[User]	(0.166, +0)	 event_stepDetail: Delete Styles page_stepDetail.c:183
+[User]	(0.166, +0)	 event_stepDetail: Delete Styles page_stepDetail.c:183
+         [INFO] Steps after: 12
+[User]	(0.166, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103067058
+[User]	(0.166, +0)	 process_detail_save: Process element exists so edited page_processDetail.c:107
+[User]	(0.166, +0)	 updateProcessElement: Updating process element in list accessories.c:1347
+[User]	(0.166, +0)	 process_detail_save: Pressed processSaveButton page_processDetail.c:114
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306aa28
+[User]	(0.166, +0)	 process_detail_close: Close Process Detail page_processDetail.c:45
+  [PASS] Create step — full details (name, time, type, source)
+  [RUN ] Edit step — modify name and time via stepDetail
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305ed90
+[User]	(0.166, +0)	 event_tab_switch: NEXT TIME page_menu.c:41
+[User]	(0.166, +0)	 event_tab_switch: OLD PRESSED 3 page_menu.c:105
+[User]	(0.166, +0)	 event_tab_switch: NEW PRESSED 3 page_menu.c:106
+[User]	(0.166, +0)	 event_processElement: LV_EVENT_CLICKED element_process.c:245
+[User]	(0.166, +0)	 event_processElement: Process Element Details address 0x9eac03e80 element_process.c:281
+[User]	(0.166, +0)	 processDetail: Process already present page_processDetail.c:277
+[User]	(0.166, +0)	 processDetail: Processes available 5 page_processDetail.c:307
+[User]	(0.166, +0)	 processDetail: Process address 0x0x9eac03e80, with n:12 steps page_processDetail.c:308
+[User]	(0.167, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.167, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.167, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.167, +0)	 stepElementCreate: Step element created with address 0x0x9eb15d040 element_step.c:590
+[User]	(0.167, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.167, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.167, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.167, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.167, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.167, +0)	 stepElementCreate: Step element created with address 0x0x9eb15cfa0 element_step.c:590
+[User]	(0.167, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.167, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.168, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.168, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.168, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.168, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f840 element_step.c:590
+[User]	(0.168, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.168, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.168, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.168, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.168, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.168, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f8e0 element_step.c:590
+[User]	(0.168, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.168, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.168, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.168, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.168, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.168, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f980 element_step.c:590
+[User]	(0.168, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.168, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.168, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.168, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.168, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.168, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fa20 element_step.c:590
+[User]	(0.168, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.168, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.168, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.168, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.168, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.168, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fac0 element_step.c:590
+[User]	(0.168, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.168, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.168, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.168, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.168, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.168, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fb60 element_step.c:590
+[User]	(0.168, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.168, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.168, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.168, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.168, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.168, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fc00 element_step.c:590
+[User]	(0.168, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.168, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.168, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.168, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.168, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.168, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fca0 element_step.c:590
+[User]	(0.168, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.168, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.169, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.169, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.169, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.169, +0)	 stepElementCreate: Step element created with address 0x0x9eb924c80 element_step.c:590
+[User]	(0.169, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.169, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.169, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.169, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.169, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.169, +0)	 stepElementCreate: Step element created with address 0x0x9eb924d20 element_step.c:590
+[User]	(0.169, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.169, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.169, +0)	 stepDetail: Step already exist with address 0x0x9eb15d040 page_stepDetail.c:229
+[User]	(0.169, +0)	 stepDetail: Step detail creation page_stepDetail.c:251
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103075028
+[User]	(0.170, +1)	 step_detail_save: Pressed stepSaveButton page_stepDetail.c:45
+[User]	(0.170, +0)	 step_detail_save: Step element creation failed, maximum entries reached page_stepDetail.c:56
+[User]	(0.170, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+[User]	(0.170, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.170, +0)	 updateStepElement: Updating element element in list accessories.c:1391
+[User]	(0.170, +0)	 event_stepDetail: Delete Styles page_stepDetail.c:183
+[User]	(0.170, +0)	 event_stepDetail: Delete Styles page_stepDetail.c:183
+[User]	(0.170, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306c950
+[User]	(0.170, +0)	 process_detail_save: Process element exists so edited page_processDetail.c:107
+[User]	(0.170, +0)	 updateProcessElement: Updating process element in list accessories.c:1347
+[User]	(0.170, +0)	 process_detail_save: Pressed processSaveButton page_processDetail.c:114
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306aa28
+[User]	(0.170, +0)	 process_detail_close: Close Process Detail page_processDetail.c:45
+  [PASS] Edit step — modify name and time via stepDetail
+  [RUN ] Delete step — remove from process list
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305ed90
+[User]	(0.170, +0)	 event_tab_switch: NEXT TIME page_menu.c:41
+[User]	(0.170, +0)	 event_tab_switch: OLD PRESSED 3 page_menu.c:105
+[User]	(0.170, +0)	 event_tab_switch: NEW PRESSED 3 page_menu.c:106
+[User]	(0.170, +0)	 event_processElement: LV_EVENT_CLICKED element_process.c:245
+[User]	(0.170, +0)	 event_processElement: Process Element Details address 0x9eac03e80 element_process.c:281
+[User]	(0.170, +0)	 processDetail: Process already present page_processDetail.c:277
+[User]	(0.170, +0)	 processDetail: Processes available 5 page_processDetail.c:307
+[User]	(0.170, +0)	 processDetail: Process address 0x0x9eac03e80, with n:12 steps page_processDetail.c:308
+[User]	(0.172, +2)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.172, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.172, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.172, +0)	 stepElementCreate: Step element created with address 0x0x9eb15d040 element_step.c:590
+[User]	(0.172, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.172, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.172, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.172, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.172, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.172, +0)	 stepElementCreate: Step element created with address 0x0x9eb15cfa0 element_step.c:590
+[User]	(0.172, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.172, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.172, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.172, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.172, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.172, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f840 element_step.c:590
+[User]	(0.172, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.172, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.172, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.172, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.172, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.172, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f8e0 element_step.c:590
+[User]	(0.172, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.172, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.172, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.172, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.172, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.172, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f980 element_step.c:590
+[User]	(0.172, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.172, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.172, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.172, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.172, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.172, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fa20 element_step.c:590
+[User]	(0.172, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.172, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.172, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.172, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.172, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.172, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fac0 element_step.c:590
+[User]	(0.172, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.172, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.172, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.172, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.172, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.172, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fb60 element_step.c:590
+[User]	(0.172, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.172, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.173, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.173, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.173, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.173, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fc00 element_step.c:590
+[User]	(0.173, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.173, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.173, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.173, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.173, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.173, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fca0 element_step.c:590
+[User]	(0.173, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.173, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.173, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.173, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.173, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.173, +0)	 stepElementCreate: Step element created with address 0x0x9eb924c80 element_step.c:590
+[User]	(0.173, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.173, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.173, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:12 steps page_processDetail.c:615
+[User]	(0.173, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.173, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 47min:0sec accessories.c:1320
+[User]	(0.173, +0)	 stepElementCreate: Step element created with address 0x0x9eb924d20 element_step.c:590
+[User]	(0.173, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.173, +0)	 stepElementCreate: Previous Step element_step.c:618
+         [INFO] Steps before delete: 12
+[User]	(0.173, +0)	 deleteStepElement: Process address 0x9eac03e80, with n:11 steps element_step.c:98
+         [INFO] Steps after delete: 11
+[User]	(0.173, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306c948
+[User]	(0.173, +0)	 process_detail_save: Process element exists so edited page_processDetail.c:107
+[User]	(0.173, +0)	 updateProcessElement: Updating process element in list accessories.c:1347
+[User]	(0.173, +0)	 process_detail_save: Pressed processSaveButton page_processDetail.c:114
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306aa28
+[User]	(0.173, +0)	 process_detail_close: Close Process Detail page_processDetail.c:45
+  [PASS] Delete step — remove from process list
+  [RUN ] Create steps — add 3 steps in sequence
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305ed90
+[User]	(0.174, +1)	 event_tab_switch: NEXT TIME page_menu.c:41
+[User]	(0.174, +0)	 event_tab_switch: OLD PRESSED 3 page_menu.c:105
+[User]	(0.174, +0)	 event_tab_switch: NEW PRESSED 3 page_menu.c:106
+[User]	(0.174, +0)	 event_processElement: LV_EVENT_CLICKED element_process.c:245
+[User]	(0.174, +0)	 event_processElement: Process Element Details address 0x9eac03e80 element_process.c:281
+[User]	(0.174, +0)	 processDetail: Process already present page_processDetail.c:277
+[User]	(0.174, +0)	 processDetail: Processes available 5 page_processDetail.c:307
+[User]	(0.174, +0)	 processDetail: Process address 0x0x9eac03e80, with n:11 steps page_processDetail.c:308
+[User]	(0.175, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.175, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.175, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.175, +0)	 stepElementCreate: Step element created with address 0x0x9eb15d040 element_step.c:590
+[User]	(0.175, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.175, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.175, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.175, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.175, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.175, +0)	 stepElementCreate: Step element created with address 0x0x9eb15cfa0 element_step.c:590
+[User]	(0.175, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.175, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.175, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.175, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.175, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.175, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f840 element_step.c:590
+[User]	(0.175, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.175, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.175, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.175, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.175, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.175, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f8e0 element_step.c:590
+[User]	(0.175, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.175, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.175, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.175, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.175, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.175, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f980 element_step.c:590
+[User]	(0.175, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.175, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.175, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.175, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.175, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.175, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fa20 element_step.c:590
+[User]	(0.175, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.175, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.175, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.175, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.175, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.175, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fac0 element_step.c:590
+[User]	(0.175, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.175, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.176, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.176, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.176, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.176, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fb60 element_step.c:590
+[User]	(0.176, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.176, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.176, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.176, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.176, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.176, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fc00 element_step.c:590
+[User]	(0.176, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.176, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.176, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.176, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.176, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.176, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fca0 element_step.c:590
+[User]	(0.176, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.176, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.176, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:11 steps page_processDetail.c:615
+[User]	(0.176, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.176, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 38min:15sec accessories.c:1320
+[User]	(0.176, +0)	 stepElementCreate: Step element created with address 0x0x9eb924c80 element_step.c:590
+[User]	(0.176, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.176, +0)	 stepElementCreate: Previous Step element_step.c:618
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103064760
+[User]	(0.176, +0)	 event_processDetail: Pressed processNewStepButton page_processDetail.c:238
+[User]	(0.176, +0)	 stepDetail: New stepNode created at address 0x0x9eb924d20 page_stepDetail.c:240
+[User]	(0.176, +0)	 stepDetail: Step detail creation page_stepDetail.c:251
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103073458
+[User]	(0.177, +1)	 step_detail_save: Pressed stepSaveButton page_stepDetail.c:45
+[User]	(0.177, +0)	 addStepElement: stepElementsList.size: 12 element_step.c:46
+[User]	(0.177, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+[User]	(0.177, +0)	 addStepElement: Process address 0x0x9eac03e80, with n:12 steps element_step.c:51
+[User]	(0.177, +0)	 step_detail_save: Step 0x9eb924d20 element created!Now process 0x9eac03e80 has n: 12 steps page_stepDetail.c:53
+[User]	(0.177, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.177, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 40min:15sec accessories.c:1320
+[User]	(0.177, +0)	 stepElementCreate: Step element created with address 0x0x9eb924d20 element_step.c:590
+[User]	(0.177, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.177, +0)	 stepElementCreate: First call to processElementCreate style now initialised element_step.c:604
+[User]	(0.177, +0)	 stepElementCreate: New Step element_step.c:614
+[User]	(0.177, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+[User]	(0.177, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 40min:15sec accessories.c:1320
+[User]	(0.177, +0)	 updateStepElement: Updating element element in list accessories.c:1391
+[User]	(0.177, +0)	 event_stepDetail: Delete Styles page_stepDetail.c:183
+[User]	(0.177, +0)	 event_stepDetail: Delete Styles page_stepDetail.c:183
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103064760
+[User]	(0.177, +0)	 event_processDetail: Pressed processNewStepButton page_processDetail.c:238
+[User]	(0.177, +0)	 stepDetail: New stepNode created at address 0x0x9eb924dc0 page_stepDetail.c:240
+[User]	(0.177, +0)	 stepDetail: Step detail creation page_stepDetail.c:251
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103072b40
+[User]	(0.179, +2)	 step_detail_save: Pressed stepSaveButton page_stepDetail.c:45
+[User]	(0.179, +0)	 addStepElement: stepElementsList.size: 13 element_step.c:46
+[User]	(0.179, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+[User]	(0.179, +0)	 addStepElement: Process address 0x0x9eac03e80, with n:13 steps element_step.c:51
+[User]	(0.179, +0)	 step_detail_save: Step 0x9eb924dc0 element created!Now process 0x9eac03e80 has n: 13 steps page_stepDetail.c:53
+[User]	(0.179, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.179, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 43min:15sec accessories.c:1320
+[User]	(0.179, +0)	 stepElementCreate: Step element created with address 0x0x9eb924dc0 element_step.c:590
+[User]	(0.179, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.179, +0)	 stepElementCreate: First call to processElementCreate style now initialised element_step.c:604
+[User]	(0.179, +0)	 stepElementCreate: New Step element_step.c:614
+[User]	(0.179, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+[User]	(0.179, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 43min:15sec accessories.c:1320
+[User]	(0.179, +0)	 updateStepElement: Updating element element in list accessories.c:1391
+[User]	(0.179, +0)	 event_stepDetail: Delete Styles page_stepDetail.c:183
+[User]	(0.179, +0)	 event_stepDetail: Delete Styles page_stepDetail.c:183
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103064760
+[User]	(0.179, +0)	 event_processDetail: Pressed processNewStepButton page_processDetail.c:238
+[User]	(0.179, +0)	 stepDetail: New stepNode created at address 0x0x9eb924e60 page_stepDetail.c:240
+[User]	(0.179, +0)	 stepDetail: Step detail creation page_stepDetail.c:251
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103072668
+[User]	(0.180, +1)	 step_detail_save: Pressed stepSaveButton page_stepDetail.c:45
+[User]	(0.180, +0)	 addStepElement: stepElementsList.size: 14 element_step.c:46
+[User]	(0.180, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+[User]	(0.180, +0)	 addStepElement: Process address 0x0x9eac03e80, with n:14 steps element_step.c:51
+[User]	(0.180, +0)	 step_detail_save: Step 0x9eb924e60 element created!Now process 0x9eac03e80 has n: 14 steps page_stepDetail.c:53
+[User]	(0.180, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.180, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.180, +0)	 stepElementCreate: Step element created with address 0x0x9eb924e60 element_step.c:590
+[User]	(0.180, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.180, +0)	 stepElementCreate: First call to processElementCreate style now initialised element_step.c:604
+[User]	(0.180, +0)	 stepElementCreate: New Step element_step.c:614
+[User]	(0.180, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+[User]	(0.180, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.180, +0)	 updateStepElement: Updating element element in list accessories.c:1391
+[User]	(0.180, +0)	 event_stepDetail: Delete Styles page_stepDetail.c:183
+[User]	(0.180, +0)	 event_stepDetail: Delete Styles page_stepDetail.c:183
+         [INFO] Steps: base=11, final=14
+[User]	(0.180, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306c950
+[User]	(0.180, +0)	 process_detail_save: Process element exists so edited page_processDetail.c:107
+[User]	(0.180, +0)	 updateProcessElement: Updating process element in list accessories.c:1347
+[User]	(0.180, +0)	 process_detail_save: Pressed processSaveButton page_processDetail.c:114
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306aa28
+[User]	(0.180, +0)	 process_detail_close: Close Process Detail page_processDetail.c:45
+  [PASS] Create steps — add 3 steps in sequence
+  [RUN ] Step cancel — discard unsaved step
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305ed90
+[User]	(0.180, +0)	 event_tab_switch: NEXT TIME page_menu.c:41
+[User]	(0.180, +0)	 event_tab_switch: OLD PRESSED 3 page_menu.c:105
+[User]	(0.180, +0)	 event_tab_switch: NEW PRESSED 3 page_menu.c:106
+[User]	(0.180, +0)	 event_processElement: LV_EVENT_CLICKED element_process.c:245
+[User]	(0.180, +0)	 event_processElement: Process Element Details address 0x9eac03e80 element_process.c:281
+[User]	(0.180, +0)	 processDetail: Process already present page_processDetail.c:277
+[User]	(0.180, +0)	 processDetail: Processes available 5 page_processDetail.c:307
+[User]	(0.180, +0)	 processDetail: Process address 0x0x9eac03e80, with n:14 steps page_processDetail.c:308
+[User]	(0.181, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.181, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.181, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.181, +0)	 stepElementCreate: Step element created with address 0x0x9eb15d040 element_step.c:590
+[User]	(0.181, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.181, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.181, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.181, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.181, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.181, +0)	 stepElementCreate: Step element created with address 0x0x9eb15cfa0 element_step.c:590
+[User]	(0.181, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.181, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.182, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.182, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.182, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.182, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f840 element_step.c:590
+[User]	(0.182, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.182, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.182, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.182, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.182, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.182, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f8e0 element_step.c:590
+[User]	(0.182, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.182, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.182, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.182, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.182, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.182, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f980 element_step.c:590
+[User]	(0.182, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.182, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.182, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.182, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.182, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.182, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fa20 element_step.c:590
+[User]	(0.182, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.182, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.182, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.182, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.182, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.182, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fac0 element_step.c:590
+[User]	(0.182, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.182, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.182, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.182, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.182, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.182, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fb60 element_step.c:590
+[User]	(0.182, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.182, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.182, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.182, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.182, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.182, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fc00 element_step.c:590
+[User]	(0.182, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.182, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.183, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.183, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.183, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.183, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fca0 element_step.c:590
+[User]	(0.183, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.183, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.183, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.183, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.183, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.183, +0)	 stepElementCreate: Step element created with address 0x0x9eb924c80 element_step.c:590
+[User]	(0.183, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.183, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.183, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.183, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.183, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.183, +0)	 stepElementCreate: Step element created with address 0x0x9eb924d20 element_step.c:590
+[User]	(0.183, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.183, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.183, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.183, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.183, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.183, +0)	 stepElementCreate: Step element created with address 0x0x9eb924dc0 element_step.c:590
+[User]	(0.183, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.183, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.183, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.183, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.183, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.183, +0)	 stepElementCreate: Step element created with address 0x0x9eb924e60 element_step.c:590
+[User]	(0.183, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.183, +0)	 stepElementCreate: Previous Step element_step.c:618
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103073af0
+[User]	(0.183, +0)	 event_processDetail: Pressed processNewStepButton page_processDetail.c:238
+[User]	(0.183, +0)	 stepDetail: New stepNode created at address 0x0x9eb924f00 page_stepDetail.c:240
+[User]	(0.183, +0)	 stepDetail: Step detail creation page_stepDetail.c:251
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x1030774d8
+[User]	(0.184, +1)	 step_detail_cancel: Pressed gui.tempStepNode->step.stepDetails->stepCancelButton page_stepDetail.c:73
+[User]	(0.184, +0)	 event_stepDetail: Delete Styles page_stepDetail.c:183
+[User]	(0.184, +0)	 event_stepDetail: Delete Styles page_stepDetail.c:183
+[User]	(0.184, +0)	 process_detail_refresh_save_button: Updated SAVE button : ENABLED page_processDetail.c:204
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103065fb0
+[User]	(0.184, +0)	 process_detail_save: Process element exists so edited page_processDetail.c:107
+[User]	(0.184, +0)	 updateProcessElement: Updating process element in list accessories.c:1347
+[User]	(0.184, +0)	 process_detail_save: Pressed processSaveButton page_processDetail.c:114
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306aa28
+[User]	(0.184, +0)	 process_detail_close: Close Process Detail page_processDetail.c:45
+  [PASS] Step cancel — discard unsaved step
+  [RUN ] Total time — calculated from all steps
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305ed90
+[User]	(0.184, +0)	 event_tab_switch: NEXT TIME page_menu.c:41
+[User]	(0.184, +0)	 event_tab_switch: OLD PRESSED 3 page_menu.c:105
+[User]	(0.184, +0)	 event_tab_switch: NEW PRESSED 3 page_menu.c:106
+[User]	(0.184, +0)	 event_processElement: LV_EVENT_CLICKED element_process.c:245
+[User]	(0.184, +0)	 event_processElement: Process Element Details address 0x9eac03e80 element_process.c:281
+[User]	(0.184, +0)	 processDetail: Process already present page_processDetail.c:277
+[User]	(0.184, +0)	 processDetail: Processes available 5 page_processDetail.c:307
+[User]	(0.184, +0)	 processDetail: Process address 0x0x9eac03e80, with n:14 steps page_processDetail.c:308
+[User]	(0.185, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.185, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.185, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.185, +0)	 stepElementCreate: Step element created with address 0x0x9eb15d040 element_step.c:590
+[User]	(0.185, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.185, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.186, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.186, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.186, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.186, +0)	 stepElementCreate: Step element created with address 0x0x9eb15cfa0 element_step.c:590
+[User]	(0.186, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.186, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.186, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.186, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.186, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.186, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f840 element_step.c:590
+[User]	(0.186, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.186, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.186, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.186, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.186, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.186, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f8e0 element_step.c:590
+[User]	(0.186, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.186, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.186, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.186, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.186, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.186, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f980 element_step.c:590
+[User]	(0.186, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.186, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.186, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.186, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.186, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.186, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fa20 element_step.c:590
+[User]	(0.186, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.186, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.186, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.186, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.186, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.186, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fac0 element_step.c:590
+[User]	(0.186, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.186, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.186, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.186, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.186, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.186, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fb60 element_step.c:590
+[User]	(0.186, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.186, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.186, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.186, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.186, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.186, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fc00 element_step.c:590
+[User]	(0.186, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.186, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.187, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.187, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.187, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.187, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fca0 element_step.c:590
+[User]	(0.187, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.187, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.187, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.187, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.187, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.187, +0)	 stepElementCreate: Step element created with address 0x0x9eb924c80 element_step.c:590
+[User]	(0.187, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.187, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.187, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.187, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.187, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.187, +0)	 stepElementCreate: Step element created with address 0x0x9eb924d20 element_step.c:590
+[User]	(0.187, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.187, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.187, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.187, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.187, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.187, +0)	 stepElementCreate: Step element created with address 0x0x9eb924dc0 element_step.c:590
+[User]	(0.187, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.187, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.187, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.187, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.187, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.187, +0)	 stepElementCreate: Step element created with address 0x0x9eb924e60 element_step.c:590
+[User]	(0.187, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.187, +0)	 stepElementCreate: Previous Step element_step.c:618
+         [INFO] Calculated total: 44min 15sec
+         [INFO] Process reports: 44min 15sec
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306aa28
+[User]	(0.187, +0)	 process_detail_close: Close Process Detail page_processDetail.c:45
+  [PASS] Total time — calculated from all steps
+
+══════════════════════════════════════
+  Suite: Execution (Checkup)
+══════════════════════════════════════
+  [RUN ] Execution — run button opens checkup screen
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305ed90
+[User]	(0.188, +1)	 event_tab_switch: NEXT TIME page_menu.c:41
+[User]	(0.188, +0)	 event_tab_switch: OLD PRESSED 3 page_menu.c:105
+[User]	(0.188, +0)	 event_tab_switch: NEW PRESSED 3 page_menu.c:106
+[User]	(0.188, +0)	 event_processElement: LV_EVENT_CLICKED element_process.c:245
+[User]	(0.188, +0)	 event_processElement: Process Element Details address 0x9eac03e80 element_process.c:281
+[User]	(0.188, +0)	 processDetail: Process already present page_processDetail.c:277
+[User]	(0.188, +0)	 processDetail: Processes available 5 page_processDetail.c:307
+[User]	(0.188, +0)	 processDetail: Process address 0x0x9eac03e80, with n:14 steps page_processDetail.c:308
+[User]	(0.189, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.189, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.189, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.189, +0)	 stepElementCreate: Step element created with address 0x0x9eb15d040 element_step.c:590
+[User]	(0.189, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.189, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.189, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.189, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.189, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.189, +0)	 stepElementCreate: Step element created with address 0x0x9eb15cfa0 element_step.c:590
+[User]	(0.189, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.189, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.189, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.189, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.189, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.189, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f840 element_step.c:590
+[User]	(0.189, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.189, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.189, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.189, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.189, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.189, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f8e0 element_step.c:590
+[User]	(0.189, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.189, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.189, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.189, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.189, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.189, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f980 element_step.c:590
+[User]	(0.189, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.189, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.189, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.189, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.189, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.189, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fa20 element_step.c:590
+[User]	(0.189, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.189, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.189, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.189, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.189, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.189, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fac0 element_step.c:590
+[User]	(0.189, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.189, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.189, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.189, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.190, +1)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.190, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fb60 element_step.c:590
+[User]	(0.190, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.190, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.190, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.190, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.190, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.190, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fc00 element_step.c:590
+[User]	(0.190, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.190, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.190, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.190, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.190, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.190, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fca0 element_step.c:590
+[User]	(0.190, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.190, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.190, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.190, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.190, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.190, +0)	 stepElementCreate: Step element created with address 0x0x9eb924c80 element_step.c:590
+[User]	(0.190, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.190, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.190, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.190, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.190, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.190, +0)	 stepElementCreate: Step element created with address 0x0x9eb924d20 element_step.c:590
+[User]	(0.190, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.190, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.190, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.190, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.190, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.190, +0)	 stepElementCreate: Step element created with address 0x0x9eb924dc0 element_step.c:590
+[User]	(0.190, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.190, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.190, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.190, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.190, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.190, +0)	 stepElementCreate: Step element created with address 0x0x9eb924e60 element_step.c:590
+[User]	(0.190, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.190, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.191, +1)	 checkup: initCheckup page_checkup.c:1405
+[User]	(0.191, +0)	 checkup: isProcessing 0 page_checkup.c:1422
+[User]	(0.191, +0)	 checkup: isProcessing False page_checkup.c:1424
+[User]	(0.191, +0)	 initCheckup: Final checks, current on ckup->data.processStep :0 page_checkup.c:1317
+[User]	(0.191, +0)	 initCheckup: Object created page_checkup.c:1336
+[User]	(0.191, +0)	 checkup: initCheckup Done! page_checkup.c:1428
+[User]	(0.191, +0)	 checkup_renderPreFlight: checkup: Start button ENABLED (tank=2, vol=2) page_checkup.c:961
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306aa28
+[User]	(0.191, +0)	 event_checkup: User pressed checkupCloseButton page_checkup.c:234
+  [PASS] Execution — run button opens checkup screen
+  [RUN ] Execution — checkup UI elements exist
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305ed90
+[User]	(0.191, +0)	 event_tab_switch: NEXT TIME page_menu.c:41
+[User]	(0.191, +0)	 event_tab_switch: OLD PRESSED 3 page_menu.c:105
+[User]	(0.191, +0)	 event_tab_switch: NEW PRESSED 3 page_menu.c:106
+[User]	(0.192, +1)	 event_processElement: LV_EVENT_CLICKED element_process.c:245
+[User]	(0.192, +0)	 event_processElement: Process Element Details address 0x9eac03e80 element_process.c:281
+[User]	(0.192, +0)	 processDetail: Process already present page_processDetail.c:277
+[User]	(0.192, +0)	 processDetail: Processes available 5 page_processDetail.c:307
+[User]	(0.192, +0)	 processDetail: Process address 0x0x9eac03e80, with n:14 steps page_processDetail.c:308
+[User]	(0.193, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.193, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.193, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.193, +0)	 stepElementCreate: Step element created with address 0x0x9eb15d040 element_step.c:590
+[User]	(0.193, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.193, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.193, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.193, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.193, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.193, +0)	 stepElementCreate: Step element created with address 0x0x9eb15cfa0 element_step.c:590
+[User]	(0.193, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.193, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.193, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.193, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.193, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.193, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f840 element_step.c:590
+[User]	(0.193, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.193, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.193, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.193, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.193, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.193, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f8e0 element_step.c:590
+[User]	(0.193, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.193, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.193, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.193, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.193, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.193, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f980 element_step.c:590
+[User]	(0.193, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.193, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.193, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.193, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.193, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.193, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fa20 element_step.c:590
+[User]	(0.193, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.193, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.193, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.193, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.193, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.193, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fac0 element_step.c:590
+[User]	(0.193, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.193, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.193, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.193, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.193, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.193, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fb60 element_step.c:590
+[User]	(0.193, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.193, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.194, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.194, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.194, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.194, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fc00 element_step.c:590
+[User]	(0.194, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.194, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.194, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.194, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.194, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.194, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fca0 element_step.c:590
+[User]	(0.194, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.194, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.194, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.194, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.194, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.194, +0)	 stepElementCreate: Step element created with address 0x0x9eb924c80 element_step.c:590
+[User]	(0.194, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.194, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.194, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.194, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.194, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.194, +0)	 stepElementCreate: Step element created with address 0x0x9eb924d20 element_step.c:590
+[User]	(0.194, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.194, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.194, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.194, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.194, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.194, +0)	 stepElementCreate: Step element created with address 0x0x9eb924dc0 element_step.c:590
+[User]	(0.194, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.194, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.194, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.194, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.194, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.194, +0)	 stepElementCreate: Step element created with address 0x0x9eb924e60 element_step.c:590
+[User]	(0.194, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.194, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.194, +0)	 checkup: initCheckup page_checkup.c:1405
+[User]	(0.194, +0)	 checkup: isProcessing 0 page_checkup.c:1422
+[User]	(0.194, +0)	 checkup: isProcessing False page_checkup.c:1424
+[User]	(0.194, +0)	 initCheckup: Final checks, current on ckup->data.processStep :0 page_checkup.c:1317
+[User]	(0.195, +1)	 initCheckup: Object created page_checkup.c:1336
+[User]	(0.195, +0)	 checkup: initCheckup Done! page_checkup.c:1428
+[User]	(0.195, +0)	 checkup_renderPreFlight: checkup: Start button ENABLED (tank=2, vol=2) page_checkup.c:961
+         [INFO] stopNow btn at step 0: 0x0 (expected NULL)
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306aa28
+[User]	(0.196, +1)	 event_checkup: User pressed checkupCloseButton page_checkup.c:234
+  [PASS] Execution — checkup UI elements exist
+  [RUN ] Execution — stop now popup via messagePopupCreate
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305ed90
+[User]	(0.196, +0)	 event_tab_switch: NEXT TIME page_menu.c:41
+[User]	(0.196, +0)	 event_tab_switch: OLD PRESSED 3 page_menu.c:105
+[User]	(0.196, +0)	 event_tab_switch: NEW PRESSED 3 page_menu.c:106
+[User]	(0.196, +0)	 event_processElement: LV_EVENT_CLICKED element_process.c:245
+[User]	(0.196, +0)	 event_processElement: Process Element Details address 0x9eac03e80 element_process.c:281
+[User]	(0.196, +0)	 processDetail: Process already present page_processDetail.c:277
+[User]	(0.196, +0)	 processDetail: Processes available 5 page_processDetail.c:307
+[User]	(0.196, +0)	 processDetail: Process address 0x0x9eac03e80, with n:14 steps page_processDetail.c:308
+[User]	(0.197, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.197, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.197, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.197, +0)	 stepElementCreate: Step element created with address 0x0x9eb15d040 element_step.c:590
+[User]	(0.197, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.197, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.197, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.197, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.197, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.197, +0)	 stepElementCreate: Step element created with address 0x0x9eb15cfa0 element_step.c:590
+[User]	(0.197, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.197, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.197, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.197, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.197, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.197, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f840 element_step.c:590
+[User]	(0.197, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.197, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.198, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.198, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.198, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.198, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f8e0 element_step.c:590
+[User]	(0.198, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.198, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.198, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.198, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.198, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.198, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f980 element_step.c:590
+[User]	(0.198, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.198, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.198, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.198, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.198, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.198, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fa20 element_step.c:590
+[User]	(0.198, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.198, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.198, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.198, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.198, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.198, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fac0 element_step.c:590
+[User]	(0.198, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.198, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.198, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.198, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.198, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.198, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fb60 element_step.c:590
+[User]	(0.198, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.198, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.198, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.198, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.198, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.198, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fc00 element_step.c:590
+[User]	(0.198, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.198, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.198, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.198, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.198, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.198, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fca0 element_step.c:590
+[User]	(0.198, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.198, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.199, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.199, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.199, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.199, +0)	 stepElementCreate: Step element created with address 0x0x9eb924c80 element_step.c:590
+[User]	(0.199, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.199, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.199, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.199, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.199, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.199, +0)	 stepElementCreate: Step element created with address 0x0x9eb924d20 element_step.c:590
+[User]	(0.199, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.199, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.199, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.199, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.199, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.199, +0)	 stepElementCreate: Step element created with address 0x0x9eb924dc0 element_step.c:590
+[User]	(0.199, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.199, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.199, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.199, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.199, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.199, +0)	 stepElementCreate: Step element created with address 0x0x9eb924e60 element_step.c:590
+[User]	(0.199, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.199, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.199, +0)	 checkup: initCheckup page_checkup.c:1405
+[User]	(0.199, +0)	 checkup: isProcessing 0 page_checkup.c:1422
+[User]	(0.199, +0)	 checkup: isProcessing False page_checkup.c:1424
+[User]	(0.199, +0)	 initCheckup: Final checks, current on ckup->data.processStep :0 page_checkup.c:1317
+[User]	(0.199, +0)	 initCheckup: Object created page_checkup.c:1336
+[User]	(0.199, +0)	 checkup: initCheckup Done! page_checkup.c:1428
+[User]	(0.200, +1)	 checkup_renderPreFlight: checkup: Start button ENABLED (tank=2, vol=2) page_checkup.c:961
+[User]	(0.200, +0)	 messagePopupCreate: Message popup create element_messagePopup.c:511
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x103069cd8
+[User]	(0.200, +0)	 event_messagePopup: Pressed gui.element.messagePopup.mBoxPopupButton2 element_messagePopup.c:492
+[User]	(0.200, +0)	 message_popup_button2_clicked: Cancel delete all process! element_messagePopup.c:450
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306aa28
+[User]	(0.200, +0)	 event_checkup: User pressed checkupCloseButton page_checkup.c:234
+  [PASS] Execution — stop now popup via messagePopupCreate
+  [RUN ] Execution — close checkup returns to menu screen
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305ed90
+[User]	(0.200, +0)	 event_tab_switch: NEXT TIME page_menu.c:41
+[User]	(0.200, +0)	 event_tab_switch: OLD PRESSED 3 page_menu.c:105
+[User]	(0.200, +0)	 event_tab_switch: NEW PRESSED 3 page_menu.c:106
+[User]	(0.200, +0)	 event_processElement: LV_EVENT_CLICKED element_process.c:245
+[User]	(0.200, +0)	 event_processElement: Process Element Details address 0x9eac03e80 element_process.c:281
+[User]	(0.200, +0)	 processDetail: Process already present page_processDetail.c:277
+[User]	(0.200, +0)	 processDetail: Processes available 5 page_processDetail.c:307
+[User]	(0.200, +0)	 processDetail: Process address 0x0x9eac03e80, with n:14 steps page_processDetail.c:308
+[User]	(0.201, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.201, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.201, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.201, +0)	 stepElementCreate: Step element created with address 0x0x9eb15d040 element_step.c:590
+[User]	(0.201, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.201, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.202, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.202, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.202, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.202, +0)	 stepElementCreate: Step element created with address 0x0x9eb15cfa0 element_step.c:590
+[User]	(0.202, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.202, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.202, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.202, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.202, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.202, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f840 element_step.c:590
+[User]	(0.202, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.202, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.202, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.202, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.202, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.202, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f8e0 element_step.c:590
+[User]	(0.202, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.202, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.202, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.202, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.202, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.202, +0)	 stepElementCreate: Step element created with address 0x0x9eb15f980 element_step.c:590
+[User]	(0.202, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.202, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.202, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.202, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.202, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.202, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fa20 element_step.c:590
+[User]	(0.202, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.202, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.202, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.202, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.202, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.202, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fac0 element_step.c:590
+[User]	(0.202, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.202, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.202, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.202, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.202, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.202, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fb60 element_step.c:590
+[User]	(0.202, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.202, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.202, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.202, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.202, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.202, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fc00 element_step.c:590
+[User]	(0.202, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.202, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.203, +1)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.203, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.203, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.203, +0)	 stepElementCreate: Step element created with address 0x0x9eb15fca0 element_step.c:590
+[User]	(0.203, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.203, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.203, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.203, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.203, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.203, +0)	 stepElementCreate: Step element created with address 0x0x9eb924c80 element_step.c:590
+[User]	(0.203, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.203, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.203, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.203, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.203, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.203, +0)	 stepElementCreate: Step element created with address 0x0x9eb924d20 element_step.c:590
+[User]	(0.203, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.203, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.203, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.203, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.203, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.203, +0)	 stepElementCreate: Step element created with address 0x0x9eb924dc0 element_step.c:590
+[User]	(0.203, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.203, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.203, +0)	 processDetail: Adding to process with address 0x0x9eac03e80 n:14 steps page_processDetail.c:615
+[User]	(0.203, +0)	 stepElementCreate: Step Creation element_step.c:583
+[User]	(0.203, +0)	 calculateTotalTime: Process 0x9eac03e80 has a total tilme of 44min:15sec accessories.c:1320
+[User]	(0.203, +0)	 stepElementCreate: Step element created with address 0x0x9eb924e60 element_step.c:590
+[User]	(0.203, +0)	 stepElementCreate: Process element associated with address 0x0x9eac03e80 element_step.c:591
+[User]	(0.203, +0)	 stepElementCreate: Previous Step element_step.c:618
+[User]	(0.204, +1)	 checkup: initCheckup page_checkup.c:1405
+[User]	(0.204, +0)	 checkup: isProcessing 0 page_checkup.c:1422
+[User]	(0.204, +0)	 checkup: isProcessing False page_checkup.c:1424
+[User]	(0.204, +0)	 initCheckup: Final checks, current on ckup->data.processStep :0 page_checkup.c:1317
+[User]	(0.204, +0)	 initCheckup: Object created page_checkup.c:1336
+[User]	(0.204, +0)	 checkup: initCheckup Done! page_checkup.c:1428
+[User]	(0.205, +1)	 checkup_renderPreFlight: checkup: Start button ENABLED (tank=2, vol=2) page_checkup.c:961
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10306aa28
+[User]	(0.205, +0)	 event_checkup: User pressed checkupCloseButton page_checkup.c:234
+  [PASS] Execution — close checkup returns to menu screen
+
+══════════════════════════════════════
+  Suite: Persistence
+══════════════════════════════════════
+  [RUN ] Persistence — write/read config preserves processes
+         [INFO] Saving 5 processes (first: "Modified Name", 14 steps)
+[User]	(0.205, +0)	 writeConfigFile: Writing configuration file: /FilMachine_Test.cfg accessories.c:1117
+[SIM] f_unlink: sd/FilMachine_Test.cfg
+[SIM] f_open OK: sd/FilMachine_Test.cfg (0 bytes, mode: wb)
+[User]	(0.205, +0)	 writeConfigFile: Writing settingsParams: 129 bytes accessories.c:1129
+[User]	(0.205, +0)	 writeConfigFile: settingsParams written OK: 129 bytes accessories.c:1131
+[User]	(0.205, +0)	 writeConfigFile: Writing processes: count=5 accessories.c:1147
+[SIM] f_open OK: sd/FilMachine_Test.cfg (1436 bytes, mode: rb)
+[User]	(0.205, +0)	 readConfigFile: Loaded stats: completed=7 totalMins=450 stopped=1 clean=5 accessories.c:1096
+         [INFO] Restored 5 processes
+         [INFO] First process steps: saved=14, restored=14
+  [PASS] Persistence — write/read config preserves processes
+  [RUN ] Persistence — ALL 10 settings fields survive write/read cycle
+         [INFO] Set all 10 fields: tempUnit=1 water=1 cal=22 speed=77 interval=42 random=33 alarm=1 autostart=1 overlap=55 rinse=120
+[User]	(0.205, +0)	 writeConfigFile: Writing configuration file: /FilMachine_Test.cfg accessories.c:1117
+[SIM] f_unlink: sd/FilMachine_Test.cfg
+[SIM] f_open OK: sd/FilMachine_Test.cfg (0 bytes, mode: wb)
+[User]	(0.205, +0)	 writeConfigFile: Writing settingsParams: 129 bytes accessories.c:1129
+[User]	(0.205, +0)	 writeConfigFile: settingsParams written OK: 129 bytes accessories.c:1131
+[User]	(0.205, +0)	 writeConfigFile: Writing processes: count=5 accessories.c:1147
+[SIM] f_open OK: sd/FilMachine_Test.cfg (1436 bytes, mode: rb)
+[User]	(0.205, +0)	 readConfigFile: Loaded stats: completed=7 totalMins=450 stopped=1 clean=5 accessories.c:1096
+         [INFO] All 10 settings fields verified OK
+  [PASS] Persistence — ALL 10 settings fields survive write/read cycle
+  [RUN ] Persistence — per-process fields survive write/read cycle
+         [INFO] Snapshot: "Modified Name" temp=38 tol=0.3 tc=1 pref=1 ft=1 44m15s
+[User]	(0.206, +1)	 writeConfigFile: Writing configuration file: /FilMachine_Test.cfg accessories.c:1117
+[SIM] f_unlink: sd/FilMachine_Test.cfg
+[SIM] f_open OK: sd/FilMachine_Test.cfg (0 bytes, mode: wb)
+[User]	(0.206, +0)	 writeConfigFile: Writing settingsParams: 129 bytes accessories.c:1129
+[User]	(0.206, +0)	 writeConfigFile: settingsParams written OK: 129 bytes accessories.c:1131
+[User]	(0.206, +0)	 writeConfigFile: Writing processes: count=5 accessories.c:1147
+[SIM] f_open OK: sd/FilMachine_Test.cfg (1436 bytes, mode: rb)
+[User]	(0.206, +0)	 readConfigFile: Loaded stats: completed=7 totalMins=450 stopped=1 clean=5 accessories.c:1096
+         [INFO] All 8 process data fields verified OK
+  [PASS] Persistence — per-process fields survive write/read cycle
+  [RUN ] Persistence — per-step fields survive write/read cycle
+         [INFO] Snapshot 14 steps from "Modified Name"
+[User]	(0.206, +0)	 writeConfigFile: Writing configuration file: /FilMachine_Test.cfg accessories.c:1117
+[SIM] f_unlink: sd/FilMachine_Test.cfg
+[SIM] f_open OK: sd/FilMachine_Test.cfg (0 bytes, mode: wb)
+[User]	(0.206, +0)	 writeConfigFile: Writing settingsParams: 129 bytes accessories.c:1129
+[User]	(0.206, +0)	 writeConfigFile: settingsParams written OK: 129 bytes accessories.c:1131
+[User]	(0.206, +0)	 writeConfigFile: Writing processes: count=5 accessories.c:1147
+[SIM] f_open OK: sd/FilMachine_Test.cfg (1436 bytes, mode: rb)
+[User]	(0.206, +0)	 readConfigFile: Loaded stats: completed=7 totalMins=450 stopped=1 clean=5 accessories.c:1096
+         [INFO] All 6 fields x 14 steps = 84 checks verified OK
+  [PASS] Persistence — per-step fields survive write/read cycle
+  [RUN ] Persistence — missing config file doesn't crash
+[SIM] f_open FAILED: sd/NonExistentFile_12345.cfg (mode: rb)
+[User]	(0.206, +0)	 readConfigFile: Failed to open configuration file for reading using default err: 4 accessories.c:1104
+         [INFO] Process count after reading missing file: 5
+  [PASS] Persistence — missing config file doesn't crash
+  [RUN ] Persistence — statistics survive write/read cycle
+         [INFO] Set stats: completed=5, totalMins=120, stopped=2, clean=3
+[User]	(0.206, +0)	 writeConfigFile: Writing configuration file: /FilMachine_Test.cfg accessories.c:1117
+[SIM] f_unlink: sd/FilMachine_Test.cfg
+[SIM] f_open OK: sd/FilMachine_Test.cfg (0 bytes, mode: wb)
+[User]	(0.206, +0)	 writeConfigFile: Writing settingsParams: 129 bytes accessories.c:1129
+[User]	(0.206, +0)	 writeConfigFile: settingsParams written OK: 129 bytes accessories.c:1131
+[User]	(0.206, +0)	 writeConfigFile: Writing processes: count=5 accessories.c:1147
+[SIM] f_open OK: sd/FilMachine_Test.cfg (1436 bytes, mode: rb)
+[User]	(0.206, +0)	 readConfigFile: Loaded stats: completed=5 totalMins=120 stopped=2 clean=3 accessories.c:1096
+         [INFO] Restored stats: completed=5, totalMins=120, stopped=2, clean=3
+  [PASS] Persistence — statistics survive write/read cycle
+  [RUN ] Persistence — tempCalibOffset survives write/read cycle
+         [INFO] Set tempCalibOffset = -15 (= -1.5°C)
+[User]	(0.206, +0)	 writeConfigFile: Writing configuration file: /FilMachine_Test.cfg accessories.c:1117
+[SIM] f_unlink: sd/FilMachine_Test.cfg
+[SIM] f_open OK: sd/FilMachine_Test.cfg (0 bytes, mode: wb)
+[User]	(0.206, +0)	 writeConfigFile: Writing settingsParams: 129 bytes accessories.c:1129
+[User]	(0.206, +0)	 writeConfigFile: settingsParams written OK: 129 bytes accessories.c:1131
+[User]	(0.206, +0)	 writeConfigFile: Writing processes: count=5 accessories.c:1147
+[SIM] f_open OK: sd/FilMachine_Test.cfg (1436 bytes, mode: rb)
+[User]	(0.206, +0)	 readConfigFile: Loaded stats: completed=7 totalMins=450 stopped=1 clean=5 accessories.c:1096
+         [INFO] Restored tempCalibOffset = -15
+  [PASS] Persistence — tempCalibOffset survives write/read cycle
+
+══════════════════════════════════════
+  Suite: Settings
+══════════════════════════════════════
+  [RUN ] Settings tab — UI elements exist
+         [DBG] click_obj → send LV_EVENT_CLICKED to 0x10305f278
+[User]	(0.206, +0)	 event_tab_switch: NEXT TIME page_menu.c:41
+[User]	(0.206, +0)	 event_tab_switch: OLD PRESSED 3 page_menu.c:105
+[User]	(0.206, +0)	 event_tab_switch: NEW PRESSED 4 page_menu.c:106
+  [PASS] Settings tab — UI elements exist
+  [RUN ] Settings — params have reasonable defaults
+         [INFO] Rotation speed: 50
+         [INFO] Inversion interval: 10
+         [INFO] Randomness: 0
+  [PASS] Settings — params have reasonable defaults
+  [RUN ] Settings — change temperature unit
+         [INFO] Current tempUnit: 0
+         [INFO] New tempUnit: 1
+  [PASS] Settings — change temperature unit
+  [RUN ] Settings — slider value change updates param
+         [INFO] Old rotation speed: 50
+[User]	(0.206, +0)	 event_settings_handler: Film Speed Rotation : 50, with analog value 196 page_settings.c:178
+         [INFO] New rotation speed: 50
+[User]	(0.206, +0)	 event_settings_handler: Film Speed Rotation : 50, with analog value 196 page_settings.c:178
+  [PASS] Settings — slider value change updates param
+  [RUN ] Settings — switch toggle updates param
+         [INFO] Old waterInlet: 0
+[User]	(0.206, +0)	 event_settings_handler: State Inlet: On page_settings.c:143
+         [INFO] New waterInlet: 1
+[User]	(0.206, +0)	 event_settings_handler: State Inlet: Off page_settings.c:143
+  [PASS] Settings — switch toggle updates param
+  [RUN ] Settings — inversion interval slider updates param
+         [INFO] Old interval: 10
+[User]	(0.206, +0)	 event_settings_handler: Film Rotation Inversion Interval : 30 page_settings.c:196
+         [INFO] New interval: 30
+[User]	(0.206, +0)	 event_settings_handler: Film Rotation Inversion Interval : 10 page_settings.c:196
+  [PASS] Settings — inversion interval slider updates param
+  [RUN ] Settings — randomness slider updates param
+         [INFO] Old randomness: 0
+[User]	(0.206, +0)	 getRandomRotationInterval: baseTime: 10, randomPercentage: 60, variation: 6, randomOffset: 1, result: 5 accessories.c:2258
+[User]	(0.206, +0)	 event_settings_handler: Film Randomness : 60, for time: 10sec, is 5sec page_settings.c:213
+         [INFO] New randomness: 60
+[User]	(0.206, +0)	 getRandomRotationInterval: baseTime: 10, randomPercentage: 0, variation: 0, randomOffset: 0, result: 10 accessories.c:2258
+[User]	(0.206, +0)	 event_settings_handler: Film Randomness : 0, for time: 10sec, is 10sec page_settings.c:213
+  [PASS] Settings — randomness slider updates param
+  [RUN ] Settings — persistent alarm switch toggle
+         [INFO] Old persistent alarm: 0
+[User]	(0.206, +0)	 event_settings_handler: Persistent Alarm: On page_settings.c:222
+         [INFO] New persistent alarm: 1
+[User]	(0.206, +0)	 event_settings_handler: Persistent Alarm: Off page_settings.c:222
+  [PASS] Settings — persistent alarm switch toggle
+  [RUN ] Settings — autostart switch toggle
+         [INFO] Old autostart: 0
+[User]	(0.206, +0)	 event_settings_handler: Autostart : On page_settings.c:230
+         [INFO] New autostart: 1
+[User]	(0.206, +0)	 event_settings_handler: Autostart : Off page_settings.c:230
+  [PASS] Settings — autostart switch toggle
+  [RUN ] Settings — drain/fill overlap slider updates param
+         [INFO] Old drain/fill overlap: 100
+[User]	(0.206, +0)	 event_settings_handler: Drain/fill time overlap percent : 50 page_settings.c:246

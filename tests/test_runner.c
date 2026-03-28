@@ -278,6 +278,7 @@ int main(int argc, char *argv[])
     test_suite_edge_cases();
     test_suite_utilities();
     test_suite_destroy_and_lifecycle();
+    test_suite_websocket();
 
     /* ── Summary ── */
     int result = test_summary();

@@ -8,8 +8,23 @@
     "randomSetpoint": 20,
     "isPersistentAlarm": 1,
     "isProcessAutostart": 0,
-    "drainFillOverlapSetpoint": 0,
-    "multiRinseTime": 60
+    "drainFillOverlapSetpoint": 100,
+    "multiRinseTime": 60,
+    "tankSize": 2,
+    "pumpSpeed": 30,
+    "chemContainerMl": 500,
+    "wbContainerMl": 2000,
+    "chemistryVolume": 2,
+    "tempCalibOffset": 0,
+    "splashRandom": 0,
+    "splashPalette": 3,
+    "splashShapeStyle": 0,
+    "splashComplexity": 40,
+    "splashSeed": 0,
+    "splashDefault": 1,
+    "wifiEnabled": 0,
+    "wifiSSID": "",
+    "wifiPassword": ""
   },
   "processes": [
     {
@@ -18,7 +33,7 @@
       "tempTolerance": 0.3,
       "isTempControlled": 1,
       "isPreferred": 1,
-      "filmType": 0,
+      "filmType": 1,
       "timeMins": 23,
       "timeSecs": 15,
       "steps": [
@@ -78,7 +93,7 @@
       "tempTolerance": 0.3,
       "isTempControlled": 1,
       "isPreferred": 0,
-      "filmType": 0,
+      "filmType": 1,
       "timeMins": 23,
       "timeSecs": 45,
       "steps": [
@@ -138,7 +153,7 @@
       "tempTolerance": 0.5,
       "isTempControlled": 1,
       "isPreferred": 1,
-      "filmType": 1,
+      "filmType": 0,
       "timeMins": 21,
       "timeSecs": 45,
       "steps": [
@@ -190,7 +205,7 @@
       "tempTolerance": 0.5,
       "isTempControlled": 0,
       "isPreferred": 0,
-      "filmType": 1,
+      "filmType": 0,
       "timeMins": 28,
       "timeSecs": 0,
       "steps": [
@@ -234,7 +249,7 @@
       "tempTolerance": 0.3,
       "isTempControlled": 1,
       "isPreferred": 0,
-      "filmType": 0,
+      "filmType": 1,
       "timeMins": 30,
       "timeSecs": 0,
       "steps": [
@@ -294,7 +309,7 @@
       "tempTolerance": 0.5,
       "isTempControlled": 1,
       "isPreferred": 1,
-      "filmType": 1,
+      "filmType": 0,
       "timeMins": 17,
       "timeSecs": 0,
       "steps": [
@@ -346,7 +361,7 @@
       "tempTolerance": 0.5,
       "isTempControlled": 1,
       "isPreferred": 0,
-      "filmType": 1,
+      "filmType": 0,
       "timeMins": 22,
       "timeSecs": 0,
       "steps": [
@@ -398,7 +413,7 @@
       "tempTolerance": 1.0,
       "isTempControlled": 0,
       "isPreferred": 0,
-      "filmType": 1,
+      "filmType": 0,
       "timeMins": 11,
       "timeSecs": 0,
       "steps": [

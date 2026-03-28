@@ -150,6 +150,7 @@ else()
 
     target_compile_definitions(filmachine_test PRIVATE
         BOARD_SIMULATOR
+        SIM_RESOLUTION=800
         TEST_RESULTS_DIR="${CMAKE_SOURCE_DIR}/test_results"
     )
 

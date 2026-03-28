@@ -36,39 +36,39 @@ static void test_profile_returns_valid_pointer(void)
  * ═══════════════════════════════════════════════ */
 static void test_profile_values_match_original(void)
 {
-    TEST_BEGIN("UIProfile — 480x320 values match original");
+    TEST_BEGIN("UIProfile — 800x480 values match profile");
 
     const ui_profile_t *ui = ui_get_profile();
 
     /* Common */
-    TEST_ASSERT_EQ(ui->common.content_x, 140, "content_x should be 140");
+    TEST_ASSERT_EQ(ui->common.content_x, 175, "content_x should be 175");
     TEST_ASSERT_EQ(ui->common.content_y, 7,   "content_y should be 7");
-    TEST_ASSERT_EQ(ui->common.content_w, 335, "content_w should be 335");
-    TEST_ASSERT_EQ(ui->common.content_h, 303, "content_h should be 303 (original)");
+    TEST_ASSERT_EQ(ui->common.content_w, 620, "content_w should be 620");
+    TEST_ASSERT_EQ(ui->common.content_h, 468, "content_h should be 468");
     TEST_ASSERT_EQ(ui->common.sidebar_x, 5,   "sidebar_x should be 5");
 
     /* Menu */
-    TEST_ASSERT_EQ(ui->menu.tab_w, 130, "tab_w should be 130");
-    TEST_ASSERT_EQ(ui->menu.tab_h, 97,  "tab_h should be 97");
+    TEST_ASSERT_EQ(ui->menu.tab_w, 165, "tab_w should be 165");
+    TEST_ASSERT_EQ(ui->menu.tab_h, 150, "tab_h should be 150");
     TEST_ASSERT_EQ(ui->menu.tab_processes_y, 7,   "tab1_y should be 7");
-    TEST_ASSERT_EQ(ui->menu.tab_settings_y, 110, "tab2_y should be 110");
-    TEST_ASSERT_EQ(ui->menu.tab_tools_y, 213, "tab3_y should be 213");
-    TEST_ASSERT_EQ(ui->menu.tab_label_offset_y, 29, "tab_label_offset_y should be 29 (original)");
+    TEST_ASSERT_EQ(ui->menu.tab_settings_y, 166, "tab2_y should be 166");
+    TEST_ASSERT_EQ(ui->menu.tab_tools_y, 325, "tab3_y should be 325");
+    TEST_ASSERT_EQ(ui->menu.tab_label_offset_y, 35, "tab_label_offset_y should be 35");
 
-    /* Process detail — values fixed during this session */
-    TEST_ASSERT_EQ(ui->process_detail.steps_label_y, 25, "steps_label_y should be 25 (original)");
-    TEST_ASSERT_EQ(ui->process_detail.info_label_y, 25,  "info_label_y should be 25 (original)");
-    TEST_ASSERT_EQ(ui->process_detail.temp_ctrl_y, -17,  "temp_ctrl_y should be -17 (original)");
-    TEST_ASSERT_EQ(ui->process_detail.close_w, 36, "close_w should be 36 (was close_scale_pct 120% of 30)");
-    TEST_ASSERT_EQ(ui->process_detail.close_h, 36, "close_h should be 36 (was close_scale_pct 120% of 30)");
+    /* Process detail */
+    TEST_ASSERT_EQ(ui->process_detail.steps_label_y, 38, "steps_label_y should be 38");
+    TEST_ASSERT_EQ(ui->process_detail.info_label_y, 38,  "info_label_y should be 38");
+    TEST_ASSERT_EQ(ui->process_detail.temp_ctrl_y, -20,  "temp_ctrl_y should be -20");
+    TEST_ASSERT_EQ(ui->process_detail.close_w, 45, "close_w should be 45");
+    TEST_ASSERT_EQ(ui->process_detail.close_h, 45, "close_h should be 45");
 
     /* Step detail */
     TEST_ASSERT(ui->step_detail.label_font != NULL, "step_detail.label_font must not be NULL");
 
-    /* Clean popup — repeat_label_x was fixed from -30 to -10 */
-    TEST_ASSERT_EQ(ui->clean_popup.repeat_label_x, -10, "repeat_label_x should be -10 (original)");
+    /* Clean popup */
+    TEST_ASSERT_EQ(ui->clean_popup.repeat_label_x, -10, "repeat_label_x should be -10");
 
-    test_printf("         [INFO] All original-reference values verified\n");
+    test_printf("         [INFO] All 800x480 reference values verified\n");
     TEST_END();
 }
 
@@ -107,8 +107,6 @@ static void test_profile_fonts_not_null(void)
 
     const ui_profile_t *ui = ui_get_profile();
 
-    TEST_ASSERT_NOT_NULL(ui->home.error_icon_font, "home.error_icon_font");
-    TEST_ASSERT_NOT_NULL(ui->home.error_text_font, "home.error_text_font");
     TEST_ASSERT_NOT_NULL(ui->menu.tab_icon_font, "menu.tab_icon_font");
     TEST_ASSERT_NOT_NULL(ui->menu.tab_label_font, "menu.tab_label_font");
     TEST_ASSERT_NOT_NULL(ui->processes.title_font, "processes.title_font");

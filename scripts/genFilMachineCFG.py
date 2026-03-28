@@ -33,9 +33,9 @@ CHEMICAL_TYPE_DEVELOP = 0
 CHEMICAL_TYPE_RINSE = 1
 CHEMICAL_TYPE_MULTI_RINSE = 2
 
-# Film types (filmType_t enum)
-FILM_TYPE_COLOR = 0
-FILM_TYPE_BW = 1
+# Film types (filmType_t enum) — matches FilMachine.h: BLACK_AND_WHITE_FILM=0, COLOR_FILM=1
+FILM_TYPE_BW = 0
+FILM_TYPE_COLOR = 1
 
 # Chemical sources
 SOURCE_C1 = 0
@@ -164,12 +164,18 @@ DEFAULT_SETTINGS = {
     "chemContainerMl": 500,
     "wbContainerMl": 2000,
     "chemistryVolume": 2,
+    "tempCalibOffset": 0,
+    # ── Splash screen settings ──
     "splashRandom": 0,
     "splashPalette": 3,       # Deep Ocean
     "splashShapeStyle": 0,
     "splashComplexity": 40,
     "splashSeed": 0,
-    "splashDefault": 1        # Use default splash
+    "splashDefault": 1,       # Use default splash
+    # ── Wi-Fi settings ──
+    "wifiEnabled": 0,
+    "wifiSSID": "",
+    "wifiPassword": "",
 }
 
 def random_settings():
@@ -177,12 +183,12 @@ def random_settings():
         "tempUnit": random.randint(0, 1),
         "waterInlet": random.randint(0, 1),
         "calibratedTemp": random.randint(0, 40),
-        "filmRotationSpeedSetpoint": random.randrange(10, 100, 10),
-        "rotationIntervalSetpoint": random.randrange(10, 60, 10),
+        "filmRotationSpeedSetpoint": random.randrange(10, 101, 10),
+        "rotationIntervalSetpoint": random.randrange(10, 61, 10),
         "randomSetpoint": random.randrange(0, 101, 20),
         "isPersistentAlarm": random.randint(0, 1),
         "isProcessAutostart": random.randint(0, 1),
-        "drainFillOverlapSetpoint": random.randrange(0, 100, 50),
+        "drainFillOverlapSetpoint": random.randrange(0, 101, 10),
         "multiRinseTime": random.randrange(60, 181, 30),
         "tankSize": random.randint(1, 3),
         "pumpSpeed": random.randrange(10, 101, 10),
@@ -194,7 +200,11 @@ def random_settings():
         "splashShapeStyle": random.randint(0, 5),
         "splashComplexity": random.randrange(20, 101, 20),
         "splashSeed": random.randint(1, 0xFFFFFFFF),
-        "splashDefault": random.randint(0, 1)
+        "splashDefault": random.randint(0, 1),
+        "tempCalibOffset": random.randint(-20, 20),
+        "wifiEnabled": 0,
+        "wifiSSID": "",
+        "wifiPassword": "",
     }
 
 # ═══════════════════════════════════════════════
@@ -297,6 +307,12 @@ def write_settings(f, s):
     f.write(struct.pack('<B', s.get("splashComplexity", 40))) # uint8_t (20–100)
     f.write(struct.pack('<L', s.get("splashSeed", 0)))        # uint32_t
     f.write(struct.pack('<B', s.get("splashDefault", 1)))     # bool (default = true)
+    # ── Wi-Fi settings ──
+    f.write(struct.pack('<B', s.get("wifiEnabled", 0)))      # bool
+    ssid = s.get("wifiSSID", "").encode('ASCII')[:32]
+    f.write(ssid.ljust(33, b'\x00'))                          # char[33]
+    pwd = s.get("wifiPassword", "").encode('ASCII')[:64]
+    f.write(pwd.ljust(65, b'\x00'))                           # char[65]
 
 def write_process(f, p):
     f.write(p["processNameString"].encode('ASCII').ljust(MAX_PROC_NAME_LEN + 1, b'\x00'))

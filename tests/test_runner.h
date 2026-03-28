@@ -264,6 +264,9 @@ void test_suite_new_settings(void);
 /** test_ui_profile.c — UI profile values, sensor stubs, board constants */
 void test_suite_ui_profile(void);
 
+/** test_websocket.c — WebSocket server, JSON serialization, state broadcasts */
+void test_suite_websocket(void);
+
 
 /* ═══════════════════════════════════════════════
  * External globals (defined in main/src)

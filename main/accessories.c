@@ -25,6 +25,7 @@
 #include "esp_heap_caps.h"
 
 #include "FilMachine.h"
+#include "ws_server.h"
 #include "mcp23017.h"
 #include "ds18b20.h"
 #include "pca9685.h"
@@ -1201,6 +1202,10 @@ void writeConfigFile( const char *path, bool enableLog ) {
         f_write( fp, &gui.page.tools.machineStats.clean,       sizeof(gui.page.tools.machineStats.clean),       &bytes_written );
 
         f_close( fp );
+
+        /* Notify connected WS clients (Flutter) about the updated data */
+        ws_broadcast_process_list();
+        ws_broadcast_state();
     }
 }
 
