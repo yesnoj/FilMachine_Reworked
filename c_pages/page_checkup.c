@@ -313,6 +313,11 @@ void processTimer(lv_timer_t * timer) {
     secondsStepLeft = (uint8_t)remaining_step_secs_only;
 
     if(ckup->currentStep != NULL) {
+        /* Continuously enforce: if we're on the last step, Stop After is always disabled */
+        if(ckup->currentStep->next == NULL) {
+            lv_obj_add_state(ckup->checkupStopAfterButton, LV_STATE_DISABLED);
+        }
+
         if(ckup->data.stopAfter == true && remaining_step_seconds == 0U){
             lv_obj_add_state(ckup->checkupStopAfterButton, LV_STATE_DISABLED);
             lv_obj_add_state(ckup->checkupStopNowButton, LV_STATE_DISABLED);
@@ -363,6 +368,11 @@ void processTimer(lv_timer_t * timer) {
                 lv_timer_pause(ckup->processTimer);
                 ckup->data.isDeveloping = false;
                 lv_timer_resume(ckup->pumpTimer);
+                /* If we just advanced to the last step (or past it),
+                   Stop After makes no sense — disable it */
+                if(ckup->currentStep == NULL || ckup->currentStep->next == NULL) {
+                    lv_obj_add_state(ckup->checkupStopAfterButton, LV_STATE_DISABLED);
+                }
             }
         }
     }
@@ -577,6 +587,13 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
         }
     } else {
         LV_LOG_USER("Intermediate step");
+
+        /* If this step is the last one, Stop After makes no sense — disable it
+           (mirrors Flutter isLastStep logic: currentStepIndex >= totalSteps - 1) */
+        if (checkup->currentStep->next == NULL) {
+            lv_obj_add_state(checkup->checkupStopAfterButton, LV_STATE_DISABLED);
+        }
+
         if (checkup->data.isFilling) {
             pumpFrom = getValueForChemicalSource(checkup->currentStep->step.stepDetails->data.source);
             pumpDir = PUMP_IN_RLY;
@@ -594,6 +611,7 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
                 tankTimeElapsed++;
             } else {
                 LV_LOG_USER("Middle step FILLING COMPLETE");
+
 
                 sendValueToRelay(pumpFrom, pumpDir, false);
                 checkup->data.isAlreadyPumping = false;
@@ -712,6 +730,7 @@ void handleStopAfter(processNode *pn) {
             tankTimeElapsed++;
         } else {
             LV_LOG_USER("STOP AFTER step FILLING COMPLETE");
+
 
             sendValueToRelay(pumpFrom, pumpDir, false);
             checkup->data.isAlreadyPumping = false;
@@ -1316,7 +1335,9 @@ void initCheckup(processNode *pn)
       const ui_checkup_layout_t *ui = &ui_get_profile()->checkup;
       LV_LOG_USER("Final checks, current on ckup->data.processStep :%d",ckup->data.processStep);
 
-      //in this way processDetail is deleted, to free memory and the "checkout" is a standard screen on top
+      /* Delete processDetail screen to free memory — but only if it exists.
+         When starting from Flutter/WebSocket the processDetail page was never
+         opened, so processDetailParent is NULL. */
       if(pn->process.processDetails->processDetailParent != NULL) {
           lv_obj_del(pn->process.processDetails->processDetailParent);
           pn->process.processDetails->processDetailParent = NULL;
@@ -1388,6 +1409,27 @@ void initCheckup(processNode *pn)
             lv_obj_set_size(ckup->checkupNextStepsContainer, ui->left_panel_w, ui->left_panel_h);
             lv_obj_set_style_border_color(ckup->checkupNextStepsContainer, lv_color_hex(WHITE), 0);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * Public getters — expose static counters to ws_server.c
+ * ═══════════════════════════════════════════════════════════════════════ */
+void checkup_reset_state(void) {
+    resetStuffBeforeNextProcess();
+}
+
+uint8_t  checkup_get_step_percentage(void)       { return stepPercentage; }
+uint8_t  checkup_get_process_percentage(void)     { return processPercentage; }
+uint8_t  checkup_get_tank_percentage(void)        { return tankPercentage; }
+
+uint32_t checkup_get_step_elapsed_mins(void)      { return minutesStepElapsed; }
+uint8_t  checkup_get_step_elapsed_secs(void)      { return (uint8_t)secondsStepElapsed; }
+uint32_t checkup_get_step_left_mins(void)         { return minutesStepLeft; }
+uint8_t  checkup_get_step_left_secs(void)         { return (uint8_t)secondsStepLeft; }
+
+uint32_t checkup_get_process_left_mins(void)      { return minutesProcessLeft; }
+uint8_t  checkup_get_process_left_secs(void)      { return (uint8_t)secondsProcessLeft; }
+uint32_t checkup_get_process_elapsed_mins(void)   { return minutesProcessElapsed; }
+uint8_t  checkup_get_process_elapsed_secs(void)   { return (uint8_t)secondsProcessElapsed; }
 
 void checkup(processNode *processToCheckup) {
 
@@ -1665,35 +1707,3 @@ void checkup(processNode *processToCheckup) {
                 checkup_renderProcessing(processToCheckup);
             }
 }
-
-/* ══════════════════════════════════════════════════════════════════
- *  Public getters for WebSocket server (ws_server.c)
- * ══════════════════════════════════════════════════════════════════ */
-
-processNode *checkup_find_active_process(void) {
-    processNode *node = gui.page.processes.processElementsList.start;
-    while (node) {
-        if (node->process.processDetails &&
-            node->process.processDetails->checkup &&
-            node->process.processDetails->checkup->data.isProcessing) {
-            return node;
-        }
-        node = node->next;
-    }
-    return NULL;
-}
-
-void     checkup_reset_state(void)            { resetStuffBeforeNextProcess(); }
-uint8_t  checkup_get_step_percentage(void)   { return stepPercentage; }
-uint8_t  checkup_get_process_percentage(void){ return processPercentage; }
-uint8_t  checkup_get_tank_percentage(void)   { return tankPercentage; }
-
-uint32_t checkup_get_step_elapsed_mins(void) { return minutesStepElapsed; }
-uint8_t  checkup_get_step_elapsed_secs(void) { return secondsStepElapsed; }
-uint32_t checkup_get_step_left_mins(void)    { return minutesStepLeft; }
-uint8_t  checkup_get_step_left_secs(void)    { return secondsStepLeft; }
-
-uint32_t checkup_get_process_left_mins(void) { return minutesProcessLeft; }
-uint8_t  checkup_get_process_left_secs(void) { return secondsProcessLeft; }
-uint32_t checkup_get_process_elapsed_mins(void) { return minutesProcessElapsed; }
-uint8_t  checkup_get_process_elapsed_secs(void) { return secondsProcessElapsed; }

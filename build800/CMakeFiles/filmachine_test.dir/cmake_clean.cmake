@@ -129,6 +129,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/filmachine_test.dir/tests/test_ui_profile.c.o.d"
   "CMakeFiles/filmachine_test.dir/tests/test_utilities.c.o"
   "CMakeFiles/filmachine_test.dir/tests/test_utilities.c.o.d"
+  "CMakeFiles/filmachine_test.dir/tests/test_websocket.c.o"
+  "CMakeFiles/filmachine_test.dir/tests/test_websocket.c.o.d"
   "filmachine_test"
   "filmachine_test.pdb"
 )

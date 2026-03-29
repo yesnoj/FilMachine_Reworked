@@ -57,10 +57,10 @@ RM = /Users/francescoprochilo/.espressif/tools/cmake/3.30.2/CMake.app/Contents/b
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2
+CMAKE_SOURCE_DIR = /Users/francescoprochilo/Desktop/filmachine_simulator_V2
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800
+CMAKE_BINARY_DIR = /Users/francescoprochilo/Desktop/filmachine_simulator_V2/build800
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -132,9 +132,9 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/francescoprochilo/Desktop/filmachine_simulator_V2/build800/CMakeFiles /Users/francescoprochilo/Desktop/filmachine_simulator_V2/build800//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/francescoprochilo/Desktop/filmachine_simulator_V2/build800/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -1961,6 +1961,30 @@ tests/test_utilities.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_utilities.c.s
 .PHONY : tests/test_utilities.c.s
 
+tests/test_websocket.o: tests/test_websocket.c.o
+.PHONY : tests/test_websocket.o
+
+# target to build an object file
+tests/test_websocket.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_websocket.c.o
+.PHONY : tests/test_websocket.c.o
+
+tests/test_websocket.i: tests/test_websocket.c.i
+.PHONY : tests/test_websocket.i
+
+# target to preprocess a source file
+tests/test_websocket.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_websocket.c.i
+.PHONY : tests/test_websocket.c.i
+
+tests/test_websocket.s: tests/test_websocket.c.s
+.PHONY : tests/test_websocket.s
+
+# target to generate assembly for a file
+tests/test_websocket.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_websocket.c.s
+.PHONY : tests/test_websocket.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -2177,6 +2201,9 @@ help:
 	@echo "... tests/test_utilities.o"
 	@echo "... tests/test_utilities.i"
 	@echo "... tests/test_utilities.s"
+	@echo "... tests/test_websocket.o"
+	@echo "... tests/test_websocket.i"
+	@echo "... tests/test_websocket.s"
 .PHONY : help
 
 

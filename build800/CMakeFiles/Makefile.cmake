@@ -36,16 +36,16 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/Users/francescoprochilo/.espressif/tools/cmake/3.30.2/CMake.app/Contents/share/cmake-3.30/Modules/Platform/Darwin-Initialize.cmake"
   "/Users/francescoprochilo/.espressif/tools/cmake/3.30.2/CMake.app/Contents/share/cmake-3.30/Modules/Platform/Darwin.cmake"
   "/Users/francescoprochilo/.espressif/tools/cmake/3.30.2/CMake.app/Contents/share/cmake-3.30/Modules/Platform/UnixPaths.cmake"
-  "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/CMakeLists.txt"
+  "/Users/francescoprochilo/Desktop/filmachine_simulator_V2/CMakeLists.txt"
   "CMakeFiles/3.30.2/CMakeASMCompiler.cmake"
   "CMakeFiles/3.30.2/CMakeCCompiler.cmake"
   "CMakeFiles/3.30.2/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.30.2/CMakeSystem.cmake"
-  "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/lvgl/CMakeLists.txt"
-  "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/lvgl/env_support/cmake/custom.cmake"
-  "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/lvgl/env_support/cmake/version.cmake"
-  "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/lvgl/lv_version.h.in"
-  "/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/lvgl/lvgl.pc.in"
+  "/Users/francescoprochilo/Desktop/filmachine_simulator_V2/lvgl/CMakeLists.txt"
+  "/Users/francescoprochilo/Desktop/filmachine_simulator_V2/lvgl/env_support/cmake/custom.cmake"
+  "/Users/francescoprochilo/Desktop/filmachine_simulator_V2/lvgl/env_support/cmake/version.cmake"
+  "/Users/francescoprochilo/Desktop/filmachine_simulator_V2/lvgl/lv_version.h.in"
+  "/Users/francescoprochilo/Desktop/filmachine_simulator_V2/lvgl/lvgl.pc.in"
   )
 
 # The corresponding makefile is:
