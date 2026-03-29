@@ -2,7 +2,7 @@
 
 FilMachine is an automated film processing machine designed for photographic film development. It handles the entire process: chemical baths, water rinses, temperature regulation, and motor-driven film agitation — all controlled through a 3.5" color touchscreen display.
 
-The project includes a **desktop simulator** (SDL2 + LVGL) that reproduces the full touchscreen UI on macOS/Linux, enabling rapid development and testing without physical hardware, plus an **automated test suite** with 147 tests. All three supported boards compile from the same codebase with board selection at compile time.
+The project includes a **desktop simulator** (SDL2 + LVGL) that reproduces the full touchscreen UI on macOS/Linux, enabling rapid development and testing without physical hardware, plus an **automated test suite** with 147 tests. All three supported boards compile from the same codebase with board selection at compile time. A **Flutter companion app** connects via WebSocket and provides full remote control from any mobile device on the same network.
 
 ---
 
@@ -14,13 +14,15 @@ The project includes a **desktop simulator** (SDL2 + LVGL) that reproduces the f
 4. [Building the Project](#building-the-project)
 5. [Running the Simulator](#running-the-simulator)
 6. [Running the Tests](#running-the-tests)
-7. [User Interface Guide](#user-interface-guide)
-8. [Firmware Update (OTA)](#firmware-update-ota)
-9. [Hardware Specifications](#hardware-specifications)
-10. [Configuration & Persistence](#configuration--persistence)
-11. [Typical Workflows](#typical-workflows)
-12. [Developer Quick Reference](#developer-quick-reference)
-13. [Authors](#authors)
+7. [WebSocket Server & Remote Control](#websocket-server--remote-control)
+8. [Flutter Companion App](#flutter-companion-app)
+9. [User Interface Guide](#user-interface-guide)
+10. [Firmware Update (OTA)](#firmware-update-ota)
+11. [Hardware Specifications](#hardware-specifications)
+12. [Configuration & Persistence](#configuration--persistence)
+13. [Typical Workflows](#typical-workflows)
+14. [Developer Quick Reference](#developer-quick-reference)
+15. [Authors](#authors)
 
 ---
 
@@ -323,6 +325,9 @@ The simulator opens a 480x320 window that reproduces the exact touchscreen inter
 - Machine statistics persistence (saved in config file, survives restart)
 - Temperature sensor calibration (Tune button calculates and applies offset)
 - Console logging of all system actions (`[SIM] sysAction: ...`)
+- WebSocket server on port 81 for Flutter companion app remote control
+- Full remote process start, stop, and checkup advance via WebSocket
+- Remote CRUD for processes and steps (create, edit, delete from Flutter)
 
 ### What is simulated (no real hardware)
 
@@ -374,6 +379,59 @@ Results are displayed in the terminal and saved to `test_results/test_results_YY
 | **Destroy & Lifecycle** | Memory cleanup, object destruction |
 
 The persistence tests verify that every field (process name, temperature, tolerance, film type, preferred flag, step names, durations, types, sources, discard flags) survives a full save-and-reload cycle.
+
+---
+
+## WebSocket Server & Remote Control
+
+The simulator and firmware include a built-in WebSocket server (`ws_server.c`) that enables remote control from the Flutter companion app or any WebSocket client. The server starts automatically and listens on **port 81** at path `/ws`.
+
+### Supported Commands
+
+All commands use JSON format: `{"cmd":"command_name", ...params}`.
+
+| Command | Parameters | Description |
+|---------|-----------|-------------|
+| `get_state` | — | Returns full machine state (80+ fields: settings, runtime, temperatures, progress, alarms) |
+| `get_processes` | — | Returns complete process list with steps, indexed for remote referencing |
+| `start_process` | `index` | Start a process by list index; initializes checkup and begins execution |
+| `checkup_advance` | — | Advance to next checkup phase (Setup → Fill → Temp → Check → Processing) |
+| `stop_now` | — | Immediately halt the running process and drain |
+| `stop_after` | — | Stop after the current step completes |
+| `close_process` | — | Close a finished/stopped process and free checkup resources |
+| `create_process` | `name, temp, tolerance, filmType, tempControlled, preferred` | Create a new process |
+| `edit_process` | `index, name, temp, tolerance, filmType, tempControlled, preferred` | Edit an existing process |
+| `delete_process` | `index` | Delete a process |
+| `add_step` | `processIndex, name, mins, secs, type, source, discard` | Add a step to a process |
+| `edit_step` | `processIndex, stepIndex, name, mins, secs, type, source, discard` | Edit a step |
+| `delete_step` | `processIndex, stepIndex` | Delete a step |
+| `set_setting` | `key, value` | Update a machine setting |
+
+### Implementation Details
+
+The server uses simple `strstr()` JSON parsing with no external library (no cJSON, no heap allocation for parsing). All commands that modify LVGL state are dispatched via `lv_async_call()` to ensure thread-safe UI updates. State changes are automatically broadcast to all connected clients.
+
+---
+
+## Flutter Companion App
+
+The **filmachine_app** is a Flutter application that provides full remote control of FilMachine from any mobile device or desktop on the same network. See the [filmachine_app README](../filmachine_app/README.md) for detailed documentation.
+
+### Key Features
+
+- **Device Discovery**: Automatic mDNS discovery of FilMachine devices on the local network (`_filmachine._tcp`), plus manual IP/port entry
+- **Process Management**: Create, edit, duplicate, and delete processes and steps — all changes sync to the machine in real-time
+- **Live Execution Monitoring**: Real-time dashboard showing current step, progress bars, temperatures, tank fill status, and elapsed/remaining time
+- **Process Control**: Start processes, advance through checkup phases, Stop Now / Stop After with confirmation dialogs
+- **Filtering**: Client-side filtering by name, film type (B&W / Color), and preferred flag
+- **Statistics**: View completed processes, stopped processes, total development time, cleaning cycles
+- **Settings**: Full access to all machine settings (temperature unit, rotation speed, autostart, alarms, Wi-Fi config, etc.)
+- **Theme**: Dark/light theme toggle with custom FilMachine color palette
+- **Persistent Connection**: Remembers last successful connection for quick reconnect
+
+### Architecture
+
+The app uses **Provider** for state management. A central `MachineService` (ChangeNotifier) maintains the WebSocket connection and holds the current `MachineState` — a data class with 80+ fields deserialized from the JSON state broadcast. All screens rebuild reactively when state changes.
 
 ---
 
