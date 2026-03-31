@@ -20,6 +20,7 @@ typedef enum {
     MSGPOP_OWNER_IMPORT,
     MSGPOP_OWNER_EXPORT,
     MSGPOP_OWNER_OTA_SD,
+    MSGPOP_OWNER_WIFI_FORGET,
 } message_popup_owner_t;
 
 typedef struct {
@@ -146,6 +147,11 @@ static void message_popup_prepare_ctx(void *whoCallMe)
 
     if (whoCallMe == gui.page.tools.toolsUpdateSDButton) {
         g_msg_ctx.type = MSGPOP_OWNER_OTA_SD;
+        return;
+    }
+
+    if (whoCallMe == gui.element.wifiPopup.listContainer) {
+        g_msg_ctx.type = MSGPOP_OWNER_WIFI_FORGET;
         return;
     }
 
@@ -313,6 +319,22 @@ static void message_popup_button1_clicked(lv_obj_t *mboxCont)
             message_popup_close(mboxCont);
             break;
 
+        case MSGPOP_OWNER_WIFI_FORGET:
+            /* Forget WiFi — clear saved credentials */
+            gui.page.settings.settingsParams.wifiSSID[0] = '\0';
+            gui.page.settings.settingsParams.wifiPassword[0] = '\0';
+            gui.page.settings.settingsParams.wifiEnabled = false;
+            qSysAction(SAVE_PROCESS_CONFIG);
+            /* Disconnect if currently connected */
+            if (wifi_is_connected()) {
+                wifi_disconnect();
+            }
+            /* Refresh scan list to remove ✓ indicator */
+            wifi_popup_refresh_list();
+            LV_LOG_USER("WiFi credentials forgotten");
+            message_popup_close(mboxCont);
+            break;
+
         default:
             LV_LOG_USER("button1: unhandled type %d — closing popup", g_msg_ctx.type);
             message_popup_close(mboxCont);
@@ -456,6 +478,11 @@ static void message_popup_button2_clicked(lv_obj_t *mboxCont)
             LV_LOG_USER("Confirmed OTA from SD — starting update");
             ota_start_sd();
             otaProgressPopupCreate(otaUpdateFromSD_text);
+            break;
+
+        case MSGPOP_OWNER_WIFI_FORGET:
+            /* Cancel forget — just close */
+            message_popup_close(mboxCont);
             break;
 
         default:

@@ -24,6 +24,7 @@ static sCheckupData *find_active_checkup(void);
 static processNode *find_active_checkup_process(void);
 extern void calculateTotalTime(processNode *processNode);
 extern void *allocateAndInitializeNode(NodeType_t type);
+static void ws_queue_lvgl_action(void (*fn)(void *), void *arg);
 
 /* ── JSON helper: extract string value for a key ─────────────────── */
 static int ws_json_get_str(const char *msg, const char *key, char *out, int outsize) {
@@ -614,7 +615,7 @@ static void ws_handle_command(const char *msg, int len) {
         /* Rebuild LVGL process cards — this is called by the app after
          * a batch of add/delete/reorder step operations to do a single
          * safe UI refresh instead of one per operation. */
-        lv_async_call(ws_async_refresh_process_list, NULL);
+        ws_queue_lvgl_action(ws_async_refresh_process_list, NULL);
         return;
     }
 
@@ -668,34 +669,60 @@ static void ws_handle_command(const char *msg, int len) {
 
         qSysAction(SAVE_PROCESS_CONFIG);
         ws_broadcast_state();
-        lv_async_call(ws_async_refresh_settings, NULL);
+        ws_queue_lvgl_action(ws_async_refresh_settings, NULL);
+        return;
+    }
+
+    /* ── reset_defaults: restore factory settings ── */
+    if (strstr(msg, "\"reset_defaults\"")) {
+        struct machineSettings *s = &gui.page.settings.settingsParams;
+        s->tempUnit = 0;
+        s->waterInlet = false;
+        s->calibratedTemp = 20;
+        s->tempCalibOffset = 0;
+        s->filmRotationSpeedSetpoint = 50;
+        s->rotationIntervalSetpoint = 10;
+        s->randomSetpoint = 0;
+        s->isPersistentAlarm = false;
+        s->isProcessAutostart = false;
+        s->drainFillOverlapSetpoint = 100;
+        s->multiRinseTime = 60;
+        s->tankSize = 2;
+        s->pumpSpeed = 30;
+        s->chemContainerMl = 500;
+        s->wbContainerMl = 2000;
+        s->chemistryVolume = 2;
+        qSysAction(SAVE_PROCESS_CONFIG);
+        ws_broadcast_state();
+        ws_queue_lvgl_action(ws_async_refresh_settings, NULL);
+        LV_LOG_USER("[WS] reset_defaults applied");
         return;
     }
 
     /* ── checkup_advance: advance to next checkup phase ── */
     if (strstr(msg, "\"checkup_advance\"")) {
-        lv_async_call(ws_async_checkup_advance, NULL);
+        ws_queue_lvgl_action(ws_async_checkup_advance, NULL);
         LV_LOG_USER("[WS] checkup_advance queued");
         return;
     }
 
     /* ── close_process ── */
     if (strstr(msg, "\"close_process\"")) {
-        lv_async_call(ws_async_close_process, NULL);
+        ws_queue_lvgl_action(ws_async_close_process, NULL);
         LV_LOG_USER("[WS] close_process queued");
         return;
     }
 
     /* ── stop_now ── */
     if (strstr(msg, "\"stop_now\"")) {
-        lv_async_call(ws_async_stop_now, NULL);
+        ws_queue_lvgl_action(ws_async_stop_now, NULL);
         LV_LOG_USER("[WS] stop_now queued");
         return;
     }
 
     /* ── stop_after ── */
     if (strstr(msg, "\"stop_after\"")) {
-        lv_async_call(ws_async_stop_after, NULL);
+        ws_queue_lvgl_action(ws_async_stop_after, NULL);
         LV_LOG_USER("[WS] stop_after queued");
         return;
     }
@@ -708,7 +735,7 @@ static void ws_handle_command(const char *msg, int len) {
             int index = atoi(idx_str + 8);
             processNode *pn = find_process_by_index(index);
             if (pn) {
-                lv_async_call(ws_async_start_process, pn);
+                ws_queue_lvgl_action(ws_async_start_process, pn);
                 LV_LOG_USER("[WS] start_process index=%d queued", index);
             } else {
                 LV_LOG_WARN("[WS] start_process: index %d not found", index);
@@ -762,7 +789,7 @@ static void ws_handle_command(const char *msg, int len) {
         calculateTotalTime(pn);
         qSysAction(SAVE_PROCESS_CONFIG);
         ws_broadcast_process_list();
-        lv_async_call(ws_async_create_process_element, pn);
+        ws_queue_lvgl_action(ws_async_create_process_element, pn);
         LV_LOG_USER("[WS] create_process: '%s'", pd->processNameString);
         return;
     }
@@ -784,7 +811,7 @@ static void ws_handle_command(const char *msg, int len) {
         calculateTotalTime(pn);
         qSysAction(SAVE_PROCESS_CONFIG);
         ws_broadcast_process_list();
-        lv_async_call(ws_async_update_process, pn);
+        ws_queue_lvgl_action(ws_async_update_process, pn);
         LV_LOG_USER("[WS] edit_process index=%d", index);
         return;
     }
@@ -803,7 +830,7 @@ static void ws_handle_command(const char *msg, int len) {
            safely deleted before the node memory is released */
         qSysAction(SAVE_PROCESS_CONFIG);
         ws_broadcast_process_list();
-        lv_async_call(ws_async_delete_and_refresh, pn);
+        ws_queue_lvgl_action(ws_async_delete_and_refresh, pn);
         LV_LOG_USER("[WS] delete_process index=%d (deferred free)", index);
         return;
     }
@@ -925,6 +952,11 @@ static void ws_handle_command(const char *msg, int len) {
  *  SIMULATOR BUILD — real WebSocket server using POSIX sockets
  * ═══════════════════════════════════════════════════════════════════ */
 #ifdef SIMULATOR_BUILD
+
+/* Simulator: lv_async_call is safe (single-threaded SDL event loop) */
+static void ws_queue_lvgl_action(void (*fn)(void *), void *arg) {
+    lv_async_call(fn, arg);
+}
 
 #include <sys/time.h>
 #include <sys/socket.h>
@@ -1415,6 +1447,8 @@ void ws_broadcast_event(const char *event_name, const char *json_data) {
 #include "esp_netif.h"
 #include "esp_log.h"
 #include "mdns.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
 
 static const char *TAG = "ws_server";
 
@@ -1539,12 +1573,42 @@ static esp_err_t ws_handler(httpd_req_t *req) {
     return ret;
 }
 
-/* ── Periodic broadcast timer (FreeRTOS) ── */
+/* ── Thread-safe action queue for LVGL calls from httpd task ── */
+/* lv_async_call is NOT thread-safe in LVGL 9 when called from a non-LVGL task.
+ * Instead, we queue actions here and drain them from the broadcast timer
+ * which runs safely in the LVGL task context. */
+
+typedef struct {
+    void (*fn)(void *);
+    void *arg;
+} ws_pending_action_t;
+
+#define WS_ACTION_QUEUE_SIZE 16
+static QueueHandle_t ws_action_queue = NULL;
+
+/* Queue an action to be executed on the LVGL thread (safe from any task) */
+static void ws_queue_lvgl_action(void (*fn)(void *), void *arg) {
+    if (ws_action_queue == NULL) return;
+    ws_pending_action_t action = { .fn = fn, .arg = arg };
+    if (xQueueSend(ws_action_queue, &action, pdMS_TO_TICKS(100)) != pdTRUE) {
+        ESP_LOGW(TAG, "LVGL action queue full — dropped action");
+    }
+}
+
+/* ── Periodic broadcast timer (runs in LVGL task context) ── */
 
 static lv_timer_t *fw_broadcast_timer = NULL;
 
 static void fw_broadcast_timer_cb(lv_timer_t *t) {
     (void)t;
+
+    /* Drain pending LVGL actions (queued from httpd task) */
+    ws_pending_action_t action;
+    while (ws_action_queue &&
+           xQueueReceive(ws_action_queue, &action, 0) == pdTRUE) {
+        if (action.fn) action.fn(action.arg);
+    }
+
     if (ws_fd_count > 0) {
         ws_broadcast_state();
     }
@@ -1554,6 +1618,11 @@ static void fw_broadcast_timer_cb(lv_timer_t *t) {
 
 bool ws_server_start(uint16_t port) {
     if (ws_httpd) return true;
+
+    /* Create LVGL action queue (once) */
+    if (ws_action_queue == NULL) {
+        ws_action_queue = xQueueCreate(WS_ACTION_QUEUE_SIZE, sizeof(ws_pending_action_t));
+    }
 
     /* Ensure TCP/IP stack is up (safe to call multiple times — returns
      * ESP_ERR_INVALID_STATE if already initialised, which we ignore). */
@@ -1570,7 +1639,7 @@ bool ws_server_start(uint16_t port) {
 
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.server_port = port;
-    config.stack_size = 8192;
+    config.stack_size = 16384;
     config.max_uri_handlers = 2;
     config.max_open_sockets = WS_MAX_CLIENTS + 1;
 
@@ -1623,15 +1692,19 @@ int ws_server_client_count(void) {
 }
 
 void ws_broadcast_state(void) {
-    char buf[8192];
-    int n = build_state_json(buf, sizeof(buf));
+    char *buf = malloc(8192);
+    if (!buf) { ESP_LOGE(TAG, "broadcast_state: malloc failed"); return; }
+    int n = build_state_json(buf, 8192);
     ws_send_all(buf, n);
+    free(buf);
 }
 
 void ws_broadcast_process_list(void) {
-    char buf[8192];
-    int n = build_process_list_json(buf, sizeof(buf));
+    char *buf = malloc(8192);
+    if (!buf) { ESP_LOGE(TAG, "broadcast_process_list: malloc failed"); return; }
+    int n = build_process_list_json(buf, 8192);
     ws_send_all(buf, n);
+    free(buf);
 }
 
 void ws_broadcast_event(const char *event_name, const char *json_data) {

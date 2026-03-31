@@ -29,6 +29,7 @@ extern struct gui_components gui;
 static void wifi_populate_scan_list(void);
 static void wifi_update_status(void);
 static void event_wifi_network_clicked(lv_event_t *e);
+static void event_wifi_network_long_pressed(lv_event_t *e);
 static void wifi_start_scan(void);
 
 /* ── Scan retry counter ── */
@@ -41,6 +42,10 @@ static void wifi_status_timer_cb(lv_timer_t *timer) {
     (void)timer;
     wifi_update_status();
 }
+
+/* ── Pending credentials (saved to settingsParams only on GOT_IP) ── */
+static char wifi_pending_ssid[33] = {0};
+static char wifi_pending_pass[65] = {0};
 
 /* ── WiFi icon blink timer for "connecting" state ── */
 static lv_timer_t *wifi_blink_timer = NULL;
@@ -95,21 +100,55 @@ void wifi_icon_set_connecting(void) {
     lv_async_call(wifi_icon_start_blink_async, NULL);
 }
 
-/* ── Connect button re-enable (called via lv_async_call from WiFi events) ── */
-static void wifi_reenable_connect_btn_async(void *arg) {
+/* ── Connect succeeded (GOT_IP) — save credentials and update UI ── */
+static void wifi_connect_success_async(void *arg) {
     (void)arg;
     struct sWifiPopup *p = &gui.element.wifiPopup;
-    if (p->connectButton != NULL) {
-        lv_obj_remove_state(p->connectButton, LV_STATE_DISABLED);
+
+    /* Persist pending credentials now that connection succeeded */
+    if (wifi_pending_ssid[0] != '\0') {
+        snprintf(gui.page.settings.settingsParams.wifiSSID,
+                 sizeof(gui.page.settings.settingsParams.wifiSSID), "%s", wifi_pending_ssid);
+        snprintf(gui.page.settings.settingsParams.wifiPassword,
+                 sizeof(gui.page.settings.settingsParams.wifiPassword), "%s", wifi_pending_pass);
+        ESP_LOGW(TAG, "[WiFi] Credentials saved: ssid='%s', pwd_len=%d, wifiEnabled=%d",
+                 gui.page.settings.settingsParams.wifiSSID,
+                 (int)strlen(gui.page.settings.settingsParams.wifiPassword),
+                 gui.page.settings.settingsParams.wifiEnabled);
+        qSysAction(SAVE_PROCESS_CONFIG);
+        wifi_pending_ssid[0] = '\0';
+        wifi_pending_pass[0] = '\0';
     }
-    /* Always update icon + popup status regardless of popup state */
+
+    if (p->connectButton != NULL)
+        lv_obj_remove_state(p->connectButton, LV_STATE_DISABLED);
     wifi_update_icon_async(NULL);
     if (p->popupParent != NULL) wifi_update_status();
 }
 
-/* Public: called from ota_update.c WiFi event handler (GOT_IP / disconnect) */
+/* ── Connect failed (disconnect) — clear pending and update UI ── */
+static void wifi_connect_fail_async(void *arg) {
+    (void)arg;
+    struct sWifiPopup *p = &gui.element.wifiPopup;
+
+    /* Discard pending credentials — don't save wrong password */
+    wifi_pending_ssid[0] = '\0';
+    wifi_pending_pass[0] = '\0';
+
+    if (p->connectButton != NULL)
+        lv_obj_remove_state(p->connectButton, LV_STATE_DISABLED);
+    wifi_update_icon_async(NULL);
+    if (p->popupParent != NULL) wifi_update_status();
+}
+
+/* Public: called from ota_update.c on GOT_IP */
 void wifi_popup_connection_result(void) {
-    lv_async_call(wifi_reenable_connect_btn_async, NULL);
+    lv_async_call(wifi_connect_success_async, NULL);
+}
+
+/* Public: called from ota_update.c on disconnect/failure */
+void wifi_popup_connection_failed(void) {
+    lv_async_call(wifi_connect_fail_async, NULL);
 }
 
 /* ── Delayed retry timer (gives ESP-Hosted C6 time to finish init) ── */
@@ -276,9 +315,10 @@ static void wifi_populate_scan_list(void) {
             lv_obj_set_style_text_color(sig_lbl, lv_color_hex(GREEN), 0);
         }
 
-        /* Store index in user_data and add click handler */
+        /* Store index in user_data and add click/long-press handlers */
         lv_obj_set_user_data(btn, (void *)(intptr_t)i);
         lv_obj_add_event_cb(btn, event_wifi_network_clicked, LV_EVENT_CLICKED, NULL);
+        lv_obj_add_event_cb(btn, event_wifi_network_long_pressed, LV_EVENT_LONG_PRESSED, NULL);
     }
 }
 
@@ -337,6 +377,36 @@ static void event_wifi_network_clicked(lv_event_t *e) {
     }
 }
 
+/* ── Network item long-pressed — offer to forget saved credentials ── */
+static void event_wifi_network_long_pressed(lv_event_t *e) {
+    lv_obj_t *btn = lv_event_get_target(e);
+    struct sWifiPopup *p = &gui.element.wifiPopup;
+    int idx = (int)(intptr_t)lv_obj_get_user_data(btn);
+
+    if (idx < 0 || idx >= p->scanCount) return;
+
+    /* Only show "Forget" for saved networks */
+    bool is_saved = (!p->scanResults[idx].open &&
+                     strcmp(p->scanResults[idx].ssid, gui.page.settings.settingsParams.wifiSSID) == 0 &&
+                     gui.page.settings.settingsParams.wifiPassword[0] != '\0');
+    if (!is_saved) return;
+
+    ESP_LOGW(TAG, "[WiFi] Long press on saved network: %s — showing forget popup", p->scanResults[idx].ssid);
+
+    /* Use listContainer as whoCallMe identifier for MSGPOP_OWNER_WIFI_FORGET */
+    messagePopupCreate(wifiForgetTitle_text, wifiForgetBody_text,
+                       wifiForgetYes_text, wifiForgetNo_text,
+                       p->listContainer);
+}
+
+/* ── Public: re-populate scan list (called after forgetting a network) ── */
+void wifi_popup_refresh_list(void) {
+    struct sWifiPopup *p = &gui.element.wifiPopup;
+    if (p->popupParent == NULL) return;
+    wifi_populate_scan_list();
+    wifi_update_status();
+}
+
 /* ── Main event handler ── */
 void event_wifiPopup(lv_event_t *e) {
     lv_event_code_t code = lv_event_get_code(e);
@@ -392,19 +462,13 @@ void event_wifiPopup(lv_event_t *e) {
                 wifi_icon_set_connecting();  /* blink white icon */
 
                 if(wifi_connect(ssid, pass)) {
-                    /* Save credentials */
-                    snprintf(gui.page.settings.settingsParams.wifiSSID,
-                             sizeof(gui.page.settings.settingsParams.wifiSSID), "%s", ssid);
-                    snprintf(gui.page.settings.settingsParams.wifiPassword,
-                             sizeof(gui.page.settings.settingsParams.wifiPassword), "%s", pass);
-                    ESP_LOGW(TAG, "[WiFi] Credentials saved to struct: ssid='%s', pwd_len=%d, wifiEnabled=%d",
-                             gui.page.settings.settingsParams.wifiSSID,
-                             (int)strlen(gui.page.settings.settingsParams.wifiPassword),
-                             gui.page.settings.settingsParams.wifiEnabled);
+                    /* Store credentials temporarily — only persist on GOT_IP */
+                    snprintf(wifi_pending_ssid, sizeof(wifi_pending_ssid), "%s", ssid);
+                    snprintf(wifi_pending_pass, sizeof(wifi_pending_pass), "%s", pass);
+                    ESP_LOGW(TAG, "[WiFi] Pending credentials: ssid='%s', pwd_len=%d",
+                             wifi_pending_ssid, (int)strlen(wifi_pending_pass));
                     /* Start WebSocket server */
                     ws_server_start(WS_SERVER_PORT);
-                    ESP_LOGW(TAG, "[WiFi] Queuing SAVE_PROCESS_CONFIG");
-                    qSysAction(SAVE_PROCESS_CONFIG);
                 } else {
                     /* Immediate failure — re-enable button right away */
                     lv_obj_remove_state(p->connectButton, LV_STATE_DISABLED);
@@ -438,6 +502,10 @@ void wifiPopupCreate(void) {
         else
             lv_obj_remove_state(p->autoConnectSwitch, LV_STATE_CHECKED);
         lv_obj_remove_flag(p->popupParent, LV_OBJ_FLAG_HIDDEN);
+        /* Show spinner immediately */
+        lv_label_set_text(p->statusLabel, wifiScanning_text);
+        lv_obj_set_style_text_color(p->statusLabel, lv_color_hex(ORANGE), 0);
+        wifi_show_scan_loading();
         if(wifi_status_timer == NULL)
             wifi_status_timer = lv_timer_create(wifi_status_timer_cb, 1000, NULL);
         /* Auto-scan after short delay so UI renders first */
@@ -560,6 +628,11 @@ void wifiPopupCreate(void) {
     p->scanCount = 0;
     p->selectedIndex = -1;
     wifi_update_status();
+
+    /* Show spinner immediately so user sees loading feedback */
+    lv_label_set_text(p->statusLabel, wifiScanning_text);
+    lv_obj_set_style_text_color(p->statusLabel, lv_color_hex(ORANGE), 0);
+    wifi_show_scan_loading();
 
     /* Start status timer */
     wifi_status_timer = lv_timer_create(wifi_status_timer_cb, 1000, NULL);

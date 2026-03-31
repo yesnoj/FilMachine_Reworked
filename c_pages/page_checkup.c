@@ -1262,7 +1262,8 @@ static void checkup_renderProcessing(processNode *proc) {
         lv_obj_align(ckup->checkupProcessTimeLeftValue, LV_ALIGN_CENTER, ui->processing_time_x, ui->processing_time_y);
 
         ckup->checkupStepNameValue = lv_label_create(ckup->checkupProcessingContainer);
-        lv_label_set_text(ckup->checkupStepNameValue, checkupEllipsis_text);
+        lv_label_set_text(ckup->checkupStepNameValue,
+            ckup->currentStep->step.stepDetails->data.stepNameString);
         lv_obj_set_style_text_align(ckup->checkupStepNameValue, LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_set_style_text_font(ckup->checkupStepNameValue, ui->stage_title_font, 0);
         lv_obj_align(ckup->checkupStepNameValue, LV_ALIGN_CENTER, ui->processing_step_name_x, ui->processing_step_name_y);
@@ -1643,9 +1644,9 @@ void checkup(processNode *processToCheckup) {
                           lv_obj_align(ckup->checkupNextStepLabel, LV_ALIGN_LEFT_MID, ui->left_status_icon_x, ui->left_status_icon_y);
 
                           ckup->checkupNextStepValue = lv_label_create(ckup->checkupNextStepContainer);
-                          //if(ckup->currentStep->next != NULL)
-                          //    lv_label_set_text(ckup->checkupNextStepValue, ckup->currentStep->next->step.stepDetails->data.stepNameString);
-                          //else
+                          if(ckup->currentStep->next != NULL)
+                              lv_label_set_text(ckup->checkupNextStepValue, ckup->currentStep->next->step.stepDetails->data.stepNameString);
+                          else
                               lv_label_set_text(ckup->checkupNextStepValue, ckup->currentStep->step.stepDetails->data.stepNameString);
 
                           lv_obj_set_width(ckup->checkupNextStepValue, LV_SIZE_CONTENT);

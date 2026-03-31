@@ -159,6 +159,10 @@ typedef enum {
 #define wifiErrConnectionFail_text              "Connection failed\n(CONNECTION_FAIL)"
 #define wifiErrBeaconTimeout_text               "Beacon timeout\n(signal lost)"
 #define wifiErrUnknownFmt_text                  "Connection failed\n(reason code: %d)"
+#define wifiForgetTitle_text                    "Forget Network"
+#define wifiForgetBody_text                     "Remove saved credentials\nfor this network?"
+#define wifiForgetYes_text                      "Forget"
+#define wifiForgetNo_text                       "Cancel"
 
 /* Checkup placeholder */
 #define checkupEllipsis_text					"..."
@@ -248,8 +252,8 @@ typedef enum {
 * Config tab strings
 *********************/
 #define Settings_text 								"Machine settings"
-#define tempUnit_text 								"Temp. unit:"
-#define tempSensorTuning_text 						"Calib. temp. sensor"
+#define tempUnit_text 								"Temperature unit"
+#define tempSensorTuning_text 						"Calibrated temperature"
 #define tuneButton_text 							"TUNE"
 #define tempAlertMBox_text							"Ensure stable machine temperature, measure ambient air, input the value, and press 'Tune'. For resetting, long-press 'Tune'."
 #define soundAlertMBox_text 						"Continue to sound the alert when a process is about to end or when the heating phase reaches the desired temperature."
@@ -262,7 +266,7 @@ typedef enum {
 #define waterInletAlertMBox_text 					"Tells the machine whether it's connected to a pressurized water source. If yes, the water bath will be automatically refilled. If no, you must manually fill the water bath."
 #define rotationSpeed_text 							"Rotation speed"
 #define rotationInversionInterval_text 				"Rotation inv. interval"
-#define rotationRandom_text 						"Randomness"
+#define rotationRandom_text 						"Random variation"
 #define celsius_text 								"°C"
 #define fahrenheit_text 							"°F"
 #define waterInlet_text 							"Water inlet link"
@@ -277,11 +281,11 @@ typedef enum {
 #define tankSizeLarge_text                  "L"
 #define pumpSpeed_text                      "Pump speed"
 #define pumpSpeedAlertMBox_text             "Set the pump speed percentage.\nHigher values = faster fill/drain."
-#define chemContainerMl_text                "Container size"
+#define chemContainerMl_text                "Chemistry container"
 #define chemContainerMlAlertMBox_text       "Set the chemistry container\nsize in milliliters."
-#define wbContainerMl_text                  "Water bath size"
+#define wbContainerMl_text                  "Water bath container"
 #define wbContainerMlAlertMBox_text         "Set the water bath size\nin milliliters."
-#define chemistryVolume_text                "Chemistry size"
+#define chemistryVolume_text                "Chemistry volume"
 #define splashScreenAlertMBox_text          "Customize the boot splash screen.\n\nUse Default: shows the standard\nDeep Ocean splash.\n\nRandom next boot: generates a\nnew random splash each boot.\n\nBoth off: choose Palette, Shape\nStyle and Complexity manually.\nPress Random to shuffle."
 #define chemistryVolumeAlertMBox_text       "Low: uses half the chemistry.\nHigh: fills the tank completely."
 #define chemistryVolumeList                 "Low\nHigh"
@@ -1692,9 +1696,11 @@ bool wifi_is_connected(void);
 const char *wifi_get_connected_ssid(void);
 const char *wifi_get_ip_address(void);
 void wifi_boot_auto_connect(void);  /* Call once after readConfigFile to auto-connect if enabled */
-void wifi_popup_connection_result(void); /* Re-enable Connect btn after connect/disconnect */
+void wifi_popup_connection_result(void); /* Save credentials + update UI on GOT_IP */
+void wifi_popup_connection_failed(void); /* Clear pending credentials + update UI on failure */
 void wifi_popup_scan_done(void);        /* Notify popup that async scan results are ready */
 void wifi_icon_set_connecting(void);    /* Start blinking white WiFi icon (connecting state) */
+void wifi_popup_refresh_list(void);     /* Re-populate scan list (e.g. after forgetting a network) */
 // @file FilMachine.c
 void stopMotorTask(void);
 void runMotorTask(void);

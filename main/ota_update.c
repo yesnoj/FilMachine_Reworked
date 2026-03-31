@@ -200,6 +200,7 @@ const char *wifi_get_ip_address(void) {
 #endif
 #include "esp_event.h"
 #include "esp_log.h"
+#include "ws_server.h"
 #include "ff.h"
 
 static const char *TAG = "OTA";
@@ -879,7 +880,7 @@ static void fw_wifi_event_handler(void *arg, esp_event_base_t event_base,
                     }
                     /* Normal disconnect (not during connect) — just re-enable UI */
                     fw_wifi_connect_pending = false;
-                    wifi_popup_connection_result();
+                    wifi_popup_connection_failed();
                     break;
                 }
 
@@ -904,12 +905,12 @@ static void fw_wifi_event_handler(void *arg, esp_event_base_t event_base,
                     snprintf(wifi_error_msg, sizeof(wifi_error_msg),
                              wifiErrUnknownFmt_text, r);
                     lv_async_call(wifi_error_popup_async, NULL);
-                    wifi_popup_connection_result();
+                    wifi_popup_connection_failed();
                     break;
                 }
                 snprintf(wifi_error_msg, sizeof(wifi_error_msg), "%s", reason_str);
                 lv_async_call(wifi_error_popup_async, NULL);
-                wifi_popup_connection_result();  /* re-enable Connect button */
+                wifi_popup_connection_failed();  /* clear pending + re-enable Connect button */
                 break;
             }
             case WIFI_EVENT_STA_CONNECTED: {
@@ -946,7 +947,10 @@ static void fw_wifi_event_handler(void *arg, esp_event_base_t event_base,
         ESP_LOGI(TAG, "[WiFi] Got IP: %s", fw_ip_addr);
         fw_wifi_connected = true;
         wifi_connected = true;
-        wifi_popup_connection_result();  /* re-enable Connect button */
+        wifi_popup_connection_result();  /* save credentials + re-enable Connect button */
+
+        /* Start WebSocket server so the Flutter app can connect */
+        ws_server_start(WS_SERVER_PORT);
 
         /* If OTA web server was requested, start it now that we have an IP */
         if (ota_httpd == NULL) {
@@ -1159,8 +1163,10 @@ const char *wifi_get_connected_ssid(void) { return NULL; }
 const char *wifi_get_ip_address(void) { return NULL; }
 void wifi_boot_auto_connect(void) {}
 void wifi_popup_connection_result(void) {}
+void wifi_popup_connection_failed(void) {}
 void wifi_popup_scan_done(void) {}
 void wifi_icon_set_connecting(void) {}
+void wifi_popup_refresh_list(void) {}
 
 #endif /* SOC_WIFI_SUPPORTED || CONFIG_ESP_WIFI_REMOTE_ENABLED — wifi scan/connect */
 
