@@ -13,8 +13,11 @@
  */
 
 #include <string.h>
+#include "esp_log.h"
 #include "FilMachine.h"
 #include "ws_server.h"
+
+static const char *TAG = "WiFiPopup";
 
 extern struct gui_components gui;
 
@@ -26,21 +29,10 @@ extern struct gui_components gui;
 static void wifi_populate_scan_list(void);
 static void wifi_update_status(void);
 static void event_wifi_network_clicked(lv_event_t *e);
+static void wifi_start_scan(void);
 
-/* ── Connect button re-enable (called via lv_async_call from WiFi events) ── */
-static void wifi_reenable_connect_btn_async(void *arg) {
-    (void)arg;
-    struct sWifiPopup *p = &gui.element.wifiPopup;
-    if (p->connectButton != NULL) {
-        lv_obj_remove_state(p->connectButton, LV_STATE_DISABLED);
-        wifi_update_status();   /* also refreshes the label text */
-    }
-}
-
-/* Public: called from ota_update.c WiFi event handler */
-void wifi_popup_connection_result(void) {
-    lv_async_call(wifi_reenable_connect_btn_async, NULL);
-}
+/* ── Scan retry counter ── */
+static uint8_t wifi_scan_retries = 0;
 
 /* ── Timer for status updates ── */
 static lv_timer_t *wifi_status_timer = NULL;
@@ -50,8 +42,110 @@ static void wifi_status_timer_cb(lv_timer_t *timer) {
     wifi_update_status();
 }
 
-/* ── Auto-scan on popup open (with retry) ── */
-static uint8_t wifi_scan_retries = 0;
+/* ── WiFi icon blink timer for "connecting" state ── */
+static lv_timer_t *wifi_blink_timer = NULL;
+static bool wifi_blink_visible = false;
+
+static void wifi_blink_timer_cb(lv_timer_t *timer) {
+    (void)timer;
+    if (gui.page.menu.wifiStatusIcon == NULL) return;
+    wifi_blink_visible = !wifi_blink_visible;
+    if (wifi_blink_visible)
+        lv_obj_remove_flag(gui.page.menu.wifiStatusIcon, LV_OBJ_FLAG_HIDDEN);
+    else
+        lv_obj_add_flag(gui.page.menu.wifiStatusIcon, LV_OBJ_FLAG_HIDDEN);
+}
+
+static void wifi_icon_stop_blink(void) {
+    if (wifi_blink_timer != NULL) {
+        lv_timer_delete(wifi_blink_timer);
+        wifi_blink_timer = NULL;
+    }
+}
+
+/* ── Update Settings tab Wi-Fi icon (safe from any context via lv_async_call) ── */
+static void wifi_update_icon_async(void *arg) {
+    (void)arg;
+    if (gui.page.menu.wifiStatusIcon == NULL) return;
+
+    wifi_icon_stop_blink();
+
+    if (wifi_is_connected()) {
+        lv_obj_set_style_text_color(gui.page.menu.wifiStatusIcon, lv_color_hex(GREEN), 0);
+        lv_obj_remove_flag(gui.page.menu.wifiStatusIcon, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_add_flag(gui.page.menu.wifiStatusIcon, LV_OBJ_FLAG_HIDDEN);
+    }
+}
+
+/* Start blinking white icon (called via lv_async_call when connecting) */
+static void wifi_icon_start_blink_async(void *arg) {
+    (void)arg;
+    if (gui.page.menu.wifiStatusIcon == NULL) return;
+
+    wifi_icon_stop_blink();
+    lv_obj_set_style_text_color(gui.page.menu.wifiStatusIcon, lv_color_white(), 0);
+    lv_obj_remove_flag(gui.page.menu.wifiStatusIcon, LV_OBJ_FLAG_HIDDEN);
+    wifi_blink_visible = true;
+    wifi_blink_timer = lv_timer_create(wifi_blink_timer_cb, 500, NULL);
+}
+
+/* Public: call when a WiFi connection attempt begins */
+void wifi_icon_set_connecting(void) {
+    lv_async_call(wifi_icon_start_blink_async, NULL);
+}
+
+/* ── Connect button re-enable (called via lv_async_call from WiFi events) ── */
+static void wifi_reenable_connect_btn_async(void *arg) {
+    (void)arg;
+    struct sWifiPopup *p = &gui.element.wifiPopup;
+    if (p->connectButton != NULL) {
+        lv_obj_remove_state(p->connectButton, LV_STATE_DISABLED);
+    }
+    /* Always update icon + popup status regardless of popup state */
+    wifi_update_icon_async(NULL);
+    if (p->popupParent != NULL) wifi_update_status();
+}
+
+/* Public: called from ota_update.c WiFi event handler (GOT_IP / disconnect) */
+void wifi_popup_connection_result(void) {
+    lv_async_call(wifi_reenable_connect_btn_async, NULL);
+}
+
+/* ── Delayed retry timer (gives ESP-Hosted C6 time to finish init) ── */
+static void wifi_retry_scan_timer_cb(lv_timer_t *timer) {
+    lv_timer_delete(timer);
+    ESP_LOGW(TAG, "[WiFi] Retry scan %d/3 (after delay)", wifi_scan_retries);
+    wifi_start_scan();
+}
+
+/* ── Scan-done callback (called via lv_async_call from SCAN_DONE event) ── */
+static void wifi_scan_done_async(void *arg) {
+    (void)arg;
+    struct sWifiPopup *p = &gui.element.wifiPopup;
+
+    /* If popup isn't open, ignore */
+    if (p->popupParent == NULL) return;
+
+    ESP_LOGW(TAG, "[WiFi] Scan done — %d networks", p->scanCount);
+
+    if (p->scanCount == 0 && wifi_scan_retries < 3) {
+        /* C6 might not be ready yet — retry after a delay */
+        wifi_scan_retries++;
+        /* Wait 2s before retrying to give ESP-Hosted transport time to settle */
+        lv_timer_create(wifi_retry_scan_timer_cb, 2000, NULL);
+        return;
+    }
+
+    wifi_scan_retries = 0;
+    wifi_populate_scan_list();
+    wifi_update_status();
+}
+
+/* Public: called from ota_update.c SCAN_DONE event handler */
+void wifi_popup_scan_done(void) {
+    lv_async_call(wifi_scan_done_async, NULL);
+}
 
 /* Show a "Scanning..." spinner inside the list container */
 static void wifi_show_scan_loading(void) {
@@ -67,36 +161,20 @@ static void wifi_show_scan_loading(void) {
     lv_obj_set_style_arc_width(spinner, WF->spinner_arc_w, LV_PART_MAIN);
 }
 
-/* Phase 2: actually run the blocking scan (called after spinner has rendered) */
-static void wifi_do_scan_cb(lv_timer_t *timer) {
-    lv_timer_delete(timer);
-
-    struct sWifiPopup *p = &gui.element.wifiPopup;
-
-    wifi_scan_start();
-    p->scanCount = wifi_scan_get_results(p->scanResults, MAX_WIFI_SCAN_RESULTS);
-    LV_LOG_USER("[WiFi] Scan found %d networks (attempt %d)", p->scanCount, wifi_scan_retries + 1);
-
-    if (p->scanCount == 0 && wifi_scan_retries < 2) {
-        /* C6 might not be ready yet — retry after 2 seconds */
-        wifi_scan_retries++;
-        lv_timer_create(wifi_do_scan_cb, 2000, NULL);
-        return;
-    }
-
-    wifi_scan_retries = 0;
-    wifi_populate_scan_list();
-    wifi_update_status();
-}
-
-/* Phase 1: show spinner, then schedule the actual scan so LVGL renders first */
+/* Start async scan: show spinner, launch non-blocking scan.
+ * Results arrive via SCAN_DONE → wifi_popup_scan_done → wifi_scan_done_async */
 static void wifi_start_scan(void) {
     struct sWifiPopup *p = &gui.element.wifiPopup;
     lv_label_set_text(p->statusLabel, wifiScanning_text);
     lv_obj_set_style_text_color(p->statusLabel, lv_color_hex(ORANGE), 0);
     wifi_show_scan_loading();
-    /* Short delay so the spinner renders before the blocking scan */
-    lv_timer_create(wifi_do_scan_cb, 50, NULL);
+    int ret = wifi_scan_start();  /* non-blocking — results come via event */
+    if (ret < 0 && wifi_scan_retries < 3) {
+        /* Scan failed (WiFi not ready) — schedule a delayed retry */
+        wifi_scan_retries++;
+        ESP_LOGW(TAG, "[WiFi] Scan start failed, scheduling retry %d/3 in 2s", wifi_scan_retries);
+        lv_timer_create(wifi_retry_scan_timer_cb, 2000, NULL);
+    }
 }
 
 /* Auto-scan on popup open (one-shot timer) */
@@ -160,6 +238,11 @@ static void wifi_populate_scan_list(void) {
     }
 
     for(int i = 0; i < p->scanCount; i++) {
+        /* Check if this network has saved credentials */
+        bool is_saved = (!p->scanResults[i].open &&
+                         strcmp(p->scanResults[i].ssid, gui.page.settings.settingsParams.wifiSSID) == 0 &&
+                         gui.page.settings.settingsParams.wifiPassword[0] != '\0');
+
         lv_obj_t *btn = lv_button_create(p->listContainer);
         lv_obj_set_size(btn, lv_pct(100), WF->list_item_h);
         lv_obj_set_style_bg_color(btn, lv_palette_darken(LV_PALETTE_GREY, 4), LV_PART_MAIN);
@@ -171,7 +254,14 @@ static void wifi_populate_scan_list(void) {
 
         /* SSID label */
         lv_obj_t *ssid_lbl = lv_label_create(btn);
-        lv_label_set_text(ssid_lbl, p->scanResults[i].ssid);
+        if (is_saved) {
+            /* Show a star before the SSID to indicate saved credentials */
+            char saved_ssid[40];
+            snprintf(saved_ssid, sizeof(saved_ssid), LV_SYMBOL_OK " %s", p->scanResults[i].ssid);
+            lv_label_set_text(ssid_lbl, saved_ssid);
+        } else {
+            lv_label_set_text(ssid_lbl, p->scanResults[i].ssid);
+        }
         lv_obj_set_style_text_font(ssid_lbl, WF->list_font, 0);
         lv_obj_align(ssid_lbl, LV_ALIGN_LEFT_MID, 0, 0);
 
@@ -207,9 +297,22 @@ static void event_wifi_network_clicked(lv_event_t *e) {
     lv_obj_add_state(btn, LV_STATE_CHECKED);
 
     p->selectedIndex = idx;
-    LV_LOG_USER("[WiFi] Selected network: %s (rssi: %d)", p->scanResults[idx].ssid, p->scanResults[idx].rssi);
+    ESP_LOGW(TAG, "[WiFi] Selected network: %s (rssi: %d)", p->scanResults[idx].ssid, p->scanResults[idx].rssi);
 
-    /* If network requires password, open keyboard */
+    /* Check if this network has saved credentials */
+    bool is_saved = (!p->scanResults[idx].open &&
+                     strcmp(p->scanResults[idx].ssid, gui.page.settings.settingsParams.wifiSSID) == 0 &&
+                     gui.page.settings.settingsParams.wifiPassword[0] != '\0');
+
+    if (is_saved) {
+        /* Known network — pre-load saved password, no keyboard needed */
+        snprintf(p->pendingPassword, sizeof(p->pendingPassword), "%s",
+                 gui.page.settings.settingsParams.wifiPassword);
+        ESP_LOGW(TAG, "[WiFi] Saved network — password loaded, ready to connect");
+        return;
+    }
+
+    /* If network requires password and not saved, open keyboard */
     if(!p->scanResults[idx].open) {
         p->pendingPassword[0] = '\0';
 
@@ -226,15 +329,7 @@ static void event_wifi_network_clicked(lv_event_t *e) {
 
         /* Use the existing keyboard popup — set max length and show it */
         lv_textarea_set_max_length(gui.element.keyboardPopup.keyboardTextArea, 64);
-
-        /* Pre-fill with saved password if same SSID */
-        if(strcmp(p->scanResults[idx].ssid, gui.page.settings.settingsParams.wifiSSID) == 0 &&
-           gui.page.settings.settingsParams.wifiPassword[0] != '\0') {
-            lv_textarea_set_text(gui.element.keyboardPopup.keyboardTextArea,
-                                 gui.page.settings.settingsParams.wifiPassword);
-        } else {
-            lv_textarea_set_text(gui.element.keyboardPopup.keyboardTextArea, "");
-        }
+        lv_textarea_set_text(gui.element.keyboardPopup.keyboardTextArea, "");
 
         lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_3);
         lv_obj_remove_flag(gui.element.keyboardPopup.keyBoardParent, LV_OBJ_FLAG_HIDDEN);
@@ -253,13 +348,13 @@ void event_wifiPopup(lv_event_t *e) {
     /* Close button — keep timer running to update Settings tab icon */
     if(obj == p->closeButton && code == LV_EVENT_CLICKED) {
         lv_obj_add_flag(p->popupParent, LV_OBJ_FLAG_HIDDEN);
-        LV_LOG_USER("[WiFi] Popup closed");
+        ESP_LOGW(TAG, "[WiFi] Popup closed");
         return;
     }
 
     /* Scan / Refresh button */
     if(obj == p->scanButton && code == LV_EVENT_CLICKED) {
-        LV_LOG_USER("[WiFi] Manual scan started");
+        ESP_LOGW(TAG, "[WiFi] Manual scan started");
         wifi_scan_retries = 0;
         wifi_start_scan();
         return;
@@ -269,7 +364,7 @@ void event_wifiPopup(lv_event_t *e) {
     if(obj == p->connectButton && code == LV_EVENT_CLICKED) {
         if(wifi_is_connected()) {
             /* Disconnect */
-            LV_LOG_USER("[WiFi] Disconnecting");
+            ESP_LOGW(TAG, "[WiFi] Disconnecting");
             ws_server_stop();
             wifi_disconnect();
             wifi_update_status();
@@ -288,12 +383,13 @@ void event_wifiPopup(lv_event_t *e) {
                     }
                 }
 
-                LV_LOG_USER("[WiFi] Connecting to: %s", ssid);
+                ESP_LOGW(TAG, "[WiFi] Connecting to: %s", ssid);
                 lv_label_set_text(p->statusLabel, wifiConnecting_text);
                 lv_obj_set_style_text_color(p->statusLabel, lv_color_hex(ORANGE), 0);
 
                 /* Disable button while connection is in progress */
                 lv_obj_add_state(p->connectButton, LV_STATE_DISABLED);
+                wifi_icon_set_connecting();  /* blink white icon */
 
                 if(wifi_connect(ssid, pass)) {
                     /* Save credentials */
@@ -301,8 +397,13 @@ void event_wifiPopup(lv_event_t *e) {
                              sizeof(gui.page.settings.settingsParams.wifiSSID), "%s", ssid);
                     snprintf(gui.page.settings.settingsParams.wifiPassword,
                              sizeof(gui.page.settings.settingsParams.wifiPassword), "%s", pass);
+                    ESP_LOGW(TAG, "[WiFi] Credentials saved to struct: ssid='%s', pwd_len=%d, wifiEnabled=%d",
+                             gui.page.settings.settingsParams.wifiSSID,
+                             (int)strlen(gui.page.settings.settingsParams.wifiPassword),
+                             gui.page.settings.settingsParams.wifiEnabled);
                     /* Start WebSocket server */
                     ws_server_start(WS_SERVER_PORT);
+                    ESP_LOGW(TAG, "[WiFi] Queuing SAVE_PROCESS_CONFIG");
                     qSysAction(SAVE_PROCESS_CONFIG);
                 } else {
                     /* Immediate failure — re-enable button right away */
@@ -317,7 +418,9 @@ void event_wifiPopup(lv_event_t *e) {
     /* Auto-connect switch */
     if(obj == p->autoConnectSwitch && code == LV_EVENT_VALUE_CHANGED) {
         gui.page.settings.settingsParams.wifiEnabled = lv_obj_has_state(obj, LV_STATE_CHECKED);
-        LV_LOG_USER("[WiFi] Auto-connect: %s", gui.page.settings.settingsParams.wifiEnabled ? "ON" : "OFF");
+        ESP_LOGW(TAG, "[WiFi] Auto-connect switch toggled: %s (wifiEnabled=%d)",
+                 gui.page.settings.settingsParams.wifiEnabled ? "ON" : "OFF",
+                 gui.page.settings.settingsParams.wifiEnabled);
         qSysAction(SAVE_PROCESS_CONFIG);
         return;
     }
@@ -464,5 +567,5 @@ void wifiPopupCreate(void) {
     /* Auto-scan after short delay so UI renders first */
     lv_timer_create(wifi_auto_scan_cb, 300, NULL);
 
-    LV_LOG_USER("[WiFi] Popup created");
+    ESP_LOGW(TAG, "[WiFi] Popup created");
 }

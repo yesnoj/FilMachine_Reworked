@@ -926,9 +926,15 @@ static void fw_wifi_event_handler(void *arg, esp_event_base_t event_base,
                 ESP_LOGI(TAG, "[WiFi] Connected to '%s' (ch:%d)", fw_connected_ssid, conn->channel);
                 break;
             }
-            case WIFI_EVENT_SCAN_DONE:
+            case WIFI_EVENT_SCAN_DONE: {
                 ESP_LOGI(TAG, "[WiFi] Scan complete");
+                /* Collect results into popup struct and notify UI */
+                struct sWifiPopup *wp = &gui.element.wifiPopup;
+                wp->scanCount = wifi_scan_get_results(wp->scanResults, MAX_WIFI_SCAN_RESULTS);
+                ESP_LOGI(TAG, "[WiFi] Scan found %d APs", wp->scanCount);
+                wifi_popup_scan_done();  /* async-notify LVGL to populate list */
                 break;
+            }
             default:
                 break;
         }
@@ -990,6 +996,7 @@ static void fw_wifi_ensure_init(void) {
         gui.page.settings.settingsParams.wifiSSID[0] != '\0') {
         ESP_LOGI(TAG, "[WiFi] Auto-connecting to '%s'...",
                  gui.page.settings.settingsParams.wifiSSID);
+        wifi_icon_set_connecting();  /* blink white icon while connecting */
         wifi_config_t wifi_config = {0};
         strncpy((char *)wifi_config.sta.ssid,
                 gui.page.settings.settingsParams.wifiSSID,
@@ -1024,31 +1031,33 @@ int wifi_scan_start(void) {
         .scan_time.active.max = 300,
     };
 
-    esp_err_t err = esp_wifi_scan_start(&scan_config, true); /* blocking scan */
+    esp_err_t err = esp_wifi_scan_start(&scan_config, false); /* non-blocking */
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "[WiFi] Scan failed: %s", esp_err_to_name(err));
-        return 0;
+        return -1;  /* error */
     }
 
-    uint16_t ap_count = 0;
-    esp_wifi_scan_get_ap_num(&ap_count);
-    ESP_LOGI(TAG, "[WiFi] Scan found %d APs", ap_count);
-    return (int)ap_count;
+    ESP_LOGI(TAG, "[WiFi] Async scan started");
+    return 0;  /* scan launched, results arrive via SCAN_DONE event */
 }
 
 int wifi_scan_get_results(wifiScanResult_t *results, int max_results) {
-    uint16_t ap_count = (uint16_t)max_results;
-    wifi_ap_record_t *ap_records = malloc(sizeof(wifi_ap_record_t) * ap_count);
+    uint16_t ap_count = 0;
+    esp_wifi_scan_get_ap_num(&ap_count);
+    if (ap_count == 0) return 0;
+
+    uint16_t fetch = (ap_count > (uint16_t)max_results) ? (uint16_t)max_results : ap_count;
+    wifi_ap_record_t *ap_records = malloc(sizeof(wifi_ap_record_t) * fetch);
     if (!ap_records) return 0;
 
-    esp_err_t err = esp_wifi_scan_get_ap_records(&ap_count, ap_records);
+    esp_err_t err = esp_wifi_scan_get_ap_records(&fetch, ap_records);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "[WiFi] Get scan results failed: %s", esp_err_to_name(err));
         free(ap_records);
         return 0;
     }
 
-    int count = (ap_count > (uint16_t)max_results) ? max_results : (int)ap_count;
+    int count = (int)fetch;
     for (int i = 0; i < count; i++) {
         snprintf(results[i].ssid, sizeof(results[i].ssid), "%s", (char *)ap_records[i].ssid);
         results[i].rssi = ap_records[i].rssi;
@@ -1150,6 +1159,8 @@ const char *wifi_get_connected_ssid(void) { return NULL; }
 const char *wifi_get_ip_address(void) { return NULL; }
 void wifi_boot_auto_connect(void) {}
 void wifi_popup_connection_result(void) {}
+void wifi_popup_scan_done(void) {}
+void wifi_icon_set_connecting(void) {}
 
 #endif /* SOC_WIFI_SUPPORTED || CONFIG_ESP_WIFI_REMOTE_ENABLED — wifi scan/connect */
 

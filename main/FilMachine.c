@@ -395,7 +395,9 @@ if( xQueueReceive( sys.sysActionQ, &msg, pdMS_TO_TICKS(MEM_MSG_DISPLAY_TIME) ) )
 switch(msg) {
 
 case SAVE_PROCESS_CONFIG:
+ESP_LOGW("sysMan", "[sysMan] SAVE_PROCESS_CONFIG received — calling writeConfigFile");
 writeConfigFile( FILENAME_SAVE, false);
+ESP_LOGW("sysMan", "[sysMan] writeConfigFile completed");
 break;
 
       // Add Further processor intensive tasks here to keep them out of the GUI execution path

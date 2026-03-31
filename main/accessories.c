@@ -1020,7 +1020,7 @@ void readConfigFile(const char *path, bool enableLog) {
 	        LV_LOG_USER("Config file shorter than expected (%u < %u) — new fields use defaults",
 	                     bytes_read, (unsigned)sizeof(gui.page.settings.settingsParams));
 	    }
-	    LV_LOG_USER("[WiFi-Load] bytes_read=%u, struct_size=%u, enabled=%d, ssid='%s', pwd_len=%d",
+	    ESP_LOGW(TAG, "[WiFi-Load] bytes_read=%u, struct_size=%u, enabled=%d, ssid='%s', pwd_len=%d",
 	                 bytes_read, (unsigned)sizeof(gui.page.settings.settingsParams),
 	                 gui.page.settings.settingsParams.wifiEnabled,
 	                 gui.page.settings.settingsParams.wifiSSID,
@@ -1209,7 +1209,7 @@ void writeConfigFile( const char *path, bool enableLog ) {
 		return;
 	}
 
-    if (initErrors == 0) {
+    if (initErrors != INIT_ERROR_SD) {
         LV_LOG_USER("Writing configuration file: %s", path);
         res = f_unlink( path );
         if(res != FR_OK && res != FR_NO_FILE) {
@@ -1224,7 +1224,7 @@ void writeConfigFile( const char *path, bool enableLog ) {
 
         // Write Machine Parameters
         LV_LOG_USER("Writing settingsParams: %zu bytes", sizeof(gui.page.settings.settingsParams));
-        LV_LOG_USER("[WiFi-Save] enabled=%d, ssid='%s', pwd_len=%d",
+        ESP_LOGW(TAG, "[WiFi-Save] enabled=%d, ssid='%s', pwd_len=%d",
                      gui.page.settings.settingsParams.wifiEnabled,
                      gui.page.settings.settingsParams.wifiSSID,
                      (int)strlen(gui.page.settings.settingsParams.wifiPassword));

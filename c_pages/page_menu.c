@@ -13,13 +13,14 @@ extern struct gui_components gui;
 void event_tab_switch(lv_event_t * e) {
 	
   lv_event_code_t code = lv_event_get_code(e);
-  
-  if(gui.page.menu.newSelection == TAB_PROCESSES && code == LV_EVENT_LONG_PRESSED){
+  lv_obj_t *target = lv_event_get_target(e);
+
+  if(target == gui.page.menu.processesTab && code == LV_EVENT_LONG_PRESSED){
       LV_LOG_USER("POPUP DELETE ALL PROCESSES");
       messagePopupCreate(deleteAllProcessPopupTitle_text,deleteAllProcessPopupBody_text, deleteButton_text, stepDetailCancel_text, &gui);
   }
 
-  if(gui.page.menu.newSelection == TAB_SETTINGS && code == LV_EVENT_LONG_PRESSED){
+  if(target == gui.page.menu.settingsTab && code == LV_EVENT_LONG_PRESSED){
       LV_LOG_USER("LONG PRESS Settings -> Wi-Fi popup");
       wifiPopupCreate();
   }

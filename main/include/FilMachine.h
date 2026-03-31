@@ -1693,6 +1693,8 @@ const char *wifi_get_connected_ssid(void);
 const char *wifi_get_ip_address(void);
 void wifi_boot_auto_connect(void);  /* Call once after readConfigFile to auto-connect if enabled */
 void wifi_popup_connection_result(void); /* Re-enable Connect btn after connect/disconnect */
+void wifi_popup_scan_done(void);        /* Notify popup that async scan results are ready */
+void wifi_icon_set_connecting(void);    /* Start blinking white WiFi icon (connecting state) */
 // @file FilMachine.c
 void stopMotorTask(void);
 void runMotorTask(void);
