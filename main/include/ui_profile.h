@@ -733,6 +733,17 @@ typedef struct {
     int connect_btn_x;
     int connect_btn_y;
     int list_item_h;
+    int list_w_pct;             /* list container width (%) */
+    int list_pad_row;           /* vertical gap between list items */
+    int list_pad_all;           /* internal padding of list container */
+    int list_border_w;          /* list container border width */
+    int list_radius;            /* list container corner radius */
+    int list_item_radius;       /* individual list-item corner radius */
+    int list_item_pad_x;        /* list-item left/right padding */
+    int status_w_pct;           /* status label width (%) */
+    int title_line_w;           /* underline width under title */
+    int spinner_size;           /* scan loading spinner size */
+    int spinner_arc_w;          /* spinner arc thickness */
     const lv_font_t *status_font;
     const lv_font_t *list_font;
     const lv_font_t *scan_btn_font;

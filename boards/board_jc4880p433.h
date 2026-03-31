@@ -5,8 +5,8 @@
  * Board: GUITION JC4880P433
  * MCU:   ESP32-P4 RISC-V dual-core @ 400 MHz, 32 MB PSRAM (HEX), 16 MB Flash
  * Display: ST7701S 4.3" IPS 480×800, MIPI-DSI 2-lane
- *          Used in landscape mode: LVGL runs at 480×320, PPA rotates 90° and
- *          scales ×1.5 → 480×720 centred on 480×800 (40 px border top/bottom)
+ *          Used in landscape mode: LVGL runs at 800×480, PPA rotates 90°
+ *          to fill the full 480×800 physical panel
  * Touch: GT911 capacitive, I2C
  * SD: SDMMC 4-bit (much faster than SPI)
  * Audio: ES8311 codec via I2S + PA enable
@@ -25,15 +25,15 @@
  * Display — ST7701S, MIPI-DSI (2-lane)
  *
  * Physical panel: 480×800 portrait (MIPI-DSI, no user-facing GPIO except BLK/RST)
- * LVGL resolution: 480×320 landscape  (same as Makerfabs S3)
- * PPA handles rotation 90° + scale ×1.5 → 480×720 centred on 480×800
+ * LVGL resolution: 800×480 landscape (full panel, no scaling)
+ * PPA handles rotation 90° only → fills 480×800 physical panel
  * ═══════════════════════════════════════════════ */
 #define DISPLAY_DRIVER_ST7701       1
 #define DISPLAY_BUS_MIPI_DSI        1
 
-/* LVGL logical resolution — what FilMachine UI sees */
-#define LCD_H_RES                   480
-#define LCD_V_RES                   320
+/* LVGL logical resolution — what FilMachine UI sees (landscape) */
+#define LCD_H_RES                   800
+#define LCD_V_RES                   480
 
 /* Physical panel resolution — used internally by ST7701 driver & PPA */
 #define LCD_PHYS_H_RES              480
@@ -41,7 +41,7 @@
 
 /* PPA landscape configuration */
 #define PPA_LANDSCAPE_ROTATION      90      /* degrees */
-#define PPA_LANDSCAPE_SCALE         1.5f    /* ×1.5 → 480×720 on 480×800 */
+#define PPA_LANDSCAPE_SCALE         1.0f    /* no scaling — 800×480 fills 480×800 */
 
 #define LCD_BLK                     23      /* Backlight enable (active high) */
 #define LCD_RST_PIN                 5       /* LCD reset (active low), -1 if not used */
@@ -142,9 +142,27 @@
 #define HALL_SENSOR_PIN             31      /* KY-003 / A3144 */
 
 /* ═══════════════════════════════════════════════
+ * Wi-Fi — ESP32-C6 companion chip via SDIO (ESP-Hosted)
+ *
+ * The JC-ESP32P4-M3 module integrates an ESP32-C6-MINI
+ * connected to the P4 over SDIO for Wi-Fi & BLE.
+ * Uses the esp_hosted + esp_wifi_remote components in
+ * ESP-IDF 5.5+ to provide standard esp_wifi API on P4.
+ * ═══════════════════════════════════════════════ */
+#define HAS_WIFI_REMOTE             1       /* Wi-Fi via C6 companion chip */
+#define WIFI_HOSTED_SDIO            1       /* Transport: SDIO (not SPI) */
+#define WIFI_SDIO_CLK               18
+#define WIFI_SDIO_CMD               19
+#define WIFI_SDIO_D0                14
+#define WIFI_SDIO_D1                15
+#define WIFI_SDIO_D2                16
+#define WIFI_SDIO_D3                17
+#define WIFI_C6_RESET_PIN           54      /* P4 GPIO to reset ESP32-C6 */
+
+/* ═══════════════════════════════════════════════
  * Spare pins (available for future use)
  * ESP32-P4 has GPIOs 0-54. With the above assignments,
- * many pins remain free: 0-6, 14-22, 32-38, 45-47, 49-54.
+ * many pins remain free: 0-6, 20-22, 32-38, 45-47, 49-53.
  * ═══════════════════════════════════════════════ */
 
 #define TEST_PIN                    32

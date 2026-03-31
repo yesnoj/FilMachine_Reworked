@@ -15,7 +15,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "esp_err.h"
-#include "driver/i2c.h"
+
+#if defined(BOARD_JC4880P433)
+    #include "driver/i2c_master.h"
+#else
+    #include "driver/i2c.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,7 +57,11 @@ extern "C" {
 /* ── Handle ── */
 typedef struct {
     uint8_t     addr;       /* 7-bit I2C address */
-    i2c_port_t  port;       /* I2C port number */
+#if defined(BOARD_JC4880P433)
+    i2c_master_dev_handle_t dev_handle;  /* New I2C master device handle */
+#else
+    i2c_port_t  port;       /* I2C port number (legacy API) */
+#endif
     bool        initialized;
     uint32_t    pwm_freq;   /* Current PWM frequency in Hz */
 } pca9685_t;
@@ -69,7 +78,11 @@ typedef struct {
  * @param freq_hz   Desired PWM frequency in Hz (24–1526)
  * @return ESP_OK on success
  */
+#if defined(BOARD_JC4880P433)
+esp_err_t pca9685_init(pca9685_t *dev, i2c_master_bus_handle_t bus, uint8_t addr, uint32_t freq_hz);
+#else
 esp_err_t pca9685_init(pca9685_t *dev, i2c_port_t port, uint8_t addr, uint32_t freq_hz);
+#endif
 
 /**
  * @brief Set PWM duty cycle for a single channel

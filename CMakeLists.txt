@@ -10,6 +10,14 @@ if(ESP_PLATFORM)
     # ─────────────────────────────────────────────
     # ESP-IDF firmware build
     # ─────────────────────────────────────────────
+
+    # ESP32-P4 I2C conflict: the built-in "driver" compat component has a
+    # global constructor in i2c/i2c.c that aborts when the new esp_driver_i2c
+    # is also linked (used by GT911 touch).  We override "driver" with a local
+    # component in components/driver/ that forwards the public REQUIRES but
+    # does NOT compile i2c.c.  No EXCLUDE_COMPONENTS needed — the local
+    # component shadows the IDF built-in automatically.
+
     include($ENV{IDF_PATH}/tools/cmake/project.cmake)
     project(FilMachine)
 

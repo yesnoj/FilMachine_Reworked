@@ -22,14 +22,14 @@
 
 extern struct gui_components gui;
 
-/* ── Generate random 5-digit PIN ──────────────────────────── */
+/* ── Generate random 8-digit PIN (WPA2 requires min 8 chars) ── */
 static void ota_generate_pin(char *pin, size_t len) {
     uint32_t r = (uint32_t)(lv_tick_get() * 7919 + 104729);
     /* Simple LCG-style mixing for variety */
     r = (r ^ (r >> 16)) * 0x45d9f3b;
     r = (r ^ (r >> 16)) * 0x45d9f3b;
     r = r ^ (r >> 16);
-    snprintf(pin, len, "%05" PRIu32, r % 100000);
+    snprintf(pin, len, "%08" PRIu32, r % 100000000);
 }
 
 /* ── Timer to update status and progress ──────────────────── */

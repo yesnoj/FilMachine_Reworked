@@ -102,6 +102,8 @@ static void splash_play_event_cb(lv_event_t * e)
     /* Start WS server only after real processes are loaded — prevents
        Flutter from ever seeing the demo fallback list. */
     ws_server_start(WS_SERVER_PORT);
+    /* Auto-connect to Wi-Fi if the user had it enabled before reboot */
+    wifi_boot_auto_connect();
 }
 
 /* ═══════════════════════════════════════════════

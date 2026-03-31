@@ -51,16 +51,9 @@ bool stopMotorManTask = false;
 uint8_t initErrors = 0;
 
 #if defined(DISPLAY_DRIVER_ST7701)
-/* ── P4: PPA-based flush needs PSRAM buffers (double-buffered, full-frame) ── */
+/* ── P4: LVGL partial rendering with double-buffered PSRAM draw buffers ── */
 static uint8_t *lvgl_buf1 = NULL;
 static uint8_t *lvgl_buf2 = NULL;
-
-/* PPA output buffer for rotated+scaled frame */
-#define PPA_BUF_ALIGN    64
-#define PPA_OUT_PIXELS   (LCD_PHYS_H_RES * LCD_PHYS_V_RES)
-#define PPA_OUT_BYTES    (PPA_OUT_PIXELS * BYTES_PER_PIXEL)
-#define PPA_OUT_ALIGNED  ((PPA_OUT_BYTES + PPA_BUF_ALIGN - 1) & ~(PPA_BUF_ALIGN - 1))
-static void *ppa_out_buf = NULL;
 #else
 /* ── S3/Simulator: static draw buffer, partial rendering ── */
 static uint8_t lvgl_buf[LVGL_BUF_SIZE];
@@ -71,43 +64,19 @@ static uint8_t lvgl_buf[LVGL_BUF_SIZE];
  * ═══════════════════════════════════════════════ */
 
 #if defined(DISPLAY_DRIVER_ST7701)
-/* ── P4: PPA rotate+scale flush ──
- * LVGL renders 480×320 (full frame).  PPA rotates 90° and scales ×1.5
- * producing 480×720 centred on the 480×800 physical panel (40 px border top/bottom).
+/* ── P4: Partial-rendering flush with CPU rotation ──
+ * LVGL renders in logical 800×480 landscape coordinates.  The flush
+ * callback rotates each dirty rectangle pixel-by-pixel into the
+ * 480×800 physical DPI framebuffer.  Only the dirty area is processed,
+ * so the CPU cost is trivial compared to the old full-frame PPA rotation.
  */
 static void disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map)
 {
-    if (!ppa_out_buf) {
-        ppa_out_buf = heap_caps_aligned_calloc(
-            PPA_BUF_ALIGN, 1, PPA_OUT_ALIGNED,
-            MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA);
-        if (!ppa_out_buf) {
-            ESP_LOGE(TAG, "PPA output buffer alloc failed (%d bytes)", PPA_OUT_ALIGNED);
-            lv_display_flush_ready(disp);
-            return;
-        }
-    }
-
-    uint32_t out_w = 0, out_h = 0;
-    esp_err_t ret = ppa_rotate_scale_rgb565_to(
-        (const uint16_t *)px_map,
-        LCD_H_RES, LCD_V_RES,          /* 480×320 LVGL input */
-        PPA_LANDSCAPE_ROTATION,         /* 90° rotation */
-        PPA_LANDSCAPE_SCALE,            /* ×1.5 horizontal */
-        PPA_LANDSCAPE_SCALE,            /* ×1.5 vertical */
-        ppa_out_buf, PPA_OUT_ALIGNED,
-        &out_w, &out_h,
-        false);                         /* rgb_swap = false */
-
-    if (ret == ESP_OK && out_w > 0 && out_h > 0) {
-        /* Centre the scaled output on the physical 480×800 panel */
-        uint16_t x_off = (LCD_PHYS_H_RES - (uint16_t)out_w) / 2;
-        uint16_t y_off = (LCD_PHYS_V_RES - (uint16_t)out_h) / 2;
-        st7701_lcd_draw_rgb_bitmap(x_off, y_off, out_w, out_h,
-                                   (const uint16_t *)ppa_out_buf);
-    } else {
-        ESP_LOGE(TAG, "PPA rotate+scale failed (0x%x), out=%lux%lu", ret, out_w, out_h);
-    }
+    uint16_t x1 = area->x1;
+    uint16_t y1 = area->y1;
+    uint16_t w  = area->x2 - area->x1 + 1;
+    uint16_t h  = area->y2 - area->y1 + 1;
+    st7701_lcd_draw_to_fb_rotated(x1, y1, w, h, (const uint16_t *)px_map);
 
     lv_display_flush_ready(disp);
 }
@@ -158,31 +127,21 @@ static void lvgl_touch_cb(lv_indev_t * indev, lv_indev_data_t * data)
 #if defined(TOUCH_DRIVER_GT911_P4)
         /*
          * P4 landscape touch remapping:
-         * Physical GT911 reports in 480×800 portrait coordinates.
-         * PPA rotates the 480×320 LVGL buffer 90° → 320×480, then scales ×1.5 → 480×720.
-         * This 480×720 image is centred on the 480×800 panel with 40 px borders top/bottom.
+         * GT911 reports in physical 480×800 portrait coordinates.
+         * LVGL display is 800×480 landscape.  The flush callback handles
+         * the rotation to the physical DPI framebuffer.
          *
-         * On-screen output after rotation+scale:
-         *   out_w  = LCD_V_RES × scale = 320×1.5 = 480  (fills physical width)
-         *   out_h  = LCD_H_RES × scale = 480×1.5 = 720  (centred in physical 800)
-         *
-         * Inverse mapping (physical touch → LVGL 480×320):
-         *   phys_y runs along the on-screen height (720 px) → maps to lvgl_x (0..479)
-         *   phys_x runs along the on-screen width  (480 px) → maps to lvgl_y (0..319, inverted)
-         *
-         * May need fine-tuning on real hardware (rotation direction, axis inversion).
+         * Mapping (physical GT911 → LVGL logical 800×480):
+         *   lvgl_x = (799 - phys_y)   → phys_y [0..799] maps to x [799..0]
+         *   lvgl_y = phys_x            → phys_x [0..479] maps to y [0..479]
          */
         int32_t phys_x = touchpad_x[0];
         int32_t phys_y = touchpad_y[0];
-        int32_t out_w  = (int32_t)(LCD_V_RES * PPA_LANDSCAPE_SCALE);   /* 320×1.5 = 480 */
-        int32_t out_h  = (int32_t)(LCD_H_RES * PPA_LANDSCAPE_SCALE);   /* 480×1.5 = 720 */
-        int32_t x_off  = (LCD_PHYS_H_RES - out_w) / 2;                /* (480-480)/2 = 0 */
-        int32_t y_off  = (LCD_PHYS_V_RES - out_h) / 2;                /* (800-720)/2 = 40 */
 
-        data->point.x = (phys_y - y_off) * LCD_H_RES / out_h;         /* phys_y [40..759] → lvgl_x [0..479] */
-        data->point.y = (LCD_PHYS_H_RES - x_off - phys_x) * LCD_V_RES / out_w; /* phys_x [0..479] → lvgl_y [319..0] */
+        data->point.x = (LCD_PHYS_V_RES - 1) - phys_y;   /* [0..799] */
+        data->point.y = phys_x;                            /* [0..479] */
 
-        /* Clamp to LVGL resolution */
+        /* Clamp to LVGL screen resolution */
         if (data->point.x < 0) data->point.x = 0;
         if (data->point.y < 0) data->point.y = 0;
         if (data->point.x >= LCD_H_RES) data->point.x = LCD_H_RES - 1;
@@ -309,14 +268,14 @@ static esp_lcd_panel_handle_t init_display(lv_display_t *our_display)
 }
 
 #elif defined(DISPLAY_DRIVER_ST7701)
-/* ── JC4880P433: ST7701S MIPI-DSI + PPA rotation/scale ──
+/* ── JC4880P433: ST7701S MIPI-DSI (LVGL rotation, no PPA) ──
  *
- * Unlike I80/QSPI boards, MIPI-DSI has a hardware framebuffer — we don't use
- * esp_lcd_panel_draw_bitmap().  Instead the PPA-based flush callback writes
- * directly to the ST7701 framebuffer via st7701_lcd_draw_rgb_bitmap().
+ * Unlike I80/QSPI boards, MIPI-DSI has a hardware DPI framebuffer.
+ * LVGL creates the display at 480×800 (physical portrait) and applies
+ * 90° software rotation so the UI sees 800×480 landscape.
+ * The flush callback writes directly to the DPI framebuffer via
+ * st7701_lcd_draw_to_fb() — partial rendering, no PPA needed.
  *
- * init_display() initialises the PPA engine and the MIPI-DSI LCD, then
- * clears the screen to black before the backlight comes on.
  * Returns NULL because the P4 flush callback doesn't use a panel handle.
  */
 static esp_lcd_panel_handle_t init_display(lv_display_t *our_display)
@@ -324,15 +283,15 @@ static esp_lcd_panel_handle_t init_display(lv_display_t *our_display)
     ESP_LOGI(TAG, "Initialise display — ST7701S MIPI-DSI (%dx%d phys, %dx%d LVGL landscape)",
              LCD_PHYS_H_RES, LCD_PHYS_V_RES, LCD_H_RES, LCD_V_RES);
 
-    /* 1. PPA engine — needed for rotation + scale in the flush callback */
+    /* PPA engine — kept initialised for potential future use */
     ESP_ERROR_CHECK(ppa_engine_init());
     ESP_LOGI(TAG, "PPA engine initialised");
 
-    /* 2. ST7701 LCD via MIPI-DSI */
+    /* ST7701 LCD via MIPI-DSI */
     ESP_ERROR_CHECK(st7701_lcd_init());
     ESP_LOGI(TAG, "ST7701 MIPI-DSI LCD initialised (%dx%d)", LCD_PHYS_H_RES, LCD_PHYS_V_RES);
 
-    /* 3. Clear screen to black before backlight on (prevents white flash) */
+    /* Clear screen to black before backlight on (prevents white flash) */
     st7701_lcd_fill_screen(0x0000);
 
     /* P4 flush does not use esp_lcd_panel_handle_t — return NULL */
@@ -372,11 +331,21 @@ static esp_lcd_touch_handle_t init_touch(void)
     /* ── GT911 on shared I2C bus ── */
     ESP_LOGI(TAG, "Initialize touch controller GT911");
     esp_lcd_panel_io_i2c_config_t tp_io_config = ESP_LCD_TOUCH_IO_I2C_GT911_CONFIG();
+#if defined(BOARD_JC4880P433)
+    /* v2 API requires explicit SCL frequency per device (v1 inherited it from i2c_driver_install) */
+    tp_io_config.scl_speed_hz = 100000;
+    /* P4: pass the new I2C master bus handle WITHOUT casting.
+     * esp_lcd_new_panel_io_i2c() is a _Generic macro — it dispatches to
+     * the v2 (new-driver) path only when it sees i2c_master_bus_handle_t.
+     * Casting to void* would route to the legacy v1 path instead. */
+    ESP_ERROR_CHECK(esp_lcd_new_panel_io_i2c(g_i2c_bus_handle, &tp_io_config, &tp_io_handle));
+#else
     ESP_ERROR_CHECK(esp_lcd_new_panel_io_i2c((esp_lcd_i2c_bus_handle_t)I2C_NUM, &tp_io_config, &tp_io_handle));
+#endif
 
 #if defined(TOUCH_DRIVER_GT911_P4)
     /* P4: Physical panel is 480×800 portrait.  Coordinate remapping to
-     * 480×320 landscape is done in lvgl_touch_cb(), so we report raw
+     * 800×480 landscape is done in lvgl_touch_cb(), so we report raw
      * physical coords here (no swap, no mirror). */
     esp_lcd_touch_config_t tp_cfg = {
         .x_max = LCD_PHYS_H_RES,   /* 480 — physical width */
@@ -544,18 +513,18 @@ ESP_LOGI(TAG, "Initialise LVGL library");
     esp_lcd_touch_handle_t tp = init_touch();
 
 #if defined(DISPLAY_DRIVER_ST7701)
-    /* P4: Double-buffered FULL rendering in PSRAM.
-     * Full-frame mode is required because the PPA flush rotates+scales
-     * the entire frame — partial dirty rects cannot be rotated individually.
-     * With 32 MB PSRAM the two 480×320 buffers (600 KB total) are trivial. */
-    size_t buf_size = LCD_H_RES * LCD_V_RES * BYTES_PER_PIXEL;
+    /* P4: Double-buffered partial rendering.
+     * LVGL renders at 800×480 (logical landscape).  The flush callback
+     * rotates each dirty rect into the 480×800 physical DPI framebuffer.
+     * Buffer = 1/10th of logical panel — only dirty areas are redrawn. */
+    size_t buf_size = LCD_H_RES * (LCD_V_RES / 10) * BYTES_PER_PIXEL;
     lvgl_buf1 = heap_caps_malloc(buf_size, MALLOC_CAP_SPIRAM);
     lvgl_buf2 = heap_caps_malloc(buf_size, MALLOC_CAP_SPIRAM);
     if (!lvgl_buf1 || !lvgl_buf2) {
         ESP_LOGE(TAG, "Failed to allocate LVGL buffers in PSRAM (%d bytes each)", buf_size);
     }
     lv_display_set_buffers(our_display, lvgl_buf1, lvgl_buf2, buf_size,
-                           LV_DISPLAY_RENDER_MODE_FULL);
+                           LV_DISPLAY_RENDER_MODE_PARTIAL);
 #else
     // initialize LVGL draw buffers (S3: single buffer, partial rendering)
     lv_display_set_buffers( our_display, lvgl_buf, NULL, LVGL_BUF_SIZE, LV_DISPLAY_RENDER_MODE_PARTIAL);
@@ -583,7 +552,7 @@ lv_indev_set_read_cb( indev, lvgl_touch_cb ); /*This function will be called per
     sys.sysActionQ = xQueueCreate( 16, sizeof( uint16_t ) );
     sys.motorActionQ = xQueueCreate( 16, sizeof( uint16_t ) );
     /* Create task to process external functions which will slow the GUI response */
-    xTaskCreatePinnedToCore( sysMan, "sysMan", 4096, NULL, 8,  NULL, tskNO_AFFINITY ); // This can run on any free core
+    xTaskCreatePinnedToCore( sysMan, "sysMan", 16384, NULL, 8,  NULL, tskNO_AFFINITY ); // 16KB — FatFS LFN internals use deep stack in f_write/f_lseek
 
     ESP_LOGI(TAG, "Start LVGL on %s (%dx%d)", BOARD_NAME, LCD_H_RES, LCD_V_RES);
     /* LVGL GUI creation code is called here! */
@@ -597,9 +566,10 @@ create_keyboard();
     lv_scr_load(splash);
 
     while (1) {
-        // raise the task priority of LVGL and/or reduce the handler period can improve the performance
-        vTaskDelay(pdMS_TO_TICKS(5));
-        // The task running lv_timer_handler should have lower priority than that running `lv_tick_inc`
-        lv_timer_handler();
+        // lv_timer_handler returns ms until next call is needed
+        uint32_t time_till_next = lv_timer_handler();
+        if (time_till_next < 5) time_till_next = 5;
+        if (time_till_next > 50) time_till_next = 50;
+        vTaskDelay(pdMS_TO_TICKS(time_till_next));
     }
 }

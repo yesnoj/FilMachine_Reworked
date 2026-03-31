@@ -1,6 +1,9 @@
 /**
  * @file mcp23017.c
  * @brief ESP-IDF driver for MCP23017 I2C 16-bit I/O expander
+ *
+ * ESP32-P4 (BOARD_JC4880P433): uses the new i2c_master API
+ * All other targets: uses the legacy driver/i2c.h API
  */
 
 #include "include/mcp23017.h"
@@ -8,9 +11,82 @@
 #include <string.h>
 
 #define TAG "MCP23017"
-#define I2C_TIMEOUT_TICKS  50   /* ~50 ms at default 1 kHz tick rate */
 
 /* ── Low-level I2C helpers ── */
+
+#if defined(BOARD_JC4880P433)
+/* ────── New I2C master API (ESP32-P4) ────── */
+
+#define I2C_TIMEOUT_MS  100
+
+static esp_err_t mcp23017_write_reg(mcp23017_t *dev, uint8_t reg, uint8_t val)
+{
+    uint8_t buf[2] = { reg, val };
+    esp_err_t ret = i2c_master_transmit(dev->dev_handle, buf, 2, I2C_TIMEOUT_MS);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Write reg 0x%02X failed: %s", reg, esp_err_to_name(ret));
+    }
+    return ret;
+}
+
+static esp_err_t mcp23017_read_reg(mcp23017_t *dev, uint8_t reg, uint8_t *val)
+{
+    esp_err_t ret = i2c_master_transmit_receive(dev->dev_handle, &reg, 1, val, 1, I2C_TIMEOUT_MS);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Read reg 0x%02X failed: %s", reg, esp_err_to_name(ret));
+    }
+    return ret;
+}
+
+esp_err_t mcp23017_init(mcp23017_t *dev, i2c_master_bus_handle_t bus, uint8_t addr)
+{
+    memset(dev, 0, sizeof(mcp23017_t));
+    dev->addr = addr;
+
+    /* Register device on the I2C bus */
+    i2c_device_config_t dev_cfg = {
+        .dev_addr_length = I2C_ADDR_BIT_LEN_7,
+        .device_address = addr,
+        .scl_speed_hz = 400000,
+    };
+    esp_err_t ret = i2c_master_bus_add_device(bus, &dev_cfg, &dev->dev_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to add MCP23017 device at 0x%02X: %s", addr, esp_err_to_name(ret));
+        return ret;
+    }
+
+    /* Probe: try to read MODE register via a simple transmit_receive */
+    uint8_t probe_reg = MCP23017_IOCON;
+    uint8_t probe_val = 0;
+    ret = i2c_master_transmit_receive(dev->dev_handle, &probe_reg, 1, &probe_val, 1, I2C_TIMEOUT_MS);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "MCP23017 not found at 0x%02X", addr);
+        return ESP_FAIL;
+    }
+
+    ESP_LOGI(TAG, "MCP23017 found at 0x%02X", addr);
+
+    /* Set IOCON: BANK=0 (sequential addresses), MIRROR=0, SEQOP=0 */
+    mcp23017_write_reg(dev, MCP23017_IOCON, 0x00);
+
+    /* Read current register state into cache */
+    mcp23017_read_reg(dev, MCP23017_IODIRA, &dev->iodir[0]);
+    mcp23017_read_reg(dev, MCP23017_IODIRB, &dev->iodir[1]);
+    mcp23017_read_reg(dev, MCP23017_OLATA,  &dev->olat[0]);
+    mcp23017_read_reg(dev, MCP23017_OLATB,  &dev->olat[1]);
+    mcp23017_read_reg(dev, MCP23017_GPPUA,  &dev->gppu[0]);
+    mcp23017_read_reg(dev, MCP23017_GPPUB,  &dev->gppu[1]);
+
+    ESP_LOGI(TAG, "Init OK — IODIR: A=0x%02X B=0x%02X, OLAT: A=0x%02X B=0x%02X",
+             dev->iodir[0], dev->iodir[1], dev->olat[0], dev->olat[1]);
+
+    return ESP_OK;
+}
+
+#else
+/* ────── Legacy I2C API (ESP32-S3 etc.) ────── */
+
+#define I2C_TIMEOUT_TICKS  50   /* ~50 ms at default 1 kHz tick rate */
 
 static esp_err_t mcp23017_write_reg(mcp23017_t *dev, uint8_t reg, uint8_t val)
 {
@@ -45,8 +121,6 @@ static esp_err_t mcp23017_read_reg(mcp23017_t *dev, uint8_t reg, uint8_t *val)
     }
     return ret;
 }
-
-/* ── Public API ── */
 
 esp_err_t mcp23017_init(mcp23017_t *dev, i2c_port_t port, uint8_t addr)
 {
@@ -85,6 +159,10 @@ esp_err_t mcp23017_init(mcp23017_t *dev, i2c_port_t port, uint8_t addr)
 
     return ESP_OK;
 }
+
+#endif /* BOARD_JC4880P433 */
+
+/* ── Public API (common to both I2C backends) ── */
 
 esp_err_t mcp23017_pinMode(mcp23017_t *dev, uint8_t pin, uint8_t mode)
 {

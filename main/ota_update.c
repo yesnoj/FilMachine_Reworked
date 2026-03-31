@@ -191,9 +191,14 @@ const char *wifi_get_ip_address(void) {
 #include "esp_ota_ops.h"
 #include "esp_app_desc.h"
 #include "esp_http_server.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "soc/soc_caps.h"
+#if SOC_WIFI_SUPPORTED || defined(CONFIG_ESP_WIFI_REMOTE_ENABLED)
 #include "esp_wifi.h"
-#include "esp_event.h"
 #include "esp_netif.h"
+#endif
+#include "esp_event.h"
 #include "esp_log.h"
 #include "ff.h"
 
@@ -204,7 +209,7 @@ static const char *TAG = "OTA";
 static int   ota_progress  = 0;
 static bool  ota_running   = false;
 static char  ota_status[64] = "";
-static char  ota_ip_addr[20] = "";
+static char  ota_ip_addr[28] = "";  /* IP:port e.g. "192.168.100.200:8080" */
 
 static httpd_handle_t ota_httpd = NULL;
 static bool  wifi_connected = false;
@@ -428,6 +433,8 @@ static bool ota_start_webserver(void) {
     if (ota_httpd) return true;
 
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+    config.server_port = 8080;
+    config.ctrl_port   = 32770;  /* different from default 32768 to avoid conflict with ws_server */
     config.stack_size = 8192;
     config.max_uri_handlers = 4;
 
@@ -464,74 +471,155 @@ static void ota_stop_webserver(void) {
     }
 }
 
-/* ── Wi-Fi event handler ──────────────────────────────────── */
-static void ota_wifi_event_handler(void *arg, esp_event_base_t event_base,
-                                    int32_t event_id, void *event_data)
-{
-    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        ESP_LOGW(TAG, "Wi-Fi disconnected, reconnecting...");
-        wifi_connected = false;
-        ota_ip_addr[0] = '\0';
-        esp_wifi_connect();
-    } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-        ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
-        snprintf(ota_ip_addr, sizeof(ota_ip_addr), IPSTR, IP2STR(&event->ip_info.ip));
-        ESP_LOGI(TAG, "Got IP: %s", ota_ip_addr);
-        wifi_connected = true;
+#if SOC_WIFI_SUPPORTED || defined(CONFIG_ESP_WIFI_REMOTE_ENABLED)
 
-        /* Start web server once we have an IP */
-        ota_start_webserver();
-        snprintf(ota_status, sizeof(ota_status), "Server running");
-    }
-}
+/* Forward-declare WiFi state + helpers defined near the bottom of this file */
+static bool fw_wifi_initialized = false;
+static void fw_wifi_ensure_init(void);
 
-/* ── Public Wi-Fi server API ──────────────────────────────── */
+/* ── Public Wi-Fi OTA server API ──────────────────────────── */
+static bool ota_wifi_ap_active = false;
+
 bool ota_wifi_server_start(void) {
     if (ota_httpd) return true; /* already running */
 
-    snprintf(ota_status, sizeof(ota_status), "Connecting to Wi-Fi...");
+    /* Decide mode: if SSID configured → STA, otherwise → SoftAP */
+    const char *ssid = gui.page.settings.settingsParams.wifiSSID;
 
-    /* Initialize TCP/IP and Wi-Fi (safe to call multiple times) */
-    static bool netif_initialized = false;
-    if (!netif_initialized) {
-        ESP_ERROR_CHECK(esp_netif_init());
-        esp_netif_create_default_wifi_sta();
-        wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-        ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-        netif_initialized = true;
+    if (ssid[0] != '\0') {
+        /* ── STA mode: connect to user's network ── */
+        snprintf(ota_status, sizeof(ota_status), "Connecting to Wi-Fi...");
+        fw_wifi_ensure_init();
+
+        wifi_config_t wifi_config = {0};
+        strncpy((char *)wifi_config.sta.ssid, ssid,
+                sizeof(wifi_config.sta.ssid) - 1);
+        strncpy((char *)wifi_config.sta.password,
+                gui.page.settings.settingsParams.wifiPassword,
+                sizeof(wifi_config.sta.password) - 1);
+        wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
+        wifi_config.sta.pmf_cfg.capable = true;
+        wifi_config.sta.pmf_cfg.required = false;
+
+        esp_err_t err = esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "esp_wifi_set_config failed: %s", esp_err_to_name(err));
+            snprintf(ota_status, sizeof(ota_status), "Wi-Fi config error");
+            return false;
+        }
+        err = esp_wifi_connect();
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "esp_wifi_connect failed: %s", esp_err_to_name(err));
+            snprintf(ota_status, sizeof(ota_status), "Wi-Fi connect error");
+            return false;
+        }
+        ESP_LOGI(TAG, "Wi-Fi STA connecting to '%s'...", ssid);
+    } else {
+        /* ── SoftAP mode: create "FilMachine_WiFi" hotspot ── */
+        snprintf(ota_status, sizeof(ota_status), "Starting AP...");
+        ESP_LOGI(TAG, "No SSID configured — starting SoftAP 'FilMachine_WiFi'");
+
+        /* Init TCP/IP + event loop (tolerate already-initialized) */
+        esp_err_t err = esp_netif_init();
+        if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+            ESP_LOGE(TAG, "esp_netif_init failed: %s", esp_err_to_name(err));
+            return false;
+        }
+        err = esp_event_loop_create_default();
+        if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+            ESP_LOGE(TAG, "esp_event_loop_create_default failed: %s", esp_err_to_name(err));
+            return false;
+        }
+
+        /* Create AP netif (with DHCP server) — only once */
+        static esp_netif_t *ap_netif = NULL;
+        if (!ap_netif) {
+            ap_netif = esp_netif_create_default_wifi_ap();
+            if (!ap_netif) {
+                ESP_LOGE(TAG, "Failed to create AP netif");
+                snprintf(ota_status, sizeof(ota_status), "AP netif error");
+                return false;
+            }
+        }
+
+        /* Init WiFi if not yet done (skip if fw_wifi_ensure_init already ran) */
+        if (!fw_wifi_initialized) {
+            wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+            err = esp_wifi_init(&cfg);
+            if (err != ESP_OK) {
+                ESP_LOGE(TAG, "esp_wifi_init failed: %s", esp_err_to_name(err));
+                snprintf(ota_status, sizeof(ota_status), "WiFi init error");
+                return false;
+            }
+        } else {
+            /* WiFi was in STA mode — stop it first */
+            esp_wifi_disconnect();
+            esp_wifi_stop();
+        }
+
+        err = esp_wifi_set_mode(WIFI_MODE_AP);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "esp_wifi_set_mode(AP) failed: %s", esp_err_to_name(err));
+            snprintf(ota_status, sizeof(ota_status), "AP mode error");
+            return false;
+        }
+
+        wifi_config_t ap_config = {
+            .ap = {
+                .ssid = "FilMachine_WiFi",
+                .ssid_len = strlen("FilMachine_WiFi"),
+                .max_connection = 2,
+                .authmode = WIFI_AUTH_WPA2_PSK,
+                .channel = 6,
+            },
+        };
+        /* Use the OTA PIN as WPA2 password */
+        strncpy((char *)ap_config.ap.password,
+                gui.element.otaWifiPopup.otaPin,
+                sizeof(ap_config.ap.password) - 1);
+
+        err = esp_wifi_set_config(WIFI_IF_AP, &ap_config);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "AP set_config failed: %s", esp_err_to_name(err));
+            snprintf(ota_status, sizeof(ota_status), "AP config error");
+            return false;
+        }
+        err = esp_wifi_start();
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "AP start failed: %s", esp_err_to_name(err));
+            snprintf(ota_status, sizeof(ota_status), "AP start error");
+            return false;
+        }
+
+        ota_wifi_ap_active = true;
+
+        /* AP IP is always 192.168.4.1 by default, OTA server on port 8080 */
+        strncpy(ota_ip_addr, "192.168.4.1:8080", sizeof(ota_ip_addr) - 1);
+        snprintf(ota_status, sizeof(ota_status), "AP: FilMachine_WiFi");
+
+        /* Start the OTA HTTP server immediately (AP has IP from the start) */
+        ota_start_webserver();
+        ESP_LOGI(TAG, "SoftAP ready — SSID: FilMachine_WiFi, PIN: %s, http://192.168.4.1:8080",
+                 gui.element.otaWifiPopup.otaPin);
     }
 
-    /* Register event handlers */
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(
-        WIFI_EVENT, ESP_EVENT_ANY_ID, &ota_wifi_event_handler, NULL, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(
-        IP_EVENT, IP_EVENT_STA_GOT_IP, &ota_wifi_event_handler, NULL, NULL));
-
-    /* Configure with credentials from settings */
-    wifi_config_t wifi_config = {0};
-    /* Use persistent Wi-Fi credentials from machineSettings */
-    strncpy((char *)wifi_config.sta.ssid,
-            gui.page.settings.settingsParams.wifiSSID,
-            sizeof(wifi_config.sta.ssid) - 1);
-    strncpy((char *)wifi_config.sta.password,
-            gui.page.settings.settingsParams.wifiPassword,
-            sizeof(wifi_config.sta.password) - 1);
-
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
-    ESP_ERROR_CHECK(esp_wifi_start());
-    ESP_ERROR_CHECK(esp_wifi_connect());
-
-    ESP_LOGI(TAG, "Wi-Fi connecting to '%s'...", gui.page.settings.settingsParams.wifiSSID);
     return true;
 }
 
 bool ota_wifi_server_stop(void) {
     ota_stop_webserver();
 
-    if (wifi_connected) {
-        esp_wifi_disconnect();
+    if (ota_wifi_ap_active) {
         esp_wifi_stop();
+        ota_wifi_ap_active = false;
+        /* If STA was initialized before, restore STA mode */
+        if (fw_wifi_initialized) {
+            esp_wifi_set_mode(WIFI_MODE_STA);
+            esp_wifi_start();
+        }
+        ESP_LOGI(TAG, "SoftAP stopped");
+    } else if (wifi_connected) {
+        esp_wifi_disconnect();
         wifi_connected = false;
     }
 
@@ -540,6 +628,17 @@ bool ota_wifi_server_stop(void) {
     ESP_LOGI(TAG, "Wi-Fi OTA server stopped");
     return true;
 }
+
+#else /* !SOC_WIFI_SUPPORTED and no ESP_WIFI_REMOTE — no Wi-Fi at all */
+
+bool ota_wifi_server_start(void) {
+    ESP_LOGW(TAG, "Wi-Fi OTA not available on this SoC (no Wi-Fi)");
+    return false;
+}
+
+bool ota_wifi_server_stop(void) { return true; }
+
+#endif /* SOC_WIFI_SUPPORTED || CONFIG_ESP_WIFI_REMOTE_ENABLED */
 
 /* ── SD card OTA (unchanged) ──────────────────────────────── */
 
@@ -611,6 +710,11 @@ static bool ota_write_from_stream(
         } else {
             snprintf(ota_status, sizeof(ota_status), "Writing firmware...");
         }
+
+        /* Yield briefly so the DPI display controller can refresh the
+         * framebuffer from PSRAM without bus contention with flash writes.
+         * Without this delay the screen flickers blue during OTA. */
+        vTaskDelay(pdMS_TO_TICKS(2));
     }
 
     free(buf);
@@ -662,53 +766,347 @@ bool ota_check_sd(char *version_out, size_t version_out_len) {
     return true;
 }
 
-bool ota_start_sd(void) {
-    if (ota_running) return false;
-
-    sd_reader_ctx_t ctx;
-    FRESULT res = f_open(&ctx.file, "/FilMachine_fw.bin", FA_READ);
-    if (res != FR_OK) {
-        snprintf(ota_status, sizeof(ota_status), "Error: cannot open firmware file");
-        return false;
+/*
+ * SD OTA runs in a dedicated FreeRTOS task so the LVGL main loop
+ * continues to service the UI (progress bar, status text) while
+ * the firmware is being read from SD and written to flash.
+ */
+static void ota_sd_task(void *arg) {
+    /* Heap-allocate the context (contains FIL which is ~600+ bytes with LFN) */
+    sd_reader_ctx_t *ctx = heap_caps_malloc(sizeof(sd_reader_ctx_t), MALLOC_CAP_SPIRAM);
+    if (!ctx) {
+        snprintf(ota_status, sizeof(ota_status), "Error: out of memory");
+        ESP_LOGE(TAG, "SD OTA: cannot allocate sd_reader_ctx_t");
+        ota_running = false;
+        vTaskDelete(NULL);
+        return;
     }
 
-    int total_size = (int)f_size(&ctx.file);
+    FRESULT res = f_open(&ctx->file, "/FilMachine_fw.bin", FA_READ);
+    if (res != FR_OK) {
+        snprintf(ota_status, sizeof(ota_status), "Error: cannot open firmware file");
+        ESP_LOGE(TAG, "SD OTA: cannot open /FilMachine_fw.bin (err %d)", res);
+        free(ctx);
+        ota_running = false;
+        vTaskDelete(NULL);
+        return;
+    }
+
+    int total_size = (int)f_size(&ctx->file);
     snprintf(ota_status, sizeof(ota_status), "Reading SD card...");
     ESP_LOGI(TAG, "Starting SD OTA, size: %d bytes", total_size);
 
-    bool ok = ota_write_from_stream(sd_read_fn, &ctx, total_size);
-    f_close(&ctx.file);
-    return ok;
+    ota_write_from_stream(sd_read_fn, ctx, total_size);
+    f_close(&ctx->file);
+    free(ctx);
+    vTaskDelete(NULL);
 }
 
-/* ── Wi-Fi scan API (real firmware) ──────────────────────────── */
+bool ota_start_sd(void) {
+    if (ota_running) return false;
+    ota_running = true;
+    ota_progress = 0;
+    snprintf(ota_status, sizeof(ota_status), "Starting SD update...");
+
+    /* Launch OTA in a background task (8 KB stack — FIL struct is ~600 bytes) */
+    BaseType_t ret = xTaskCreatePinnedToCore(
+        ota_sd_task, "ota_sd", 8192, NULL, 5, NULL, tskNO_AFFINITY);
+    if (ret != pdPASS) {
+        snprintf(ota_status, sizeof(ota_status), "Error: cannot create OTA task");
+        ota_running = false;
+        return false;
+    }
+    return true;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * Wi-Fi scan/connect API (real firmware)
+ *
+ * Works on both native-WiFi SoCs (ESP32-S3) and on ESP32-P4
+ * via esp_wifi_remote + esp_hosted (C6 companion chip over SDIO).
+ * The esp_wifi API is identical in both cases.
+ * ═══════════════════════════════════════════════════════════════ */
+#if SOC_WIFI_SUPPORTED || defined(CONFIG_ESP_WIFI_REMOTE_ENABLED)
+
 static bool fw_wifi_connected = false;
 static char fw_connected_ssid[33] = "";
+static char fw_ip_addr[20] = "";
+
+/* ── Auto-retry state for reason-8 disconnects after connect ── */
+static bool fw_wifi_connect_pending = false;  /* true while waiting for connect result */
+static uint8_t fw_wifi_retry_count = 0;
+#define FW_WIFI_MAX_RETRIES 2
+
+/* ── Async popup for WiFi errors (runs in LVGL thread) ── */
+static char wifi_error_msg[128] = "";
+
+static void wifi_error_popup_async(void *arg) {
+    (void)arg;
+    messagePopupCreate(wifiErrorTitle_text, wifi_error_msg, NULL, NULL, NULL);
+}
+
+/* ── WiFi + IP event handler for scan/connect ── */
+static void fw_wifi_event_handler(void *arg, esp_event_base_t event_base,
+                                   int32_t event_id, void *event_data)
+{
+    if (event_base == WIFI_EVENT) {
+        switch (event_id) {
+            case WIFI_EVENT_STA_DISCONNECTED: {
+                wifi_event_sta_disconnected_t *disc =
+                    (wifi_event_sta_disconnected_t *)event_data;
+                ESP_LOGW(TAG, "[WiFi] Disconnected, reason: %d (ssid: %.*s)",
+                         disc->reason, disc->ssid_len, disc->ssid);
+                fw_wifi_connected = false;
+                fw_ip_addr[0] = '\0';
+
+                /* Show error popup with human-readable reason
+                 * Reason codes from esp_wifi_types.h:
+                 *   2=AUTH_EXPIRE, 8=ASSOC_LEAVE, 14=MIC_FAILURE,
+                 *   15=4WAY_HANDSHAKE_TIMEOUT, 16=HANDSHAKE_TIMEOUT,
+                 *   201=NO_AP_FOUND, 202=AUTH_FAIL, 203/204/205=NO_AP variants
+                 */
+                uint8_t r = disc->reason;
+
+                /* Reason 8 = ASSOC_LEAVE — if we just tried to connect, auto-retry
+                 * (ESP-Hosted C6 often drops the first connect after a scan) */
+                if (r == 8) {
+                    if (fw_wifi_connect_pending && fw_wifi_retry_count < FW_WIFI_MAX_RETRIES) {
+                        fw_wifi_retry_count++;
+                        ESP_LOGI(TAG, "[WiFi] Reason 8 during connect — auto-retry %d/%d",
+                                 fw_wifi_retry_count, FW_WIFI_MAX_RETRIES);
+                        esp_wifi_connect();  /* retry with same config */
+                        break;
+                    }
+                    /* Normal disconnect (not during connect) — just re-enable UI */
+                    fw_wifi_connect_pending = false;
+                    wifi_popup_connection_result();
+                    break;
+                }
+
+                /* Any other reason clears the connect-pending state */
+                fw_wifi_connect_pending = false;
+                fw_wifi_retry_count = 0;
+
+                const char *reason_str;
+                if (r == 202)        reason_str = wifiErrAuthFailed_text;
+                else if (r == 15)    reason_str = wifiErrHandshakeTimeout_text;
+                else if (r == 14)    reason_str = wifiErrMicFailure_text;
+                else if (r == 16)    reason_str = wifiErrGroupKeyTimeout_text;
+                else if (r == 201)   reason_str = wifiErrApNotFound_text;
+                else if (r == 203 || r == 204 || r == 205)
+                                     reason_str = wifiErrApNotFoundGeneric_text;
+                else if (r == 2)     reason_str = wifiErrAuthExpired_text;
+                else if (r == 6)     reason_str = wifiErrClass2Frame_text;
+                else if (r == 7)     reason_str = wifiErrClass3Frame_text;
+                else if (r == 210)   reason_str = wifiErrConnectionFail_text;
+                else if (r == 200)   reason_str = wifiErrBeaconTimeout_text;
+                else {
+                    snprintf(wifi_error_msg, sizeof(wifi_error_msg),
+                             wifiErrUnknownFmt_text, r);
+                    lv_async_call(wifi_error_popup_async, NULL);
+                    wifi_popup_connection_result();
+                    break;
+                }
+                snprintf(wifi_error_msg, sizeof(wifi_error_msg), "%s", reason_str);
+                lv_async_call(wifi_error_popup_async, NULL);
+                wifi_popup_connection_result();  /* re-enable Connect button */
+                break;
+            }
+            case WIFI_EVENT_STA_CONNECTED: {
+                wifi_event_sta_connected_t *conn =
+                    (wifi_event_sta_connected_t *)event_data;
+                /* Connection succeeded — clear retry state */
+                fw_wifi_connect_pending = false;
+                fw_wifi_retry_count = 0;
+                /* Save connected SSID (handles auto-connect from NVS too) */
+                int len = conn->ssid_len < sizeof(fw_connected_ssid) - 1
+                        ? conn->ssid_len : sizeof(fw_connected_ssid) - 1;
+                memcpy(fw_connected_ssid, conn->ssid, len);
+                fw_connected_ssid[len] = '\0';
+                ESP_LOGI(TAG, "[WiFi] Connected to '%s' (ch:%d)", fw_connected_ssid, conn->channel);
+                break;
+            }
+            case WIFI_EVENT_SCAN_DONE:
+                ESP_LOGI(TAG, "[WiFi] Scan complete");
+                break;
+            default:
+                break;
+        }
+    } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+        ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
+        snprintf(fw_ip_addr, sizeof(fw_ip_addr), IPSTR, IP2STR(&event->ip_info.ip));
+        /* Also update OTA module's IP copy */
+        snprintf(ota_ip_addr, sizeof(ota_ip_addr), "%s:8080", fw_ip_addr);
+        ESP_LOGI(TAG, "[WiFi] Got IP: %s", fw_ip_addr);
+        fw_wifi_connected = true;
+        wifi_connected = true;
+        wifi_popup_connection_result();  /* re-enable Connect button */
+
+        /* If OTA web server was requested, start it now that we have an IP */
+        if (ota_httpd == NULL) {
+            ota_start_webserver();
+            snprintf(ota_status, sizeof(ota_status), "Server running");
+        }
+    }
+}
+
+/* ── Lazy init: call once before any WiFi operation ── */
+static void fw_wifi_ensure_init(void) {
+    if (fw_wifi_initialized) return;
+
+    esp_err_t err = esp_netif_init();
+    if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+        ESP_LOGE(TAG, "esp_netif_init failed: %s", esp_err_to_name(err));
+        return;
+    }
+    err = esp_event_loop_create_default();
+    if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+        ESP_LOGE(TAG, "esp_event_loop_create_default failed: %s", esp_err_to_name(err));
+        return;
+    }
+    esp_netif_create_default_wifi_sta();
+
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(
+        WIFI_EVENT, ESP_EVENT_ANY_ID, &fw_wifi_event_handler, NULL, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(
+        IP_EVENT, IP_EVENT_STA_GOT_IP, &fw_wifi_event_handler, NULL, NULL));
+
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+
+    /* Clear any credentials the C6 has cached in its NVS
+     * so it doesn't auto-connect without our permission */
+    wifi_config_t empty_config = {0};
+    esp_wifi_set_config(WIFI_IF_STA, &empty_config);
+
+    ESP_ERROR_CHECK(esp_wifi_start());
+
+    fw_wifi_initialized = true;
+
+    /* If auto-connect is enabled and credentials are saved, connect now */
+    if (gui.page.settings.settingsParams.wifiEnabled &&
+        gui.page.settings.settingsParams.wifiSSID[0] != '\0') {
+        ESP_LOGI(TAG, "[WiFi] Auto-connecting to '%s'...",
+                 gui.page.settings.settingsParams.wifiSSID);
+        wifi_config_t wifi_config = {0};
+        strncpy((char *)wifi_config.sta.ssid,
+                gui.page.settings.settingsParams.wifiSSID,
+                sizeof(wifi_config.sta.ssid) - 1);
+        strncpy((char *)wifi_config.sta.password,
+                gui.page.settings.settingsParams.wifiPassword,
+                sizeof(wifi_config.sta.password) - 1);
+        wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
+        wifi_config.sta.pmf_cfg.capable = true;
+        wifi_config.sta.pmf_cfg.required = false;
+        esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
+        esp_wifi_connect();
+    } else {
+        ESP_LOGI(TAG, "[WiFi] Auto-connect skipped: enabled=%d, ssid='%s'",
+                 gui.page.settings.settingsParams.wifiEnabled,
+                 gui.page.settings.settingsParams.wifiSSID);
+    }
+
+    ESP_LOGI(TAG, "[WiFi] Stack initialized (STA mode)");
+}
 
 int wifi_scan_start(void) {
-    /* TODO: Implement with esp_wifi_scan_start() */
-    ESP_LOGI(TAG, "[WiFi] Scan not yet implemented on real firmware");
-    return 0;
+    fw_wifi_ensure_init();
+
+    wifi_scan_config_t scan_config = {
+        .ssid = NULL,
+        .bssid = NULL,
+        .channel = 0,
+        .show_hidden = false,
+        .scan_type = WIFI_SCAN_TYPE_ACTIVE,
+        .scan_time.active.min = 100,
+        .scan_time.active.max = 300,
+    };
+
+    esp_err_t err = esp_wifi_scan_start(&scan_config, true); /* blocking scan */
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "[WiFi] Scan failed: %s", esp_err_to_name(err));
+        return 0;
+    }
+
+    uint16_t ap_count = 0;
+    esp_wifi_scan_get_ap_num(&ap_count);
+    ESP_LOGI(TAG, "[WiFi] Scan found %d APs", ap_count);
+    return (int)ap_count;
 }
 
 int wifi_scan_get_results(wifiScanResult_t *results, int max_results) {
-    /* TODO: Implement with esp_wifi_scan_get_ap_records() */
-    (void)results; (void)max_results;
-    return 0;
+    uint16_t ap_count = (uint16_t)max_results;
+    wifi_ap_record_t *ap_records = malloc(sizeof(wifi_ap_record_t) * ap_count);
+    if (!ap_records) return 0;
+
+    esp_err_t err = esp_wifi_scan_get_ap_records(&ap_count, ap_records);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "[WiFi] Get scan results failed: %s", esp_err_to_name(err));
+        free(ap_records);
+        return 0;
+    }
+
+    int count = (ap_count > (uint16_t)max_results) ? max_results : (int)ap_count;
+    for (int i = 0; i < count; i++) {
+        snprintf(results[i].ssid, sizeof(results[i].ssid), "%s", (char *)ap_records[i].ssid);
+        results[i].rssi = ap_records[i].rssi;
+        results[i].open = (ap_records[i].authmode == WIFI_AUTH_OPEN);
+    }
+
+    free(ap_records);
+    ESP_LOGI(TAG, "[WiFi] Returning %d scan results", count);
+    return count;
 }
 
 bool wifi_connect(const char *ssid, const char *password) {
-    /* TODO: Implement with esp_wifi_connect() */
-    ESP_LOGI(TAG, "[WiFi] Connect to '%s'", ssid);
-    fw_wifi_connected = true;
+    fw_wifi_ensure_init();
+
+    /* Disconnect from any previous network first */
+    esp_wifi_disconnect();
+
+    wifi_config_t wifi_config = {0};
+    strncpy((char *)wifi_config.sta.ssid, ssid, sizeof(wifi_config.sta.ssid) - 1);
+    if (password && password[0]) {
+        strncpy((char *)wifi_config.sta.password, password, sizeof(wifi_config.sta.password) - 1);
+        wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
+    }
+    /* Enable PMF (Protected Management Frames) — required by many modern routers */
+    wifi_config.sta.pmf_cfg.capable = true;
+    wifi_config.sta.pmf_cfg.required = false;
+
+    ESP_LOGI(TAG, "[WiFi] Connecting to '%s' (pwd len=%d)...", ssid,
+             password ? (int)strlen(password) : 0);
+
+    esp_err_t err = esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "[WiFi] set_config failed: %s", esp_err_to_name(err));
+        return false;
+    }
+    /* Mark connect-pending so reason-8 disconnect triggers auto-retry */
+    fw_wifi_connect_pending = true;
+    fw_wifi_retry_count = 0;
+
+    err = esp_wifi_connect();
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "[WiFi] Connect failed: %s", esp_err_to_name(err));
+        fw_wifi_connect_pending = false;
+        return false;
+    }
+
     snprintf(fw_connected_ssid, sizeof(fw_connected_ssid), "%s", ssid);
     return true;
 }
 
 void wifi_disconnect(void) {
-    /* TODO: Implement with esp_wifi_disconnect() */
+    if (fw_wifi_connected) {
+        esp_wifi_disconnect();
+    }
     fw_wifi_connected = false;
     fw_connected_ssid[0] = '\0';
+    fw_ip_addr[0] = '\0';
+    ESP_LOGI(TAG, "[WiFi] Disconnected");
 }
 
 bool wifi_is_connected(void) {
@@ -720,7 +1118,39 @@ const char *wifi_get_connected_ssid(void) {
 }
 
 const char *wifi_get_ip_address(void) {
-    return fw_wifi_connected ? "0.0.0.0" : NULL;
+    return fw_wifi_connected ? fw_ip_addr : NULL;
 }
+
+void wifi_boot_auto_connect(void) {
+    if (gui.page.settings.settingsParams.wifiEnabled &&
+        gui.page.settings.settingsParams.wifiSSID[0] != '\0') {
+        ESP_LOGI(TAG, "[WiFi] Boot auto-connect: enabled=%d, ssid='%s'",
+                 gui.page.settings.settingsParams.wifiEnabled,
+                 gui.page.settings.settingsParams.wifiSSID);
+        fw_wifi_ensure_init();   /* will auto-connect inside */
+    } else {
+        ESP_LOGI(TAG, "[WiFi] Boot auto-connect skipped: enabled=%d, ssid='%s'",
+                 gui.page.settings.settingsParams.wifiEnabled,
+                 gui.page.settings.settingsParams.wifiSSID);
+    }
+}
+
+#else /* No WiFi at all — provide stub implementations */
+
+int wifi_scan_start(void) { return 0; }
+int wifi_scan_get_results(wifiScanResult_t *results, int max_results) {
+    (void)results; (void)max_results; return 0;
+}
+bool wifi_connect(const char *ssid, const char *password) {
+    (void)ssid; (void)password; return false;
+}
+void wifi_disconnect(void) {}
+bool wifi_is_connected(void) { return false; }
+const char *wifi_get_connected_ssid(void) { return NULL; }
+const char *wifi_get_ip_address(void) { return NULL; }
+void wifi_boot_auto_connect(void) {}
+void wifi_popup_connection_result(void) {}
+
+#endif /* SOC_WIFI_SUPPORTED || CONFIG_ESP_WIFI_REMOTE_ENABLED — wifi scan/connect */
 
 #endif /* SIMULATOR_BUILD */

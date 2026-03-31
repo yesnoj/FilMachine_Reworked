@@ -141,7 +141,6 @@ esp_err_t st7701_lcd_draw_to_fb(uint16_t x, uint16_t y,
                &data[row * w], w * sizeof(uint16_t));
     }
 
-    /* Flush the modified framebuffer rows so the DPI controller sees them */
     void *sync_start = &fb16[y * ST7701_PHYS_H_RES];
     size_t sync_size = (size_t)h * ST7701_PHYS_H_RES * sizeof(uint16_t);
     esp_cache_msync(sync_start, sync_size,
@@ -149,27 +148,102 @@ esp_err_t st7701_lcd_draw_to_fb(uint16_t x, uint16_t y,
     return ESP_OK;
 }
 
-esp_err_t st7701_lcd_fill_screen(uint16_t color)
-{
-    void *color_data = NULL;
-    size_t buf_size = 0;
+/*
+ * Persistent rotation buffer — allocated once on first call.
+ * Max size matches the largest LVGL partial dirty rect.
+ */
+static uint16_t *s_rotate_buf = NULL;
+static size_t    s_rotate_buf_pixels = 0;
 
-    /* Use PPA hardware fill — much faster than CPU loop */
-    esp_err_t ret = ppa_create_filled_buffer(ST7701_PHYS_H_RES, ST7701_PHYS_V_RES, color, &color_data, &buf_size);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "PPA fill failed, falling back to CPU fill");
-        buf_size = ST7701_PHYS_H_RES * ST7701_PHYS_V_RES * sizeof(uint16_t);
-        uint16_t *cpu_buf = (uint16_t *)heap_caps_malloc(buf_size, MALLOC_CAP_SPIRAM);
-        if (!cpu_buf) return ESP_ERR_NO_MEM;
-        for (int i = 0; i < ST7701_PHYS_H_RES * ST7701_PHYS_V_RES; i++) cpu_buf[i] = color;
-        ret = esp_lcd_panel_draw_bitmap(s_panel_handle, 0, 0, ST7701_PHYS_H_RES, ST7701_PHYS_V_RES, cpu_buf);
-        heap_caps_free(cpu_buf);
-        return ret;
+esp_err_t st7701_lcd_draw_to_fb_rotated(uint16_t lx, uint16_t ly,
+                                         uint16_t lw, uint16_t lh,
+                                         const uint16_t *data)
+{
+    const size_t need_pixels = (size_t)lw * lh;
+
+    /* Lazy-allocate / grow the rotation staging buffer */
+    if (!s_rotate_buf || need_pixels > s_rotate_buf_pixels) {
+        if (s_rotate_buf) heap_caps_free(s_rotate_buf);
+        s_rotate_buf_pixels = need_pixels;
+        s_rotate_buf = heap_caps_malloc(need_pixels * sizeof(uint16_t),
+                                        MALLOC_CAP_SPIRAM);
+        if (!s_rotate_buf) {
+            s_rotate_buf_pixels = 0;
+            return ESP_ERR_NO_MEM;
+        }
     }
 
-    ret = esp_lcd_panel_draw_bitmap(s_panel_handle, 0, 0, ST7701_PHYS_H_RES, ST7701_PHYS_V_RES, color_data);
-    heap_caps_free(color_data);
-    return ret;
+    /*
+     * ── Step 1: Rotate into temp buffer (physical row-major order) ──
+     *
+     * Rotation mapping (logical 800×480 landscape → physical 480×800 portrait):
+     *   phys_x = logical_y          →  column index in physical row
+     *   phys_y = (799 - logical_x)  →  row index in physical FB
+     *
+     * The temp buffer is laid out as `lw` physical rows × `lh` physical cols.
+     * Physical row r corresponds to logical column dx = (lw-1-r).
+     * Physical col c corresponds to logical row    dy = c.
+     *
+     * This loop touches source data with stride `lw` (column-major read)
+     * but writes sequentially to the temp buffer — good cache locality
+     * on the write side.
+     */
+    for (int dx = 0; dx < lw; dx++) {
+        const int phys_row = lw - 1 - dx;         /* top phys row = rightmost logical col */
+        uint16_t *dst_row = &s_rotate_buf[phys_row * lh];
+        for (int dy = 0; dy < lh; dy++) {
+            dst_row[dy] = data[dy * lw + dx];
+        }
+    }
+
+    /*
+     * ── Step 2: Fast row-by-row memcpy into the single DPI framebuffer ──
+     *
+     * With num_fbs=1 + optimized memcpy, the write window is very short
+     * (~75 KB for a typical dirty rect), minimizing visible tearing.
+     */
+    void *fb = NULL;
+    esp_err_t ret = esp_lcd_dpi_panel_get_frame_buffer(s_panel_handle, 1, &fb);
+    if (ret != ESP_OK || !fb) return ret ? ret : ESP_ERR_INVALID_STATE;
+
+    uint16_t *fb16 = (uint16_t *)fb;
+    const int phys_y_start = (ST7701_PHYS_V_RES - 1) - (lx + lw - 1);
+
+    for (int r = 0; r < lw; r++) {
+        memcpy(&fb16[(phys_y_start + r) * ST7701_PHYS_H_RES + ly],
+               &s_rotate_buf[r * lh],
+               lh * sizeof(uint16_t));
+    }
+
+    /* ── Step 3: Flush modified cache lines so DPI controller sees the update ── */
+    void *sync_start = &fb16[phys_y_start * ST7701_PHYS_H_RES];
+    size_t sync_size = (size_t)lw * ST7701_PHYS_H_RES * sizeof(uint16_t);
+    esp_cache_msync(sync_start, sync_size,
+                    ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED);
+    return ESP_OK;
+}
+
+esp_err_t st7701_lcd_fill_screen(uint16_t color)
+{
+    /* Write directly to the single DPI framebuffer — faster than draw_bitmap
+     * and avoids the DMA2D pipeline overhead. */
+    void *fb = NULL;
+    esp_err_t ret = esp_lcd_dpi_panel_get_frame_buffer(s_panel_handle, 1, &fb);
+    if (ret != ESP_OK || !fb) return ret ? ret : ESP_ERR_INVALID_STATE;
+
+    const size_t total_pixels = ST7701_PHYS_H_RES * ST7701_PHYS_V_RES;
+    const size_t fb_bytes = total_pixels * sizeof(uint16_t);
+
+    if (color == 0x0000) {
+        memset(fb, 0, fb_bytes);
+    } else {
+        uint16_t *p = (uint16_t *)fb;
+        for (size_t i = 0; i < total_pixels; i++) p[i] = color;
+    }
+
+    esp_cache_msync(fb, fb_bytes,
+                    ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED);
+    return ESP_OK;
 }
 
 void st7701_lcd_get_handles(bsp_lcd_handles_t *ret_handles)

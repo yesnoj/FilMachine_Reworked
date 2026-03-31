@@ -27,12 +27,83 @@ static void wifi_populate_scan_list(void);
 static void wifi_update_status(void);
 static void event_wifi_network_clicked(lv_event_t *e);
 
+/* ── Connect button re-enable (called via lv_async_call from WiFi events) ── */
+static void wifi_reenable_connect_btn_async(void *arg) {
+    (void)arg;
+    struct sWifiPopup *p = &gui.element.wifiPopup;
+    if (p->connectButton != NULL) {
+        lv_obj_remove_state(p->connectButton, LV_STATE_DISABLED);
+        wifi_update_status();   /* also refreshes the label text */
+    }
+}
+
+/* Public: called from ota_update.c WiFi event handler */
+void wifi_popup_connection_result(void) {
+    lv_async_call(wifi_reenable_connect_btn_async, NULL);
+}
+
 /* ── Timer for status updates ── */
 static lv_timer_t *wifi_status_timer = NULL;
 
 static void wifi_status_timer_cb(lv_timer_t *timer) {
     (void)timer;
     wifi_update_status();
+}
+
+/* ── Auto-scan on popup open (with retry) ── */
+static uint8_t wifi_scan_retries = 0;
+
+/* Show a "Scanning..." spinner inside the list container */
+static void wifi_show_scan_loading(void) {
+    struct sWifiPopup *p = &gui.element.wifiPopup;
+    lv_obj_clean(p->listContainer);
+    lv_obj_t *spinner = lv_spinner_create(p->listContainer);
+    lv_obj_set_size(spinner, WF->spinner_size, WF->spinner_size);
+    lv_obj_align(spinner, LV_ALIGN_CENTER, 0, 0);
+    lv_spinner_set_anim_params(spinner, 1000, 270);
+    lv_obj_set_style_arc_color(spinner, lv_color_hex(ORANGE), LV_PART_INDICATOR);
+    lv_obj_set_style_arc_color(spinner, lv_palette_darken(LV_PALETTE_GREY, 2), LV_PART_MAIN);
+    lv_obj_set_style_arc_width(spinner, WF->spinner_arc_w, LV_PART_INDICATOR);
+    lv_obj_set_style_arc_width(spinner, WF->spinner_arc_w, LV_PART_MAIN);
+}
+
+/* Phase 2: actually run the blocking scan (called after spinner has rendered) */
+static void wifi_do_scan_cb(lv_timer_t *timer) {
+    lv_timer_delete(timer);
+
+    struct sWifiPopup *p = &gui.element.wifiPopup;
+
+    wifi_scan_start();
+    p->scanCount = wifi_scan_get_results(p->scanResults, MAX_WIFI_SCAN_RESULTS);
+    LV_LOG_USER("[WiFi] Scan found %d networks (attempt %d)", p->scanCount, wifi_scan_retries + 1);
+
+    if (p->scanCount == 0 && wifi_scan_retries < 2) {
+        /* C6 might not be ready yet — retry after 2 seconds */
+        wifi_scan_retries++;
+        lv_timer_create(wifi_do_scan_cb, 2000, NULL);
+        return;
+    }
+
+    wifi_scan_retries = 0;
+    wifi_populate_scan_list();
+    wifi_update_status();
+}
+
+/* Phase 1: show spinner, then schedule the actual scan so LVGL renders first */
+static void wifi_start_scan(void) {
+    struct sWifiPopup *p = &gui.element.wifiPopup;
+    lv_label_set_text(p->statusLabel, wifiScanning_text);
+    lv_obj_set_style_text_color(p->statusLabel, lv_color_hex(ORANGE), 0);
+    wifi_show_scan_loading();
+    /* Short delay so the spinner renders before the blocking scan */
+    lv_timer_create(wifi_do_scan_cb, 50, NULL);
+}
+
+/* Auto-scan on popup open (one-shot timer) */
+static void wifi_auto_scan_cb(lv_timer_t *timer) {
+    lv_timer_delete(timer);
+    wifi_scan_retries = 0;
+    wifi_start_scan();
 }
 
 static void wifi_update_status(void) {
@@ -94,9 +165,9 @@ static void wifi_populate_scan_list(void) {
         lv_obj_set_style_bg_color(btn, lv_palette_darken(LV_PALETTE_GREY, 4), LV_PART_MAIN);
         lv_obj_set_style_bg_color(btn, lv_color_hex(ORANGE_DARK), LV_STATE_CHECKED);
         lv_obj_add_flag(btn, LV_OBJ_FLAG_CHECKABLE);
-        lv_obj_set_style_radius(btn, 4, 0);
-        lv_obj_set_style_pad_left(btn, 8, 0);
-        lv_obj_set_style_pad_right(btn, 8, 0);
+        lv_obj_set_style_radius(btn, WF->list_item_radius, 0);
+        lv_obj_set_style_pad_left(btn, WF->list_item_pad_x, 0);
+        lv_obj_set_style_pad_right(btn, WF->list_item_pad_x, 0);
 
         /* SSID label */
         lv_obj_t *ssid_lbl = lv_label_create(btn);
@@ -142,7 +213,7 @@ static void event_wifi_network_clicked(lv_event_t *e) {
     if(!p->scanResults[idx].open) {
         p->pendingPassword[0] = '\0';
 
-        /* Set up keyboard context */
+        /* Set up keyboard context and activate it */
         p->wifiPasswordKbCtx = (sKeyboardOwnerContext){
             .owner       = KB_OWNER_SETTINGS,
             .textArea    = NULL,  /* No visible textarea — commit directly */
@@ -151,6 +222,7 @@ static void event_wifi_network_clicked(lv_event_t *e) {
             .ownerData   = p->pendingPassword,
             .maxLength   = 64
         };
+        kb_ctx_set(&p->wifiPasswordKbCtx);
 
         /* Use the existing keyboard popup — set max length and show it */
         lv_textarea_set_max_length(gui.element.keyboardPopup.keyboardTextArea, 64);
@@ -164,7 +236,7 @@ static void event_wifi_network_clicked(lv_event_t *e) {
             lv_textarea_set_text(gui.element.keyboardPopup.keyboardTextArea, "");
         }
 
-        lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_1);
+        lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_3);
         lv_obj_remove_flag(gui.element.keyboardPopup.keyBoardParent, LV_OBJ_FLAG_HIDDEN);
         lv_obj_move_foreground(gui.element.keyboardPopup.keyBoardParent);
     }
@@ -185,19 +257,11 @@ void event_wifiPopup(lv_event_t *e) {
         return;
     }
 
-    /* Scan button */
+    /* Scan / Refresh button */
     if(obj == p->scanButton && code == LV_EVENT_CLICKED) {
-        LV_LOG_USER("[WiFi] Scan started");
-        lv_label_set_text(p->statusLabel, wifiScanning_text);
-        lv_obj_set_style_text_color(p->statusLabel, lv_color_hex(ORANGE), 0);
-
-        /* Start scan and get results */
-        wifi_scan_start();
-        p->scanCount = wifi_scan_get_results(p->scanResults, MAX_WIFI_SCAN_RESULTS);
-        LV_LOG_USER("[WiFi] Found %d networks", p->scanCount);
-
-        wifi_populate_scan_list();
-        wifi_update_status();
+        LV_LOG_USER("[WiFi] Manual scan started");
+        wifi_scan_retries = 0;
+        wifi_start_scan();
         return;
     }
 
@@ -216,18 +280,20 @@ void event_wifiPopup(lv_event_t *e) {
                 const char *pass = "";
 
                 if(!p->scanResults[p->selectedIndex].open) {
-                    /* Get password from keyboard or saved */
-                    const char *kbText = lv_textarea_get_text(gui.element.keyboardPopup.keyboardTextArea);
-                    if(kbText && kbText[0] != '\0') {
-                        pass = kbText;
+                    /* Get password from pendingPassword (set by keyboard commit) or saved */
+                    if(p->pendingPassword[0] != '\0') {
+                        pass = p->pendingPassword;
                     } else if(strcmp(ssid, gui.page.settings.settingsParams.wifiSSID) == 0) {
                         pass = gui.page.settings.settingsParams.wifiPassword;
                     }
                 }
 
                 LV_LOG_USER("[WiFi] Connecting to: %s", ssid);
-                lv_label_set_text(p->statusLabel, "Connecting...");
+                lv_label_set_text(p->statusLabel, wifiConnecting_text);
                 lv_obj_set_style_text_color(p->statusLabel, lv_color_hex(ORANGE), 0);
+
+                /* Disable button while connection is in progress */
+                lv_obj_add_state(p->connectButton, LV_STATE_DISABLED);
 
                 if(wifi_connect(ssid, pass)) {
                     /* Save credentials */
@@ -238,6 +304,9 @@ void event_wifiPopup(lv_event_t *e) {
                     /* Start WebSocket server */
                     ws_server_start(WS_SERVER_PORT);
                     qSysAction(SAVE_PROCESS_CONFIG);
+                } else {
+                    /* Immediate failure — re-enable button right away */
+                    lv_obj_remove_state(p->connectButton, LV_STATE_DISABLED);
                 }
                 wifi_update_status();
             }
@@ -268,6 +337,8 @@ void wifiPopupCreate(void) {
         lv_obj_remove_flag(p->popupParent, LV_OBJ_FLAG_HIDDEN);
         if(wifi_status_timer == NULL)
             wifi_status_timer = lv_timer_create(wifi_status_timer_cb, 1000, NULL);
+        /* Auto-scan after short delay so UI renders first */
+        lv_timer_create(wifi_auto_scan_cb, 300, NULL);
         return;
     }
 
@@ -287,7 +358,7 @@ void wifiPopupCreate(void) {
 
     /* Underline */
     initTitleLineStyle(&p->style_titleLine, ORANGE);
-    p->titleLinePoints[1].x = 200;
+    p->titleLinePoints[1].x = WF->title_line_w;
     p->titleLine = lv_line_create(p->popupContainer);
     lv_line_set_points(p->titleLine, p->titleLinePoints, 2);
     lv_obj_add_style(p->titleLine, &p->style_titleLine, 0);
@@ -311,7 +382,7 @@ void wifiPopupCreate(void) {
     lv_label_set_text(p->statusLabel, wifiDisconnected_text);
     lv_obj_set_style_text_font(p->statusLabel, WF->status_font, 0);
     lv_obj_set_style_text_color(p->statusLabel, lv_color_hex(GREY), 0);
-    lv_obj_set_width(p->statusLabel, lv_pct(80));
+    lv_obj_set_width(p->statusLabel, lv_pct(WF->status_w_pct));
     lv_obj_set_style_text_align(p->statusLabel, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_long_mode(p->statusLabel, LV_LABEL_LONG_WRAP);
     lv_obj_align(p->statusLabel, LV_ALIGN_TOP_MID, 0, WF->status_y);
@@ -330,18 +401,18 @@ void wifiPopupCreate(void) {
 
     /* Scrollable list container for scan results */
     p->listContainer = lv_obj_create(p->popupContainer);
-    lv_obj_set_size(p->listContainer, lv_pct(90), WF->list_h);
+    lv_obj_set_size(p->listContainer, lv_pct(WF->list_w_pct), WF->list_h);
     lv_obj_align(p->listContainer, LV_ALIGN_TOP_MID, 0, WF->list_y);
     lv_obj_set_scroll_dir(p->listContainer, LV_DIR_VER);
     lv_obj_set_scrollbar_mode(p->listContainer, LV_SCROLLBAR_MODE_AUTO);
     lv_obj_set_flex_flow(p->listContainer, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(p->listContainer, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_row(p->listContainer, 4, 0);
-    lv_obj_set_style_pad_all(p->listContainer, 5, 0);
+    lv_obj_set_style_pad_row(p->listContainer, WF->list_pad_row, 0);
+    lv_obj_set_style_pad_all(p->listContainer, WF->list_pad_all, 0);
     lv_obj_set_style_bg_color(p->listContainer, lv_palette_darken(LV_PALETTE_GREY, 4), 0);
     lv_obj_set_style_border_color(p->listContainer, lv_color_hex(ORANGE_DARK), 0);
-    lv_obj_set_style_border_width(p->listContainer, 1, 0);
-    lv_obj_set_style_radius(p->listContainer, 5, 0);
+    lv_obj_set_style_border_width(p->listContainer, WF->list_border_w, 0);
+    lv_obj_set_style_radius(p->listContainer, WF->list_radius, 0);
 
     /* Bottom row: auto-connect toggle + connect button */
     /* Auto-connect switch */
@@ -374,6 +445,8 @@ void wifiPopupCreate(void) {
     lv_obj_align(p->connectButton, LV_ALIGN_BOTTOM_RIGHT, WF->connect_btn_x, WF->connect_btn_y);
     lv_obj_add_event_cb(p->connectButton, event_wifiPopup, LV_EVENT_CLICKED, NULL);
     lv_obj_set_style_bg_color(p->connectButton, lv_color_hex(ORANGE), LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(p->connectButton, LV_OPA_50, LV_STATE_DISABLED);
+    lv_obj_set_style_text_opa(p->connectButton, LV_OPA_50, LV_STATE_DISABLED);
 
     p->connectButtonLabel = lv_label_create(p->connectButton);
     lv_label_set_text(p->connectButtonLabel, wifiConnect_text);
@@ -387,6 +460,9 @@ void wifiPopupCreate(void) {
 
     /* Start status timer */
     wifi_status_timer = lv_timer_create(wifi_status_timer_cb, 1000, NULL);
+
+    /* Auto-scan after short delay so UI renders first */
+    lv_timer_create(wifi_auto_scan_cb, 300, NULL);
 
     LV_LOG_USER("[WiFi] Popup created");
 }

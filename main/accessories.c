@@ -11,13 +11,17 @@
 #include <sys/stat.h>
 
 #include "driver/sdmmc_host.h"
+#if defined(BOARD_JC4880P433)
+    #include "sd_pwr_ctrl_by_on_chip_ldo.h"
+#endif
 #include "esp_err.h"
-#include "esp_log.h" 
+#include "esp_log.h"
 #include "ff.h"
 #include "sdmmc_cmd.h"
-#include "driver/i2c.h"
 #if defined(BOARD_JC4880P433)
     #include "driver/i2c_master.h"
+#else
+    #include "driver/i2c.h"
 #endif
 #include "driver/gpio.h"
 #include "driver/ledc.h"
@@ -183,6 +187,10 @@ static void kb_ctx_clear(void) {
     memset(&kbCtx, 0, sizeof(kbCtx));
 }
 
+void kb_ctx_set(const sKeyboardOwnerContext *ctx) {
+    kbCtx = *ctx;
+}
+
 static const char *kb_owner_name(kbOwnerType owner) {
     switch(owner) {
         case KB_OWNER_FILTER: return "filter";
@@ -194,11 +202,13 @@ static const char *kb_owner_name(kbOwnerType owner) {
 }
 
 static void kb_commit_text(const char *kbText) {
-    if(kbText == NULL || kbCtx.owner == KB_OWNER_NONE || kbCtx.textArea == NULL) {
+    if(kbText == NULL || kbCtx.owner == KB_OWNER_NONE) {
         return;
     }
 
-    lv_textarea_set_text(kbCtx.textArea, kbText);
+    if(kbCtx.textArea != NULL) {
+        lv_textarea_set_text(kbCtx.textArea, kbText);
+    }
 
     switch(kbCtx.owner) {
         case KB_OWNER_FILTER:
@@ -258,8 +268,20 @@ void event_keyboard(lv_event_t* e) {
           }
           if(txt != NULL && strcmp(txt, "Abc") == 0) {
               for(int i = 0; i < 3; i++) lv_textarea_delete_char(gui.element.keyboardPopup.keyboardTextArea);
-              lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_1);
-              LV_LOG_USER("Keyboard switched to letters");
+              lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_3);
+              LV_LOG_USER("Keyboard switched to lowercase letters");
+              return;
+          }
+          if(txt != NULL && strcmp(txt, LV_SYMBOL_UP) == 0) {
+              /* Toggle uppercase ↔ lowercase */
+              lv_keyboard_mode_t cur = lv_keyboard_get_mode(gui.element.keyboardPopup.keyboard);
+              if(cur == LV_KEYBOARD_MODE_USER_3) {
+                  lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_1);
+                  LV_LOG_USER("Keyboard switched to UPPERCASE");
+              } else {
+                  lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_3);
+                  LV_LOG_USER("Keyboard switched to lowercase");
+              }
               return;
           }
       }
@@ -321,17 +343,31 @@ void create_keyboard() {
 
 
     /* ── USER_1 : letter keyboard ── */
+    /* ── USER_1 : UPPERCASE letters (default) ── */
     static const char * kb_map[] = {"Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", " ", "\n",
                                     "A", "S", "D", "F", "G", "H", "J", "K", "L",  " ", "\n",
-                                    " "," ", "Z", "X", "C", "V", "B", "N", "M"," "," ","\n",
+                                    LV_SYMBOL_UP," ", "Z", "X", "C", "V", "B", "N", "M"," "," ","\n",
                                     LV_SYMBOL_CLOSE, LV_SYMBOL_BACKSPACE,  " ", "123", LV_SYMBOL_OK, NULL
                                    };
 
     static const lv_buttonmatrix_ctrl_t kb_ctrl[] = {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, LV_BUTTONMATRIX_CTRL_HIDDEN,
                                                      4, 4, 4, 4, 4, 4, 4, 4, 4, LV_BUTTONMATRIX_CTRL_HIDDEN,
-                                                     LV_BUTTONMATRIX_CTRL_HIDDEN, LV_BUTTONMATRIX_CTRL_HIDDEN, 4, 4, 4, 4, 4, 4, 4, LV_BUTTONMATRIX_CTRL_HIDDEN, LV_BUTTONMATRIX_CTRL_HIDDEN,
+                                                     2, LV_BUTTONMATRIX_CTRL_HIDDEN, 4, 4, 4, 4, 4, 4, 4, LV_BUTTONMATRIX_CTRL_HIDDEN, LV_BUTTONMATRIX_CTRL_HIDDEN,
                                                      2, 2, 4, 2, 2
                                                     };
+
+    /* ── USER_3 : lowercase letters ── */
+    static const char * kb_map_lower[] = {"q", "w", "e", "r", "t", "y", "u", "i", "o", "p", " ", "\n",
+                                          "a", "s", "d", "f", "g", "h", "j", "k", "l",  " ", "\n",
+                                          LV_SYMBOL_UP," ", "z", "x", "c", "v", "b", "n", "m"," "," ","\n",
+                                          LV_SYMBOL_CLOSE, LV_SYMBOL_BACKSPACE,  " ", "123", LV_SYMBOL_OK, NULL
+                                         };
+
+    static const lv_buttonmatrix_ctrl_t kb_ctrl_lower[] = {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, LV_BUTTONMATRIX_CTRL_HIDDEN,
+                                                           4, 4, 4, 4, 4, 4, 4, 4, 4, LV_BUTTONMATRIX_CTRL_HIDDEN,
+                                                           2, LV_BUTTONMATRIX_CTRL_HIDDEN, 4, 4, 4, 4, 4, 4, 4, LV_BUTTONMATRIX_CTRL_HIDDEN, LV_BUTTONMATRIX_CTRL_HIDDEN,
+                                                           2, 2, 4, 2, 2
+                                                          };
 
     /* ── USER_2 : number / symbol keyboard ── */
     static const char * kb_map_num[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", " ", "\n",
@@ -348,7 +384,8 @@ void create_keyboard() {
 
     lv_keyboard_set_map(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_1, kb_map, kb_ctrl);
     lv_keyboard_set_map(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_2, kb_map_num, kb_ctrl_num);
-    lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_1);
+    lv_keyboard_set_map(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_3, kb_map_lower, kb_ctrl_lower);
+    lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_3);
     
     const ui_keyboard_layout_t *kb = &ui_get_profile()->keyboard;
     gui.element.keyboardPopup.keyboardTextArea = lv_textarea_create(gui.element.keyboardPopup.keyBoardParent);
@@ -698,7 +735,7 @@ void showKeyboard(lv_obj_t * whoCallMe, lv_obj_t * textArea){
       else
         lv_textarea_set_text(gui.element.keyboardPopup.keyboardTextArea, "");
 
-      lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_1);
+      lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_3);
       lv_obj_remove_flag(gui.element.keyboardPopup.keyBoardParent, LV_OBJ_FLAG_HIDDEN);
       lv_obj_move_foreground(gui.element.keyboardPopup.keyBoardParent);
     } else lv_textarea_set_text(gui.element.keyboardPopup.keyboardTextArea, "");
@@ -730,10 +767,29 @@ uint8_t SD_init() {
     LV_LOG_USER("Initialise SD Card");
 
 #if defined(SD_BUS_SDMMC)
-    /* ── P4: SDMMC 4-bit bus (much faster than SPI) ── */
-    sdmmc_host_t host = SDMMC_HOST_DEFAULT();
-    host.max_freq_khz = SDMMC_FREQ_HIGHSPEED;
+    /* ── P4: SDMMC 4-bit bus (much faster than SPI) ──
+     * The JC4880P433 board requires on-chip LDO channel 4 (3.3V)
+     * to power the SD card slot — without it the card won't respond.
+     * (Same pattern used by RetroESP32-P4 reference project.)
+     */
 
+    /* 1. Power the SD card via on-chip LDO */
+    sd_pwr_ctrl_ldo_config_t ldo_config = { .ldo_chan_id = 4 };
+    sd_pwr_ctrl_handle_t pwr_ctrl_handle = NULL;
+    esp_err_t ldo_ret = sd_pwr_ctrl_new_on_chip_ldo(&ldo_config, &pwr_ctrl_handle);
+    if (ldo_ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to init SD LDO power (ch4): %s", esp_err_to_name(ldo_ret));
+    }
+
+    /* 2. Configure SDMMC host — slot 0, default speed for reliable init */
+    sdmmc_host_t host = SDMMC_HOST_DEFAULT();
+    host.slot = SDMMC_HOST_SLOT_0;
+    host.max_freq_khz = SDMMC_FREQ_DEFAULT;
+    if (pwr_ctrl_handle) {
+        host.pwr_ctrl_handle = pwr_ctrl_handle;
+    }
+
+    /* 3. Configure slot pins (4-bit bus) */
     sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
     slot_config.clk = SD_MMC_CLK;
     slot_config.cmd = SD_MMC_CMD;
@@ -741,14 +797,23 @@ uint8_t SD_init() {
     slot_config.d1  = SD_MMC_D1;
     slot_config.d2  = SD_MMC_D2;
     slot_config.d3  = SD_MMC_D3;
-    slot_config.width = 4;          /* 4-bit bus */
+    slot_config.width = 4;
     slot_config.cd  = SDMMC_SLOT_NO_CD;
     slot_config.wp  = SDMMC_SLOT_NO_WP;
     slot_config.flags |= SDMMC_SLOT_FLAG_INTERNAL_PULLUP;
 
+    /* 4. Mount with retry + power-cycle (some cards need a reset) */
     ESP_LOGI(TAG, "Mounting filesystem (SDMMC 4-bit)");
-    if (esp_vfs_fat_sdmmc_mount("/sd", &host, &slot_config, &mount, &card) != ESP_OK) {
-        LV_LOG_USER("Card Mount Failed (SDMMC)");
+    esp_err_t mount_ret = ESP_FAIL;
+    for (int attempt = 0; attempt < 3; attempt++) {
+        mount_ret = esp_vfs_fat_sdmmc_mount("/sd", &host, &slot_config, &mount, &card);
+        if (mount_ret == ESP_OK) break;
+        ESP_LOGW(TAG, "SD mount attempt %d failed (%s), power-cycling...",
+                 attempt + 1, esp_err_to_name(mount_ret));
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
+    if (mount_ret != ESP_OK) {
+        LV_LOG_USER("Card Mount Failed (SDMMC) after 3 attempts");
         return ESP_FAIL;
     }
 
@@ -786,6 +851,11 @@ uint8_t SD_init() {
     sdmmc_card_print_info(stdout, card);
     return ESP_OK;
 }
+
+#if defined(BOARD_JC4880P433)
+/* Global I2C master bus handle — used by init_touch() in FilMachine.c */
+i2c_master_bus_handle_t g_i2c_bus_handle = NULL;
+#endif
 
 void init_Pins_and_Buses( void ) {
 	
@@ -829,8 +899,7 @@ void init_Pins_and_Buses( void ) {
         .glitch_ignore_cnt = 7,
         .flags.enable_internal_pullup = true,
     };
-    i2c_master_bus_handle_t i2c_bus_handle;
-    ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_bus_cfg, &i2c_bus_handle));
+    ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_bus_cfg, &g_i2c_bus_handle));
 #else
     const i2c_config_t i2c_conf = {
         .mode = I2C_MODE_MASTER,
@@ -845,7 +914,11 @@ void init_Pins_and_Buses( void ) {
 #endif
 
     /* Initialize MCP23017 I/O expander */
+#if defined(BOARD_JC4880P433)
+    if (mcp23017_init(&mcp, g_i2c_bus_handle, MCP23017_DEFAULT_ADDR) != ESP_OK) {
+#else
     if (mcp23017_init(&mcp, I2C_NUM, MCP23017_DEFAULT_ADDR) != ESP_OK) {
+#endif
         LV_LOG_USER("MCP23017 init ERROR!");
         initErrors = INIT_ERROR_I2C_MCP;
     } else {
@@ -874,7 +947,11 @@ void init_Pins_and_Buses( void ) {
     /* Initialize PCA9685 I2C PWM controller for pump speed control.
      * Daisy-chained on same I2C bus as MCP23017 via Adafruit 6318 pass-through. */
     {
+#if defined(BOARD_JC4880P433)
+        esp_err_t pca_ret = pca9685_init(&pca_pwm, g_i2c_bus_handle, PCA9685_ADDR, PCA9685_PWM_FREQ);
+#else
         esp_err_t pca_ret = pca9685_init(&pca_pwm, I2C_NUM, PCA9685_ADDR, PCA9685_PWM_FREQ);
+#endif
         if (pca_ret == ESP_OK) {
             LV_LOG_USER("PCA9685 at 0x%02X init OK — pump on ch%d, %d Hz PWM",
                         PCA9685_ADDR, PUMP_PCA9685_CHANNEL, PCA9685_PWM_FREQ);
@@ -895,7 +972,8 @@ void init_Pins_and_Buses( void ) {
 /* ── Read ONLY the machineSettings blob (no processes, no stats).
  *    Used at boot to know splash preferences before the full UI is ready. ── */
 void readSettingsOnly(const char *path) {
-    FIL file, *fp = &file;
+    FIL *fp = heap_caps_malloc(sizeof(FIL), MALLOC_CAP_SPIRAM);
+    if (!fp) return;
     unsigned int br;
     if (f_open(fp, path, FA_READ | FA_OPEN_EXISTING) == FR_OK) {
         if (f_read(fp, &gui.page.settings.settingsParams,
@@ -911,16 +989,22 @@ void readSettingsOnly(const char *path) {
         }
         f_close(fp);
     }
+    free(fp);
 }
 
 void readConfigFile(const char *path, bool enableLog) {
 	
-	FIL				file, *fp;
+	FIL				*fp;
 	FRESULT			res;
 	unsigned int	bytes_read;
-	
-	fp = &file;
-	
+
+	/* Heap-allocate FIL to avoid stack overflow */
+	fp = heap_caps_malloc( sizeof(FIL), MALLOC_CAP_SPIRAM );
+	if (!fp) {
+		LV_LOG_USER("Error: cannot allocate FIL struct for read");
+		return;
+	}
+
   	if( (res = f_open( fp, path, FA_READ | FA_OPEN_EXISTING )) == FR_OK ) {
 	    // Load Machine Settings
 	    /* Zero the struct first so new fields (Wi-Fi etc.) get safe defaults
@@ -928,6 +1012,7 @@ void readConfigFile(const char *path, bool enableLog) {
 	    memset(&gui.page.settings.settingsParams, 0, sizeof(gui.page.settings.settingsParams));
 	    if( (res = f_read( fp, &gui.page.settings.settingsParams, sizeof(gui.page.settings.settingsParams), &bytes_read ) ) !=  FR_OK ) {
 	      f_close( fp );
+	      free( fp );
 	      LV_LOG_USER("Configuration file error aborting load err: %d", res );
 	      return;
 	    }
@@ -935,6 +1020,11 @@ void readConfigFile(const char *path, bool enableLog) {
 	        LV_LOG_USER("Config file shorter than expected (%u < %u) — new fields use defaults",
 	                     bytes_read, (unsigned)sizeof(gui.page.settings.settingsParams));
 	    }
+	    LV_LOG_USER("[WiFi-Load] bytes_read=%u, struct_size=%u, enabled=%d, ssid='%s', pwd_len=%d",
+	                 bytes_read, (unsigned)sizeof(gui.page.settings.settingsParams),
+	                 gui.page.settings.settingsParams.wifiEnabled,
+	                 gui.page.settings.settingsParams.wifiSSID,
+	                 (int)strlen(gui.page.settings.settingsParams.wifiPassword));
 
 	    if(enableLog) {
 	        LV_LOG_USER("--- MACHINE PARAMS ---");
@@ -1103,15 +1193,21 @@ void readConfigFile(const char *path, bool enableLog) {
 	} else {
 		LV_LOG_USER("Failed to open configuration file for reading using default err: %d", res);
 	}
+	free( fp );  /* Release heap-allocated FIL struct */
 }
 
 void writeConfigFile( const char *path, bool enableLog ) {
 	
-	FIL				file, *fp;
+	FIL				*fp;
 	FRESULT			res;
 	unsigned int	bytes_written;
 
-	fp = &file;
+	/* Heap-allocate FIL to avoid stack overflow in sysMan task */
+	fp = heap_caps_malloc( sizeof(FIL), MALLOC_CAP_SPIRAM );
+	if (!fp) {
+		LV_LOG_USER("Error: cannot allocate FIL struct for write");
+		return;
+	}
 
     if (initErrors == 0) {
         LV_LOG_USER("Writing configuration file: %s", path);
@@ -1122,11 +1218,16 @@ void writeConfigFile( const char *path, bool enableLog ) {
 
         if( ( res = f_open( fp, path, FA_WRITE | FA_CREATE_NEW ) ) != FR_OK ) {
             LV_LOG_USER("Failed to open file for writing");
+            free(fp);
             return;
         }
 
         // Write Machine Parameters
         LV_LOG_USER("Writing settingsParams: %zu bytes", sizeof(gui.page.settings.settingsParams));
+        LV_LOG_USER("[WiFi-Save] enabled=%d, ssid='%s', pwd_len=%d",
+                     gui.page.settings.settingsParams.wifiEnabled,
+                     gui.page.settings.settingsParams.wifiSSID,
+                     (int)strlen(gui.page.settings.settingsParams.wifiPassword));
         f_write( fp, &gui.page.settings.settingsParams, sizeof(gui.page.settings.settingsParams), &bytes_written );
         LV_LOG_USER("settingsParams written OK: %u bytes", bytes_written);
 
@@ -1207,30 +1308,36 @@ void writeConfigFile( const char *path, bool enableLog ) {
         ws_broadcast_process_list();
         ws_broadcast_state();
     }
+    free( fp );  /* Release heap-allocated FIL struct */
 }
 
 #define FILE_COPY_BUF_SIZE	4096
 bool copyAndRenameFile( const char* sourceFile, const char* destFile) {
-	
-	FIL				srcFile, dstFile, *sp, *dp;
+
+	/*
+	 * FIL structs are ~600+ bytes each (larger with LFN enabled).
+	 * Allocating on heap prevents stack overflow in sysMan task.
+	 */
+	FIL				*sp = NULL, *dp = NULL;
 	FRESULT			res;
 	unsigned int	bytes_read = 1, bytes_written, current_written;
-	char			*buf;
+	char			*buf = NULL;
 	bool			ret = false;
-	
+
 	// Before removing the old destination, verify that the source exists!
 	if( f_stat( sourceFile, NULL ) != FR_OK ) {
 		LV_LOG_USER("Error: source file does not exist!" );
 		return ret;
 	}
 
+	sp = heap_caps_malloc( sizeof(FIL), MALLOC_CAP_SPIRAM );
+	dp = heap_caps_malloc( sizeof(FIL), MALLOC_CAP_SPIRAM );
 	buf = malloc( FILE_COPY_BUF_SIZE );
-	if( !buf ) {
-		LV_LOG_USER("Error during copy buffer allocation!" );
+	if( !sp || !dp || !buf ) {
+		LV_LOG_USER("Error during allocation (FIL/buf)!" );
+		free(sp); free(dp); free(buf);
 		return ret;
 	}
-	sp = &srcFile;
-	dp = &dstFile;
 
 	// Check if the destination file already exists and remove it if necessary
 	if( f_stat( destFile, NULL ) == FR_OK ) {
@@ -1286,6 +1393,8 @@ out2:
 	
 out1:
 	free( buf );	// Free the transfer buffer
+	free( sp );		// Free heap-allocated FIL structs
+	free( dp );
 	return ret;
 }
 

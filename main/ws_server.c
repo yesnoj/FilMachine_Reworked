@@ -1406,7 +1406,13 @@ void ws_broadcast_event(const char *event_name, const char *json_data) {
  * ═══════════════════════════════════════════════════════════════════ */
 #else /* !SIMULATOR_BUILD */
 
+#include "soc/soc_caps.h"
+
+#if SOC_WIFI_SUPPORTED || defined(CONFIG_ESP_WIFI_REMOTE_ENABLED)
+
 #include "esp_http_server.h"
+#include "esp_event.h"
+#include "esp_netif.h"
 #include "esp_log.h"
 #include "mdns.h"
 
@@ -1549,6 +1555,19 @@ static void fw_broadcast_timer_cb(lv_timer_t *t) {
 bool ws_server_start(uint16_t port) {
     if (ws_httpd) return true;
 
+    /* Ensure TCP/IP stack is up (safe to call multiple times — returns
+     * ESP_ERR_INVALID_STATE if already initialised, which we ignore). */
+    esp_err_t err = esp_netif_init();
+    if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+        ESP_LOGE(TAG, "esp_netif_init failed: %s", esp_err_to_name(err));
+        return false;
+    }
+    err = esp_event_loop_create_default();
+    if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+        ESP_LOGE(TAG, "esp_event_loop_create_default failed: %s", esp_err_to_name(err));
+        return false;
+    }
+
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.server_port = port;
     config.stack_size = 8192;
@@ -1629,5 +1648,24 @@ void ws_broadcast_event(const char *event_name, const char *json_data) {
     }
     ws_send_all(buf, n);
 }
+
+#else /* !SOC_WIFI_SUPPORTED and no ESP_WIFI_REMOTE — no Wi-Fi at all, stubs */
+
+#include "esp_log.h"
+static const char *TAG = "ws_server";
+
+bool ws_server_start(uint16_t port) {
+    ESP_LOGW(TAG, "WebSocket server not available (no Wi-Fi on this SoC)");
+    return false;
+}
+void ws_server_stop(void) {}
+bool ws_server_is_running(void) { return false; }
+void ws_broadcast_state(void) {}
+void ws_broadcast_process_list(void) {}
+void ws_broadcast_event(const char *event_name, const char *json_data) {
+    (void)event_name; (void)json_data;
+}
+
+#endif /* SOC_WIFI_SUPPORTED || CONFIG_ESP_WIFI_REMOTE_ENABLED */
 
 #endif /* SIMULATOR_BUILD */

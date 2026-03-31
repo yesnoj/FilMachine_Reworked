@@ -41,6 +41,7 @@ uint8_t analogVal_rotationSpeedPercent;
 #define Y_CHEM_VOLUME                (Y_WB_CONTAINER_ML + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #define Y_SPLASH_SCREEN              (Y_CHEM_VOLUME + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #define Y_WIFI_ROW                   (Y_SPLASH_SCREEN + SETTINGS_H_ROW + SETTINGS_GAP_Y)
+#define Y_RESET_ROW                  (Y_WIFI_ROW + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 
 //ACCESSORY INCLUDES
 
@@ -127,7 +128,7 @@ void event_settings_handler(lv_event_t * e)
 
     /*Do nothing if the container was clicked*/
 
-    if(act_cb == cont && cont != gui.page.settings.waterInletSwitch && cont != gui.page.settings.tempSensorTuneButton && cont != gui.page.settings.filmRotationSpeedSlider && cont != gui.page.settings.filmRotationInversionIntervalSlider && cont != gui.page.settings.filmRandomSlider && cont != gui.page.settings.persistentAlarmSwitch && cont != gui.page.settings.autostartSwitch && cont != gui.page.settings.drainFillTimeSlider && cont != gui.page.settings.multiRinseTimeSlider && cont != gui.page.settings.tankSizeTextArea && cont != gui.page.settings.pumpSpeedSlider && cont != gui.page.settings.chemContainerMlTextArea && cont != gui.page.settings.wbContainerMlTextArea && cont != gui.page.settings.chemVolumeTextArea && cont != gui.page.settings.splashButton && cont != gui.page.settings.wifiButton)
+    if(act_cb == cont && cont != gui.page.settings.waterInletSwitch && cont != gui.page.settings.tempSensorTuneButton && cont != gui.page.settings.filmRotationSpeedSlider && cont != gui.page.settings.filmRotationInversionIntervalSlider && cont != gui.page.settings.filmRandomSlider && cont != gui.page.settings.persistentAlarmSwitch && cont != gui.page.settings.autostartSwitch && cont != gui.page.settings.drainFillTimeSlider && cont != gui.page.settings.multiRinseTimeSlider && cont != gui.page.settings.tankSizeTextArea && cont != gui.page.settings.pumpSpeedSlider && cont != gui.page.settings.chemContainerMlTextArea && cont != gui.page.settings.wbContainerMlTextArea && cont != gui.page.settings.chemVolumeTextArea && cont != gui.page.settings.splashButton && cont != gui.page.settings.wifiButton && cont != gui.page.settings.resetButton)
       return;
 
     if(act_cb == gui.page.settings.tempUnitCelsiusRadioButton || act_cb == gui.page.settings.tempUnitFahrenheitRadioButton){
@@ -352,6 +353,45 @@ void event_settings_handler(lv_event_t * e)
             } else {
                 lv_obj_remove_flag(gui.element.splashPopup.splashPopupParent, LV_OBJ_FLAG_HIDDEN);
             }
+        }
+    }
+
+    /* ── Reset to Defaults button ── */
+    if(act_cb == gui.page.settings.resetButton) {
+        if(code == LV_EVENT_CLICKED) {
+            LV_LOG_USER("PRESSED resetButton — restoring factory defaults");
+
+            struct machineSettings *p = &gui.page.settings.settingsParams;
+
+            /* Restore all settings to factory defaults
+             * (same values as initGlobals in accessories.c) */
+            p->tempUnit = 0;               /* Celsius */
+            p->waterInlet = false;
+            p->calibratedTemp = 20;
+            p->filmRotationSpeedSetpoint = 50;
+            p->rotationIntervalSetpoint = 10;
+            p->randomSetpoint = 0;
+            p->isPersistentAlarm = false;
+            p->isProcessAutostart = false;
+            p->drainFillOverlapSetpoint = 100;
+            p->multiRinseTime = 60;
+            p->tankSize = 2;               /* Medium */
+            p->pumpSpeed = 30;
+            p->chemContainerMl = 500;
+            p->wbContainerMl = 2000;
+            p->chemistryVolume = 2;         /* High */
+            p->tempCalibOffset = 0;
+
+            /* Update all UI widgets to reflect the new values */
+            refreshSettingsUI();
+
+            /* Persist to SD */
+            qSysAction(SAVE_PROCESS_CONFIG);
+
+            /* Show confirmation popup */
+            messagePopupCreate(settingsResetPopupTitle_text,
+                               settingsResetPopupBody_text,
+                               NULL, NULL, NULL);
         }
     }
 
@@ -828,6 +868,29 @@ gui.page.settings.chemVolumeContainer = lv_obj_create(parent);
         lv_label_set_text(gui.page.settings.wifiButtonLabel, LV_SYMBOL_WIFI);
         lv_obj_set_style_text_font(gui.page.settings.wifiButtonLabel, UI_SETTINGS->button_font, 0);
         lv_obj_align(gui.page.settings.wifiButtonLabel, LV_ALIGN_CENTER, 0, 0);
+
+  /* ── Reset to Defaults ── */
+  gui.page.settings.resetContainer = lv_obj_create(parent);
+  lv_obj_align(gui.page.settings.resetContainer, LV_ALIGN_TOP_LEFT, SETTINGS_LEFT_X, Y_RESET_ROW);
+  lv_obj_set_size(gui.page.settings.resetContainer, UI_SETTINGS->row_w, SETTINGS_H_ROW);
+  lv_obj_remove_flag(gui.page.settings.resetContainer, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_style_border_opa(gui.page.settings.resetContainer, LV_OPA_TRANSP, 0);
+
+        gui.page.settings.resetLabel = lv_label_create(gui.page.settings.resetContainer);
+        lv_label_set_text(gui.page.settings.resetLabel, settingsReset_text);
+        lv_obj_set_style_text_font(gui.page.settings.resetLabel, UI_SETTINGS->label_font, 0);
+        lv_obj_align(gui.page.settings.resetLabel, LV_ALIGN_LEFT_MID, UI_SETTINGS->row_label_x, UI_SETTINGS->row_label_y);
+
+        gui.page.settings.resetButton = lv_button_create(gui.page.settings.resetContainer);
+        lv_obj_set_size(gui.page.settings.resetButton, BUTTON_TUNE_WIDTH, BUTTON_TUNE_HEIGHT);
+        lv_obj_align(gui.page.settings.resetButton, LV_ALIGN_RIGHT_MID, UI_SETTINGS->tune_button_x, UI_SETTINGS->tune_button_y);
+        lv_obj_add_event_cb(gui.page.settings.resetButton, event_settings_handler, LV_EVENT_CLICKED, gui.page.settings.resetButton);
+        lv_obj_set_style_bg_color(gui.page.settings.resetButton, lv_color_hex(ORANGE), LV_PART_MAIN);
+
+        gui.page.settings.resetButtonLabel = lv_label_create(gui.page.settings.resetButton);
+        lv_label_set_text(gui.page.settings.resetButtonLabel, LV_SYMBOL_REFRESH);
+        lv_obj_set_style_text_font(gui.page.settings.resetButtonLabel, UI_SETTINGS->button_font, 0);
+        lv_obj_align(gui.page.settings.resetButtonLabel, LV_ALIGN_CENTER, 0, 0);
 }
 
 

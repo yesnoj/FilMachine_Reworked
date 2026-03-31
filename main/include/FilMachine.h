@@ -51,6 +51,10 @@ void sim_ui_debug_tag(lv_obj_t *obj, const char *name);
 
 /* I2C instance (shared across touch, MCP23017, PCA9685) */
 #define I2C_NUM						0
+#if defined(BOARD_JC4880P433)
+    #include "driver/i2c_master.h"
+    extern i2c_master_bus_handle_t g_i2c_bus_handle;
+#endif
 
 /* System defines */
 #define FILENAME_SAVE				"/FilMachine.cfg"
@@ -128,16 +132,33 @@ typedef enum {
 
 /* Wi-Fi / Remote control section strings */
 #define settingsWifi_text                       "Wi-Fi"
+#define settingsReset_text                      "Reset to Defaults"
+#define settingsResetPopupTitle_text             "Settings Reset"
+#define settingsResetPopupBody_text              "All settings restored\nto factory defaults."
 #define wifiPopupTitle_text                     "Wi-Fi"
 #define wifiScan_text                           "Scan"
 #define wifiConnect_text                        "Connect"
 #define wifiDisconnect_text                     "Disconnect"
 #define wifiConnected_text                      "Connected to:"
 #define wifiDisconnected_text                   "Not connected"
+#define wifiConnecting_text                     "Connecting..."
 #define wifiScanning_text                       "Scanning..."
 #define wifiAutoConnect_text                    "Auto-connect"
 #define wifiEnterPassword_text                  "Enter password"
 #define wifiNoNetworks_text                     "No networks found"
+#define wifiErrorTitle_text                     "Wi-Fi Error"
+#define wifiErrAuthFailed_text                  "Authentication failed\n(wrong password)"
+#define wifiErrHandshakeTimeout_text            "Handshake timeout\n(wrong password or WPA3 mismatch)"
+#define wifiErrMicFailure_text                  "MIC failure\n(wrong password)"
+#define wifiErrGroupKeyTimeout_text             "Handshake timeout\n(group key)"
+#define wifiErrApNotFound_text                  "Network not found\n(AP_NOT_FOUND)"
+#define wifiErrApNotFoundGeneric_text           "Network not found"
+#define wifiErrAuthExpired_text                 "Authentication expired\n(AUTH_EXPIRE)"
+#define wifiErrClass2Frame_text                 "Class 2 frame from\nnon-authenticated station"
+#define wifiErrClass3Frame_text                 "Class 3 frame from\nnon-associated station"
+#define wifiErrConnectionFail_text              "Connection failed\n(CONNECTION_FAIL)"
+#define wifiErrBeaconTimeout_text               "Beacon timeout\n(signal lost)"
+#define wifiErrUnknownFmt_text                  "Connection failed\n(reason code: %d)"
 
 /* Checkup placeholder */
 #define checkupEllipsis_text					"..."
@@ -1142,7 +1163,7 @@ struct sOtaWifiPopup {
 	lv_obj_t			*pinLabel;
 	lv_obj_t			*statusLabel;
 	lv_obj_t			*progressBar;
-	char				 otaPin[6]; /* 5 digits + null */
+	char				 otaPin[9]; /* 8 digits + null (WPA2 min password) */
 };
 
 /* ── Wi-Fi configuration scan results ── */
@@ -1339,6 +1360,12 @@ struct sSettings {
 	lv_obj_t                *wifiLabel;
 	lv_obj_t                *wifiButton;
 	lv_obj_t                *wifiButtonLabel;
+
+	/* Reset to Defaults row */
+	lv_obj_t                *resetContainer;
+	lv_obj_t                *resetLabel;
+	lv_obj_t                *resetButton;
+	lv_obj_t                *resetButtonLabel;
 
   /* Params objects */
   struct machineSettings   settingsParams;
@@ -1664,6 +1691,8 @@ void wifi_disconnect(void);
 bool wifi_is_connected(void);
 const char *wifi_get_connected_ssid(void);
 const char *wifi_get_ip_address(void);
+void wifi_boot_auto_connect(void);  /* Call once after readConfigFile to auto-connect if enabled */
+void wifi_popup_connection_result(void); /* Re-enable Connect btn after connect/disconnect */
 // @file FilMachine.c
 void stopMotorTask(void);
 void runMotorTask(void);
@@ -1680,6 +1709,7 @@ void *allocateAndInitializeNode(NodeType_t type);
 void event_cb(lv_event_t * e);
 void event_checkbox_handler(lv_event_t * e);
 void event_keyboard(lv_event_t* e);
+void kb_ctx_set(const sKeyboardOwnerContext *ctx);
 void createQuestionMark(lv_obj_t * parent,lv_obj_t * element,lv_event_cb_t e, const int32_t x, const int32_t y);
 void createPopupBackdrop(lv_obj_t **parent, lv_obj_t **container, int32_t width, int32_t height);
 void initTitleLineStyle(lv_style_t *style, uint32_t color);

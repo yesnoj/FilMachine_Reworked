@@ -68,6 +68,23 @@ esp_err_t st7701_lcd_draw_to_fb(uint16_t x, uint16_t y,
                                 uint16_t w, uint16_t h,
                                 const uint16_t *data);
 
+/**
+ * @brief Write a rotated bitmap to the DPI framebuffer.
+ *        Accepts pixel data in LOGICAL landscape coordinates (800×480)
+ *        and rotates each pixel into the PHYSICAL portrait framebuffer (480×800).
+ *        Rotation mapping: phys_x = logical_y, phys_y = (799 - logical_x).
+ *        Only the dirty rectangle is processed — ideal for partial rendering.
+ *
+ * @param lx  Logical X origin (0..799)
+ * @param ly  Logical Y origin (0..479)
+ * @param lw  Logical width of the dirty rectangle
+ * @param lh  Logical height of the dirty rectangle
+ * @param data  Pixel data in row-major logical order (lw * lh pixels, RGB565)
+ */
+esp_err_t st7701_lcd_draw_to_fb_rotated(uint16_t lx, uint16_t ly,
+                                         uint16_t lw, uint16_t lh,
+                                         const uint16_t *data);
+
 #ifdef __cplusplus
 }
 #endif
