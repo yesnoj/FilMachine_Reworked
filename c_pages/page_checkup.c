@@ -1373,8 +1373,9 @@ void initCheckup(processNode *pn)
             lv_obj_align(ckup->checkupCloseButton, LV_ALIGN_TOP_RIGHT, ui->close_x , ui->close_y);
             lv_obj_add_event_cb(ckup->checkupCloseButton, event_checkup, LV_EVENT_CLICKED, pn);
             lv_obj_set_style_bg_color(ckup->checkupCloseButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
+            lv_obj_move_foreground(ckup->checkupCloseButton);
             if(ckup->data.processStep > 0){
-              lv_obj_add_state(ckup->checkupCloseButton, LV_STATE_DISABLED);            
+              lv_obj_add_state(ckup->checkupCloseButton, LV_STATE_DISABLED);
             }
 
                   ckup->checkupCloseButtonLabel = lv_label_create(ckup->checkupCloseButton);         
