@@ -973,9 +973,13 @@ void init_Pins_and_Buses( void ) {
  *    Used at boot to know splash preferences before the full UI is ready. ── */
 void readSettingsOnly(const char *path) {
     FIL *fp = heap_caps_malloc(sizeof(FIL), MALLOC_CAP_SPIRAM);
-    if (!fp) return;
+    if (!fp) {
+        LV_LOG_USER("readSettingsOnly: FAILED to alloc FIL struct");
+        return;
+    }
     unsigned int br;
-    if (f_open(fp, path, FA_READ | FA_OPEN_EXISTING) == FR_OK) {
+    FRESULT res = f_open(fp, path, FA_READ | FA_OPEN_EXISTING);
+    if (res == FR_OK) {
         if (f_read(fp, &gui.page.settings.settingsParams,
                    sizeof(gui.page.settings.settingsParams), &br) == FR_OK) {
             LV_LOG_USER("readSettingsOnly: loaded %u bytes (splashDefault=%d splashRandom=%d pal=%d style=%d cmx=%d seed=%"PRIu32")",
@@ -986,8 +990,12 @@ void readSettingsOnly(const char *path) {
                         gui.page.settings.settingsParams.splashShapeStyle,
                         gui.page.settings.settingsParams.splashComplexity,
                         gui.page.settings.settingsParams.splashSeed);
+        } else {
+            LV_LOG_USER("readSettingsOnly: f_read FAILED");
         }
         f_close(fp);
+    } else {
+        LV_LOG_USER("readSettingsOnly: f_open('%s') FAILED (res=%d) — using defaults", path, res);
     }
     free(fp);
 }

@@ -12,6 +12,7 @@
 
 #include "FilMachine.h"
 #include "ws_server.h"
+#include "esp_random.h"
 
 extern struct gui_components gui;
 
@@ -531,24 +532,23 @@ lv_obj_t * splash_screen_create(void)
         /* Default mode or uninitialised config → standard Deep Ocean */
         create_standard_splash(splash_scr);
     } else if (gui.page.settings.settingsParams.splashRandom) {
-        /* Random mode → generate fresh random params from LVGL tick */
-        uint32_t tick = lv_tick_get();
-        uint32_t rng  = tick * 1103515245u + 12345u;
+        /* Random mode → generate fresh random params from HW RNG */
+        uint32_t rng  = esp_random();
         uint8_t  rpal = (uint8_t)(rng % PALETTE_COUNT);
         rng = rng * 1103515245u + 12345u;
         uint8_t  rsty = (uint8_t)(rng % 6);
         rng = rng * 1103515245u + 12345u;
         uint8_t  rcmx = 2 + (uint8_t)(rng % 29);  /* 2–30 */
         rng = rng * 1103515245u + 12345u;
-        LV_LOG_USER("SPLASH RANDOM: tick=%"PRIu32" seed=%"PRIu32" pal=%d style=%d cmx=%d",
-                     tick, rng, rpal, rsty, rcmx);
+        LV_LOG_USER("SPLASH RANDOM: seed=%"PRIu32" pal=%d style=%d cmx=%d",
+                     rng, rpal, rsty, rcmx);
         line_pts_idx = 0;
         create_random_splash(splash_scr, rng, rpal, rsty, rcmx);
         LV_LOG_USER("SPLASH RANDOM: creation OK");
     } else {
         /* Custom mode → use saved params (palette, style, complexity, seed) */
         uint32_t seed = gui.page.settings.settingsParams.splashSeed;
-        if (seed == 0) seed = lv_tick_get() * 1103515245u + 12345u;
+        if (seed == 0) seed = esp_random();
         LV_LOG_USER("SPLASH CUSTOM: seed=%"PRIu32" pal=%d style=%d cmx=%d",
                      seed,
                      gui.page.settings.settingsParams.splashPalette,
