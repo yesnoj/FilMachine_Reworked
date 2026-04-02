@@ -92,6 +92,18 @@ static const splash_palette_t palettes[] = {
 #define PALETTE_COUNT  (sizeof(palettes) / sizeof(palettes[0]))
 
 /* ═══════════════════════════════════════════════
+ * Background task: WiFi/SDIO transport init (~2s).
+ * Runs after the menu screen is already visible so
+ * the UI isn't blocked during SDIO slave negotiation.
+ * ═══════════════════════════════════════════════ */
+static void wifi_init_task(void *arg)
+{
+    (void)arg;
+    wifi_boot_auto_connect();   /* ~2s SDIO transport + wifi_start */
+    vTaskDelete(NULL);
+}
+
+/* ═══════════════════════════════════════════════
  * Play button callback → enter menu
  * ═══════════════════════════════════════════════ */
 static void splash_play_event_cb(lv_event_t * e)
@@ -100,11 +112,10 @@ static void splash_play_event_cb(lv_event_t * e)
     readConfigFile(FILENAME_SAVE, false);
     menu();
     refreshSettingsUI();
-    /* Start WS server only after real processes are loaded — prevents
-       Flutter from ever seeing the demo fallback list. */
+    /* WS server start is fast and creates an lv_timer → must stay on LVGL thread */
     ws_server_start(WS_SERVER_PORT);
-    /* Auto-connect to Wi-Fi if the user had it enabled before reboot */
-    wifi_boot_auto_connect();
+    /* WiFi/SDIO init is slow (~2s) → run in background so UI appears instantly */
+    xTaskCreate(wifi_init_task, "wifi_init", 4096, NULL, 5, NULL);
 }
 
 /* ═══════════════════════════════════════════════
