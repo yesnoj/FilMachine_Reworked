@@ -585,3 +585,61 @@ esp_err_t ppa_rotate_scale_rgb565_to(const void *in_buf, uint32_t in_w, uint32_t
     if (out_h) *out_h = result_h;
     return ESP_OK;
 }
+
+/* =================== Direct-to-framebuffer rotation =================== */
+
+esp_err_t ppa_rotate_to_region(const void *in_buf, uint32_t in_w, uint32_t in_h,
+                                uint32_t angle_deg,
+                                void *out_buf, size_t out_buf_size,
+                                uint32_t out_pic_w, uint32_t out_pic_h,
+                                uint32_t out_offset_x, uint32_t out_offset_y)
+{
+    if (!s_ppa_srm_client || !in_buf || !out_buf) return ESP_ERR_INVALID_ARG;
+
+    ppa_srm_rotation_angle_t rotation;
+    switch (angle_deg) {
+        case 0:   rotation = PPA_SRM_ROTATION_ANGLE_0;   break;
+        case 90:  rotation = PPA_SRM_ROTATION_ANGLE_90;  break;
+        case 180: rotation = PPA_SRM_ROTATION_ANGLE_180; break;
+        case 270: rotation = PPA_SRM_ROTATION_ANGLE_270; break;
+        default:
+            ESP_LOGE(TAG, "Invalid rotation angle: %u", (unsigned)angle_deg);
+            return ESP_ERR_INVALID_ARG;
+    }
+
+    ppa_srm_oper_config_t srm_cfg = {
+        .in = {
+            .buffer = in_buf,
+            .pic_w = in_w,
+            .pic_h = in_h,
+            .block_w = in_w,
+            .block_h = in_h,
+            .block_offset_x = 0,
+            .block_offset_y = 0,
+            .srm_cm = PPA_SRM_COLOR_MODE_RGB565,
+        },
+        .out = {
+            .buffer = out_buf,
+            .buffer_size = out_buf_size,
+            .pic_w = out_pic_w,
+            .pic_h = out_pic_h,
+            .block_offset_x = out_offset_x,
+            .block_offset_y = out_offset_y,
+            .srm_cm = PPA_SRM_COLOR_MODE_RGB565,
+        },
+        .rotation_angle = rotation,
+        .scale_x = 1.0f,
+        .scale_y = 1.0f,
+        .mirror_x = false,
+        .mirror_y = false,
+        .rgb_swap = false,
+        .byte_swap = false,
+        .mode = PPA_TRANS_MODE_BLOCKING,
+    };
+
+    esp_err_t ret = ppa_do_scale_rotate_mirror(s_ppa_srm_client, &srm_cfg);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "PPA rotate_to_region failed: %s", esp_err_to_name(ret));
+    }
+    return ret;
+}

@@ -13,6 +13,7 @@
 #include "lvgl.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/queue.h"
 
 /* FilMachine.h pulls in board.h which defines DISPLAY_DRIVER_xxx
  * and TOUCH_DRIVER_xxx — must come BEFORE the conditional includes. */
@@ -54,6 +55,56 @@ uint8_t initErrors = 0;
 /* ── P4: LVGL partial rendering with double-buffered PSRAM draw buffers ── */
 static uint8_t *lvgl_buf1 = NULL;
 static uint8_t *lvgl_buf2 = NULL;
+
+/* ── Dual-core async flush: core 0 renders, core 1 flushes via PPA ── */
+typedef struct {
+    lv_display_t *disp;
+    uint16_t x1, y1, w, h;
+    const uint16_t *data;
+    bool is_last_flush;
+} flush_job_t;
+
+static QueueHandle_t      s_flush_queue = NULL;    /* core 0 → core 1 */
+static lv_display_t      *s_flush_disp  = NULL;    /* cached display handle for flush_ready */
+
+/* FPS tracking (updated from core 1) */
+static volatile int64_t s_fps_window_start = 0;
+static volatile int     s_fps_frame_count  = 0;
+static volatile int     s_fps_flush_count  = 0;
+
+static void flush_task(void *arg)
+{
+    flush_job_t job;
+    ESP_LOGI("FLUSH", "Flush task started on core %d", xPortGetCoreID());
+
+    while (1) {
+        /* Block until core 0 posts a flush job */
+        if (xQueueReceive(s_flush_queue, &job, portMAX_DELAY) != pdTRUE) continue;
+
+        /* PPA rotate + write directly to DPI framebuffer */
+        st7701_lcd_draw_to_fb_rotated(job.x1, job.y1, job.w, job.h, job.data);
+
+        /* FPS tracking */
+        s_fps_flush_count++;
+        if (job.is_last_flush) {
+            s_fps_frame_count++;
+            int64_t now = esp_timer_get_time();
+            if (s_fps_window_start == 0) s_fps_window_start = now;
+            int64_t elapsed_us = now - s_fps_window_start;
+            if (elapsed_us >= 2000000) {
+                float fps = (float)s_fps_frame_count * 1000000.0f / (float)elapsed_us;
+                ESP_LOGI("FPS", "%.1f FPS  (%d frames, %d flushes in %lld ms)",
+                         fps, s_fps_frame_count, s_fps_flush_count, elapsed_us / 1000);
+                s_fps_frame_count = 0;
+                s_fps_flush_count = 0;
+                s_fps_window_start = now;
+            }
+        }
+
+        /* Tell LVGL the buffer is free — it can start rendering into it */
+        lv_display_flush_ready(job.disp);
+    }
+}
 #else
 /* ── S3/Simulator: static draw buffer, partial rendering ── */
 static uint8_t lvgl_buf[LVGL_BUF_SIZE];
@@ -64,21 +115,28 @@ static uint8_t lvgl_buf[LVGL_BUF_SIZE];
  * ═══════════════════════════════════════════════ */
 
 #if defined(DISPLAY_DRIVER_ST7701)
-/* ── P4: Partial-rendering flush with CPU rotation ──
- * LVGL renders in logical 800×480 landscape coordinates.  The flush
- * callback rotates each dirty rectangle pixel-by-pixel into the
- * 480×800 physical DPI framebuffer.  Only the dirty area is processed,
- * so the CPU cost is trivial compared to the old full-frame PPA rotation.
+/* ── P4: Dual-core async flush.
+ * Core 0 (LVGL) posts flush jobs to a queue.
+ * Core 1 (flush_task) picks them up, runs PPA rotation, and signals flush_ready.
+ * This overlaps LVGL rendering with PPA+cache_sync for ~2× throughput.
  */
 static void disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map)
 {
-    uint16_t x1 = area->x1;
-    uint16_t y1 = area->y1;
-    uint16_t w  = area->x2 - area->x1 + 1;
-    uint16_t h  = area->y2 - area->y1 + 1;
-    st7701_lcd_draw_to_fb_rotated(x1, y1, w, h, (const uint16_t *)px_map);
+    flush_job_t job = {
+        .disp = disp,
+        .x1   = area->x1,
+        .y1   = area->y1,
+        .w    = (uint16_t)(area->x2 - area->x1 + 1),
+        .h    = (uint16_t)(area->y2 - area->y1 + 1),
+        .data = (const uint16_t *)px_map,
+        .is_last_flush = lv_display_flush_is_last(disp),
+    };
 
-    lv_display_flush_ready(disp);
+    /* Post to core 1 — returns immediately so LVGL can render into the other buffer.
+     * portMAX_DELAY is safe because core 1 processes jobs fast (~7ms). */
+    xQueueSend(s_flush_queue, &job, portMAX_DELAY);
+    /* NOTE: we do NOT call lv_display_flush_ready() here.
+     * Core 1's flush_task calls it after PPA completes. */
 }
 
 #else
@@ -268,13 +326,12 @@ static esp_lcd_panel_handle_t init_display(lv_display_t *our_display)
 }
 
 #elif defined(DISPLAY_DRIVER_ST7701)
-/* ── JC4880P433: ST7701S MIPI-DSI (LVGL rotation, no PPA) ──
+/* ── JC4880P433: ST7701S MIPI-DSI (PPA hardware rotation) ──
  *
  * Unlike I80/QSPI boards, MIPI-DSI has a hardware DPI framebuffer.
- * LVGL creates the display at 480×800 (physical portrait) and applies
- * 90° software rotation so the UI sees 800×480 landscape.
- * The flush callback writes directly to the DPI framebuffer via
- * st7701_lcd_draw_to_fb() — partial rendering, no PPA needed.
+ * LVGL works in 800×480 landscape; the PPA hardware engine rotates
+ * each dirty rect to 480×800 portrait and writes directly to the
+ * DPI framebuffer — no intermediate buffers needed.
  *
  * Returns NULL because the P4 flush callback doesn't use a panel handle.
  */
@@ -503,7 +560,14 @@ init_Pins_and_Buses();
 
 ESP_LOGI(TAG, "Initialise LVGL library");
     lv_init();
+#if defined(DISPLAY_DRIVER_ST7701)
+    /* P4: LVGL in 800×480 landscape, PPA handles rotation to physical 480×800 */
     our_display = lv_display_create( LCD_H_RES, LCD_V_RES );
+    ESP_LOGI(TAG, "Display: %dx%d logical (PPA rotates to %dx%d physical)",
+             LCD_H_RES, LCD_V_RES, LCD_PHYS_H_RES, LCD_PHYS_V_RES);
+#else
+    our_display = lv_display_create( LCD_H_RES, LCD_V_RES );
+#endif
 
     /* Board-specific display init */
     esp_lcd_panel_handle_t panel_handle = init_display(our_display);
@@ -515,18 +579,38 @@ ESP_LOGI(TAG, "Initialise LVGL library");
     esp_lcd_touch_handle_t tp = init_touch();
 
 #if defined(DISPLAY_DRIVER_ST7701)
-    /* P4: Double-buffered partial rendering.
-     * LVGL renders at 800×480 (logical landscape).  The flush callback
-     * rotates each dirty rect into the 480×800 physical DPI framebuffer.
-     * Buffer = 1/10th of logical panel — only dirty areas are redrawn. */
-    size_t buf_size = LCD_H_RES * (LCD_V_RES / 10) * BYTES_PER_PIXEL;
-    lvgl_buf1 = heap_caps_malloc(buf_size, MALLOC_CAP_SPIRAM);
-    lvgl_buf2 = heap_caps_malloc(buf_size, MALLOC_CAP_SPIRAM);
+    /* P4: Double-buffered partial rendering with small PSRAM buffers.
+     *
+     * Dual-core async flush: core 0 renders, core 1 flushes via PPA.
+     * Buffer = 1/15 of screen (800×32 = 25600 px = 51200 bytes).
+     * Compromise between flush speed and visual tearing:
+     *   1/10 (76KB): 4ms/flush, 13-20 FPS, no flicker
+     *   1/15 (51KB): ~3ms/flush target, less tearing than 1/20
+     *   1/20 (38KB): 2ms/flush, 14-21 FPS, flicker at bottom
+     *
+     * NOTE: Internal SRAM causes freezes during step scroll —
+     * the step rendering needs internal DMA memory for widgets.
+     * PSRAM-only is the only stable path.
+     */
+    size_t buf_size = LCD_H_RES * (LCD_V_RES / 15) * BYTES_PER_PIXEL;
+    lvgl_buf1 = heap_caps_aligned_alloc(64, buf_size, MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA);
+    lvgl_buf2 = heap_caps_aligned_alloc(64, buf_size, MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA);
     if (!lvgl_buf1 || !lvgl_buf2) {
-        ESP_LOGE(TAG, "Failed to allocate LVGL buffers in PSRAM (%d bytes each)", buf_size);
+        ESP_LOGE(TAG, "Failed to allocate LVGL buffers (%d bytes each)", (int)buf_size);
     }
+    ESP_LOGI(TAG, "LVGL buffers: %d bytes each (PSRAM, 1/15 screen, DMA-aligned)", (int)buf_size);
     lv_display_set_buffers(our_display, lvgl_buf1, lvgl_buf2, buf_size,
                            LV_DISPLAY_RENDER_MODE_PARTIAL);
+
+    /* ── Dual-core async flush: create queue + task on core 1 ── */
+    s_flush_queue = xQueueCreate(2, sizeof(flush_job_t));
+    assert(s_flush_queue != NULL);
+    s_flush_disp = our_display;
+
+    /* Pin flush task to core 1, priority 10 (higher than LVGL on core 0).
+     * Stack: 4KB is enough — flush_task just posts PPA jobs + cache sync. */
+    xTaskCreatePinnedToCore(flush_task, "flush_ppa", 4096, NULL, 10, NULL, 1);
+    ESP_LOGI(TAG, "Dual-core async flush: LVGL on core 0, PPA flush on core 1");
 #else
     // initialize LVGL draw buffers (S3: single buffer, partial rendering)
     lv_display_set_buffers( our_display, lvgl_buf, NULL, LVGL_BUF_SIZE, LV_DISPLAY_RENDER_MODE_PARTIAL);
@@ -570,7 +654,7 @@ create_keyboard();
     while (1) {
         // lv_timer_handler returns ms until next call is needed
         uint32_t time_till_next = lv_timer_handler();
-        if (time_till_next < 5) time_till_next = 5;
+        if (time_till_next < 1) time_till_next = 1;
         if (time_till_next > 50) time_till_next = 50;
         vTaskDelay(pdMS_TO_TICKS(time_till_next));
     }

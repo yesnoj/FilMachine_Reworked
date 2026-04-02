@@ -19,6 +19,7 @@
 #include "esp_lcd_st7701.h"
 #include "st7701_lcd.h"
 #include "ppa_engine.h"
+#include "esp_timer.h"
 
 /* Physical panel resolution (internal to this driver — do NOT use
  * ST7701_PHYS_H_RES / ST7701_PHYS_V_RES which are the LVGL logical resolution from board.h) */
@@ -149,77 +150,127 @@ esp_err_t st7701_lcd_draw_to_fb(uint16_t x, uint16_t y,
 }
 
 /*
- * Persistent rotation buffer — allocated once on first call.
- * Max size matches the largest LVGL partial dirty rect.
+ * Persistent rotation buffer — only needed for CPU fallback path.
+ * Primary path writes directly to DPI framebuffer via PPA.
  */
 static uint16_t *s_rotate_buf = NULL;
-static size_t    s_rotate_buf_pixels = 0;
+static size_t    s_rotate_buf_bytes = 0;
+
+/* ── Performance counters (logged every 100 flushes) ── */
+static int64_t  s_perf_total_us   = 0;
+static int      s_perf_count      = 0;
+static int      s_perf_ppa_direct = 0;   /* PPA direct-to-FB */
+static int      s_perf_ppa_buf    = 0;   /* PPA via temp buffer */
+static int      s_perf_cpu_fb     = 0;   /* CPU fallback */
+
+/*
+ * PPA rotation angle for landscape→portrait mapping.
+ * The CPU reference code does: output[r][c] = input[c][lw-1-r]
+ * which is a 90° CCW rotation.
+ *
+ * Try 90 first (CCW per ESP-IDF docs).  If the display looks wrong
+ * (mirrored / rotated), change to 270.
+ */
+#define PPA_ROTATION_ANGLE  90
 
 esp_err_t st7701_lcd_draw_to_fb_rotated(uint16_t lx, uint16_t ly,
                                          uint16_t lw, uint16_t lh,
                                          const uint16_t *data)
 {
-    const size_t need_pixels = (size_t)lw * lh;
+    int64_t t_start = esp_timer_get_time();
 
-    /* Lazy-allocate / grow the rotation staging buffer */
-    if (!s_rotate_buf || need_pixels > s_rotate_buf_pixels) {
-        if (s_rotate_buf) heap_caps_free(s_rotate_buf);
-        s_rotate_buf_pixels = need_pixels;
-        s_rotate_buf = heap_caps_malloc(need_pixels * sizeof(uint16_t),
-                                        MALLOC_CAP_SPIRAM);
-        if (!s_rotate_buf) {
-            s_rotate_buf_pixels = 0;
-            return ESP_ERR_NO_MEM;
-        }
-    }
-
-    /*
-     * ── Step 1: Rotate into temp buffer (physical row-major order) ──
-     *
-     * Rotation mapping (logical 800×480 landscape → physical 480×800 portrait):
-     *   phys_x = logical_y          →  column index in physical row
-     *   phys_y = (799 - logical_x)  →  row index in physical FB
-     *
-     * The temp buffer is laid out as `lw` physical rows × `lh` physical cols.
-     * Physical row r corresponds to logical column dx = (lw-1-r).
-     * Physical col c corresponds to logical row    dy = c.
-     *
-     * This loop touches source data with stride `lw` (column-major read)
-     * but writes sequentially to the temp buffer — good cache locality
-     * on the write side.
-     */
-    for (int dx = 0; dx < lw; dx++) {
-        const int phys_row = lw - 1 - dx;         /* top phys row = rightmost logical col */
-        uint16_t *dst_row = &s_rotate_buf[phys_row * lh];
-        for (int dy = 0; dy < lh; dy++) {
-            dst_row[dy] = data[dy * lw + dx];
-        }
-    }
-
-    /*
-     * ── Step 2: Fast row-by-row memcpy into the single DPI framebuffer ──
-     *
-     * With num_fbs=1 + optimized memcpy, the write window is very short
-     * (~75 KB for a typical dirty rect), minimizing visible tearing.
-     */
     void *fb = NULL;
     esp_err_t ret = esp_lcd_dpi_panel_get_frame_buffer(s_panel_handle, 1, &fb);
     if (ret != ESP_OK || !fb) return ret ? ret : ESP_ERR_INVALID_STATE;
 
-    uint16_t *fb16 = (uint16_t *)fb;
+    const size_t fb_size = ST7701_PHYS_H_RES * ST7701_PHYS_V_RES * sizeof(uint16_t);
+    const int phys_x_start = ly;
     const int phys_y_start = (ST7701_PHYS_V_RES - 1) - (lx + lw - 1);
 
-    for (int r = 0; r < lw; r++) {
-        memcpy(&fb16[(phys_y_start + r) * ST7701_PHYS_H_RES + ly],
-               &s_rotate_buf[r * lh],
-               lh * sizeof(uint16_t));
+    /*
+     * ═══ PRIMARY PATH: PPA direct-to-framebuffer ═══
+     *
+     * PPA rotates the dirty rect and writes directly into the correct
+     * position within the DPI framebuffer.  No temp buffer, no memcpy.
+     * This eliminates ~6.6ms of memcpy overhead per flush.
+     */
+    ret = ppa_rotate_to_region(
+        data, lw, lh,                              /* input dirty rect          */
+        PPA_ROTATION_ANGLE,                         /* rotation angle            */
+        fb, fb_size,                                /* output: DPI framebuffer   */
+        ST7701_PHYS_H_RES, ST7701_PHYS_V_RES,      /* FB stride: 480×800        */
+        (uint32_t)phys_x_start,                     /* x offset in physical FB   */
+        (uint32_t)phys_y_start                      /* y offset in physical FB   */
+    );
+
+    if (ret == ESP_OK) {
+        s_perf_ppa_direct++;
+    } else {
+        /*
+         * ═══ FALLBACK: PPA to temp buffer + memcpy ═══
+         * (alignment constraints may prevent direct-to-FB)
+         */
+        const size_t need_pixels = (size_t)lw * lh;
+        const size_t alloc_bytes = (need_pixels * sizeof(uint16_t) + 63) & ~(size_t)63;
+
+        if (!s_rotate_buf || alloc_bytes > s_rotate_buf_bytes) {
+            if (s_rotate_buf) heap_caps_free(s_rotate_buf);
+            s_rotate_buf_bytes = alloc_bytes;
+            s_rotate_buf = heap_caps_aligned_alloc(64, alloc_bytes,
+                                                    MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA);
+            if (!s_rotate_buf) { s_rotate_buf_bytes = 0; return ESP_ERR_NO_MEM; }
+        }
+
+        ret = ppa_rotate_scale_rgb565_to(
+            data, lw, lh, PPA_ROTATION_ANGLE,
+            1.0f, 1.0f,
+            s_rotate_buf, alloc_bytes,
+            NULL, NULL, false
+        );
+
+        if (ret != ESP_OK) {
+            /* ═══ LAST RESORT: CPU rotation ═══ */
+            for (int dx = 0; dx < lw; dx++) {
+                const int phys_row = lw - 1 - dx;
+                uint16_t *dst_row = &s_rotate_buf[phys_row * lh];
+                for (int dy = 0; dy < lh; dy++) {
+                    dst_row[dy] = data[dy * lw + dx];
+                }
+            }
+            s_perf_cpu_fb++;
+        } else {
+            s_perf_ppa_buf++;
+        }
+
+        /* Copy rotated data to DPI framebuffer row-by-row */
+        uint16_t *fb16 = (uint16_t *)fb;
+        for (int r = 0; r < lw; r++) {
+            memcpy(&fb16[(phys_y_start + r) * ST7701_PHYS_H_RES + ly],
+                   &s_rotate_buf[r * lh],
+                   lh * sizeof(uint16_t));
+        }
+
+        /* Flush cache lines for memcpy-written region */
+        void *sync_start = &fb16[phys_y_start * ST7701_PHYS_H_RES];
+        size_t sync_size = (size_t)lw * ST7701_PHYS_H_RES * sizeof(uint16_t);
+        esp_cache_msync(sync_start, sync_size,
+                        ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED);
     }
 
-    /* ── Step 3: Flush modified cache lines so DPI controller sees the update ── */
-    void *sync_start = &fb16[phys_y_start * ST7701_PHYS_H_RES];
-    size_t sync_size = (size_t)lw * ST7701_PHYS_H_RES * sizeof(uint16_t);
-    esp_cache_msync(sync_start, sync_size,
-                    ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED);
+    int64_t t_end = esp_timer_get_time();
+
+    /* ── Performance logging (every 100 flush calls) ── */
+    s_perf_total_us += (t_end - t_start);
+    s_perf_count++;
+
+    if (s_perf_count >= 100) {
+        ESP_LOGI(TAG, "PERF avg/flush: %lld us  (direct:%d buf:%d cpu:%d)",
+                 s_perf_total_us / s_perf_count,
+                 s_perf_ppa_direct, s_perf_ppa_buf, s_perf_cpu_fb);
+        s_perf_total_us = 0;
+        s_perf_count = s_perf_ppa_direct = s_perf_ppa_buf = s_perf_cpu_fb = 0;
+    }
+
     return ESP_OK;
 }
 

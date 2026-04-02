@@ -178,6 +178,33 @@ esp_err_t ppa_rotate_scale_rgb565_to(const void *in_buf, uint32_t in_w, uint32_t
                                       uint32_t *out_w, uint32_t *out_h,
                                       bool byte_swap);
 
+/* =================== Direct-to-framebuffer rotation =================== */
+
+/**
+ * @brief Rotate an RGB565 block directly into a sub-region of a larger framebuffer.
+ *
+ * Unlike ppa_rotate_scale_rgb565_to(), this writes into an arbitrary position
+ * within a larger output picture (e.g. the DPI framebuffer), eliminating the
+ * need for a temporary rotation buffer and row-by-row memcpy.
+ *
+ * @param in_buf        Input pixel buffer (RGB565, DMA-capable)
+ * @param in_w          Input block width in pixels
+ * @param in_h          Input block height in pixels
+ * @param angle_deg     Rotation angle: 0, 90, 180, or 270
+ * @param out_buf       Output framebuffer (DMA-capable, cache-line aligned)
+ * @param out_buf_size  Total size of output framebuffer in bytes
+ * @param out_pic_w     Stride (width) of the output framebuffer in pixels
+ * @param out_pic_h     Height of the output framebuffer in pixels
+ * @param out_offset_x  X offset within the framebuffer to place rotated block
+ * @param out_offset_y  Y offset within the framebuffer to place rotated block
+ * @return ESP_OK on success
+ */
+esp_err_t ppa_rotate_to_region(const void *in_buf, uint32_t in_w, uint32_t in_h,
+                                uint32_t angle_deg,
+                                void *out_buf, size_t out_buf_size,
+                                uint32_t out_pic_w, uint32_t out_pic_h,
+                                uint32_t out_offset_x, uint32_t out_offset_y);
+
 #ifdef __cplusplus
 }
 #endif

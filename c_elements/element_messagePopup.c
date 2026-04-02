@@ -21,6 +21,7 @@ typedef enum {
     MSGPOP_OWNER_EXPORT,
     MSGPOP_OWNER_OTA_SD,
     MSGPOP_OWNER_WIFI_FORGET,
+    MSGPOP_OWNER_PROCESS_DISCARD,
 } message_popup_owner_t;
 
 typedef struct {
@@ -33,6 +34,9 @@ typedef struct {
 } message_popup_ctx_t;
 
 static message_popup_ctx_t g_msg_ctx = {0};
+
+/* Sentinel address used by process_detail to trigger the discard popup */
+static char s_process_discard_sentinel;
 
 static void message_popup_ctx_clear(void)
 {
@@ -152,6 +156,12 @@ static void message_popup_prepare_ctx(void *whoCallMe)
 
     if (whoCallMe == gui.element.wifiPopup.listContainer) {
         g_msg_ctx.type = MSGPOP_OWNER_WIFI_FORGET;
+        return;
+    }
+
+    if (whoCallMe == &s_process_discard_sentinel) {
+        g_msg_ctx.type = MSGPOP_OWNER_PROCESS_DISCARD;
+        g_msg_ctx.process = gui.tempProcessNode;
         return;
     }
 
@@ -316,6 +326,12 @@ static void message_popup_button1_clicked(lv_obj_t *mboxCont)
 
         case MSGPOP_OWNER_OTA_SD:
             LV_LOG_USER("Cancel OTA from SD");
+            message_popup_close(mboxCont);
+            break;
+
+        case MSGPOP_OWNER_PROCESS_DISCARD:
+            /* Cancel = keep editing, just close the popup */
+            LV_LOG_USER("Cancel discard — keep editing");
             message_popup_close(mboxCont);
             break;
 
@@ -485,6 +501,76 @@ static void message_popup_button2_clicked(lv_obj_t *mboxCont)
             message_popup_close(mboxCont);
             break;
 
+        case MSGPOP_OWNER_PROCESS_DISCARD: {
+            /* Discard = close process detail without saving */
+            LV_LOG_USER("Discard unsaved changes — closing process detail");
+            processNode *discard_pn = g_msg_ctx.process;
+            message_popup_close(mboxCont);
+            if (discard_pn != NULL && discard_pn->process.processDetails != NULL) {
+                sProcessDetail *pd = discard_pn->process.processDetails;
+
+                if (isNodeInList((void *)&(gui.page.processes.processElementsList), discard_pn, PROCESS_NODE) == NULL) {
+                    /* New process never saved — destroy UI and free node */
+                    lv_style_reset(&pd->textAreaStyle);
+                    lv_obj_delete(pd->processDetailParent);
+                    process_node_destroy(discard_pn);
+                    gui.tempProcessNode = NULL;
+                } else {
+                    /* Existing process — restore data + steps from deep copy backup */
+                    processNode *backup = getProcessDetailBackup();
+                    if (backup != NULL && backup->process.processDetails != NULL) {
+                        sProcessDetail *bpd = backup->process.processDetails;
+
+                        /* 1. Restore business data */
+                        pd->data = bpd->data;
+                        pd->data.somethingChanged = false;
+
+                        /* 2. Destroy current (modified) steps */
+                        stepNode *s = pd->stepElementsList.start;
+                        while (s != NULL) {
+                            stepNode *next = s->next;
+                            step_node_destroy(s);
+                            s = next;
+                        }
+
+                        /* 3. Move original steps from backup → live process */
+                        pd->stepElementsList = bpd->stepElementsList;
+                        bpd->stepElementsList.start = NULL;
+                        bpd->stepElementsList.end   = NULL;
+                        bpd->stepElementsList.size  = 0;
+
+                        /* 4. Restore checkup data if applicable */
+                        if (pd->checkup != NULL && bpd->checkup != NULL) {
+                            pd->checkup->data = bpd->checkup->data;
+                        }
+
+                        LV_LOG_USER("Restored process data + %d steps from backup",
+                                    pd->stepElementsList.size);
+                    } else {
+                        pd->data.somethingChanged = false;
+                        LV_LOG_USER("No backup available — closing without full restore");
+                    }
+
+                    /* Recalculate total time and update list element */
+                    calculateTotalTime(discard_pn);
+                    updateProcessElement(discard_pn);
+
+                    /* Close detail UI */
+                    lv_style_reset(&pd->textAreaStyle);
+                    lv_obj_delete(pd->processDetailParent);
+                }
+
+                /* Free backup node (steps already transferred, only shell remains) */
+                processNode *bk = getProcessDetailBackup();
+                if (bk != NULL) {
+                    clearProcessDetailBackup();   /* detach pointer */
+                    process_node_destroy(bk);     /* free the shell */
+                }
+            }
+            lv_scr_load(gui.page.menu.screen_mainMenu);
+            break;
+        }
+
         default:
             LV_LOG_USER("button2: unhandled type %d — closing popup", g_msg_ctx.type);
             message_popup_close(mboxCont);
@@ -630,4 +716,8 @@ void messagePopupCreate(const char * popupTitleText,const char * popupText,const
             lv_obj_set_style_text_font(gui.element.messagePopup.mBoxPopupButton2Label, ui->button_font, 0);
             lv_obj_align(gui.element.messagePopup.mBoxPopupButton2Label, LV_ALIGN_CENTER, 0, 0);
   }
+}
+
+void *getProcessDiscardSentinel(void) {
+    return &s_process_discard_sentinel;
 }

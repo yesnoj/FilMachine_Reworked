@@ -221,8 +221,10 @@ static void kb_commit_text(const char *kbText) {
             if(kbCtx.ownerData != NULL) {
                 sProcessDetail *pd = (sProcessDetail *)kbCtx.ownerData;
                 LV_LOG_USER("Press ok from processDetailNameTextArea");
-                snprintf(pd->data.processNameString, sizeof(pd->data.processNameString), "%s", kbText);
-                pd->data.somethingChanged = true;
+                if (strcmp(pd->data.processNameString, kbText) != 0) {
+                    snprintf(pd->data.processNameString, sizeof(pd->data.processNameString), "%s", kbText);
+                    pd->data.somethingChanged = true;
+                }
             }
             break;
 
@@ -230,8 +232,10 @@ static void kb_commit_text(const char *kbText) {
             if(kbCtx.ownerData != NULL) {
                 sStepDetail *sd = (sStepDetail *)kbCtx.ownerData;
                 LV_LOG_USER("Press ok from stepDetailNameTextArea");
-                snprintf(sd->data.stepNameString, sizeof(sd->data.stepNameString), "%s", kbText);
-                sd->data.somethingChanged = true;
+                if (strcmp(sd->data.stepNameString, kbText) != 0) {
+                    snprintf(sd->data.stepNameString, sizeof(sd->data.stepNameString), "%s", kbText);
+                    sd->data.somethingChanged = true;
+                }
             }
             break;
 
@@ -701,8 +705,8 @@ void initGlobals( void ) {
   gui.page.settings.settingsParams.multiRinseTime = 60;
   gui.page.settings.settingsParams.drainFillOverlapSetpoint = 100;
 
-  gui.element.rollerPopup.tempCelsiusOptions = createRollerValues(0,40,"",false);
-  gui.element.rollerPopup.tempFahrenheitOptions = createRollerValues(0,40,"",true);
+  gui.element.rollerPopup.tempCelsiusOptions = createRollerValues(TEMP_ROLLER_MIN,TEMP_ROLLER_MAX,"",false);
+  gui.element.rollerPopup.tempFahrenheitOptions = createRollerValues(TEMP_ROLLER_MIN,TEMP_ROLLER_MAX,"",true);
   gui.element.rollerPopup.minutesOptions = createRollerValues(0,240,"",false);
   gui.element.rollerPopup.secondsOptions = createRollerValues(0,59,"",false); 
   gui.element.rollerPopup.tempToleranceOptions = createRollerValues(0,5,"0.",false);
@@ -1090,6 +1094,10 @@ void readConfigFile(const char *path, bool enableLog) {
 	      f_read( fp, &nodeP->process.processDetails->data.isTempControlled, sizeof(nodeP->process.processDetails->data.isTempControlled), &bytes_read );
 	      f_read( fp, &nodeP->process.processDetails->data.isPreferred, sizeof(nodeP->process.processDetails->data.isPreferred), &bytes_read );
 	      f_read( fp, &nodeP->process.processDetails->data.filmType, sizeof(nodeP->process.processDetails->data.filmType), &bytes_read );
+	      /* Clamp temp loaded from old files: if below roller minimum (15), default to 20°C */
+	      if (nodeP->process.processDetails->data.temp < 15) {
+	          nodeP->process.processDetails->data.temp = 20;
+	      }
 	      f_read( fp, &nodeP->process.processDetails->data.timeMins, sizeof(nodeP->process.processDetails->data.timeMins), &bytes_read );
 	      f_read( fp, &nodeP->process.processDetails->data.timeSecs, sizeof(nodeP->process.processDetails->data.timeSecs), &bytes_read );
 	

@@ -167,6 +167,16 @@ typedef enum {
 /* Checkup placeholder */
 #define checkupEllipsis_text					"..."
 
+/* Temperature roller range */
+#define TEMP_ROLLER_MIN  15
+#define TEMP_ROLLER_MAX  40
+
+/* Discard unsaved changes popup */
+#define discardChangesTitle_text                "Unsaved Changes"
+#define discardChangesBody_text                 "Close without saving?\nAll changes will be lost."
+#define discardChangesNo_text                   "Cancel"
+#define discardChangesYes_text                  "Discard"
+
 /* Step source format */
 #define stepSourceFmt_text						"From:%s"
 
@@ -1587,6 +1597,9 @@ void filterPopupCreate(void);
 // @file element_messagePopup.c
 void messagePopupCreate(const char *popupTitleText, const char *popupText, const char *textButton1, const char *textButton2, void *whoCallMe);
 void event_messagePopup(lv_event_t *e);
+void *getProcessDiscardSentinel(void);
+processNode *getProcessDetailBackup(void);
+void clearProcessDetailBackup(void);
 // @file element_cleanPopup.c
 void event_cleanPopup(lv_event_t *e);
 void cleanPopup(void);

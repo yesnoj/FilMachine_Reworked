@@ -175,13 +175,13 @@ static const ui_profile_t ui_profile_480x320 __attribute__((unused)) = {
     },
 
     .step_detail = {
-        .modal_w = 350,
+        .modal_w = 380,
         .modal_h = 300,
         .title_y = -10,
-        .title_line_w = 310,
+        .title_line_w = 340,
         .title_line_y = 23,
         .form_row_x = -15,
-        .form_row_w = 325,
+        .form_row_w = 355,
         .form_row_h = 40,
         .row_label_x = -10,
         .dropdown_list_h = 50,

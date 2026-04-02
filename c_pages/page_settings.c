@@ -155,7 +155,9 @@ void event_settings_handler(lv_event_t * e)
     if(act_cb == gui.page.settings.tempSensorTuneButton){
       if(code == LV_EVENT_SHORT_CLICKED) {
           LV_LOG_USER("TUNE short click");
-          rollerPopupCreate(gui.element.rollerPopup.tempCelsiusOptions,tuneTempPopupTitle_text,gui.page.settings.tempSensorTuneButton, gui.page.settings.settingsParams.calibratedTemp, ORANGE);
+          rollerPopupCreate(gui.element.rollerPopup.tempCelsiusOptions,tuneTempPopupTitle_text,gui.page.settings.tempSensorTuneButton,
+                            gui.page.settings.settingsParams.calibratedTemp >= TEMP_ROLLER_MIN ? gui.page.settings.settingsParams.calibratedTemp - TEMP_ROLLER_MIN : 0,
+                            ORANGE);
         }
       if(code == LV_EVENT_LONG_PRESSED) {
           LV_LOG_USER("TUNE Long click - Resetting calibration");

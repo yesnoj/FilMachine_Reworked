@@ -9,6 +9,19 @@
 extern struct gui_components gui;
 processNode *existingProcess;
 
+/* Backup snapshot taken when process detail is opened — used for discard */
+static processNode *s_processBackup = NULL;
+
+static void process_detail_free_backup(void) {
+    if (s_processBackup != NULL) {
+        process_node_destroy(s_processBackup);
+        s_processBackup = NULL;
+    }
+}
+
+processNode *getProcessDetailBackup(void) { return s_processBackup; }
+void clearProcessDetailBackup(void) { s_processBackup = NULL; /* caller takes ownership */ }
+
 /**
  * Check whether the process detail form is ready to save.
  * Returns true if there's at least one change, one step, and a non-empty name.
@@ -38,11 +51,23 @@ static void process_detail_teardown(processNode *pn) {
 
     /* 2. Destroy the UI object tree */
     lv_obj_delete(pd->processDetailParent);
+
+    /* 3. Free backup snapshot */
+    process_detail_free_backup();
 }
 
-/** Handle Close button: teardown runtime, return to main menu */
+/** Handle Close button: teardown runtime, return to main menu.
+ *  If there are unsaved changes, show a confirmation popup first. */
 static void process_detail_close(processNode *pn) {
-    LV_LOG_USER("Close Process Detail");
+    sProcessDetail *pd = pn->process.processDetails;
+    if (pd != NULL && pd->data.somethingChanged) {
+        /* Show "discard unsaved changes?" popup */
+        messagePopupCreate(discardChangesTitle_text, discardChangesBody_text,
+                           discardChangesNo_text, discardChangesYes_text,
+                           getProcessDiscardSentinel());
+        return;
+    }
+    LV_LOG_USER("Close Process Detail (no changes)");
     process_detail_teardown(pn);
     lv_scr_load(gui.page.menu.screen_mainMenu);
 }
@@ -50,6 +75,7 @@ static void process_detail_close(processNode *pn) {
 /** Handle film type selection (Color / B&W labels) */
 static void process_detail_set_film_type(processNode *pn, filmType_t ft) {
     sProcessDetail *pd = pn->process.processDetails;
+    if (ft == pd->data.filmType) return;  /* no change */
     pd->data.filmType = ft;
     pd->data.somethingChanged = true;
 
@@ -108,6 +134,10 @@ static void process_detail_save(processNode *pn) {
         }
         qSysAction(SAVE_PROCESS_CONFIG);
 
+        /* Save succeeded — update the backup to reflect new saved state */
+        process_detail_free_backup();
+        s_processBackup = deepCopyProcessNode(pn);
+
         updateProcessElement(pn);
         if (gui.page.processes.isFiltered == 1)
             filterAndDisplayProcesses();
@@ -137,9 +167,12 @@ static void process_detail_run(processNode *pn) {
 static void process_detail_handle_temp_control(processNode *pn, lv_obj_t *obj) {
     sProcessDetail *pd = pn->process.processDetails;
 
-    LV_LOG_USER("Temperature controlled : %s", lv_obj_has_state(obj, LV_STATE_CHECKED) ? "On" : "Off");
-    pd->data.somethingChanged = true;
-    pd->data.isTempControlled = lv_obj_has_state(obj, LV_STATE_CHECKED);
+    bool newVal = lv_obj_has_state(obj, LV_STATE_CHECKED);
+    LV_LOG_USER("Temperature controlled : %s", newVal ? "On" : "Off");
+    if (newVal != pd->data.isTempControlled) {
+        pd->data.somethingChanged = true;
+    }
+    pd->data.isTempControlled = newVal;
 
     /* Enable/disable temperature and tolerance fields based on temp control state */
     if (pd->data.isTempControlled) {
@@ -199,7 +232,7 @@ static void process_detail_refresh_save_button(processNode *pn, lv_obj_t *obj) {
     if (obj == pd->processSaveButton) {
         if (process_detail_is_valid(pd)) {
             lv_obj_clear_state(pd->processSaveButton, LV_STATE_DISABLED);
-            lv_obj_add_state(pd->processDetailCloseButton, LV_STATE_DISABLED);
+            /* Close button stays enabled — confirmation popup handles unsaved changes */
             lv_obj_add_state(pd->processRunButton, LV_STATE_DISABLED);
             LV_LOG_USER("Updated SAVE button : ENABLED");
         }
@@ -284,6 +317,7 @@ if(existingProcess != NULL) {
           return;
       }
       gui.tempProcessNode->process.processDetails->data.filmType = BLACK_AND_WHITE_FILM;
+      gui.tempProcessNode->process.processDetails->data.temp = 20;  /* default 20°C */
       gui.tempProcessNode->process.isFiltered = false;
   }
 
@@ -293,6 +327,15 @@ if(existingProcess != NULL) {
   const ui_process_detail_layout_t *ui = &ui_get_profile()->process_detail;
   processNode *pn = gui.tempProcessNode;
   sProcessDetail *pd = pn->process.processDetails;
+
+  /* Snapshot current process so we can restore on discard (data + steps) */
+  process_detail_free_backup();
+  if (existingProcess != NULL) {
+      s_processBackup = deepCopyProcessNode(pn);
+      if (s_processBackup == NULL) {
+          LV_LOG_USER("Warning: failed to create process backup for discard");
+      }
+  }
 
   memset(&pd->nameKeyboardCtx, 0, sizeof(pd->nameKeyboardCtx));
   pd->nameKeyboardCtx.owner = KB_OWNER_PROCESS;

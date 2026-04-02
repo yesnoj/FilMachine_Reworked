@@ -9,6 +9,12 @@
 
 extern struct gui_components gui;
 
+/* Backup of step data taken when the step detail popup opens (edit mode).
+ * If the user presses Cancel, we restore from this backup so that any
+ * roller/keyboard changes made during the edit are reverted.             */
+static sStepData  s_stepDataBackup;
+static bool       s_hasStepBackup = false;
+
 /**
  * Check whether the step detail form has valid inputs for saving.
  * Returns true if the name is non-empty AND at least one of mins/secs > 0.
@@ -57,6 +63,7 @@ static void step_detail_save(stepNode *sn, processNode *proc) {
     }
 
     sn->step.stepDetails->data.somethingChanged = false;
+    s_hasStepBackup = false;  /* Save committed — discard the backup */
     lv_obj_send_event(sn->step.stepDetails->stepSaveButton, LV_EVENT_REFRESH, NULL);
 
     proc->process.processDetails->data.somethingChanged = true;
@@ -68,9 +75,16 @@ static void step_detail_save(stepNode *sn, processNode *proc) {
     lv_msgbox_close(sn->step.stepDetails->stepDetailParent);
 }
 
-/** Handle Cancel button click: reset swipe, close popup */
+/** Handle Cancel button click: restore backup data, reset swipe, close popup */
 static void step_detail_cancel(stepNode *sn) {
     LV_LOG_USER("Pressed gui.tempStepNode->step.stepDetails->stepCancelButton");
+
+    /* Restore step data from the backup taken when the popup was opened */
+    if (s_hasStepBackup && sn->step.stepDetails != NULL) {
+        sn->step.stepDetails->data = s_stepDataBackup;
+        s_hasStepBackup = false;
+    }
+
     step_detail_reset_swipe(sn);
     lv_msgbox_close(sn->step.stepDetails->stepDetailParent);
 }
@@ -81,35 +95,40 @@ static void step_detail_handle_value_changed(stepNode *sn, lv_obj_t *obj) {
 
     if (obj == sd->stepTypeDropDownList) {
         uint32_t sel = lv_dropdown_get_selected(sd->stepTypeDropDownList);
-        if (sel == CHEMISTRY) {
-            sd->data.type = CHEMISTRY;
-            LV_LOG_USER("Selected stepTypeDropDownList: CHEMISTRY (%d)", sd->data.type);
-            lv_label_set_text(sd->stepTypeHelpIcon, chemical_icon);
-        } else if (sel == RINSE) {
-            sd->data.type = RINSE;
-            LV_LOG_USER("Selected stepTypeDropDownList: RINSE (%d)", sd->data.type);
-            lv_label_set_text(sd->stepTypeHelpIcon, rinse_icon);
-        } else if (sel == MULTI_RINSE) {
-            sd->data.type = MULTI_RINSE;
-            LV_LOG_USER("Selected stepTypeDropDownList: MULTI_RINSE (%d)", sd->data.type);
-            lv_label_set_text(sd->stepTypeHelpIcon, multiRinse_icon);
+        uint8_t newType = sd->data.type;  /* default: no change */
+        if (sel == CHEMISTRY)  newType = CHEMISTRY;
+        else if (sel == RINSE) newType = RINSE;
+        else if (sel == MULTI_RINSE) newType = MULTI_RINSE;
+
+        if (newType != sd->data.type) {
+            sd->data.type = newType;
+            if (newType == CHEMISTRY)       lv_label_set_text(sd->stepTypeHelpIcon, chemical_icon);
+            else if (newType == RINSE)      lv_label_set_text(sd->stepTypeHelpIcon, rinse_icon);
+            else if (newType == MULTI_RINSE) lv_label_set_text(sd->stepTypeHelpIcon, multiRinse_icon);
+            LV_LOG_USER("Selected stepTypeDropDownList: %d", sd->data.type);
+            sd->data.somethingChanged = true;
+            lv_obj_send_event(sd->stepSaveButton, LV_EVENT_REFRESH, NULL);
         }
-        sd->data.somethingChanged = true;
-        lv_obj_send_event(sd->stepSaveButton, LV_EVENT_REFRESH, NULL);
     }
 
     if (obj == sd->stepDiscardAfterSwitch) {
-        sd->data.discardAfterProc = lv_obj_has_state(obj, LV_STATE_CHECKED);
-        sd->data.somethingChanged = true;
-        lv_obj_send_event(sd->stepSaveButton, LV_EVENT_REFRESH, NULL);
-        LV_LOG_USER("Discard After : %s", lv_obj_has_state(obj, LV_STATE_CHECKED) ? "On" : "Off");
+        bool newVal = lv_obj_has_state(obj, LV_STATE_CHECKED);
+        if (newVal != sd->data.discardAfterProc) {
+            sd->data.discardAfterProc = newVal;
+            sd->data.somethingChanged = true;
+            lv_obj_send_event(sd->stepSaveButton, LV_EVENT_REFRESH, NULL);
+            LV_LOG_USER("Discard After : %s", newVal ? "On" : "Off");
+        }
     }
 
     if (obj == sd->stepSourceDropDownList) {
-        sd->data.source = lv_dropdown_get_selected(sd->stepSourceDropDownList);
-        sd->data.somethingChanged = true;
-        lv_obj_send_event(sd->stepSaveButton, LV_EVENT_REFRESH, NULL);
-        LV_LOG_USER("Selected gui.tempStepNode->step.stepDetails->stepSourceDropDownList %d", sd->data.source);
+        uint8_t newSource = lv_dropdown_get_selected(sd->stepSourceDropDownList);
+        if (newSource != sd->data.source) {
+            sd->data.source = newSource;
+            sd->data.somethingChanged = true;
+            lv_obj_send_event(sd->stepSaveButton, LV_EVENT_REFRESH, NULL);
+            LV_LOG_USER("Selected stepSourceDropDownList %d", sd->data.source);
+        }
     }
 }
 
@@ -242,6 +261,14 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
 
       /* Store parent process reference for context-based event handling */
       gui.tempStepNode->step.stepDetails->parentProcess = referenceNode;
+
+      /* Backup step data so Cancel can restore it (edit mode only) */
+      if (existingStep != NULL) {
+          s_stepDataBackup = gui.tempStepNode->step.stepDetails->data;
+          s_hasStepBackup  = true;
+      } else {
+          s_hasStepBackup  = false;
+      }
 
       /* Local aliases */
       stepNode *sn = gui.tempStepNode;
