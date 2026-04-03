@@ -57,10 +57,10 @@ RM = /Users/francescoprochilo/.espressif/tools/cmake/3.30.2/CMake.app/Contents/b
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/francescoprochilo/Desktop/filmachine_simulator_V2
+CMAKE_SOURCE_DIR = /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/francescoprochilo/Desktop/filmachine_simulator_V2/build800
+CMAKE_BINARY_DIR = /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -132,9 +132,9 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/francescoprochilo/Desktop/filmachine_simulator_V2/build800/CMakeFiles /Users/francescoprochilo/Desktop/filmachine_simulator_V2/build800//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/francescoprochilo/Desktop/filmachine_simulator_V2/build800/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -1625,6 +1625,30 @@ tests/test_helpers.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_helpers.c.s
 .PHONY : tests/test_helpers.c.s
 
+tests/test_live_sync.o: tests/test_live_sync.c.o
+.PHONY : tests/test_live_sync.o
+
+# target to build an object file
+tests/test_live_sync.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_live_sync.c.o
+.PHONY : tests/test_live_sync.c.o
+
+tests/test_live_sync.i: tests/test_live_sync.c.i
+.PHONY : tests/test_live_sync.i
+
+# target to preprocess a source file
+tests/test_live_sync.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_live_sync.c.i
+.PHONY : tests/test_live_sync.c.i
+
+tests/test_live_sync.s: tests/test_live_sync.c.s
+.PHONY : tests/test_live_sync.s
+
+# target to generate assembly for a file
+tests/test_live_sync.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/filmachine_test.dir/build.make CMakeFiles/filmachine_test.dir/tests/test_live_sync.c.s
+.PHONY : tests/test_live_sync.c.s
+
 tests/test_navigation.o: tests/test_navigation.c.o
 .PHONY : tests/test_navigation.o
 
@@ -2159,6 +2183,9 @@ help:
 	@echo "... tests/test_helpers.o"
 	@echo "... tests/test_helpers.i"
 	@echo "... tests/test_helpers.s"
+	@echo "... tests/test_live_sync.o"
+	@echo "... tests/test_live_sync.i"
+	@echo "... tests/test_live_sync.s"
 	@echo "... tests/test_navigation.o"
 	@echo "... tests/test_navigation.i"
 	@echo "... tests/test_navigation.s"

@@ -215,7 +215,7 @@ static void test_ota_wifi_popup(void)
     TEST_ASSERT_NOT_NULL(p->statusLabel, "status label should exist");
 
     /* PIN should be 5 digits */
-    TEST_ASSERT(strlen(p->otaPin) == 5, "PIN should be 5 digits");
+    TEST_ASSERT(strlen(p->otaPin) == 8, "PIN should be 8 digits (WPA2 min)");
     test_printf("         [INFO] Wi-Fi popup open, PIN: %s\n", p->otaPin);
 
     /* Close the popup */

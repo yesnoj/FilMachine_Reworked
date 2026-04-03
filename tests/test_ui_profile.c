@@ -59,8 +59,8 @@ static void test_profile_values_match_original(void)
     TEST_ASSERT_EQ(ui->process_detail.steps_label_y, 38, "steps_label_y should be 38");
     TEST_ASSERT_EQ(ui->process_detail.info_label_y, 38,  "info_label_y should be 38");
     TEST_ASSERT_EQ(ui->process_detail.temp_ctrl_y, -20,  "temp_ctrl_y should be -20");
-    TEST_ASSERT_EQ(ui->process_detail.close_w, 45, "close_w should be 45");
-    TEST_ASSERT_EQ(ui->process_detail.close_h, 45, "close_h should be 45");
+    TEST_ASSERT_EQ(ui->process_detail.close_w, 53, "close_w should be 53");
+    TEST_ASSERT_EQ(ui->process_detail.close_h, 53, "close_h should be 53");
 
     /* Step detail */
     TEST_ASSERT(ui->step_detail.label_font != NULL, "step_detail.label_font must not be NULL");

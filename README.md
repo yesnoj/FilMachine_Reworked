@@ -2,7 +2,7 @@
 
 FilMachine is an automated film processing machine designed for photographic film development. It handles the entire process: chemical baths, water rinses, temperature regulation, and motor-driven film agitation — all controlled through a 3.5" color touchscreen display.
 
-The project includes a **desktop simulator** (SDL2 + LVGL) that reproduces the full touchscreen UI on macOS/Linux, enabling rapid development and testing without physical hardware, plus an **automated test suite** with 147 tests. All three supported boards compile from the same codebase with board selection at compile time. A **Flutter companion app** connects via WebSocket and provides full remote control from any mobile device on the same network.
+The project includes a **desktop simulator** (SDL2 + LVGL) that reproduces the full touchscreen UI on macOS/Linux, enabling rapid development and testing without physical hardware, plus an **automated test suite** with 180 tests. All three supported boards compile from the same codebase with board selection at compile time. A **Flutter companion app** connects via WebSocket and provides full remote control from any mobile device on the same network.
 
 ---
 
@@ -110,7 +110,8 @@ FilMachine_Simulator_v2/
 │   ├── element_drainPopup.c       #   Drain process UI with animated tank bars
 │   ├── element_splashPopup.c      #   Splash screen config popup with live preview
 │   ├── element_selfcheckPopup.c   #   Self-check diagnostic wizard (7-phase hardware test)
-│   └── element_otaWifiPopup.c     #   Wi-Fi OTA update popup (IP + PIN + progress)
+│   ├── element_otaWifiPopup.c     #   Wi-Fi OTA update popup (IP + PIN + progress)
+│   └── element_wifiPopup.c       #   Wi-Fi connection popup (scan, connect, status)
 │
 ├── c_fonts/                       # Custom icon fonts (5 sizes: 15/20/30/40/100px)
 │   │                              #   + 8 custom splash title fonts (size 48px each)
@@ -151,6 +152,12 @@ FilMachine_Simulator_v2/
 │   ├── test_tools.c               #   Maintenance tools
 │   ├── test_edge_cases.c          #   Boundary conditions & error paths
 │   ├── test_utilities.c           #   Helper function tests
+│   ├── test_ota.c                 #   OTA update UI & Wi-Fi popup tests
+│   ├── test_websocket.c           #   WebSocket command tests
+│   ├── test_new_settings.c        #   Extended settings tests
+│   ├── test_selfcheck.c           #   Self-check wizard tests
+│   ├── test_live_sync.c           #   Live sync integration tests
+│   ├── test_ui_profile.c          #   UI profile validation & sensor stubs
 │   └── test_destroy_and_lifecycle.c # Memory cleanup & object destruction
 │
 ├── lvgl/                          # LVGL 9.2.2 library (auto-cloned on first build)
@@ -254,9 +261,11 @@ cd FilMachine_Simulator_v2
 # First-time setup: set target to esp32p4 (creates sdkconfig from defaults)
 idf.py set-target esp32p4
 
-# Build with P4 board flag
-idf.py -D CMAKE_C_FLAGS="-DBOARD_JC4880P433" build
+# Build — board is auto-detected from IDF_TARGET (no manual -DBOARD flag needed)
+idf.py build
 ```
+
+Board selection is automatic: the `main/CMakeLists.txt` sets `-DBOARD_JC4880P433` when `IDF_TARGET` is `esp32p4`, and `-DBOARD_MAKERFABS_S3` otherwise. No manual `-D CMAKE_C_FLAGS` flag is needed.
 
 Note: switching between ESP32-S3 and ESP32-P4 targets requires `idf.py fullclean` because the toolchains are different (Xtensa vs RISC-V).
 
@@ -376,6 +385,11 @@ Results are displayed in the terminal and saved to `test_results/test_results_YY
 | **Edge Cases** | Boundary conditions, max limits, error recovery |
 | **Utilities** | Helper functions, linked list operations, drain/fill overlap calculation |
 | **UI Profile & Sensors** | Profile values match original, popup dimensions, font pointers, sensor stubs, board constants |
+| **OTA** | OTA update UI, Wi-Fi popup PIN generation, progress popup |
+| **WebSocket** | WebSocket command handling, async LVGL dispatch |
+| **New Settings** | Extended settings validation |
+| **Self-check** | Self-check diagnostic wizard phases |
+| **LiveSync** | Live sync between WebSocket state and LVGL UI |
 | **Destroy & Lifecycle** | Memory cleanup, object destruction |
 
 The persistence tests verify that every field (process name, temperature, tolerance, film type, preferred flag, step names, durations, types, sources, discard flags) survives a full save-and-reload cycle.
@@ -441,6 +455,7 @@ The app uses **Provider** for state management. A central `MachineService` (Chan
 
 This is where you manage your film development recipes. Each process is a sequence of steps the machine executes in order. The list shows each process with its name, total time, film type icon, and a star if marked as preferred.
 
+- **Process count:** The section header dynamically shows the number of processes (e.g., "8 Processes"). The "+" button stays positioned right after the label text regardless of the count.
 - **Create:** Tap "+" to add a new process
 - **Edit:** Tap a process to open its detail view
 - **Duplicate:** Swipe left to reveal the duplicate button
@@ -533,7 +548,7 @@ All settings are saved automatically to the SD card when changed. Slider values 
 - **Statistics** — Completed processes, total time, cleaning cycles, stopped processes
 - **Software info** — Firmware version (read from the running binary, also shown on the splash screen) and serial number
 - **Update from SD** — Firmware OTA update from a `.bin` file on the SD card. The system reads the firmware version from the binary header, asks for confirmation, then writes it to the secondary OTA partition. After completion, a reboot applies the new firmware. If the update fails, the bootloader automatically rolls back to the previous version.
-- **Wi-Fi update** — Starts a local web server on the board. A popup shows the board's IP address (e.g. `http://192.168.1.42`) and a randomly generated 5-digit PIN for security. The user opens the URL in any browser on the same network and sees a drag-and-drop upload page styled with the FilMachine branding. After uploading the `.bin` firmware file, it is streamed directly to the OTA partition. The board reboots automatically when complete. Wi-Fi credentials (SSID/password) are configured in the Settings tab.
+- **Wi-Fi update** — Starts a local web server on the board. A popup shows the board's IP address (e.g. `http://192.168.1.42`) and a randomly generated 8-digit PIN for security. The user opens the URL in any browser on the same network and sees a drag-and-drop upload page styled with the FilMachine branding. After uploading the `.bin` firmware file, it is streamed directly to the OTA partition. The board reboots automatically when complete. Wi-Fi credentials (SSID/password) are configured in the Settings tab.
 
 ---
 
@@ -554,7 +569,7 @@ The board supports two methods for over-the-air firmware updates. Both use the E
 
 1. Configure Wi-Fi SSID and password in Settings
 2. Go to Tools → "Wi-Fi update" and press the play button
-3. The popup shows the board's local IP and a 5-digit PIN
+3. The popup shows the board's local IP and a 8-digit PIN
 4. On any device on the same network, open `http://<board-ip>` in a browser
 5. You'll see a drag-and-drop page — drop the `.bin` file or click to select it
 6. The firmware uploads in streaming and the board reboots automatically
@@ -711,7 +726,7 @@ idf.py size                      # Show firmware size breakdown
 
 # ── Firmware (ESP32-P4) ──────────────────────────────────
 idf.py set-target esp32p4       # First time: set RISC-V target
-idf.py -D CMAKE_C_FLAGS="-DBOARD_JC4880P433" build
+idf.py build                     # Board auto-detected from IDF_TARGET
 idf.py flash                     # Flash (bootloader offset 0x2000)
 
 # ── Switching between S3 and P4 ─────────────────────────

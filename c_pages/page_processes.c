@@ -64,12 +64,11 @@ void refreshProcessesLabel(void) {
 
         /* Keep the "+" button right after the label text */
         if (gui.page.processes.newProcessButton) {
+            lv_obj_set_width(gui.page.processes.processesLabel, LV_SIZE_CONTENT);
             lv_obj_update_layout(gui.page.processes.processesLabel);
-            const ui_profile_t *ui = ui_get_profile();
-            lv_coord_t label_w = lv_obj_get_width(gui.page.processes.processesLabel);
-            lv_coord_t new_x   = ui->processes.title_label_x + label_w + 4;
-            lv_obj_align(gui.page.processes.newProcessButton,
-                         LV_ALIGN_TOP_LEFT, new_x, ui->processes.add_btn_y);
+            lv_obj_align_to(gui.page.processes.newProcessButton,
+                            gui.page.processes.processesLabel,
+                            LV_ALIGN_OUT_RIGHT_MID, 8, 0);
         }
     }
 }
@@ -107,7 +106,7 @@ static void initProcesses(void){
       gui.page.processes.iconNewProcessLabel = lv_label_create(gui.page.processes.newProcessButton);
       lv_label_set_text(gui.page.processes.iconNewProcessLabel, newProcess_icon);
       lv_obj_set_style_text_font(gui.page.processes.iconNewProcessLabel, ui->processes.header_icon_font, 0);
-      lv_obj_align(gui.page.processes.iconNewProcessLabel, LV_ALIGN_RIGHT_MID, ui->processes.add_icon_x, ui->processes.add_icon_y);
+      lv_obj_align(gui.page.processes.iconNewProcessLabel, LV_ALIGN_CENTER, 0, 0);
 
 
   //FILTER BUTTON CONTAINER

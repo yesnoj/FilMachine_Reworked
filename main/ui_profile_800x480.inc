@@ -32,7 +32,7 @@ static const ui_profile_t ui_profile_800x480 __attribute__((unused)) = {
     },
 
     .processes = {
-        .add_btn_w = 260,
+        .add_btn_w = 50,
         .add_btn_h = 50,
         .add_btn_x = -20,
         .add_btn_y = -12,

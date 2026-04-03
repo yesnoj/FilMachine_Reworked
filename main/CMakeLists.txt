@@ -38,3 +38,10 @@ idf_component_register(
         ${WIFI_DEPS}
         ${P4_DEPS}
 )
+
+# ── Board selection ──
+if(IDF_TARGET STREQUAL "esp32p4")
+    target_compile_definitions(${COMPONENT_LIB} PUBLIC BOARD_JC4880P433)
+else()
+    target_compile_definitions(${COMPONENT_LIB} PUBLIC BOARD_MAKERFABS_S3)
+endif()

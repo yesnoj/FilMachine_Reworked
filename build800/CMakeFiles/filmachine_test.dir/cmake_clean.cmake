@@ -101,6 +101,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/filmachine_test.dir/tests/test_filter.c.o.d"
   "CMakeFiles/filmachine_test.dir/tests/test_helpers.c.o"
   "CMakeFiles/filmachine_test.dir/tests/test_helpers.c.o.d"
+  "CMakeFiles/filmachine_test.dir/tests/test_live_sync.c.o"
+  "CMakeFiles/filmachine_test.dir/tests/test_live_sync.c.o.d"
   "CMakeFiles/filmachine_test.dir/tests/test_navigation.c.o"
   "CMakeFiles/filmachine_test.dir/tests/test_navigation.c.o.d"
   "CMakeFiles/filmachine_test.dir/tests/test_new_settings.c.o"

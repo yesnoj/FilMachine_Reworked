@@ -1,8 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/sim_build/cmake_install.cmake",
-		"/Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/sim_build/lvgl/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
