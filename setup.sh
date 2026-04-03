@@ -50,7 +50,7 @@ cp "$OLD/lvgl_config/lv_conf.h"       "$NEW/lvgl_config/"
 
 # 5. Copy stub redirect headers
 echo "[5/6] Creating stub redirect headers..."
-for f in esp_err.h esp_log.h esp_timer.h esp_heap_caps.h esp_lcd_panel_dev.h esp_lcd_panel_ops.h esp_lcd_ili9488.h esp_lcd_touch.h esp_lcd_touch_ft5x06.h esp_vfs_fat.h sdmmc_cmd.h; do
+for f in esp_err.h esp_log.h esp_timer.h esp_heap_caps.h esp_lcd_panel_dev.h esp_lcd_panel_ops.h esp_lcd_touch.h esp_vfs_fat.h sdmmc_cmd.h; do
     echo '#include "esp_stubs.h"' > "$NEW/stub/$f"
 done
 echo '#include "fatfs_stubs.h"' > "$NEW/stub/ff.h"

@@ -3,23 +3,21 @@
  * @brief Board selection and shared board-wide constants.
  *
  * The active board is chosen at compile time via -DBOARD_xxx.
- * Each board header defines hardware constants such as pins, display/touch
- * driver type and resolution.
+ * The only supported hardware board is the JC4880P433 (ESP32-P4).
+ * The simulator uses BOARD_SIMULATOR for SDL2-based desktop builds.
  */
 
 #ifndef BOARD_H
 #define BOARD_H
 
-#if defined(BOARD_JC4880P433)
-    #include "board_jc4880p433.h"
-#elif defined(BOARD_MAKERFABS_S3)
-    #include "board_makerfabs_s3.h"
-#elif defined(BOARD_SIMULATOR)
+#if defined(BOARD_SIMULATOR)
     #include "board_simulator.h"
+#elif defined(BOARD_JC4880P433)
+    #include "board_jc4880p433.h"
 #else
-    /* No -DBOARD_xxx flag passed — default to the original board. */
-    #define BOARD_MAKERFABS_S3      1
-    #include "board_makerfabs_s3.h"
+    /* Default to P4 board for ESP-IDF builds */
+    #define BOARD_JC4880P433    1
+    #include "board_jc4880p433.h"
 #endif
 
 #ifndef LCD_H_RES
@@ -35,9 +33,5 @@
 /* Shared derived constants */
 #define BYTES_PER_PIXEL         2   /* RGB565 = 16 bit */
 #define LVGL_BUF_SIZE           (LCD_H_RES * (LCD_V_RES / 10) * BYTES_PER_PIXEL)
-
-/* Optional generic scaling helper retained for non-profiled values. */
-#define LAYOUT_REF_V_RES        320
-#define SCALE_Y(v)              ((int32_t)(v) * LCD_V_RES / LAYOUT_REF_V_RES)
 
 #endif /* BOARD_H */

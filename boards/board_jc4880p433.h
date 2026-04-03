@@ -1,6 +1,6 @@
 /**
  * @file board_jc4880p433.h
- * @brief Pin definitions for the ESP32-P4 board — 4.3" ST7701S 480×800 → landscape 480×320
+ * @brief Pin definitions for the ESP32-P4 board — 4.3" ST7701S 480×800 → landscape 800×480
  *
  * Board: GUITION JC4880P433
  * MCU:   ESP32-P4 RISC-V dual-core @ 400 MHz, 32 MB PSRAM (HEX), 16 MB Flash
@@ -50,7 +50,7 @@
  * Touch — GT911 capacitive, I2C
  * Uses the standard esp_lcd_touch_gt911 driver.
  * Physical touch area: 480×800 portrait.
- * Coordinate remapping to 480×320 landscape is done
+ * Coordinate remapping to 800×480 landscape is done
  * in the custom touch callback (see FilMachine.c).
  * ═══════════════════════════════════════════════ */
 #define TOUCH_DRIVER_GT911          1
@@ -128,7 +128,6 @@
 
 /* ═══════════════════════════════════════════════
  * Additional sensors
- * Same sensor support as JC4827W543 board.
  * GPIO assignment provisional — depends on expansion wiring.
  * ═══════════════════════════════════════════════ */
 #define HAS_FLOW_METER              1

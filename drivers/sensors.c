@@ -1,6 +1,6 @@
 /**
  * @file sensors.c
- * @brief Drivers for additional sensors on the JC4827W543 board.
+ * @brief Drivers for additional sensors (flow, water level, hall effect).
  *
  * All functions are guarded by HAS_xxx defines from the active board header,
  * so they compile to no-ops on boards that lack the sensor hardware.

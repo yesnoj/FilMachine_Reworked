@@ -121,7 +121,7 @@ static inline void test_printf(const char *fmt, ...)
 
 
 /* ═══════════════════════════════════════════════
- * UI Coordinate Constants (480x320 display)
+ * UI Coordinate Constants (800x480 display)
  * ═══════════════════════════════════════════════ */
 
 /* Home page — startButton is 60x60 at BOTTOM_RIGHT(-10,-7) → center (440,283) */

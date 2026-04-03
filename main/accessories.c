@@ -876,7 +876,7 @@ void init_Pins_and_Buses( void ) {
     gpio_set_level(LCD_BLK, LCD_BK_LIGHT_OFF_LEVEL);
 
 #if defined(DISPLAY_BUS_PARALLEL16)
-    ESP_LOGI(TAG, "Set RD Pin High");		/* With out this the Display on the Makerfabs board will not function! */
+    ESP_LOGI(TAG, "Set RD Pin High");		/* Required for parallel-16 bus displays */
     gpio_config_t rd_gpio_config = {
         .mode = GPIO_MODE_OUTPUT,
         .pin_bit_mask = 1ULL << LCD_RD
