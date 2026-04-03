@@ -52,6 +52,28 @@ void event_tabProcesses(lv_event_t * e)
 }
  
 
+/* ── Update "N Processes" title label and reposition "+" button ── */
+void refreshProcessesLabel(void) {
+    if (gui.page.processes.processesLabel) {
+        int32_t count = gui.page.processes.processElementsList.size;
+        if (count > 0)
+            lv_label_set_text_fmt(gui.page.processes.processesLabel,
+                                  "%"PRIi32" " Processes_text, count);
+        else
+            lv_label_set_text(gui.page.processes.processesLabel, Processes_text);
+
+        /* Keep the "+" button right after the label text */
+        if (gui.page.processes.newProcessButton) {
+            lv_obj_update_layout(gui.page.processes.processesLabel);
+            const ui_profile_t *ui = ui_get_profile();
+            lv_coord_t label_w = lv_obj_get_width(gui.page.processes.processesLabel);
+            lv_coord_t new_x   = ui->processes.title_label_x + label_w + 4;
+            lv_obj_align(gui.page.processes.newProcessButton,
+                         LV_ALIGN_TOP_LEFT, new_x, ui->processes.add_btn_y);
+        }
+    }
+}
+
 static void initProcesses(void){
   /*********************
   *    PAGE HEADER
@@ -144,6 +166,7 @@ void processes(void)
 
   lv_obj_clear_flag(gui.page.processes.processesSection, LV_OBJ_FLAG_HIDDEN);
   lv_style_set_line_color(&gui.page.processes.style_sectionTitleLine, lv_palette_main(LV_PALETTE_GREEN));
+  refreshProcessesLabel();
 }
 
 

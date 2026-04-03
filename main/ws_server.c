@@ -22,7 +22,8 @@ extern struct gui_components gui;
 extern void checkup(processNode *pn);
 static sCheckupData *find_active_checkup(void);
 static processNode *find_active_checkup_process(void);
-extern void calculateTotalTime(processNode *processNode);
+extern void calculateTotalTimeData(processNode *processNode);  /* Thread-safe: no LVGL */
+extern void calculateTotalTime(processNode *processNode);      /* LVGL thread only */
 extern void *allocateAndInitializeNode(NodeType_t type);
 static void ws_queue_lvgl_action(void (*fn)(void *), void *arg);
 
@@ -112,10 +113,17 @@ static void ws_async_update_process(void *user_data) {
     if (!pn) return;
     if (gui.page.processes.processesListContainer == NULL) return;
 
+    /* Update the process-detail total-time label (safe — we are in LVGL thread) */
+    calculateTotalTime(pn);
+
     if (pn->process.processElement != NULL) {
         /* Element exists → update in-place */
         updateProcessElement(pn);
     }
+
+    /* Live-update the process detail popup if it's open for this process */
+    process_detail_live_update(pn);
+
     LV_LOG_USER("[WS] Process element updated in-place");
 }
 
@@ -126,6 +134,7 @@ static void ws_async_create_process_element(void *user_data) {
     if (gui.page.processes.processesListContainer == NULL) return;
 
     processElementCreate(pn, -1);
+    refreshProcessesLabel();
     LV_LOG_USER("[WS] New process element created in UI");
 }
 
@@ -150,6 +159,7 @@ static void ws_async_refresh_process_list(void *user_data) {
     if (gui.page.processes.processesListContainer == NULL) return;
     lv_obj_clean(gui.page.processes.processesListContainer);
     loadSDCardProcesses();
+    refreshProcessesLabel();
     LV_LOG_USER("[WS] Process list UI rebuilt");
 }
 
@@ -176,7 +186,27 @@ static void ws_async_delete_and_refresh(void *user_data) {
         lv_obj_clean(gui.page.processes.processesListContainer);
         loadSDCardProcesses();
     }
+    refreshProcessesLabel();
     LV_LOG_USER("[WS] Process deleted and UI refreshed");
+}
+
+/* Free an orphaned stepNode in the LVGL thread after delete_step.
+ * The node was already unlinked from the step list on the httpd thread
+ * but its LVGL element (with a style reference) may still be alive.
+ * We must delete the LVGL element first (which resets the style via
+ * LV_EVENT_DELETE), then free the C memory. */
+static void ws_async_free_orphan_step(void *user_data) {
+    stepNode *sn = (stepNode *)user_data;
+    if (!sn) return;
+    if (sn->step.stepElement != NULL) {
+        lv_obj_del(sn->step.stepElement);
+        sn->step.stepElement = NULL;
+    }
+    /* Style was reset by LV_EVENT_DELETE (or was never initialised).
+     * Now safe to free the node memory. */
+    if (sn->step.stepDetails) free(sn->step.stepDetails);
+    free(sn);
+    LV_LOG_USER("[WS] Orphan step element deleted and memory freed");
 }
 
 /* ── Async callback: start process on LVGL thread ───────────────── */
@@ -195,6 +225,7 @@ static void ws_async_start_process(void *user_data) {
        assuming processDetail page is open */
     pn->process.processDetails->checkup->checkupParent = NULL;
     lv_style_reset(&pn->process.processDetails->textAreaStyle);
+    pn->process.processDetails->processTotalTimeValue = NULL;
     checkup(pn);
     LV_LOG_USER("[WS] Process started via remote: %s",
                 pn->process.processDetails->data.processNameString);
@@ -368,6 +399,23 @@ static processNode *find_active_checkup_process(void) {
     return NULL;
 }
 
+/* ── JSON-safe string copy: escape control chars, backslash and quotes ── */
+static int json_escape(char *dst, int dstsize, const char *src) {
+    int w = 0;
+    for (int i = 0; src[i] != '\0' && w < dstsize - 6; i++) {
+        unsigned char c = (unsigned char)src[i];
+        if (c == '"')       { dst[w++] = '\\'; dst[w++] = '"'; }
+        else if (c == '\\') { dst[w++] = '\\'; dst[w++] = '\\'; }
+        else if (c == '\n') { dst[w++] = '\\'; dst[w++] = 'n'; }
+        else if (c == '\r') { dst[w++] = '\\'; dst[w++] = 'r'; }
+        else if (c == '\t') { dst[w++] = '\\'; dst[w++] = 't'; }
+        else if (c < 0x20)  { w += snprintf(dst + w, dstsize - w, "\\u%04x", c); }
+        else                { dst[w++] = c; }
+    }
+    dst[w] = '\0';
+    return w;
+}
+
 /* ── Build full state JSON ───────────────────────────────────────── */
 static int build_state_json(char *buf, int bufsize) {
     struct machineSettings *s = &gui.page.settings.settingsParams;
@@ -409,6 +457,16 @@ static int build_state_json(char *buf, int bufsize) {
         }
         total_steps = idx;
     }
+
+    /* Escape all user-facing strings for JSON safety */
+    char esc_proc[MAX_PROC_NAME_LEN * 6 + 1];
+    char esc_step[MAX_PROC_NAME_LEN * 6 + 1];
+    char esc_next[MAX_PROC_NAME_LEN * 6 + 1];
+    char esc_ssid[sizeof(s->wifiSSID) * 6 + 1];
+    json_escape(esc_proc, sizeof(esc_proc), proc_name);
+    json_escape(esc_step, sizeof(esc_step), step_name);
+    json_escape(esc_next, sizeof(esc_next), next_step_name);
+    json_escape(esc_ssid, sizeof(esc_ssid), s->wifiSSID);
 
     int n = snprintf(buf, bufsize,
         "{\"type\":\"state\",\"data\":{"
@@ -470,6 +528,7 @@ static int build_state_json(char *buf, int bufsize) {
         /* Statistics */
         "\"statsCompleted\":%lu,"
         "\"statsTotalMins\":%llu,"
+        "\"statsTotalSecs\":%lu,"
         "\"statsStopped\":%lu,"
         "\"statsClean\":%lu,"
         /* Alarm */
@@ -495,7 +554,7 @@ static int build_state_json(char *buf, int bufsize) {
         (unsigned)s->wbContainerMl,
         (unsigned)s->chemistryVolume,
         s->wifiEnabled ? "true" : "false",
-        s->wifiSSID,
+        esc_ssid,
         wifi_is_connected() ? "true" : "false",
         (find_active_checkup_process() != NULL) ? "true" : "false",
         ck->isProcessing ? "true" : "false",
@@ -510,10 +569,10 @@ static int build_state_json(char *buf, int bufsize) {
         (unsigned)ck->stepFillWaterStatus,
         (unsigned)ck->stepReachTempStatus,
         (unsigned)ck->stepCheckFilmStatus,
-        /* Process runtime detail */
-        proc_name,
-        step_name,
-        next_step_name,
+        /* Process runtime detail — escaped for JSON safety */
+        esc_proc,
+        esc_step,
+        esc_next,
         (unsigned)cur_step_idx,
         (unsigned)total_steps,
         (unsigned)step_mins,
@@ -533,6 +592,7 @@ static int build_state_json(char *buf, int bufsize) {
         /* Statistics */
         (unsigned long)st->completed,
         (unsigned long long)st->totalMins,
+        (unsigned long)st->totalSecs,
         (unsigned long)st->stopped,
         (unsigned long)st->clean,
         alarm_is_active() ? "true" : "false",
@@ -557,12 +617,14 @@ static int build_process_list_json(char *buf, int bufsize) {
         int sn = 1;
         stepNode *snode = node->process.processDetails->stepElementsList.start;
         int si = 0;
-        while (snode != NULL && sn < (int)sizeof(steps_buf) - 150) {
+        while (snode != NULL && sn < (int)sizeof(steps_buf) - 200) {
             sStepData *sd = &snode->step.stepDetails->data;
+            char esc_step_name[MAX_PROC_NAME_LEN * 6 + 1];
+            json_escape(esc_step_name, sizeof(esc_step_name), sd->stepNameString);
             if (si > 0) steps_buf[sn++] = ',';
             sn += snprintf(steps_buf + sn, sizeof(steps_buf) - sn,
                 "{\"name\":\"%s\",\"mins\":%u,\"secs\":%u,\"type\":%d,\"source\":%u,\"discard\":%s}",
-                sd->stepNameString,
+                esc_step_name,
                 (unsigned)sd->timeMins,
                 (unsigned)sd->timeSecs,
                 (int)sd->type,
@@ -574,13 +636,16 @@ static int build_process_list_json(char *buf, int bufsize) {
         }
         snprintf(steps_buf + sn, sizeof(steps_buf) - sn, "]");
 
+        char esc_proc_name[MAX_PROC_NAME_LEN * 6 + 1];
+        json_escape(esc_proc_name, sizeof(esc_proc_name), pd->processNameString);
+
         if (idx > 0) buf[n++] = ',';
         n += snprintf(buf + n, bufsize - n,
             "{\"index\":%d,\"name\":\"%s\",\"temp\":%u,\"tolerance\":%.1f,"
             "\"tempControlled\":%s,\"preferred\":%s,\"filmType\":%d,"
             "\"mins\":%u,\"secs\":%u,\"steps\":%s}",
             idx,
-            pd->processNameString,
+            esc_proc_name,
             (unsigned)pd->temp,
             pd->tempTolerance,
             pd->isTempControlled ? "true" : "false",
@@ -786,7 +851,7 @@ static void ws_handle_command(const char *msg, int len) {
         else { list->end->next = pn; pn->prev = list->end; }
         list->end = pn;
         list->size++;
-        calculateTotalTime(pn);
+        calculateTotalTimeData(pn);
         qSysAction(SAVE_PROCESS_CONFIG);
         ws_broadcast_process_list();
         ws_queue_lvgl_action(ws_async_create_process_element, pn);
@@ -808,7 +873,7 @@ static void ws_handle_command(const char *msg, int len) {
         if (strstr(msg, "\"tempControlled\":"))pd->isTempControlled = ws_json_get_bool(msg, "tempControlled", pd->isTempControlled);
         if (strstr(msg, "\"preferred\":"))     pd->isPreferred = ws_json_get_bool(msg, "preferred", pd->isPreferred);
         if (strstr(msg, "\"filmType\":"))      pd->filmType = (filmType_t)ws_json_get_int(msg, "filmType", (int)pd->filmType);
-        calculateTotalTime(pn);
+        calculateTotalTimeData(pn);
         qSysAction(SAVE_PROCESS_CONFIG);
         ws_broadcast_process_list();
         ws_queue_lvgl_action(ws_async_update_process, pn);
@@ -857,11 +922,10 @@ static void ws_handle_command(const char *msg, int len) {
         else { sl->end->next = sn; sn->prev = sl->end; }
         sl->end = sn;
         sl->size++;
-        calculateTotalTime(pn);
+        calculateTotalTimeData(pn);
         qSysAction(SAVE_PROCESS_CONFIG);
         ws_broadcast_process_list();
-        /* No lv_async_call here — the app sends get_processes at the end
-         * of a batch edit, which triggers a single UI refresh. */
+        ws_queue_lvgl_action(ws_async_update_process, pn);
         LV_LOG_USER("[WS] add_step to process %d: '%s'", pi, sd->stepNameString);
         return;
     }
@@ -883,10 +947,14 @@ static void ws_handle_command(const char *msg, int len) {
         if (strstr(msg, "\"type\":"))    sd->type = (chemicalType_t)ws_json_get_int(msg, "type", (int)sd->type);
         if (strstr(msg, "\"source\":"))  sd->source = (uint8_t)ws_json_get_int(msg, "source", sd->source);
         if (strstr(msg, "\"discard\":")) sd->discardAfterProc = (uint8_t)(ws_json_get_bool(msg, "discard", sd->discardAfterProc) ? 1 : 0);
-        calculateTotalTime(pn);
+        LV_LOG_USER("[WS] edit_step: name='%s' mins=%d secs=%d type=%d src=%d discard=%d somethingChanged=%d",
+            sd->stepNameString, sd->timeMins, sd->timeSecs, sd->type, sd->source,
+            sd->discardAfterProc, sd->somethingChanged);
+        calculateTotalTimeData(pn);
         qSysAction(SAVE_PROCESS_CONFIG);
         ws_broadcast_process_list();
-        LV_LOG_USER("[WS] edit_step process=%d step=%d", pi, si);
+        ws_queue_lvgl_action(ws_async_update_process, pn);
+        LV_LOG_USER("[WS] edit_step process=%d step=%d — queued LVGL update", pi, si);
         return;
     }
 
@@ -902,11 +970,11 @@ static void ws_handle_command(const char *msg, int len) {
         if (sn->prev) sn->prev->next = sn->next; else sl->start = sn->next;
         if (sn->next) sn->next->prev = sn->prev; else sl->end = sn->prev;
         sl->size--;
-        free(sn->step.stepDetails);
-        free(sn);
-        calculateTotalTime(pn);
+        calculateTotalTimeData(pn);
         qSysAction(SAVE_PROCESS_CONFIG);
         ws_broadcast_process_list();
+        ws_queue_lvgl_action(ws_async_free_orphan_step, sn);
+        ws_queue_lvgl_action(ws_async_update_process, pn);
         LV_LOG_USER("[WS] delete_step process=%d step=%d", pi, si);
         return;
     }
@@ -940,6 +1008,7 @@ static void ws_handle_command(const char *msg, int len) {
         }
         qSysAction(SAVE_PROCESS_CONFIG);
         ws_broadcast_process_list();
+        ws_queue_lvgl_action(ws_async_update_process, pn);
         LV_LOG_USER("[WS] reorder_step process=%d from=%d to=%d", pi, from, to);
         return;
     }

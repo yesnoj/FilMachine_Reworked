@@ -56,11 +56,14 @@ static void process_card_set_time_label(processNode *process) {
     if(process == NULL || process->process.processTime == NULL || process->process.processDetails == NULL) return;
 
     uint32_t estimated_seconds = process_card_estimated_runtime_seconds(process);
-    lv_label_set_text_fmt(process->process.processTime, "%" PRIu32 "m%" PRIu8 "s / ~%" PRIu32 "m%" PRIu32 "s",
+    int steps = process->process.processDetails->stepElementsList.size;
+    lv_label_set_text_fmt(process->process.processTime,
+        "%" PRIu32 "m%" PRIu8 "s / ~%" PRIu32 "m%" PRIu32 "s - %d step%s",
         process->process.processDetails->data.timeMins,
         process->process.processDetails->data.timeSecs,
         estimated_seconds / 60U,
-        estimated_seconds % 60U);
+        estimated_seconds % 60U,
+        steps, steps == 1 ? "" : "s");
 }
 
 
@@ -85,8 +88,9 @@ processNode *addProcessElement(processNode	*processToAdd) {
       gui.page.processes.processElementsList.end = processToAdd;
       gui.page.processes.processElementsList.end->next = NULL;
       gui.page.processes.processElementsList.size++;
+      refreshProcessesLabel();
 
-      LV_LOG_USER("Processes available %"PRIi32" after",gui.page.processes.processElementsList.size -1); 
+      LV_LOG_USER("Processes available %"PRIi32" after",gui.page.processes.processElementsList.size -1);
       return processToAdd;
 }
 
@@ -138,8 +142,9 @@ bool deleteProcessElement( processNode	*processToDelete ) {
     lv_obj_delete( processToDelete->process.processElement );
     process_node_destroy( processToDelete );                                      // Free the list entry itself
 		gui.page.processes.processElementsList.size--;
+    refreshProcessesLabel();
 
-    LV_LOG_USER("Processes available %"PRIi32"",gui.page.processes.processElementsList.size); 
+    LV_LOG_USER("Processes available %"PRIi32"",gui.page.processes.processElementsList.size);
 		return true;
 	}
 	return false;

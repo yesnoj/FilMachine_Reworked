@@ -69,9 +69,10 @@ static void test_tools_statistics_display(void)
     TEST_ASSERT_NOT_NULL(gui.page.tools.toolStatStoppedProcessesValue,
                          "stopped processes value label");
 
-    test_printf("         [INFO] Stats: completed=%d, totalMins=%llu, stopped=%d, clean=%d\n",
+    test_printf("         [INFO] Stats: completed=%d, totalMins=%llu, totalSecs=%u, stopped=%d, clean=%d\n",
                 (int)gui.page.tools.machineStats.completed,
                 (unsigned long long)gui.page.tools.machineStats.totalMins,
+                (unsigned)gui.page.tools.machineStats.totalSecs,
                 (int)gui.page.tools.machineStats.stopped,
                 (int)gui.page.tools.machineStats.clean);
 
@@ -258,35 +259,38 @@ static void test_tools_stats_persistence(void)
     /* Save originals */
     uint32_t orig_completed = stats->completed;
     uint64_t orig_totalMins = stats->totalMins;
+    uint32_t orig_totalSecs = stats->totalSecs;
     uint32_t orig_stopped   = stats->stopped;
     uint32_t orig_clean     = stats->clean;
 
     /* Set known values */
     stats->completed = 7;
     stats->totalMins = 450;
+    stats->totalSecs = 30;
     stats->stopped   = 1;
     stats->clean     = 5;
 
-    test_printf("         [INFO] Stats set: completed=%d, totalMins=%llu, stopped=%d, clean=%d\n",
+    test_printf("         [INFO] Stats set: completed=%d, totalMins=%llu, totalSecs=%u, stopped=%d, clean=%d\n",
                 stats->completed, (unsigned long long)stats->totalMins,
-                stats->stopped, stats->clean);
+                (unsigned)stats->totalSecs, stats->stopped, stats->clean);
 
     /* Write stats (this should persist to config) */
     writeMachineStats(stats);
     test_pump(100);
 
     /* Verify we can read them back (create a temp structure) */
-    machineStatistics temp_stats = { .completed = 0, .totalMins = 0, .stopped = 0, .clean = 0 };
+    machineStatistics temp_stats = { .completed = 0, .totalMins = 0, .totalSecs = 0, .stopped = 0, .clean = 0 };
     readMachineStats(&temp_stats);
     test_pump(100);
 
-    test_printf("         [INFO] Stats read: completed=%d, totalMins=%llu, stopped=%d, clean=%d\n",
+    test_printf("         [INFO] Stats read: completed=%d, totalMins=%llu, totalSecs=%u, stopped=%d, clean=%d\n",
                 temp_stats.completed, (unsigned long long)temp_stats.totalMins,
-                temp_stats.stopped, temp_stats.clean);
+                (unsigned)temp_stats.totalSecs, temp_stats.stopped, temp_stats.clean);
 
     /* Restore originals */
     stats->completed = orig_completed;
     stats->totalMins = orig_totalMins;
+    stats->totalSecs = orig_totalSecs;
     stats->stopped   = orig_stopped;
     stats->clean     = orig_clean;
 

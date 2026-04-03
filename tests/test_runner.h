@@ -267,6 +267,9 @@ void test_suite_ui_profile(void);
 /** test_websocket.c — WebSocket server, JSON serialization, state broadcasts */
 void test_suite_websocket(void);
 
+/** test_live_sync.c — Live sync, real-time updates, tolerance roller, deferred free */
+void test_suite_live_sync(void);
+
 
 /* ═══════════════════════════════════════════════
  * External globals (defined in main/src)

@@ -610,6 +610,7 @@ typedef struct sRollerOwnerContext {
 typedef struct machineStatistics {
   uint32_t 	          		completed;
   uint64_t 	          		totalMins;
+  uint32_t 	          		totalSecs;   /* 0-59 — carries into totalMins */
   uint32_t 	          		stopped;
   uint32_t 	          		clean;
 } machineStatistics;
@@ -1660,10 +1661,13 @@ void menu(void);
 void event_processDetail(lv_event_t *e);
 void event_processDetail_style_delete(lv_event_t *e);
 void processDetail(lv_obj_t *referenceProcess);
+void process_detail_live_update(processNode *pn);
+void step_detail_live_update(stepNode *sn);
 // @file page_processes.c
 void event_processes_style_delete(lv_event_t *e);
 void event_tabProcesses(lv_event_t *e);
 void processes(void);
+void refreshProcessesLabel(void);
 // @file page_settings.c
 void event_settings_style_delete(lv_event_t *e);
 void event_settingPopupMBox(lv_event_t *e);
@@ -1742,7 +1746,8 @@ char *createRollerValues( uint32_t minVal, uint32_t maxVal, const char* extra_st
 uint8_t SD_init(void);
 void init_Pins_and_Buses(void);
 void initMCP23017Pins();
-void calculateTotalTime(processNode *processNode);
+void calculateTotalTimeData(processNode *processNode);  /* Thread-safe: data only, no LVGL */
+void calculateTotalTime(processNode *processNode);      /* LVGL thread only: data + label update */
 uint8_t calculatePercentage(uint32_t minutes, uint8_t seconds, uint32_t total_minutes, uint8_t total_seconds);
 int32_t convertCelsiusToFahrenheit(int32_t tempC);
 void updateProcessElement(processNode *process);

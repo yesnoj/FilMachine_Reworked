@@ -183,6 +183,10 @@ const char *wifi_get_ip_address(void) {
     return sim_wifi_connected ? "192.168.1.42" : NULL;
 }
 
+void wifi_boot_auto_connect(void) {
+    LV_LOG_USER("[WiFi SIM] wifi_boot_auto_connect — no-op in simulator");
+}
+
 #else
 /* ═══════════════════════════════════════════════════════════════
  *  REAL ESP32 IMPLEMENTATION

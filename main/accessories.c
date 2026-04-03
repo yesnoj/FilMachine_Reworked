@@ -709,7 +709,11 @@ void initGlobals( void ) {
   gui.element.rollerPopup.tempFahrenheitOptions = createRollerValues(TEMP_ROLLER_MIN,TEMP_ROLLER_MAX,"",true);
   gui.element.rollerPopup.minutesOptions = createRollerValues(0,240,"",false);
   gui.element.rollerPopup.secondsOptions = createRollerValues(0,59,"",false); 
-  gui.element.rollerPopup.tempToleranceOptions = createRollerValues(0,5,"0.",false);
+  /* Fixed tolerance values matching Flutter: ±0.3°, ±0.5°, ±1.0° */
+  {
+      const char *tol = "0.3\n0.5\n1.0";
+      gui.element.rollerPopup.tempToleranceOptions = strdup(tol);
+  }
 
   //gui.element.filterPopup.filterName = ""; // Not Required this will set this to some constant pointer which is not good...
   //gui.element.filterPopup.isColorFilter = FILM_TYPE_NA;   // This breaks filtering not needed
@@ -1005,7 +1009,7 @@ void readSettingsOnly(const char *path) {
 }
 
 void readConfigFile(const char *path, bool enableLog) {
-	
+
 	FIL				*fp;
 	FRESULT			res;
 	unsigned int	bytes_read;
@@ -1017,7 +1021,23 @@ void readConfigFile(const char *path, bool enableLog) {
 		return;
 	}
 
-  	if( (res = f_open( fp, path, FA_READ | FA_OPEN_EXISTING )) == FR_OK ) {
+	/* ── Crash recovery: if .cfg is missing but .tmp exists, the previous
+	 *    write completed successfully but the rename was interrupted.
+	 *    Recover by renaming .tmp → .cfg before proceeding. ── */
+	res = f_open(fp, path, FA_READ | FA_OPEN_EXISTING);
+	if (res != FR_OK) {
+	    char tmpPath[64];
+	    snprintf(tmpPath, sizeof(tmpPath), "%s.tmp", path);
+	    FRESULT tmpRes = f_open(fp, tmpPath, FA_READ | FA_OPEN_EXISTING);
+	    if (tmpRes == FR_OK) {
+	        f_close(fp);
+	        f_rename(tmpPath, path);
+	        LV_LOG_USER("Recovered config from %s → %s", tmpPath, path);
+	        res = f_open(fp, path, FA_READ | FA_OPEN_EXISTING);
+	    }
+	}
+
+  	if( res == FR_OK ) {
 	    // Load Machine Settings
 	    /* Zero the struct first so new fields (Wi-Fi etc.) get safe defaults
 	     * when reading an older, shorter config file */
@@ -1195,11 +1215,12 @@ void readConfigFile(const char *path, bool enableLog) {
 	        f_read( fp, &gui.page.tools.machineStats.completed, sizeof(gui.page.tools.machineStats.completed), &br );
 	        if(br > 0) {
 	            f_read( fp, &gui.page.tools.machineStats.totalMins, sizeof(gui.page.tools.machineStats.totalMins), &br );
+	            f_read( fp, &gui.page.tools.machineStats.totalSecs, sizeof(gui.page.tools.machineStats.totalSecs), &br );
 	            f_read( fp, &gui.page.tools.machineStats.stopped,   sizeof(gui.page.tools.machineStats.stopped),   &br );
 	            f_read( fp, &gui.page.tools.machineStats.clean,     sizeof(gui.page.tools.machineStats.clean),     &br );
-	            LV_LOG_USER("Loaded stats: completed=%"PRIu32" totalMins=%"PRIu64" stopped=%"PRIu32" clean=%"PRIu32"",
+	            LV_LOG_USER("Loaded stats: completed=%"PRIu32" totalMins=%"PRIu64" totalSecs=%"PRIu32" stopped=%"PRIu32" clean=%"PRIu32"",
 	                gui.page.tools.machineStats.completed, gui.page.tools.machineStats.totalMins,
-	                gui.page.tools.machineStats.stopped, gui.page.tools.machineStats.clean);
+	                gui.page.tools.machineStats.totalSecs, gui.page.tools.machineStats.stopped, gui.page.tools.machineStats.clean);
 	        } else {
 	            LV_LOG_USER("No stats section in config (old format) — starting from zero");
 	        }
@@ -1213,7 +1234,7 @@ void readConfigFile(const char *path, bool enableLog) {
 }
 
 void writeConfigFile( const char *path, bool enableLog ) {
-	
+
 	FIL				*fp;
 	FRESULT			res;
 	unsigned int	bytes_written;
@@ -1226,14 +1247,19 @@ void writeConfigFile( const char *path, bool enableLog ) {
 	}
 
     if (initErrors != INIT_ERROR_SD) {
-        LV_LOG_USER("Writing configuration file: %s", path);
-        res = f_unlink( path );
-        if(res != FR_OK && res != FR_NO_FILE) {
-            LV_LOG_USER("Error deleting configuration file: %s (res=%d)", path, res);
-        }
+        /* ── Crash-safe write: write to .tmp, then rename ──
+         * If the system crashes mid-write, the original .cfg is preserved.
+         * On next boot, readConfigFile recovers from .tmp if .cfg is missing. */
+        char tmpPath[64];
+        snprintf(tmpPath, sizeof(tmpPath), "%s.tmp", path);
 
-        if( ( res = f_open( fp, path, FA_WRITE | FA_CREATE_NEW ) ) != FR_OK ) {
-            LV_LOG_USER("Failed to open file for writing");
+        /* Remove stale temp file if any */
+        f_unlink(tmpPath);
+
+        LV_LOG_USER("Writing configuration file: %s (via %s)", path, tmpPath);
+
+        if( ( res = f_open( fp, tmpPath, FA_WRITE | FA_CREATE_NEW ) ) != FR_OK ) {
+            LV_LOG_USER("Failed to open temp file for writing (res=%d)", res);
             free(fp);
             return;
         }
@@ -1315,10 +1341,27 @@ void writeConfigFile( const char *path, bool enableLog ) {
         /* ── Machine statistics (appended after processes) ── */
         f_write( fp, &gui.page.tools.machineStats.completed,  sizeof(gui.page.tools.machineStats.completed),  &bytes_written );
         f_write( fp, &gui.page.tools.machineStats.totalMins,   sizeof(gui.page.tools.machineStats.totalMins),   &bytes_written );
+        f_write( fp, &gui.page.tools.machineStats.totalSecs,   sizeof(gui.page.tools.machineStats.totalSecs),   &bytes_written );
         f_write( fp, &gui.page.tools.machineStats.stopped,     sizeof(gui.page.tools.machineStats.stopped),     &bytes_written );
         f_write( fp, &gui.page.tools.machineStats.clean,       sizeof(gui.page.tools.machineStats.clean),       &bytes_written );
 
         f_close( fp );
+
+        /* ── Atomic swap: delete old config, rename temp → config ──
+         * The old file is only deleted after the new one is fully written
+         * and closed. If we crash between unlink and rename, the .tmp
+         * file is still complete and will be recovered on next boot. */
+        res = f_unlink(path);
+        if (res != FR_OK && res != FR_NO_FILE) {
+            LV_LOG_USER("Warning: could not delete old config (res=%d)", res);
+        }
+        res = f_rename(tmpPath, path);
+        if (res != FR_OK) {
+            LV_LOG_USER("Error: f_rename(%s → %s) failed (res=%d)", tmpPath, path, res);
+            /* The .tmp file is still valid — will be recovered on next boot */
+        } else {
+            LV_LOG_USER("Config saved successfully: %s", path);
+        }
 
         /* Notify connected WS clients (Flutter) about the updated data */
         ws_broadcast_process_list();
@@ -1414,19 +1457,19 @@ out1:
 	return ret;
 }
 
-void calculateTotalTime(processNode *processNode){
+/* Data-only version: sums step durations into processData.timeMins/timeSecs.
+ * Safe to call from ANY thread (no LVGL calls). */
+void calculateTotalTimeData(processNode *processNode){
     uint32_t mins = 0;
     uint8_t  secs = 0;
 
      stepList *stepElementsList;
- //    memset( &stepElementsList, 0, sizeof( stepElementsList ) );  // Not required! 
-     stepElementsList = &(processNode->process.processDetails->stepElementsList);   
+     stepElementsList = &(processNode->process.processDetails->stepElementsList);
 
             stepNode *stepNode;
-//            memset( &stepNode, 0, sizeof( stepNode ) );  // Not Required
             stepNode = stepElementsList->start;
 
-            while(stepNode != NULL){                
+            while(stepNode != NULL){
                 mins += stepNode->step.stepDetails->data.timeMins;
                 secs += stepNode->step.stepDetails->data.timeSecs;
 
@@ -1438,11 +1481,17 @@ void calculateTotalTime(processNode *processNode){
             }
     processNode->process.processDetails->data.timeMins = mins;
     processNode->process.processDetails->data.timeSecs = secs;
+    LV_LOG_USER("Process %p has a total time of %"PRIu32"min:%"PRIu8"sec", processNode, mins, secs);
+}
+
+/* Full version: recalculates data AND updates the LVGL label.
+ * Must be called from the LVGL thread only! */
+void calculateTotalTime(processNode *processNode){
+    calculateTotalTimeData(processNode);
 
     if(processNode->process.processDetails->processTotalTimeValue != NULL)
         lv_label_set_text_fmt(processNode->process.processDetails->processTotalTimeValue, "%"PRIu32"m%"PRIu8"s", processNode->process.processDetails->data.timeMins,
           processNode->process.processDetails->data.timeSecs);
-    LV_LOG_USER("Process %p has a total tilme of %"PRIu32"min:%"PRIu8"sec", processNode, mins, secs);
 }
 
 
@@ -1916,6 +1965,9 @@ void checkup_destroy(sCheckup *ckup) {
 
 void process_detail_destroy(sProcessDetail *pd) {
     if (pd == NULL) return;
+    /* Null out LVGL pointers to prevent stale access from async callbacks */
+    pd->processTotalTimeValue = NULL;
+    pd->processDetailParent   = NULL;
     /* Reset runtime style allocated during processDetail() creation */
     lv_style_reset(&pd->textAreaStyle);
     /* Free all steps in the step list */
@@ -2483,11 +2535,14 @@ static void process_list_set_time_label(processNode *process) {
     if(process == NULL || process->process.processTime == NULL || process->process.processDetails == NULL) return;
 
     uint32_t estimated_seconds = process_list_estimated_runtime_seconds(process);
-    lv_label_set_text_fmt(process->process.processTime, "%" PRIu32 "m%" PRIu8 "s / ~%" PRIu32 "m%" PRIu32 "s",
+    int steps = process->process.processDetails->stepElementsList.size;
+    lv_label_set_text_fmt(process->process.processTime,
+        "%" PRIu32 "m%" PRIu8 "s / ~%" PRIu32 "m%" PRIu32 "s - %d step%s",
         process->process.processDetails->data.timeMins,
         process->process.processDetails->data.timeSecs,
         estimated_seconds / 60U,
-        estimated_seconds % 60U);
+        estimated_seconds % 60U,
+        steps, steps == 1 ? "" : "s");
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

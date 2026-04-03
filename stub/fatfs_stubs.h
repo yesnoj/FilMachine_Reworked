@@ -163,6 +163,15 @@ static inline FRESULT f_unlink(const char *path) {
     return FR_OK;
 }
 
+static inline FRESULT f_rename(const char *path_old, const char *path_new) {
+    char local_old[256], local_new[256];
+    fatfs_local_path(path_old, local_old, sizeof(local_old));
+    fatfs_local_path(path_new, local_new, sizeof(local_new));
+    printf("[SIM] f_rename: %s -> %s\n", local_old, local_new);
+    if (rename(local_old, local_new) != 0) return FR_DISK_ERR;
+    return FR_OK;
+}
+
 static inline long f_size(FIL *fp) {
     return fp ? fp->file_size : 0;
 }

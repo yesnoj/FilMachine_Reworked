@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "FilMachine.h"
+#include "ws_server.h"
 
 extern struct gui_components gui;
 
@@ -72,7 +73,13 @@ static void step_detail_save(stepNode *sn, processNode *proc) {
     step_detail_reset_swipe(sn);
     calculateTotalTime(proc);
     updateStepElement(proc, sn);
-    lv_msgbox_close(sn->step.stepDetails->stepDetailParent);
+
+    /* Notify Flutter immediately so open step/process views update in real-time */
+    ws_broadcast_process_list();
+
+    lv_obj_t *popup = sn->step.stepDetails->stepDetailParent;
+    sn->step.stepDetails->stepDetailParent = NULL;
+    lv_msgbox_close(popup);
 }
 
 /** Handle Cancel button click: restore backup data, reset swipe, close popup */
@@ -86,7 +93,9 @@ static void step_detail_cancel(stepNode *sn) {
     }
 
     step_detail_reset_swipe(sn);
-    lv_msgbox_close(sn->step.stepDetails->stepDetailParent);
+    lv_obj_t *popup = sn->step.stepDetails->stepDetailParent;
+    sn->step.stepDetails->stepDetailParent = NULL;
+    lv_msgbox_close(popup);
 }
 
 /** Handle dropdown and switch value changes */
@@ -173,6 +182,94 @@ static void step_detail_refresh_save_button(stepNode *sn, lv_obj_t *obj) {
             lv_obj_add_state(sd->stepSaveButton, LV_STATE_DISABLED);
         }
     }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  Live-update the open step detail popup when data changes
+ *  externally (e.g. via Flutter / WebSocket edit_step).
+ *
+ *  Safety: skipped when the user has unsaved local edits
+ *  (somethingChanged == true) to avoid overwriting their work.
+ *  Called from the LVGL thread only (via process_detail_live_update).
+ * ═══════════════════════════════════════════════════════════════════ */
+void step_detail_live_update(stepNode *sn) {
+    if (sn == NULL || sn->step.stepDetails == NULL) {
+        LV_LOG_USER("[StepLiveUpdate] SKIP: sn=%p stepDetails=%p",
+            (void*)sn, sn ? (void*)sn->step.stepDetails : NULL);
+        return;
+    }
+    sStepDetail *sd = sn->step.stepDetails;
+
+    /* Only update if the step detail popup is actually open */
+    if (sd->stepDetailParent == NULL) {
+        LV_LOG_USER("[StepLiveUpdate] SKIP: stepDetailParent is NULL for step '%s'",
+            sd->data.stepNameString);
+        return;
+    }
+
+    LV_LOG_USER("[StepLiveUpdate] ENTER for step '%s' — popup is OPEN, somethingChanged=%d",
+        sd->data.stepNameString, sd->data.somethingChanged);
+
+    /* Don't overwrite if the user is editing locally */
+    if (sd->data.somethingChanged) {
+        LV_LOG_USER("[StepLiveUpdate] Skipped — local edits pending");
+        return;
+    }
+
+    char buf[12];
+
+    /* 1. Name */
+    if (sd->stepDetailNameTextArea != NULL) {
+        const char *cur = lv_textarea_get_text(sd->stepDetailNameTextArea);
+        if (cur == NULL || strcmp(cur, sd->data.stepNameString) != 0)
+            lv_textarea_set_text(sd->stepDetailNameTextArea, sd->data.stepNameString);
+    }
+
+    /* 2. Minutes */
+    if (sd->stepDetailMinTextArea != NULL) {
+        snprintf(buf, sizeof(buf), "%d", sd->data.timeMins);
+        const char *cur = lv_textarea_get_text(sd->stepDetailMinTextArea);
+        if (cur == NULL || strcmp(cur, buf) != 0)
+            lv_textarea_set_text(sd->stepDetailMinTextArea, buf);
+    }
+
+    /* 3. Seconds */
+    if (sd->stepDetailSecTextArea != NULL) {
+        snprintf(buf, sizeof(buf), "%d", sd->data.timeSecs);
+        const char *cur = lv_textarea_get_text(sd->stepDetailSecTextArea);
+        if (cur == NULL || strcmp(cur, buf) != 0)
+            lv_textarea_set_text(sd->stepDetailSecTextArea, buf);
+    }
+
+    /* 4. Type dropdown */
+    if (sd->stepTypeDropDownList != NULL) {
+        uint32_t sel = lv_dropdown_get_selected(sd->stepTypeDropDownList);
+        if ((uint32_t)sd->data.type != sel)
+            lv_dropdown_set_selected(sd->stepTypeDropDownList, sd->data.type);
+    }
+
+    /* 5. Source dropdown */
+    if (sd->stepSourceDropDownList != NULL) {
+        uint32_t sel = lv_dropdown_get_selected(sd->stepSourceDropDownList);
+        if ((uint32_t)sd->data.source != sel)
+            lv_dropdown_set_selected(sd->stepSourceDropDownList, sd->data.source);
+    }
+
+    /* 6. Discard-after switch */
+    if (sd->stepDiscardAfterSwitch != NULL) {
+        bool isChecked = lv_obj_has_state(sd->stepDiscardAfterSwitch, LV_STATE_CHECKED);
+        if (sd->data.discardAfterProc && !isChecked)
+            lv_obj_add_state(sd->stepDiscardAfterSwitch, LV_STATE_CHECKED);
+        else if (!sd->data.discardAfterProc && isChecked)
+            lv_obj_clear_state(sd->stepDiscardAfterSwitch, LV_STATE_CHECKED);
+    }
+
+    /* Also refresh the backup so Cancel restores the latest remote data */
+    if (s_hasStepBackup) {
+        s_stepDataBackup = sd->data;
+    }
+
+    LV_LOG_USER("[StepLiveUpdate] Step detail refreshed from external data");
 }
 
 /*--------------------------------------------------------------

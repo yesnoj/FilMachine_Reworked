@@ -12,7 +12,12 @@
 
 #include "FilMachine.h"
 #include "ws_server.h"
+#ifdef ESP_PLATFORM
 #include "esp_random.h"
+#else
+#include <stdlib.h>
+static inline uint32_t esp_random(void) { return (uint32_t)rand(); }
+#endif
 
 extern struct gui_components gui;
 

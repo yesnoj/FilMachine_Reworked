@@ -338,19 +338,20 @@ def write_step(f, s):
 def write_stats(f, stats=None):
     """Write machine statistics at the end of the config file"""
     if stats is None:
-        stats = {"completed": 0, "totalMins": 0, "stopped": 0, "clean": 0}
-    f.write(struct.pack('<I', stats["completed"]))   # uint32_t
-    f.write(struct.pack('<Q', stats["totalMins"]))    # uint64_t
-    f.write(struct.pack('<I', stats["stopped"]))      # uint32_t
-    f.write(struct.pack('<I', stats["clean"]))         # uint32_t
+        stats = {"completed": 0, "totalMins": 0, "totalSecs": 0, "stopped": 0, "clean": 0}
+    f.write(struct.pack('<I', stats["completed"]))    # uint32_t
+    f.write(struct.pack('<Q', stats["totalMins"]))     # uint64_t
+    f.write(struct.pack('<I', stats.get("totalSecs", 0)))  # uint32_t (new)
+    f.write(struct.pack('<I', stats["stopped"]))       # uint32_t
+    f.write(struct.pack('<I', stats["clean"]))          # uint32_t
 
-def write_config(filename, settings, processes):
+def write_config(filename, settings, processes, stats=None):
     with open(filename, "wb") as f:
         write_settings(f, settings)
         f.write(struct.pack('<l', len(processes)))    # int32_t (processList.size)
         for p in processes:
             write_process(f, p)
-        write_stats(f)  # Machine statistics (zeroed)
+        write_stats(f, stats)  # Machine statistics
     print(f"  Written: {filename} ({os.path.getsize(filename)} bytes, {len(processes)} processes)")
 
 # ═══════════════════════════════════════════════
@@ -393,8 +394,21 @@ def main():
     backup_path = os.path.join(args.output, 'FilMachine_Backup.cfg')
     json_path = os.path.join(args.output, 'FilMachine.json')
 
-    write_config(cfg_path, settings, processes)
-    write_config(backup_path, settings, processes)
+    # Generate random stats when using random settings
+    stats = None
+    if args.random_settings:
+        import random as rng
+        stats = {
+            "completed": rng.randint(1, 50),
+            "totalMins": rng.randint(10, 2000),
+            "totalSecs": rng.randint(0, 59),
+            "stopped": rng.randint(0, 10),
+            "clean": rng.randint(0, 20),
+        }
+        print(f"  Stats: completed={stats['completed']}, totalMins={stats['totalMins']}, totalSecs={stats['totalSecs']}, stopped={stats['stopped']}, clean={stats['clean']}")
+
+    write_config(cfg_path, settings, processes, stats)
+    write_config(backup_path, settings, processes, stats)
 
     # JSON for human inspection
     data = {"settingsParams": settings, "processes": processes}

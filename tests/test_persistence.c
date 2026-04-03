@@ -335,18 +335,20 @@ static void test_stats_persistence(void)
     /* Save originals */
     uint32_t orig_completed = stats->completed;
     uint64_t orig_totalMins = stats->totalMins;
+    uint32_t orig_totalSecs = stats->totalSecs;
     uint32_t orig_stopped   = stats->stopped;
     uint32_t orig_clean     = stats->clean;
 
     /* Set distinctive values */
     stats->completed = 5;
     stats->totalMins = 120;
+    stats->totalSecs = 45;
     stats->stopped   = 2;
     stats->clean     = 3;
 
-    test_printf("         [INFO] Set stats: completed=%d, totalMins=%llu, stopped=%d, clean=%d\n",
+    test_printf("         [INFO] Set stats: completed=%d, totalMins=%llu, totalSecs=%u, stopped=%d, clean=%d\n",
                 stats->completed, (unsigned long long)stats->totalMins,
-                stats->stopped, stats->clean);
+                (unsigned)stats->totalSecs, stats->stopped, stats->clean);
 
     /* Write config */
     writeConfigFile(TEST_CONFIG_FILE, false);
@@ -355,6 +357,7 @@ static void test_stats_persistence(void)
     /* Clobber stats to 0 */
     stats->completed = 0;
     stats->totalMins = 0;
+    stats->totalSecs = 0;
     stats->stopped   = 0;
     stats->clean     = 0;
 
@@ -363,17 +366,19 @@ static void test_stats_persistence(void)
     test_pump(100);
 
     /* Verify all stats restored */
-    test_printf("         [INFO] Restored stats: completed=%d, totalMins=%llu, stopped=%d, clean=%d\n",
+    test_printf("         [INFO] Restored stats: completed=%d, totalMins=%llu, totalSecs=%u, stopped=%d, clean=%d\n",
                 stats->completed, (unsigned long long)stats->totalMins,
-                stats->stopped, stats->clean);
+                (unsigned)stats->totalSecs, stats->stopped, stats->clean);
     TEST_ASSERT_EQ((int)stats->completed, 5, "completed count should be restored");
     TEST_ASSERT_EQ((int)stats->totalMins, 120, "totalMins should be restored");
+    TEST_ASSERT_EQ((int)stats->totalSecs, 45, "totalSecs should be restored");
     TEST_ASSERT_EQ((int)stats->stopped, 2, "stopped count should be restored");
     TEST_ASSERT_EQ((int)stats->clean, 3, "clean count should be restored");
 
     /* Restore originals */
     stats->completed = orig_completed;
     stats->totalMins = orig_totalMins;
+    stats->totalSecs = orig_totalSecs;
     stats->stopped   = orig_stopped;
     stats->clean     = orig_clean;
 

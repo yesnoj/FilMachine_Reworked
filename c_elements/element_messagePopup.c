@@ -512,7 +512,10 @@ static void message_popup_button2_clicked(lv_obj_t *mboxCont)
                 if (isNodeInList((void *)&(gui.page.processes.processElementsList), discard_pn, PROCESS_NODE) == NULL) {
                     /* New process never saved — destroy UI and free node */
                     lv_style_reset(&pd->textAreaStyle);
-                    lv_obj_delete(pd->processDetailParent);
+                    lv_obj_t *parent = pd->processDetailParent;
+                    pd->processTotalTimeValue = NULL;
+                    pd->processDetailParent   = NULL;
+                    lv_obj_delete(parent);
                     process_node_destroy(discard_pn);
                     gui.tempProcessNode = NULL;
                 } else {
@@ -557,7 +560,10 @@ static void message_popup_button2_clicked(lv_obj_t *mboxCont)
 
                     /* Close detail UI */
                     lv_style_reset(&pd->textAreaStyle);
-                    lv_obj_delete(pd->processDetailParent);
+                    lv_obj_t *parent = pd->processDetailParent;
+                    pd->processTotalTimeValue = NULL;
+                    pd->processDetailParent   = NULL;
+                    lv_obj_delete(parent);
                 }
 
                 /* Free backup node (steps already transferred, only shell remains) */

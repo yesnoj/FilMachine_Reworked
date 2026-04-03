@@ -577,6 +577,12 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
 
                 gui.page.tools.machineStats.completed++;
                 gui.page.tools.machineStats.totalMins += pn->process.processDetails->data.timeMins;
+                gui.page.tools.machineStats.totalSecs += pn->process.processDetails->data.timeSecs;
+                /* Carry overflow seconds into minutes */
+                if (gui.page.tools.machineStats.totalSecs >= 60) {
+                    gui.page.tools.machineStats.totalMins += gui.page.tools.machineStats.totalSecs / 60;
+                    gui.page.tools.machineStats.totalSecs  = gui.page.tools.machineStats.totalSecs % 60;
+                }
                 qSysAction(SAVE_MACHINE_STATS);
             }
 

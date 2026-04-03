@@ -49,10 +49,18 @@ static void process_detail_teardown(processNode *pn) {
     /* 1. Reset runtime styles */
     lv_style_reset(&pd->textAreaStyle);
 
-    /* 2. Destroy the UI object tree */
-    lv_obj_delete(pd->processDetailParent);
+    /* 2. Save the parent pointer, then null out LVGL widget pointers
+     *    BEFORE deleting the tree.  This way, async callbacks that fire
+     *    after the delete (e.g. calculateTotalTime called from
+     *    ws_async_update_process) won't touch freed memory. */
+    lv_obj_t *parent = pd->processDetailParent;
+    pd->processTotalTimeValue = NULL;
+    pd->processDetailParent   = NULL;
 
-    /* 3. Free backup snapshot */
+    /* 3. Destroy the UI object tree */
+    if (parent != NULL) lv_obj_delete(parent);
+
+    /* 4. Free backup snapshot */
     process_detail_free_backup();
 }
 
@@ -160,6 +168,8 @@ static void process_detail_run(processNode *pn) {
     hideKeyboard(pn->process.processDetails->processDetailParent);
     pn->process.processDetails->checkup->checkupParent = NULL;
     lv_style_reset(&pn->process.processDetails->textAreaStyle);
+    /* Null out before checkup deletes the parent — prevents stale access */
+    pn->process.processDetails->processTotalTimeValue = NULL;
     checkup(pn);
 }
 
@@ -287,6 +297,173 @@ void event_processDetail(lv_event_t * e) {
   }
 }
 
+
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  Live-update the open process detail popup when data changes
+ *  externally (e.g. via Flutter / WebSocket).
+ *
+ *  Safety: skipped when the user has unsaved local edits
+ *  (somethingChanged == true) to avoid overwriting their work.
+ *  Called from the LVGL thread only (via ws_async_update_process).
+ * ═══════════════════════════════════════════════════════════════════ */
+void process_detail_live_update(processNode *pn) {
+    if (pn == NULL || pn->process.processDetails == NULL) return;
+    sProcessDetail *pd = pn->process.processDetails;
+
+    /* Only update if the process detail popup is actually open */
+    if (pd->processDetailParent == NULL) return;
+
+    /* Don't overwrite if the user is editing locally */
+    if (pd->data.somethingChanged) {
+        LV_LOG_USER("[LiveUpdate] Skipped — process-level somethingChanged=true");
+        return;
+    }
+
+    LV_LOG_USER("[LiveUpdate] ENTER — process '%s', somethingChanged=false",
+        pd->data.processNameString);
+
+    char buf[20];
+
+    /* 1. Name */
+    if (pd->processDetailNameTextArea != NULL) {
+        const char *cur = lv_textarea_get_text(pd->processDetailNameTextArea);
+        if (cur == NULL || strcmp(cur, pd->data.processNameString) != 0)
+            lv_textarea_set_text(pd->processDetailNameTextArea, pd->data.processNameString);
+    }
+
+    /* 2. Temperature */
+    if (pd->processTempTextArea != NULL) {
+        if (gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP)
+            snprintf(buf, sizeof(buf), "%"PRIi32"", pd->data.temp);
+        else
+            snprintf(buf, sizeof(buf), "%"PRIi32"", convertCelsiusToFahrenheit(pd->data.temp));
+        const char *cur = lv_textarea_get_text(pd->processTempTextArea);
+        if (cur == NULL || strcmp(cur, buf) != 0)
+            lv_textarea_set_text(pd->processTempTextArea, buf);
+    }
+
+    /* 3. Tolerance */
+    if (pd->processToleranceTextArea != NULL) {
+        snprintf(buf, sizeof(buf), "%.1f", pd->data.tempTolerance);
+        const char *cur = lv_textarea_get_text(pd->processToleranceTextArea);
+        if (cur == NULL || strcmp(cur, buf) != 0)
+            lv_textarea_set_text(pd->processToleranceTextArea, buf);
+    }
+
+    /* 4. Temp-controlled switch */
+    if (pd->processTempControlSwitch != NULL) {
+        bool isChecked = lv_obj_has_state(pd->processTempControlSwitch, LV_STATE_CHECKED);
+        if (pd->data.isTempControlled && !isChecked)
+            lv_obj_add_state(pd->processTempControlSwitch, LV_STATE_CHECKED);
+        else if (!pd->data.isTempControlled && isChecked)
+            lv_obj_clear_state(pd->processTempControlSwitch, LV_STATE_CHECKED);
+
+        /* Enable/disable temp and tolerance fields */
+        if (pd->data.isTempControlled) {
+            lv_obj_clear_state(pd->processTempTextArea, LV_STATE_DISABLED);
+            lv_obj_clear_state(pd->processToleranceTextArea, LV_STATE_DISABLED);
+        } else {
+            lv_obj_add_state(pd->processTempTextArea, LV_STATE_DISABLED);
+            lv_obj_add_state(pd->processToleranceTextArea, LV_STATE_DISABLED);
+        }
+    }
+
+    /* 5. Film type */
+    if (pd->processColorLabel != NULL && pd->processBnWLabel != NULL) {
+        if (pd->data.filmType == COLOR_FILM) {
+            lv_obj_set_style_text_color(pd->processColorLabel, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
+            lv_obj_set_style_text_color(pd->processBnWLabel, lv_color_hex(WHITE), LV_PART_MAIN);
+        } else {
+            lv_obj_set_style_text_color(pd->processBnWLabel, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
+            lv_obj_set_style_text_color(pd->processColorLabel, lv_color_hex(WHITE), LV_PART_MAIN);
+        }
+    }
+
+    /* 6. Preferred */
+    if (pd->processPreferredLabel != NULL) {
+        lv_obj_set_style_text_color(pd->processPreferredLabel,
+            pd->data.isPreferred ? lv_color_hex(RED) : lv_color_hex(WHITE),
+            LV_PART_MAIN);
+    }
+
+    /* 7. Total time */
+    if (pd->processTotalTimeValue != NULL) {
+        lv_label_set_text_fmt(pd->processTotalTimeValue, "%"PRIu32"m%"PRIu8"s",
+            pd->data.timeMins, pd->data.timeSecs);
+    }
+
+    /* 8. Step list — destroy all step LVGL elements and recreate from
+     *    the current linked list.  This handles add / edit / delete /
+     *    reorder that arrived via WebSocket from Flutter.
+     *
+     *    Skip the rebuild if a step-detail popup is currently open:
+     *    the popup lives on lv_layer_top() but stepElementCreate
+     *    resets swipe/gesture state on the stepNode, which breaks
+     *    the popup's Cancel flow. */
+    if (pd->processStepsContainer != NULL) {
+        /* Check whether any step detail popup is open */
+        bool stepPopupOpen = false;
+        {
+            stepNode *chk = pd->stepElementsList.start;
+            while (chk) {
+                if (chk->step.stepDetails != NULL &&
+                    chk->step.stepDetails->stepDetailParent != NULL) {
+                    stepPopupOpen = true;
+                    break;
+                }
+                chk = chk->next;
+            }
+        }
+
+        LV_LOG_USER("[LiveUpdate] stepPopupOpen=%d, stepList size=%d",
+            stepPopupOpen, pd->stepElementsList.size);
+
+        if (stepPopupOpen) {
+            /* Don't rebuild step elements — but DO live-update the open
+             * step detail popup AND update existing step element labels
+             * in-place (no destroy/recreate). */
+            stepNode *sn = pd->stepElementsList.start;
+            while (sn) {
+                LV_LOG_USER("[LiveUpdate] Calling step_detail_live_update for step '%s'",
+                    sn->step.stepDetails ? sn->step.stepDetails->data.stepNameString : "NULL");
+                step_detail_live_update(sn);
+                if (sn->step.stepElement != NULL)
+                    updateStepElement(pn, sn);
+                sn = sn->next;
+            }
+            LV_LOG_USER("[LiveUpdate] Step popup updated in-place (rebuild skipped)");
+        } else {
+            /* a) Delete every step's LVGL widget tree.
+             *    lv_obj_clean removes all children; the LV_EVENT_DELETE
+             *    handler in element_step.c calls lv_style_reset for each
+             *    live stepNode it can still find in the list. */
+            lv_obj_clean(pd->processStepsContainer);
+
+            /* b) Null out stepElement pointers on live nodes (the LVGL
+             *    objects they pointed to are now gone). */
+            stepNode *sn = pd->stepElementsList.start;
+            while (sn) {
+                sn->step.stepElement = NULL;
+                sn = sn->next;
+            }
+
+            /* c) Recreate step element cards from the current list order. */
+            int8_t idx = 1;
+            sn = pd->stepElementsList.start;
+            while (sn) {
+                stepElementCreate(sn, pn, idx);
+                sn = sn->next;
+                idx++;
+            }
+
+            LV_LOG_USER("[LiveUpdate] Step list rebuilt (%d steps)",
+                         pd->stepElementsList.size);
+        }
+    }
+
+    LV_LOG_USER("[LiveUpdate] Process detail refreshed from external data");
+}
 
 
 /*********************

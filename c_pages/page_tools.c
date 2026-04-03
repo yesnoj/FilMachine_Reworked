@@ -112,7 +112,7 @@ void event_toolsElement(lv_event_t * e) {
 
 void guiUpdater_timer(lv_timer_t * timer) {
 
-  lv_label_set_text_fmt(gui.page.tools.toolStatTotalTimeValue, "%"PRIu64"", gui.page.tools.machineStats.totalMins);
+  lv_label_set_text_fmt(gui.page.tools.toolStatTotalTimeValue, "%"PRIu64"m %02"PRIu32"s", gui.page.tools.machineStats.totalMins, gui.page.tools.machineStats.totalSecs);
   lv_label_set_text_fmt(gui.page.tools.toolStatCompletedProcessesValue, "%"PRIu32"", gui.page.tools.machineStats.completed);
   lv_label_set_text_fmt(gui.page.tools.toolStatStoppedProcessesValue, "%"PRIu32"", gui.page.tools.machineStats.stopped);
   lv_label_set_text_fmt(gui.page.tools.toolStatCompleteCycleValue, "%"PRIu32"", gui.page.tools.machineStats.clean);
@@ -316,7 +316,7 @@ static void initTools_statistics(lv_obj_t *parent) {
   lv_obj_align(gui.page.tools.toolStatTotalTimeLabel, LV_ALIGN_LEFT_MID, ui->item_label_x, ui->item_label_y);
 
   gui.page.tools.toolStatTotalTimeValue = lv_label_create(gui.page.tools.toolsStatTotalTimeContainer);
-  lv_label_set_text_fmt(gui.page.tools.toolStatTotalTimeValue, "%"PRIu64"", gui.page.tools.machineStats.totalMins);
+  lv_label_set_text_fmt(gui.page.tools.toolStatTotalTimeValue, "%"PRIu64"m %02"PRIu32"s", gui.page.tools.machineStats.totalMins, gui.page.tools.machineStats.totalSecs);
   lv_obj_set_style_text_font(gui.page.tools.toolStatTotalTimeValue, ui->item_font, 0);
   lv_obj_align(gui.page.tools.toolStatTotalTimeValue, LV_ALIGN_RIGHT_MID, ui->item_label_x, ui->item_label_y);
 
