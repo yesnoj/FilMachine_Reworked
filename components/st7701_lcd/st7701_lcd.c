@@ -205,6 +205,15 @@ esp_err_t st7701_lcd_draw_to_fb_rotated(uint16_t lx, uint16_t ly,
 
     if (ret == ESP_OK) {
         s_perf_ppa_direct++;
+
+        /* PPA wrote to the DPI framebuffer via DMA, bypassing CPU cache.
+         * Flush/invalidate so the DPI controller (and future CPU accesses
+         * like fill_screen) see the freshly written pixels.              */
+        uint16_t *fb16 = (uint16_t *)fb;
+        void *sync_start = &fb16[phys_y_start * ST7701_PHYS_H_RES];
+        size_t sync_size = (size_t)lw * ST7701_PHYS_H_RES * sizeof(uint16_t);
+        esp_cache_msync(sync_start, sync_size,
+                        ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED);
     } else {
         /*
          * ═══ FALLBACK: PPA to temp buffer + memcpy ═══

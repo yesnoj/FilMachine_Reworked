@@ -5,6 +5,9 @@
 #include <string.h>
 
 #include "FilMachine.h"
+#if defined(DISPLAY_DRIVER_ST7701)
+#include "st7701_lcd.h"
+#endif
 
 extern struct gui_components gui;
 processNode *existingProcess;
@@ -77,7 +80,11 @@ static void process_detail_close(processNode *pn) {
     }
     LV_LOG_USER("Close Process Detail (no changes)");
     process_detail_teardown(pn);
+#if defined(DISPLAY_DRIVER_ST7701)
+    st7701_lcd_fill_screen(0x0000);
+#endif
     lv_scr_load(gui.page.menu.screen_mainMenu);
+    lv_obj_invalidate(gui.page.menu.screen_mainMenu);
 }
 
 /** Handle film type selection (Color / B&W labels) */
@@ -528,7 +535,11 @@ if(existingProcess != NULL) {
   LV_LOG_USER("Process address 0x%p, with n:%"PRIu16" steps",pn, pd->stepElementsList.size);
 
   pd->processDetailParent = lv_obj_create(NULL);
+#if defined(DISPLAY_DRIVER_ST7701)
+      st7701_lcd_fill_screen(0x0000);
+#endif
       lv_scr_load(pd->processDetailParent);
+      lv_obj_invalidate(pd->processDetailParent);
       pd->nameKeyboardCtx.parentScreen = pd->processDetailParent;
 
   lv_style_init(&pd->textAreaStyle);

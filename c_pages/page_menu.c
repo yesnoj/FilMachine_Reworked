@@ -7,6 +7,9 @@
 
 //ESSENTIAL INCLUDES
 #include "FilMachine.h"
+#if defined(DISPLAY_DRIVER_ST7701)
+#include "st7701_lcd.h"
+#endif
 
 extern struct gui_components gui;
 
@@ -47,6 +50,14 @@ void event_tab_switch(lv_event_t * e) {
       { 
         //FIRST HIDE THE CORRECT SECTION
         if(gui.page.menu.oldSelection == TAB_PROCESSES){
+            /* Hide filter button BEFORE parent — its y=-12 offset
+             * overflows the section bounds; hiding it explicitly
+             * ensures LVGL invalidates the correct pixel area. */
+            /* Hide overflow children BEFORE parent — their y=-12 offset
+             * overflows the section bounds; hiding them explicitly
+             * ensures LVGL invalidates the correct pixel area. */
+            lv_obj_add_flag(gui.page.processes.processFilterButton, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(gui.page.processes.newProcessButton, LV_OBJ_FLAG_HIDDEN);
             lv_obj_add_flag(gui.page.processes.processesSection, LV_OBJ_FLAG_HIDDEN);
         }
         if(gui.page.menu.oldSelection == TAB_SETTINGS){
@@ -70,6 +81,8 @@ void event_tab_switch(lv_event_t * e) {
             lv_obj_set_style_border_opa(gui.page.menu.settingsTab, LV_OPA_50, 0);
             
             lv_obj_clear_flag(gui.page.processes.processesSection, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(gui.page.processes.processFilterButton, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(gui.page.processes.newProcessButton, LV_OBJ_FLAG_HIDDEN);
             lv_obj_scroll_to_y(gui.page.processes.processesListContainer, 0, LV_ANIM_OFF);
         }
         if(gui.page.menu.newSelection == TAB_SETTINGS){
@@ -101,8 +114,16 @@ void event_tab_switch(lv_event_t * e) {
             lv_obj_scroll_to_y(gui.page.tools.toolsSection, 0, LV_ANIM_OFF);
             tools_resume_timer();
         }
+
+#if defined(DISPLAY_DRIVER_ST7701)
+        /* Wipe DPI framebuffer — persistent pixels from the previous tab
+         * survive across LVGL frames with partial rendering. */
+        st7701_lcd_fill_screen(0x0000);
+#endif
+        /* Force full redraw on the clean framebuffer. */
+        lv_obj_invalidate(gui.page.menu.screen_mainMenu);
       }
-    
+
     LV_LOG_USER("OLD PRESSED %"PRIi32"", lv_obj_get_index(gui.page.menu.oldTabSelected));
     LV_LOG_USER("NEW PRESSED %"PRIi32"", lv_obj_get_index(gui.page.menu.newTabSelected));
      
@@ -113,13 +134,26 @@ void event_tab_switch(lv_event_t * e) {
 void menu(void) {
 	
     lv_obj_del(lv_screen_active());
+
     gui.page.menu.screen_mainMenu = lv_obj_create(NULL);
+    /* Opaque background guarantees LVGL writes every pixel in partial mode. */
+    lv_obj_set_style_bg_opa(gui.page.menu.screen_mainMenu, LV_OPA_COVER, 0);
+    lv_obj_set_style_bg_color(gui.page.menu.screen_mainMenu, lv_color_hex(0x000000), 0);
     lv_scr_load(gui.page.menu.screen_mainMenu);
 
     processes();
     settings();
     tools();
-    
+
+#if defined(DISPLAY_DRIVER_ST7701)
+    /* Wipe DPI framebuffer AFTER all LVGL objects are created and the old
+     * screen is deleted.  This ensures no async flush from the splash
+     * screen can write stale pixels after our clear. */
+    st7701_lcd_fill_screen(0x0000);
+#endif
+    /* Force full screen redraw on the clean framebuffer. */
+    lv_obj_invalidate(gui.page.menu.screen_mainMenu);
+
     gui.page.menu.processesTab = lv_obj_create(gui.page.menu.screen_mainMenu);
     const ui_profile_t *ui = ui_get_profile();
     lv_obj_set_pos(gui.page.menu.processesTab, ui->common.sidebar_x, ui->menu.tab_processes_y);

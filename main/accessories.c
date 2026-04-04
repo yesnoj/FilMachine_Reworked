@@ -191,6 +191,7 @@ void kb_ctx_set(const sKeyboardOwnerContext *ctx) {
     kbCtx = *ctx;
 }
 
+static const char *kb_owner_name(kbOwnerType owner) __attribute__((unused));
 static const char *kb_owner_name(kbOwnerType owner) {
     switch(owner) {
         case KB_OWNER_FILTER: return "filter";
@@ -2151,11 +2152,13 @@ char* generateRandomSuffix(const char* baseName) {
 
     if (len > maxBaseLen) {
         // If baseName is longer than the maximum allowed for the base name, shorten it
-        snprintf(newProcessName, maxBaseLen + 1, "%s", baseName); // Copy only maxBaseLen characters
+        memcpy(newProcessName, baseName, maxBaseLen);
+        newProcessName[maxBaseLen] = '\0';
         len = maxBaseLen; // Update the effective length of the new base name
     } else {
         // Otherwise copy it directly
-        snprintf(newProcessName, sizeof(newProcessName), "%s", baseName);
+        memcpy(newProcessName, baseName, len);
+        newProcessName[len] = '\0';
     }
 
     // Check if baseName already has a valid numeric suffix

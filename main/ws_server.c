@@ -15,6 +15,9 @@
 #include <stdlib.h>
 #include "FilMachine.h"
 #include "ws_server.h"
+#if defined(DISPLAY_DRIVER_ST7701)
+#include "st7701_lcd.h"
+#endif
 
 extern struct gui_components gui;
 
@@ -360,7 +363,11 @@ static void ws_async_close_process(void *user_data) {
     lv_style_reset(&ckup->textAreaStyleCheckup);
 
     /* Switch back to the menu screen, then delete checkup screen */
+#if defined(DISPLAY_DRIVER_ST7701)
+    st7701_lcd_fill_screen(0x0000);
+#endif
     lv_scr_load(gui.page.menu.screen_mainMenu);
+    lv_obj_invalidate(gui.page.menu.screen_mainMenu);
     if (ckup->checkupParent != NULL) {
         lv_obj_delete(ckup->checkupParent);
         ckup->checkupParent = NULL;

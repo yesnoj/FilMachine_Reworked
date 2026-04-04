@@ -1,0 +1,116 @@
+# ═══════════════════════════════════════════════════════════════
+# sdkconfig defaults for ESP32-P4 target (GUITION JC4880P433)
+#
+# Usage:  idf.py -DBOARD_JC4880P433=1 set-target esp32p4
+#         idf.py build
+#
+# ESP-IDF automatically loads this file when the target is esp32p4.
+# ═══════════════════════════════════════════════════════════════
+
+# ── Target ──
+CONFIG_IDF_TARGET="esp32p4"
+
+# ── Flash ──
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+
+# ── PSRAM (32 MB HEX mode) ──
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_HEX=y
+CONFIG_SPIRAM_SPEED_80M=y
+CONFIG_SPIRAM_BOOT_INIT=y
+
+# ── MIPI-DSI (ST7701S) ──
+CONFIG_SOC_MIPI_DSI_SUPPORTED=y
+
+# ── PPA (Pixel Processing Accelerator) ──
+CONFIG_SOC_PPA_SUPPORTED=y
+
+# ── FreeRTOS ──
+CONFIG_FREERTOS_HZ=1000
+
+# ── Task watchdog — LVGL full-frame 800x480 rendering blocks CPU0 ──
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=30
+# CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU0 is not set
+
+# ── Main task stack (default 3584 is too small for LVGL+FatFS on P4) ──
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
+
+# ── LVGL (managed component) ──
+CONFIG_LV_COLOR_DEPTH_16=y
+# Use standard C malloc/free — LVGL 9 Kconfig option name
+# (CONFIG_LV_MEM_CUSTOM was LVGL 8; ignored by LVGL 9)
+CONFIG_LV_USE_CLIB_MALLOC=y
+CONFIG_LV_USE_CLIB_STRING=y
+CONFIG_LV_USE_CLIB_SPRINTF=y
+# Dark theme (FilMachine UI expects black background)
+CONFIG_LV_THEME_DEFAULT_DARK=y
+
+# ── LVGL built-in Montserrat fonts (needed by ui_profile + page_splash) ──
+CONFIG_LV_FONT_MONTSERRAT_12=y
+CONFIG_LV_FONT_MONTSERRAT_14=y
+CONFIG_LV_FONT_MONTSERRAT_16=y
+CONFIG_LV_FONT_MONTSERRAT_18=y
+CONFIG_LV_FONT_MONTSERRAT_20=y
+CONFIG_LV_FONT_MONTSERRAT_22=y
+CONFIG_LV_FONT_MONTSERRAT_24=y
+CONFIG_LV_FONT_MONTSERRAT_26=y
+CONFIG_LV_FONT_MONTSERRAT_28=y
+CONFIG_LV_FONT_MONTSERRAT_30=y
+CONFIG_LV_FONT_MONTSERRAT_32=y
+CONFIG_LV_FONT_MONTSERRAT_36=y
+CONFIG_LV_FONT_MONTSERRAT_40=y
+CONFIG_LV_FONT_MONTSERRAT_48=y
+
+# ── SD/MMC ──
+CONFIG_SOC_SDMMC_HOST_SUPPORTED=y
+
+# ── FatFS — Long File Names required for "FilMachine.cfg" etc. ──
+CONFIG_FATFS_LFN_HEAP=y
+CONFIG_FATFS_MAX_LFN=127
+
+# ── I2C (new master driver for GT911 + peripherals) ──
+CONFIG_I2C_ISR_IRAM_SAFE=y
+
+# ── Partition table ──
+# Bootloader offset on P4 is 0x2000 (different from S3's 0x0)
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+
+# ── Logging ──
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+
+# ── HTTP Server (WebSocket support for Flutter companion app) ──
+CONFIG_HTTPD_WS_SUPPORT=y
+CONFIG_HTTPD_MAX_REQ_HDR_LEN=1024
+CONFIG_HTTPD_MAX_URI_LEN=512
+
+# ── ESP-Hosted: Wi-Fi via ESP32-C6 companion chip over SDIO ──
+CONFIG_ESP_WIFI_REMOTE_ENABLED=y
+CONFIG_SLAVE_IDF_TARGET_ESP32C6=y
+CONFIG_ESP_HOSTED_CP_TARGET_ESP32C6=y
+
+# Wi-Fi remote buffer tuning (recommended by esp-hosted-mcu docs)
+CONFIG_WIFI_RMT_STATIC_RX_BUFFER_NUM=16
+CONFIG_WIFI_RMT_DYNAMIC_RX_BUFFER_NUM=64
+CONFIG_WIFI_RMT_DYNAMIC_TX_BUFFER_NUM=64
+CONFIG_WIFI_RMT_AMPDU_TX_ENABLED=y
+CONFIG_WIFI_RMT_TX_BA_WIN=32
+CONFIG_WIFI_RMT_AMPDU_RX_ENABLED=y
+CONFIG_WIFI_RMT_RX_BA_WIN=32
+
+# lwIP TCP/IP stack tuning for throughput via SDIO bridge
+CONFIG_LWIP_TCP_SND_BUF_DEFAULT=65534
+CONFIG_LWIP_TCP_WND_DEFAULT=65534
+CONFIG_LWIP_TCP_RECVMBOX_SIZE=64
+CONFIG_LWIP_UDP_RECVMBOX_SIZE=64
+CONFIG_LWIP_TCPIP_RECVMBOX_SIZE=64
+CONFIG_LWIP_TCP_SACK_OUT=y
+
+# ── mDNS (filmachine.local discovery for Flutter app) ──
+CONFIG_MDNS_MAX_INTERFACES=3
+CONFIG_MDNS_MAX_SERVICES=10
+
+# ── Compiler ──
+CONFIG_COMPILER_OPTIMIZATION_PERF=y

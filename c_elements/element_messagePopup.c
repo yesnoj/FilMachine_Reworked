@@ -4,6 +4,9 @@
  */
 #include <string.h>
 #include "FilMachine.h"
+#if defined(DISPLAY_DRIVER_ST7701)
+#include "st7701_lcd.h"
+#endif
 
 extern struct gui_components gui;
 
@@ -573,7 +576,11 @@ static void message_popup_button2_clicked(lv_obj_t *mboxCont)
                     process_node_destroy(bk);     /* free the shell */
                 }
             }
+#if defined(DISPLAY_DRIVER_ST7701)
+            st7701_lcd_fill_screen(0x0000);
+#endif
             lv_scr_load(gui.page.menu.screen_mainMenu);
+            lv_obj_invalidate(gui.page.menu.screen_mainMenu);
             break;
         }
 

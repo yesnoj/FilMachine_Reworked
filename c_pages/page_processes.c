@@ -128,7 +128,7 @@ static void initProcesses(void){
   lv_obj_set_pos(gui.page.processes.processesListContainer, ui->processes.list_x, ui->processes.list_y);
   lv_obj_set_size(gui.page.processes.processesListContainer, ui->processes.list_w, ui->processes.list_h);
   lv_obj_set_style_border_opa(gui.page.processes.processesListContainer, LV_OPA_TRANSP, 0);
-  lv_obj_set_style_bg_opa(gui.page.processes.processesListContainer, LV_OPA_TRANSP, 0);
+  lv_obj_set_style_bg_opa(gui.page.processes.processesListContainer, LV_OPA_COVER, 0);
   lv_obj_set_scroll_dir(gui.page.processes.processesListContainer, LV_DIR_VER);
 
   //CREATE STYLE AND LINE FOR THE TITLE

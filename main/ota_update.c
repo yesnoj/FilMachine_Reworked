@@ -221,6 +221,19 @@ static bool  wifi_connected = false;
 
 extern struct gui_components gui;
 
+/**
+ * safe_strcopy — null-terminated copy without -Werror=stringop-truncation.
+ * Uses memcpy instead of strncpy to avoid GCC truncation warnings under -O2.
+ */
+static void safe_strcopy(char *dst, const char *src, size_t dst_size)
+{
+    if (dst_size == 0) return;
+    size_t len = strlen(src);
+    if (len >= dst_size) len = dst_size - 1;
+    memcpy(dst, src, len);
+    dst[len] = '\0';
+}
+
 const char *ota_get_running_version(void) {
     const esp_app_desc_t *desc = esp_app_get_description();
     return desc->version;
@@ -497,11 +510,11 @@ bool ota_wifi_server_start(void) {
         fw_wifi_ensure_init();
 
         wifi_config_t wifi_config = {0};
-        strncpy((char *)wifi_config.sta.ssid, ssid,
-                sizeof(wifi_config.sta.ssid) - 1);
-        strncpy((char *)wifi_config.sta.password,
-                gui.page.settings.settingsParams.wifiPassword,
-                sizeof(wifi_config.sta.password) - 1);
+        safe_strcopy((char *)wifi_config.sta.ssid, ssid,
+                     sizeof(wifi_config.sta.ssid));
+        safe_strcopy((char *)wifi_config.sta.password,
+                     gui.page.settings.settingsParams.wifiPassword,
+                     sizeof(wifi_config.sta.password));
         wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
         wifi_config.sta.pmf_cfg.capable = true;
         wifi_config.sta.pmf_cfg.required = false;
@@ -579,9 +592,9 @@ bool ota_wifi_server_start(void) {
             },
         };
         /* Use the OTA PIN as WPA2 password */
-        strncpy((char *)ap_config.ap.password,
-                gui.element.otaWifiPopup.otaPin,
-                sizeof(ap_config.ap.password) - 1);
+        safe_strcopy((char *)ap_config.ap.password,
+                     gui.element.otaWifiPopup.otaPin,
+                     sizeof(ap_config.ap.password));
 
         err = esp_wifi_set_config(WIFI_IF_AP, &ap_config);
         if (err != ESP_OK) {
@@ -599,7 +612,7 @@ bool ota_wifi_server_start(void) {
         ota_wifi_ap_active = true;
 
         /* AP IP is always 192.168.4.1 by default, OTA server on port 8080 */
-        strncpy(ota_ip_addr, "192.168.4.1:8080", sizeof(ota_ip_addr) - 1);
+        safe_strcopy(ota_ip_addr, "192.168.4.1:8080", sizeof(ota_ip_addr));
         snprintf(ota_status, sizeof(ota_status), "AP: FilMachine_WiFi");
 
         /* Start the OTA HTTP server immediately (AP has IP from the start) */
@@ -1006,12 +1019,12 @@ static void fw_wifi_ensure_init(void) {
                  gui.page.settings.settingsParams.wifiSSID);
         wifi_icon_set_connecting();  /* blink white icon while connecting */
         wifi_config_t wifi_config = {0};
-        strncpy((char *)wifi_config.sta.ssid,
-                gui.page.settings.settingsParams.wifiSSID,
-                sizeof(wifi_config.sta.ssid) - 1);
-        strncpy((char *)wifi_config.sta.password,
-                gui.page.settings.settingsParams.wifiPassword,
-                sizeof(wifi_config.sta.password) - 1);
+        safe_strcopy((char *)wifi_config.sta.ssid,
+                     gui.page.settings.settingsParams.wifiSSID,
+                     sizeof(wifi_config.sta.ssid));
+        safe_strcopy((char *)wifi_config.sta.password,
+                     gui.page.settings.settingsParams.wifiPassword,
+                     sizeof(wifi_config.sta.password));
         wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
         wifi_config.sta.pmf_cfg.capable = true;
         wifi_config.sta.pmf_cfg.required = false;
@@ -1084,9 +1097,9 @@ bool wifi_connect(const char *ssid, const char *password) {
     esp_wifi_disconnect();
 
     wifi_config_t wifi_config = {0};
-    strncpy((char *)wifi_config.sta.ssid, ssid, sizeof(wifi_config.sta.ssid) - 1);
+    safe_strcopy((char *)wifi_config.sta.ssid, ssid, sizeof(wifi_config.sta.ssid));
     if (password && password[0]) {
-        strncpy((char *)wifi_config.sta.password, password, sizeof(wifi_config.sta.password) - 1);
+        safe_strcopy((char *)wifi_config.sta.password, password, sizeof(wifi_config.sta.password));
         wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
     }
     /* Enable PMF (Protected Management Frames) — required by many modern routers */

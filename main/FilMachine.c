@@ -25,6 +25,7 @@
 #if defined(DISPLAY_DRIVER_ST7701)
     #include "st7701_lcd.h"
     #include "ppa_engine.h"
+    #include "esp_cache.h"
     #include "esp_heap_caps.h"
 #elif !defined(DISPLAY_DRIVER_SDL)
     #error "No display driver defined — check board.h"
@@ -57,10 +58,10 @@ typedef struct {
     bool is_last_flush;
 } flush_job_t;
 
-static QueueHandle_t      s_flush_queue = NULL;    /* core 0 → core 1 */
-static lv_display_t      *s_flush_disp  = NULL;    /* cached display handle for flush_ready */
+static QueueHandle_t      s_flush_queue = NULL;
+static lv_display_t      *s_flush_disp  = NULL;
 
-/* FPS tracking (updated from core 1) */
+/* FPS tracking */
 static volatile int64_t s_fps_window_start = 0;
 static volatile int     s_fps_frame_count  = 0;
 static volatile int     s_fps_flush_count  = 0;
@@ -71,13 +72,16 @@ static void flush_task(void *arg)
     ESP_LOGI("FLUSH", "Flush task started on core %d", xPortGetCoreID());
 
     while (1) {
-        /* Block until core 0 posts a flush job */
         if (xQueueReceive(s_flush_queue, &job, portMAX_DELAY) != pdTRUE) continue;
 
-        /* PPA rotate + write directly to DPI framebuffer */
+        /* Flush CPU D-cache → PSRAM so PPA's DMA reads fresh pixels.
+         * Core 0 wrote the draw buffer; Core 1 (here) triggers PPA DMA.
+         * DMA bypasses CPU cache, so explicit sync is mandatory. */
+        esp_cache_msync((void *)job.data, (size_t)job.w * job.h * sizeof(uint16_t),
+                        ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED);
+
         st7701_lcd_draw_to_fb_rotated(job.x1, job.y1, job.w, job.h, job.data);
 
-        /* FPS tracking */
         s_fps_flush_count++;
         if (job.is_last_flush) {
             s_fps_frame_count++;
@@ -93,8 +97,6 @@ static void flush_task(void *arg)
                 s_fps_window_start = now;
             }
         }
-
-        /* Tell LVGL the buffer is free — it can start rendering into it */
         lv_display_flush_ready(job.disp);
     }
 }
@@ -110,8 +112,8 @@ static uint8_t lvgl_buf[LVGL_BUF_SIZE];
 #if defined(DISPLAY_DRIVER_ST7701)
 /* ── P4: Dual-core async flush.
  * Core 0 (LVGL) posts flush jobs to a queue.
- * Core 1 (flush_task) picks them up, runs PPA rotation, and signals flush_ready.
- * This overlaps LVGL rendering with PPA+cache_sync for ~2× throughput.
+ * Core 1 (flush_task) picks them up, runs cache sync + PPA rotation,
+ * and signals flush_ready.
  */
 static void disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map)
 {

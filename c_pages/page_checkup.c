@@ -6,6 +6,9 @@
 
 //ESSENTIAL INCLUDES
 #include "FilMachine.h"
+#if defined(DISPLAY_DRIVER_ST7701)
+#include "st7701_lcd.h"
+#endif
 
 
 extern struct gui_components gui;
@@ -254,7 +257,11 @@ void event_checkup(lv_event_t * e){
         lv_style_reset(&ckup->textAreaStyleCheckup);
 
         /* Switch back to the menu screen FIRST, then delete the checkup screen */
+#if defined(DISPLAY_DRIVER_ST7701)
+        st7701_lcd_fill_screen(0x0000);
+#endif
         lv_scr_load(gui.page.menu.screen_mainMenu);
+        lv_obj_invalidate(gui.page.menu.screen_mainMenu);
 
         /* Delete the entire checkup screen (checkupParent owns checkupContainer) */
         if(ckup->checkupParent != NULL) {
@@ -1350,7 +1357,11 @@ void initCheckup(processNode *pn)
           pn->process.processDetails->processDetailParent = NULL;
       }
       ckup->checkupParent = lv_obj_create(NULL);
+#if defined(DISPLAY_DRIVER_ST7701)
+      st7701_lcd_fill_screen(0x0000);
+#endif
       lv_scr_load(ckup->checkupParent);
+      lv_obj_invalidate(ckup->checkupParent);
 
       ckup->currentStep = pn->process.processDetails->stepElementsList.start;
       
