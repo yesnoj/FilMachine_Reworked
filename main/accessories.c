@@ -868,6 +868,10 @@ i2c_master_bus_handle_t g_i2c_bus_handle = NULL;
 
 void init_Pins_and_Buses( void ) {
 	
+#if defined(DISPLAY_DRIVER_ST7701)
+    /* P4: backlight is managed by st7701_lcd via LEDC PWM — skip GPIO init here */
+    ESP_LOGI(TAG, "LCD backlight: managed by st7701_lcd (LEDC PWM)");
+#else
     ESP_LOGI(TAG, "Turn off LCD backlight");
     gpio_config_t bk_gpio_config = {
         .mode = GPIO_MODE_OUTPUT,
@@ -875,6 +879,7 @@ void init_Pins_and_Buses( void ) {
     };
     ESP_ERROR_CHECK(gpio_config(&bk_gpio_config));
     gpio_set_level(LCD_BLK, LCD_BK_LIGHT_OFF_LEVEL);
+#endif
 
 #if defined(DISPLAY_BUS_PARALLEL16)
     ESP_LOGI(TAG, "Set RD Pin High");		/* Required for parallel-16 bus displays */

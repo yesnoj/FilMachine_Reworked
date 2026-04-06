@@ -30,6 +30,7 @@ idf_component_register(
         esp_http_server
         esp_event
         mdns
+        nvs_flash
         ${WIFI_DEPS}
         ${P4_DEPS}
 )

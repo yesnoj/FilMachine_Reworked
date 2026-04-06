@@ -24,7 +24,9 @@
     "splashDefault": 1,
     "wifiEnabled": 0,
     "wifiSSID": "",
-    "wifiPassword": ""
+    "wifiPassword": "",
+    "brightness": 100,
+    "dimTimeout": 30
   },
   "processes": [
     {

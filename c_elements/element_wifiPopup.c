@@ -116,6 +116,9 @@ static void wifi_connect_success_async(void *arg) {
                  (int)strlen(gui.page.settings.settingsParams.wifiPassword),
                  gui.page.settings.settingsParams.wifiEnabled);
         qSysAction(SAVE_PROCESS_CONFIG);
+        /* Also persist to NVS for SD-card-free boot */
+        wifi_nvs_save(gui.page.settings.settingsParams.wifiSSID,
+                      gui.page.settings.settingsParams.wifiPassword);
         wifi_pending_ssid[0] = '\0';
         wifi_pending_pass[0] = '\0';
     }

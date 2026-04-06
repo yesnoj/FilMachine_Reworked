@@ -18,6 +18,7 @@
 /* FilMachine.h pulls in board.h which defines DISPLAY_DRIVER_xxx
  * and TOUCH_DRIVER_xxx — must come BEFORE the conditional includes. */
 #include "FilMachine.h"
+#include "nvs_flash.h"
 
 /* ═══════════════════════════════════════════════
  * Board-specific display and touch driver includes
@@ -177,6 +178,9 @@ static void lvgl_touch_cb(lv_indev_t * indev, lv_indev_data_t * data)
 #pragma GCC diagnostic pop
 
     if (touchpad_pressed && touchpad_cnt > 0) {
+#if defined(DISPLAY_DRIVER_ST7701)
+        st7701_lcd_activity_reset();
+#endif
 #if defined(TOUCH_DRIVER_GT911_P4)
         /*
          * P4 landscape touch remapping:
@@ -238,6 +242,11 @@ static esp_lcd_panel_handle_t init_display(lv_display_t *our_display)
 
     /* Clear screen to black before backlight on (prevents white flash) */
     st7701_lcd_fill_screen(0x0000);
+
+    /* Initialize auto-dimming: 60s→50%, 5min→20%, 10min→off
+     * Will be overridden by saved config once refreshSettingsUI() runs. */
+    st7701_lcd_set_dim_timeout(60, 300, 600);
+    st7701_lcd_activity_reset();
 
     /* P4 flush does not use esp_lcd_panel_handle_t — return NULL */
     (void)our_display;
@@ -399,6 +408,18 @@ void app_main( void ) {
 lv_display_t *our_display;
 
     initGlobals();
+
+    /* ── NVS flash: needed for Wi-Fi credential persistence ── */
+    esp_err_t nvs_ret = nvs_flash_init();
+    if (nvs_ret == ESP_ERR_NVS_NO_FREE_PAGES ||
+        nvs_ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_LOGW(TAG, "NVS partition truncated/outdated — erasing");
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        nvs_ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(nvs_ret);
+    ESP_LOGI(TAG, "NVS flash initialized");
+
 init_Pins_and_Buses();
 
 ESP_LOGI(TAG, "Initialise LVGL library");
@@ -415,8 +436,9 @@ ESP_LOGI(TAG, "Initialise LVGL library");
     /* Board-specific display init */
     esp_lcd_panel_handle_t panel_handle = init_display(our_display);
 
-    ESP_LOGI(TAG, "Turn on LCD backlight");
-    gpio_set_level(LCD_BLK, LCD_BK_LIGHT_ON_LEVEL);
+    /* Backlight is now managed by st7701_lcd via LEDC PWM.
+     * st7701_lcd_init() already turns it on at 100%.
+     * Use st7701_lcd_set_brightness(0..100) to adjust. */
 
     /* Board-specific touch init */
     esp_lcd_touch_handle_t tp = init_touch();
@@ -497,6 +519,19 @@ create_keyboard();
     while (1) {
         // lv_timer_handler returns ms until next call is needed
         uint32_t time_till_next = lv_timer_handler();
+
+#if defined(DISPLAY_DRIVER_ST7701)
+        /* Auto-dimming: check ~once per second from LVGL task (safe context) */
+        {
+            static uint32_t dim_accum_ms = 0;
+            dim_accum_ms += time_till_next;
+            if (dim_accum_ms >= 1000) {
+                dim_accum_ms = 0;
+                st7701_lcd_dimming_tick();
+            }
+        }
+#endif
+
         if (time_till_next < 1) time_till_next = 1;
         if (time_till_next > 50) time_till_next = 50;
         vTaskDelay(pdMS_TO_TICKS(time_till_next));

@@ -31,15 +31,22 @@
 
 #define EXAMPLE_MIPI_DSI_PHY_PWR_LDO_CHAN       3
 #define EXAMPLE_MIPI_DSI_PHY_PWR_LDO_VOLTAGE_MV 2500
-#define EXAMPLE_LCD_BK_LIGHT_ON_LEVEL           1
-#define EXAMPLE_LCD_BK_LIGHT_OFF_LEVEL          0
 /* Backlight pin — matches LCD_BLK from board header (GPIO 23 on JC4880P433) */
 #define EXAMPLE_PIN_NUM_BK_LIGHT                GPIO_NUM_23
+
+/* LEDC PWM configuration for backlight dimming */
+#define BL_LEDC_TIMER       LEDC_TIMER_1       /* Timer 0 used by motor in accessories.c */
+#define BL_LEDC_MODE        LEDC_LOW_SPEED_MODE
+#define BL_LEDC_CHANNEL     LEDC_CHANNEL_1     /* Channel 0 used by motor in accessories.c */
+#define BL_LEDC_DUTY_RES    LEDC_TIMER_10_BIT  /* 0–1023, enough for smooth dimming */
+#define BL_LEDC_FREQ_HZ     25000              /* 25 kHz — above audible range, no coil whine */
+#define BL_DUTY_MAX         ((1 << 10) - 1)    /* 1023 */
 
 static const char *TAG = "st7701_lcd";
 
 static esp_lcd_panel_handle_t s_panel_handle = NULL;
 static esp_lcd_panel_io_handle_t s_io_handle = NULL;
+static uint8_t s_brightness_pct = 0;  /* current brightness 0-100 */
 
 static void enable_dsi_phy_power(void)
 {
@@ -54,16 +61,150 @@ static void enable_dsi_phy_power(void)
 
 static void init_lcd_backlight(void)
 {
-    gpio_config_t bk_gpio_config = {
-        .pin_bit_mask = 1ULL << EXAMPLE_PIN_NUM_BK_LIGHT,
-        .mode = GPIO_MODE_OUTPUT,
+    /* Configure LEDC timer */
+    ledc_timer_config_t ledc_timer = {
+        .speed_mode      = BL_LEDC_MODE,
+        .duty_resolution = BL_LEDC_DUTY_RES,
+        .timer_num       = BL_LEDC_TIMER,
+        .freq_hz         = BL_LEDC_FREQ_HZ,
+        .clk_cfg         = LEDC_AUTO_CLK,
     };
-    ESP_ERROR_CHECK(gpio_config(&bk_gpio_config));
+    ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
+
+    /* Configure LEDC channel — starts at duty 0 (backlight off) */
+    ledc_channel_config_t ledc_channel = {
+        .speed_mode = BL_LEDC_MODE,
+        .channel    = BL_LEDC_CHANNEL,
+        .timer_sel  = BL_LEDC_TIMER,
+        .intr_type  = LEDC_INTR_DISABLE,
+        .gpio_num   = EXAMPLE_PIN_NUM_BK_LIGHT,
+        .duty       = 0,
+        .hpoint     = 0,
+    };
+    ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
+
+    /* Enable hardware fade for smooth transitions */
+    ESP_ERROR_CHECK(ledc_fade_func_install(0));
+
+    ESP_LOGI(TAG, "Backlight PWM initialized (LEDC timer%d ch%d, %d Hz, 10-bit)",
+             BL_LEDC_TIMER, BL_LEDC_CHANNEL, BL_LEDC_FREQ_HZ);
 }
 
-static void set_lcd_backlight(uint32_t level)
+esp_err_t st7701_lcd_set_brightness(uint8_t percent)
 {
-    gpio_set_level(EXAMPLE_PIN_NUM_BK_LIGHT, level);
+    if (percent > 100) percent = 100;
+    s_brightness_pct = percent;
+    uint32_t duty = (uint32_t)BL_DUTY_MAX * percent / 100;
+    esp_err_t ret = ledc_set_fade_with_time(BL_LEDC_MODE, BL_LEDC_CHANNEL,
+                                             duty, 300 /* ms */);
+    if (ret == ESP_OK) {
+        ret = ledc_fade_start(BL_LEDC_MODE, BL_LEDC_CHANNEL, LEDC_FADE_NO_WAIT);
+    }
+    ESP_LOGI(TAG, "Backlight brightness: %d%% (duty %lu/%d)", percent, (unsigned long)duty, BL_DUTY_MAX);
+    return ret;
+}
+
+uint8_t st7701_lcd_get_brightness(void)
+{
+    return s_brightness_pct;
+}
+
+/* ── Auto-dimming ──
+ * 3-stage dimming: ACTIVE → DIM1 (50%) → DIM2 (20%) → OFF
+ * Default timeouts: 60s → 300s (5min) → 600s (10min)
+ */
+static int64_t   s_last_activity_us = 0;     /* timestamp of last touch/interaction */
+static uint8_t   s_user_brightness  = 100;   /* brightness the user chose (slider value) */
+static uint16_t  s_dim1_timeout_s   = 60;    /* seconds until first dim (0=disabled) */
+static uint16_t  s_dim2_timeout_s   = 300;   /* seconds until deep dim */
+static uint16_t  s_off_timeout_s    = 600;   /* seconds until screen off */
+static bool      s_dim_inhibit      = false; /* true = dimming suspended (e.g. during checkup) */
+
+typedef enum { DIM_STATE_ACTIVE, DIM_STATE_DIM1, DIM_STATE_DIM2, DIM_STATE_OFF } dim_state_t;
+static dim_state_t s_dim_state = DIM_STATE_ACTIVE;
+static volatile bool s_wake_pending = false;
+
+void st7701_lcd_activity_reset(void)
+{
+    s_last_activity_us = esp_timer_get_time();
+
+    /* Mark wake-up needed — actual LEDC call happens in dimming_tick
+     * on the LVGL thread (safe context). Touch callback may run in
+     * ISR or timer context where LEDC fade functions are NOT safe. */
+    if (s_dim_state != DIM_STATE_ACTIVE) {
+        s_dim_state = DIM_STATE_ACTIVE;
+        s_wake_pending = true;
+    }
+}
+
+void st7701_lcd_set_dim_timeout(uint16_t dim1_seconds, uint16_t dim2_seconds, uint16_t off_seconds)
+{
+    s_dim1_timeout_s = dim1_seconds;
+    s_dim2_timeout_s = dim2_seconds;
+    s_off_timeout_s  = off_seconds;
+    ESP_LOGI(TAG, "Dim timeouts: %ds→50%%, %ds→20%%, %ds→off",
+             dim1_seconds, dim2_seconds, off_seconds);
+}
+
+void st7701_lcd_set_user_brightness(uint8_t percent)
+{
+    if (percent > 100) percent = 100;
+    if (percent < 10) percent = 10;
+    s_user_brightness = percent;
+    /* If currently active, apply immediately */
+    if (s_dim_state == DIM_STATE_ACTIVE) {
+        st7701_lcd_set_brightness(percent);
+    }
+}
+
+void st7701_lcd_set_dim_inhibit(bool inhibit)
+{
+    s_dim_inhibit = inhibit;
+    ESP_LOGI(TAG, "Dimming %s", inhibit ? "INHIBITED (process running)" : "ENABLED");
+    if (inhibit && s_dim_state != DIM_STATE_ACTIVE) {
+        /* Restore brightness immediately when entering inhibit mode */
+        st7701_lcd_activity_reset();
+    }
+}
+
+void st7701_lcd_dimming_tick(void)
+{
+    /* Handle deferred wake-up (touch callback sets s_wake_pending) */
+    if (s_wake_pending) {
+        s_wake_pending = false;
+        uint32_t duty = (uint32_t)BL_DUTY_MAX * s_user_brightness / 100;
+        ledc_set_duty(BL_LEDC_MODE, BL_LEDC_CHANNEL, duty);
+        ledc_update_duty(BL_LEDC_MODE, BL_LEDC_CHANNEL);
+        s_brightness_pct = s_user_brightness;
+        return;
+    }
+
+    if (s_dim1_timeout_s == 0) return;  /* auto-dim disabled */
+    if (s_dim_inhibit) return;          /* inhibited during checkup */
+    if (s_last_activity_us == 0) return; /* not yet initialized */
+
+    int64_t elapsed_us = esp_timer_get_time() - s_last_activity_us;
+    int64_t dim1_us = (int64_t)s_dim1_timeout_s * 1000000;
+    int64_t dim2_us = (int64_t)s_dim2_timeout_s * 1000000;
+    int64_t off_us  = (int64_t)s_off_timeout_s  * 1000000;
+
+    if (elapsed_us >= off_us && s_dim_state != DIM_STATE_OFF) {
+        /* 10 min → screen off */
+        s_dim_state = DIM_STATE_OFF;
+        st7701_lcd_set_brightness(0);
+    } else if (elapsed_us >= dim2_us && s_dim_state < DIM_STATE_DIM2) {
+        /* 5 min → 20% of user brightness */
+        s_dim_state = DIM_STATE_DIM2;
+        uint8_t dim_val = s_user_brightness / 5;
+        if (dim_val < 5) dim_val = 5;
+        st7701_lcd_set_brightness(dim_val);
+    } else if (elapsed_us >= dim1_us && s_dim_state == DIM_STATE_ACTIVE) {
+        /* 1 min → 50% of user brightness */
+        s_dim_state = DIM_STATE_DIM1;
+        uint8_t dim_val = s_user_brightness / 2;
+        if (dim_val < 5) dim_val = 5;
+        st7701_lcd_set_brightness(dim_val);
+    }
 }
 
 esp_err_t st7701_lcd_init(void)
@@ -107,8 +248,8 @@ esp_err_t st7701_lcd_init(void)
     // to avoid a white flash from uninitialized DPI buffer
     st7701_lcd_fill_screen(0x0000);
 
-    // Turn on backlight
-    set_lcd_backlight(EXAMPLE_LCD_BK_LIGHT_ON_LEVEL);
+    // Turn on backlight at full brightness via PWM
+    st7701_lcd_set_brightness(100);
 
     ESP_LOGI(TAG, "LCD initialized successfully (%dx%d, RGB565)", ST7701_PHYS_H_RES, ST7701_PHYS_V_RES);
     return ESP_OK;

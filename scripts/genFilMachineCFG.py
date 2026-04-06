@@ -176,6 +176,9 @@ DEFAULT_SETTINGS = {
     "wifiEnabled": 0,
     "wifiSSID": "",
     "wifiPassword": "",
+    # ── Display settings ──
+    "brightness": 100,
+    "dimTimeout": 30,
 }
 
 def random_settings():
@@ -205,6 +208,8 @@ def random_settings():
         "wifiEnabled": 0,
         "wifiSSID": "",
         "wifiPassword": "",
+        "brightness": random.randrange(50, 101, 10),
+        "dimTimeout": random.choice([0, 15, 30, 60]),
     }
 
 # ═══════════════════════════════════════════════
@@ -313,6 +318,9 @@ def write_settings(f, s):
     f.write(ssid.ljust(33, b'\x00'))                          # char[33]
     pwd = s.get("wifiPassword", "").encode('ASCII')[:64]
     f.write(pwd.ljust(65, b'\x00'))                           # char[65]
+    # ── Display settings ──
+    f.write(struct.pack('<B', s.get("brightness", 100)))     # uint8_t (10-100%)
+    f.write(struct.pack('<B', s.get("dimTimeout", 30)))      # uint8_t (seconds, 0=disabled)
 
 def write_process(f, p):
     f.write(p["processNameString"].encode('ASCII').ljust(MAX_PROC_NAME_LEN + 1, b'\x00'))

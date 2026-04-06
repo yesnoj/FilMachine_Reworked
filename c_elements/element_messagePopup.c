@@ -339,11 +339,12 @@ static void message_popup_button1_clicked(lv_obj_t *mboxCont)
             break;
 
         case MSGPOP_OWNER_WIFI_FORGET:
-            /* Forget WiFi — clear saved credentials */
+            /* Forget WiFi — clear saved credentials (SD + NVS) */
             gui.page.settings.settingsParams.wifiSSID[0] = '\0';
             gui.page.settings.settingsParams.wifiPassword[0] = '\0';
             gui.page.settings.settingsParams.wifiEnabled = false;
             qSysAction(SAVE_PROCESS_CONFIG);
+            wifi_nvs_clear();
             /* Disconnect if currently connected */
             if (wifi_is_connected()) {
                 wifi_disconnect();

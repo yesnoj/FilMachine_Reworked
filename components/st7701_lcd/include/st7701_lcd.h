@@ -45,6 +45,49 @@ esp_err_t st7701_lcd_draw_rgb_bitmap(uint16_t x, uint16_t y,
 esp_err_t st7701_lcd_fill_screen(uint16_t color);
 
 /**
+ * @brief Set backlight brightness (0–100%).
+ *        Uses LEDC PWM with smooth 300ms fade transition.
+ *        0 = off, 100 = full brightness.
+ */
+esp_err_t st7701_lcd_set_brightness(uint8_t percent);
+
+/**
+ * @brief Get current backlight brightness (0–100%).
+ */
+uint8_t st7701_lcd_get_brightness(void);
+
+/**
+ * @brief Set the user-preferred brightness level (10–100%).
+ *        This is the brightness restored on touch wake-up.
+ */
+void st7701_lcd_set_user_brightness(uint8_t percent);
+
+/**
+ * @brief Reset the inactivity timer (call on every touch event).
+ *        If the screen is dimmed or off, it wakes up instantly.
+ */
+void st7701_lcd_activity_reset(void);
+
+/**
+ * @brief Configure 3-stage auto-dim timeouts.
+ * @param dim1_seconds  Seconds of inactivity before dim to 50% (0 = disabled)
+ * @param dim2_seconds  Seconds of inactivity before dim to 20%
+ * @param off_seconds   Seconds of inactivity before turning off
+ */
+void st7701_lcd_set_dim_timeout(uint16_t dim1_seconds, uint16_t dim2_seconds, uint16_t off_seconds);
+
+/**
+ * @brief Inhibit (true) or allow (false) auto-dimming.
+ *        Use during checkup/process to keep the screen on.
+ */
+void st7701_lcd_set_dim_inhibit(bool inhibit);
+
+/**
+ * @brief Call periodically (~1 Hz) to check inactivity and dim/off the backlight.
+ */
+void st7701_lcd_dimming_tick(void);
+
+/**
  * @brief Get the LCD panel handles
  */
 void st7701_lcd_get_handles(bsp_lcd_handles_t *ret_handles);

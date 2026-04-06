@@ -291,6 +291,8 @@ typedef enum {
 #define tankSizeLarge_text                  "L"
 #define pumpSpeed_text                      "Pump speed"
 #define pumpSpeedAlertMBox_text             "Set the pump speed percentage.\nHigher values = faster fill/drain."
+#define brightness_text                     "Brightness"
+#define brightnessAlertMBox_text            "Set the LCD backlight brightness.\nAuto-dim: 1min \xe2\x86\x92 50%, 5min \xe2\x86\x92 20%,\n10min \xe2\x86\x92 off. Touch to wake."
 #define chemContainerMl_text                "Chemistry container"
 #define chemContainerMlAlertMBox_text       "Set the chemistry container\nsize in milliliters."
 #define wbContainerMl_text                  "Water bath container"
@@ -578,6 +580,9 @@ struct __attribute__ ((packed)) machineSettings {
 	bool					wifiEnabled;        /* true = connect to Wi-Fi on boot & run WebSocket server */
 	char					wifiSSID[33];       /* SSID (max 32 chars + NUL) */
 	char					wifiPassword[65];   /* Password (max 64 chars + NUL) */
+	/* ── Display settings (added last for binary config compatibility) ── */
+	uint8_t					brightness;         /* 10-100% LCD backlight brightness */
+	uint8_t					dimTimeout;         /* Auto-dim timeout in seconds (0=disabled, default 30) */
 };
 
 
@@ -1352,6 +1357,11 @@ struct sSettings {
 	lv_obj_t                *pumpSpeedSlider;
 	lv_obj_t                *pumpSpeedValueLabel;
 
+	lv_obj_t                *brightnessContainer;
+	lv_obj_t                *brightnessLabel;
+	lv_obj_t                *brightnessSlider;
+	lv_obj_t                *brightnessValueLabel;
+
 	lv_obj_t                *chemContainerMlContainer;
 	lv_obj_t                *chemContainerMlLabel;
 	lv_obj_t                *chemContainerMlTextArea;
@@ -1713,6 +1723,10 @@ bool wifi_is_connected(void);
 const char *wifi_get_connected_ssid(void);
 const char *wifi_get_ip_address(void);
 void wifi_boot_auto_connect(void);  /* Call once after readConfigFile to auto-connect if enabled */
+/* NVS-based Wi-Fi credential persistence (works without SD card) */
+void wifi_nvs_save(const char *ssid, const char *password);
+bool wifi_nvs_load(char *ssid_buf, size_t ssid_sz, char *pwd_buf, size_t pwd_sz);
+void wifi_nvs_clear(void);
 void wifi_popup_connection_result(void); /* Save credentials + update UI on GOT_IP */
 void wifi_popup_connection_failed(void); /* Clear pending credentials + update UI on failure */
 void wifi_popup_scan_done(void);        /* Notify popup that async scan results are ready */

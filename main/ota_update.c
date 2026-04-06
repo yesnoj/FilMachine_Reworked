@@ -187,6 +187,18 @@ void wifi_boot_auto_connect(void) {
     LV_LOG_USER("[WiFi SIM] wifi_boot_auto_connect — no-op in simulator");
 }
 
+void wifi_nvs_save(const char *ssid, const char *password) {
+    (void)ssid; (void)password;
+    LV_LOG_USER("[WiFi SIM] wifi_nvs_save — no-op in simulator");
+}
+bool wifi_nvs_load(char *ssid_buf, size_t ssid_sz, char *pwd_buf, size_t pwd_sz) {
+    (void)ssid_buf; (void)ssid_sz; (void)pwd_buf; (void)pwd_sz;
+    return false;
+}
+void wifi_nvs_clear(void) {
+    LV_LOG_USER("[WiFi SIM] wifi_nvs_clear — no-op in simulator");
+}
+
 #else
 /* ═══════════════════════════════════════════════════════════════
  *  REAL ESP32 IMPLEMENTATION
@@ -204,6 +216,8 @@ void wifi_boot_auto_connect(void) {
 #endif
 #include "esp_event.h"
 #include "esp_log.h"
+#include "nvs_flash.h"
+#include "nvs.h"
 #include "ws_server.h"
 #include "ff.h"
 
@@ -232,6 +246,68 @@ static void safe_strcopy(char *dst, const char *src, size_t dst_size)
     if (len >= dst_size) len = dst_size - 1;
     memcpy(dst, src, len);
     dst[len] = '\0';
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ *  NVS-based Wi-Fi credential persistence
+ *  Allows Wi-Fi auto-connect even without SD card inserted.
+ * ═══════════════════════════════════════════════════════════════ */
+#define WIFI_NVS_NAMESPACE "wifi_cred"
+#define WIFI_NVS_KEY_SSID  "ssid"
+#define WIFI_NVS_KEY_PASS  "pass"
+
+void wifi_nvs_save(const char *ssid, const char *password)
+{
+    nvs_handle_t h;
+    esp_err_t err = nvs_open(WIFI_NVS_NAMESPACE, NVS_READWRITE, &h);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "[NVS] open failed: %s", esp_err_to_name(err));
+        return;
+    }
+    nvs_set_str(h, WIFI_NVS_KEY_SSID, ssid);
+    nvs_set_str(h, WIFI_NVS_KEY_PASS, password ? password : "");
+    err = nvs_commit(h);
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "[NVS] Wi-Fi credentials saved (ssid='%s')", ssid);
+    } else {
+        ESP_LOGE(TAG, "[NVS] commit failed: %s", esp_err_to_name(err));
+    }
+    nvs_close(h);
+}
+
+bool wifi_nvs_load(char *ssid_buf, size_t ssid_sz, char *pwd_buf, size_t pwd_sz)
+{
+    nvs_handle_t h;
+    esp_err_t err = nvs_open(WIFI_NVS_NAMESPACE, NVS_READONLY, &h);
+    if (err != ESP_OK) {
+        ESP_LOGI(TAG, "[NVS] No saved Wi-Fi credentials");
+        return false;
+    }
+    size_t len = ssid_sz;
+    err = nvs_get_str(h, WIFI_NVS_KEY_SSID, ssid_buf, &len);
+    if (err != ESP_OK || ssid_buf[0] == '\0') {
+        nvs_close(h);
+        return false;
+    }
+    len = pwd_sz;
+    err = nvs_get_str(h, WIFI_NVS_KEY_PASS, pwd_buf, &len);
+    if (err != ESP_OK) {
+        pwd_buf[0] = '\0';  /* open network */
+    }
+    nvs_close(h);
+    ESP_LOGI(TAG, "[NVS] Wi-Fi credentials loaded (ssid='%s')", ssid_buf);
+    return true;
+}
+
+void wifi_nvs_clear(void)
+{
+    nvs_handle_t h;
+    esp_err_t err = nvs_open(WIFI_NVS_NAMESPACE, NVS_READWRITE, &h);
+    if (err != ESP_OK) return;
+    nvs_erase_all(h);
+    nvs_commit(h);
+    nvs_close(h);
+    ESP_LOGI(TAG, "[NVS] Wi-Fi credentials cleared");
 }
 
 const char *ota_get_running_version(void) {
@@ -1012,28 +1088,52 @@ static void fw_wifi_ensure_init(void) {
 
     fw_wifi_initialized = true;
 
-    /* If auto-connect is enabled and credentials are saved, connect now */
+    /* If auto-connect is enabled and credentials are saved, connect now.
+     * Try SD-based settingsParams first; fall back to NVS if SSID is empty
+     * (e.g. SD card not inserted). */
+    const char *connect_ssid = gui.page.settings.settingsParams.wifiSSID;
+    const char *connect_pass = gui.page.settings.settingsParams.wifiPassword;
+    bool use_nvs_fallback = false;
+
+    static char nvs_ssid[33];
+    static char nvs_pass[65];
+
     if (gui.page.settings.settingsParams.wifiEnabled &&
-        gui.page.settings.settingsParams.wifiSSID[0] != '\0') {
-        ESP_LOGI(TAG, "[WiFi] Auto-connecting to '%s'...",
-                 gui.page.settings.settingsParams.wifiSSID);
+        connect_ssid[0] != '\0') {
+        /* SD config has credentials — use them */
+    } else if (wifi_nvs_load(nvs_ssid, sizeof(nvs_ssid),
+                             nvs_pass, sizeof(nvs_pass))) {
+        /* No SD credentials but NVS has saved ones — use NVS */
+        connect_ssid = nvs_ssid;
+        connect_pass = nvs_pass;
+        use_nvs_fallback = true;
+        /* Also populate settingsParams so the UI reflects the connection */
+        safe_strcopy(gui.page.settings.settingsParams.wifiSSID,
+                     nvs_ssid, sizeof(gui.page.settings.settingsParams.wifiSSID));
+        safe_strcopy(gui.page.settings.settingsParams.wifiPassword,
+                     nvs_pass, sizeof(gui.page.settings.settingsParams.wifiPassword));
+        gui.page.settings.settingsParams.wifiEnabled = true;
+        ESP_LOGI(TAG, "[WiFi] Using NVS fallback credentials (ssid='%s')", nvs_ssid);
+    } else {
+        connect_ssid = NULL;  /* no credentials at all */
+    }
+
+    if (connect_ssid != NULL && connect_ssid[0] != '\0') {
+        ESP_LOGI(TAG, "[WiFi] Auto-connecting to '%s'%s...",
+                 connect_ssid, use_nvs_fallback ? " (from NVS)" : "");
         wifi_icon_set_connecting();  /* blink white icon while connecting */
         wifi_config_t wifi_config = {0};
         safe_strcopy((char *)wifi_config.sta.ssid,
-                     gui.page.settings.settingsParams.wifiSSID,
-                     sizeof(wifi_config.sta.ssid));
+                     connect_ssid, sizeof(wifi_config.sta.ssid));
         safe_strcopy((char *)wifi_config.sta.password,
-                     gui.page.settings.settingsParams.wifiPassword,
-                     sizeof(wifi_config.sta.password));
+                     connect_pass, sizeof(wifi_config.sta.password));
         wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
         wifi_config.sta.pmf_cfg.capable = true;
         wifi_config.sta.pmf_cfg.required = false;
         esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
         esp_wifi_connect();
     } else {
-        ESP_LOGI(TAG, "[WiFi] Auto-connect skipped: enabled=%d, ssid='%s'",
-                 gui.page.settings.settingsParams.wifiEnabled,
-                 gui.page.settings.settingsParams.wifiSSID);
+        ESP_LOGI(TAG, "[WiFi] Auto-connect skipped: no credentials (SD or NVS)");
     }
 
     ESP_LOGI(TAG, "[WiFi] Stack initialized (STA mode)");
@@ -1179,6 +1279,8 @@ bool wifi_is_connected(void) { return false; }
 const char *wifi_get_connected_ssid(void) { return NULL; }
 const char *wifi_get_ip_address(void) { return NULL; }
 void wifi_boot_auto_connect(void) {}
+/* NVS wifi_nvs_save/load/clear are defined above the #if SOC_WIFI guard —
+ * they work regardless of WiFi support, so no stubs needed here. */
 void wifi_popup_connection_result(void) {}
 void wifi_popup_connection_failed(void) {}
 void wifi_popup_scan_done(void) {}

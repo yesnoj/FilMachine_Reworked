@@ -364,6 +364,7 @@ static void ws_async_close_process(void *user_data) {
 
     /* Switch back to the menu screen, then delete checkup screen */
 #if defined(DISPLAY_DRIVER_ST7701)
+    st7701_lcd_set_dim_inhibit(false);  /* Re-enable auto-dimming */
     st7701_lcd_fill_screen(0x0000);
 #endif
     lv_scr_load(gui.page.menu.screen_mainMenu);

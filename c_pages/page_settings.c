@@ -6,6 +6,9 @@
 
 //ESSENTIAL INCLUDE
 #include "FilMachine.h"
+#if defined(DISPLAY_DRIVER_ST7701)
+#include "st7701_lcd.h"
+#endif
 
 extern struct gui_components gui;
 
@@ -34,7 +37,12 @@ uint8_t analogVal_rotationSpeedPercent;
 #define Y_DRAIN_FILL                 (Y_FILM_RANDOM + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
 #define Y_MULTI_RINSE                (Y_DRAIN_FILL + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
 #define Y_PUMP_SPEED                 (Y_MULTI_RINSE + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
+#if defined(DISPLAY_DRIVER_ST7701)
+#define Y_BRIGHTNESS                 (Y_PUMP_SPEED + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
+#define Y_PERSISTENT_ALARM           (Y_BRIGHTNESS + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
+#else
 #define Y_PERSISTENT_ALARM           (Y_PUMP_SPEED + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
+#endif
 #define Y_TANK_SIZE                  (Y_PERSISTENT_ALARM + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #define Y_CHEM_CONTAINER_ML          (Y_TANK_SIZE + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #define Y_WB_CONTAINER_ML            (Y_CHEM_CONTAINER_ML + SETTINGS_H_ROW + SETTINGS_GAP_Y)
@@ -97,6 +105,9 @@ void event_settingPopupMBox(lv_event_t * e){
     if(data == gui.page.settings.pumpSpeedLabel) {
         messagePopupCreate(messagePopupDetailTitle_text,pumpSpeedAlertMBox_text,NULL,NULL,NULL);
     }
+    if(data == gui.page.settings.brightnessLabel) {
+        messagePopupCreate(messagePopupDetailTitle_text,brightnessAlertMBox_text,NULL,NULL,NULL);
+    }
     if(data == gui.page.settings.chemContainerMlLabel) {
         messagePopupCreate(messagePopupDetailTitle_text,chemContainerMlAlertMBox_text,NULL,NULL,NULL);
     }
@@ -128,7 +139,7 @@ void event_settings_handler(lv_event_t * e)
 
     /*Do nothing if the container was clicked*/
 
-    if(act_cb == cont && cont != gui.page.settings.waterInletSwitch && cont != gui.page.settings.tempSensorTuneButton && cont != gui.page.settings.filmRotationSpeedSlider && cont != gui.page.settings.filmRotationInversionIntervalSlider && cont != gui.page.settings.filmRandomSlider && cont != gui.page.settings.persistentAlarmSwitch && cont != gui.page.settings.autostartSwitch && cont != gui.page.settings.drainFillTimeSlider && cont != gui.page.settings.multiRinseTimeSlider && cont != gui.page.settings.tankSizeTextArea && cont != gui.page.settings.pumpSpeedSlider && cont != gui.page.settings.chemContainerMlTextArea && cont != gui.page.settings.wbContainerMlTextArea && cont != gui.page.settings.chemVolumeTextArea && cont != gui.page.settings.splashButton && cont != gui.page.settings.wifiButton && cont != gui.page.settings.resetButton)
+    if(act_cb == cont && cont != gui.page.settings.waterInletSwitch && cont != gui.page.settings.tempSensorTuneButton && cont != gui.page.settings.filmRotationSpeedSlider && cont != gui.page.settings.filmRotationInversionIntervalSlider && cont != gui.page.settings.filmRandomSlider && cont != gui.page.settings.persistentAlarmSwitch && cont != gui.page.settings.autostartSwitch && cont != gui.page.settings.drainFillTimeSlider && cont != gui.page.settings.multiRinseTimeSlider && cont != gui.page.settings.tankSizeTextArea && cont != gui.page.settings.pumpSpeedSlider && cont != gui.page.settings.brightnessSlider && cont != gui.page.settings.chemContainerMlTextArea && cont != gui.page.settings.wbContainerMlTextArea && cont != gui.page.settings.chemVolumeTextArea && cont != gui.page.settings.splashButton && cont != gui.page.settings.wifiButton && cont != gui.page.settings.resetButton)
       return;
 
     if(act_cb == gui.page.settings.tempUnitCelsiusRadioButton || act_cb == gui.page.settings.tempUnitFahrenheitRadioButton){
@@ -305,6 +316,25 @@ void event_settings_handler(lv_event_t * e)
         }
     }
 
+    if(act_cb == gui.page.settings.brightnessSlider) {
+        if(code == LV_EVENT_VALUE_CHANGED) {
+            new_value = lv_slider_get_value(act_cb);
+            new_value = roundToStep(new_value, 10);
+            if(new_value < 10) new_value = 10;
+            if(new_value > 100) new_value = 100;
+            lv_slider_set_value(act_cb, new_value, LV_ANIM_OFF);
+            lv_label_set_text_fmt((lv_obj_t*)lv_event_get_user_data(e), "%d%%", new_value);
+            LV_LOG_USER("Brightness: %d%%", new_value);
+            gui.page.settings.settingsParams.brightness = new_value;
+#if defined(DISPLAY_DRIVER_ST7701)
+            st7701_lcd_set_user_brightness(new_value);
+#endif
+        }
+        if(code == LV_EVENT_RELEASED) {
+            qSysAction(SAVE_PROCESS_CONFIG);
+        }
+    }
+
     if(act_cb == gui.page.settings.chemContainerMlTextArea) {
         if(code == LV_EVENT_FOCUSED) {
             if(gui.element.rollerPopup.mBoxRollerParent != NULL) return;
@@ -379,6 +409,8 @@ void event_settings_handler(lv_event_t * e)
             p->multiRinseTime = 60;
             p->tankSize = 2;               /* Medium */
             p->pumpSpeed = 30;
+            p->brightness = 100;
+            p->dimTimeout = 30;
             p->chemContainerMl = 500;
             p->wbContainerMl = 2000;
             p->chemistryVolume = 2;         /* High */
@@ -744,6 +776,39 @@ gui.page.settings.pumpSpeedContainer = lv_obj_create(parent);
         lv_obj_add_event_cb(gui.page.settings.pumpSpeedSlider, event_settings_handler, LV_EVENT_RELEASED, gui.page.settings.pumpSpeedValueLabel);
         lv_label_set_text_fmt(gui.page.settings.pumpSpeedValueLabel, "%d%%", gui.page.settings.settingsParams.pumpSpeed);
 
+/* ── Brightness slider ── */
+#if defined(DISPLAY_DRIVER_ST7701)
+gui.page.settings.brightnessContainer = lv_obj_create(parent);
+  lv_obj_align(gui.page.settings.brightnessContainer, LV_ALIGN_TOP_LEFT, SETTINGS_LEFT_X, Y_BRIGHTNESS);
+  lv_obj_set_size(gui.page.settings.brightnessContainer, UI_SETTINGS->row_w, SETTINGS_H_SLIDER);
+  lv_obj_remove_flag(gui.page.settings.brightnessContainer, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_style_border_opa(gui.page.settings.brightnessContainer, LV_OPA_TRANSP, 0);
+
+        gui.page.settings.brightnessLabel = lv_label_create(gui.page.settings.brightnessContainer);
+        lv_label_set_text(gui.page.settings.brightnessLabel, brightness_text);
+        lv_obj_set_style_text_font(gui.page.settings.brightnessLabel, UI_SETTINGS->label_font, 0);
+        lv_obj_align(gui.page.settings.brightnessLabel, LV_ALIGN_TOP_LEFT, -UI_SETTINGS->row_value_x, UI_SETTINGS->row_value_y);
+
+        createQuestionMark(gui.page.settings.brightnessContainer, gui.page.settings.brightnessLabel, event_settingPopupMBox, UI_SETTINGS->help_icon_x, UI_SETTINGS->help_icon_y);
+
+        gui.page.settings.brightnessSlider = lv_slider_create(gui.page.settings.brightnessContainer);
+        lv_obj_set_width(gui.page.settings.brightnessSlider, UI_SETTINGS->slider_w);
+        lv_obj_align(gui.page.settings.brightnessSlider, LV_ALIGN_TOP_LEFT, UI_SETTINGS->slider_x_offset, UI_SETTINGS->slider_y);
+        lv_obj_set_style_anim_duration(gui.page.settings.brightnessSlider, 2000, 0);
+        lv_obj_set_style_bg_color(gui.page.settings.brightnessSlider, lv_color_hex(ORANGE), LV_PART_KNOB);
+        lv_obj_set_style_bg_color(gui.page.settings.brightnessSlider, lv_color_hex(ORANGE_LIGHT), LV_PART_INDICATOR);
+        lv_obj_set_style_bg_color(gui.page.settings.brightnessSlider, lv_palette_lighten(LV_PALETTE_GREY, 3), LV_PART_MAIN);
+        lv_slider_set_range(gui.page.settings.brightnessSlider, 10, 100);
+        lv_slider_set_value(gui.page.settings.brightnessSlider, gui.page.settings.settingsParams.brightness, LV_ANIM_OFF);
+
+        gui.page.settings.brightnessValueLabel = lv_label_create(gui.page.settings.brightnessContainer);
+        lv_obj_set_style_text_font(gui.page.settings.brightnessValueLabel, UI_SETTINGS->value_font, 0);
+        lv_obj_align(gui.page.settings.brightnessValueLabel, LV_ALIGN_TOP_RIGHT, UI_SETTINGS->row_value_x, UI_SETTINGS->row_value_y);
+        lv_obj_add_event_cb(gui.page.settings.brightnessSlider, event_settings_handler, LV_EVENT_VALUE_CHANGED, gui.page.settings.brightnessValueLabel);
+        lv_obj_add_event_cb(gui.page.settings.brightnessSlider, event_settings_handler, LV_EVENT_RELEASED, gui.page.settings.brightnessValueLabel);
+        lv_label_set_text_fmt(gui.page.settings.brightnessValueLabel, "%d%%", gui.page.settings.settingsParams.brightness);
+#endif
+
 /* ── Chemistry container capacity ── */
 gui.page.settings.chemContainerMlContainer = lv_obj_create(parent);
   lv_obj_align(gui.page.settings.chemContainerMlContainer, LV_ALIGN_TOP_LEFT, SETTINGS_LEFT_X, Y_CHEM_CONTAINER_ML);
@@ -1052,6 +1117,19 @@ void refreshSettingsUI(void)
                         p->pumpSpeed, LV_ANIM_OFF);
     lv_label_set_text_fmt(gui.page.settings.pumpSpeedValueLabel,
                           "%d%%", p->pumpSpeed);
+
+    /* ── Brightness slider ── */
+#if defined(DISPLAY_DRIVER_ST7701)
+    /* Safe defaults for old configs (fields zeroed by memset in readConfigFile) */
+    if (p->dimTimeout == 0) p->dimTimeout = 30;   /* default 30s dim */
+    if (p->brightness < 10) p->brightness = 100;  /* default full brightness */
+    lv_slider_set_value(gui.page.settings.brightnessSlider,
+                        p->brightness, LV_ANIM_OFF);
+    lv_label_set_text_fmt(gui.page.settings.brightnessValueLabel,
+                          "%d%%", p->brightness);
+    st7701_lcd_set_user_brightness(p->brightness);
+    st7701_lcd_set_dim_timeout(60, 300, 600);  /* 1min→50%, 5min→20%, 10min→off */
+#endif
 
     /* ── Chemistry container capacity ── */
     { char buf[16]; snprintf(buf, sizeof(buf), "%dml", p->chemContainerMl); lv_textarea_set_text(gui.page.settings.chemContainerMlTextArea, buf); }

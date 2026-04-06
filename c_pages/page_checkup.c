@@ -258,6 +258,7 @@ void event_checkup(lv_event_t * e){
 
         /* Switch back to the menu screen FIRST, then delete the checkup screen */
 #if defined(DISPLAY_DRIVER_ST7701)
+        st7701_lcd_set_dim_inhibit(false);  /* Re-enable auto-dimming */
         st7701_lcd_fill_screen(0x0000);
 #endif
         lv_scr_load(gui.page.menu.screen_mainMenu);
@@ -1359,6 +1360,7 @@ void initCheckup(processNode *pn)
       ckup->checkupParent = lv_obj_create(NULL);
 #if defined(DISPLAY_DRIVER_ST7701)
       st7701_lcd_fill_screen(0x0000);
+      st7701_lcd_set_dim_inhibit(true);  /* Keep screen on during process */
 #endif
       lv_scr_load(ckup->checkupParent);
       lv_obj_invalidate(ckup->checkupParent);
