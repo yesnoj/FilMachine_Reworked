@@ -177,7 +177,7 @@ static void step_detail_refresh_save_button(stepNode *sn, lv_obj_t *obj) {
     sStepDetail *sd = sn->step.stepDetails;
     if (obj == sd->stepSaveButton) {
         if (step_detail_is_valid(sd)) {
-            lv_obj_clear_state(sd->stepSaveButton, LV_STATE_DISABLED);
+            lv_obj_remove_state(sd->stepSaveButton, LV_STATE_DISABLED);
         } else {
             lv_obj_add_state(sd->stepSaveButton, LV_STATE_DISABLED);
         }
@@ -261,7 +261,7 @@ void step_detail_live_update(stepNode *sn) {
         if (sd->data.discardAfterProc && !isChecked)
             lv_obj_add_state(sd->stepDiscardAfterSwitch, LV_STATE_CHECKED);
         else if (!sd->data.discardAfterProc && isChecked)
-            lv_obj_clear_state(sd->stepDiscardAfterSwitch, LV_STATE_CHECKED);
+            lv_obj_remove_state(sd->stepDiscardAfterSwitch, LV_STATE_CHECKED);
     }
 
     /* Also refresh the backup so Cancel restores the latest remote data */

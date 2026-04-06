@@ -140,7 +140,7 @@ static void disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_ma
 static bool notify_lvgl_flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx) {
 
     lv_display_t *display = (lv_display_t *)user_ctx;
-    lv_disp_flush_ready(display);
+    lv_display_flush_ready(display);
     return false;
 }
 
@@ -514,7 +514,7 @@ create_keyboard();
 
     /* Show splash screen — play button calls readConfigFile → menu → refreshSettingsUI */
     lv_obj_t * splash = splash_screen_create();
-    lv_scr_load(splash);
+    lv_screen_load(splash);
 
     while (1) {
         // lv_timer_handler returns ms until next call is needed

@@ -83,7 +83,7 @@ static void process_detail_close(processNode *pn) {
 #if defined(DISPLAY_DRIVER_ST7701)
     st7701_lcd_fill_screen(0x0000);
 #endif
-    lv_scr_load(gui.page.menu.screen_mainMenu);
+    lv_screen_load(gui.page.menu.screen_mainMenu);
     lv_obj_invalidate(gui.page.menu.screen_mainMenu);
 }
 
@@ -132,8 +132,8 @@ static void process_detail_save(processNode *pn) {
 
         snprintf(pd->data.processNameString, sizeof(pd->data.processNameString),
                  "%s", lv_textarea_get_text(pd->processDetailNameTextArea));
-        lv_obj_clear_state(pd->processRunButton, LV_STATE_DISABLED);
-        lv_obj_clear_state(pd->processDetailCloseButton, LV_STATE_DISABLED);
+        lv_obj_remove_state(pd->processRunButton, LV_STATE_DISABLED);
+        lv_obj_remove_state(pd->processDetailCloseButton, LV_STATE_DISABLED);
         lv_obj_add_state(pd->processSaveButton, LV_STATE_DISABLED);
 
         if (isNodeInList((void *)&(gui.page.processes.processElementsList), pn, PROCESS_NODE) == NULL) {
@@ -160,7 +160,7 @@ static void process_detail_save(processNode *pn) {
     } else {
         lv_obj_add_state(pd->processSaveButton, LV_STATE_DISABLED);
         lv_obj_add_state(pd->processRunButton, LV_STATE_DISABLED);
-        lv_obj_clear_state(pd->processDetailCloseButton, LV_STATE_DISABLED);
+        lv_obj_remove_state(pd->processDetailCloseButton, LV_STATE_DISABLED);
     }
 }
 
@@ -248,7 +248,7 @@ static void process_detail_refresh_save_button(processNode *pn, lv_obj_t *obj) {
     sProcessDetail *pd = pn->process.processDetails;
     if (obj == pd->processSaveButton) {
         if (process_detail_is_valid(pd)) {
-            lv_obj_clear_state(pd->processSaveButton, LV_STATE_DISABLED);
+            lv_obj_remove_state(pd->processSaveButton, LV_STATE_DISABLED);
             /* Close button stays enabled — confirmation popup handles unsaved changes */
             lv_obj_add_state(pd->processRunButton, LV_STATE_DISABLED);
             LV_LOG_USER("Updated SAVE button : ENABLED");
@@ -364,12 +364,12 @@ void process_detail_live_update(processNode *pn) {
         if (pd->data.isTempControlled && !isChecked)
             lv_obj_add_state(pd->processTempControlSwitch, LV_STATE_CHECKED);
         else if (!pd->data.isTempControlled && isChecked)
-            lv_obj_clear_state(pd->processTempControlSwitch, LV_STATE_CHECKED);
+            lv_obj_remove_state(pd->processTempControlSwitch, LV_STATE_CHECKED);
 
         /* Enable/disable temp and tolerance fields */
         if (pd->data.isTempControlled) {
-            lv_obj_clear_state(pd->processTempTextArea, LV_STATE_DISABLED);
-            lv_obj_clear_state(pd->processToleranceTextArea, LV_STATE_DISABLED);
+            lv_obj_remove_state(pd->processTempTextArea, LV_STATE_DISABLED);
+            lv_obj_remove_state(pd->processToleranceTextArea, LV_STATE_DISABLED);
         } else {
             lv_obj_add_state(pd->processTempTextArea, LV_STATE_DISABLED);
             lv_obj_add_state(pd->processToleranceTextArea, LV_STATE_DISABLED);
@@ -538,7 +538,7 @@ if(existingProcess != NULL) {
 #if defined(DISPLAY_DRIVER_ST7701)
       st7701_lcd_fill_screen(0x0000);
 #endif
-      lv_scr_load(pd->processDetailParent);
+      lv_screen_load(pd->processDetailParent);
       lv_obj_invalidate(pd->processDetailParent);
       pd->nameKeyboardCtx.parentScreen = pd->processDetailParent;
 
@@ -829,7 +829,7 @@ if(existingProcess != NULL) {
                   if(pd->stepElementsList.size == 0)
                       lv_obj_add_state(pd->processRunButton, LV_STATE_DISABLED);
                   else
-                      lv_obj_clear_state(pd->processRunButton, LV_STATE_DISABLED);
+                      lv_obj_remove_state(pd->processRunButton, LV_STATE_DISABLED);
 
                           pd->processRunLabel = lv_label_create(pd->processRunButton);
                           lv_label_set_text(pd->processRunLabel, play_icon);

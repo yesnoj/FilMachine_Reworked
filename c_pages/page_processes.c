@@ -163,7 +163,7 @@ void processes(void)
     loadSDCardProcesses();
   }
 
-  lv_obj_clear_flag(gui.page.processes.processesSection, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_remove_flag(gui.page.processes.processesSection, LV_OBJ_FLAG_HIDDEN);
   lv_style_set_line_color(&gui.page.processes.style_sectionTitleLine, lv_palette_main(LV_PALETTE_GREEN));
   refreshProcessesLabel();
 }

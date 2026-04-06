@@ -973,7 +973,7 @@ void initSettings(void){
   lv_obj_set_style_border_color(gui.page.settings.settingsSection, lv_color_hex(ORANGE_LIGHT), 0);
 
 
-    lv_coord_t pad = UI_SETTINGS->section_padding;
+    int32_t pad = UI_SETTINGS->section_padding;
     lv_obj_set_style_pad_left(gui.page.settings.settingsSection, pad, LV_PART_INDICATOR);
     lv_obj_set_style_pad_right(gui.page.settings.settingsSection, pad, LV_PART_INDICATOR);
     lv_obj_set_style_pad_top(gui.page.settings.settingsSection, pad, LV_PART_INDICATOR);

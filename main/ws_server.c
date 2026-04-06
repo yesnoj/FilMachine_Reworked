@@ -173,7 +173,7 @@ static void ws_async_delete_and_refresh(void *user_data) {
 
     /* 1. Delete this process's LVGL element (safe — node memory still alive) */
     if (pn->process.processElement != NULL) {
-        lv_obj_del(pn->process.processElement);
+        lv_obj_delete(pn->process.processElement);
         pn->process.processElement = NULL;
     }
 
@@ -202,7 +202,7 @@ static void ws_async_free_orphan_step(void *user_data) {
     stepNode *sn = (stepNode *)user_data;
     if (!sn) return;
     if (sn->step.stepElement != NULL) {
-        lv_obj_del(sn->step.stepElement);
+        lv_obj_delete(sn->step.stepElement);
         sn->step.stepElement = NULL;
     }
     /* Style was reset by LV_EVENT_DELETE (or was never initialised).
@@ -331,7 +331,7 @@ static void ws_async_stop_after(void *user_data) {
     ckup->data.stopAfter = true;
 
     if (ckup->checkupStopAfterButton) lv_obj_add_state(ckup->checkupStopAfterButton, LV_STATE_DISABLED);
-    if (ckup->checkupStopNowButton)   lv_obj_clear_state(ckup->checkupStopNowButton, LV_STATE_DISABLED);
+    if (ckup->checkupStopNowButton)   lv_obj_remove_state(ckup->checkupStopNowButton, LV_STATE_DISABLED);
 
     gui.page.tools.machineStats.stopped++;
     qSysAction(SAVE_MACHINE_STATS);
@@ -367,7 +367,7 @@ static void ws_async_close_process(void *user_data) {
     st7701_lcd_set_dim_inhibit(false);  /* Re-enable auto-dimming */
     st7701_lcd_fill_screen(0x0000);
 #endif
-    lv_scr_load(gui.page.menu.screen_mainMenu);
+    lv_screen_load(gui.page.menu.screen_mainMenu);
     lv_obj_invalidate(gui.page.menu.screen_mainMenu);
     if (ckup->checkupParent != NULL) {
         lv_obj_delete(ckup->checkupParent);

@@ -698,7 +698,7 @@ typedef struct singleStep { //GRAPHIC ELEMENT IN THE STEPS LIST
     lv_obj_t           		*stepTypeIcon;
     lv_obj_t           		*discardAfterIcon;
     lv_obj_t           		*sourceLabel;
-    lv_coord_t         		container_y;
+    int32_t         		container_y;
     lv_obj_t          		*deleteButton;
     lv_obj_t          		*deleteButtonLabel;
     lv_obj_t          		*editButton;
@@ -931,7 +931,7 @@ typedef struct singleProcess {
     lv_obj_t          	*processTypeIcon;
     lv_obj_t          	*deleteButton;
     lv_obj_t          	*deleteButtonLabel;
-    lv_coord_t        	container_y;
+    int32_t        	container_y;
     bool               	swipedLeft;
     bool               	swipedRight;
     bool               	isFiltered;
@@ -1297,7 +1297,7 @@ struct sSettings {
 	lv_obj_t			      *sectionTitleLine;
 	lv_style_t			    style_sectionTitleLine;
 	lv_point_precise_t	titleLinePoints[2];
-	lv_coord_t 			    pad;
+	int32_t 			    pad;
 
 	lv_obj_t 	        	*settingsLabel;
 	lv_obj_t 	        	*tempUnitLabel;
@@ -1558,8 +1558,8 @@ struct sys_components {
 typedef struct _LVGLObjectScale {
 	
     lv_obj_t *obj;
-    lv_coord_t original_width;
-    lv_coord_t original_height;
+    int32_t original_width;
+    int32_t original_height;
     float current_scale;
 } LVGLObjectScale;
 

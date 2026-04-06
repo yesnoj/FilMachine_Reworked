@@ -261,7 +261,7 @@ void event_checkup(lv_event_t * e){
         st7701_lcd_set_dim_inhibit(false);  /* Re-enable auto-dimming */
         st7701_lcd_fill_screen(0x0000);
 #endif
-        lv_scr_load(gui.page.menu.screen_mainMenu);
+        lv_screen_load(gui.page.menu.screen_mainMenu);
         lv_obj_invalidate(gui.page.menu.screen_mainMenu);
 
         /* Delete the entire checkup screen (checkupParent owns checkupContainer) */
@@ -288,7 +288,7 @@ void event_checkup(lv_event_t * e){
   if(ckup->data.tankSize > 0
     && ckup->data.activeVolume_index > 0 &&
       ckup->data.processStep < 1){
-        lv_obj_clear_state(ckup->checkupStartButton, LV_STATE_DISABLED);
+        lv_obj_remove_state(ckup->checkupStartButton, LV_STATE_DISABLED);
   }
 }
 
@@ -571,7 +571,7 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
 
             lv_arc_set_value(checkup->pumpArc, 100 - tankPercentage);
             lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
-            lv_obj_clear_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
+            lv_obj_remove_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
 
             if(!checkup->data.stopAfter && !checkup->data.stopNow) {
                 lv_obj_add_state(checkup->checkupStopAfterButton, LV_STATE_DISABLED);
@@ -717,7 +717,7 @@ void handleStopNow(processNode *pn) {
 
         lv_arc_set_value(checkup->pumpArc, tankPercentage);
         lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
-        lv_obj_clear_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
+        lv_obj_remove_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
         safeTimerDelete(&checkup->pumpTimer);
 
         /* Start persistent alarm after stop-now draining is fully complete */
@@ -793,7 +793,7 @@ void handleStopAfter(processNode *pn) {
 
             lv_arc_set_value(checkup->pumpArc, 100 - tankPercentage);
             lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
-            lv_obj_clear_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
+            lv_obj_remove_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
             safeTimerDelete(&checkup->pumpTimer);
 
             /* Start persistent alarm after stop-after draining is fully complete */
@@ -840,7 +840,7 @@ void handleStopNowAfterStopAfter(processNode *pn) {
 
         lv_arc_set_value(checkup->pumpArc, tankPercentage);
         lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
-        lv_obj_clear_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
+        lv_obj_remove_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
         safeTimerDelete(&checkup->pumpTimer);
 
         /* Start persistent alarm after stop-now-after-stop-after draining is fully complete */
@@ -990,7 +990,7 @@ static void checkup_renderPreFlight(processNode *proc) {
         lv_obj_align(ckup->checkupStartButtonLabel, LV_ALIGN_CENTER, 0, 0);
         /* Enable Start immediately if tank/volume are already set from settings */
         if (ckup->data.tankSize > 0 && ckup->data.activeVolume_index > 0 && ckup->data.processStep < 1) {
-            lv_obj_clear_state(ckup->checkupStartButton, LV_STATE_DISABLED);
+            lv_obj_remove_state(ckup->checkupStartButton, LV_STATE_DISABLED);
             LV_LOG_USER("checkup: Start button ENABLED (tank=%d, vol=%lu)", ckup->data.tankSize, (unsigned long)ckup->data.activeVolume_index);
         } else {
             lv_obj_add_state(ckup->checkupStartButton, LV_STATE_DISABLED);
@@ -1354,7 +1354,7 @@ void initCheckup(processNode *pn)
          When starting from Flutter/WebSocket the processDetail page was never
          opened, so processDetailParent is NULL. */
       if(pn->process.processDetails->processDetailParent != NULL) {
-          lv_obj_del(pn->process.processDetails->processDetailParent);
+          lv_obj_delete(pn->process.processDetails->processDetailParent);
           pn->process.processDetails->processDetailParent = NULL;
       }
       ckup->checkupParent = lv_obj_create(NULL);
@@ -1362,7 +1362,7 @@ void initCheckup(processNode *pn)
       st7701_lcd_fill_screen(0x0000);
       st7701_lcd_set_dim_inhibit(true);  /* Keep screen on during process */
 #endif
-      lv_scr_load(ckup->checkupParent);
+      lv_screen_load(ckup->checkupParent);
       lv_obj_invalidate(ckup->checkupParent);
 
       ckup->currentStep = pn->process.processDetails->stepElementsList.start;

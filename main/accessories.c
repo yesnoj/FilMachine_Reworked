@@ -131,8 +131,8 @@ lv_obj_t * create_radiobutton(lv_obj_t * mBoxParent, const char * txt, const int
     lv_obj_align(obj, LV_ALIGN_RIGHT_MID, x, y);
 
 
-    lv_coord_t font_h = lv_font_get_line_height(font);
-    lv_coord_t pad = (size - font_h) / 2;
+    int32_t font_h = lv_font_get_line_height(font);
+    int32_t pad = (size - font_h) / 2;
     lv_obj_set_style_pad_left(obj, pad, LV_PART_INDICATOR);
     lv_obj_set_style_pad_right(obj, pad, LV_PART_INDICATOR);
     lv_obj_set_style_pad_top(obj, pad, LV_PART_INDICATOR);
@@ -471,7 +471,7 @@ void createQuestionMark(lv_obj_t * parent, lv_obj_t * element, lv_event_cb_t e, 
         const lv_font_t *qm_font = &FilMachineFontIcons_30;
     #endif
 
-    lv_coord_t sz = (lv_coord_t)((lv_font_get_line_height(qm_font) * 3) / 2);
+    int32_t sz = (int32_t)((lv_font_get_line_height(qm_font) * 3) / 2);
 
     lv_obj_set_size(questionMark, sz, sz);
     lv_label_set_text(questionMark, questionMark_icon);
@@ -1542,8 +1542,8 @@ void updateProcessElement(processNode *process){
             lv_obj_align(process->process.processTime, LV_ALIGN_LEFT_MID, ui_get_profile()->process_element.time_value_x, ui_get_profile()->process_element.time_value_y);
             lv_obj_align(process->process.processTimeIcon, LV_ALIGN_LEFT_MID, ui_get_profile()->process_element.time_icon_x, ui_get_profile()->process_element.time_icon_y);
             lv_obj_set_width(process->process.processTime, ui_get_profile()->process_element.card_content_w - ui_get_profile()->process_element.time_value_x - 18);
-            lv_obj_clear_flag(process->process.processTempIcon, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_clear_flag(process->process.processTemp, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_remove_flag(process->process.processTempIcon, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_remove_flag(process->process.processTemp, LV_OBJ_FLAG_HIDDEN);
        }
  
       //Update preferred

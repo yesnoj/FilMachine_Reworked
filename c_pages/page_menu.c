@@ -80,9 +80,9 @@ void event_tab_switch(lv_event_t * e) {
             lv_obj_set_style_border_color(gui.page.menu.settingsTab, lv_color_hex(GREY), 0);
             lv_obj_set_style_border_opa(gui.page.menu.settingsTab, LV_OPA_50, 0);
             
-            lv_obj_clear_flag(gui.page.processes.processesSection, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_clear_flag(gui.page.processes.processFilterButton, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_clear_flag(gui.page.processes.newProcessButton, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_remove_flag(gui.page.processes.processesSection, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_remove_flag(gui.page.processes.processFilterButton, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_remove_flag(gui.page.processes.newProcessButton, LV_OBJ_FLAG_HIDDEN);
             lv_obj_scroll_to_y(gui.page.processes.processesListContainer, 0, LV_ANIM_OFF);
         }
         if(gui.page.menu.newSelection == TAB_SETTINGS){
@@ -96,7 +96,7 @@ void event_tab_switch(lv_event_t * e) {
             lv_obj_set_style_border_color(gui.page.menu.settingsTab, lv_color_hex(ORANGE_LIGHT), 0);
             lv_obj_set_style_border_opa(gui.page.menu.settingsTab, LV_OPA_MAX, 0);
 
-            lv_obj_clear_flag(gui.page.settings.settingsSection, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_remove_flag(gui.page.settings.settingsSection, LV_OBJ_FLAG_HIDDEN);
             lv_obj_scroll_to_y(gui.page.settings.settingsContainer, 0, LV_ANIM_OFF);
         }
         if(gui.page.menu.newSelection == TAB_TOOLS){
@@ -110,7 +110,7 @@ void event_tab_switch(lv_event_t * e) {
             lv_obj_set_style_border_color(gui.page.menu.settingsTab, lv_color_hex(GREY), 0);
             lv_obj_set_style_border_opa(gui.page.menu.settingsTab, LV_OPA_50, 0);
 
-            lv_obj_clear_flag(gui.page.tools.toolsSection, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_remove_flag(gui.page.tools.toolsSection, LV_OBJ_FLAG_HIDDEN);
             lv_obj_scroll_to_y(gui.page.tools.toolsSection, 0, LV_ANIM_OFF);
             tools_resume_timer();
         }
@@ -133,13 +133,13 @@ void event_tab_switch(lv_event_t * e) {
 
 void menu(void) {
 	
-    lv_obj_del(lv_screen_active());
+    lv_obj_delete(lv_screen_active());
 
     gui.page.menu.screen_mainMenu = lv_obj_create(NULL);
     /* Opaque background guarantees LVGL writes every pixel in partial mode. */
     lv_obj_set_style_bg_opa(gui.page.menu.screen_mainMenu, LV_OPA_COVER, 0);
     lv_obj_set_style_bg_color(gui.page.menu.screen_mainMenu, lv_color_hex(0x000000), 0);
-    lv_scr_load(gui.page.menu.screen_mainMenu);
+    lv_screen_load(gui.page.menu.screen_mainMenu);
 
     processes();
     settings();
