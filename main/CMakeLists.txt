@@ -29,6 +29,7 @@ idf_component_register(
         app_update
         esp_http_server
         esp_event
+        esp_timer
         mdns
         nvs_flash
         ${WIFI_DEPS}

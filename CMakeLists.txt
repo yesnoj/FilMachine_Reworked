@@ -35,14 +35,16 @@ else()
     link_directories(${SDL2_LIBRARY_DIRS} /opt/homebrew/lib)
 
     if(NOT EXISTS "${CMAKE_SOURCE_DIR}/lvgl/CMakeLists.txt")
-        message(STATUS "Cloning LVGL v9.2.2 ...")
+        message(STATUS "Cloning LVGL v9.5.0 ...")
         execute_process(
-            COMMAND git clone --depth 1 --branch v9.2.2 https://github.com/lvgl/lvgl.git
+            COMMAND git clone --depth 1 --branch v9.5.0 https://github.com/lvgl/lvgl.git
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         )
     endif()
 
+    # LVGL ≥9.5 uses LV_BUILD_CONF_DIR; keep LV_CONF_PATH for compat with older tags
     set(LV_CONF_PATH "${CMAKE_SOURCE_DIR}/lvgl_config/lv_conf.h" CACHE STRING "" FORCE)
+    set(LV_BUILD_CONF_DIR "${CMAKE_SOURCE_DIR}/lvgl_config" CACHE STRING "" FORCE)
     add_definitions(-DLV_CONF_INCLUDE_SIMPLE)
     include_directories(${CMAKE_SOURCE_DIR}/lvgl_config)
     include_directories(${SDL2_INCLUDE_DIRS})

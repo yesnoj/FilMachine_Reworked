@@ -57,10 +57,10 @@ RM = /Users/francescoprochilo/.espressif/tools/cmake/3.30.2/CMake.app/Contents/b
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2
+CMAKE_SOURCE_DIR = /Users/francescoprochilo/Desktop/filmachine_simulator_v2
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800
+CMAKE_BINARY_DIR = /Users/francescoprochilo/Desktop/filmachine_simulator_v2/build800
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -132,9 +132,9 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/francescoprochilo/Desktop/filmachine_simulator_v2/build800/CMakeFiles /Users/francescoprochilo/Desktop/filmachine_simulator_v2/build800//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/build800/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/francescoprochilo/Desktop/filmachine_simulator_v2/build800/CMakeFiles 0
 .PHONY : all
 
 # The main clean target

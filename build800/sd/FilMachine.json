@@ -1,0 +1,449 @@
+{
+  "settingsParams": {
+    "tempUnit": 0,
+    "waterInlet": 1,
+    "calibratedTemp": 20,
+    "filmRotationSpeedSetpoint": 50,
+    "rotationIntervalSetpoint": 10,
+    "randomSetpoint": 20,
+    "isPersistentAlarm": 1,
+    "isProcessAutostart": 0,
+    "drainFillOverlapSetpoint": 100,
+    "multiRinseTime": 60,
+    "tankSize": 2,
+    "pumpSpeed": 30,
+    "chemContainerMl": 500,
+    "wbContainerMl": 2000,
+    "chemistryVolume": 2,
+    "tempCalibOffset": 0,
+    "splashRandom": 0,
+    "splashPalette": 3,
+    "splashShapeStyle": 0,
+    "splashComplexity": 40,
+    "splashSeed": 0,
+    "splashDefault": 1,
+    "wifiEnabled": 0,
+    "wifiSSID": "",
+    "wifiPassword": "",
+    "brightness": 100,
+    "dimTimeout": 30
+  },
+  "processes": [
+    {
+      "processNameString": "C41 Color Std",
+      "temp": 38,
+      "tempTolerance": 0.3,
+      "isTempControlled": 1,
+      "isPreferred": 1,
+      "filmType": 1,
+      "timeMins": 23,
+      "timeSecs": 15,
+      "steps": [
+        {
+          "stepNameString": "Pre-wash",
+          "timeMins": 1,
+          "timeSecs": 0,
+          "type": 1,
+          "source": 3,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "Developer",
+          "timeMins": 3,
+          "timeSecs": 15,
+          "type": 0,
+          "source": 0,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Bleach",
+          "timeMins": 6,
+          "timeSecs": 30,
+          "type": 0,
+          "source": 1,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Wash",
+          "timeMins": 3,
+          "timeSecs": 0,
+          "type": 2,
+          "source": 3,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "Fix",
+          "timeMins": 6,
+          "timeSecs": 30,
+          "type": 0,
+          "source": 2,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Final Wash",
+          "timeMins": 3,
+          "timeSecs": 0,
+          "type": 2,
+          "source": 3,
+          "discardAfterProc": 1
+        }
+      ]
+    },
+    {
+      "processNameString": "C41 Push +1",
+      "temp": 38,
+      "tempTolerance": 0.3,
+      "isTempControlled": 1,
+      "isPreferred": 0,
+      "filmType": 1,
+      "timeMins": 23,
+      "timeSecs": 45,
+      "steps": [
+        {
+          "stepNameString": "Pre-wash",
+          "timeMins": 1,
+          "timeSecs": 0,
+          "type": 1,
+          "source": 3,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "Developer",
+          "timeMins": 3,
+          "timeSecs": 45,
+          "type": 0,
+          "source": 0,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Bleach",
+          "timeMins": 6,
+          "timeSecs": 30,
+          "type": 0,
+          "source": 1,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Wash",
+          "timeMins": 3,
+          "timeSecs": 0,
+          "type": 2,
+          "source": 3,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "Fix",
+          "timeMins": 6,
+          "timeSecs": 30,
+          "type": 0,
+          "source": 2,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Final Wash",
+          "timeMins": 3,
+          "timeSecs": 0,
+          "type": 2,
+          "source": 3,
+          "discardAfterProc": 1
+        }
+      ]
+    },
+    {
+      "processNameString": "B&W D76 1+1",
+      "temp": 20,
+      "tempTolerance": 0.5,
+      "isTempControlled": 1,
+      "isPreferred": 1,
+      "filmType": 0,
+      "timeMins": 21,
+      "timeSecs": 45,
+      "steps": [
+        {
+          "stepNameString": "Pre-wash",
+          "timeMins": 1,
+          "timeSecs": 0,
+          "type": 1,
+          "source": 3,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "Developer",
+          "timeMins": 9,
+          "timeSecs": 45,
+          "type": 0,
+          "source": 0,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "Stop Bath",
+          "timeMins": 1,
+          "timeSecs": 0,
+          "type": 0,
+          "source": 1,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Fixer",
+          "timeMins": 5,
+          "timeSecs": 0,
+          "type": 0,
+          "source": 2,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Wash",
+          "timeMins": 5,
+          "timeSecs": 0,
+          "type": 2,
+          "source": 3,
+          "discardAfterProc": 1
+        }
+      ]
+    },
+    {
+      "processNameString": "B&W Rodinal 1+50",
+      "temp": 20,
+      "tempTolerance": 0.5,
+      "isTempControlled": 0,
+      "isPreferred": 0,
+      "filmType": 0,
+      "timeMins": 28,
+      "timeSecs": 0,
+      "steps": [
+        {
+          "stepNameString": "Developer",
+          "timeMins": 12,
+          "timeSecs": 0,
+          "type": 0,
+          "source": 0,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "Stop Bath",
+          "timeMins": 1,
+          "timeSecs": 0,
+          "type": 0,
+          "source": 1,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Fixer",
+          "timeMins": 5,
+          "timeSecs": 0,
+          "type": 0,
+          "source": 2,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Wash",
+          "timeMins": 10,
+          "timeSecs": 0,
+          "type": 2,
+          "source": 3,
+          "discardAfterProc": 1
+        }
+      ]
+    },
+    {
+      "processNameString": "E6 Slide",
+      "temp": 38,
+      "tempTolerance": 0.3,
+      "isTempControlled": 1,
+      "isPreferred": 0,
+      "filmType": 1,
+      "timeMins": 30,
+      "timeSecs": 0,
+      "steps": [
+        {
+          "stepNameString": "First Dev",
+          "timeMins": 6,
+          "timeSecs": 0,
+          "type": 0,
+          "source": 0,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Wash",
+          "timeMins": 2,
+          "timeSecs": 0,
+          "type": 2,
+          "source": 3,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "Color Dev",
+          "timeMins": 6,
+          "timeSecs": 0,
+          "type": 0,
+          "source": 1,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Wash",
+          "timeMins": 2,
+          "timeSecs": 0,
+          "type": 2,
+          "source": 3,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "Bleach Fix",
+          "timeMins": 10,
+          "timeSecs": 0,
+          "type": 0,
+          "source": 2,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Final Wash",
+          "timeMins": 4,
+          "timeSecs": 0,
+          "type": 2,
+          "source": 3,
+          "discardAfterProc": 1
+        }
+      ]
+    },
+    {
+      "processNameString": "B&W HC110 DilB",
+      "temp": 20,
+      "tempTolerance": 0.5,
+      "isTempControlled": 1,
+      "isPreferred": 1,
+      "filmType": 0,
+      "timeMins": 17,
+      "timeSecs": 0,
+      "steps": [
+        {
+          "stepNameString": "Pre-wash",
+          "timeMins": 1,
+          "timeSecs": 0,
+          "type": 1,
+          "source": 3,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "Developer",
+          "timeMins": 6,
+          "timeSecs": 30,
+          "type": 0,
+          "source": 0,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "Stop",
+          "timeMins": 0,
+          "timeSecs": 30,
+          "type": 0,
+          "source": 1,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Fixer",
+          "timeMins": 4,
+          "timeSecs": 0,
+          "type": 0,
+          "source": 2,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Wash",
+          "timeMins": 5,
+          "timeSecs": 0,
+          "type": 2,
+          "source": 3,
+          "discardAfterProc": 1
+        }
+      ]
+    },
+    {
+      "processNameString": "B&W XTOL Stock",
+      "temp": 20,
+      "tempTolerance": 0.5,
+      "isTempControlled": 1,
+      "isPreferred": 0,
+      "filmType": 0,
+      "timeMins": 22,
+      "timeSecs": 0,
+      "steps": [
+        {
+          "stepNameString": "Pre-wash",
+          "timeMins": 1,
+          "timeSecs": 0,
+          "type": 1,
+          "source": 3,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "Developer",
+          "timeMins": 7,
+          "timeSecs": 0,
+          "type": 0,
+          "source": 0,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Stop Bath",
+          "timeMins": 1,
+          "timeSecs": 0,
+          "type": 0,
+          "source": 1,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Fixer",
+          "timeMins": 5,
+          "timeSecs": 0,
+          "type": 0,
+          "source": 2,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Wash",
+          "timeMins": 8,
+          "timeSecs": 0,
+          "type": 2,
+          "source": 3,
+          "discardAfterProc": 1
+        }
+      ]
+    },
+    {
+      "processNameString": "Quick B&W Test",
+      "temp": 24,
+      "tempTolerance": 1.0,
+      "isTempControlled": 0,
+      "isPreferred": 0,
+      "filmType": 0,
+      "timeMins": 11,
+      "timeSecs": 0,
+      "steps": [
+        {
+          "stepNameString": "Developer",
+          "timeMins": 5,
+          "timeSecs": 0,
+          "type": 0,
+          "source": 0,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "Fixer",
+          "timeMins": 3,
+          "timeSecs": 0,
+          "type": 0,
+          "source": 1,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "Rinse",
+          "timeMins": 3,
+          "timeSecs": 0,
+          "type": 1,
+          "source": 3,
+          "discardAfterProc": 1
+        }
+      ]
+    }
+  ]
+}

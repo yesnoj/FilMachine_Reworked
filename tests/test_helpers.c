@@ -49,7 +49,7 @@ void test_indev_init(void)
     lv_indev_set_read_cb(s_test_indev, test_indev_read_cb);
 
     /* Lower gesture thresholds to match the simulator settings */
-    s_test_indev->gesture_limit        = 30;
+    s_test_indev->gesture_min_distance = 30;
     s_test_indev->gesture_min_velocity = 2;
 
     test_printf("[TEST] Input device initialized\n");

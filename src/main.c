@@ -922,8 +922,8 @@ int main(int argc, char *argv[]) {
     }
 
     /* Lower gesture thresholds so short/slow swipes are detected more reliably.
-       Defaults: gesture_limit=50, gesture_min_velocity=3 */
-    mouse->gesture_limit        = 30;   /* was 50 — pixels of movement to trigger GESTURE */
+       LVGL 9.5 renamed gesture_limit → gesture_min_distance */
+    mouse->gesture_min_distance = 30;   /* was 50 — pixels of movement to trigger GESTURE */
     mouse->gesture_min_velocity = 2;    /* was 3  — min per-frame velocity to keep accumulating */
 
     /* Create FreeRTOS queues (stub implementation) */

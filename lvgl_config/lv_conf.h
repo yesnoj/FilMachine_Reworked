@@ -45,6 +45,11 @@
 #define LV_DRAW_BUF_ALIGN 4
 #define LV_DRAW_SW_COMPLEX 1
 
+/*  Disable ARM-specific assembly optimisations (Helium / NEON)
+ *  — they are for Cortex-M / embedded ARM, not Apple Silicon desktop. */
+#define LV_USE_DRAW_SW_ASM      LV_DRAW_SW_ASM_NONE
+#define LV_USE_NATIVE_HELIUM_ASM 0
+
 /*====================
    LOGGING
  *====================*/
