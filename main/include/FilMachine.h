@@ -582,7 +582,7 @@ struct __attribute__ ((packed)) machineSettings {
 	char					wifiPassword[65];   /* Password (max 64 chars + NUL) */
 	/* ── Display settings (added last for binary config compatibility) ── */
 	uint8_t					brightness;         /* 10-100% LCD backlight brightness */
-	uint8_t					dimTimeout;         /* Auto-dim timeout in seconds (0=disabled, default 30) */
+	uint8_t					dimTimeout;         /* LEGACY — kept for binary config compat; dimming is now fixed 60/300/600s */
 };
 
 

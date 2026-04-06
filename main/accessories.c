@@ -1687,7 +1687,33 @@ void sendValueToRelay(uint8_t pumpFrom, uint8_t pumpDir, bool activePump) {
 }
 
 
+/* ── Motor direction helpers ──
+ * P4 board: IN1/IN2 are ESP32 GPIOs on the Expand IO header (direct control).
+ * Other boards: IN1/IN2 are MCP23017 pins (I2C expander). */
+static inline void motor_dir_set(uint8_t pin, uint8_t value)
+{
+#if defined(BOARD_JC4880P433)
+    gpio_set_level(pin, value);
+#else
+    mcp23017_digitalWrite(&mcp, pin, value);
+#endif
+}
+
 void initializeMotorPins(){
+#if defined(BOARD_JC4880P433)
+    /* IN1 and IN2 on ESP32 GPIOs (Expand IO header) */
+    gpio_config_t io_conf = {
+        .pin_bit_mask = (1ULL << MOTOR_IN1_PIN) | (1ULL << MOTOR_IN2_PIN),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    gpio_config(&io_conf);
+    gpio_set_level(MOTOR_IN1_PIN, 0);
+    gpio_set_level(MOTOR_IN2_PIN, 0);
+    LV_LOG_USER("Motor IN1 (GPIO %d) + IN2 (GPIO %d) init OK", MOTOR_IN1_PIN, MOTOR_IN2_PIN);
+#else
     /* IN1 and IN2 on MCP23017 */
     mcp23017_pinMode(&mcp, MOTOR_IN1_PIN, MCP23017_OUTPUT);
     mcp23017_digitalWrite(&mcp, MOTOR_IN1_PIN, 0);
@@ -1696,6 +1722,7 @@ void initializeMotorPins(){
     mcp23017_pinMode(&mcp, MOTOR_IN2_PIN, MCP23017_OUTPUT);
     mcp23017_digitalWrite(&mcp, MOTOR_IN2_PIN, 0);
     LV_LOG_USER("Motor pin init %d: %d", MOTOR_IN2_PIN, mcp23017_digitalRead(&mcp, MOTOR_IN2_PIN));
+#endif
 
     /* ENA on ESP32 GPIO via LEDC PWM (8-bit, 5kHz) */
     ledc_timer_config_t timer_conf = {
@@ -1726,15 +1753,15 @@ void stopMotor(uint8_t pin1, uint8_t pin2){
     motor_ledc_set_duty(dutyCycle);
     vTaskDelay(pdMS_TO_TICKS(10));
   }
-  mcp23017_digitalWrite(&mcp, pin1, 0);
-  mcp23017_digitalWrite(&mcp, pin2, 0);
+  motor_dir_set(pin1, 0);
+  motor_dir_set(pin2, 0);
   motor_ledc_set_duty(0);
   LV_LOG_USER("Run stopMotor");
 }
 
 void runMotorFW(uint8_t pin1, uint8_t pin2){
-  mcp23017_digitalWrite(&mcp, pin1, 1);
-  mcp23017_digitalWrite(&mcp, pin2, 0);
+  motor_dir_set(pin1, 1);
+  motor_dir_set(pin2, 0);
 
   for (uint8_t dutyCycle = MOTOR_MIN_ANALOG_VAL; dutyCycle <= sys.analogVal_rotationSpeedPercent; dutyCycle++) {
     motor_ledc_set_duty(dutyCycle);
@@ -1744,8 +1771,8 @@ void runMotorFW(uint8_t pin1, uint8_t pin2){
 }
 
 void runMotorRV(uint8_t pin1, uint8_t pin2){
-  mcp23017_digitalWrite(&mcp, pin1, 0);
-  mcp23017_digitalWrite(&mcp, pin2, 1);
+  motor_dir_set(pin1, 0);
+  motor_dir_set(pin2, 1);
 
   for (uint8_t dutyCycle = MOTOR_MIN_ANALOG_VAL; dutyCycle <= sys.analogVal_rotationSpeedPercent; dutyCycle++) {
     motor_ledc_set_duty(dutyCycle);
@@ -2447,8 +2474,8 @@ uint8_t getRandomRotationInterval() {
 
 void pwmLedTest(){
    LV_LOG_USER("pwmLedTest");
-   mcp23017_digitalWrite(&mcp, MOTOR_IN1_PIN, 0);
-   mcp23017_digitalWrite(&mcp, MOTOR_IN2_PIN, 1);
+   motor_dir_set(MOTOR_IN1_PIN, 0);
+   motor_dir_set(MOTOR_IN2_PIN, 1);
 
    for (uint16_t dutyCycle = MOTOR_MIN_ANALOG_VAL; dutyCycle <= MOTOR_MAX_ANALOG_VAL; dutyCycle++) {
     motor_ledc_set_duty(dutyCycle);
@@ -2462,8 +2489,8 @@ void pwmLedTest(){
     vTaskDelay(pdMS_TO_TICKS(10));
   }
 
-  mcp23017_digitalWrite(&mcp, MOTOR_IN1_PIN, 0);
-  mcp23017_digitalWrite(&mcp, MOTOR_IN2_PIN, 0);
+  motor_dir_set(MOTOR_IN1_PIN, 0);
+  motor_dir_set(MOTOR_IN2_PIN, 0);
   motor_ledc_set_duty(0);
 }
 

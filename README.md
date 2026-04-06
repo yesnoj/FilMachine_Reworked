@@ -50,7 +50,7 @@ The project has a **dual-target build system** that produces ESP32-P4 firmware o
 | **2D Acceleration** | PPA hardware engine (rotate, scale, blend, fill) | — |
 | **Audio** | ES8311 codec via I2S + power amplifier | — |
 | **Temp Sensors** | DS18B20 OneWire | Simulated (20°C ambient, heater model) |
-| **Motor/Relays** | GPIO + MCP23017 I2C | printf stubs |
+| **Motor/Valves** | GPIO + Adafruit I2C 8-Ch Solenoid Driver (MCP23017) | printf stubs |
 | **OTA Updates** | esp_ota_ops + esp_http_server | Simulated (progress timer) |
 | **Build Tool** | ESP-IDF (`idf.py`) | CMake + Make |
 | **Sensors** | Flow meter, water level, hall effect | Simulated |
@@ -62,7 +62,7 @@ The simulator replaces all hardware-specific code with a **stub layer** that pro
 
 - **FatFS stubs** map firmware paths (e.g., `/FilMachine.cfg`) to files inside the `sd/` subdirectory relative to the executable, so read/write operations work transparently.
 - **FreeRTOS stubs** provide working queue implementations (xQueueCreate, xQueueSend, xQueueReceive) using simple circular buffers. Task creation is a no-op since there are no real threads — instead, the main loop drains the system queue every frame.
-- **Hardware stubs** (GPIO, I2C, SPI, relay, motor, temperature) are either no-ops or printf-based logging functions. Temperature readings come from a simple thermal model that simulates heating/cooling.
+- **Hardware stubs** (GPIO, I2C, SPI, solenoid driver, motor, temperature) are either no-ops or printf-based logging functions. Temperature readings come from a simple thermal model that simulates heating/cooling.
 - **OTA stubs** simulate the firmware update flow with a progress timer (0→100%) and fake IP address, allowing full UI testing without real hardware.
 - **LVGL's SDL2 driver** provides the display backend and mouse input, which simulates the capacitive touchscreen.
 
@@ -118,7 +118,7 @@ FilMachine_Simulator_v2/
 │   │                              #   + 8 custom splash title fonts (size 48px each)
 ├── drivers/                       # Custom peripheral drivers (MCP23017, PCA9685, DS18B20, sensors)
 │   ├── include/                   #   Driver headers
-│   ├── mcp23017.c                 #   I2C 16-bit I/O expander (relay control)
+│   ├── mcp23017.c                 #   I2C 16-bit I/O expander (Adafruit solenoid driver)
 │   ├── pca9685.c                  #   I2C PWM controller (pump speed)
 │   ├── ds18b20.c                  #   OneWire temperature sensor
 │   └── sensors.c                  #   Flow meter, water level, hall effect sensors
@@ -598,15 +598,37 @@ The JC4880P433's physical display is 480×800 in portrait orientation. FilMachin
 
 Touch coordinates from the GT911 (which reports in 480×800 portrait) are inverse-mapped back to 800×480 LVGL coordinates. All of this is transparent to the UI code.
 
+### Expand IO Header (J9) — JC4880P433 Pin Assignments
+
+All external peripherals connect through the board's 2×13 Expand IO header (J9):
+
+| J9 Pin | GPIO | Function |
+|--------|------|----------|
+| 1 | — | VCC 3.3V |
+| 2 | — | VCC 5V |
+| 7 | 33 | Motor IN1 (H-bridge direction A) |
+| 9 | 34 | Motor IN2 (H-bridge direction B) |
+| 11 | 35 | DS18B20 OneWire (temperature) |
+| 12 | 20 | Hall sensor (KY-003) |
+| 13 | 36 | Flow meter (YF-S201) |
+| 14 | — | GND |
+| 15 | 37 | Water level min (XKC-Y21) |
+| 16 | 38 | Water level max |
+| 17 | 24 | Motor ENA (LEDC PWM speed) |
+| 23 | 7 | I2C SDA (shared bus) |
+| 25 | 8 | I2C SCL (shared bus) |
+
+Spare pins on header: GPIO 0, 1, 2, 3, 4, 6, 21, 22.
+
 ### Shared Peripherals (all boards)
 
 | Component | Detail |
 |-----------|--------|
-| **I/O Expander** | MCP23017 (I2C) — 8 relay outputs |
+| **Solenoid Driver** | Adafruit I2C 8-Ch Solenoid Driver (#6318) — MCP23017 @ 0x20, MOSFET outputs with flyback protection |
 | **PWM Controller** | PCA9685 (I2C) — pump speed control |
 | **Temperature** | 2× DS18B20 OneWire sensors (chemical bath + water bath) |
-| **Motor** | DC motor with H-bridge, PWM speed control |
-| **Relays** | Heater, 3 chemical valves (C1/C2/C3), water bath, waste, pump in, pump out |
+| **Motor** | DC motor with H-bridge, PWM speed control (ENA on ESP32 LEDC, IN1/IN2 on GPIO) |
+| **Valves** | Heater, 3 chemical valves (C1/C2/C3), water bath, waste, pump in, pump out — driven by solenoid driver |
 | **Power** | USB Type-C 5.0V |
 
 ### Chemical Container Layout

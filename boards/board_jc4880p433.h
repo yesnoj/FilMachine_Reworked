@@ -88,26 +88,26 @@
 
 /* ═══════════════════════════════════════════════
  * Motor — DC motor with H-bridge
- * Pin assignment provisional — depends on expansion header wiring.
- * ESP32-P4 GPIOs 24-38 are generally available.
+ * All pins routed via the Expand IO header (J9).
  * ═══════════════════════════════════════════════ */
 #define MOTOR_PIN_NUMBER            3
-#define MOTOR_ENA_PIN               24      /* PWM speed control (or PCA9685) */
-#define MOTOR_IN1_PIN               25      /* H-bridge direction A */
-#define MOTOR_IN2_PIN               26      /* H-bridge direction B */
-/* NOTE: provisional — final assignment depends on expansion PCB wiring */
+#define MOTOR_ENA_PIN               24      /* PWM speed control — J9 pin 17 */
+#define MOTOR_IN1_PIN               33      /* H-bridge direction A — J9 pin 7 */
+#define MOTOR_IN2_PIN               34      /* H-bridge direction B — J9 pin 9 */
 
 /* ═══════════════════════════════════════════════
  * Temperature — DS18B20 OneWire
  * ═══════════════════════════════════════════════ */
-#define TEMPERATURE_BUS_PIN         27      /* OneWire data */
+#define TEMPERATURE_BUS_PIN         35      /* OneWire data — J9 pin 11 */
 #define TEMPERATURE_SENSOR_BATH     0
 #define TEMPERATURE_SENSOR_CHEMICAL 1
 
 /* ═══════════════════════════════════════════════
- * Relay board — MCP23017 I2C GPIO expander
- * Connected on the shared I2C bus (GPIO 7/8)
- * Same relay mapping as all other boards.
+ * Solenoid driver — Adafruit I2C 8-Ch Solenoid Driver (#6318)
+ * MCP23017-based, I2C address 0x20, on shared bus (GPIO 7/8).
+ * Connected via J9 pins 23 (SDA) / 25 (SCL) + 3.3V/GND.
+ * Drop-in replacement for discrete relay board — same chip,
+ * same address, same register layout.
  * ═══════════════════════════════════════════════ */
 #define RELAY_NUMBER                8
 #define HEATER_RLY                  0
@@ -128,17 +128,17 @@
 
 /* ═══════════════════════════════════════════════
  * Additional sensors
- * GPIO assignment provisional — depends on expansion wiring.
+ * All pins routed via the Expand IO header (J9).
  * ═══════════════════════════════════════════════ */
 #define HAS_FLOW_METER              1
-#define FLOW_METER_PIN              28      /* YF-S201 pulse output */
+#define FLOW_METER_PIN              36      /* YF-S201 pulse output — J9 pin 13 */
 
 #define HAS_WATER_LEVEL_SENSOR      1
-#define WATER_LEVEL_PIN             29      /* XKC-Y21 (min level) */
-#define WATER_LEVEL_2_PIN           30      /* Second level (max, optional) */
+#define WATER_LEVEL_PIN             37      /* XKC-Y21 (min level) — J9 pin 15 */
+#define WATER_LEVEL_2_PIN           38      /* Second level (max) — J9 pin 16 */
 
 #define HAS_HALL_SENSOR             1
-#define HALL_SENSOR_PIN             31      /* KY-003 / A3144 */
+#define HALL_SENSOR_PIN             20      /* KY-003 / A3144 — J9 pin 12 */
 
 /* ═══════════════════════════════════════════════
  * Wi-Fi — ESP32-C6 companion chip via SDIO (ESP-Hosted)
@@ -159,11 +159,14 @@
 #define WIFI_C6_RESET_PIN           54      /* P4 GPIO to reset ESP32-C6 */
 
 /* ═══════════════════════════════════════════════
- * Spare pins (available for future use)
- * ESP32-P4 has GPIOs 0-54. With the above assignments,
- * many pins remain free: 0-6, 20-22, 32-38, 45-47, 49-53.
+ * Spare pins on Expand IO header (J9) — available for future use:
+ *   GPIO 0 (pin 4), 1 (pin 3), 2 (pin 6), 3 (pin 5),
+ *   4 (pin 8), 6 (pin 10), 21 (pin 19), 22 (pin 21)
+ *
+ * Not on header but free on ESP32-P4:
+ *   GPIO 25-32, 45-47, 49-53
  * ═══════════════════════════════════════════════ */
 
-#define TEST_PIN                    32
+#define TEST_PIN                    21      /* J9 pin 19 — spare on header */
 
 #endif /* BOARD_JC4880P433_H */
