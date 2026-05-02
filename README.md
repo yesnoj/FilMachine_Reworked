@@ -50,7 +50,7 @@ The project has a **dual-target build system** that produces ESP32-P4 firmware o
 | **2D Acceleration** | PPA hardware engine (rotate, scale, blend, fill) | — |
 | **Audio** | ES8311 codec via I2S + power amplifier | — |
 | **Temp Sensors** | DS18B20 OneWire | Simulated (20°C ambient, heater model) |
-| **Motor/Valves** | GPIO + Adafruit I2C 8-Ch Solenoid Driver (MCP23017) | printf stubs |
+| **Motor/Pump** | DBH-12V dual H-bridge (motor ch.A + pump ch.B) + MCP23017 solenoid driver | printf stubs |
 | **OTA Updates** | esp_ota_ops + esp_http_server | Simulated (progress timer) |
 | **Build Tool** | ESP-IDF (`idf.py`) | CMake + Make |
 | **Sensors** | Flow meter, water level, hall effect | Simulated |
@@ -77,17 +77,12 @@ FilMachine_Simulator_v2/
 │
 ├── main/                          # Core source (shared with ESP32 firmware)
 │   ├── include/
-│   │   ├── FilMachine.h           #   Main header — all structs, enums, constants, prototypes
-│   │   ├── ds18b20.h              #   Temperature sensor driver API
-│   │   └── pca9685.h              #   PWM controller driver API
+│   │   └── FilMachine.h           #   Main header — all structs, enums, constants, prototypes
 │   ├── FilMachine.c               #   ESP32 entry point — board-conditional display/touch init
 │   ├── accessories.c              #   Utilities — linked lists, deep copy, config I/O, keyboard
 │   ├── ota_update.c               #   OTA firmware update (SD card + Wi-Fi web server)
 │   ├── sensors.c                  #   Additional sensors (flow meter, water level, hall effect)
-│   ├── ui_profile.c               #   Centralized UI layout constants (800×480)
-│   ├── ds18b20.c                  #   DS18B20 OneWire temperature sensor driver
-│   ├── mcp23017.c                 #   MCP23017 I2C GPIO expander driver
-│   └── pca9685.c                  #   PCA9685 I2C PWM controller driver
+│   └── ui_profile.c               #   Centralized UI layout constants (800×480)
 │
 ├── c_pages/                       # UI pages (screens)
 │   ├── page_splash.c              #   Splash screen — standard, random, and custom modes with
@@ -116,11 +111,11 @@ FilMachine_Simulator_v2/
 │
 ├── c_fonts/                       # Custom icon fonts (5 sizes: 15/20/30/40/100px)
 │   │                              #   + 8 custom splash title fonts (size 48px each)
-├── drivers/                       # Custom peripheral drivers (MCP23017, PCA9685, DS18B20, sensors)
-│   ├── include/                   #   Driver headers
+├── drivers/                       # Custom peripheral drivers
+│   ├── include/                   #   Driver headers (mcp23017.h, ds18b20.h, pca9685.h)
 │   ├── mcp23017.c                 #   I2C 16-bit I/O expander (Adafruit solenoid driver)
-│   ├── pca9685.c                  #   I2C PWM controller (pump speed)
-│   ├── ds18b20.c                  #   OneWire temperature sensor
+│   ├── pca9685.c                  #   I2C PWM controller (legacy, kept for reference)
+│   ├── ds18b20.c                  #   OneWire temperature sensor (shared bus)
 │   └── sensors.c                  #   Flow meter, water level, hall effect sensors
 │
 ├── components/                    # ESP32-P4 specific hardware drivers
@@ -624,11 +619,12 @@ Spare pins on header: GPIO 0, 1, 2, 3, 4, 6, 21, 22.
 
 | Component | Detail |
 |-----------|--------|
-| **Solenoid Driver** | Adafruit I2C 8-Ch Solenoid Driver (#6318) — MCP23017 @ 0x20, MOSFET outputs with flyback protection |
-| **PWM Controller** | PCA9685 (I2C) — pump speed control |
-| **Temperature** | 2× DS18B20 OneWire sensors (chemical bath + water bath) |
-| **Motor** | DC motor with H-bridge, PWM speed control (ENA on ESP32 LEDC, IN1/IN2 on GPIO) |
-| **Valves** | Heater, 3 chemical valves (C1/C2/C3), water bath, waste, pump in, pump out — driven by solenoid driver |
+| **Solenoid Driver** | Adafruit I2C 8-Ch Solenoid Driver (#6318) — MCP23017 @ 0x20, 6 channels (heater, C1–C3, water bath, waste) |
+| **Motor Driver** | DBH-12V dual DC motor driver — channel A: agitation motor, channel B: pump |
+| **Temperature** | 2× DS18B20 OneWire sensors (chemical bath + water bath) on shared bus |
+| **Motor** | DC motor with H-bridge (DBH-12V ch.A), PWM speed control (ENA on ESP32 LEDC, IN1/IN2 on GPIO) |
+| **Pump** | DC pump with H-bridge (DBH-12V ch.B), direction reversal for fill/drain (replaces solenoid pump valves) |
+| **Valves** | Heater, 3 chemical valves (C1/C2/C3), water bath, waste — driven by MCP23017 solenoid driver |
 | **Power** | USB Type-C 5.0V |
 
 ### Chemical Container Layout
