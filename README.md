@@ -73,7 +73,7 @@ The key architectural principle is that **all UI code is shared 1:1** between fi
 ## Directory Structure
 
 ```
-FilMachine_Simulator_v2/
+FilMachine_Reworked/
 │
 ├── main/                          # Core source (shared with ESP32 firmware)
 │   ├── include/
@@ -87,7 +87,6 @@ FilMachine_Simulator_v2/
 ├── c_pages/                       # UI pages (screens)
 │   ├── page_splash.c              #   Splash screen — standard, random, and custom modes with
 │   │                              #     10 palettes, 6 shape styles, 9 title fonts, PRNG engine
-│   ├── page_home.c                #   Home screen & boot error display
 │   ├── page_menu.c                #   Tab bar navigation (Processes / Settings / Tools)
 │   ├── page_processes.c           #   Process list with filtering
 │   ├── page_processDetail.c       #   Process creation & editing
@@ -170,11 +169,14 @@ FilMachine_Simulator_v2/
 ├── resources/                     # Hardware datasheets & font usage docs
 │
 ├── CMakeLists.txt                 # Dual-target build (ESP-IDF P4 + simulator/tests)
-├── sdkconfig                      # ESP-IDF configuration (partition table, Wi-Fi, etc.)
+├── sdkconfig.defaults             # ESP-IDF shared defaults
 ├── sdkconfig.defaults.esp32p4     # ESP-IDF defaults for ESP32-P4 target
 ├── setup.sh                       # Project initialization script
 ├── flash.sh                       # Flash firmware to ESP32 board
-├── ANALISI_PROGETTO.md            # Technical analysis (Italian)
+├── boards/                        # Board-specific hardware definitions
+│   ├── board.h                    #   Board selector (includes correct board header)
+│   ├── board_jc4880p433.h         #   JC4880P433 pin assignments, peripherals, H-bridge config
+│   └── board_simulator.h          #   Simulator stubs (matching pin constants)
 └── wiring_philosophy.md           # Hardware design philosophy
 ```
 
@@ -613,7 +615,11 @@ All external peripherals connect through the board's 2×13 Expand IO header (J9)
 | 23 | 7 | I2C SDA (shared bus) |
 | 25 | 8 | I2C SCL (shared bus) |
 
-Spare pins on header: GPIO 0, 1, 2, 3, 4, 6, 21, 22.
+| 4 | 0 | Pump IN1 (H-bridge ch.B direction A) |
+| 3 | 1 | Pump IN2 (H-bridge ch.B direction B) |
+| 6 | 2 | Pump ENA (LEDC PWM speed) |
+
+Spare pins on header: GPIO 3, 4, 6, 22.
 
 ### Shared Peripherals (all boards)
 
@@ -692,7 +698,7 @@ make -j$(sysctl -n hw.ncpu) filmachine_test  # Build tests (parallel)
 ./filmachine_test                            # Run all 180 tests
 
 # ── Firmware (ESP32-P4) ──────────────────────────────────
-cd ~/Desktop/FilMachine_Simulator_v2       # Must be in project root!
+cd ~/Documents/GitHub/FilMachine_Reworked       # Must be in project root!
 . $HOME/esp/esp-idf-v5.5/export.sh        # Load ESP-IDF environment
 idf.py set-target esp32p4                  # First time: set RISC-V target
 idf.py build                               # Build firmware
