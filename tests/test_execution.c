@@ -119,10 +119,10 @@ static void test_checkup_ui_elements(void)
                          "process name label should exist");
 
     /* Initial state */
-    TEST_ASSERT_EQ((int)ck->isProcessing, 0, "should not be processing initially");
-    TEST_ASSERT_EQ((int)ck->processStep, 0, "processStep should be 0 initially");
-    TEST_ASSERT_EQ((int)ck->stopNow, 0, "stopNow should be false initially");
-    TEST_ASSERT_EQ((int)ck->stopAfter, 0, "stopAfter should be false initially");
+    TEST_ASSERT_EQ((int)ck->data.isProcessing, 0, "should not be processing initially");
+    TEST_ASSERT_EQ((int)ck->data.processStep, 0, "processStep should be 0 initially");
+    TEST_ASSERT_EQ((int)ck->data.stopNow, 0, "stopNow should be false initially");
+    TEST_ASSERT_EQ((int)ck->data.stopAfter, 0, "stopAfter should be false initially");
 
     close_checkup();
 
@@ -171,7 +171,7 @@ static void test_stop_now_popup(void)
     test_pump(500);
 
     /* Verify stopNow was NOT set (we cancelled with neutral whoCallMe) */
-    TEST_ASSERT_EQ((int)ck->stopNow, 0, "stopNow should still be false after cancel");
+    TEST_ASSERT_EQ((int)ck->data.stopNow, 0, "stopNow should still be false after cancel");
 
     close_checkup();
 

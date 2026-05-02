@@ -11,85 +11,49 @@
 #include "freertos/FreeRTOS.h"
 #include "lvgl.h"
 
+/* ═══════════════════════════════════════════════
+ * Board-specific hardware definitions
+ * All pin assignments, resolution, display/touch driver selection,
+ * and sensor availability come from the active board header.
+ * Select board at compile time: -DBOARD_JC4880P433 or -DBOARD_SIMULATOR
+ * ═══════════════════════════════════════════════ */
+#include "board.h"
+#include "ui_profile.h"
+
+#ifdef BOARD_SIMULATOR
+void sim_ui_debug_tag(lv_obj_t *obj, const char *name);
+#else
+#define sim_ui_debug_tag(obj, name) ((void)0)
+#endif
+
 #define FILM_USE_LOG				1
 
-//Digital input for relays
-#define RELAY_NUMBER				8
-#define HEATER_RLY					0 // Don't use NULL for 0 NULL is defined as (void*)0 which is a pointer type and will cause problems!
-#define C1_RLY						1
-#define C2_RLY						2
-#define C3_RLY						3
-#define WB_RLY						4
-#define WASTE_RLY					5
-#define PUMP_IN_RLY					6
-#define PUMP_OUT_RLY				7
-#define INVALID_RELAY				255
-
-//MOTORS PIN
-#define MOTOR_PIN_NUMBER			3
-#define MAX_MOTOR_SPD				200 //need to be tested, but is max 255
-#define MOTOR_ENA_PIN				18
-#define MOTOR_IN1_PIN				8
-#define MOTOR_IN2_PIN				9
+/* Motor speed limits (independent of board) */
+#define MAX_MOTOR_SPD				200
 #define MOTOR_MIN_ANALOG_VAL		150
 #define MOTOR_MAX_ANALOG_VAL		255
 
-//TEMPERATURE SENSOR PIN (DS18B20 OneWire on ESP32 GPIO)
-#define TEMPERATURE_CHEMICAL_PIN	17
-#define TEMPERATURE_BATH_PIN		19
+/* Pump default speed (0-255, 8-bit duty cycle) */
+#define PUMP_DEFAULT_SPEED          200
 
-#define TEST_PIN					15
-
-/* SD Card */
-#define SDSPI_HOST_ID				SPI3_HOST
-#define SD_CS						GPIO_NUM_1
-#define SD_MOSI						GPIO_NUM_2
-#define SD_MISO						GPIO_NUM_41 
-#define SD_SCLK						GPIO_NUM_42
-
-/* LCD defines */
-#define LCD_BLK						GPIO_NUM_45
-#define LCD_WR						GPIO_NUM_35
-#define LCD_RD						GPIO_NUM_48
-#define LCD_RS						GPIO_NUM_36
-#define LCD_CS						GPIO_NUM_37
-#define LCD_RST						GPIO_NUM_NC
-#define LCD_BSY						GPIO_NUM_NC
-#define LCD_D0						GPIO_NUM_47
-#define LCD_D1						GPIO_NUM_21
-#define LCD_D2						GPIO_NUM_14
-#define LCD_D3						GPIO_NUM_13
-#define LCD_D4						GPIO_NUM_12
-#define LCD_D5						GPIO_NUM_11
-#define LCD_D6						GPIO_NUM_10
-#define LCD_D7						GPIO_NUM_9
-#define LCD_D8						GPIO_NUM_3
-#define LCD_D9						GPIO_NUM_8
-#define LCD_D10						GPIO_NUM_16
-#define LCD_D11						GPIO_NUM_15
-#define LCD_D12						GPIO_NUM_7
-#define LCD_D13						GPIO_NUM_6
-#define LCD_D14						GPIO_NUM_5
-#define LCD_D15						GPIO_NUM_4
+/* LCD timing (used by parallel-bus boards, ignored by QSPI/simulator) */
+#ifndef LCD_PIXEL_CLOCK_HZ
 #define LCD_PIXEL_CLOCK_HZ			(40000000)
+#endif
 #define LCD_BK_LIGHT_ON_LEVEL		1
 #define LCD_BK_LIGHT_OFF_LEVEL		!LCD_BK_LIGHT_ON_LEVEL
 #define LCD_CMD_BITS				8
 #define LCD_PARAM_BITS				8
 
-/* LVGL Defines */
-#define BYTES_PER_PIXEL				(LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB565)) /*will be 2 for BGR565 */
-#define LVGL_BUF_SIZE				LCD_H_RES * (LCD_V_RES / 10) * BYTES_PER_PIXEL	/* 10% of screen size */	
-#define LCD_H_RES					480
-#define LCD_V_RES					320
+/* LVGL timing */
 #define LVGL_TICK_PERIOD_MS			2
 
-/* I2C Defines */
-#define I2C_INT						GPIO_NUM_40
-#define I2C_NUM						0		// I2C instance number
-#define I2C_SDA						GPIO_NUM_38
-#define I2C_SCL						GPIO_NUM_39
-#define TOUCH_I2C_ADR				0x38	// Just for reference
+/* I2C instance (shared across touch, MCP23017, PCA9685) */
+#define I2C_NUM						0
+#if defined(BOARD_JC4880P433)
+    #include "driver/i2c_master.h"
+    extern i2c_master_bus_handle_t g_i2c_bus_handle;
+#endif
 
 /* System defines */
 #define FILENAME_SAVE				"/FilMachine.cfg"
@@ -138,19 +102,91 @@ typedef enum {
 #define TAB_SETTINGS				4
 #define TAB_TOOLS					5
 
+/* UI Layout Constants — resolved from ui_profile at runtime.
+   These macros keep backward compatibility with existing code while
+   routing through the profile so values adapt to the active board. */
+#define STEP_HEIGHT					(ui_get_profile()->step_element.card_h)
+#define STEP_Y_START				(ui_get_profile()->step_element.list_start_y)
+#define PROCESS_ELEMENT_HEIGHT		(ui_get_profile()->process_element.card_h)
+#define PROCESS_Y_START				(ui_get_profile()->process_element.list_start_y)
+#define POPUP_WIDTH					(ui_get_profile()->popups.message_w)
+#define POPUP_HEIGHT				(ui_get_profile()->popups.message_h)
+
+/* Splash screen strings */
+#define splashTitle_text						"FILMACHINE"
+#define splashSubtitle_text						"Digital Film Developer"
+#define splashVersion_text						softwareVersionValue_text
+
+/* Splash popup strings */
+#define splashPopupTitle_text					"Splash Screen"
+#define splashPopupUseDefault_text				"Use Default"
+#define splashPopupRandom_text					"Random next boot"
+#define splashPopupRandomBtn_text				LV_SYMBOL_SHUFFLE " Random"
+#define splashPopupPalette_text					"Palette"
+#define splashPopupShapeStyle_text				"Shape Style"
+#define splashPopupComplexity_text				"Complexity"
+
+/* Settings row strings */
+#define settingsSplashScreen_text				"Splash Screen"
+
+/* Wi-Fi / Remote control section strings */
+#define settingsWifi_text                       "Wi-Fi"
+#define settingsReset_text                      "Reset to Defaults"
+#define settingsResetPopupTitle_text             "Settings Reset"
+#define settingsResetPopupBody_text              "All settings restored\nto factory defaults."
+#define wifiPopupTitle_text                     "Wi-Fi"
+#define wifiScan_text                           "Scan"
+#define wifiConnect_text                        "Connect"
+#define wifiDisconnect_text                     "Disconnect"
+#define wifiConnected_text                      "Connected to:"
+#define wifiDisconnected_text                   "Not connected"
+#define wifiConnecting_text                     "Connecting..."
+#define wifiScanning_text                       "Scanning..."
+#define wifiAutoConnect_text                    "Auto-connect"
+#define wifiEnterPassword_text                  "Enter password"
+#define wifiNoNetworks_text                     "No networks found"
+#define wifiErrorTitle_text                     "Wi-Fi Error"
+#define wifiErrAuthFailed_text                  "Authentication failed\n(wrong password)"
+#define wifiErrHandshakeTimeout_text            "Handshake timeout\n(wrong password or WPA3 mismatch)"
+#define wifiErrMicFailure_text                  "MIC failure\n(wrong password)"
+#define wifiErrGroupKeyTimeout_text             "Handshake timeout\n(group key)"
+#define wifiErrApNotFound_text                  "Network not found\n(AP_NOT_FOUND)"
+#define wifiErrApNotFoundGeneric_text           "Network not found"
+#define wifiErrAuthExpired_text                 "Authentication expired\n(AUTH_EXPIRE)"
+#define wifiErrClass2Frame_text                 "Class 2 frame from\nnon-authenticated station"
+#define wifiErrClass3Frame_text                 "Class 3 frame from\nnon-associated station"
+#define wifiErrConnectionFail_text              "Connection failed\n(CONNECTION_FAIL)"
+#define wifiErrBeaconTimeout_text               "Beacon timeout\n(signal lost)"
+#define wifiErrUnknownFmt_text                  "Connection failed\n(reason code: %d)"
+#define wifiForgetTitle_text                    "Forget Network"
+#define wifiForgetBody_text                     "Remove saved credentials\nfor this network?"
+#define wifiForgetYes_text                      "Forget"
+#define wifiForgetNo_text                       "Cancel"
+
+/* Checkup placeholder */
+#define checkupEllipsis_text					"..."
+
+/* Temperature roller range */
+#define TEMP_ROLLER_MIN  15
+#define TEMP_ROLLER_MAX  40
+
+/* Discard unsaved changes popup */
+#define discardChangesTitle_text                "Unsaved Changes"
+#define discardChangesBody_text                 "Close without saving?\nAll changes will be lost."
+#define discardChangesNo_text                   "Cancel"
+#define discardChangesYes_text                  "Discard"
+
+/* Step source format */
+#define stepSourceFmt_text						"From:%s"
+
 /* Icon Characters */
-#define plusplus_icon2				"\xC2\xB1"   
-#define oldCamera_icon				"\xEF\x82\x83" //never used, to add into font.c file in case need to be used
-#define plusplus_icon				"\xEF\x84\x81" //never used, to add into font.c file in case need to be used
-#define film_icon					"\xEF\x80\x88" //never used, to add into font.c file in case need to be used
-#define image_icon					"\xEF\x80\xBE" //never used, to add into font.c file in case need to be used
+#define plusplus_icon2				"\xC2\xB1"
 #define tabProcess_label			"Process list"
 #define tabProcess_icon				"\xEF\x85\xA0"
 #define tabSetting_label			"Settings"
 #define tabSetting_icon				"\xEF\x93\xBE"
 #define tabTools_label				"Tools"
 #define tabTools_icon				"\xEF\x9F\x99"
-#define filter_icon					"\xEF\x87\x9E" //never used, to add into font.c file in case need to be used
 #define funnel_icon					"\xEF\x82\xB0"
 #define newProcess_icon				"\xEF\x83\xBE"
 #define preferred_icon				"\xEF\x80\x84"
@@ -162,13 +198,10 @@ typedef enum {
 #define play_icon					"\xEF\x81\x8B"
 #define save_icon					"\xEF\x83\x87"
 #define trash_icon					"\xEF\x8B\xAD"
-#define moveUp_icon					"\xEF\x81\xB7" //never used, to add into font.c file in case need to be used
-#define moveDown_icon				"\xEF\x81\xB8" //never used, to add into font.c file in case need to be used
 #define chemical_icon				"\xEF\x83\x83"
-#define rinse_icon					"\xEF\x81\x83"
+#define rinse_icon                  "\xEF\x8B\x8C"
 #define multiRinse_icon				"\xEF\x86\xB8"
 #define edit_icon					"\xEF\x81\x84"
-#define copy_icon					"\xEF\x83\x85" //never used, to add into font.c file in case need to be used
 #define checkStep_icon				"\xEF\x80\x8C"
 #define arrowStep_icon				"\xEF\x81\xA1"
 #define dotStep_icon				"\xEF\x86\x92"
@@ -176,6 +209,17 @@ typedef enum {
 #define chip_icon					"\xEF\x8B\x9B"
 #define alert_icon					"\xEF\x81\xAA"
 #define sdCard_icon					"\xEF\x9F\x82"
+
+/* Reserved Icons — not loaded in font files yet, uncomment and add to font.c when needed
+#define oldCamera_icon				"\xEF\x82\x83"
+#define plusplus_icon				"\xEF\x84\x81"
+#define film_icon					"\xEF\x80\x88"
+#define image_icon					"\xEF\x80\xBE"
+#define filter_icon					"\xEF\x87\x9E"
+#define moveUp_icon					"\xEF\x81\xB7"
+#define moveDown_icon				"\xEF\x81\xB8"
+#define copy_icon					"\xEF\x83\x85"
+*/
 #define discardAfter_icon			"\xEF\x8B\xB5"
 
 /* Some colours */
@@ -209,7 +253,7 @@ typedef enum {
 #define filterPopupColor_text 			 			"Color"
 #define filterPopupBnW_text 			 			"B&W"
 #define filterPopupBoth_text 			 			"Both"
-#define filterPopupPreferred_text 		 			"Preferred only"
+#define filterPopupPreferred_text 		 			"Preferred"
 #define filterPopupApplyButton_text 	 			"Apply"
 #define filterPopupResetButton_text 	 			"Reset"
 
@@ -217,8 +261,8 @@ typedef enum {
 * Config tab strings
 *********************/
 #define Settings_text 								"Machine settings"
-#define tempUnit_text 								"Temp. unit:"
-#define tempSensorTuning_text 						"Calib. temp. sensor"
+#define tempUnit_text 								"Temperature unit"
+#define tempSensorTuning_text 						"Calibrated temperature"
 #define tuneButton_text 							"TUNE"
 #define tempAlertMBox_text							"Ensure stable machine temperature, measure ambient air, input the value, and press 'Tune'. For resetting, long-press 'Tune'."
 #define soundAlertMBox_text 						"Continue to sound the alert when a process is about to end or when the heating phase reaches the desired temperature."
@@ -227,9 +271,11 @@ typedef enum {
 #define rotationInverseIntervalAlertMBox_text 		"The duration, which may be adjusted between 5 and 60 seconds,during which the film will spin in one direction before moving to the other."
 #define filmRotationRandomAlertMBox_text 			"Introduce random variation to inversion times for consistent development, e.g.,10% randomization on a 10-second inversion yields times between 8 and 10 seconds."
 #define drainFillTimeAlertMBox_text 				"Adjust the overlap of tank filling and draining times with processing times to affect the total processing time, as these actions cannot be rushed."
+#define multiRinseTimeAlertMBox_text 				"Sets the duration of a single multi-rinse wash cycle (not the entire step). Adjustable from 30 seconds to 3 minutes. Longer cycles are better for larger tanks, shorter for smaller ones. 2 minutes is a good default."
+#define waterInletAlertMBox_text 					"Tells the machine whether it's connected to a pressurized water source. If yes, the water bath will be automatically refilled. If no, you must manually fill the water bath."
 #define rotationSpeed_text 							"Rotation speed"
 #define rotationInversionInterval_text 				"Rotation inv. interval"
-#define rotationRandom_text 						"Randomness"
+#define rotationRandom_text 						"Random variation"
 #define celsius_text 								"°C"
 #define fahrenheit_text 							"°F"
 #define waterInlet_text 							"Water inlet link"
@@ -237,6 +283,25 @@ typedef enum {
 #define autostart_text 								"Process autostart"
 #define drainFillTime_text 							"Drain/fill time overlap"
 #define multiRinseTime_text 						"Multi rinse cycle time"
+#define tankSize_text                       "Tank size"
+#define tankSizeAlertMBox_text              "Select the default tank size.\nSmall, Medium, or Large."
+#define tankSizeSmall_text                  "S"
+#define tankSizeMedium_text                 "M"
+#define tankSizeLarge_text                  "L"
+#define pumpSpeed_text                      "Pump speed"
+#define pumpSpeedAlertMBox_text             "Set the pump speed percentage.\nHigher values = faster fill/drain."
+#define brightness_text                     "Brightness"
+#define brightnessAlertMBox_text            "Set the LCD backlight brightness.\nAuto-dim: 1min \xe2\x86\x92 50%, 5min \xe2\x86\x92 20%,\n10min \xe2\x86\x92 off. Touch to wake."
+#define chemContainerMl_text                "Chemistry container"
+#define chemContainerMlAlertMBox_text       "Set the chemistry container\nsize in milliliters."
+#define wbContainerMl_text                  "Water bath container"
+#define wbContainerMlAlertMBox_text         "Set the water bath size\nin milliliters."
+#define chemistryVolume_text                "Chemistry volume"
+#define splashScreenAlertMBox_text          "Customize the boot splash screen.\n\nUse Default: shows the standard\nDeep Ocean splash.\n\nRandom next boot: generates a\nnew random splash each boot.\n\nBoth off: choose Palette, Shape\nStyle and Complexity manually.\nPress Random to shuffle."
+#define chemistryVolumeAlertMBox_text       "Low: uses half the chemistry.\nHigh: fills the tank completely."
+#define chemistryVolumeList                 "Low\nHigh"
+#define chemContainerMlList                 "250\n500\n750\n1000\n1250\n1500"
+#define wbContainerMlList                   "1000\n1500\n2000\n2500\n3000\n3500\n4000\n5000"
 
 /* Checkup strings/vars */
 #define checkupNexStepsTitle_text 					"Next steps:"
@@ -256,8 +321,8 @@ typedef enum {
 #define checkupWaterTemp_text 						"Water temp:"
 #define checkupNextStep_text						"Next step:"
 #define checkupSelectBeforeStart_text 				"Select the tank size and chemistry amount and click the 'Start' button"
-#define checkupTankSize_text 						"Select tank size"
-#define checkupChemistryVolume_text 				"Select chemistry volume"
+#define checkupTankSize_text 						"Selected tank size"
+#define checkupChemistryVolume_text 				"Selected volume"
 #define checkupMinimumChemistry_text 				"Minimum required chemistry : 500ml"
 #define checkupFillWaterMachine_text 				"The machine is not connected to a water source.\n\nFill the water bath manually up to the top water level sensor"
 #define checkupTargetTemp_text 						"Target temperature"
@@ -274,6 +339,17 @@ typedef enum {
 #define checkupTankSizePlaceHolder_text				"Size"
 #define checkupChemistryLowVol_text					"Low"
 #define checkupChemistryHighVol_text				"High"
+#define checkupFilling_text							"Filling"
+#define checkupDraining_text						"Draining"
+#define checkupProcessing_text						"Processing"
+#define checkupDrainingComplete_text				"Complete"
+#define checkupHeaterStatusFmt_text					"Heater: %s"
+#define checkupHeaterOn_text						"ON"
+#define checkupHeaterOff_text						"OFF"
+#define checkupTempReached_text						"Temp ok!"
+#define checkupTempTimedOut_text						"Timeout!"
+#define checkupContinue_text						"Continue"
+#define checkupNoTempControl_text					"No temp control"
 
 /* Clean Popup elements */
 #define cleanPopupTitle_text						"Cleaning process setup"
@@ -286,11 +362,55 @@ typedef enum {
 #define cleanRunButton_text							"Run"
 #define cleanStopButton_text						"Stop"
 #define cleanCloseButton_text						"Close"
+#define cleanCycleFmt_text							"%s cycle:%d"
 #define cleanCurrentClean_text						"Cleaning"
 #define cleanCompleteClean_text						"COMPLETE"
 #define cleanWaste_text								"Waste"
 #define cleanDraining_text							"Draining"
 #define cleanFilling_text							"Filling"
+
+/* Drain popup texts */
+#define drainStopped_text                       "Drain stopped"
+#define drainComplete_text                      "Drain complete!"
+#define drainWasteIndicator_text                ">> WASTE <<"
+#define drainDrainingFmt_text                   "Draining: %s"
+#define drainDrainingC1_text                    "Draining: C1"
+
+/* Self-check popup texts */
+#define selfCheck_text                          "Self-check"
+#define selfCheckTasks_text                     "Tasks:"
+#define selfCheckTempSensors_text               "Temp. sensors"
+#define selfCheckWaterPump_text                 "Water pump"
+#define selfCheckHeater_text                    "Heater"
+#define selfCheckValves_text                    "Valves"
+#define selfCheckContainer1_text                "Container C1"
+#define selfCheckContainer2_text                "Container C2"
+#define selfCheckContainer3_text                "Container C3"
+#define selfCheckRunning_text                   "Running..."
+#define selfCheckDone_text                      "Done"
+#define selfCheckComplete_text                  "Self-check complete!"
+#define selfCheckFinished_text                  "Self-check finished"
+#define selfCheckSkip_text                      "Skip"
+#define selfCheckNext_text                      "Next"
+#define selfCheckRerun_text                     "Re-run"
+#define selfCheckStopped_text                   "Stopped"
+#define selfCheckSkipped_text                   "Skipped"
+#define selfCheckPumpRunning_text               "Pump running..."
+#define selfCheckTimeFmt_text                   "Time: %lds"
+#define selfCheckTempFmt_text                   "Temp: %d.%d C"
+#define selfCheckValveFmt_text                  "Valve: %s"
+
+/* Common button texts */
+#define buttonClose_text                        "Close"
+#define buttonStop_text                         "Stop"
+#define buttonStart_text                        "Start"
+#define buttonCancel_text                       "Cancel"
+
+/* Tank size display values */
+#define tankSizeValues                          {"500ml", "700ml", "1000ml"}
+
+/* Chemistry volume display values */
+#define chemVolumeValues                        {"Low", "High"}
 
 /* Popup elements */
 #define stopProcessPopupTitle_text 					"Stop process"
@@ -338,85 +458,28 @@ typedef enum {
 #define softwareSerialNumValue_text 				"1234567890"
 #define softwareCredits_text 						"Credits"
 #define softwareCreditsValue_text 					"Credit to Frank P. \nand \nPete B."
+#define calibrationPopupTitle_text					"Calibration"
+#define calibrationResetPopupTitle_text				"Calibration Reset"
+#define calibrationResetPopupBody_text				"Temperature calibration has been reset to default values."
 
-/* Checkup strings/vars */
-#define checkupNexStepsTitle_text					"Next steps:"
-#define checkupProcessReady_text					"Process starting..."
-#define checkupTheMachineWillDo_text				"The machine will:"
-#define checkupFillWater_text						"Fill the water bath"
-#define checkupTankRotation_text					"Check tank presence and film rotation"
-#define checkupReachTemp_text						"Reach the chemistry target temperature"
-#define checkupStop_text							"Stop"
-#define checkupStart_text							"Start"
-#define checkupSkip_text							"Skip"
-#define checkupStopNow_text							"Stop now!"
-#define checkupStopAfter_text						"Stop after!"
-#define checkupProcessingTitle_text					"Processing:"
-#define checkupStepSource_text						"Step source:"
-#define checkupTempControl_text						"Temp. control:"
-#define checkupWaterTemp_text						"Water temp:"
-#define checkupNextStep_text						"Next step:"
-#define checkupSelectBeforeStart_text				"Select the tank size and chemistry amount and click the 'Start' button"
-#define checkupTankSize_text						"Select tank size"
-#define checkupChemistryVolume_text					"Select chemistry volume"
-#define checkupMinimumChemistry_text				"Minimum required chemistry : 500ml"
-#define checkupFillWaterMachine_text				"The machine is not connected to a water source.\n\nFill the water bath manually up to the top water level sensor"
-#define checkupTargetTemp_text						"Target temperature"
-#define checkupWater_text							"Water"
-#define checkupChemistry_text						"Chemistry"
-#define checkupTankPosition_text					"Tank is in position:"
-#define checkupFilmRotation_text					"Film is rotating:"
-#define checkupYes_text								"Yes"
-#define checkupNo_text 								"No"
-#define checkupChecking_text 						"Checking..."
-#define checkupTargetToleranceTemp_text 			"tolerance"
-#define checkupProcessComplete_text 				"Process\nCOMPLETE!"
-#define checkupProcessStopped_text					"Process\nSTOPPED!"
-#define checkupFilling_text							"Filling"
-#define checkupDraining_text						"Draining"
-#define checkupProcessing_text						"Processing"
-#define checkupDrainingComplete_text				"Complete"
-
-/* Checkup strings/vars */
-#define checkupNexStepsTitle_text					"Next steps:"
-#define checkupProcessReady_text					"Process starting..."
-#define checkupTheMachineWillDo_text				"The machine will:"
-#define checkupFillWater_text						"Fill the water bath"
-#define checkupTankRotation_text					"Check tank presence and film rotation"
-#define checkupReachTemp_text						"Reach the chemistry target temperature"
-#define checkupStop_text							"Stop"
-#define checkupStart_text							"Start"
-#define checkupSkip_text							"Skip"
-#define checkupStopNow_text							"Stop now!"
-#define checkupStopAfter_text						"Stop after!"
-#define checkupProcessingTitle_text					"Processing:"
-#define checkupStepSource_text						"Step source:"
-#define checkupTempControl_text						"Temp. control:"
-#define checkupWaterTemp_text						"Water temp:"
-#define checkupNextStep_text						"Next step:"
-#define checkupSelectBeforeStart_text				"Select the tank size and chemistry amount and click the 'Start' button"
-#define checkupTankSize_text						"Select tank size"
-#define checkupChemistryVolume_text					"Select chemistry volume"
-#define checkupMinimumChemistry_text				"Minimum required chemistry : 500ml"
-#define checkupFillWaterMachine_text				"The machine is not connected to a water source.\n\nFill the water bath manually up to the top water level sensor"
-#define checkupTargetTemp_text						"Target temperature"
-#define checkupWater_text							"Water"
-#define checkupChemistry_text						"Chemistry"
-#define checkupTankPosition_text					"Tank is in position:"
-#define checkupFilmRotation_text					"Film is rotating:"
-#define checkupYes_text								"Yes"
-#define checkupNo_text								"No"
-#define checkupChecking_text						"Checking..."
-#define checkupTargetToleranceTemp_text				"tolerance"
-#define checkupProcessComplete_text					"Process\nCOMPLETE!"
-#define checkupProcessStopped_text					"Process\nSTOPPED!"
-#define checkupHeaterStatusFmt_text					"Heater: %s"
-#define checkupHeaterOn_text						"ON"
-#define checkupHeaterOff_text						"OFF"
-#define checkupTempReached_text						"Temp ok!"
-#define checkupTempTimedOut_text						"Timeout!"
-#define checkupContinue_text						"Continue"
-#define checkupNoTempControl_text					"No temp control"
+/* OTA update strings */
+#define otaConnecting_text							"Connecting..."
+#define otaStartingServer_text						"Starting server..."
+#define otaStarting_text							"Starting..."
+#define otaZeroPercent_text							"0%"
+#define otaUpdate_text								"Update"
+#define otaUpdateFromSD_text						"Update from SD"
+#define otaUpdateFromSDMBox_text					"Update firmware from\nSD card file."
+#define otaWifiUpdate_text							"Wi-Fi update"
+#define otaWifiUpdateMBox_text						"Start a local web server.\nUpload firmware via browser."
+#define otaUpdating_text							"Updating..."
+#define otaNoFirmware_text							"No firmware found on SD"
+#define otaConfirmUpdate_text						"Update firmware to %s?\nDo not turn off the machine!"
+#define otaRebootNow_text							"Reboot now to apply update?"
+#define otaWifiSSID_text							"Wi-Fi SSID"
+#define otaWifiSSIDAlert_text						"Enter the Wi-Fi network\nname for OTA updates."
+#define otaWifiPassword_text						"Wi-Fi password"
+#define otaWifiPasswordAlert_text					"Enter the Wi-Fi network\npassword."
 
 /* Process detail strings/vars */
 #define processDetailStep_text				 		"Steps"
@@ -445,21 +508,21 @@ typedef enum {
 #define stepDetailCancel_text						"Cancel"
 #define stepDetailCurrentTemp_text			   		"Now:"
 
-/* Button sizes */
-#define BUTTON_PROCESS_HEIGHT						40
-#define BUTTON_PROCESS_WIDTH						95
-#define BUTTON_START_HEIGHT							90
-#define BUTTON_START_WIDTH							140
-#define BUTTON_MBOX_HEIGHT							45
-#define BUTTON_MBOX_WIDTH							110
-#define BUTTON_POPUP_CLOSE_HEIGHT					30
-#define BUTTON_POPUP_CLOSE_WIDTH					30
-#define BUTTON_TUNE_HEIGHT							35
-#define BUTTON_TUNE_WIDTH							80
-#define LOGO_HEIGHT									89
-#define LOGO_WIDTH									102
+/* Button sizes — resolved from ui_profile at runtime */
+#define BUTTON_PROCESS_HEIGHT						(ui_get_profile()->buttons.process_h)
+#define BUTTON_PROCESS_WIDTH						(ui_get_profile()->buttons.process_w)
+#define BUTTON_START_HEIGHT							(ui_get_profile()->buttons.start_h)
+#define BUTTON_START_WIDTH							(ui_get_profile()->buttons.start_w)
+#define BUTTON_MBOX_HEIGHT							(ui_get_profile()->buttons.msgbox_btn_h)
+#define BUTTON_MBOX_WIDTH							(ui_get_profile()->buttons.msgbox_btn_w)
+#define BUTTON_POPUP_CLOSE_HEIGHT					(ui_get_profile()->buttons.popup_close_h)
+#define BUTTON_POPUP_CLOSE_WIDTH					(ui_get_profile()->buttons.popup_close_w)
+#define BUTTON_TUNE_HEIGHT							(ui_get_profile()->buttons.tune_h)
+#define BUTTON_TUNE_WIDTH							(ui_get_profile()->buttons.tune_w)
+#define LOGO_HEIGHT									(ui_get_profile()->buttons.logo_h)
+#define LOGO_WIDTH									(ui_get_profile()->buttons.logo_w)
 
-#define checkupTankSizesList						"Small\nMedium\nLarge"
+#define checkupTankSizesList						"500ml\n700ml\n1000ml"
 #define checkupStepStatuses 						{ dotStep_icon, arrowStep_icon, checkStep_icon }
 #define stepTypeList								"Chemistry\nRinse\nMultiRinse"
 #define stepSourceList								"C1\nC2\nC3\nWB"
@@ -467,11 +530,20 @@ typedef enum {
 #define processTempControlList						{"Off", "Run", "Susp."}
 #define tanksSizesAndTimes 							{ { {250,  8}, {350, 11}, {550, 16} }, { {500,  15}, {700,  19}, {1000, 25} } } // Ml and seconds
 
-#define C1    0
-#define C2    1
-#define C3    2
-#define WB    3
-#define WASTE 4		                            
+typedef enum {
+    SOURCE_C1    = 0,
+    SOURCE_C2    = 1,
+    SOURCE_C3    = 2,
+    SOURCE_WB    = 3,
+    SOURCE_WASTE = 4
+} chemicalSource_t;
+
+/* Legacy aliases — keep for backward compatibility */
+#define C1    SOURCE_C1
+#define C2    SOURCE_C2
+#define C3    SOURCE_C3
+#define WB    SOURCE_WB
+#define WASTE SOURCE_WASTE		                            
 
 /*********************
 * ELEMENTS STRUCTS
@@ -490,14 +562,74 @@ struct __attribute__ ((packed)) machineSettings {
 	bool					isProcessAutostart;
 	uint8_t					drainFillOverlapSetpoint;
 	uint8_t					multiRinseTime;
+	uint8_t					tankSize;       // 1=Small, 2=Medium, 3=Large
+	uint8_t					pumpSpeed;          // 10-100% pump speed
+	uint16_t				chemContainerMl;    // Chemistry container capacity in ml (250-2000)
+	uint16_t				wbContainerMl;      // Water bath capacity in ml (1000-5000)
+	uint8_t					chemistryVolume;    // 1=Low, 2=High
+	int8_t					tempCalibOffset;    /* Calibration offset in tenths of degree (e.g., -15 = -1.5°C) */
+	/* ── Splash screen settings ── */
+	bool					splashRandom;       /* true = randomize palette/shape/complexity/seed each boot */
+	uint8_t					splashPalette;      /* 0–9 palette index */
+	uint8_t					splashShapeStyle;   /* 0–5 shape style index */
+	uint8_t					splashComplexity;   /* 20–100 shape count (step 20) */
+	uint32_t				splashSeed;         /* (reserved, auto-generated from tick) */
+	bool					splashDefault;      /* true = use standard Deep Ocean splash */
+	/* ── Wi-Fi / Remote control settings ── */
+	bool					wifiEnabled;        /* true = connect to Wi-Fi on boot & run WebSocket server */
+	char					wifiSSID[33];       /* SSID (max 32 chars + NUL) */
+	char					wifiPassword[65];   /* Password (max 64 chars + NUL) */
+	/* ── Display settings (added last for binary config compatibility) ── */
+	uint8_t					brightness;         /* 10-100% LCD backlight brightness */
+	uint8_t					dimTimeout;         /* LEGACY — kept for binary config compat; dimming is now fixed 60/300/600s */
 };
 
+
+
+typedef enum kbOwnerType { KB_OWNER_NONE, KB_OWNER_FILTER, KB_OWNER_PROCESS, KB_OWNER_STEP, KB_OWNER_SETTINGS } kbOwnerType;
+
+typedef struct sKeyboardOwnerContext {
+    kbOwnerType         owner;
+    lv_obj_t           *textArea;
+    lv_obj_t           *parentScreen;
+    lv_obj_t           *saveButton;
+    void               *ownerData;
+    uint32_t            maxLength;      /* 0 = use default MAX_PROC_NAME_LEN */
+} sKeyboardOwnerContext;
+
+typedef enum rollerOwnerType {
+    ROLLER_OWNER_NONE,
+    ROLLER_OWNER_PROCESS_TEMP,
+    ROLLER_OWNER_PROCESS_TOLERANCE,
+    ROLLER_OWNER_STEP_MIN,
+    ROLLER_OWNER_STEP_SEC
+} rollerOwnerType;
+
+typedef struct sRollerOwnerContext {
+    rollerOwnerType     owner;
+    lv_obj_t           *textArea;
+    lv_obj_t           *saveButton;
+    void               *ownerData;
+} sRollerOwnerContext;
 typedef struct machineStatistics {
   uint32_t 	          		completed;
   uint64_t 	          		totalMins;
+  uint32_t 	          		totalSecs;   /* 0-59 — carries into totalMins */
   uint32_t 	          		stopped;
   uint32_t 	          		clean;
 } machineStatistics;
+
+/* Business data for a step — separated from UI for safe deep copy */
+typedef struct sStepData {
+    char                	stepNameString[MAX_PROC_NAME_LEN+1];
+    bool                	somethingChanged;
+    bool                	isEditMode;
+    uint8_t             	timeMins;
+    uint8_t             	timeSecs;
+    chemicalType_t      	type;
+    uint8_t             	source;
+    uint8_t             	discardAfterProc;
+} sStepData;
 
 typedef struct sStepDetail {
     /* LVGL objects */
@@ -539,19 +671,18 @@ typedef struct sStepDetail {
 
 	lv_obj_t	        	*stepDetailSecTextArea;
 	lv_obj_t	        	*stepDetailMinTextArea;
-	lv_obj_t	        	*stepDetailNamelTextArea;
+	lv_obj_t	        	*stepDetailNameTextArea;
 
-	/* Params objects */
+	/* Back-reference to parent process (set during stepDetail creation).
+	 * Allows event handlers to access the parent process without relying
+	 * on the gui.tempProcessNode global. NOT deep-copied. */
+	struct processNode      *parentProcess;
 
-//	  processNode       	*referenceProcess;  // Use a pointer instead of an instance
-    char                	stepNameString[MAX_PROC_NAME_LEN+1];
-    bool                	somethingChanged;
-    bool                	isEditMode;
-    uint8_t             	timeMins;
-    uint8_t             	timeSecs;
-    chemicalType_t      	type;
-    uint8_t             	source;
-    uint8_t             	discardAfterProc;
+	/* Business data (deep-copyable as a single block) */
+    sStepData               data;
+    sKeyboardOwnerContext   nameKeyboardCtx;
+    sRollerOwnerContext     minRollerCtx;
+    sRollerOwnerContext     secRollerCtx;
 } sStepDetail;
 
 
@@ -566,7 +697,7 @@ typedef struct singleStep { //GRAPHIC ELEMENT IN THE STEPS LIST
     lv_obj_t           		*stepTypeIcon;
     lv_obj_t           		*discardAfterIcon;
     lv_obj_t           		*sourceLabel;
-    lv_coord_t         		container_y;
+    int32_t         		container_y;
     lv_obj_t          		*deleteButton;
     lv_obj_t          		*deleteButtonLabel;
     lv_obj_t          		*editButton;
@@ -591,6 +722,26 @@ typedef struct stepList {
     uint16_t           		size;   /* Number of list entries currently */
 } stepList;
 
+
+/* Business data for a checkup — separated from UI for safe deep copy */
+typedef struct sCheckupData {
+    bool                isProcessing;
+    uint8_t             processStep;
+    uint32_t            activeVolume_index;
+    uint8_t             tankSize;
+    bool                stopNow;
+    bool                stopAfter;
+    bool                isFilling;
+    bool                isAlreadyPumping;
+    bool                isDeveloping;
+    uint8_t             stepFillWaterStatus;
+    uint8_t             stepReachTempStatus;
+    uint8_t             stepCheckFilmStatus;
+    float               currentWaterTemp;
+    float               currentChemTemp;
+    bool                heaterOn;
+    uint16_t            tempTimeoutCounter;
+} sCheckupData;
 
 typedef struct sCheckup{
     /* LVGL objects */
@@ -680,32 +831,34 @@ typedef struct sCheckup{
   	lv_timer_t    		*pumpTimer;
 	lv_timer_t    		*tempTimer;
 
-	bool 			    isProcessing; // 0 or 1
-	uint8_t 			processStep;//0 or 1 or 2 or 3 or 4
-	uint32_t			activeVolume_index;
-	uint8_t 			tankSize;
-  	bool    			stopNow;
-	bool    			stopAfter;
-  	bool          		isFilling;
-  	bool          		isAlreadyPumping;
-  	bool    			isDeveloping;
-	uint8_t 			stepFillWaterStatus;
-	uint8_t 			stepReachTempStatus;
-	uint8_t 			stepCheckFilmStatus;
-
-	float				currentWaterTemp;
-	float				currentChemTemp;
-	bool				heaterOn;
-	uint16_t			tempTimeoutCounter;
+	/* Business data (deep-copyable as a single block) */
+	sCheckupData        data;
 
 	lv_obj_t			*stepArc;
 	lv_obj_t			*processArc;
   	lv_obj_t			*pumpArc;
- 
+
 	lv_obj_t			*checkupTankSizeTextArea;
+	lv_obj_t			*checkupVolumeTextArea;
+
+	/* Runtime cursor: current step being processed (replaces gui.tempStepNode in checkup) */
+	struct stepNode		*currentStep;
 
 	/* Params objects */
 } sCheckup;
+
+/* Business data for a process — separated from UI for safe deep copy */
+typedef struct sProcessData {
+    char                processNameString[MAX_PROC_NAME_LEN+1];
+    uint32_t            temp;
+    float               tempTolerance;
+    bool                isTempControlled;
+    bool                isPreferred;
+    bool                somethingChanged;
+    filmType_t          filmType;
+    uint32_t            timeMins;
+    uint8_t             timeSecs;
+} sProcessData;
 
 typedef struct sProcessDetail {
     /* LVGL objects */
@@ -749,18 +902,15 @@ typedef struct sProcessDetail {
 	lv_obj_t			*processTempTextArea;
 	lv_obj_t			*processToleranceTextArea;
 
-	/* Params objects */
+	/* Non-data params (require special deep copy handling) */
     stepList          	stepElementsList;  /* Process steps list */
 	sCheckup		    *checkup;
-    char              	processNameString[MAX_PROC_NAME_LEN+1];
-    uint32_t          	temp;
-    float             	tempTolerance;
-    bool           		isTempControlled;
-    bool           		isPreferred;
-    bool              	somethingChanged;
-    filmType_t        	filmType;
-    uint32_t          	timeMins;
-    uint8_t           	timeSecs;
+
+    /* Business data (deep-copyable as a single block) */
+    sProcessData        data;
+    sKeyboardOwnerContext nameKeyboardCtx;
+    sRollerOwnerContext tempRollerCtx;
+    sRollerOwnerContext toleranceRollerCtx;
 
 } sProcessDetail;
 
@@ -780,7 +930,7 @@ typedef struct singleProcess {
     lv_obj_t          	*processTypeIcon;
     lv_obj_t          	*deleteButton;
     lv_obj_t          	*deleteButtonLabel;
-    lv_coord_t        	container_y;
+    int32_t        	container_y;
     bool               	swipedLeft;
     bool               	swipedRight;
     bool               	isFiltered;
@@ -892,6 +1042,7 @@ struct sFilterPopup {
 	lv_obj_t	      		*mBoxNameContainer;
 	lv_obj_t	      		*mBoxNameLabel;
 	lv_obj_t	      		*selectColorContainerRadioButton;
+	lv_obj_t	      		*selectBnWContainerRadioButton;
 	lv_obj_t	      		*mBoxColorLabel;
 	lv_obj_t	      		*mBoxBnWLabel;
 	lv_obj_t	      		*mBoxPreferredContainer;
@@ -906,15 +1057,168 @@ struct sFilterPopup {
 	lv_obj_t	      		*mBoxOnlyPreferredSwitch;
 	lv_obj_t	      		*mBoxResetFilterButton;
 	lv_obj_t	      		*mBoxApplyFilterButton;
+	lv_obj_t	      		*mBoxCloseButton;
+	lv_obj_t	      		*mBoxCloseButtonLabel;
 
-  
+
 	/* Params objects */
-  char                *filterName;
+  char                filterName[MAX_PROC_NAME_LEN + 1];
   bool                isColorFilter;
   bool                isBnWFilter;
   bool                preferredOnly;
+  sKeyboardOwnerContext nameKeyboardCtx;
 };
 
+
+struct sDrainPopup {
+	/* Main containers */
+	lv_obj_t			*drainPopupParent;
+	lv_obj_t			*drainContainer;
+	lv_obj_t			*drainTitle;
+	lv_obj_t			*drainTitleLine;
+	lv_style_t			 style_drainTitleLine;
+	lv_point_precise_t	 titleLinePoints[2];
+
+	/* Close button */
+	lv_obj_t			*drainCloseButton;
+	lv_obj_t			*drainCloseButtonLabel;
+
+	/* Confirm phase */
+	lv_obj_t			*drainConfirmContainer;
+	lv_obj_t			*drainInfoLabel;
+	lv_obj_t			*drainStartButton;
+	lv_obj_t			*drainStartButtonLabel;
+	lv_obj_t			*drainCancelButton;
+	lv_obj_t			*drainCancelButtonLabel;
+
+	/* Process phase */
+	lv_obj_t			*drainProcessContainer;
+	lv_obj_t			*tankBar[4];
+	lv_obj_t			*tankLabel[4];
+	lv_obj_t			*drainStatusLabel;
+	lv_obj_t			*drainWasteLabel;
+	lv_obj_t			*drainTimeLabel;
+	lv_obj_t			*drainStopButton;
+	lv_obj_t			*drainStopButtonLabel;
+
+	/* Timer */
+	lv_timer_t			*drainTimer;
+
+	/* Data */
+	bool				 isDraining;
+	bool				 stopNowPressed;
+	uint8_t				 currentTank;
+	int32_t				 tankElapsed;
+	int32_t				 totalElapsed;
+};
+
+struct sSelfcheckPopup {
+	lv_obj_t			*selfcheckPopupParent;
+	lv_obj_t			*selfcheckContainer;
+	lv_obj_t			*selfcheckTitle;
+	lv_obj_t			*selfcheckTitleLine;
+	lv_style_t			 style_selfcheckTitleLine;
+	lv_point_precise_t	 titleLinePoints[2];
+
+	/* Left panel - task list */
+	lv_obj_t			*leftPanel;
+	lv_obj_t			*tasksLabel;
+	lv_obj_t			*phaseIcon[7];
+	lv_obj_t			*phaseNameLabel[7];
+
+	/* Right panel - current phase */
+	lv_obj_t			*rightPanel;
+	lv_obj_t			*phaseTitle;
+	lv_obj_t			*phaseDescription;
+	lv_obj_t			*phaseStatus;
+	lv_obj_t			*phaseTimer;
+
+	/* Progress bar (for container phases) */
+	lv_obj_t			*progressBar;
+
+	/* Close button (X, green) */
+	lv_obj_t			*closeButton;
+	lv_obj_t			*closeButtonLabel;
+
+	/* Buttons */
+	lv_obj_t			*stopButton;
+	lv_obj_t			*stopButtonLabel;
+	lv_obj_t			*startButton;
+	lv_obj_t			*startButtonLabel;
+	lv_obj_t			*advanceButton;
+	lv_obj_t			*advanceButtonLabel;
+
+	/* State */
+	lv_timer_t			*checkTimer;
+	uint8_t				 currentPhase;
+	uint8_t				 phaseElapsed;
+	bool				 isRunning;
+};
+
+struct sOtaProgressPopup {
+	lv_obj_t			*popupParent;
+	lv_obj_t			*popupContainer;
+	lv_obj_t			*titleLabel;
+	lv_obj_t			*titleLine;
+	lv_style_t			 style_titleLine;
+	lv_point_precise_t	 titleLinePoints[2];
+	lv_obj_t			*closeButton;
+	lv_obj_t			*closeButtonLabel;
+	lv_obj_t			*statusLabel;
+	lv_obj_t			*progressBar;
+	lv_obj_t			*percentLabel;
+};
+
+struct sOtaWifiPopup {
+	lv_obj_t			*popupParent;
+	lv_obj_t			*popupContainer;
+	lv_obj_t			*titleLabel;
+	lv_obj_t			*titleLine;
+	lv_style_t			 style_titleLine;
+	lv_point_precise_t	 titleLinePoints[2];
+	lv_obj_t			*closeButton;
+	lv_obj_t			*closeButtonLabel;
+	lv_obj_t			*ipLabel;
+	lv_obj_t			*pinLabel;
+	lv_obj_t			*statusLabel;
+	lv_obj_t			*progressBar;
+	char				 otaPin[9]; /* 8 digits + null (WPA2 min password) */
+};
+
+/* ── Wi-Fi configuration scan results ── */
+#define MAX_WIFI_SCAN_RESULTS 15
+
+typedef struct {
+	char ssid[33];
+	int8_t rssi;
+	bool open;  /* true = no password needed */
+} wifiScanResult_t;
+
+struct sWifiPopup {
+	lv_obj_t            *popupParent;
+	lv_obj_t            *popupContainer;
+	lv_obj_t            *titleLabel;
+	lv_obj_t            *titleLine;
+	lv_style_t           style_titleLine;
+	lv_point_precise_t   titleLinePoints[2];
+	lv_obj_t            *closeButton;
+	lv_obj_t            *closeButtonLabel;
+	lv_obj_t            *statusLabel;
+	lv_obj_t            *scanButton;
+	lv_obj_t            *scanButtonLabel;
+	lv_obj_t            *listContainer;      /* scrollable list of scan results */
+	lv_obj_t            *connectButton;
+	lv_obj_t            *connectButtonLabel;
+	lv_obj_t            *autoConnectContainer;
+	lv_obj_t            *autoConnectLabel;
+	lv_obj_t            *autoConnectSwitch;
+	/* Scan state */
+	wifiScanResult_t     scanResults[MAX_WIFI_SCAN_RESULTS];
+	int                  scanCount;
+	int                  selectedIndex;       /* -1 = none */
+	char                 pendingPassword[65];
+	sKeyboardOwnerContext wifiPasswordKbCtx;
+};
 
 struct sMessagePopup {
 	/* LVGL objects */
@@ -942,19 +1246,6 @@ struct sMessagePopup {
 };
 
 
-/*********************
-* HOME PAGE STRUCT
-*********************/
-struct sHome {
-    /* LVGL objects */
-	lv_obj_t *screen_home;
-  lv_obj_t *startButton;
-  lv_obj_t *splashImage;
-  lv_obj_t *errorButtonLabel;
-  lv_obj_t *errorLabel;
-	/* Params objects */
-};
-
 
 /*********************
 * MENU STRUCT
@@ -969,6 +1260,7 @@ struct sMenu {
 	lv_obj_t			*toolsTab;
 	lv_obj_t			*iconLabel;
 	lv_obj_t			*label;
+	lv_obj_t			*wifiStatusIcon;
 
 	/* Params objects */
 	uint8_t				oldSelection;
@@ -1004,7 +1296,7 @@ struct sSettings {
 	lv_obj_t			      *sectionTitleLine;
 	lv_style_t			    style_sectionTitleLine;
 	lv_point_precise_t	titleLinePoints[2];
-	lv_coord_t 			    pad;
+	int32_t 			    pad;
 
 	lv_obj_t 	        	*settingsLabel;
 	lv_obj_t 	        	*tempUnitLabel;
@@ -1030,7 +1322,7 @@ struct sSettings {
 	lv_obj_t 	        	*waterInletContainer;
 	lv_obj_t 	        	*tempTuningContainer;
 	lv_obj_t 	        	*filmRotationSpeedContainer;
-	lv_obj_t 	        	*filmRotationInverseIntervallContainer;
+	lv_obj_t 	        	*filmRotationInverseIntervalContainer;
 	lv_obj_t 	        	*randomContainer;
 	lv_obj_t 	        	*persistentAlarmContainer;
 	lv_obj_t 	        	*autostartContainer;
@@ -1043,16 +1335,61 @@ struct sSettings {
 
 	lv_obj_t 	        	*filmRotationSpeedSlider;
 	lv_obj_t 	        	*filmRotationInversionIntervalSlider;
-	lv_obj_t 	        	*filmRandomlSlider;
+	lv_obj_t 	        	*filmRandomSlider;
 	lv_obj_t 	        	*drainFillTimeSlider;
   lv_obj_t 	        	*multiRinseTimeSlider;
 
 	lv_obj_t	        	*tempSensorTuneButton;
+	lv_obj_t 	        	*tempCalibOffsetValueLabel;  /* Display current calibration offset */
 	lv_obj_t 	        	*tempUnitCelsiusRadioButton;
 	lv_obj_t 	        	*tempUnitFahrenheitRadioButton;
 
 	uint32_t 	        	active_index;
 
+	lv_obj_t                *tankSizeContainer;
+	lv_obj_t                *tankSizeLabel;
+	lv_obj_t                *tankSizeTextArea;
+	uint32_t                tankSize_active_index;
+
+	lv_obj_t                *pumpSpeedContainer;
+	lv_obj_t                *pumpSpeedLabel;
+	lv_obj_t                *pumpSpeedSlider;
+	lv_obj_t                *pumpSpeedValueLabel;
+
+	lv_obj_t                *brightnessContainer;
+	lv_obj_t                *brightnessLabel;
+	lv_obj_t                *brightnessSlider;
+	lv_obj_t                *brightnessValueLabel;
+
+	lv_obj_t                *chemContainerMlContainer;
+	lv_obj_t                *chemContainerMlLabel;
+	lv_obj_t                *chemContainerMlTextArea;
+
+	lv_obj_t                *wbContainerMlContainer;
+	lv_obj_t                *wbContainerMlLabel;
+	lv_obj_t                *wbContainerMlTextArea;
+
+	lv_obj_t                *chemVolumeContainer;
+	lv_obj_t                *chemVolumeLabel;
+	lv_obj_t                *chemVolumeTextArea;
+
+	/* Splash screen settings row */
+	lv_obj_t                *splashContainer;
+	lv_obj_t                *splashLabel;
+	lv_obj_t                *splashButton;
+	lv_obj_t                *splashButtonLabel;
+
+	/* Wi-Fi settings row */
+	lv_obj_t                *wifiContainer;
+	lv_obj_t                *wifiLabel;
+	lv_obj_t                *wifiButton;
+	lv_obj_t                *wifiButtonLabel;
+
+	/* Reset to Defaults row */
+	lv_obj_t                *resetContainer;
+	lv_obj_t                *resetLabel;
+	lv_obj_t                *resetButton;
+	lv_obj_t                *resetButtonLabel;
 
   /* Params objects */
   struct machineSettings   settingsParams;
@@ -1068,12 +1405,14 @@ struct sTools {
 
 	lv_obj_t 	        	*toolsCleaningContainer;
 	lv_obj_t 	        	*toolsDrainingContainer;
+	lv_obj_t 	        	*toolsSelfcheckContainer;
 	lv_obj_t 	        	*toolsImportContainer;
 	lv_obj_t 	        	*toolsExportContainer;
 
 
 	lv_obj_t 	        	*toolsCleaningLabel;
 	lv_obj_t 	        	*toolsDrainingLabel;
+	lv_obj_t 	        	*toolsSelfcheckLabel;
 	lv_obj_t 	        	*toolsImportLabel;
 	lv_obj_t 	        	*toolsExportLabel;
 
@@ -1081,6 +1420,8 @@ struct sTools {
   lv_obj_t 	        	*toolsCleaningButtonLabel;
 	lv_obj_t 	        	*toolsDrainingButton;
   lv_obj_t 	        	*toolsDrainingButtonLabel;
+	lv_obj_t 	        	*toolsSelfcheckButton;
+  lv_obj_t 	        	*toolsSelfcheckButtonLabel;
 	lv_obj_t 	        	*toolsImportButton;
   lv_obj_t 	          *toolsImportButtonLabel;
 	lv_obj_t 	        	*toolsExportButton;
@@ -1117,6 +1458,16 @@ struct sTools {
 	lv_obj_t 	        	*toolCreditButton;
 	lv_obj_t 	        	*toolCreditButtonLabel;
 
+	/* OTA Update UI */
+	lv_obj_t			*toolsUpdateContainer;
+	lv_obj_t			*toolsUpdateSDLabel;
+	lv_obj_t			*toolsUpdateSDButton;
+	lv_obj_t			*toolsUpdateSDButtonLabel;
+	lv_obj_t			*toolsUpdateWifiContainer;
+	lv_obj_t			*toolsUpdateWifiLabel;
+	lv_obj_t			*toolsUpdateWifiButton;
+	lv_obj_t			*toolsUpdateWifiButtonLabel;
+
 	/* Params objects */
   struct machineStatistics machineStats;
 };
@@ -1128,6 +1479,32 @@ struct sKeyboardPopup {
 	lv_obj_t			    *keyboardTextArea;
 };
 
+struct sSplashPopup {
+	lv_obj_t			*splashPopupParent;
+	lv_obj_t			*splashContainer;
+	lv_obj_t			*previewContainer;      /* background preview of splash shapes */
+	lv_obj_t			*overlayRect;           /* semi-transparent dark overlay for readability */
+	lv_obj_t			*splashTitle;
+	lv_obj_t			*splashTitleLine;
+	lv_style_t			 style_titleLine;
+	lv_point_precise_t	 titleLinePoints[2];
+	lv_obj_t			*defaultSwitch;
+	lv_obj_t			*defaultLabel;
+	lv_obj_t			*randomSwitch;
+	lv_obj_t			*randomLabel;
+	lv_obj_t			*optionsContainer;
+	lv_obj_t			*paletteLabel;
+	lv_obj_t			*paletteTextArea;
+	lv_obj_t			*shapeLabel;
+	lv_obj_t			*shapeTextArea;
+	lv_obj_t			*complexityLabel;
+	lv_obj_t			*complexitySlider;
+	lv_obj_t			*randomButton;          /* bottom button — regenerate random splash */
+	lv_obj_t			*randomButtonLabel;
+	lv_obj_t			*xCloseButton;          /* X button top-right */
+	lv_obj_t			*xCloseButtonLabel;
+};
+
 
 /*********************
 * ELEMENTS STRUCT
@@ -1135,9 +1512,15 @@ struct sKeyboardPopup {
 struct sElements {
 	struct sFilterPopup			filterPopup;
   struct sCleanPopup      cleanPopup;
+  struct sDrainPopup      drainPopup;
+  struct sSelfcheckPopup  selfcheckPopup;
+  struct sOtaWifiPopup    otaWifiPopup;
+  struct sOtaProgressPopup otaProgressPopup;
 	struct sMessagePopup 		messagePopup;
 	struct sRollerPopup			rollerPopup;
   struct sKeyboardPopup   keyboardPopup;
+  struct sSplashPopup     splashPopup;
+  struct sWifiPopup       wifiPopup;
 };
 
 
@@ -1145,7 +1528,6 @@ struct sElements {
 * PAGES STRUCT
 *********************/
 struct sPages {
-	struct sHome				  home;
 	struct sMenu				  menu;
 	struct sProcesses			processes;
 	struct sSettings			settings;
@@ -1175,8 +1557,8 @@ struct sys_components {
 typedef struct _LVGLObjectScale {
 	
     lv_obj_t *obj;
-    lv_coord_t original_width;
-    lv_coord_t original_height;
+    int32_t original_width;
+    int32_t original_height;
     float current_scale;
 } LVGLObjectScale;
 
@@ -1198,10 +1580,25 @@ LV_FONT_DECLARE(FilMachineFontIcons_15);
 LV_FONT_DECLARE(FilMachineFontIcons_20);
 LV_FONT_DECLARE(FilMachineFontIcons_30);
 LV_FONT_DECLARE(FilMachineFontIcons_40);
+LV_FONT_DECLARE(FilMachineFontIcons_50);
+LV_FONT_DECLARE(FilMachineFontIcons_60);
 LV_FONT_DECLARE(FilMachineFontIcons_100);
+LV_FONT_DECLARE(lv_font_montserrat_64);
 
-/* Our Images */
-LV_IMG_DECLARE(splash_img);
+/* Custom splash title fonts */
+LV_FONT_DECLARE(font_air_americana_48);
+LV_FONT_DECLARE(font_decaying_felt_pen_48);
+LV_FONT_DECLARE(font_ds_digital_48);
+LV_FONT_DECLARE(font_evanescent_48);
+LV_FONT_DECLARE(font_nerdropol_lattice_48);
+LV_FONT_DECLARE(font_retrolight_48);
+LV_FONT_DECLARE(font_tropical_leaves_48);
+LV_FONT_DECLARE(font_wishful_melisande_48);
+
+/* HELPER UTILITIES Function Prototypes */
+// @file accessories.c
+int32_t roundToStep(int32_t value, int32_t step);
+void safeTimerDelete(lv_timer_t **timer);
 
 /* ELEMENTS Function Prototypes */
 // @file element_filterPopup.c
@@ -1210,6 +1607,26 @@ void filterPopupCreate(void);
 // @file element_messagePopup.c
 void messagePopupCreate(const char *popupTitleText, const char *popupText, const char *textButton1, const char *textButton2, void *whoCallMe);
 void event_messagePopup(lv_event_t *e);
+void *getProcessDiscardSentinel(void);
+processNode *getProcessDetailBackup(void);
+void clearProcessDetailBackup(void);
+// @file element_cleanPopup.c
+void event_cleanPopup(lv_event_t *e);
+void cleanPopup(void);
+// @file element_drainPopup.c
+void event_drainPopup(lv_event_t *e);
+void drainPopupCreate(void);
+// @file element_selfcheckPopup.c
+void event_selfcheckPopup(lv_event_t *e);
+void selfcheckPopupCreate(void);
+// @file element_splashPopup.c
+void splashPopupCreate(void);
+void splashPopupRefreshPreview(void);
+// @file page_splash.c
+void splash_preview_generate(lv_obj_t *parent, uint32_t seed,
+                              uint8_t palette_idx, uint8_t shape_style,
+                              uint8_t complexity);
+void splash_standard_preview_generate(lv_obj_t *parent);
 // @file element_process.c
 void event_processElement(lv_event_t *e);
 void processElementCreate(processNode *newProcess, int32_t tempSize);
@@ -1218,7 +1635,7 @@ processNode *getProcElementEntryByObject( lv_obj_t *obj );
 processNode *addProcessElement(processNode	*processToAdd);
 // @file element_rollerPopup.c
 void event_Roller(lv_event_t *e);
-void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *whoCallMe, uint32_t currentVal);
+void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *whoCallMe, uint32_t currentVal, uint32_t accentColor);
 // @file element_step.c
 void event_stepElement(lv_event_t *e);
 void stepElementCreate(stepNode * newStep,processNode * processReference, int8_t tempSize);
@@ -1232,9 +1649,20 @@ void initGlobals( void );
 // @file page_checkup.c
 void event_checkup(lv_event_t *e);
 void checkup(processNode *referenceProcess);
-// @file page_home.c
-void event_btn_start(lv_event_t *e);
-void homePage(void);
+/* Runtime getters for WebSocket server */
+processNode *checkup_find_active_process(void);
+void     checkup_reset_state(void);
+uint8_t  checkup_get_step_percentage(void);
+uint8_t  checkup_get_process_percentage(void);
+uint8_t  checkup_get_tank_percentage(void);
+uint32_t checkup_get_step_elapsed_mins(void);
+uint8_t  checkup_get_step_elapsed_secs(void);
+uint32_t checkup_get_step_left_mins(void);
+uint8_t  checkup_get_step_left_secs(void);
+uint32_t checkup_get_process_left_mins(void);
+uint8_t  checkup_get_process_left_secs(void);
+uint32_t checkup_get_process_elapsed_mins(void);
+uint8_t  checkup_get_process_elapsed_secs(void);
 // @file page_menu.c
 void event_tab_switch(lv_event_t *e);
 void menu(void);
@@ -1242,16 +1670,20 @@ void menu(void);
 void event_processDetail(lv_event_t *e);
 void event_processDetail_style_delete(lv_event_t *e);
 void processDetail(lv_obj_t *referenceProcess);
+void process_detail_live_update(processNode *pn);
+void step_detail_live_update(stepNode *sn);
 // @file page_processes.c
 void event_processes_style_delete(lv_event_t *e);
 void event_tabProcesses(lv_event_t *e);
 void processes(void);
+void refreshProcessesLabel(void);
 // @file page_settings.c
 void event_settings_style_delete(lv_event_t *e);
 void event_settingPopupMBox(lv_event_t *e);
 void event_settings_handler(lv_event_t *e);
 void initSettings(void);
 void settings(void);
+void refreshSettingsUI(void);
 // @file page_stepDetail.c
 void event_stepDetail(lv_event_t *e);
 void stepDetail(processNode *referenceNode, stepNode *currentNode);
@@ -1260,6 +1692,45 @@ void event_toolsElement(lv_event_t *e);
 void initTools(void);
 void tools(void);
 void tools_pause_timer(void);
+void tools_resume_timer(void);
+void tools_delete_timer(void);
+// @file ota_update.c
+const char *ota_get_running_version(void);
+int         ota_get_progress(void);
+const char *ota_get_status_text(void);
+bool        ota_is_running(void);
+bool        ota_check_sd(char *version_out, size_t version_out_len);
+bool        ota_start_sd(void);
+bool        ota_wifi_server_start(void);
+bool        ota_wifi_server_stop(void);
+bool        ota_wifi_server_is_running(void);
+const char *ota_get_ip_address(void);
+// @file element_otaWifiPopup.c
+void otaWifiPopupCreate(void);
+void event_otaWifiPopup(lv_event_t *e);
+void otaProgressPopupCreate(const char *title);
+void event_otaProgressPopup(lv_event_t *e);
+// @file element_wifiPopup.c
+void wifiPopupCreate(void);
+void event_wifiPopup(lv_event_t *e);
+// Wi-Fi scan API
+int  wifi_scan_start(void);
+int  wifi_scan_get_results(wifiScanResult_t *results, int max_results);
+bool wifi_connect(const char *ssid, const char *password);
+void wifi_disconnect(void);
+bool wifi_is_connected(void);
+const char *wifi_get_connected_ssid(void);
+const char *wifi_get_ip_address(void);
+void wifi_boot_auto_connect(void);  /* Call once after readConfigFile to auto-connect if enabled */
+/* NVS-based Wi-Fi credential persistence (works without SD card) */
+void wifi_nvs_save(const char *ssid, const char *password);
+bool wifi_nvs_load(char *ssid_buf, size_t ssid_sz, char *pwd_buf, size_t pwd_sz);
+void wifi_nvs_clear(void);
+void wifi_popup_connection_result(void); /* Save credentials + update UI on GOT_IP */
+void wifi_popup_connection_failed(void); /* Clear pending credentials + update UI on failure */
+void wifi_popup_scan_done(void);        /* Notify popup that async scan results are ready */
+void wifi_icon_set_connecting(void);    /* Start blinking white WiFi icon (connecting state) */
+void wifi_popup_refresh_list(void);     /* Re-populate scan list (e.g. after forgetting a network) */
 // @file FilMachine.c
 void stopMotorTask(void);
 void runMotorTask(void);
@@ -1276,7 +1747,10 @@ void *allocateAndInitializeNode(NodeType_t type);
 void event_cb(lv_event_t * e);
 void event_checkbox_handler(lv_event_t * e);
 void event_keyboard(lv_event_t* e);
+void kb_ctx_set(const sKeyboardOwnerContext *ctx);
 void createQuestionMark(lv_obj_t * parent,lv_obj_t * element,lv_event_cb_t e, const int32_t x, const int32_t y);
+void createPopupBackdrop(lv_obj_t **parent, lv_obj_t **container, int32_t width, int32_t height);
+void initTitleLineStyle(lv_style_t *style, uint32_t color);
 void createMessageBox(lv_obj_t *messageBox, char *title, char *text, char *button1Text, char *button2Text);
 void create_keyboard();
 void showKeyboard(lv_obj_t * whoCallMe, lv_obj_t * textArea);
@@ -1285,9 +1759,10 @@ char *createRollerValues( uint32_t minVal, uint32_t maxVal, const char* extra_st
 uint8_t SD_init(void);
 void init_Pins_and_Buses(void);
 void initMCP23017Pins();
-void calculateTotalTime(processNode *processNode);
+void calculateTotalTimeData(processNode *processNode);  /* Thread-safe: data only, no LVGL */
+void calculateTotalTime(processNode *processNode);      /* LVGL thread only: data + label update */
 uint8_t calculatePercentage(uint32_t minutes, uint8_t seconds, uint32_t total_minutes, uint8_t total_seconds);
-int32_t convertCelsiusoToFahrenheit(int32_t tempC);
+int32_t convertCelsiusToFahrenheit(int32_t tempC);
 void updateProcessElement(processNode *process);
 void updateStepElement(processNode *referenceProcess, stepNode *step);
 uint32_t loadSDCardProcesses();
@@ -1307,27 +1782,32 @@ void testPin(uint8_t pin);
 void initializeTemperatureSensor();
 void printTemperature(float temp);
 /* Temperature control — simulator stubs / hardware wrappers */
-float sim_getTemperature(uint8_t sensorPin);
+float sim_getTemperature(uint8_t sensorIndex);
 void  sim_setHeater(bool on);
 void  sim_resetTemperatures(void);
 //char* printAddressSensor(DeviceAddress deviceAddress);
 void writeMachineStats(machineStatistics *machineStats);
 void readMachineStats(machineStatistics *machineStats);
-uint32_t findRolleStringIndex(const char *input, const char *list);
+uint32_t findRollerStringIndex(const char *input, const char *list);
 char *getRollerStringIndex(uint32_t index, const char *list);
 char *generateRandomSuffix(const char* baseName);
 sStepDetail *deepCopyStepDetail(sStepDetail *original);
-singleStep *deepCopySingleStep(singleStep *original);
+bool single_step_clone(const singleStep *src, singleStep *dst);
 stepNode *deepCopyStepNode(stepNode *original);
 stepList deepCopyStepList(stepList original);
 sCheckup *deepCopyCheckup(sCheckup *original);
 sProcessDetail *deepCopyProcessDetail(sProcessDetail *original);
-singleProcess *deepCopySingleProcess(singleProcess *original);
+bool single_process_clone(const singleProcess *src, singleProcess *dst);
 struct processNode *deepCopyProcessNode(struct processNode *original);
 void toLowerCase(char *str);
 uint8_t caseInsensitiveStrstr(const char *haystack, const char *needle);
 void filterAndDisplayProcesses( void );
 void removeFiltersAndDisplayAllProcesses( void );
+void step_detail_destroy(sStepDetail *sd);
+void checkup_destroy(sCheckup *ckup);
+void process_detail_destroy(sProcessDetail *pd);
+void step_node_destroy(stepNode *node);
+void process_node_destroy(processNode *node);
 void emptyList(void *list, NodeType_t type);
 char *ftoa(char *a, float f, uint8_t precisione);
 uint8_t getValueForChemicalSource(uint8_t source);
@@ -1337,6 +1817,17 @@ uint8_t getRandomRotationInterval();
 uint8_t mapPercentageToValue(uint8_t percentage, uint8_t minPercent, uint8_t maxPercent);
 void pwmLedTest();
 void readConfigFile(const char *path, bool enableLog);
+void readSettingsOnly(const char *path);  /* Read just machineSettings — for splash boot */
 void writeConfigFile( const char *path, bool enableLog );
 bool copyAndRenameFile( const char* sourceFile, const char* destFile );
+uint16_t calculateFillTime(uint16_t capacityMl, uint8_t pumpSpeedPercent);
+uint16_t getContainerFillTime(void);
+uint16_t getWbFillTime(void);
+
+/* Buzzer / alarm API */
+void buzzer_beep(void);            /* play a short beep (hardware or simulator) */
+void alarm_start_persistent(void); /* start repeating beep every 10 seconds */
+void alarm_stop(void);             /* stop repeating beep */
+bool alarm_is_active(void);        /* check if persistent alarm is running */
+
 #endif /* MAIN_FILMACHINE_H_ */

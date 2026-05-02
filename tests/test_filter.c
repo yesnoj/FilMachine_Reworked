@@ -58,7 +58,7 @@ static void test_filter_by_name(void)
     /* Set filter: name = "Test" — matches "Test B&W", "Quick Test",
        but not "Modified Name" (which was renamed by CRUD tests) */
     gui.page.processes.isFiltered = false;
-    gui.element.filterPopup.filterName = "Test";
+    snprintf(gui.element.filterPopup.filterName, sizeof(gui.element.filterPopup.filterName), "%s", "Test");
     gui.element.filterPopup.isColorFilter  = false;
     gui.element.filterPopup.isBnWFilter    = false;
     gui.element.filterPopup.preferredOnly  = false;
@@ -104,7 +104,7 @@ static void test_filter_by_film_type(void)
     int bnw_count = 0;
     processNode *p = gui.page.processes.processElementsList.start;
     while (p != NULL) {
-        if (p->process.processDetails->filmType == BLACK_AND_WHITE_FILM)
+        if (p->process.processDetails->data.filmType == BLACK_AND_WHITE_FILM)
             bnw_count++;
         p = p->next;
     }
@@ -112,7 +112,7 @@ static void test_filter_by_film_type(void)
 
     /* Set filter: B&W only */
     gui.page.processes.isFiltered = false;
-    gui.element.filterPopup.filterName     = "";
+    gui.element.filterPopup.filterName[0]  = '\0';
     gui.element.filterPopup.isColorFilter  = false;
     gui.element.filterPopup.isBnWFilter    = true;
     gui.element.filterPopup.preferredOnly  = false;
@@ -154,7 +154,7 @@ static void test_filter_by_preferred(void)
     int pref_count = 0;
     processNode *p = gui.page.processes.processElementsList.start;
     while (p != NULL) {
-        if (p->process.processDetails->isPreferred)
+        if (p->process.processDetails->data.isPreferred)
             pref_count++;
         p = p->next;
     }
@@ -162,7 +162,7 @@ static void test_filter_by_preferred(void)
 
     /* Set filter: preferred only */
     gui.page.processes.isFiltered = false;
-    gui.element.filterPopup.filterName     = "";
+    gui.element.filterPopup.filterName[0]  = '\0';
     gui.element.filterPopup.isColorFilter  = false;
     gui.element.filterPopup.isBnWFilter    = false;
     gui.element.filterPopup.preferredOnly  = true;
@@ -202,7 +202,7 @@ static void test_filter_reset(void)
 
     /* Apply a restrictive filter first */
     gui.page.processes.isFiltered = false;
-    gui.element.filterPopup.filterName     = "ZZZZZ_NO_MATCH";
+    snprintf(gui.element.filterPopup.filterName, sizeof(gui.element.filterPopup.filterName), "%s", "ZZZZZ_NO_MATCH");
     gui.element.filterPopup.isColorFilter  = false;
     gui.element.filterPopup.isBnWFilter    = false;
     gui.element.filterPopup.preferredOnly  = false;

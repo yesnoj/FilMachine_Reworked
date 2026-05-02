@@ -37,7 +37,7 @@ static void save_and_close_process(void)
     /* Save if possible (needs steps > 0) */
     if (pd->stepElementsList.size > 0 && pd->processSaveButton != NULL) {
         /* Mark as changed so save button is enabled */
-        pd->somethingChanged = true;
+        pd->data.somethingChanged = true;
         lv_obj_send_event(pd->processSaveButton, LV_EVENT_REFRESH, NULL);
         test_pump(100);
         test_click_obj(pd->processSaveButton);
@@ -58,7 +58,7 @@ static void close_process_nosave(void)
     sProcessDetail *pd = gui.tempProcessNode->process.processDetails;
 
     /* If somethingChanged, clear it so close button works */
-    pd->somethingChanged = false;
+    pd->data.somethingChanged = false;
     lv_obj_clear_state(pd->processDetailCloseButton, LV_STATE_DISABLED);
 
     if (pd->processDetailCloseButton != NULL) {
@@ -98,9 +98,9 @@ static void test_create_process_full(void)
     TEST_ASSERT_NOT_NULL(gui.tempStepNode->step.stepDetails, "step details should exist");
 
     /* Set step name and time directly on the node (roller popup is hard to automate) */
-    gui.tempStepNode->step.stepDetails->timeMins = 5;
-    gui.tempStepNode->step.stepDetails->timeSecs = 30;
-    lv_textarea_set_text(gui.tempStepNode->step.stepDetails->stepDetailNamelTextArea, "Dev Step");
+    gui.tempStepNode->step.stepDetails->data.timeMins = 5;
+    gui.tempStepNode->step.stepDetails->data.timeSecs = 30;
+    lv_textarea_set_text(gui.tempStepNode->step.stepDetails->stepDetailNameTextArea, "Dev Step");
     /* Update the minutes/seconds textareas for the REFRESH handler */
     lv_textarea_set_text(gui.tempStepNode->step.stepDetails->stepDetailMinTextArea, "5");
     lv_textarea_set_text(gui.tempStepNode->step.stepDetails->stepDetailSecTextArea, "30");
@@ -119,7 +119,7 @@ static void test_create_process_full(void)
     test_printf("         [INFO] Steps in new process: %d\n", (int)pd->stepElementsList.size);
 
     /* 4. Save the process */
-    pd->somethingChanged = true;
+    pd->data.somethingChanged = true;
     lv_obj_send_event(pd->processSaveButton, LV_EVENT_REFRESH, NULL);
     test_pump(100);
     test_click_obj(pd->processSaveButton);
@@ -137,7 +137,7 @@ static void test_create_process_full(void)
     /* Verify the new process has the correct name */
     processNode *last = gui.page.processes.processElementsList.end;
     TEST_ASSERT_NOT_NULL(last, "last process should exist");
-    TEST_ASSERT_STR_EQ(last->process.processDetails->processNameString,
+    TEST_ASSERT_STR_EQ(last->process.processDetails->data.processNameString,
                        "AutoTest Process", "new process should have correct name");
 
     TEST_END();
@@ -159,7 +159,7 @@ static void test_modify_process_name(void)
 
     /* Change the name */
     lv_textarea_set_text(pd->processDetailNameTextArea, "Modified Name");
-    pd->somethingChanged = true;
+    pd->data.somethingChanged = true;
     lv_obj_send_event(pd->processSaveButton, LV_EVENT_REFRESH, NULL);
     test_pump(100);
 
@@ -168,7 +168,7 @@ static void test_modify_process_name(void)
     test_pump(500);
 
     /* Verify name was updated in the node */
-    TEST_ASSERT_STR_EQ(pd->processNameString, "Modified Name",
+    TEST_ASSERT_STR_EQ(pd->data.processNameString, "Modified Name",
                        "process name should be updated after save");
 
     /* Close */
@@ -190,7 +190,7 @@ static void test_change_film_type(void)
     TEST_ASSERT(open_process(first), "should open process detail");
 
     sProcessDetail *pd = gui.tempProcessNode->process.processDetails;
-    uint8_t old_type = pd->filmType;
+    uint8_t old_type = pd->data.filmType;
 
     /* Click the opposite film type label */
     if (old_type == COLOR_FILM) {
@@ -203,8 +203,8 @@ static void test_change_film_type(void)
     test_pump(200);
 
     /* Verify film type changed */
-    TEST_ASSERT(pd->filmType != old_type, "film type should have changed");
-    test_printf("         [INFO] Film type: %d → %d\n", old_type, pd->filmType);
+    TEST_ASSERT(pd->data.filmType != old_type, "film type should have changed");
+    test_printf("         [INFO] Film type: %d → %d\n", old_type, pd->data.filmType);
 
     save_and_close_process();
 
@@ -223,15 +223,15 @@ static void test_toggle_preferred(void)
     TEST_ASSERT(open_process(first), "should open process detail");
 
     sProcessDetail *pd = gui.tempProcessNode->process.processDetails;
-    bool old_pref = pd->isPreferred;
+    bool old_pref = pd->data.isPreferred;
 
     TEST_ASSERT_NOT_NULL(pd->processPreferredLabel, "preferred label should exist");
     test_click_obj(pd->processPreferredLabel);
     test_pump(200);
 
     /* Verify preferred toggled */
-    TEST_ASSERT(pd->isPreferred != old_pref, "preferred should have toggled");
-    test_printf("         [INFO] Preferred: %d → %d\n", old_pref, pd->isPreferred);
+    TEST_ASSERT(pd->data.isPreferred != old_pref, "preferred should have toggled");
+    test_printf("         [INFO] Preferred: %d → %d\n", old_pref, pd->data.isPreferred);
 
     save_and_close_process();
 

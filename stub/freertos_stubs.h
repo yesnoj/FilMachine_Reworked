@@ -82,6 +82,13 @@ static inline BaseType_t xTaskCreatePinnedToCore(
     return pdPASS;
 }
 
+static inline BaseType_t xTaskCreate(
+    void (*taskFunc)(void*), const char *name, uint32_t stackSize,
+    void *params, int priority, TaskHandle_t *handle) {
+    printf("[FreeRTOS STUB] Task '%s' created (not running in simulator)\n", name);
+    return pdPASS;
+}
+
 static inline void vTaskDelay(TickType_t ticks) { /* No-op */ }
 static inline void vTaskDelete(TaskHandle_t handle) { }
 

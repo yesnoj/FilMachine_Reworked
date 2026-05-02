@@ -11,6 +11,60 @@ extern struct gui_components gui;
 
 //ACCESSORY INCLUDES
 
+static uint16_t process_card_fill_time_seconds(void) {
+    uint8_t volume_index = gui.page.settings.settingsParams.chemistryVolume;
+    uint8_t tank_size = gui.page.settings.settingsParams.tankSize;
+    uint16_t table[2][3][2] = tanksSizesAndTimes;
+
+    if(volume_index < 1 || volume_index > 2) volume_index = 2;
+    if(tank_size < 1 || tank_size > 3) tank_size = 2;
+
+    return table[volume_index - 1][tank_size - 1][1];
+}
+
+static uint32_t process_card_overlap_credit_seconds(uint16_t fill_time_seconds) {
+    uint32_t overlap_pct = gui.page.settings.settingsParams.drainFillOverlapSetpoint;
+    if (overlap_pct > 100U) overlap_pct = 100U;
+    return (((uint32_t)fill_time_seconds * 2U) * overlap_pct) / 100U;
+}
+
+static uint32_t process_card_adjusted_processing_seconds(const stepNode *step, uint16_t fill_time_seconds) {
+    if(step == NULL || step->step.stepDetails == NULL) return 0U;
+
+    uint32_t recipe_seconds = ((uint32_t)step->step.stepDetails->data.timeMins * 60U) +
+                              (uint32_t)step->step.stepDetails->data.timeSecs;
+    uint32_t overlap_credit = process_card_overlap_credit_seconds(fill_time_seconds);
+
+    return (recipe_seconds > overlap_credit) ? (recipe_seconds - overlap_credit) : 0U;
+}
+
+static uint32_t process_card_estimated_runtime_seconds(const processNode *process) {
+    if(process == NULL || process->process.processDetails == NULL) return 0U;
+
+    uint16_t fill_time_seconds = process_card_fill_time_seconds();
+    uint32_t total_seconds = 0U;
+
+    for(stepNode *step = process->process.processDetails->stepElementsList.start; step != NULL; step = step->next) {
+        total_seconds += ((uint32_t)fill_time_seconds * 2U);
+        total_seconds += process_card_adjusted_processing_seconds(step, fill_time_seconds);
+    }
+
+    return total_seconds;
+}
+
+static void process_card_set_time_label(processNode *process) {
+    if(process == NULL || process->process.processTime == NULL || process->process.processDetails == NULL) return;
+
+    uint32_t estimated_seconds = process_card_estimated_runtime_seconds(process);
+    int steps = process->process.processDetails->stepElementsList.size;
+    lv_label_set_text_fmt(process->process.processTime,
+        "%" PRIu32 "m%" PRIu8 "s / ~%" PRIu32 "m%" PRIu32 "s - %d step%s",
+        process->process.processDetails->data.timeMins,
+        process->process.processDetails->data.timeSecs,
+        estimated_seconds / 60U,
+        estimated_seconds % 60U,
+        steps, steps == 1 ? "" : "s");
+}
 
 
 /******************************
@@ -34,8 +88,9 @@ processNode *addProcessElement(processNode	*processToAdd) {
       gui.page.processes.processElementsList.end = processToAdd;
       gui.page.processes.processElementsList.end->next = NULL;
       gui.page.processes.processElementsList.size++;
+      refreshProcessesLabel();
 
-      LV_LOG_USER("Processes available %"PRIi32" after",gui.page.processes.processElementsList.size -1); 
+      LV_LOG_USER("Processes available %"PRIi32" after",gui.page.processes.processElementsList.size -1);
       return processToAdd;
 }
 
@@ -85,12 +140,11 @@ bool deleteProcessElement( processNode	*processToDelete ) {
     }
 
     lv_obj_delete( processToDelete->process.processElement );
-    free( processToDelete->process.processDetails->checkup );
-    free( processToDelete->process.processDetails );
-    free( processToDelete );												                    // Free the list entry itself
+    process_node_destroy( processToDelete );                                      // Free the list entry itself
 		gui.page.processes.processElementsList.size--;
+    refreshProcessesLabel();
 
-    LV_LOG_USER("Processes available %"PRIi32"",gui.page.processes.processElementsList.size); 
+    LV_LOG_USER("Processes available %"PRIi32"",gui.page.processes.processElementsList.size);
 		return true;
 	}
 	return false;
@@ -121,117 +175,11 @@ processNode* getProcElementEntryByObject(lv_obj_t* obj) {
     return currentNode;   // Will Return NULL if no matching processNode is found
 }
 
-/* Unused - kept for reference
-static bool deleteProcessElementByObj( lv_obj_t *obj ) {
-	processNode	*proc_ptr  = getProcElementEntryByObject( obj );
-	return deleteProcessElement( proc_ptr );
-}
-*/
-
-
-
 
 
 /******************************
 *  LVGL ELEMENTS IMPLEMENTATION
 ******************************/
-
-/*
-void event_processElement(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t * obj = (lv_obj_t *)lv_event_get_target(e);
-    lv_obj_t * cont = (lv_obj_t *)lv_event_get_current_target(e);
-    lv_obj_t * data = (lv_obj_t *)lv_event_get_user_data(e);
-    processNode *currentNode = getProcElementEntryByObject(data);
-    lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
-
-    int8_t x;
-
-    if (currentNode == NULL) {
-        LV_LOG_USER("Bad object passed to eventProcessElement!"); // This will stop a crash
-        return;                                                    // if something is wrong
-    }
-
-    if (code == LV_EVENT_RELEASED) {
-      LV_LOG_USER("LV_EVENT_RELEASED");
-      if(currentNode->process.gestureHandled == true && currentNode->process.swipedLeft == 1){
-        currentNode->process.gestureHandled = false;
-        return;
-      }
-    }
-
-    if (code == LV_EVENT_GESTURE && currentNode->process.longPressHandled == false) {
-        currentNode->process.gestureHandled = true; // Imposta il flag quando un gesto viene gestito
-
-        switch (dir) {
-            case LV_DIR_LEFT:
-                if (currentNode->process.swipedLeft == 0 && currentNode->process.swipedRight == 1) {
-                    LV_LOG_USER("Left gesture to return");
-                    x = lv_obj_get_x_aligned(obj) - 50;
-                    lv_obj_set_pos(obj, x, lv_obj_get_y_aligned(obj));
-                    currentNode->process.swipedRight = 0;
-                    currentNode->process.swipedLeft = 1;
-                    lv_obj_add_flag(currentNode->process.deleteButton, LV_OBJ_FLAG_HIDDEN);
-                }
-                break;
-
-            case LV_DIR_RIGHT:
-                if (currentNode->process.swipedLeft == 1 && currentNode->process.swipedRight == 0) {
-                    LV_LOG_USER("Right gesture for delete");
-                    x = lv_obj_get_x_aligned(obj) + 50;
-                    lv_obj_set_pos(obj, x, lv_obj_get_y_aligned(obj));
-                    currentNode->process.swipedRight = 1;
-                    currentNode->process.swipedLeft = 0;
-                    lv_obj_remove_flag(currentNode->process.deleteButton, LV_OBJ_FLAG_HIDDEN);
-                }
-                break;
-        }
-    } 
-    if (code == LV_EVENT_CLICKED && currentNode->process.longPressHandled == false) {
-         LV_LOG_USER("LV_EVENT_CLICKED");
-
-
-        if (obj == currentNode->process.preferredIcon) {
-            if (lv_color_eq(lv_obj_get_style_text_color(currentNode->process.preferredIcon, LV_PART_MAIN), lv_color_hex(RED))) {
-                lv_obj_set_style_text_color(currentNode->process.preferredIcon, lv_color_hex(WHITE), LV_PART_MAIN);
-                currentNode->process.processDetails->isPreferred = 0;
-            } else {
-                lv_obj_set_style_text_color(currentNode->process.preferredIcon, lv_color_hex(RED), LV_PART_MAIN);
-                currentNode->process.processDetails->isPreferred = 1;
-            }
-          LV_LOG_USER("Process is preferred : %d", currentNode->process.processDetails->isPreferred);
-          if(gui.page.processes.isFiltered == 1)
-            filterAndDisplayProcesses();
-            qSysAction( SAVE_PROCESS_CONFIG );
-        }
-
-        if (obj == currentNode->process.deleteButton) {
-            if (gui.element.messagePopup.mBoxPopupParent == NULL) {
-                LV_LOG_USER("Process Element click for popup delete");
-                gui.tempProcessNode = currentNode;
-                messagePopupCreate(deletePopupTitle_text, deletePopupBody_text, deleteButton_text, stepDetailCancel_text, currentNode);
-            }
-        }
-
-        if (obj == currentNode->process.processElementSummary && currentNode->process.swipedLeft == 1) {
-            LV_LOG_USER("Process Element Details address %p", currentNode);
-            gui.tempProcessNode = currentNode;
-            processDetail(currentNode->process.processDetails->processesContainer); // currentNode
-        }
-    }
-    if (code == LV_EVENT_LONG_PRESSED && currentNode->process.swipedLeft == 1) {
-        LV_LOG_USER("LV_EVENT_LONG_PRESSED");
-        currentNode->process.longPressHandled = true;
-        gui.tempProcessNode = currentNode;    
-        LV_LOG_USER("Duplicate process element %p", currentNode);
-        messagePopupCreate(duplicatePopupTitle_text, duplicateProcessPopupBody_text, checkupNo_text, checkupYes_text, currentNode);  
-     }
-
-    if (code == LV_EVENT_DELETE) {
-        lv_style_reset(&currentNode->process.processStyle);
-    }
-}
-*/
 
 void event_processElement(lv_event_t *e) {
     lv_event_code_t code = lv_event_get_code(e);
@@ -259,7 +207,6 @@ void event_processElement(lv_event_t *e) {
             currentNode->process.gestureHandled = false;
             return;
         }
-        ignore_click = false;  // Reset ignore click flag on release
     }
 
     if (code == LV_EVENT_GESTURE && currentNode->process.longPressHandled == false) {
@@ -269,7 +216,7 @@ void event_processElement(lv_event_t *e) {
             case LV_DIR_LEFT:
                 if (currentNode->process.swipedLeft == false && currentNode->process.swipedRight == true) {
                     LV_LOG_USER("Left gesture to return");
-                    x = lv_obj_get_x_aligned(obj) - 50;
+                    x = lv_obj_get_x_aligned(obj) - ui_get_profile()->process_element.swipe_offset;
                     lv_obj_set_pos(obj, x, lv_obj_get_y_aligned(obj));
                     currentNode->process.swipedRight = false;
                     currentNode->process.swipedLeft = true;
@@ -281,7 +228,7 @@ void event_processElement(lv_event_t *e) {
             case LV_DIR_RIGHT:
                 if (currentNode->process.swipedLeft == true && currentNode->process.swipedRight == false) {
                     LV_LOG_USER("Right gesture for delete");
-                    x = lv_obj_get_x_aligned(obj) + 50;
+                    x = lv_obj_get_x_aligned(obj) + ui_get_profile()->process_element.swipe_offset;
                     lv_obj_set_pos(obj, x, lv_obj_get_y_aligned(obj));
                     currentNode->process.swipedRight = true;
                     currentNode->process.swipedLeft = false;
@@ -295,18 +242,33 @@ void event_processElement(lv_event_t *e) {
         }
     }
 
-    if (code == LV_EVENT_SHORT_CLICKED && currentNode->process.longPressHandled == false && !ignore_click) {
+    if (code == LV_EVENT_SHORT_CLICKED && currentNode->process.longPressHandled == false) {
+        if (ignore_click) {
+            ignore_click = false;
+            return;
+        }
         LV_LOG_USER("LV_EVENT_CLICKED");
+
+        if (currentNode->process.swipedRight == true && obj != currentNode->process.deleteButton) {
+            LV_LOG_USER("Tap to close panel");
+            lv_obj_t *pe = currentNode->process.processElement;
+            x = lv_obj_get_x_aligned(pe) - ui_get_profile()->process_element.swipe_offset;
+            lv_obj_set_pos(pe, x, lv_obj_get_y_aligned(pe));
+            currentNode->process.swipedRight = false;
+            currentNode->process.swipedLeft = true;
+            lv_obj_add_flag(currentNode->process.deleteButton, LV_OBJ_FLAG_HIDDEN);
+            return;
+        }
 
         if (obj == currentNode->process.preferredIcon) {
             if (lv_color_eq(lv_obj_get_style_text_color(currentNode->process.preferredIcon, LV_PART_MAIN), lv_color_hex(RED))) {
                 lv_obj_set_style_text_color(currentNode->process.preferredIcon, lv_color_hex(WHITE), LV_PART_MAIN);
-                currentNode->process.processDetails->isPreferred = false;
+                currentNode->process.processDetails->data.isPreferred = false;
             } else {
                 lv_obj_set_style_text_color(currentNode->process.preferredIcon, lv_color_hex(RED), LV_PART_MAIN);
-                currentNode->process.processDetails->isPreferred = true;
+                currentNode->process.processDetails->data.isPreferred = true;
             }
-            LV_LOG_USER("Process is preferred: %d", currentNode->process.processDetails->isPreferred);
+            LV_LOG_USER("Process is preferred: %d", currentNode->process.processDetails->data.isPreferred);
             if (gui.page.processes.isFiltered == true)
                 filterAndDisplayProcesses();
             qSysAction(SAVE_PROCESS_CONFIG);
@@ -337,10 +299,11 @@ void event_processElement(lv_event_t *e) {
 
     if(code == LV_EVENT_REFRESH){
       if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
-			lv_label_set_text_fmt(currentNode->process.processTemp, "%"PRIi32"°C", currentNode->process.processDetails->temp); 
+			lv_label_set_text_fmt(currentNode->process.processTemp, "%"PRIi32"°C", currentNode->process.processDetails->data.temp); 
       } else{
-			lv_label_set_text_fmt(currentNode->process.processTemp, "%"PRIi32"°F", convertCelsiusoToFahrenheit(currentNode->process.processDetails->temp)); 
+			lv_label_set_text_fmt(currentNode->process.processTemp, "%"PRIi32"°F", convertCelsiusToFahrenheit(currentNode->process.processDetails->data.temp)); 
       }
+      process_card_set_time_label(currentNode);
     }
 
     if (code == LV_EVENT_DELETE) {
@@ -350,6 +313,7 @@ void event_processElement(lv_event_t *e) {
 
 
 void processElementCreate(processNode *newProcess, int32_t tempSize) {
+  const ui_process_element_layout_t *pe = &ui_get_profile()->process_element;
   gui.tempProcessNode = newProcess;
 
 	if(newProcess->process.processStyle.values_and_props == NULL ) {		/* Only initialise the style once! */
@@ -357,7 +321,7 @@ void processElementCreate(processNode *newProcess, int32_t tempSize) {
 
 		lv_style_set_bg_color(&newProcess->process.processStyle, lv_color_hex(GREY));
 		lv_style_set_border_color(&newProcess->process.processStyle, lv_color_hex(GREEN_DARK));
-		lv_style_set_border_width(&newProcess->process.processStyle, 4);
+		lv_style_set_border_width(&newProcess->process.processStyle, ui_get_profile()->element_border_width);
 		lv_style_set_border_opa(&newProcess->process.processStyle, LV_OPA_50);
 		lv_style_set_border_side(&newProcess->process.processStyle, LV_BORDER_SIDE_BOTTOM | LV_BORDER_SIDE_RIGHT);
 		LV_LOG_USER("First call to processElementCreate style now initialised");
@@ -376,9 +340,9 @@ void processElementCreate(processNode *newProcess, int32_t tempSize) {
   newProcess->process.gestureHandled = false;
 
 	newProcess->process.processElement = lv_obj_create(gui.page.processes.processesListContainer);
-	newProcess->process.container_y = -10 + ((positionIndex - 1) * 70);
-	lv_obj_set_pos(newProcess->process.processElement, -10, newProcess->process.container_y);
-  lv_obj_set_size(newProcess->process.processElement, 365, 70);
+	newProcess->process.container_y = pe->list_start_y + ((positionIndex - 1) * pe->card_h);
+	lv_obj_set_pos(newProcess->process.processElement, pe->card_x, newProcess->process.container_y);
+  lv_obj_set_size(newProcess->process.processElement, pe->card_w, pe->card_h);
 	lv_obj_remove_flag(newProcess->process.processElement, LV_OBJ_FLAG_SCROLLABLE);
 	lv_obj_set_style_border_opa(newProcess->process.processElement, LV_OPA_TRANSP, 0);
   lv_obj_add_event_cb(newProcess->process.processElement, event_processElement, LV_EVENT_GESTURE, newProcess);
@@ -388,7 +352,7 @@ void processElementCreate(processNode *newProcess, int32_t tempSize) {
   lv_obj_add_event_cb(newProcess->process.processElement, event_processElement, LV_EVENT_LONG_PRESSED, newProcess);
 
   lv_obj_remove_flag(newProcess->process.processElement, LV_OBJ_FLAG_GESTURE_BUBBLE);
-  lv_obj_set_pos(newProcess->process.processElement,lv_obj_get_x_aligned(newProcess->process.processElement) - 50,lv_obj_get_y_aligned(newProcess->process.processElement));
+  lv_obj_set_pos(newProcess->process.processElement,lv_obj_get_x_aligned(newProcess->process.processElement) - pe->swipe_offset,lv_obj_get_y_aligned(newProcess->process.processElement));
 
 
   /*********************
@@ -396,87 +360,89 @@ void processElementCreate(processNode *newProcess, int32_t tempSize) {
 	*********************/
         newProcess->process.deleteButton = lv_obj_create(newProcess->process.processElement);
         lv_obj_set_style_bg_color(newProcess->process.deleteButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
-        lv_obj_set_size(newProcess->process.deleteButton, 60, 70);
-        lv_obj_align(newProcess->process.deleteButton, LV_ALIGN_TOP_LEFT, -16, -18);
+        lv_obj_set_size(newProcess->process.deleteButton, pe->delete_btn_w, pe->delete_btn_h);
+        lv_obj_align(newProcess->process.deleteButton, LV_ALIGN_TOP_LEFT, pe->delete_btn_x, pe->delete_btn_y);
         lv_obj_add_flag(newProcess->process.deleteButton, LV_OBJ_FLAG_HIDDEN);
         lv_obj_remove_flag(newProcess->process.deleteButton, LV_OBJ_FLAG_SCROLLABLE);
         lv_obj_add_event_cb(newProcess->process.deleteButton, event_processElement, LV_EVENT_SHORT_CLICKED, newProcess);
 
-                newProcess->process.deleteButtonLabel = lv_label_create(newProcess->process.deleteButton);         
-                lv_label_set_text(newProcess->process.deleteButtonLabel, trash_icon); 
-                lv_obj_set_style_text_font(newProcess->process.deleteButtonLabel, &FilMachineFontIcons_30, 0);              
-                lv_obj_align(newProcess->process.deleteButtonLabel, LV_ALIGN_CENTER, -5 , 0);
+                newProcess->process.deleteButtonLabel = lv_label_create(newProcess->process.deleteButton);
+                lv_label_set_text(newProcess->process.deleteButtonLabel, trash_icon);
+                lv_obj_set_style_text_font(newProcess->process.deleteButtonLabel, pe->delete_icon_font, 0);
+                lv_obj_align(newProcess->process.deleteButtonLabel, LV_ALIGN_CENTER, pe->delete_icon_x, pe->delete_icon_y);
 
 
         newProcess->process.processElementSummary = lv_obj_create(newProcess->process.processElement);
         //lv_obj_set_style_border_color(proc_ptr->process.processElementSummary, lv_color_hex(LV_PALETTE_ORANGE), 0);
-        lv_obj_set_size(newProcess->process.processElementSummary, 270, 66);
-        lv_obj_align(newProcess->process.processElementSummary, LV_ALIGN_TOP_LEFT, 34, -16);
+        lv_obj_set_size(newProcess->process.processElementSummary, pe->card_content_w, pe->card_content_h);
+        lv_obj_align(newProcess->process.processElementSummary, LV_ALIGN_TOP_LEFT, pe->card_content_x, pe->card_content_y);
         lv_obj_remove_flag(newProcess->process.processElementSummary, LV_OBJ_FLAG_SCROLLABLE);
         lv_obj_add_flag(newProcess->process.processElementSummary, LV_OBJ_FLAG_EVENT_BUBBLE);
         lv_obj_add_style(newProcess->process.processElementSummary, &newProcess->process.processStyle, 0);
 
         newProcess->process.processName = lv_label_create(newProcess->process.processElementSummary);
-        lv_label_set_text(newProcess->process.processName, newProcess->process.processDetails->processNameString);
-        lv_obj_set_style_text_font(newProcess->process.processName, &lv_font_montserrat_22, 0);
+        lv_label_set_text(newProcess->process.processName, newProcess->process.processDetails->data.processNameString);
+        lv_obj_set_style_text_font(newProcess->process.processName, pe->name_font, 0);
         lv_label_set_long_mode(newProcess->process.processName, LV_LABEL_LONG_SCROLL_CIRCULAR);
-        lv_obj_set_width(newProcess->process.processName, 220);
-        lv_obj_align(newProcess->process.processName, LV_ALIGN_LEFT_MID, -10, -10);
+        lv_obj_set_width(newProcess->process.processName, pe->name_w);
+        lv_obj_align(newProcess->process.processName, LV_ALIGN_LEFT_MID, pe->name_x, pe->name_y);
         lv_obj_remove_flag(newProcess->process.processName, LV_OBJ_FLAG_SCROLLABLE);
 
         newProcess->process.processTempIcon = lv_label_create(newProcess->process.processElementSummary);
         lv_label_set_text(newProcess->process.processTempIcon, temp_icon);
-        lv_obj_set_style_text_font(newProcess->process.processTempIcon, &FilMachineFontIcons_20, 0);
+        lv_obj_set_style_text_font(newProcess->process.processTempIcon, pe->detail_icon_font, 0);
         //lv_obj_set_style_text_color(newProcess->process.tempIcon, lv_color_hex(GREY), LV_PART_MAIN);
-        lv_obj_align(newProcess->process.processTempIcon, LV_ALIGN_LEFT_MID, -10, 17);
+        lv_obj_align(newProcess->process.processTempIcon, LV_ALIGN_LEFT_MID, pe->temp_icon_x, pe->temp_icon_y);
 
         newProcess->process.processTemp = lv_label_create(newProcess->process.processElementSummary);
 
         if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
-           lv_label_set_text_fmt(newProcess->process.processTemp, "%"PRIi32"°C", newProcess->process.processDetails->temp); 
+           lv_label_set_text_fmt(newProcess->process.processTemp, "%"PRIi32"°C", newProcess->process.processDetails->data.temp); 
         } else{
-            lv_label_set_text_fmt(newProcess->process.processTemp, "%"PRIi32"°F", convertCelsiusoToFahrenheit(newProcess->process.processDetails->temp)); 
+            lv_label_set_text_fmt(newProcess->process.processTemp, "%"PRIi32"°F", convertCelsiusToFahrenheit(newProcess->process.processDetails->data.temp)); 
         }
         
-        lv_obj_set_style_text_font(newProcess->process.processTemp, &lv_font_montserrat_18, 0);
-        lv_obj_align(newProcess->process.processTemp, LV_ALIGN_LEFT_MID, 7, 17);
+        lv_obj_set_style_text_font(newProcess->process.processTemp, pe->detail_font, 0);
+        lv_obj_align(newProcess->process.processTemp, LV_ALIGN_LEFT_MID, pe->temp_value_x, pe->temp_value_y);
 
-        newProcess->process.processTimeIcon = lv_label_create(newProcess->process.processElementSummary);          
-        lv_label_set_text(newProcess->process.processTimeIcon, clock_icon);                  
-        lv_obj_set_style_text_font(newProcess->process.processTimeIcon, &FilMachineFontIcons_20, 0);
+        newProcess->process.processTimeIcon = lv_label_create(newProcess->process.processElementSummary);
+        lv_label_set_text(newProcess->process.processTimeIcon, clock_icon);
+        lv_obj_set_style_text_font(newProcess->process.processTimeIcon, pe->detail_icon_font, 0);
         //lv_obj_set_style_text_color(newStep->step.stepTimeIcon, lv_color_hex(GREY), LV_PART_MAIN);
-        lv_obj_align(newProcess->process.processTimeIcon, LV_ALIGN_LEFT_MID, 65, 17);
+        lv_obj_align(newProcess->process.processTimeIcon, LV_ALIGN_LEFT_MID, pe->time_icon_x, pe->time_icon_y);
 
         newProcess->process.processTime = lv_label_create(newProcess->process.processElementSummary);    
-        lv_label_set_text_fmt(newProcess->process.processTime, "%"PRIu32"m%"PRIu8"s", newProcess->process.processDetails->timeMins, 
-          newProcess->process.processDetails->timeSecs); 
-        lv_obj_set_style_text_font(newProcess->process.processTime, &lv_font_montserrat_18, 0);              
-        lv_obj_align(newProcess->process.processTime, LV_ALIGN_LEFT_MID, 87, 17);
+        lv_obj_set_style_text_font(newProcess->process.processTime, pe->detail_font, 0);
+        lv_obj_set_width(newProcess->process.processTime, pe->card_content_w - pe->time_value_x - pe->time_width_margin);
+        lv_label_set_long_mode(newProcess->process.processTime, LV_LABEL_LONG_CLIP);
+        lv_obj_align(newProcess->process.processTime, LV_ALIGN_LEFT_MID, pe->time_value_x, pe->time_value_y);
+        process_card_set_time_label(newProcess);
 
         newProcess->process.processTypeIcon = lv_label_create(newProcess->process.processElementSummary);
-        lv_label_set_text(newProcess->process.processTypeIcon, newProcess->process.processDetails->filmType == BLACK_AND_WHITE_FILM ? blackwhite_icon : colorpalette_icon);
-        newProcess->process.processDetails->filmType = newProcess->process.processDetails->filmType;
-        lv_obj_set_style_text_font(newProcess->process.processTypeIcon, &FilMachineFontIcons_30, 0);
-        lv_obj_align(newProcess->process.processTypeIcon, LV_ALIGN_RIGHT_MID, 7, 0);
+        lv_label_set_text(newProcess->process.processTypeIcon, newProcess->process.processDetails->data.filmType == BLACK_AND_WHITE_FILM ? blackwhite_icon : colorpalette_icon);
+        newProcess->process.processDetails->data.filmType = newProcess->process.processDetails->data.filmType;
+        lv_obj_set_style_text_font(newProcess->process.processTypeIcon, pe->type_icon_font, 0);
+        lv_obj_align(newProcess->process.processTypeIcon, LV_ALIGN_RIGHT_MID, pe->type_icon_x, pe->type_icon_y);
         
 
-        if(newProcess->process.processDetails->isTempControlled == false)
+        if(newProcess->process.processDetails->data.isTempControlled == false)
           {
             lv_obj_add_flag(newProcess->process.processTempIcon, LV_OBJ_FLAG_HIDDEN);
             lv_obj_add_flag(newProcess->process.processTemp, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_align(newProcess->process.processTimeIcon, LV_ALIGN_LEFT_MID, -10, 17);
-            lv_obj_align(newProcess->process.processTime, LV_ALIGN_LEFT_MID, 12, 17);
+            lv_obj_align(newProcess->process.processTimeIcon, LV_ALIGN_LEFT_MID, pe->time_icon_no_temp_x, pe->time_icon_y);
+            lv_obj_align(newProcess->process.processTime, LV_ALIGN_LEFT_MID, pe->time_value_no_temp_x, pe->time_value_y);
+            lv_obj_set_width(newProcess->process.processTime, pe->card_content_w - pe->time_value_no_temp_x - pe->time_width_margin);
           }
 
 
         newProcess->process.preferredIcon = lv_label_create(newProcess->process.processElement);
         lv_label_set_text(newProcess->process.preferredIcon, preferred_icon);
         lv_obj_add_flag(newProcess->process.preferredIcon, LV_OBJ_FLAG_CLICKABLE);
-        lv_obj_set_style_text_font(newProcess->process.preferredIcon, &FilMachineFontIcons_30, 0);
+        lv_obj_set_style_text_font(newProcess->process.preferredIcon, pe->type_icon_font, 0);
         lv_obj_set_style_text_color(newProcess->process.preferredIcon, lv_color_hex(WHITE), LV_PART_MAIN);
-        lv_obj_align(newProcess->process.preferredIcon, LV_ALIGN_RIGHT_MID, 15, 0);
+        lv_obj_align(newProcess->process.preferredIcon, LV_ALIGN_RIGHT_MID, pe->preferred_icon_x, pe->preferred_icon_y);
         
-        if(newProcess->process.processDetails->isPreferred == true){
+        if(newProcess->process.processDetails->data.isPreferred == true){
             lv_obj_set_style_text_color(newProcess->process.preferredIcon, lv_color_hex(RED), LV_PART_MAIN);
         }
         else{

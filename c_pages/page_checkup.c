@@ -6,6 +6,9 @@
 
 //ESSENTIAL INCLUDES
 #include "FilMachine.h"
+#if defined(DISPLAY_DRIVER_ST7701)
+#include "st7701_lcd.h"
+#endif
 
 
 extern struct gui_components gui;
@@ -19,11 +22,11 @@ static uint8_t isStepStatus3created = 0;
 static uint8_t isStepStatus4created = 0;
 
 static uint32_t minutesProcessElapsed = 0;
-static uint8_t secondsProcessElapsed = 1;
+static uint8_t secondsProcessElapsed = 0;
 static uint8_t hoursProcessElapsed = 0;
 
 static uint32_t minutesStepElapsed = 0;
-static uint8_t secondsStepElapsed = 1;
+static uint8_t secondsStepElapsed = 0;
 
 static uint32_t minutesProcessLeft = 0;
 static uint8_t secondsProcessLeft = 0;
@@ -41,6 +44,108 @@ static uint8_t tankPercentage = 0;
 static uint8_t pumpFrom = 0;
 static uint8_t pumpDir = 0;
 
+static uint16_t checkup_get_tank_fill_time_seconds(const sCheckup *ckup) {
+    uint8_t volume_index = gui.page.settings.settingsParams.chemistryVolume;
+    uint8_t tank_size = gui.page.settings.settingsParams.tankSize;
+
+    if (ckup != NULL) {
+        if (ckup->data.activeVolume_index >= 1 && ckup->data.activeVolume_index <= 2)
+            volume_index = (uint8_t)ckup->data.activeVolume_index;
+        if (ckup->data.tankSize >= 1 && ckup->data.tankSize <= 3)
+            tank_size = ckup->data.tankSize;
+    }
+
+    if (volume_index < 1 || volume_index > 2) volume_index = 2;
+    if (tank_size < 1 || tank_size > 3) tank_size = 2;
+
+    uint16_t table[2][3][2] = tanksSizesAndTimes;
+    return table[volume_index - 1][tank_size - 1][1];
+}
+
+static uint32_t checkup_elapsed_process_seconds(void) {
+    return ((uint32_t)hoursProcessElapsed * 3600U) +
+           (minutesProcessElapsed * 60U) +
+           (uint32_t)secondsProcessElapsed;
+}
+
+static uint32_t checkup_elapsed_step_seconds(void) {
+    return (minutesStepElapsed * 60U) + (uint32_t)secondsStepElapsed;
+}
+
+static void checkup_tick_process_elapsed(void) {
+    secondsProcessElapsed++;
+    if (secondsProcessElapsed >= 60U) {
+        secondsProcessElapsed = 0;
+        minutesProcessElapsed++;
+        if (minutesProcessElapsed >= 60U) {
+            minutesProcessElapsed = 0;
+            hoursProcessElapsed++;
+            if (hoursProcessElapsed >= 12U) hoursProcessElapsed = 0;
+        }
+    }
+}
+
+static void checkup_tick_step_elapsed(void) {
+    secondsStepElapsed++;
+    if (secondsStepElapsed >= 60U) {
+        secondsStepElapsed = 0;
+        minutesStepElapsed++;
+    }
+}
+
+static uint32_t checkup_overlap_credit_seconds(uint16_t fill_time_seconds) {
+    uint32_t fill_and_drain = (uint32_t)fill_time_seconds * 2U;
+    uint32_t overlap_pct = gui.page.settings.settingsParams.drainFillOverlapSetpoint;
+    if (overlap_pct > 100U) overlap_pct = 100U;
+    return (fill_and_drain * overlap_pct) / 100U;
+}
+
+static uint32_t checkup_adjusted_processing_seconds(const stepNode *step, uint16_t fill_time_seconds) {
+    if (step == NULL || step->step.stepDetails == NULL) return 0;
+
+    uint32_t recipe_seconds =
+        ((uint32_t)step->step.stepDetails->data.timeMins * 60U) +
+        (uint32_t)step->step.stepDetails->data.timeSecs;
+    uint32_t overlap_credit = checkup_overlap_credit_seconds(fill_time_seconds);
+
+    return (recipe_seconds > overlap_credit) ? (recipe_seconds - overlap_credit) : 0U;
+}
+
+static uint32_t checkup_estimated_process_runtime_seconds(const processNode *pn, const sCheckup *ckup) {
+    if (pn == NULL || pn->process.processDetails == NULL) return 1U;
+
+    uint16_t fill_time_seconds = checkup_get_tank_fill_time_seconds(ckup);
+    uint32_t total_seconds = 0U;
+
+    for (stepNode *step = pn->process.processDetails->stepElementsList.start; step != NULL; step = step->next) {
+        total_seconds += ((uint32_t)fill_time_seconds * 2U);
+        total_seconds += checkup_adjusted_processing_seconds(step, fill_time_seconds);
+    }
+
+    return total_seconds > 0U ? total_seconds : 1U;
+}
+
+static void checkup_refresh_process_ui(processNode *pn, sCheckup *ckup) {
+    if (pn == NULL || ckup == NULL || ckup->checkupProcessTimeLeftValue == NULL || ckup->processArc == NULL) return;
+
+    uint32_t total_seconds = checkup_estimated_process_runtime_seconds(pn, ckup);
+    uint32_t elapsed_seconds = checkup_elapsed_process_seconds();
+    uint32_t remaining_seconds = (total_seconds > elapsed_seconds) ? (total_seconds - elapsed_seconds) : 0U;
+    uint32_t remaining_minutes = remaining_seconds / 60U;
+    uint32_t remaining_secs_only = remaining_seconds % 60U;
+    uint32_t percentage_u32 = (elapsed_seconds * 100U) / total_seconds;
+
+    if (percentage_u32 > 100U) percentage_u32 = 100U;
+    processPercentage = (uint8_t)percentage_u32;
+
+    minutesProcessLeft = remaining_minutes;
+    secondsProcessLeft = (uint8_t)remaining_secs_only;
+
+    lv_label_set_text_fmt(ckup->checkupProcessTimeLeftValue, "%" PRIu32 "m%" PRIu32 "s",
+        remaining_minutes, remaining_secs_only);
+    lv_arc_set_value(ckup->processArc, processPercentage);
+}
+
 static void resetStuffBeforeNextProcess(){
     isProcessingStatus0created = 0;
     isProcessingStatus1created = 0;
@@ -51,10 +156,10 @@ static void resetStuffBeforeNextProcess(){
     isStepStatus4created = 0;
 
     minutesProcessElapsed = 0;
-    secondsProcessElapsed = 1;
+    secondsProcessElapsed = 0;
     hoursProcessElapsed = 0;
     minutesStepElapsed = 0;
-    secondsStepElapsed = 1;
+    secondsStepElapsed = 0;
     minutesProcessLeft = 0;
     secondsProcessLeft = 0;
     minutesStepLeft = 0;
@@ -71,113 +176,77 @@ static void resetStuffBeforeNextProcess(){
 
 void event_checkup(lv_event_t * e){
   lv_event_code_t code = lv_event_get_code(e);
-  lv_obj_t * obj = (lv_obj_t *)lv_event_get_target(e);
-  lv_obj_t * objCont = (lv_obj_t *)lv_obj_get_parent(obj);
-  lv_obj_t * mboxCont = (lv_obj_t *)lv_obj_get_parent(objCont);
-//  lv_obj_t * mboxParent = (lv_obj_t *)lv_obj_get_parent(mboxCont);
-  lv_obj_t * data = (lv_obj_t *)lv_event_get_user_data(e);
+  lv_obj_t *widget = lv_event_get_current_target(e);
+  processNode *pn = (processNode *)lv_event_get_user_data(e);
 
-  //to manage radio buttons
-  lv_obj_t * cont = (lv_obj_t *)lv_event_get_current_target(e);
-  uint32_t * active_id = (uint32_t *)lv_event_get_user_data(e);
-  lv_obj_t * act_cb = (lv_obj_t *)lv_event_get_target(e);
-  lv_obj_t * old_cb = (lv_obj_t *)lv_obj_get_child(cont, *active_id);
+  if(pn == NULL || pn->process.processDetails == NULL
+      || pn->process.processDetails->checkup == NULL) return;
+  sCheckup *ckup = pn->process.processDetails->checkup;
 
-  if(code == LV_EVENT_FOCUSED) {
-      if(data == gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea){
-          /* Guard: prevent double-fire of FOCUSED event from creating two popups */
-          if(gui.element.rollerPopup.mBoxRollerParent != NULL) return;
-          LV_LOG_USER("Set Tank Size");
-          rollerPopupCreate(checkupTankSizesList,checkupTankSize_text,data,gui.tempProcessNode->process.processDetails->checkup->tankSize);
-      }
-  }
-  if(code == LV_EVENT_VALUE_CHANGED) {
-      if(data == gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea){
-          LV_LOG_USER("Set New Tank Size %d", gui.tempProcessNode->process.processDetails->checkup->tankSize);
-      }
-  }
-  if(act_cb == gui.tempProcessNode->process.processDetails->checkup->lowVolumeChemRadioButton || act_cb == gui.tempProcessNode->process.processDetails->checkup->highVolumeChemRadioButton){
-   if(code == LV_EVENT_CLICKED) {
-        lv_obj_remove_state(old_cb, LV_STATE_CHECKED);
-        lv_obj_add_state(act_cb, LV_STATE_CHECKED); 
-        *active_id = lv_obj_get_index(act_cb);
-        LV_LOG_USER("Selected chemistry volume radio buttons: %d", (int)gui.tempProcessNode->process.processDetails->checkup->activeVolume_index);
-   }
-  }
 
+  /* ── Button clicks: use processStep to disambiguate reused widgets ── */
   if(code == LV_EVENT_CLICKED){
-    if(obj == gui.tempProcessNode->process.processDetails->checkup->checkupStartButton){
-      if(data == gui.tempProcessNode->process.processDetails->checkup->checkupSelectTankChemistryContainer){
-        LV_LOG_USER("User pressed gui.tempProcessNode->process.processDetails->checkup->checkupStartButton on Step 0");
-        gui.tempProcessNode->process.processDetails->checkup->isProcessing = 0;
-        gui.tempProcessNode->process.processDetails->checkup->processStep = 1;
-        gui.tempProcessNode->process.processDetails->checkup->stepFillWaterStatus = 1;
-        gui.tempProcessNode->process.processDetails->checkup->stepReachTempStatus = 0;
-        gui.tempProcessNode->process.processDetails->checkup->stepCheckFilmStatus = 0;
-        checkup(gui.tempProcessNode);
+    if(widget == ckup->checkupStartButton){
+      alarm_stop();
+      if(ckup->data.processStep == 0){
+        LV_LOG_USER("User pressed checkupStartButton on Step 0");
+        ckup->data.isProcessing = 0;
+        ckup->data.processStep = 1;
+        ckup->data.stepFillWaterStatus = 1;
+        ckup->data.stepReachTempStatus = 0;
+        ckup->data.stepCheckFilmStatus = 0;
+        checkup(pn);
       }
-
-      if(data == gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingContainer){
-        LV_LOG_USER("User pressed gui.tempProcessNode->process.processDetails->checkup->checkupStartButton on Step 3");
-        gui.tempProcessNode->process.processDetails->checkup->isProcessing = 1;
-        gui.tempProcessNode->process.processDetails->checkup->processStep = 4;
-        gui.tempProcessNode->process.processDetails->checkup->stepFillWaterStatus = 2;
-        gui.tempProcessNode->process.processDetails->checkup->stepReachTempStatus = 2;
-        gui.tempProcessNode->process.processDetails->checkup->stepCheckFilmStatus = 2;
-        checkup(gui.tempProcessNode);
+      else if(ckup->data.processStep == 3){
+        LV_LOG_USER("User pressed checkupStartButton on Step 3");
+        ckup->data.isProcessing = 1;
+        ckup->data.processStep = 4;
+        ckup->data.stepFillWaterStatus = 2;
+        ckup->data.stepReachTempStatus = 2;
+        ckup->data.stepCheckFilmStatus = 2;
+        checkup(pn);
       }
-  }
-    if(obj == gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton){
-
-      if(data == gui.tempProcessNode->process.processDetails->checkup->checkupFillWaterContainer){
-        LV_LOG_USER("User pressed gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton on Step 1");
-        gui.tempProcessNode->process.processDetails->checkup->isProcessing = 0;
-        gui.tempProcessNode->process.processDetails->checkup->processStep = 2;
-        gui.tempProcessNode->process.processDetails->checkup->stepFillWaterStatus = 2;
-        gui.tempProcessNode->process.processDetails->checkup->stepReachTempStatus = 1;
-        gui.tempProcessNode->process.processDetails->checkup->stepCheckFilmStatus = 0;
-        checkup(gui.tempProcessNode);
+    }
+    if(widget == ckup->checkupSkipButton){
+      alarm_stop();
+      if(ckup->data.processStep == 1){
+        LV_LOG_USER("User pressed checkupSkipButton on Step 1");
+        ckup->data.isProcessing = 0;
+        ckup->data.processStep = 2;
+        ckup->data.stepFillWaterStatus = 2;
+        ckup->data.stepReachTempStatus = 1;
+        ckup->data.stepCheckFilmStatus = 0;
+        checkup(pn);
       }
-      if(data == gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempContainer){
-        LV_LOG_USER("User pressed gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton on Step 2");
-        /* Stop temp timer and heater if running */
-        if(gui.tempProcessNode->process.processDetails->checkup->tempTimer != NULL) {
-            lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->tempTimer);
-            gui.tempProcessNode->process.processDetails->checkup->tempTimer = NULL;
-        }
+      else if(ckup->data.processStep == 2){
+        LV_LOG_USER("User pressed checkupSkipButton on Step 2");
+        safeTimerDelete(&ckup->tempTimer);
         sim_setHeater(false);
-        gui.tempProcessNode->process.processDetails->checkup->heaterOn = false;
+        ckup->data.heaterOn = false;
 
-        gui.tempProcessNode->process.processDetails->checkup->isProcessing = 0;
-        gui.tempProcessNode->process.processDetails->checkup->processStep = 3;
-        gui.tempProcessNode->process.processDetails->checkup->stepFillWaterStatus = 2;
-        gui.tempProcessNode->process.processDetails->checkup->stepReachTempStatus = 2;
-        gui.tempProcessNode->process.processDetails->checkup->stepCheckFilmStatus = 1;
-        checkup(gui.tempProcessNode);
-
+        ckup->data.isProcessing = 0;
+        ckup->data.processStep = 3;
+        ckup->data.stepFillWaterStatus = 2;
+        ckup->data.stepReachTempStatus = 2;
+        ckup->data.stepCheckFilmStatus = 1;
+        checkup(pn);
       }
     }
 
-    if(obj == gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton){
+    if(widget == ckup->checkupCloseButton){
         LV_LOG_USER("User pressed checkupCloseButton");
 
         /* FIX #19: Do NOT call lv_msgbox_close — checkupParent is a regular
          * screen created with lv_obj_create(NULL), NOT an lv_msgbox.
          * Calling lv_msgbox_close on it causes a BUS ERROR (crash). */
 
+        /* Stop persistent alarm */
+        alarm_stop();
+
         /* Safety: delete any timers that might still be running */
-        if(gui.tempProcessNode->process.processDetails->checkup->processTimer != NULL) {
-            lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->processTimer);
-            gui.tempProcessNode->process.processDetails->checkup->processTimer = NULL;
-        }
-        if(gui.tempProcessNode->process.processDetails->checkup->pumpTimer != NULL) {
-            lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
-            gui.tempProcessNode->process.processDetails->checkup->pumpTimer = NULL;
-        }
-        if(gui.tempProcessNode->process.processDetails->checkup->tempTimer != NULL) {
-            lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->tempTimer);
-            gui.tempProcessNode->process.processDetails->checkup->tempTimer = NULL;
-        }
+        safeTimerDelete(&ckup->processTimer);
+        safeTimerDelete(&ckup->pumpTimer);
+        safeTimerDelete(&ckup->tempTimer);
         /* Safety: always turn off the heater when leaving checkup */
         sim_setHeater(false);
 
@@ -185,355 +254,138 @@ void event_checkup(lv_event_t * e){
         resetStuffBeforeNextProcess();
 
         /* Clean up the style */
-        lv_style_reset(&gui.tempProcessNode->process.processDetails->checkup->textAreaStyleCheckup);
+        lv_style_reset(&ckup->textAreaStyleCheckup);
 
         /* Switch back to the menu screen FIRST, then delete the checkup screen */
-        lv_scr_load(gui.page.menu.screen_mainMenu);
+#if defined(DISPLAY_DRIVER_ST7701)
+        st7701_lcd_set_dim_inhibit(false);  /* Re-enable auto-dimming */
+        st7701_lcd_fill_screen(0x0000);
+#endif
+        lv_screen_load(gui.page.menu.screen_mainMenu);
+        lv_obj_invalidate(gui.page.menu.screen_mainMenu);
 
         /* Delete the entire checkup screen (checkupParent owns checkupContainer) */
-        if(gui.tempProcessNode->process.processDetails->checkup->checkupParent != NULL) {
-            lv_obj_delete(gui.tempProcessNode->process.processDetails->checkup->checkupParent);
-            gui.tempProcessNode->process.processDetails->checkup->checkupParent = NULL;
-            gui.tempProcessNode->process.processDetails->checkup->checkupContainer = NULL;
+        if(ckup->checkupParent != NULL) {
+            lv_obj_delete(ckup->checkupParent);
+            ckup->checkupParent = NULL;
+            ckup->checkupContainer = NULL;
         }
         return;
     }
-    if(obj == gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton){
-        LV_LOG_USER("User pressed gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton");
-        messagePopupCreate(warningPopupTitle_text,stopAfterProcessPopupBody_text,checkupStop_text,stepDetailCancel_text, gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton);
+    if(widget == ckup->checkupStopAfterButton){
+        LV_LOG_USER("User pressed checkupStopAfterButton");
+        alarm_stop();
+        messagePopupCreate(warningPopupTitle_text,stopAfterProcessPopupBody_text,checkupStop_text,stepDetailCancel_text, ckup->checkupStopAfterButton);
     }
-    if(obj == gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton){
-        LV_LOG_USER("User pressed gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton");
-        messagePopupCreate(warningPopupTitle_text,stopNowProcessPopupBody_text,checkupStop_text,stepDetailCancel_text, gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton);
+    if(widget == ckup->checkupStopNowButton){
+        LV_LOG_USER("User pressed checkupStopNowButton");
+        alarm_stop();
+        messagePopupCreate(warningPopupTitle_text,stopNowProcessPopupBody_text,checkupStop_text,stepDetailCancel_text, ckup->checkupStopNowButton);
     }
 
   }
 
-  if(gui.tempProcessNode->process.processDetails->checkup->tankSize > 0 
-    && gui.tempProcessNode->process.processDetails->checkup->activeVolume_index > 0 && 
-      gui.tempProcessNode->process.processDetails->checkup->processStep < 1){
-        lv_obj_clear_state(gui.tempProcessNode->process.processDetails->checkup->checkupStartButton, LV_STATE_DISABLED);
+  if(ckup->data.tankSize > 0
+    && ckup->data.activeVolume_index > 0 &&
+      ckup->data.processStep < 1){
+        lv_obj_remove_state(ckup->checkupStartButton, LV_STATE_DISABLED);
   }
 }
 
 
-//WROTE BY HAND
-/*
-void pumpTimer(lv_timer_t * timer){
-
-tankPercentage = calculatePercentage(0, tankTimeElapsed, 0, tankFillTime);
-  
-LV_LOG_USER("pumpTimer running :%d", tankPercentage);
-
-    if(gui.tempProcessNode->process.processDetails->checkup->stopAfter == false){
-        if(gui.tempProcessNode->process.processDetails->checkup->stopNow == false){
-            if(gui.tempStepNode != NULL){
-                if(gui.tempStepNode->prev == NULL){
-                  LV_LOG_USER("First Step");
-                          if(tankPercentage < 100) {
-                              LV_LOG_USER("First step FILLING");
-                              lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc, tankPercentage);
-                              lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, LV_OBJ_FLAG_HIDDEN);
-                              tankTimeElapsed++;
-                          }
-                          if(tankPercentage == 100){
-                            LV_LOG_USER("First step FILLING COMPLETE");
-                            lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc, tankPercentage);
-                            lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupProcessing_text);
-
-                            tankPercentage = 0;
-                            tankTimeElapsed = 0;
-                            gui.tempProcessNode->process.processDetails->checkup->isFilling = false;
-                            lv_timer_pause(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
-                            lv_timer_resume(gui.tempProcessNode->process.processDetails->checkup->processTimer);
-                          }
-                }
-                if(gui.tempStepNode->prev != NULL){
-                          LV_LOG_USER("Intermediate step");
-                          if(gui.tempProcessNode->process.processDetails->checkup->isFilling == false){//FIRST DRAIN
-                              if(tankPercentage < 100) {
-                                lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->stepArc, 0);
-                                LV_LOG_USER("Middle step DRAINING");
-                                lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupDraining_text);
-                                lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc,100 - tankPercentage);
-                                
-                                tankTimeElapsed++;
-                              }
-                              if(tankPercentage == 100){
-                                LV_LOG_USER("Middle step DRAINING COMPLETE");
-                                gui.tempProcessNode->process.processDetails->checkup->isFilling = true;
-                                lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc,tankPercentage);
-                                lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupDrainingComplete_text);
-
-                                tankPercentage = 0;
-                                tankTimeElapsed = 0;
-                              }
-                            }
-                          if(gui.tempProcessNode->process.processDetails->checkup->isFilling == true){//THEN FILL
-                              if(tankPercentage < 100) {
-                                LV_LOG_USER("Middle step FILLING");
-                                lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupFilling_text);
-                                lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc, tankPercentage);
-                                tankTimeElapsed++;
-                              }
-                              if(tankPercentage == 100){
-                                LV_LOG_USER("Middle step FILLING COMPLETE");
-                                gui.tempProcessNode->process.processDetails->checkup->isFilling = false;
-                                lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc,tankPercentage);
-                                lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupProcessing_text);
-
-                                tankPercentage = 0;
-                                tankTimeElapsed = 0;
-                                lv_timer_pause(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
-                                lv_timer_resume(gui.tempProcessNode->process.processDetails->checkup->processTimer);
-                                return;
-                              }
-                          }
-                    }
-                }
-              else{
-                  LV_LOG_USER("Last step");
-                      if(tankPercentage < 100) {
-                        lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->stepArc, 0);
-                        LV_LOG_USER("Last step DRAINING");
-                        lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc,100 - tankPercentage);
-                        lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupDraining_text);
-                        tankTimeElapsed++;
-                      }
-                      if(tankPercentage == 100){
-                        LV_LOG_USER("Last step DRAINING COMPLETE");
-                        lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc,100 - tankPercentage);
-                        lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupDrainingComplete_text);
-                        lv_obj_clear_state(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, LV_STATE_DISABLED);
-                        lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
-                        gui.tempProcessNode->process.processDetails->checkup->pumpTimer = NULL;
-                        return;
-                      }
-              }
-          }
-
-  else{
-    if(gui.tempProcessNode->process.processDetails->checkup->isFilling == false && tankPercentage == 0){
-        tankPercentage = 100;
-        tankTimeElapsed = tankFillTime;
-        gui.tempProcessNode->process.processDetails->checkup->isFilling = true;
-      } //Reverte liquid if is pumping-in
-        if(tankPercentage > 0) {
-            LV_LOG_USER("STOP NOW DRAINING");
-            lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc, tankPercentage);
-            lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupDraining_text);
-            tankTimeElapsed--;
-          }
-          if(tankPercentage == 0){
-            LV_LOG_USER("STOP NOW DRAINING COMPLETE");
-            lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc, tankPercentage);
-            lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupDrainingComplete_text);
-            
-            lv_obj_clear_state(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, LV_STATE_DISABLED);
-            lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
-            gui.tempProcessNode->process.processDetails->checkup->pumpTimer = NULL;
-            return;
-           }
-    }
-  }
-    //STOP AFTER TRUE
-    else{
-      if(gui.tempProcessNode->process.processDetails->checkup->stopNow == false){
-        if(gui.tempProcessNode->process.processDetails->checkup->isFilling == true){
-          if(tankPercentage < 100) {
-              LV_LOG_USER("STOP AFTER step FILLING");
-              lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc, tankPercentage);
-              lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupFilling_text);
-              tankTimeElapsed++;
-          }
-          if(tankPercentage == 100){
-            LV_LOG_USER("STOP AFTER step FILLING COMPLETE");
-            lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc, tankPercentage);
-            lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupProcessing_text);
-
-            tankPercentage = 0;
-            tankTimeElapsed = 0;
-            gui.tempProcessNode->process.processDetails->checkup->isFilling = false;
-            lv_timer_pause(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
-            lv_timer_resume(gui.tempProcessNode->process.processDetails->checkup->processTimer);
-          }
-          }
-          else{
-            if(tankPercentage < 100) {
-              lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->stepArc, 0);
-              LV_LOG_USER("STOP AFTER step DRAINING");
-              lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc,100 - tankPercentage);
-              lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupDraining_text);
-              tankTimeElapsed++;
-            }
-            if(tankPercentage == 100){
-              LV_LOG_USER("STOP AFTER step DRAINING COMPLETE");
-              lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc,100 - tankPercentage);
-              lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupDrainingComplete_text);
-              lv_obj_clear_state(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, LV_STATE_DISABLED);
-              lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
-              gui.tempProcessNode->process.processDetails->checkup->pumpTimer = NULL;
-              return;
-            }
-          }
-        }
-        else{ //STOP NOW pressed after STOP AFTER!
-                if(gui.tempProcessNode->process.processDetails->checkup->isFilling == false && tankPercentage == 0){
-                  tankPercentage = 100;
-                  tankTimeElapsed = tankFillTime;
-                  gui.tempProcessNode->process.processDetails->checkup->isFilling = true;
-                }
-                  //Reverte liquid if is pumping-in
-                if(tankPercentage > 0) {
-                    LV_LOG_USER("STOP NOW after STOP AFTER step NOW DRAINING");
-                    lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc, tankPercentage);
-                    lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupDraining_text);
-                    tankTimeElapsed--;
-                  }
-                  if(tankPercentage == 0){
-                    LV_LOG_USER("STOP NOW after STOP AFTER  DRAINING COMPLETE");
-                    lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->pumpArc, tankPercentage);
-                    lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupDrainingComplete_text);
-                    
-                    lv_obj_clear_state(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, LV_STATE_DISABLED);
-                    lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
-                    gui.tempProcessNode->process.processDetails->checkup->pumpTimer = NULL;
-                    return;
-                  }
-            }
-      }
-}
-*/
 
 void processTimer(lv_timer_t * timer) {
-	 
-	char *tmp_processSourceList[] = processSourceList;
+    /* Extract context from timer user_data */
+    processNode *pn = (processNode *)lv_timer_get_user_data(timer);
+    if(pn == NULL || pn->process.processDetails == NULL || pn->process.processDetails->checkup == NULL) return;
+    sCheckup *ckup = pn->process.processDetails->checkup;
+
+    char *tmp_processSourceList[] = processSourceList;
+    uint16_t fill_time_seconds = checkup_get_tank_fill_time_seconds(ckup);
+    uint32_t adjusted_step_seconds = checkup_adjusted_processing_seconds(ckup->currentStep, fill_time_seconds);
 
     LV_LOG_USER("processTimer running");
-    gui.tempProcessNode->process.processDetails->checkup->isDeveloping = true;
+    ckup->data.isDeveloping = true;
 
-    if(secondsProcessElapsed >= 60) {
-        secondsProcessElapsed = 0;
-        minutesProcessElapsed++;
-        if(minutesProcessElapsed >= 60) {
-            minutesProcessElapsed = 0;
-            hoursProcessElapsed++;
-            if(hoursProcessElapsed >= 12) 
-                hoursProcessElapsed = 0;
+    checkup_tick_process_elapsed();
+    checkup_tick_step_elapsed();
+    checkup_refresh_process_ui(pn, ckup);
+
+    /* Remaining time for the processing portion of the current step */
+    uint32_t elapsed_step_seconds = checkup_elapsed_step_seconds();
+    uint32_t remaining_step_seconds = (adjusted_step_seconds > elapsed_step_seconds) ?
+        (adjusted_step_seconds - elapsed_step_seconds) : 0U;
+    uint32_t remaining_step_mins = remaining_step_seconds / 60U;
+    uint32_t remaining_step_secs_only = remaining_step_seconds % 60U;
+    minutesStepLeft = remaining_step_mins;
+    secondsStepLeft = (uint8_t)remaining_step_secs_only;
+
+    if(ckup->currentStep != NULL) {
+        /* Continuously enforce: if we're on the last step, Stop After is always disabled */
+        if(ckup->currentStep->next == NULL) {
+            lv_obj_add_state(ckup->checkupStopAfterButton, LV_STATE_DISABLED);
         }
-    }
 
-    if(secondsStepElapsed >= 60) {
-        secondsStepElapsed = 0;
-        minutesStepElapsed++;
-        if(minutesStepElapsed >= 60) {
-            minutesStepElapsed = 0;
+        if(ckup->data.stopAfter == true && remaining_step_seconds == 0U){
+            lv_obj_add_state(ckup->checkupStopAfterButton, LV_STATE_DISABLED);
+            lv_obj_add_state(ckup->checkupStopNowButton, LV_STATE_DISABLED);
+
+            lv_label_set_text(ckup->checkupProcessCompleteLabel, checkupProcessStopped_text);
+            lv_obj_remove_flag(ckup->checkupProcessCompleteLabel, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(ckup->checkupStepNameValue, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(ckup->checkupStepTimeLeftValue, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(ckup->checkupProcessTimeLeftValue, LV_OBJ_FLAG_HIDDEN);
+
+            lv_arc_set_value(ckup->stepArc, 100);
+
+            lv_timer_pause(ckup->processTimer);
+            ckup->data.isDeveloping = false;
+            lv_timer_resume(ckup->pumpTimer);
         }
-    }
-    
+        else{
+            if(adjusted_step_seconds == 0U) {
+                stepPercentage = 100;
+            } else {
+                uint32_t percentage_u32 = (elapsed_step_seconds * 100U) / adjusted_step_seconds;
+                if (percentage_u32 > 100U) percentage_u32 = 100U;
+                stepPercentage = (uint8_t)percentage_u32;
+            }
 
-    processPercentage = calculatePercentage(minutesProcessElapsed, secondsProcessElapsed, gui.tempProcessNode->process.processDetails->timeMins, gui.tempProcessNode->process.processDetails->timeSecs);
-    LV_LOG_USER("Elapsed Time %"PRIu8"h:%"PRIu32"m:%"PRIu8"s, processPercentage %"PRIu8" stepPercentage %"PRIu8"", hoursProcessElapsed, minutesProcessElapsed, secondsProcessElapsed, processPercentage, stepPercentage); 
+            lv_arc_set_value(ckup->stepArc, stepPercentage);
+            if(ckup->currentStep->next != NULL)
+                lv_label_set_text(ckup->checkupStepSourceValue, tmp_processSourceList[ckup->currentStep->next->step.stepDetails->data.source]);
+            else
+                lv_label_set_text(ckup->checkupStepSourceValue, tmp_processSourceList[ckup->currentStep->step.stepDetails->data.source]);
 
-    // Convert the remaining process time to minutes and seconds
-    uint8_t totalProcessSecs = gui.tempProcessNode->process.processDetails->timeMins * 60 + gui.tempProcessNode->process.processDetails->timeSecs;
-    uint8_t elapsedProcessSecs = minutesProcessElapsed * 60 + secondsProcessElapsed;
-    uint8_t remainingProcessSecs = totalProcessSecs - elapsedProcessSecs;
+            if(pn->process.processDetails->stepElementsList.size == 1)
+                lv_label_set_text(ckup->checkupNextStepValue,
+                  pn->process.processDetails->stepElementsList.start->step.stepDetails->data.stepNameString);
+            else if(ckup->currentStep->next != NULL)
+                lv_label_set_text(ckup->checkupNextStepValue, ckup->currentStep->next->step.stepDetails->data.stepNameString);
 
-    uint8_t remainingProcessMins = remainingProcessSecs / 60;
-    uint8_t remainingProcessSecsOnly = remainingProcessSecs % 60;
+            lv_label_set_text(ckup->checkupStepNameValue, ckup->currentStep->step.stepDetails->data.stepNameString);
+            lv_label_set_text_fmt(ckup->checkupStepTimeLeftValue, "%" PRIu32 "m%" PRIu32 "s", remaining_step_mins, remaining_step_secs_only);
 
-    // Convert the remaining step time to minutes and seconds
-    uint8_t totalStepSecs = gui.tempStepNode->step.stepDetails->timeMins * 60 + gui.tempStepNode->step.stepDetails->timeSecs;
-    uint8_t elapsedStepSecs = minutesStepElapsed * 60 + secondsStepElapsed;
-    uint8_t remainingStepSecs = totalStepSecs - elapsedStepSecs;
-
-    uint8_t remainingStepMins = remainingStepSecs / 60;
-    uint8_t remainingStepSecsOnly = remainingStepSecs % 60;
-
-    if(gui.tempStepNode != NULL) { 
-        if(gui.tempProcessNode->process.processDetails->checkup->stopAfter == true && remainingStepMins == 0 && remainingStepSecsOnly == 0){
-            //lv_obj_clear_state(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, LV_STATE_DISABLED);
-            lv_obj_add_state(gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton, LV_STATE_DISABLED);
-            lv_obj_add_state(gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton, LV_STATE_DISABLED); 
-            
-            lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupProcessCompleteLabel, checkupProcessStopped_text);
-            lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupProcessCompleteLabel, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(gui.tempProcessNode->process.processDetails->checkup->checkupStepNameValue, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(gui.tempProcessNode->process.processDetails->checkup->checkupStepTimeLeftValue, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(gui.tempProcessNode->process.processDetails->checkup->checkupProcessTimeLeftValue, LV_OBJ_FLAG_HIDDEN);
-            
-            lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->stepArc, 100);
-            
-            //lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->processTimer);
-            lv_timer_resume(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
-        }
-        else{              
-          stepPercentage = calculatePercentage(minutesStepElapsed, secondsStepElapsed, gui.tempStepNode->step.stepDetails->timeMins, gui.tempStepNode->step.stepDetails->timeSecs);
-          lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->stepArc, stepPercentage);
-          if(gui.tempStepNode->next != NULL)
-              lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceValue, tmp_processSourceList[gui.tempStepNode->next->step.stepDetails->source]);
-          else
-              lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceValue, tmp_processSourceList[gui.tempStepNode->step.stepDetails->source]);
-
-          if(gui.tempProcessNode->process.processDetails->stepElementsList.size == 1)
-            lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepValue, 
-              gui.tempProcessNode->process.processDetails->stepElementsList.start->step.stepDetails->stepNameString);
-          else
-            if(gui.tempStepNode->next != NULL)
-              lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepValue, gui.tempStepNode->next->step.stepDetails->stepNameString); 
-                   
-          lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepNameValue, gui.tempStepNode->step.stepDetails->stepNameString);
-
-          
-          lv_label_set_text_fmt(gui.tempProcessNode->process.processDetails->checkup->checkupStepTimeLeftValue, "%dm%ds", remainingStepMins,remainingStepSecsOnly);
-          
-          if(stepPercentage == 100) {
-              stepPercentage = 0;
-              minutesStepElapsed = 0;
-              secondsStepElapsed = 0;
-              gui.tempStepNode = gui.tempStepNode->next;
-              lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepNameValue, "...");
-              lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->stepArc, stepPercentage);
-              lv_timer_pause(gui.tempProcessNode->process.processDetails->checkup->processTimer);
-              lv_timer_resume(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
-          }
+            if(stepPercentage == 100) {
+                stepPercentage = 0;
+                minutesStepElapsed = 0;
+                secondsStepElapsed = 0;
+                ckup->currentStep = ckup->currentStep->next;
+                lv_label_set_text(ckup->checkupStepNameValue, checkupEllipsis_text);
+                lv_arc_set_value(ckup->stepArc, stepPercentage);
+                lv_timer_pause(ckup->processTimer);
+                ckup->data.isDeveloping = false;
+                lv_timer_resume(ckup->pumpTimer);
+                /* If we just advanced to the last step (or past it),
+                   Stop After makes no sense — disable it */
+                if(ckup->currentStep == NULL || ckup->currentStep->next == NULL) {
+                    lv_obj_add_state(ckup->checkupStopAfterButton, LV_STATE_DISABLED);
+                }
+            }
         }
     }
     else{
-        lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->processTimer);
-        gui.tempProcessNode->process.processDetails->checkup->processTimer = NULL;
-    }
-
-    lv_label_set_text_fmt(gui.tempProcessNode->process.processDetails->checkup->checkupProcessTimeLeftValue, "%dm%ds", remainingProcessMins,
-      remainingProcessSecsOnly);
-
-    lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->processArc, processPercentage);
-
-    if(processPercentage <= 100) {
-        secondsProcessElapsed++;
-        secondsStepElapsed++;
-        if(processPercentage == 100) {
-          gui.tempProcessNode->process.processDetails->checkup->isDeveloping = false;
-
-          lv_obj_add_state(gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton, LV_STATE_DISABLED);
-          lv_obj_add_state(gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton, LV_STATE_DISABLED);   
-          //lv_obj_clear_state(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, LV_STATE_DISABLED);  
-          
-          lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupProcessCompleteLabel, checkupProcessComplete_text);
-          lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupProcessCompleteLabel, LV_OBJ_FLAG_HIDDEN);
-          lv_obj_add_flag(gui.tempProcessNode->process.processDetails->checkup->checkupStepNameValue, LV_OBJ_FLAG_HIDDEN);
-          lv_obj_add_flag(gui.tempProcessNode->process.processDetails->checkup->checkupStepTimeLeftValue, LV_OBJ_FLAG_HIDDEN);
-          lv_obj_add_flag(gui.tempProcessNode->process.processDetails->checkup->checkupProcessTimeLeftValue, LV_OBJ_FLAG_HIDDEN);
-          
-          gui.page.tools.machineStats.completed++;
-          gui.page.tools.machineStats.totalMins += gui.tempProcessNode->process.processDetails->timeMins;
-          qSysAction( SAVE_MACHINE_STATS );
-          
-          lv_timer_delete(gui.tempProcessNode->process.processDetails->checkup->processTimer);
-          gui.tempProcessNode->process.processDetails->checkup->processTimer = NULL;
-          lv_timer_resume(gui.tempProcessNode->process.processDetails->checkup->pumpTimer);
-        }
+        safeTimerDelete(&ckup->processTimer);
     }
 }
 
@@ -544,80 +396,91 @@ void processTimer(lv_timer_t * timer) {
 #define TEMP_TIMEOUT_SECONDS 600  /* 10 minutes safety timeout */
 
 void tempTimerCallback(lv_timer_t * timer) {
-    sCheckup *ckup = gui.tempProcessNode->process.processDetails->checkup;
-    sProcessDetail *pd = gui.tempProcessNode->process.processDetails;
+    /* Extract context from timer user_data */
+    processNode *pn = (processNode *)lv_timer_get_user_data(timer);
+    if(pn == NULL || pn->process.processDetails == NULL || pn->process.processDetails->checkup == NULL) return;
+
+    sCheckup *ckup = pn->process.processDetails->checkup;
+    sProcessDetail *pd = pn->process.processDetails;
 
     /* Read current temperatures */
-    ckup->currentWaterTemp = sim_getTemperature(TEMPERATURE_BATH_PIN);
-    ckup->currentChemTemp  = sim_getTemperature(TEMPERATURE_CHEMICAL_PIN);
+    ckup->data.currentWaterTemp = sim_getTemperature(TEMPERATURE_SENSOR_BATH);
+    ckup->data.currentChemTemp  = sim_getTemperature(TEMPERATURE_SENSOR_CHEMICAL);
 
     /* Update UI with live values (use snprintf — LVGL builtin sprintf lacks %f) */
     {
         char buf[16];
         if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP) {
-            snprintf(buf, sizeof(buf), "%.1f°C", ckup->currentWaterTemp);
+            snprintf(buf, sizeof(buf), "%.1f°C", ckup->data.currentWaterTemp);
             lv_label_set_text(ckup->checkupTargetWaterTempValue, buf);
-            snprintf(buf, sizeof(buf), "%.1f°C", ckup->currentChemTemp);
+            snprintf(buf, sizeof(buf), "%.1f°C", ckup->data.currentChemTemp);
             lv_label_set_text(ckup->checkupTargetChemistryTempValue, buf);
         } else {
-            snprintf(buf, sizeof(buf), "%.1f°F", ckup->currentWaterTemp * 1.8f + 32.0f);
+            snprintf(buf, sizeof(buf), "%.1f°F", ckup->data.currentWaterTemp * 1.8f + 32.0f);
             lv_label_set_text(ckup->checkupTargetWaterTempValue, buf);
-            snprintf(buf, sizeof(buf), "%.1f°F", ckup->currentChemTemp * 1.8f + 32.0f);
+            snprintf(buf, sizeof(buf), "%.1f°F", ckup->data.currentChemTemp * 1.8f + 32.0f);
             lv_label_set_text(ckup->checkupTargetChemistryTempValue, buf);
         }
     }
 
     /* Heater control logic: ON when below (target - tolerance), OFF when at target */
-    float targetTemp = (float)pd->temp;
-    float tolerance  = pd->tempTolerance;
+    float targetTemp = (float)pd->data.temp;
+    float tolerance  = pd->data.tempTolerance;
 
-    if(ckup->currentWaterTemp < targetTemp - tolerance) {
-        if(!ckup->heaterOn) {
+    if(ckup->data.currentWaterTemp < targetTemp - tolerance) {
+        if(!ckup->data.heaterOn) {
             sim_setHeater(true);
-            ckup->heaterOn = true;
+            ckup->data.heaterOn = true;
         }
-    } else if(ckup->currentWaterTemp >= targetTemp) {
-        if(ckup->heaterOn) {
+    } else if(ckup->data.currentWaterTemp >= targetTemp) {
+        if(ckup->data.heaterOn) {
             sim_setHeater(false);
-            ckup->heaterOn = false;
+            ckup->data.heaterOn = false;
         }
     }
 
     /* Update heater status label */
     if(ckup->checkupHeaterStatusLabel != NULL)
-        lv_label_set_text_fmt(ckup->checkupHeaterStatusLabel, checkupHeaterStatusFmt_text, ckup->heaterOn ? checkupHeaterOn_text : checkupHeaterOff_text);
+        lv_label_set_text_fmt(ckup->checkupHeaterStatusLabel, checkupHeaterStatusFmt_text, ckup->data.heaterOn ? checkupHeaterOn_text : checkupHeaterOff_text);
 
     /* Safety timeout counter (logged to terminal only) */
-    ckup->tempTimeoutCounter++;
+    ckup->data.tempTimeoutCounter++;
 
-    /* Check if temperature reached (water temp within target ± tolerance) */
-    bool tempReached = (ckup->currentWaterTemp >= targetTemp - tolerance) &&
-                       (ckup->currentWaterTemp <= targetTemp + tolerance);
+    /* Check if temperature reached (water temp within target ± tolerance).
+       Use a minimum effective tolerance of 1.0°C so the simulator's discrete
+       temperature steps (0.5°C per tick) can actually satisfy the condition. */
+    float effectiveTolerance = (tolerance > 1.0f) ? tolerance : 1.0f;
+    bool tempReached = (ckup->data.currentWaterTemp >= targetTemp - effectiveTolerance) &&
+                       (ckup->data.currentWaterTemp <= targetTemp + effectiveTolerance);
 
     if(tempReached) {
         LV_LOG_USER("Temperature reached! Water=%.1f Target=%"PRIu32" Tol=%.1f",
-            ckup->currentWaterTemp, pd->temp, pd->tempTolerance);
+            ckup->data.currentWaterTemp, pd->data.temp, pd->data.tempTolerance);
 
         sim_setHeater(false);
-        ckup->heaterOn = false;
+        ckup->data.heaterOn = false;
 
-        lv_timer_delete(ckup->tempTimer);
-        ckup->tempTimer = NULL;
+        safeTimerDelete(&ckup->tempTimer);
 
         if(ckup->checkupHeaterStatusLabel != NULL)
             lv_label_set_text(ckup->checkupHeaterStatusLabel, checkupTempReached_text);
 
+        /* Start persistent alarm for temperature reached (if temp control enabled) */
+        alarm_start_persistent();
+
         /* If autostart is enabled, advance to step 3 automatically */
         if(gui.page.settings.settingsParams.isProcessAutostart) {
             LV_LOG_USER("Autostart: advancing to step 3");
-            ckup->processStep = 3;
-            ckup->stepReachTempStatus = 2;
-            ckup->stepCheckFilmStatus = 1;
-            checkup(gui.tempProcessNode);
+            ckup->data.processStep = 3;
+            ckup->data.stepReachTempStatus = 2;
+            ckup->data.stepCheckFilmStatus = 1;
+            checkup(pn);
         } else {
+            /* Mark temp as reached so Flutter shows "Continue" instead of "Skip" */
+            ckup->data.stepReachTempStatus = 2;
             /* Show CONTINUE button for manual advance — widen to fit text */
             if(ckup->checkupSkipButton != NULL)
-                lv_obj_set_width(ckup->checkupSkipButton, 150);
+                lv_obj_set_width(ckup->checkupSkipButton, ui_get_profile()->checkup.continue_button_w);
             if(ckup->checkupSkipButtonLabel != NULL)
                 lv_label_set_text(ckup->checkupSkipButtonLabel, checkupContinue_text);
         }
@@ -625,14 +488,13 @@ void tempTimerCallback(lv_timer_t * timer) {
     }
 
     /* Safety timeout reached — stop heating, let user skip manually */
-    if(ckup->tempTimeoutCounter >= TEMP_TIMEOUT_SECONDS) {
+    if(ckup->data.tempTimeoutCounter >= TEMP_TIMEOUT_SECONDS) {
         LV_LOG_USER("Temperature timeout reached! Stopping heater.");
 
         sim_setHeater(false);
-        ckup->heaterOn = false;
+        ckup->data.heaterOn = false;
 
-        lv_timer_delete(ckup->tempTimer);
-        ckup->tempTimer = NULL;
+        safeTimerDelete(&ckup->tempTimer);
 
         if(ckup->checkupHeaterStatusLabel != NULL)
             lv_label_set_text(ckup->checkupHeaterStatusLabel, checkupTempTimedOut_text);
@@ -641,18 +503,19 @@ void tempTimerCallback(lv_timer_t * timer) {
     }
 }
 
-void handleFirstStep(sCheckup* checkup) {
-    pumpFrom = getValueForChemicalSource(gui.tempStepNode->step.stepDetails->source);
+void handleFirstStep(processNode *pn) {
+    sCheckup* checkup = pn->process.processDetails->checkup;
+    pumpFrom = getValueForChemicalSource(checkup->currentStep->step.stepDetails->data.source);
     pumpDir = PUMP_IN_RLY;
 
     LV_LOG_USER("First Step");
     if (tankPercentage < 100) {
         LV_LOG_USER("First step FILLING");
 
-        if (checkup->isAlreadyPumping == false) {
+        if (checkup->data.isAlreadyPumping == false) {
             runMotorTask();
             sendValueToRelay(pumpFrom, pumpDir, true);
-            checkup->isAlreadyPumping = true;
+            checkup->data.isAlreadyPumping = true;
         }
 
         lv_arc_set_value(checkup->pumpArc, tankPercentage);
@@ -662,22 +525,24 @@ void handleFirstStep(sCheckup* checkup) {
         LV_LOG_USER("First step FILLING COMPLETE");
 
         sendValueToRelay(pumpFrom, pumpDir, false);
-        checkup->isAlreadyPumping = false;
+        checkup->data.isAlreadyPumping = false;
 
         lv_arc_set_value(checkup->pumpArc, tankPercentage);
         lv_label_set_text(checkup->checkupStepKindValue, checkupProcessing_text);
 
         tankPercentage = 0;
         tankTimeElapsed = 0;
-        checkup->isFilling = false;
+        checkup->data.isFilling = false;
+        checkup->data.isDeveloping = true;  /* Set immediately to avoid brief "draining" state */
 
         lv_timer_pause(checkup->pumpTimer);
 
-        gui.tempProcessNode->process.processDetails->checkup->processTimer = lv_timer_create(processTimer, 1000,  NULL); //&
+        checkup->processTimer = lv_timer_create(processTimer, 1000, pn);
     }
 }
 
-void handleIntermediateOrLastStep(sCheckup* checkup, bool isLastStep) {
+void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
+    sCheckup* checkup = pn->process.processDetails->checkup;
     if (isLastStep) {
         pumpFrom = getValueForChemicalSource(WASTE);//last step go into the waste
         pumpDir = PUMP_OUT_RLY;
@@ -685,9 +550,12 @@ void handleIntermediateOrLastStep(sCheckup* checkup, bool isLastStep) {
         if (tankPercentage < 100) {
             LV_LOG_USER("Last step DRAINING");
 
-            if (checkup->isAlreadyPumping == false) {
+            if (checkup->data.isAlreadyPumping == false) {
                 sendValueToRelay(pumpFrom, pumpDir, true);
-                checkup->isAlreadyPumping = true;
+                checkup->data.isAlreadyPumping = true;
+                /* Disable stop buttons — last step is already draining */
+                lv_obj_add_state(checkup->checkupStopAfterButton, LV_STATE_DISABLED);
+                lv_obj_add_state(checkup->checkupStopNowButton, LV_STATE_DISABLED);
             }
 
             lv_arc_set_value(checkup->pumpArc, 100 - tankPercentage);
@@ -699,26 +567,57 @@ void handleIntermediateOrLastStep(sCheckup* checkup, bool isLastStep) {
             sendValueToRelay(pumpFrom, pumpDir, false);
             stopMotor(MOTOR_IN1_PIN, MOTOR_IN2_PIN);
             stopMotorTask();
-            checkup->isAlreadyPumping = false;
+            checkup->data.isAlreadyPumping = false;
 
             lv_arc_set_value(checkup->pumpArc, 100 - tankPercentage);
             lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
-            lv_obj_clear_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
-            lv_timer_delete(checkup->pumpTimer);
-            checkup->pumpTimer = NULL;
+            lv_obj_remove_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
+
+            if(!checkup->data.stopAfter && !checkup->data.stopNow) {
+                lv_obj_add_state(checkup->checkupStopAfterButton, LV_STATE_DISABLED);
+                lv_obj_add_state(checkup->checkupStopNowButton, LV_STATE_DISABLED);
+
+                lv_label_set_text(checkup->checkupProcessCompleteLabel, checkupProcessComplete_text);
+                lv_obj_remove_flag(checkup->checkupProcessCompleteLabel, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(checkup->checkupStepNameValue, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(checkup->checkupStepTimeLeftValue, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(checkup->checkupProcessTimeLeftValue, LV_OBJ_FLAG_HIDDEN);
+
+                gui.page.tools.machineStats.completed++;
+                gui.page.tools.machineStats.totalMins += pn->process.processDetails->data.timeMins;
+                gui.page.tools.machineStats.totalSecs += pn->process.processDetails->data.timeSecs;
+                /* Carry overflow seconds into minutes */
+                if (gui.page.tools.machineStats.totalSecs >= 60) {
+                    gui.page.tools.machineStats.totalMins += gui.page.tools.machineStats.totalSecs / 60;
+                    gui.page.tools.machineStats.totalSecs  = gui.page.tools.machineStats.totalSecs % 60;
+                }
+                qSysAction(SAVE_MACHINE_STATS);
+            }
+
+            safeTimerDelete(&checkup->pumpTimer);
+
+            /* Start persistent alarm only after last draining is fully complete */
+            alarm_start_persistent();
         }
     } else {
         LV_LOG_USER("Intermediate step");
-        if (checkup->isFilling) {
-            pumpFrom = getValueForChemicalSource(gui.tempStepNode->step.stepDetails->source);
+
+        /* If this step is the last one, Stop After makes no sense — disable it
+           (mirrors Flutter isLastStep logic: currentStepIndex >= totalSteps - 1) */
+        if (checkup->currentStep->next == NULL) {
+            lv_obj_add_state(checkup->checkupStopAfterButton, LV_STATE_DISABLED);
+        }
+
+        if (checkup->data.isFilling) {
+            pumpFrom = getValueForChemicalSource(checkup->currentStep->step.stepDetails->data.source);
             pumpDir = PUMP_IN_RLY;
             if (tankPercentage < 100) {
                 LV_LOG_USER("Middle step FILLING");
 
-                if (checkup->isAlreadyPumping == false) {
+                if (checkup->data.isAlreadyPumping == false) {
 
                     sendValueToRelay(pumpFrom, pumpDir, true);
-                    checkup->isAlreadyPumping = true;
+                    checkup->data.isAlreadyPumping = true;
                 }
 
                 lv_arc_set_value(checkup->pumpArc, tankPercentage);
@@ -729,31 +628,31 @@ void handleIntermediateOrLastStep(sCheckup* checkup, bool isLastStep) {
 
 
                 sendValueToRelay(pumpFrom, pumpDir, false);
-                checkup->isAlreadyPumping = false;
+                checkup->data.isAlreadyPumping = false;
 
                 lv_arc_set_value(checkup->pumpArc, tankPercentage);
                 lv_label_set_text(checkup->checkupStepKindValue, checkupProcessing_text);
 
                 tankPercentage = 0;
                 tankTimeElapsed = 0;
-                checkup->isFilling = false;
+                checkup->data.isFilling = false;
+                checkup->data.isDeveloping = true;  /* Set immediately to avoid brief "draining" state */
 
                 lv_timer_pause(checkup->pumpTimer);
                 lv_timer_resume(checkup->processTimer);
             }
         } else {
-            if(gui.tempStepNode->prev->step.stepDetails->discardAfterProc == false)
-                pumpFrom = getValueForChemicalSource(gui.tempStepNode->prev->step.stepDetails->source);
+            if(checkup->currentStep->prev != NULL && checkup->currentStep->prev->step.stepDetails->data.discardAfterProc == false)
+                pumpFrom = getValueForChemicalSource(checkup->currentStep->prev->step.stepDetails->data.source);
             else
                 pumpFrom = getValueForChemicalSource(WASTE);
-            //pumpFrom = (gui.tempStepNode->step.stepDetails->discardAfterProc == false) ? getValueForChemicalSource(gui.tempStepNode->step.stepDetails->source) : getValueForChemicalSource(WB);
             pumpDir = PUMP_OUT_RLY;
             if (tankPercentage < 100) {
                 LV_LOG_USER("Middle step DRAINING");
 
-                if (checkup->isAlreadyPumping == false) {
+                if (checkup->data.isAlreadyPumping == false) {
                     sendValueToRelay(pumpFrom, pumpDir, true);
-                    checkup->isAlreadyPumping = true;
+                    checkup->data.isAlreadyPumping = true;
                 }
 
                 lv_arc_set_value(checkup->pumpArc, 100 - tankPercentage);
@@ -763,40 +662,45 @@ void handleIntermediateOrLastStep(sCheckup* checkup, bool isLastStep) {
                 LV_LOG_USER("Middle step DRAINING COMPLETE");
 
                 sendValueToRelay(pumpFrom, pumpDir, false);
-                checkup->isAlreadyPumping = false;
+                checkup->data.isAlreadyPumping = false;
 
                 lv_arc_set_value(checkup->pumpArc, 100 - tankPercentage);
                 lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
 
                 tankPercentage = 0;
                 tankTimeElapsed = 0;
-                checkup->isFilling = true;
+                checkup->data.isFilling = true;
             }
         }
     }
 }
 
-void handleStopNow(sCheckup* checkup) {
-    pumpFrom = getValueForChemicalSource(gui.tempStepNode->step.stepDetails->source);
+void handleStopNow(processNode *pn) {
+    sCheckup* checkup = pn->process.processDetails->checkup;
+    /* currentStep is NULL during last-step draining — use waste in that case */
+    if (checkup->currentStep != NULL)
+        pumpFrom = getValueForChemicalSource(checkup->currentStep->step.stepDetails->data.source);
+    else
+        pumpFrom = getValueForChemicalSource(WASTE);
     pumpDir = PUMP_OUT_RLY;
 
-    if (!checkup->isFilling && tankPercentage == 0) {
+    if (!checkup->data.isFilling && tankPercentage == 0) {
         tankPercentage = 100;
         tankTimeElapsed = tankFillTime;
-        checkup->isFilling = true;
+        checkup->data.isFilling = true;
 
         sendValueToRelay(0, 0, false);
         sendValueToRelay(pumpFrom, pumpDir, true);
-        checkup->isAlreadyPumping = false;
+        checkup->data.isAlreadyPumping = false;
     }
     if (tankPercentage > 0) {
         LV_LOG_USER("STOP NOW DRAINING");
 
         
-        if(checkup->isAlreadyPumping == true){
+        if(checkup->data.isAlreadyPumping == true){
             sendValueToRelay(0, 0, false);
             sendValueToRelay(pumpFrom, pumpDir, true);
-            checkup->isAlreadyPumping = false;
+            checkup->data.isAlreadyPumping = false;
         }
       
 
@@ -809,27 +713,29 @@ void handleStopNow(sCheckup* checkup) {
         sendValueToRelay(pumpFrom, pumpDir, false);
         stopMotor(MOTOR_IN1_PIN, MOTOR_IN2_PIN);
         stopMotorTask();
-        checkup->isAlreadyPumping = false;
+        checkup->data.isAlreadyPumping = false;
 
         lv_arc_set_value(checkup->pumpArc, tankPercentage);
         lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
-        lv_obj_clear_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
-        lv_timer_delete(checkup->pumpTimer);
-        checkup->pumpTimer = NULL;
+        lv_obj_remove_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
+        safeTimerDelete(&checkup->pumpTimer);
 
+        /* Start persistent alarm after stop-now draining is fully complete */
+        alarm_start_persistent();
     }
 }
 
-void handleStopAfter(sCheckup* checkup) {
-    if (checkup->isFilling) {
-        pumpFrom = getValueForChemicalSource(gui.tempStepNode->step.stepDetails->source);
+void handleStopAfter(processNode *pn) {
+    sCheckup* checkup = pn->process.processDetails->checkup;
+    if (checkup->data.isFilling) {
+        pumpFrom = getValueForChemicalSource(checkup->currentStep->step.stepDetails->data.source);
         pumpDir = PUMP_IN_RLY;
         if (tankPercentage < 100) {
             LV_LOG_USER("STOP AFTER step FILLING");
 
-        if (checkup->isAlreadyPumping == false) {
+        if (checkup->data.isAlreadyPumping == false) {
             sendValueToRelay(pumpFrom, pumpDir, true);
-            checkup->isAlreadyPumping = true;
+            checkup->data.isAlreadyPumping = true;
         }
 
 
@@ -841,26 +747,27 @@ void handleStopAfter(sCheckup* checkup) {
 
 
             sendValueToRelay(pumpFrom, pumpDir, false);
-            checkup->isAlreadyPumping = false;
+            checkup->data.isAlreadyPumping = false;
 
             lv_arc_set_value(checkup->pumpArc, tankPercentage);
             lv_label_set_text(checkup->checkupStepKindValue, checkupProcessing_text);
 
             tankPercentage = 0;
             tankTimeElapsed = 0;
-            checkup->isFilling = false;
+            checkup->data.isFilling = false;
+            checkup->data.isDeveloping = true;  /* Set immediately to avoid brief "draining" state */
 
             lv_timer_pause(checkup->pumpTimer);
             if(checkup->processTimer != NULL)
                 lv_timer_resume(checkup->processTimer);
             else
-                gui.tempProcessNode->process.processDetails->checkup->processTimer = lv_timer_create(processTimer, 1000,  NULL); //&
+                checkup->processTimer = lv_timer_create(processTimer, 1000, pn);
         }
     } else {
-        if(gui.tempStepNode->prev != NULL){
-            pumpFrom = getValueForChemicalSource(gui.tempStepNode->prev->step.stepDetails->source);
+        if(checkup->currentStep->prev != NULL){
+            pumpFrom = getValueForChemicalSource(checkup->currentStep->prev->step.stepDetails->data.source);
         }else{
-            pumpFrom = getValueForChemicalSource(gui.tempStepNode->step.stepDetails->source);
+            pumpFrom = getValueForChemicalSource(checkup->currentStep->step.stepDetails->data.source);
         }
         
         pumpDir = PUMP_OUT_RLY;
@@ -868,9 +775,9 @@ void handleStopAfter(sCheckup* checkup) {
             LV_LOG_USER("STOP AFTER step DRAINING");
 
 
-            if (checkup->isAlreadyPumping == false) {
+            if (checkup->data.isAlreadyPumping == false) {
                 sendValueToRelay(pumpFrom, pumpDir, true);
-                checkup->isAlreadyPumping = true;
+                checkup->data.isAlreadyPumping = true;
             }
 
             lv_arc_set_value(checkup->pumpArc, 100 - tankPercentage);
@@ -882,37 +789,44 @@ void handleStopAfter(sCheckup* checkup) {
             sendValueToRelay(pumpFrom, pumpDir, false);
             stopMotor(MOTOR_IN1_PIN, MOTOR_IN2_PIN);
             stopMotorTask();
-            checkup->isAlreadyPumping = false;
+            checkup->data.isAlreadyPumping = false;
 
             lv_arc_set_value(checkup->pumpArc, 100 - tankPercentage);
             lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
-            lv_obj_clear_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
-            lv_timer_delete(checkup->pumpTimer);
-            checkup->pumpTimer = NULL;
+            lv_obj_remove_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
+            safeTimerDelete(&checkup->pumpTimer);
+
+            /* Start persistent alarm after stop-after draining is fully complete */
+            alarm_start_persistent();
         }
     }
 }
 
-void handleStopNowAfterStopAfter(sCheckup* checkup) {
-    pumpFrom = getValueForChemicalSource(gui.tempStepNode->step.stepDetails->source);
+void handleStopNowAfterStopAfter(processNode *pn) {
+    sCheckup* checkup = pn->process.processDetails->checkup;
+    /* currentStep is NULL during last-step draining — use waste in that case */
+    if (checkup->currentStep != NULL)
+        pumpFrom = getValueForChemicalSource(checkup->currentStep->step.stepDetails->data.source);
+    else
+        pumpFrom = getValueForChemicalSource(WASTE);
     pumpDir = PUMP_OUT_RLY;
 
-    if (!checkup->isFilling && tankPercentage == 0) {
+    if (!checkup->data.isFilling && tankPercentage == 0) {
         tankPercentage = 100;
         tankTimeElapsed = tankFillTime;
-        checkup->isFilling = true;
+        checkup->data.isFilling = true;
 
         sendValueToRelay(0, 0, false);
         sendValueToRelay(pumpFrom, pumpDir, true);
-        checkup->isAlreadyPumping = false;
+        checkup->data.isAlreadyPumping = false;
     }
     if (tankPercentage > 0) {
         LV_LOG_USER("STOP NOW after STOP AFTER step NOW DRAINING");
 
-        if(checkup->isAlreadyPumping == true){
+        if(checkup->data.isAlreadyPumping == true){
             sendValueToRelay(0, 0, false);
             sendValueToRelay(pumpFrom, pumpDir, true);
-            checkup->isAlreadyPumping = false;
+            checkup->data.isAlreadyPumping = false;
         }
 
         lv_arc_set_value(checkup->pumpArc, tankPercentage);
@@ -922,45 +836,59 @@ void handleStopNowAfterStopAfter(sCheckup* checkup) {
         LV_LOG_USER("STOP NOW after STOP AFTER DRAINING COMPLETE");
 
         sendValueToRelay(pumpFrom, pumpDir, false);
-        checkup->isAlreadyPumping = false;
+        checkup->data.isAlreadyPumping = false;
 
         lv_arc_set_value(checkup->pumpArc, tankPercentage);
         lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
-        lv_obj_clear_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
-        lv_timer_delete(checkup->pumpTimer);
-        checkup->pumpTimer = NULL;
+        lv_obj_remove_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
+        safeTimerDelete(&checkup->pumpTimer);
+
+        /* Start persistent alarm after stop-now-after-stop-after draining is fully complete */
+        alarm_start_persistent();
     }
 }
 
 
-
-//Optimized BY CHATGPT
 void pumpTimer(lv_timer_t *timer) {
+    /* Extract context from timer user_data */
+    processNode *pn = (processNode *)lv_timer_get_user_data(timer);
+    if(pn == NULL || pn->process.processDetails == NULL || pn->process.processDetails->checkup == NULL) return;
+
     tankPercentage = calculatePercentage(0, tankTimeElapsed, 0, tankFillTime);
-    LV_LOG_USER("pumpTimer running :%d", tankPercentage);
 
-    sCheckup *checkup = gui.tempProcessNode->process.processDetails->checkup;
+    sCheckup *checkup = pn->process.processDetails->checkup;
 
-    if (!checkup->stopAfter) {
-        if (!checkup->stopNow) {
-            if (gui.tempStepNode) {
-                if (!gui.tempStepNode->prev) {
-                    handleFirstStep(checkup);
+    /* Only advance process elapsed time when NOT in stop/drain phase */
+    if (!checkup->data.stopAfter && !checkup->data.stopNow) {
+        checkup_tick_process_elapsed();
+    }
+
+    if (!checkup->data.stopAfter) {
+        if (!checkup->data.stopNow) {
+            if (checkup->currentStep) {
+                if (!checkup->currentStep->prev) {
+                    handleFirstStep(pn);
                 } else {
-                    handleIntermediateOrLastStep(checkup, false);
+                    handleIntermediateOrLastStep(pn, false);
                 }
             } else {
-                handleIntermediateOrLastStep(checkup, true);
+                handleIntermediateOrLastStep(pn, true);
             }
         } else {
-            handleStopNow(checkup);
+            handleStopNow(pn);
         }
     } else {
-        if (!checkup->stopNow) {
-            handleStopAfter(checkup);
+        if (!checkup->data.stopNow) {
+            handleStopAfter(pn);
         } else {
-            handleStopNowAfterStopAfter(checkup);
+            handleStopNowAfterStopAfter(pn);
         }
+    }
+
+    /* Only refresh process arc/time when NOT in stop/drain phase */
+    if(checkup->checkupProcessTimeLeftValue != NULL
+       && !checkup->data.stopAfter && !checkup->data.stopNow) {
+        checkup_refresh_process_ui(pn, checkup);
     }
 }
 
@@ -969,738 +897,834 @@ void pumpTimer(lv_timer_t *timer) {
 
 
 
-void initCheckup()
-{  
-      LV_LOG_USER("Final checks, current on gui.tempProcessNode->process.processDetails->checkup->processStep :%d",gui.tempProcessNode->process.processDetails->checkup->processStep);
-      
-      //in this way processDetail is deleted, to free memory and the "checkout" is a standard screen on top
-      lv_obj_del(gui.tempProcessNode->process.processDetails->processDetailParent);
-      gui.tempProcessNode->process.processDetails->checkup->checkupParent = lv_obj_create(NULL);
-      lv_scr_load(gui.tempProcessNode->process.processDetails->checkup->checkupParent);
+/* ═══════════════════════════════════════════════════════════════════════
+ * Checkup sub-screen rendering functions
+ * These helper functions handle the UI construction for each processStep
+ * ═══════════════════════════════════════════════════════════════════════ */
 
-      gui.tempStepNode = gui.tempProcessNode->process.processDetails->stepElementsList.start;
+static void checkup_renderPreFlight(processNode *proc) {
+    const ui_checkup_layout_t *ui = &ui_get_profile()->checkup;
+    /* processStep 0: Tank size and chemistry volume selection */
+    sCheckup *ckup = proc->process.processDetails->checkup;
+    if(isStepStatus0created == 0) {
+        ckup->checkupSelectTankChemistryContainer = lv_obj_create(ckup->checkupStepContainer);
+        lv_obj_remove_flag(ckup->checkupSelectTankChemistryContainer, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_align(ckup->checkupSelectTankChemistryContainer, LV_ALIGN_TOP_LEFT, ui->stage_panel_x, ui->stage_panel_y);
+        lv_obj_set_size(ckup->checkupSelectTankChemistryContainer, ui_get_profile()->checkup.stage_panel_w, ui_get_profile()->checkup.stage_panel_h);
+        lv_obj_set_style_border_opa(ckup->checkupSelectTankChemistryContainer, LV_OPA_TRANSP, 0);
+        lv_obj_add_event_cb(ckup->checkupSelectTankChemistryContainer, event_checkup, LV_EVENT_CLICKED, proc);
+
+        ckup->checkupProcessReadyLabel = lv_label_create(ckup->checkupSelectTankChemistryContainer);
+        lv_label_set_text(ckup->checkupProcessReadyLabel, checkupProcessReady_text);
+        lv_obj_set_width(ckup->checkupProcessReadyLabel, ui->stage_title_w);
+        lv_obj_set_style_text_font(ckup->checkupProcessReadyLabel, ui->left_title_font, 0);
+        lv_obj_align(ckup->checkupProcessReadyLabel, LV_ALIGN_TOP_LEFT, ui->stage_title_x, ui->stage_title_y);
+
+        ckup->checkupTankSizeLabel = lv_label_create(ckup->checkupSelectTankChemistryContainer);
+        lv_label_set_text(ckup->checkupTankSizeLabel, checkupTankSize_text);
+        lv_obj_set_width(ckup->checkupTankSizeLabel, LV_SIZE_CONTENT);
+        lv_obj_set_style_text_font(ckup->checkupTankSizeLabel, ui->stage_label_font, 0);
+        lv_obj_align(ckup->checkupTankSizeLabel, LV_ALIGN_TOP_MID, ui->tank_size_label_x, ui->tank_size_label_y);
+
+        ckup->checkupTankSizeTextArea = lv_textarea_create(ckup->checkupSelectTankChemistryContainer);
+        lv_textarea_set_one_line(ckup->checkupTankSizeTextArea, true);
+        lv_textarea_set_placeholder_text(ckup->checkupTankSizeTextArea, checkupTankSizePlaceHolder_text);
+        lv_obj_align(ckup->checkupTankSizeTextArea, LV_ALIGN_TOP_MID, ui->stage_tank_size_textarea_x, ui->stage_tank_size_textarea_y);
+        lv_obj_set_width(ckup->checkupTankSizeTextArea, ui->stage_textarea_w);
+
+        lv_obj_set_style_bg_color(ckup->checkupTankSizeTextArea, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
+        lv_obj_set_style_text_align(ckup->checkupTankSizeTextArea, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_set_style_text_font(ckup->checkupTankSizeTextArea, ui->stage_label_font, 0);
+        lv_obj_add_style(ckup->checkupTankSizeTextArea, &ckup->textAreaStyleCheckup, LV_PART_MAIN);
+        lv_obj_set_style_border_color(ckup->checkupTankSizeTextArea, lv_color_hex(WHITE), 0);
+        lv_obj_remove_flag(ckup->checkupTankSizeTextArea, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_set_style_text_color(ckup->checkupTankSizeTextArea, lv_palette_darken(LV_PALETTE_GREY, 1), 0);
+
+        /* Always read tank size from settings (persistent) and sync to checkup data */
+        {
+            const char *sizes[] = tankSizeValues;
+            uint8_t idx = gui.page.settings.settingsParams.tankSize;
+            if(idx < 1 || idx > 3) idx = 2;
+            ckup->data.tankSize = idx;
+            lv_textarea_set_text(ckup->checkupTankSizeTextArea, sizes[idx - 1]);
+        }
+
+        ckup->checkupChemistryVolumeLabel = lv_label_create(ckup->checkupSelectTankChemistryContainer);
+        lv_label_set_text(ckup->checkupChemistryVolumeLabel, checkupChemistryVolume_text);
+        lv_obj_set_width(ckup->checkupChemistryVolumeLabel, LV_SIZE_CONTENT);
+        lv_obj_set_style_text_font(ckup->checkupChemistryVolumeLabel, ui->stage_label_font, 0);
+        lv_obj_align(ckup->checkupChemistryVolumeLabel, LV_ALIGN_TOP_MID, ui->chem_volume_label_x, ui->chem_volume_label_y);
+
+        /* Read-only volume textarea */
+        ckup->checkupVolumeTextArea = lv_textarea_create(ckup->checkupSelectTankChemistryContainer);
+        lv_textarea_set_one_line(ckup->checkupVolumeTextArea, true);
+        lv_obj_align(ckup->checkupVolumeTextArea, LV_ALIGN_TOP_MID, ui->stage_chem_volume_textarea_x, ui->stage_chem_volume_textarea_y);
+        lv_obj_set_width(ckup->checkupVolumeTextArea, ui->stage_textarea_w);
+        lv_obj_set_style_bg_color(ckup->checkupVolumeTextArea, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
+        lv_obj_set_style_text_align(ckup->checkupVolumeTextArea, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_set_style_text_font(ckup->checkupVolumeTextArea, ui->stage_label_font, 0);
+        lv_obj_add_style(ckup->checkupVolumeTextArea, &ckup->textAreaStyleCheckup, LV_PART_MAIN);
+        lv_obj_set_style_border_color(ckup->checkupVolumeTextArea, lv_color_hex(WHITE), 0);
+        lv_obj_remove_flag(ckup->checkupVolumeTextArea, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_set_style_text_color(ckup->checkupVolumeTextArea, lv_palette_darken(LV_PALETTE_GREY, 1), 0);
+
+        /* Always read volume from settings and sync to checkup data */
+        {
+            const char *vols[] = chemVolumeValues;
+            uint8_t v = gui.page.settings.settingsParams.chemistryVolume;
+            if(v < 1 || v > 2) v = 2;
+            ckup->data.activeVolume_index = v;
+            lv_textarea_set_text(ckup->checkupVolumeTextArea, vols[v - 1]);
+        }
+
+        ckup->checkupStartButton = lv_button_create(ckup->checkupSelectTankChemistryContainer);
+        lv_obj_set_size(ckup->checkupStartButton, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
+        lv_obj_align(ckup->checkupStartButton, LV_ALIGN_BOTTOM_MID, ui->stage_button_x, ui->stage_button_y);
+        lv_obj_add_event_cb(ckup->checkupStartButton, event_checkup, LV_EVENT_CLICKED, proc);
+        lv_obj_set_style_bg_color(ckup->checkupStartButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
+        lv_obj_move_foreground(ckup->checkupStartButton);
+
+        ckup->checkupStartButtonLabel = lv_label_create(ckup->checkupStartButton);
+        lv_label_set_text(ckup->checkupStartButtonLabel, checkupStart_text);
+        lv_obj_set_style_text_font(ckup->checkupStartButtonLabel, ui->stage_title_font, 0);
+        lv_obj_align(ckup->checkupStartButtonLabel, LV_ALIGN_CENTER, 0, 0);
+        /* Enable Start immediately if tank/volume are already set from settings */
+        if (ckup->data.tankSize > 0 && ckup->data.activeVolume_index > 0 && ckup->data.processStep < 1) {
+            lv_obj_remove_state(ckup->checkupStartButton, LV_STATE_DISABLED);
+            LV_LOG_USER("checkup: Start button ENABLED (tank=%d, vol=%lu)", ckup->data.tankSize, (unsigned long)ckup->data.activeVolume_index);
+        } else {
+            lv_obj_add_state(ckup->checkupStartButton, LV_STATE_DISABLED);
+        }
+
+        isStepStatus0created = 1;
+    }
+}
+
+static void checkup_renderFillWater(processNode *proc) {
+    const ui_checkup_layout_t *ui = &ui_get_profile()->checkup;
+    /* processStep 1: Fill water */
+    sCheckup *ckup = proc->process.processDetails->checkup;
+    if(isStepStatus1created == 0) {
+        lv_obj_clean(ckup->checkupStepContainer);
+        ckup->checkupFillWaterContainer = lv_obj_create(ckup->checkupStepContainer);
+        lv_obj_remove_flag(ckup->checkupFillWaterContainer, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_align(ckup->checkupFillWaterContainer, LV_ALIGN_TOP_LEFT, ui_get_profile()->checkup.stage_panel_inset, ui_get_profile()->checkup.stage_panel_inset);
+        lv_obj_set_size(ckup->checkupFillWaterContainer, ui_get_profile()->checkup.stage_panel_w, ui_get_profile()->checkup.stage_panel_h);
+        lv_obj_set_style_border_opa(ckup->checkupFillWaterContainer, LV_OPA_TRANSP, 0);
+
+        ckup->checkupFillWaterLabel = lv_label_create(ckup->checkupFillWaterContainer);
+        lv_label_set_text(ckup->checkupFillWaterLabel, checkupFillWaterMachine_text);
+        lv_obj_set_style_text_font(ckup->checkupFillWaterLabel, ui->stage_label_font, 0);
+        lv_obj_align(ckup->checkupFillWaterLabel, LV_ALIGN_CENTER, ui->fill_label_x, ui->fill_label_y);
+        lv_obj_set_style_text_align(ckup->checkupFillWaterLabel, LV_TEXT_ALIGN_CENTER, 0);
+        lv_label_set_long_mode(ckup->checkupFillWaterLabel, LV_LABEL_LONG_WRAP);
+        lv_obj_set_size(ckup->checkupFillWaterLabel, ui->fill_label_w, LV_SIZE_CONTENT);
+
+        ckup->checkupSkipButton = lv_button_create(ckup->checkupFillWaterContainer);
+        lv_obj_set_size(ckup->checkupSkipButton, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
+        lv_obj_align(ckup->checkupSkipButton, LV_ALIGN_BOTTOM_MID, ui->stage_button_x, ui->stage_button_y);
+        lv_obj_add_event_cb(ckup->checkupSkipButton, event_checkup, LV_EVENT_CLICKED, proc);
+        lv_obj_set_style_bg_color(ckup->checkupSkipButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
+        lv_obj_move_foreground(ckup->checkupSkipButton);
+
+        ckup->checkupSkipButtonLabel = lv_label_create(ckup->checkupSkipButton);
+        lv_label_set_text(ckup->checkupSkipButtonLabel, checkupSkip_text);
+        lv_obj_set_style_text_font(ckup->checkupSkipButtonLabel, ui->stage_title_font, 0);
+        lv_obj_align(ckup->checkupSkipButtonLabel, LV_ALIGN_CENTER, 0, 0);
+
+        isStepStatus1created = 1;
+    }
+}
+
+static void checkup_renderReachTemp(processNode *proc) {
+    const ui_checkup_layout_t *ui = &ui_get_profile()->checkup;
+    /* processStep 2: Reach temperature */
+    sCheckup *ckup = proc->process.processDetails->checkup;
+    if(isStepStatus2created == 0) {
+        lv_obj_clean(ckup->checkupStepContainer);
+        ckup->checkupTargetTempsContainer = lv_obj_create(ckup->checkupStepContainer);
+        lv_obj_remove_flag(ckup->checkupTargetTempsContainer, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_align(ckup->checkupTargetTempsContainer, LV_ALIGN_TOP_LEFT, ui->stage_panel_x, ui->stage_panel_y);
+        lv_obj_set_size(ckup->checkupTargetTempsContainer, ui_get_profile()->checkup.stage_panel_w, ui_get_profile()->checkup.stage_panel_h);
+        lv_obj_set_style_border_opa(ckup->checkupTargetTempsContainer, LV_OPA_TRANSP, 0);
+
+        ckup->checkupTargetTempContainer = lv_obj_create(ckup->checkupStepContainer);
+        lv_obj_remove_flag(ckup->checkupTargetTempContainer, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_align(ckup->checkupTargetTempContainer, LV_ALIGN_TOP_MID, ui->target_temp_container_x, ui->target_temp_container_y);
+        lv_obj_set_size(ckup->checkupTargetTempContainer, ui->target_title_w, ui->target_title_h);
+        lv_obj_set_style_border_opa(ckup->checkupTargetTempContainer, LV_OPA_TRANSP, 0);
+
+        ckup->checkupTargetTempLabel = lv_label_create(ckup->checkupTargetTempContainer);
+        lv_label_set_text(ckup->checkupTargetTempLabel, checkupTargetTemp_text);
+        lv_obj_set_style_text_font(ckup->checkupTargetTempLabel, ui->target_title_font, 0);
+        lv_obj_align(ckup->checkupTargetTempLabel, LV_ALIGN_CENTER, ui->target_title_x, ui->target_title_y);
+
+        ckup->checkupTargetTempValue = lv_label_create(ckup->checkupTargetTempContainer);
+
+        if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
+            lv_label_set_text_fmt(ckup->checkupTargetTempValue, "%"PRIi32"°C", proc->process.processDetails->data.temp);
+        } else{
+            lv_label_set_text_fmt(ckup->checkupTargetTempValue, "%"PRIi32"°F", convertCelsiusToFahrenheit(proc->process.processDetails->data.temp));
+        }
+
+        lv_obj_set_style_text_font(ckup->checkupTargetTempValue, ui->target_value_font, 0);
+        lv_obj_align(ckup->checkupTargetTempValue, LV_ALIGN_CENTER, ui->target_title_value_x, ui->target_title_value_y);
+
+        ckup->checkupTargetToleranceTempValue = lv_label_create(ckup->checkupTargetTempContainer);
+        {
+            char buf[32];
+            snprintf(buf, sizeof(buf), "%s ~%.1f", checkupTargetToleranceTemp_text, proc->process.processDetails->data.tempTolerance);
+            lv_label_set_text(ckup->checkupTargetToleranceTempValue, buf);
+        }
+        lv_obj_set_style_text_font(ckup->checkupTargetToleranceTempValue, ui->target_title_font, 0);
+        lv_obj_align(ckup->checkupTargetToleranceTempValue, LV_ALIGN_CENTER, ui->target_tolerance_x, ui->target_tolerance_y);
+
+        ckup->checkupTargetWaterTempContainer = lv_obj_create(ckup->checkupStepContainer);
+        lv_obj_remove_flag(ckup->checkupTargetWaterTempContainer, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_align(ckup->checkupTargetWaterTempContainer, LV_ALIGN_BOTTOM_LEFT, ui->target_temp_left_x, ui->target_temp_y);
+        lv_obj_set_size(ckup->checkupTargetWaterTempContainer, ui->target_temp_w, ui->target_temp_h);
+        lv_obj_set_style_border_opa(ckup->checkupTargetWaterTempContainer, LV_OPA_TRANSP, 0);
+
+        ckup->checkupTargetWaterTempLabel = lv_label_create(ckup->checkupTargetWaterTempContainer);
+        lv_label_set_text(ckup->checkupTargetWaterTempLabel, checkupWater_text);
+        lv_obj_set_style_text_font(ckup->checkupTargetWaterTempLabel, ui->stage_label_font, 0);
+        lv_obj_align(ckup->checkupTargetWaterTempLabel, LV_ALIGN_CENTER, ui->target_temp_label_x, ui->target_temp_label_y);
+
+        ckup->checkupTargetWaterTempValue = lv_label_create(ckup->checkupTargetWaterTempContainer);
+
+        {
+            char buf[16];
+            float initWaterTemp = sim_getTemperature(TEMPERATURE_SENSOR_BATH);
+            if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
+                snprintf(buf, sizeof(buf), "%.1f°C", initWaterTemp);
+            } else{
+                snprintf(buf, sizeof(buf), "%.1f°F", initWaterTemp * 1.8f + 32.0f);
+            }
+            lv_label_set_text(ckup->checkupTargetWaterTempValue, buf);
+        }
+
+        lv_obj_set_style_text_font(ckup->checkupTargetWaterTempValue, ui->stage_value_font, 0);
+        lv_obj_align(ckup->checkupTargetWaterTempValue, LV_ALIGN_CENTER, ui->target_temp_value_x, ui->target_temp_value_y);
+
+        ckup->checkupTargetChemistryTempContainer = lv_obj_create(ckup->checkupStepContainer);
+        lv_obj_remove_flag(ckup->checkupTargetChemistryTempContainer, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_align(ckup->checkupTargetChemistryTempContainer, LV_ALIGN_BOTTOM_RIGHT, ui->target_temp_right_x, ui->target_temp_y);
+        lv_obj_set_size(ckup->checkupTargetChemistryTempContainer, ui->target_temp_w, ui->target_temp_h);
+        lv_obj_set_style_border_opa(ckup->checkupTargetChemistryTempContainer, LV_OPA_TRANSP, 0);
+
+        ckup->checkupTargetChemistryTempLabel = lv_label_create(ckup->checkupTargetChemistryTempContainer);
+        lv_label_set_text(ckup->checkupTargetChemistryTempLabel, checkupChemistry_text);
+        lv_obj_set_style_text_font(ckup->checkupTargetChemistryTempLabel, ui->stage_label_font, 0);
+        lv_obj_align(ckup->checkupTargetChemistryTempLabel, LV_ALIGN_CENTER, ui->target_temp_label_x, ui->target_temp_label_y);
+
+        ckup->checkupTargetChemistryTempValue = lv_label_create(ckup->checkupTargetChemistryTempContainer);
+
+        {
+            char buf[16];
+            float initChemTemp = sim_getTemperature(TEMPERATURE_SENSOR_CHEMICAL);
+            if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
+                snprintf(buf, sizeof(buf), "%.1f°C", initChemTemp);
+            } else{
+                snprintf(buf, sizeof(buf), "%.1f°F", initChemTemp * 1.8f + 32.0f);
+            }
+            lv_label_set_text(ckup->checkupTargetChemistryTempValue, buf);
+        }
+
+        lv_obj_set_style_text_font(ckup->checkupTargetChemistryTempValue, ui->stage_value_font, 0);
+        lv_obj_align(ckup->checkupTargetChemistryTempValue, LV_ALIGN_CENTER, ui->target_temp_value_x, ui->target_temp_value_y);
+
+        ckup->checkupSkipButton = lv_button_create(ckup->checkupTargetTempsContainer);
+        lv_obj_set_size(ckup->checkupSkipButton, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
+        lv_obj_align(ckup->checkupSkipButton, LV_ALIGN_BOTTOM_MID, ui->stage_button_x, ui->stage_button_y);
+        lv_obj_add_event_cb(ckup->checkupSkipButton, event_checkup, LV_EVENT_CLICKED, proc);
+        lv_obj_set_style_bg_color(ckup->checkupSkipButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
+        lv_obj_move_foreground(ckup->checkupSkipButton);
+
+        ckup->checkupSkipButtonLabel = lv_label_create(ckup->checkupSkipButton);
+        lv_label_set_text(ckup->checkupSkipButtonLabel, checkupSkip_text);
+        lv_obj_set_style_text_font(ckup->checkupSkipButtonLabel, ui->stage_title_font, 0);
+        lv_obj_align(ckup->checkupSkipButtonLabel, LV_ALIGN_CENTER, 0, 0);
+
+        ckup->checkupHeaterStatusLabel = lv_label_create(ckup->checkupTargetTempsContainer);
+        lv_label_set_text_fmt(ckup->checkupHeaterStatusLabel, checkupHeaterStatusFmt_text, checkupHeaterOff_text);
+        lv_obj_set_style_text_font(ckup->checkupHeaterStatusLabel, ui->heater_status_font, 0);
+        lv_obj_align(ckup->checkupHeaterStatusLabel, LV_ALIGN_BOTTOM_MID, ui->heater_status_x, ui->heater_status_y);
+
+        ckup->checkupTempTimeoutLabel = NULL;
+
+        /* Start temperature monitoring timer if temp control is enabled */
+        if(proc->process.processDetails->data.isTempControlled) {
+            LV_LOG_USER("Temperature control enabled — starting temp timer (target=%"PRIu32"°C, tolerance=%.1f)",
+                proc->process.processDetails->data.temp,
+                proc->process.processDetails->data.tempTolerance);
+            ckup->data.tempTimeoutCounter = 0;
+            ckup->data.heaterOn = false;
+            ckup->data.currentWaterTemp = sim_getTemperature(TEMPERATURE_SENSOR_BATH);
+            ckup->data.currentChemTemp = sim_getTemperature(TEMPERATURE_SENSOR_CHEMICAL);
+            ckup->tempTimer = lv_timer_create(tempTimerCallback, 1000, proc);
+        } else {
+            ckup->tempTimer = NULL;
+            lv_label_set_text(ckup->checkupHeaterStatusLabel, checkupNoTempControl_text);
+        }
+
+        isStepStatus2created = 1;
+    }
+}
+
+static void checkup_renderCheckFilm(processNode *proc) {
+    const ui_checkup_layout_t *ui = &ui_get_profile()->checkup;
+    /* processStep 3: Check film/tank */
+    sCheckup *ckup = proc->process.processDetails->checkup;
+    if(isStepStatus3created == 0) {
+        lv_obj_clean(ckup->checkupStepContainer);
+        ckup->checkupFilmRotatingContainer = lv_obj_create(ckup->checkupStepContainer);
+        lv_obj_remove_flag(ckup->checkupFilmRotatingContainer, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_align(ckup->checkupFilmRotatingContainer, LV_ALIGN_TOP_LEFT, ui_get_profile()->checkup.stage_panel_inset, ui_get_profile()->checkup.stage_panel_inset);
+        lv_obj_set_size(ckup->checkupFilmRotatingContainer, ui_get_profile()->checkup.stage_panel_w, ui_get_profile()->checkup.stage_panel_h);
+        lv_obj_set_style_border_opa(ckup->checkupFilmRotatingContainer, LV_OPA_TRANSP, 0);
+
+        ckup->checkupTankIsPresentContainer = lv_obj_create(ckup->checkupFilmRotatingContainer);
+        lv_obj_remove_flag(ckup->checkupTankIsPresentContainer, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_align(ckup->checkupTankIsPresentContainer, LV_ALIGN_CENTER, ui->film_tank_present_box_x, ui->film_tank_present_box_y);
+        lv_obj_set_size(ckup->checkupTankIsPresentContainer, ui->film_box_w, ui->film_box_h);
+        lv_obj_set_style_border_opa(ckup->checkupTankIsPresentContainer, LV_OPA_TRANSP, 0);
+
+        ckup->checkupTankIsPresentLabel = lv_label_create(ckup->checkupTankIsPresentContainer);
+        lv_label_set_text(ckup->checkupTankIsPresentLabel, checkupTankPosition_text);
+        lv_obj_set_style_text_font(ckup->checkupTankIsPresentLabel, ui->stage_value_font, 0);
+        lv_obj_align(ckup->checkupTankIsPresentLabel, LV_ALIGN_CENTER, ui->film_label_x, ui->film_label_y);
+
+        ckup->checkupTankIsPresentValue = lv_label_create(ckup->checkupTankIsPresentContainer);
+        lv_label_set_text(ckup->checkupTankIsPresentValue, checkupYes_text);
+        lv_obj_set_style_text_font(ckup->checkupTankIsPresentValue, ui->process_name_font, 0);
+        lv_obj_align(ckup->checkupTankIsPresentValue, LV_ALIGN_CENTER, ui->film_value_x, ui->film_value_y);
+
+        ckup->checkupFilmInPositionContainer = lv_obj_create(ckup->checkupFilmRotatingContainer);
+        lv_obj_remove_flag(ckup->checkupFilmInPositionContainer, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_align(ckup->checkupFilmInPositionContainer, LV_ALIGN_CENTER, ui->film_rotating_box_x, ui->film_rotating_box_y);
+        lv_obj_set_size(ckup->checkupFilmInPositionContainer, ui->film_box_w, ui->film_box_h);
+        lv_obj_set_style_border_opa(ckup->checkupFilmInPositionContainer, LV_OPA_TRANSP, 0);
+
+        ckup->checkupFilmRotatingLabel = lv_label_create(ckup->checkupFilmInPositionContainer);
+        lv_label_set_text(ckup->checkupFilmRotatingLabel, checkupFilmRotation_text);
+        lv_obj_set_style_text_font(ckup->checkupFilmRotatingLabel, ui->stage_value_font, 0);
+        lv_obj_align(ckup->checkupFilmRotatingLabel, LV_ALIGN_CENTER, ui->film_label_x, ui->film_label_y);
+
+        ckup->checkupFilmRotatingValue = lv_label_create(ckup->checkupFilmInPositionContainer);
+        lv_label_set_text(ckup->checkupFilmRotatingValue, checkupChecking_text);
+        lv_obj_set_style_text_font(ckup->checkupFilmRotatingValue, ui->process_name_font, 0);
+        lv_obj_align(ckup->checkupFilmRotatingValue, LV_ALIGN_CENTER, ui->film_value_x, ui->film_value_y);
+
+        ckup->checkupStartButton = lv_button_create(ckup->checkupFilmRotatingContainer);
+        lv_obj_set_size(ckup->checkupStartButton, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
+        lv_obj_align(ckup->checkupStartButton, LV_ALIGN_BOTTOM_MID, ui->stage_button_x, ui->stage_button_y);
+        lv_obj_add_event_cb(ckup->checkupStartButton, event_checkup, LV_EVENT_CLICKED, proc);
+        lv_obj_set_style_bg_color(ckup->checkupStartButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
+        lv_obj_move_foreground(ckup->checkupStartButton);
+
+        ckup->checkupStartButtonLabel = lv_label_create(ckup->checkupStartButton);
+        lv_label_set_text(ckup->checkupStartButtonLabel, checkupStart_text);
+        lv_obj_set_style_text_font(ckup->checkupStartButtonLabel, ui->stage_title_font, 0);
+        lv_obj_align(ckup->checkupStartButtonLabel, LV_ALIGN_CENTER, 0, 0);
+
+        isStepStatus3created = 1;
+    }
+}
+
+static void checkup_renderProcessing(processNode *proc) {
+    const ui_checkup_layout_t *ui = &ui_get_profile()->checkup;
+    /* processStep 4: Main processing */
+    sCheckup *ckup = proc->process.processDetails->checkup;
+    if(isStepStatus4created == 0) {
+        tankFillTime = (uint8_t)checkup_get_tank_fill_time_seconds(ckup);
+        LV_LOG_USER("tankFillTime Volume %"PRIu32", size %"PRIu8", time %"PRIu8"",ckup->data.activeVolume_index > 0 ? ckup->data.activeVolume_index - 1 : 0, ckup->data.tankSize > 0 ? ckup->data.tankSize - 1 : 0, tankFillTime);
+
+        ckup->data.isFilling = true;
+        ckup->pumpTimer = lv_timer_create(pumpTimer, 1000, proc);
+        lv_obj_add_state(ckup->checkupCloseButton, LV_STATE_DISABLED);
+
+        lv_obj_clean(ckup->checkupStepContainer);
+        ckup->checkupProcessingContainer = lv_obj_create(ckup->checkupStepContainer);
+        lv_obj_remove_flag(ckup->checkupProcessingContainer, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_align(ckup->checkupProcessingContainer, LV_ALIGN_TOP_LEFT, ui->processing_container_x, ui->processing_container_y);
+        lv_obj_set_size(ckup->checkupProcessingContainer, ui->processing_container_w, ui->processing_container_h);
+        lv_obj_set_style_border_opa(ckup->checkupProcessingContainer, LV_OPA_TRANSP, 0);
+
+        ckup->processArc = lv_arc_create(ckup->checkupProcessingContainer);
+        lv_obj_set_size(ckup->processArc, ui->processing_arc_size, ui->processing_arc_size);
+        lv_arc_set_rotation(ckup->processArc, 140);
+        lv_arc_set_bg_angles(ckup->processArc, 0, 260);
+        lv_arc_set_value(ckup->processArc, 0);
+        lv_arc_set_range(ckup->processArc, 0, 100);
+        lv_obj_align(ckup->processArc, LV_ALIGN_CENTER, ui->processing_arc_center_x, ui->processing_arc_center_y);
+        lv_obj_remove_style(ckup->processArc, NULL, LV_PART_KNOB);
+        lv_obj_remove_flag(ckup->processArc, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_set_style_arc_color(ckup->processArc,lv_color_hex(GREEN) , LV_PART_INDICATOR);
+        lv_obj_set_style_arc_color(ckup->processArc, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
+        if (ui->processing_arc_width > 0) {
+            lv_obj_set_style_arc_width(ckup->processArc, ui->processing_arc_width, LV_PART_MAIN);
+            lv_obj_set_style_arc_width(ckup->processArc, ui->processing_arc_width, LV_PART_INDICATOR);
+        }
+
+        ckup->checkupProcessTimeLeftValue = lv_label_create(ckup->checkupProcessingContainer);
+        {
+            uint32_t estimated_total_seconds = checkup_estimated_process_runtime_seconds(proc, ckup);
+            lv_label_set_text_fmt(ckup->checkupProcessTimeLeftValue, "%" PRIu32 "m%" PRIu32 "s",
+              estimated_total_seconds / 60U, estimated_total_seconds % 60U);
+        }
+        lv_obj_set_style_text_font(ckup->checkupProcessTimeLeftValue, ui->target_value_font, 0);
+        lv_obj_align(ckup->checkupProcessTimeLeftValue, LV_ALIGN_CENTER, ui->processing_time_x, ui->processing_time_y);
+
+        ckup->checkupStepNameValue = lv_label_create(ckup->checkupProcessingContainer);
+        lv_label_set_text(ckup->checkupStepNameValue,
+            ckup->currentStep->step.stepDetails->data.stepNameString);
+        lv_obj_set_style_text_align(ckup->checkupStepNameValue, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_set_style_text_font(ckup->checkupStepNameValue, ui->stage_title_font, 0);
+        lv_obj_align(ckup->checkupStepNameValue, LV_ALIGN_CENTER, ui->processing_step_name_x, ui->processing_step_name_y);
+        lv_obj_set_width(ckup->checkupStepNameValue, ui->processing_step_name_w);
+        lv_label_set_long_mode(ckup->checkupStepNameValue, LV_LABEL_LONG_SCROLL_CIRCULAR);
+
+        ckup->checkupStepTimeLeftValue = lv_label_create(ckup->checkupProcessingContainer);
+        lv_label_set_text_fmt(ckup->checkupStepTimeLeftValue, "%dm%ds",
+            proc->process.processDetails->stepElementsList.start->step.stepDetails->data.timeMins,
+            proc->process.processDetails->stepElementsList.start->step.stepDetails->data.timeSecs);
+        lv_obj_set_style_text_font(ckup->checkupStepTimeLeftValue, ui->stage_title_font, 0);
+
+        ckup->stepArc = lv_arc_create(ckup->checkupProcessingContainer);
+        lv_obj_set_size(ckup->stepArc, ui->processing_step_arc_size, ui->processing_step_arc_size);
+        lv_arc_set_rotation(ckup->stepArc, 230);
+        lv_arc_set_bg_angles(ckup->stepArc, 0, 80);
+        lv_arc_set_value(ckup->stepArc, 0);
+        lv_arc_set_range(ckup->stepArc, 0, 100);
+        lv_obj_align(ckup->stepArc, LV_ALIGN_CENTER, ui->processing_step_arc_center_x, ui->processing_step_arc_center_y);
+        lv_obj_remove_style(ckup->stepArc, NULL, LV_PART_KNOB);
+        lv_obj_remove_flag(ckup->stepArc, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_set_style_arc_color(ckup->stepArc,lv_color_hex(ORANGE_LIGHT) , LV_PART_INDICATOR);
+        lv_obj_set_style_arc_color(ckup->stepArc, lv_color_hex(ORANGE_DARK), LV_PART_MAIN);
+        if (ui->processing_arc_width > 0) {
+            lv_obj_set_style_arc_width(ckup->stepArc, ui->processing_arc_width, LV_PART_MAIN);
+            lv_obj_set_style_arc_width(ckup->stepArc, ui->processing_arc_width, LV_PART_INDICATOR);
+        }
+        lv_obj_move_foreground(ckup->stepArc);
+
+        ckup->checkupStepKindValue = lv_label_create(ckup->checkupProcessingContainer);
+        lv_label_set_text(ckup->checkupStepKindValue, checkupFilling_text);
+        lv_obj_set_style_text_font(ckup->checkupStepKindValue, ui->stage_label_font, 0);
+        lv_obj_set_style_text_align(ckup->checkupStepKindValue, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_set_width(ckup->checkupStepKindValue, ui->processing_step_name_w);
+        lv_obj_align(ckup->checkupStepKindValue, LV_ALIGN_CENTER, ui->processing_step_kind_x, ui->processing_step_kind_y);
+        lv_obj_add_flag(ckup->checkupStepKindValue, LV_OBJ_FLAG_HIDDEN);
+
+        lv_obj_align_to(ckup->checkupStepTimeLeftValue, ckup->checkupStepNameValue, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
+
+        ckup->pumpArc = lv_arc_create(ckup->checkupProcessingContainer);
+        lv_obj_set_size(ckup->pumpArc, ui->processing_pump_arc_size, ui->processing_pump_arc_size);
+        lv_arc_set_rotation(ckup->pumpArc, 48);
+        lv_arc_set_bg_angles(ckup->pumpArc, 0, 84);
+        lv_arc_set_range(ckup->pumpArc, 0, 100);
+        lv_obj_align(ckup->pumpArc, LV_ALIGN_CENTER, ui->processing_arc_center_x, ui->processing_arc_center_y);
+        lv_obj_remove_style(ckup->pumpArc, NULL, LV_PART_KNOB);
+        lv_obj_remove_flag(ckup->pumpArc, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_set_style_arc_color(ckup->pumpArc,lv_color_hex(LIGHT_BLUE) , LV_PART_INDICATOR);
+        lv_obj_set_style_arc_color(ckup->pumpArc, lv_color_hex(BLUE_DARK), LV_PART_MAIN);
+        if (ui->processing_arc_width > 0) {
+            lv_obj_set_style_arc_width(ckup->pumpArc, ui->processing_arc_width, LV_PART_MAIN);
+            lv_obj_set_style_arc_width(ckup->pumpArc, ui->processing_arc_width, LV_PART_INDICATOR);
+        }
+        lv_obj_move_foreground(ckup->pumpArc);
+        lv_arc_set_mode(ckup->pumpArc, LV_ARC_MODE_REVERSE);
+
+        ckup->checkupProcessCompleteLabel = lv_label_create(ckup->checkupProcessingContainer);
+        lv_obj_set_style_text_align(ckup->checkupProcessCompleteLabel, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_set_style_text_font(ckup->checkupProcessCompleteLabel, ui->stage_title_font, 0);
+        lv_obj_align(ckup->checkupProcessCompleteLabel, LV_ALIGN_CENTER, ui->processing_complete_x, ui->processing_complete_y);
+        lv_obj_add_flag(ckup->checkupProcessCompleteLabel, LV_OBJ_FLAG_HIDDEN);
+
+        isStepStatus4created = 1;
+    }
+}
+
+void initCheckup(processNode *pn)
+{
+      sCheckup *ckup = pn->process.processDetails->checkup;
+      const ui_checkup_layout_t *ui = &ui_get_profile()->checkup;
+      LV_LOG_USER("Final checks, current on ckup->data.processStep :%d",ckup->data.processStep);
+
+      /* Delete processDetail screen to free memory — but only if it exists.
+         When starting from Flutter/WebSocket the processDetail page was never
+         opened, so processDetailParent is NULL. */
+      if(pn->process.processDetails->processDetailParent != NULL) {
+          lv_obj_delete(pn->process.processDetails->processDetailParent);
+          pn->process.processDetails->processDetailParent = NULL;
+      }
+      ckup->checkupParent = lv_obj_create(NULL);
+#if defined(DISPLAY_DRIVER_ST7701)
+      st7701_lcd_fill_screen(0x0000);
+      st7701_lcd_set_dim_inhibit(true);  /* Keep screen on during process */
+#endif
+      lv_screen_load(ckup->checkupParent);
+      lv_obj_invalidate(ckup->checkupParent);
+
+      ckup->currentStep = pn->process.processDetails->stepElementsList.start;
       
       //in this way create a new layer on top of others, so "checkout" will be on top of processDetail
-      //gui.tempProcessNode->process.processDetails->checkup->checkupParent = lv_obj_class_create_obj(&lv_msgbox_backdrop_class, lv_layer_top());
-      //lv_obj_class_init_obj(gui.tempProcessNode->process.processDetails->checkup->checkupParent);
-      //lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupParent, LV_OBJ_FLAG_IGNORE_LAYOUT);
-      //lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupParent, LV_PCT(100), LV_PCT(100));
+      //ckup->checkupParent = lv_obj_class_create_obj(&lv_msgbox_backdrop_class, lv_layer_top());
       
-      
-      if(gui.tempProcessNode->process.processDetails->checkup->checkupParent == NULL){
-        LV_LOG_USER("Oggetto non creato");
+      if(ckup->checkupParent == NULL){
+        LV_LOG_USER("Object not created");
       }
       else {
-        LV_LOG_USER("Oggetto creato");
+        LV_LOG_USER("Object created");
       }
       
-	    if(gui.tempProcessNode->process.processDetails->checkup->textAreaStyleCheckup.values_and_props == NULL ) {		/* Only initialise the style once! */
-        lv_style_init(&gui.tempProcessNode->process.processDetails->checkup->textAreaStyleCheckup);
+	    if(ckup->textAreaStyleCheckup.values_and_props == NULL ) {		/* Only initialise the style once! */
+        lv_style_init(&ckup->textAreaStyleCheckup);
       }
    
 
-      gui.tempProcessNode->process.processDetails->checkup->checkupContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupParent);
-      lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupContainer, LV_ALIGN_CENTER, 0, 0);
-      lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupContainer, LV_PCT(100), LV_PCT(100)); 
-      lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupContainer, LV_OBJ_FLAG_SCROLLABLE); 
+      ckup->checkupContainer = lv_obj_create(ckup->checkupParent);
+      lv_obj_align(ckup->checkupContainer, LV_ALIGN_CENTER, 0, 0);
+      lv_obj_set_size(ckup->checkupContainer, LV_PCT(100), LV_PCT(100)); 
+      lv_obj_remove_flag(ckup->checkupContainer, LV_OBJ_FLAG_SCROLLABLE); 
 
-            gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton = lv_button_create(gui.tempProcessNode->process.processDetails->checkup->checkupContainer);
-            lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, BUTTON_POPUP_CLOSE_WIDTH * 1.2, BUTTON_POPUP_CLOSE_HEIGHT * 1.2);
-            lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, LV_ALIGN_TOP_RIGHT, 7 , -10);
-            lv_obj_add_event_cb(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, event_checkup, LV_EVENT_CLICKED, gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton);
-            lv_obj_set_style_bg_color(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
-            if(gui.tempProcessNode->process.processDetails->checkup->processStep > 0){
-              lv_obj_add_state(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, LV_STATE_DISABLED);            
+            ckup->checkupCloseButton = lv_button_create(ckup->checkupContainer);
+            lv_obj_set_size(ckup->checkupCloseButton, ui->close_btn_w, ui->close_btn_h);
+            lv_obj_align(ckup->checkupCloseButton, LV_ALIGN_TOP_RIGHT, ui->close_x , ui->close_y);
+            lv_obj_add_event_cb(ckup->checkupCloseButton, event_checkup, LV_EVENT_CLICKED, pn);
+            lv_obj_set_style_bg_color(ckup->checkupCloseButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
+            lv_obj_move_foreground(ckup->checkupCloseButton);
+            if(ckup->data.processStep > 0){
+              lv_obj_add_state(ckup->checkupCloseButton, LV_STATE_DISABLED);
             }
 
-                  gui.tempProcessNode->process.processDetails->checkup->checkupCloseButtonLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton);         
-                  lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButtonLabel, closePopup_icon); 
-                  lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButtonLabel, &FilMachineFontIcons_30, 0);              
-                  lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButtonLabel, LV_ALIGN_CENTER, 0, 0);
+                  ckup->checkupCloseButtonLabel = lv_label_create(ckup->checkupCloseButton);         
+                  lv_label_set_text(ckup->checkupCloseButtonLabel, closePopup_icon); 
+                  lv_obj_set_style_text_font(ckup->checkupCloseButtonLabel, ui->close_icon_font, 0);              
+                  lv_obj_align(ckup->checkupCloseButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
 
-            gui.tempProcessNode->process.processDetails->checkup->checkupProcessNameContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupContainer);
-            lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupProcessNameContainer, LV_OBJ_FLAG_SCROLLABLE); 
-            lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupProcessNameContainer, LV_ALIGN_TOP_LEFT, -10, -15);
-            lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupProcessNameContainer, 420, 50); 
-            //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupProcessNameContainer, lv_color_hex(GREEN_DARK), 0);
-            lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupProcessNameContainer, LV_OPA_TRANSP, 0);
+            ckup->checkupProcessNameContainer = lv_obj_create(ckup->checkupContainer);
+            lv_obj_remove_flag(ckup->checkupProcessNameContainer, LV_OBJ_FLAG_SCROLLABLE); 
+            lv_obj_align(ckup->checkupProcessNameContainer, LV_ALIGN_TOP_LEFT, ui->process_name_x, ui->process_name_y);
+            lv_obj_set_size(ckup->checkupProcessNameContainer, ui->process_name_w, ui->process_name_h);
+            lv_obj_set_style_border_opa(ckup->checkupProcessNameContainer, LV_OPA_TRANSP, 0);
 
-                  gui.tempProcessNode->process.processDetails->checkup->checkupProcessNameValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupProcessNameContainer);         
-                  lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupProcessNameValue, gui.tempProcessNode->process.processDetails->processNameString); 
-                  lv_obj_set_width(gui.tempProcessNode->process.processDetails->checkup->checkupProcessNameValue, 420);
-                  lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupProcessNameValue, &lv_font_montserrat_30, 0);              
-                  lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupProcessNameValue, LV_ALIGN_TOP_LEFT, -10, -8);
-                  lv_label_set_long_mode(gui.tempProcessNode->process.processDetails->checkup->checkupProcessNameValue, LV_LABEL_LONG_SCROLL_CIRCULAR);
+                  ckup->checkupProcessNameValue = lv_label_create(ckup->checkupProcessNameContainer);
+                  lv_label_set_text(ckup->checkupProcessNameValue, pn->process.processDetails->data.processNameString);
+                  lv_obj_set_width(ckup->checkupProcessNameValue, ui->process_name_label_w);
+                  lv_obj_set_style_text_font(ckup->checkupProcessNameValue, ui->process_name_font, 0);              
+                  lv_obj_align(ckup->checkupProcessNameValue, LV_ALIGN_TOP_LEFT, ui->process_name_label_x, ui->process_name_label_y);
+                  lv_label_set_long_mode(ckup->checkupProcessNameValue, LV_LABEL_LONG_SCROLL_CIRCULAR);
 
             //RIGHT GREEN CONTAINER
-            gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupContainer);
-            lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer, LV_OBJ_FLAG_SCROLLABLE); 
-            lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer, LV_ALIGN_TOP_LEFT, 217, 35);
-            lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer, 240, 265); 
-            lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer, lv_palette_main(LV_PALETTE_GREEN), 0);
-            //lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer, LV_OPA_TRANSP, 0);
+            ckup->checkupStepContainer = lv_obj_create(ckup->checkupContainer);
+            lv_obj_remove_flag(ckup->checkupStepContainer, LV_OBJ_FLAG_SCROLLABLE); 
+            lv_obj_align(ckup->checkupStepContainer, LV_ALIGN_TOP_LEFT, ui->step_panel_x, ui->step_panel_y);
+            lv_obj_set_size(ckup->checkupStepContainer, ui->step_panel_w, ui->step_panel_h);
+            lv_obj_set_style_border_color(ckup->checkupStepContainer, lv_palette_main(LV_PALETTE_GREEN), 0);
 
             //LEFT WHITE CONTAINER
-            gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupContainer);
-            lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer, LV_OBJ_FLAG_SCROLLABLE); 
-            lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer, LV_ALIGN_TOP_LEFT, -10, 35);
-            lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer, 225, 265); 
-            lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer, lv_color_hex(WHITE), 0);
-            //lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer, LV_OPA_TRANSP, 0);
+            ckup->checkupNextStepsContainer = lv_obj_create(ckup->checkupContainer);
+            lv_obj_remove_flag(ckup->checkupNextStepsContainer, LV_OBJ_FLAG_SCROLLABLE); 
+            lv_obj_align(ckup->checkupNextStepsContainer, LV_ALIGN_TOP_LEFT, ui->left_panel_x, ui->left_panel_y);
+            lv_obj_set_size(ckup->checkupNextStepsContainer, ui->left_panel_w, ui->left_panel_h);
+            lv_obj_set_style_border_color(ckup->checkupNextStepsContainer, lv_color_hex(WHITE), 0);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+ * Public getters — expose static counters to ws_server.c
+ * ═══════════════════════════════════════════════════════════════════════ */
+void checkup_reset_state(void) {
+    resetStuffBeforeNextProcess();
+}
+
+uint8_t  checkup_get_step_percentage(void)       { return stepPercentage; }
+uint8_t  checkup_get_process_percentage(void)     { return processPercentage; }
+uint8_t  checkup_get_tank_percentage(void)        { return tankPercentage; }
+
+uint32_t checkup_get_step_elapsed_mins(void)      { return minutesStepElapsed; }
+uint8_t  checkup_get_step_elapsed_secs(void)      { return (uint8_t)secondsStepElapsed; }
+uint32_t checkup_get_step_left_mins(void)         { return minutesStepLeft; }
+uint8_t  checkup_get_step_left_secs(void)         { return (uint8_t)secondsStepLeft; }
+
+uint32_t checkup_get_process_left_mins(void)      { return minutesProcessLeft; }
+uint8_t  checkup_get_process_left_secs(void)      { return (uint8_t)secondsProcessLeft; }
+uint32_t checkup_get_process_elapsed_mins(void)   { return minutesProcessElapsed; }
+uint8_t  checkup_get_process_elapsed_secs(void)   { return (uint8_t)secondsProcessElapsed; }
+
 void checkup(processNode *processToCheckup) {
-	
+
+	const ui_checkup_layout_t *ui = &ui_get_profile()->checkup;
 	char *tmp_checkupStepStatuses[] = checkupStepStatuses;
 	char *tmp_processSourceList[] = processSourceList;
 	char *tmp_processTempControlList[] = processTempControlList;
-	uint16_t tmp_tanksSizesAndTimes[2][3][2] = tanksSizesAndTimes;
-	
-  if(processToCheckup->process.processDetails->checkup->checkupParent == NULL){
+
+	/* Backward compatibility: keep gui.tempProcessNode in sync for other modules */
+	gui.tempProcessNode = processToCheckup;
+
+	sCheckup *ckup = processToCheckup->process.processDetails->checkup;
+
+  if(ckup->checkupParent == NULL){
     LV_LOG_USER("initCheckup");
 
-    gui.tempProcessNode = processToCheckup;
-//    gui.tempProcessNode->process.processDetails->checkup = malloc(sizeof(sCheckup));
-    gui.tempProcessNode->process.processDetails->checkup->isProcessing = false;
-    gui.tempProcessNode->process.processDetails->checkup->isFilling = false;
-    gui.tempProcessNode->process.processDetails->checkup->processStep = 0;
+//    processToCheckup->process.processDetails->checkup = malloc(sizeof(sCheckup));
+    ckup->data.isProcessing = false;
+    ckup->data.isFilling = false;
+    ckup->data.processStep = 0;
 
-    gui.tempProcessNode->process.processDetails->checkup->stepFillWaterStatus = 0;
-    gui.tempProcessNode->process.processDetails->checkup->stepCheckFilmStatus = 0;
-    gui.tempProcessNode->process.processDetails->checkup->stepReachTempStatus = 0;
-    gui.tempProcessNode->process.processDetails->checkup->activeVolume_index  = 0;
-    gui.tempProcessNode->process.processDetails->checkup->stopAfter  = false;
-    gui.tempProcessNode->process.processDetails->checkup->stopNow    = false;
-    gui.tempProcessNode->process.processDetails->checkup->isAlreadyPumping    = false;
+    ckup->data.stepFillWaterStatus = 0;
+    ckup->data.stepCheckFilmStatus = 0;
+    ckup->data.stepReachTempStatus = 0;
+    /* Initialize from settings so Start is active immediately */
+    ckup->data.tankSize            = gui.page.settings.settingsParams.tankSize;
+    ckup->data.activeVolume_index  = gui.page.settings.settingsParams.chemistryVolume;
+    ckup->data.stopAfter  = false;
+    ckup->data.stopNow    = false;
+    ckup->data.isAlreadyPumping    = false;
 
-    LV_LOG_USER("isProcessing %d", gui.tempProcessNode->process.processDetails->checkup->isProcessing);
-    if(gui.tempProcessNode->process.processDetails->checkup->isProcessing == 0)
+    LV_LOG_USER("isProcessing %d", ckup->data.isProcessing);
+    if(ckup->data.isProcessing == 0)
         LV_LOG_USER("isProcessing False");
 
-    initCheckup();
+    initCheckup(processToCheckup);
   }
     LV_LOG_USER("initCheckup Done!");
+
         resetStuffBeforeNextProcess();
         //LEFT SIDE OF SCREEN
-        if(gui.tempProcessNode->process.processDetails->checkup->isProcessing == 0){
+        if(ckup->data.isProcessing == 0){
             if(isProcessingStatus0created == 0){
-                  gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer);         
-                  lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsLabel, checkupNexStepsTitle_text); 
-                  lv_obj_set_width(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsLabel, LV_SIZE_CONTENT);
-                  lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsLabel, &lv_font_montserrat_22, 0);              
-                  lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsLabel, LV_ALIGN_TOP_LEFT, -10, -8);
+                  ckup->checkupNextStepsLabel = lv_label_create(ckup->checkupNextStepsContainer);         
+                  lv_label_set_text(ckup->checkupNextStepsLabel, checkupNexStepsTitle_text); 
+                  lv_obj_set_width(ckup->checkupNextStepsLabel, LV_SIZE_CONTENT);
+                  lv_obj_set_style_text_font(ckup->checkupNextStepsLabel, ui->left_title_font, 0);              
+                  lv_obj_align(ckup->checkupNextStepsLabel, LV_ALIGN_TOP_LEFT, ui->left_title_x, ui->left_title_y);
 
-                  gui.tempProcessNode->process.processDetails->checkup->checkupMachineWillDoLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer);
-                  lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupMachineWillDoLabel, checkupTheMachineWillDo_text); 
-                  lv_obj_set_width(gui.tempProcessNode->process.processDetails->checkup->checkupMachineWillDoLabel, LV_SIZE_CONTENT);
-                  lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupMachineWillDoLabel, &lv_font_montserrat_18, 0);              
-                  lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupMachineWillDoLabel, LV_ALIGN_TOP_LEFT, -10, 17);
+                  ckup->checkupMachineWillDoLabel = lv_label_create(ckup->checkupNextStepsContainer);
+                  lv_label_set_text(ckup->checkupMachineWillDoLabel, checkupTheMachineWillDo_text); 
+                  lv_obj_set_width(ckup->checkupMachineWillDoLabel, LV_SIZE_CONTENT);
+                  lv_obj_set_style_text_font(ckup->checkupMachineWillDoLabel, ui->left_body_font, 0);              
+                  lv_obj_align(ckup->checkupMachineWillDoLabel, LV_ALIGN_TOP_LEFT, ui->left_title_x, ui->left_body_intro_y);
 
-                  gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer);
-                  lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                  lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillContainer, LV_ALIGN_TOP_LEFT, -10, 45);
-                  lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillContainer, 195, 45); 
-                  //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillContainer, lv_color_hex(GREEN_DARK), 0);
-                  lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillContainer, LV_OPA_TRANSP, 0);
+                  ckup->checkupWaterFillContainer = lv_obj_create(ckup->checkupNextStepsContainer);
+                  lv_obj_remove_flag(ckup->checkupWaterFillContainer, LV_OBJ_FLAG_SCROLLABLE); 
+                  lv_obj_align(ckup->checkupWaterFillContainer, LV_ALIGN_TOP_LEFT, ui->left_row_x, ui->left_water_fill_row_y);
+                  lv_obj_set_size(ckup->checkupWaterFillContainer, ui->left_row_w, ui->left_row_h);
+                  lv_obj_set_style_border_opa(ckup->checkupWaterFillContainer, LV_OPA_TRANSP, 0);
 
                   
-                          gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillStatusIcon = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillContainer);         
-                          lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillStatusIcon, tmp_checkupStepStatuses[gui.tempProcessNode->process.processDetails->checkup->stepFillWaterStatus]); 
-                          lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillStatusIcon, &FilMachineFontIcons_15, 0);              
-                          lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillStatusIcon, LV_ALIGN_LEFT_MID, -15, 0);
+                          ckup->checkupWaterFillStatusIcon = lv_label_create(ckup->checkupWaterFillContainer);         
+                          lv_label_set_text(ckup->checkupWaterFillStatusIcon, tmp_checkupStepStatuses[ckup->data.stepFillWaterStatus]); 
+                          lv_obj_set_style_text_font(ckup->checkupWaterFillStatusIcon, ui->status_icon_font, 0);              
+                          lv_obj_align(ckup->checkupWaterFillStatusIcon, LV_ALIGN_LEFT_MID, ui->left_status_icon_x, ui->left_status_icon_y);
 
-                          gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillContainer);         
-                          lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillLabel, checkupFillWater_text); 
-                          lv_obj_set_width(gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillLabel, 168);
-                          lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillLabel, &lv_font_montserrat_18, 0);              
-                          lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillLabel, LV_ALIGN_LEFT_MID, 2, 0);
-                          lv_label_set_long_mode(gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillLabel, LV_LABEL_LONG_SCROLL_CIRCULAR);
-
-
-                  gui.tempProcessNode->process.processDetails->checkup->checkupReachTempContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer);
-                  lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupReachTempContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                  lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupReachTempContainer, LV_ALIGN_TOP_LEFT, -10, 90);
-                  lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupReachTempContainer, 195, 45); 
-                  //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupReachTempContainer, lv_color_hex(GREEN_DARK), 0);
-                  lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupReachTempContainer, LV_OPA_TRANSP, 0);
-
-                          gui.tempProcessNode->process.processDetails->checkup->checkupReachTempStatusIcon = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupReachTempContainer);         
-                         // lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupReachTempStatusIcon, checkupStepStatuses[gui.tempProcessNode->process.processDetails->checkup->stepReachTempStatus]); 
-                          lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupReachTempStatusIcon, &FilMachineFontIcons_15, 0);              
-                          lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupReachTempStatusIcon, LV_ALIGN_LEFT_MID, -15, 0);
+                          ckup->checkupWaterFillLabel = lv_label_create(ckup->checkupWaterFillContainer);         
+                          lv_label_set_text(ckup->checkupWaterFillLabel, checkupFillWater_text); 
+                          lv_obj_set_width(ckup->checkupWaterFillLabel, ui->left_status_label_w);
+                          lv_obj_set_style_text_font(ckup->checkupWaterFillLabel, ui->left_body_font, 0);              
+                          lv_obj_align(ckup->checkupWaterFillLabel, LV_ALIGN_LEFT_MID, ui->left_status_label_x, ui->left_status_label_y);
+                          lv_label_set_long_mode(ckup->checkupWaterFillLabel, LV_LABEL_LONG_SCROLL_CIRCULAR);
 
 
-                          gui.tempProcessNode->process.processDetails->checkup->checkupReachTempLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupReachTempContainer);         
-                          lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupReachTempLabel, checkupReachTemp_text); 
-                          lv_obj_set_width(gui.tempProcessNode->process.processDetails->checkup->checkupReachTempLabel, 168);
-                          lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupReachTempLabel, &lv_font_montserrat_18, 0);              
-                          lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupReachTempLabel, LV_ALIGN_LEFT_MID, 2, 0);
-                          lv_label_set_long_mode(gui.tempProcessNode->process.processDetails->checkup->checkupReachTempLabel, LV_LABEL_LONG_SCROLL_CIRCULAR);
+                  ckup->checkupReachTempContainer = lv_obj_create(ckup->checkupNextStepsContainer);
+                  lv_obj_remove_flag(ckup->checkupReachTempContainer, LV_OBJ_FLAG_SCROLLABLE); 
+                  lv_obj_align(ckup->checkupReachTempContainer, LV_ALIGN_TOP_LEFT, ui->left_row_x, ui->left_reach_temp_row_y);
+                  lv_obj_set_size(ckup->checkupReachTempContainer, ui->left_row_w, ui->left_row_h);
+                  lv_obj_set_style_border_opa(ckup->checkupReachTempContainer, LV_OPA_TRANSP, 0);
+
+                          ckup->checkupReachTempStatusIcon = lv_label_create(ckup->checkupReachTempContainer);
+                          lv_obj_set_style_text_font(ckup->checkupReachTempStatusIcon, ui->status_icon_font, 0);              
+                          lv_obj_align(ckup->checkupReachTempStatusIcon, LV_ALIGN_LEFT_MID, ui->left_status_icon_x, ui->left_status_icon_y);
+
+
+                          ckup->checkupReachTempLabel = lv_label_create(ckup->checkupReachTempContainer);         
+                          lv_label_set_text(ckup->checkupReachTempLabel, checkupReachTemp_text); 
+                          lv_obj_set_width(ckup->checkupReachTempLabel, ui->left_status_label_w);
+                          lv_obj_set_style_text_font(ckup->checkupReachTempLabel, ui->left_body_font, 0);              
+                          lv_obj_align(ckup->checkupReachTempLabel, LV_ALIGN_LEFT_MID, ui->left_status_label_x, ui->left_status_label_y);
+                          lv_label_set_long_mode(ckup->checkupReachTempLabel, LV_LABEL_LONG_SCROLL_CIRCULAR);
 
 
 
-                  gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer);
-                  lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                  lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmContainer, LV_ALIGN_TOP_LEFT, -10, 135);
-                  lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmContainer, 195, 45); 
-                  //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmContainer, lv_color_hex(GREEN_DARK), 0);
-                  lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmContainer, LV_OPA_TRANSP, 0);
+                  ckup->checkupTankAndFilmContainer = lv_obj_create(ckup->checkupNextStepsContainer);
+                  lv_obj_remove_flag(ckup->checkupTankAndFilmContainer, LV_OBJ_FLAG_SCROLLABLE); 
+                  lv_obj_align(ckup->checkupTankAndFilmContainer, LV_ALIGN_TOP_LEFT, ui->left_row_x, ui->left_tank_film_row_y);
+                  lv_obj_set_size(ckup->checkupTankAndFilmContainer, ui->left_row_w, ui->left_row_h);
+                  lv_obj_set_style_border_opa(ckup->checkupTankAndFilmContainer, LV_OPA_TRANSP, 0);
 
-                          gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmStatusIcon = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmContainer);         
-                         // lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmStatusIcon, checkupStepStatuses[gui.tempProcessNode->process.processDetails->checkup->stepCheckFilmStatus]); 
-                          lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmStatusIcon, &FilMachineFontIcons_15, 0);              
-                          lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmStatusIcon, LV_ALIGN_LEFT_MID, -15, 0);
+                          ckup->checkupTankAndFilmStatusIcon = lv_label_create(ckup->checkupTankAndFilmContainer);
+                          lv_obj_set_style_text_font(ckup->checkupTankAndFilmStatusIcon, ui->status_icon_font, 0);              
+                          lv_obj_align(ckup->checkupTankAndFilmStatusIcon, LV_ALIGN_LEFT_MID, ui->left_status_icon_x, ui->left_status_icon_y);
 
 
-                          gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmContainer);         
-                          lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmLabel, checkupTankRotation_text); 
-                          lv_obj_set_width(gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmLabel, 168);
-                          lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmLabel, &lv_font_montserrat_18, 0);              
-                          lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmLabel, LV_ALIGN_LEFT_MID, 2, 0);
-                          lv_label_set_long_mode(gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmLabel, LV_LABEL_LONG_SCROLL_CIRCULAR);
+                          ckup->checkupTankAndFilmLabel = lv_label_create(ckup->checkupTankAndFilmContainer);         
+                          lv_label_set_text(ckup->checkupTankAndFilmLabel, checkupTankRotation_text); 
+                          lv_obj_set_width(ckup->checkupTankAndFilmLabel, ui->left_status_label_w);
+                          lv_obj_set_style_text_font(ckup->checkupTankAndFilmLabel, ui->left_body_font, 0);              
+                          lv_obj_align(ckup->checkupTankAndFilmLabel, LV_ALIGN_LEFT_MID, ui->left_status_label_x, ui->left_status_label_y);
+                          lv_label_set_long_mode(ckup->checkupTankAndFilmLabel, LV_LABEL_LONG_SCROLL_CIRCULAR);
             
                   isProcessingStatus0created = 1;
             }
 
-            lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupWaterFillStatusIcon, tmp_checkupStepStatuses[gui.tempProcessNode->process.processDetails->checkup->stepFillWaterStatus]); 
-            lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTankAndFilmStatusIcon, tmp_checkupStepStatuses[gui.tempProcessNode->process.processDetails->checkup->stepCheckFilmStatus]); 
-            lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupReachTempStatusIcon, tmp_checkupStepStatuses[gui.tempProcessNode->process.processDetails->checkup->stepReachTempStatus]); 
+            lv_label_set_text(ckup->checkupWaterFillStatusIcon, tmp_checkupStepStatuses[ckup->data.stepFillWaterStatus]); 
+            lv_label_set_text(ckup->checkupTankAndFilmStatusIcon, tmp_checkupStepStatuses[ckup->data.stepCheckFilmStatus]); 
+            lv_label_set_text(ckup->checkupReachTempStatusIcon, tmp_checkupStepStatuses[ckup->data.stepReachTempStatus]); 
 
         }
-        if(gui.tempProcessNode->process.processDetails->checkup->isProcessing == 1 && isProcessingStatus1created == 0){
-                  lv_obj_clean(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer);
-                  gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer);         
-                  lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsLabel, checkupProcessingTitle_text); 
-                  lv_obj_set_width(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsLabel, LV_SIZE_CONTENT);
-                  lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsLabel, &lv_font_montserrat_22, 0);              
-                  lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsLabel, LV_ALIGN_TOP_LEFT, -10, -8);
+        if(ckup->data.isProcessing == 1 && isProcessingStatus1created == 0){
+                  lv_obj_clean(ckup->checkupNextStepsContainer);
+                  ckup->checkupNextStepsLabel = lv_label_create(ckup->checkupNextStepsContainer);         
+                  lv_label_set_text(ckup->checkupNextStepsLabel, checkupProcessingTitle_text); 
+                  lv_obj_set_width(ckup->checkupNextStepsLabel, LV_SIZE_CONTENT);
+                  lv_obj_set_style_text_font(ckup->checkupNextStepsLabel, ui->left_title_font, 0);              
+                  lv_obj_align(ckup->checkupNextStepsLabel, LV_ALIGN_TOP_LEFT, ui->left_title_x, ui->left_title_y);
 
 
-                  gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer);
-                  lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                  lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceContainer, LV_ALIGN_TOP_LEFT, -10, 17);
-                  lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceContainer, 215, 45); 
-                  //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceContainer, lv_color_hex(GREEN_DARK), 0);
-                  lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceContainer, LV_OPA_TRANSP, 0);
+                  ckup->checkupStepSourceContainer = lv_obj_create(ckup->checkupNextStepsContainer);
+                  lv_obj_remove_flag(ckup->checkupStepSourceContainer, LV_OBJ_FLAG_SCROLLABLE); 
+                  lv_obj_align(ckup->checkupStepSourceContainer, LV_ALIGN_TOP_LEFT, ui->left_row_x, ui->processing_source_row_y);
+                  lv_obj_set_size(ckup->checkupStepSourceContainer, ui->processing_row_w, ui->left_row_h);
+                  lv_obj_set_style_border_opa(ckup->checkupStepSourceContainer, LV_OPA_TRANSP, 0);
 
 
-                          gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceContainer);         
-                          lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceLabel, checkupStepSource_text); 
-                          lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceLabel, &lv_font_montserrat_18, 0);              
-                          lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceLabel, LV_ALIGN_LEFT_MID, -15, 0);
+                          ckup->checkupStepSourceLabel = lv_label_create(ckup->checkupStepSourceContainer);         
+                          lv_label_set_text(ckup->checkupStepSourceLabel, checkupStepSource_text); 
+                          lv_obj_set_style_text_font(ckup->checkupStepSourceLabel, ui->left_body_font, 0);              
+                          lv_obj_align(ckup->checkupStepSourceLabel, LV_ALIGN_LEFT_MID, ui->left_status_icon_x, ui->left_status_icon_y);
 
-                          gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceContainer);         
-                          lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceValue, tmp_processSourceList[gui.tempProcessNode->process.processDetails->stepElementsList.start->step.stepDetails->source]); //THIS NEED TO BE ALIGNED WITH THE ACTUAL STEP OF THE PROCESS!
-                          lv_obj_set_width(gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceValue, LV_SIZE_CONTENT);
-                          lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceValue, &lv_font_montserrat_20, 0);              
-                          lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupStepSourceValue, LV_ALIGN_RIGHT_MID, 10, 0);
-
-
-                  gui.tempProcessNode->process.processDetails->checkup->checkupTempControlContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer);
-                  lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupTempControlContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                  lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTempControlContainer, LV_ALIGN_TOP_LEFT, -10, 62);
-                  lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupTempControlContainer, 215, 45); 
-                  //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupTempControlContainer, lv_color_hex(GREEN_DARK), 0);
-                  lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupTempControlContainer, LV_OPA_TRANSP, 0);
+                          ckup->checkupStepSourceValue = lv_label_create(ckup->checkupStepSourceContainer);         
+                          lv_label_set_text(ckup->checkupStepSourceValue, tmp_processSourceList[processToCheckup->process.processDetails->stepElementsList.start->step.stepDetails->data.source]); //THIS NEED TO BE ALIGNED WITH THE ACTUAL STEP OF THE PROCESS!
+                          lv_obj_set_width(ckup->checkupStepSourceValue, LV_SIZE_CONTENT);
+                          lv_obj_set_style_text_font(ckup->checkupStepSourceValue, ui->left_value_font, 0);              
+                          lv_obj_align(ckup->checkupStepSourceValue, LV_ALIGN_RIGHT_MID, ui->processing_row_value_x, ui->processing_row_value_y);
 
 
-                          gui.tempProcessNode->process.processDetails->checkup->checkupTempControlLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTempControlContainer);         
-                          lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTempControlLabel, checkupTempControl_text); 
-                          lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupTempControlLabel, &lv_font_montserrat_18, 0);              
-                          lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTempControlLabel, LV_ALIGN_LEFT_MID, -15, 0);
+                  ckup->checkupTempControlContainer = lv_obj_create(ckup->checkupNextStepsContainer);
+                  lv_obj_remove_flag(ckup->checkupTempControlContainer, LV_OBJ_FLAG_SCROLLABLE); 
+                  lv_obj_align(ckup->checkupTempControlContainer, LV_ALIGN_TOP_LEFT, ui->left_row_x, ui->processing_temp_ctrl_row_y);
+                  lv_obj_set_size(ckup->checkupTempControlContainer, ui->processing_row_w, ui->left_row_h);
+                  lv_obj_set_style_border_opa(ckup->checkupTempControlContainer, LV_OPA_TRANSP, 0);
 
-                          gui.tempProcessNode->process.processDetails->checkup->checkupTempControlValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTempControlContainer);         
-                          lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTempControlValue, tmp_processTempControlList[gui.tempProcessNode->process.processDetails->isTempControlled]); 
-                          lv_obj_set_width(gui.tempProcessNode->process.processDetails->checkup->checkupTempControlValue, LV_SIZE_CONTENT);
-                          lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupTempControlValue, &lv_font_montserrat_20, 0);              
-                          lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTempControlValue, LV_ALIGN_RIGHT_MID, 10, 0);
+
+                          ckup->checkupTempControlLabel = lv_label_create(ckup->checkupTempControlContainer);         
+                          lv_label_set_text(ckup->checkupTempControlLabel, checkupTempControl_text); 
+                          lv_obj_set_style_text_font(ckup->checkupTempControlLabel, ui->left_body_font, 0);              
+                          lv_obj_align(ckup->checkupTempControlLabel, LV_ALIGN_LEFT_MID, ui->left_status_icon_x, ui->left_status_icon_y);
+
+                          ckup->checkupTempControlValue = lv_label_create(ckup->checkupTempControlContainer);         
+                          lv_label_set_text(ckup->checkupTempControlValue, tmp_processTempControlList[processToCheckup->process.processDetails->data.isTempControlled]);
+                          lv_obj_set_width(ckup->checkupTempControlValue, LV_SIZE_CONTENT);
+                          lv_obj_set_style_text_font(ckup->checkupTempControlValue, ui->left_value_font, 0);              
+                          lv_obj_align(ckup->checkupTempControlValue, LV_ALIGN_RIGHT_MID, ui->processing_row_value_x, ui->processing_row_value_y);
 
 
 
-                  gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer);
-                  lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                  lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempContainer, LV_ALIGN_TOP_LEFT, -10, 107);
-                  lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempContainer, 215, 45); 
-                  //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempContainer, lv_color_hex(GREEN_DARK), 0);
-                  lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempContainer, LV_OPA_TRANSP, 0);
+                  ckup->checkupWaterTempContainer = lv_obj_create(ckup->checkupNextStepsContainer);
+                  lv_obj_remove_flag(ckup->checkupWaterTempContainer, LV_OBJ_FLAG_SCROLLABLE); 
+                  lv_obj_align(ckup->checkupWaterTempContainer, LV_ALIGN_TOP_LEFT, ui->left_row_x, ui->processing_water_temp_row_y);
+                  lv_obj_set_size(ckup->checkupWaterTempContainer, ui->processing_row_w, ui->left_row_h);
+                  lv_obj_set_style_border_opa(ckup->checkupWaterTempContainer, LV_OPA_TRANSP, 0);
 
 
-                          gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempContainer);         
-                          lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempLabel, checkupWaterTemp_text); 
-                          lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempLabel, &lv_font_montserrat_18, 0);              
-                          lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempLabel, LV_ALIGN_LEFT_MID, -15, 0);
+                          ckup->checkupWaterTempLabel = lv_label_create(ckup->checkupWaterTempContainer);         
+                          lv_label_set_text(ckup->checkupWaterTempLabel, checkupWaterTemp_text); 
+                          lv_obj_set_style_text_font(ckup->checkupWaterTempLabel, ui->left_body_font, 0);              
+                          lv_obj_align(ckup->checkupWaterTempLabel, LV_ALIGN_LEFT_MID, ui->left_status_icon_x, ui->left_status_icon_y);
 
-                          gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempContainer);         
+                          ckup->checkupWaterTempValue = lv_label_create(ckup->checkupWaterTempContainer);         
 
                           {
                               char buf[16];
+                              float waterTemp = sim_getTemperature(TEMPERATURE_SENSOR_BATH);
                               if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
-                                  snprintf(buf, sizeof(buf), "%.1f°C", 32.4);
+                                  snprintf(buf, sizeof(buf), "%.1f°C", waterTemp);
                               } else{
-                                  snprintf(buf, sizeof(buf), "%.1f°F", 20.5);
+                                  snprintf(buf, sizeof(buf), "%.1f°F", waterTemp * 1.8f + 32.0f);
                               }
-                              lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempValue, buf);
+                              lv_label_set_text(ckup->checkupWaterTempValue, buf);
                           }
 
-                          lv_obj_set_width(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempValue, LV_SIZE_CONTENT);
-                          lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempValue, &lv_font_montserrat_20, 0);              
-                          lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupWaterTempValue, LV_ALIGN_RIGHT_MID, 10, 0);
+                          lv_obj_set_width(ckup->checkupWaterTempValue, LV_SIZE_CONTENT);
+                          lv_obj_set_style_text_font(ckup->checkupWaterTempValue, ui->left_value_font, 0);              
+                          lv_obj_align(ckup->checkupWaterTempValue, LV_ALIGN_RIGHT_MID, ui->processing_row_value_x, ui->processing_row_value_y);
 
 
 
-                  gui.tempProcessNode->process.processDetails->checkup->checkupNextStepContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer);
-                  lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                  lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepContainer, LV_ALIGN_TOP_LEFT, -10, 152);
-                  lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepContainer, 215, 45); 
-                  //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepContainer, lv_color_hex(GREEN_DARK), 0);
-                  lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepContainer, LV_OPA_TRANSP, 0);
+                  ckup->checkupNextStepContainer = lv_obj_create(ckup->checkupNextStepsContainer);
+                  lv_obj_remove_flag(ckup->checkupNextStepContainer, LV_OBJ_FLAG_SCROLLABLE); 
+                  lv_obj_align(ckup->checkupNextStepContainer, LV_ALIGN_TOP_LEFT, ui->left_row_x, ui->processing_next_step_row_y);
+                  lv_obj_set_size(ckup->checkupNextStepContainer, ui->processing_row_w, ui->left_row_h);
+                  lv_obj_set_style_border_opa(ckup->checkupNextStepContainer, LV_OPA_TRANSP, 0);
 
 
-                          gui.tempProcessNode->process.processDetails->checkup->checkupNextStepLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepContainer);         
-                          lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepLabel, checkupNextStep_text); 
-                          lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepLabel, &lv_font_montserrat_18, 0);              
-                          lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepLabel, LV_ALIGN_LEFT_MID, -15, 0);
+                          ckup->checkupNextStepLabel = lv_label_create(ckup->checkupNextStepContainer);         
+                          lv_label_set_text(ckup->checkupNextStepLabel, checkupNextStep_text); 
+                          lv_obj_set_style_text_font(ckup->checkupNextStepLabel, ui->left_body_font, 0);              
+                          lv_obj_align(ckup->checkupNextStepLabel, LV_ALIGN_LEFT_MID, ui->left_status_icon_x, ui->left_status_icon_y);
 
-                          gui.tempProcessNode->process.processDetails->checkup->checkupNextStepValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepContainer);         
-                          //if(gui.tempStepNode->next != NULL)
-                          //    lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepValue, gui.tempStepNode->next->step.stepDetails->stepNameString); 
-                          //else       
-                              lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepValue, gui.tempStepNode->step.stepDetails->stepNameString);
+                          ckup->checkupNextStepValue = lv_label_create(ckup->checkupNextStepContainer);
+                          if(ckup->currentStep->next != NULL)
+                              lv_label_set_text(ckup->checkupNextStepValue, ckup->currentStep->next->step.stepDetails->data.stepNameString);
+                          else
+                              lv_label_set_text(ckup->checkupNextStepValue, ckup->currentStep->step.stepDetails->data.stepNameString);
 
-                          lv_obj_set_width(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepValue, 105);
-                          lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepValue, &lv_font_montserrat_20, 0);              
-                          lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepValue, LV_ALIGN_RIGHT_MID, 10, 0);
-                          lv_label_set_long_mode(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepValue, LV_LABEL_LONG_SCROLL_CIRCULAR);
-
-
-                  gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton = lv_button_create(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer);
-                  lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton, BUTTON_PROCESS_WIDTH, BUTTON_PROCESS_HEIGHT);
-                  lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton, LV_ALIGN_BOTTOM_LEFT, -10, 10);
-                  lv_obj_add_event_cb(gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton, event_checkup, LV_EVENT_CLICKED, gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton);
-                  lv_obj_set_style_bg_color(gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
-                  lv_obj_move_foreground(gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton);
+                          lv_obj_set_width(ckup->checkupNextStepValue, LV_SIZE_CONTENT);
+                          lv_obj_set_style_text_font(ckup->checkupNextStepValue, ui->left_value_font, 0);
+                          lv_obj_align(ckup->checkupNextStepValue, LV_ALIGN_RIGHT_MID, ui->processing_row_value_x, ui->processing_row_value_y);
 
 
-                          gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButtonLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButton);         
-                          lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButtonLabel, checkupStopNow_text); 
-                          lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButtonLabel, &lv_font_montserrat_16, 0);              
-                          lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupStopNowButtonLabel, LV_ALIGN_CENTER, 0, 0);
+                  ckup->checkupStopNowButton = lv_button_create(ckup->checkupNextStepsContainer);
+                  lv_obj_set_size(ckup->checkupStopNowButton, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
+                  lv_obj_align(ckup->checkupStopNowButton, LV_ALIGN_BOTTOM_LEFT, ui->processing_stop_left_x, ui->processing_stop_y);
+                  lv_obj_add_event_cb(ckup->checkupStopNowButton, event_checkup, LV_EVENT_CLICKED, processToCheckup);
+                  lv_obj_set_style_bg_color(ckup->checkupStopNowButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
+                  lv_obj_move_foreground(ckup->checkupStopNowButton);
+
+
+                          ckup->checkupStopNowButtonLabel = lv_label_create(ckup->checkupStopNowButton);         
+                          lv_label_set_text(ckup->checkupStopNowButtonLabel, checkupStopNow_text); 
+                          lv_obj_set_style_text_font(ckup->checkupStopNowButtonLabel, ui->action_btn_font, 0);              
+                          lv_obj_align(ckup->checkupStopNowButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
                   
-                  gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton = lv_button_create(gui.tempProcessNode->process.processDetails->checkup->checkupNextStepsContainer);
-                  lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton, BUTTON_PROCESS_WIDTH, BUTTON_PROCESS_HEIGHT);
-                  lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton, LV_ALIGN_BOTTOM_RIGHT, 10, 10);
-                  lv_obj_add_event_cb(gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton, event_checkup, LV_EVENT_CLICKED, gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton);
-                  lv_obj_set_style_bg_color(gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
-                  lv_obj_move_foreground(gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton);
-                  if(gui.tempProcessNode->process.processDetails->stepElementsList.size == 1){
-                    lv_obj_add_state(gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton, LV_STATE_DISABLED);
+                  ckup->checkupStopAfterButton = lv_button_create(ckup->checkupNextStepsContainer);
+                  lv_obj_set_size(ckup->checkupStopAfterButton, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
+                  lv_obj_align(ckup->checkupStopAfterButton, LV_ALIGN_BOTTOM_RIGHT, ui->processing_stop_right_x, ui->processing_stop_y);
+                  lv_obj_add_event_cb(ckup->checkupStopAfterButton, event_checkup, LV_EVENT_CLICKED, processToCheckup);
+                  lv_obj_set_style_bg_color(ckup->checkupStopAfterButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
+                  lv_obj_move_foreground(ckup->checkupStopAfterButton);
+                  if(processToCheckup->process.processDetails->stepElementsList.size == 1){
+                    lv_obj_add_state(ckup->checkupStopAfterButton, LV_STATE_DISABLED);
                   }
 
-                          gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButtonLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButton);         
-                          lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButtonLabel, checkupStopAfter_text); 
-                          lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButtonLabel, &lv_font_montserrat_16, 0);              
-                          lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupStopAfterButtonLabel, LV_ALIGN_CENTER, 0, 0);
+                          ckup->checkupStopAfterButtonLabel = lv_label_create(ckup->checkupStopAfterButton);         
+                          lv_label_set_text(ckup->checkupStopAfterButtonLabel, checkupStopAfter_text); 
+                          lv_obj_set_style_text_font(ckup->checkupStopAfterButtonLabel, ui->action_btn_font, 0);              
+                          lv_obj_align(ckup->checkupStopAfterButtonLabel, LV_ALIGN_CENTER, 0, 0);
         
             isProcessingStatus1created = 1;
         }
 
-            //RIGHT SIDE OF SCREEN
-                  if(gui.tempProcessNode->process.processDetails->checkup->processStep == 0 && isStepStatus0created == 0){
-                        gui.tempProcessNode->process.processDetails->checkup->checkupSelectTankChemistryContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer);
-                        lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupSelectTankChemistryContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupSelectTankChemistryContainer, LV_ALIGN_TOP_LEFT, -18, -18);
-                        lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupSelectTankChemistryContainer, 240, 265); 
-                        //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupSelectTankChemistryContainer, lv_palette_main(LV_PALETTE_GREEN), 0);
-                        lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupSelectTankChemistryContainer, LV_OPA_TRANSP, 0);
-                        lv_obj_add_event_cb(gui.tempProcessNode->process.processDetails->checkup->checkupSelectTankChemistryContainer, event_checkup, LV_EVENT_CLICKED, &gui.tempProcessNode->process.processDetails->checkup->activeVolume_index);
-
-
-                              gui.tempProcessNode->process.processDetails->checkup->checkupProcessReadyLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupSelectTankChemistryContainer);         
-                              lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupProcessReadyLabel, checkupProcessReady_text); 
-                              lv_obj_set_width(gui.tempProcessNode->process.processDetails->checkup->checkupProcessReadyLabel, 230);
-                              lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupProcessReadyLabel, &lv_font_montserrat_22, 0);              
-                              lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupProcessReadyLabel, LV_ALIGN_TOP_LEFT, -10, -8);
-
-
-                              gui.tempProcessNode->process.processDetails->checkup->lowVolumeChemRadioButton = create_radiobutton(gui.tempProcessNode->process.processDetails->checkup->checkupSelectTankChemistryContainer, checkupChemistryLowVol_text, -105, 45, 27, &lv_font_montserrat_18, lv_color_hex(GREEN_DARK), lv_palette_main(LV_PALETTE_GREEN));
-                              gui.tempProcessNode->process.processDetails->checkup->highVolumeChemRadioButton = create_radiobutton(gui.tempProcessNode->process.processDetails->checkup->checkupSelectTankChemistryContainer, checkupChemistryHighVol_text, -10, 45, 27, &lv_font_montserrat_18, lv_color_hex(GREEN_DARK), lv_palette_main(LV_PALETTE_GREEN));
-
-
-                              gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupSelectTankChemistryContainer);         
-                              lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeLabel, checkupTankSize_text); 
-                              lv_obj_set_width(gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeLabel, LV_SIZE_CONTENT);
-                              lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeLabel, &lv_font_montserrat_18, 0);              
-                              lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeLabel, LV_ALIGN_TOP_MID, 0, 20);
-
-                              gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea = lv_textarea_create(gui.tempProcessNode->process.processDetails->checkup->checkupSelectTankChemistryContainer);
-                              lv_textarea_set_one_line(gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea, true);
-                              lv_textarea_set_placeholder_text(gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea, checkupTankSizePlaceHolder_text);
-                              lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea, LV_ALIGN_TOP_MID, 0, 45);
-                              lv_obj_set_width(gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea, 100);
-
-                              lv_obj_add_event_cb(gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea, event_checkup, LV_EVENT_FOCUSED, gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea);
-                              lv_obj_add_event_cb(gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea, event_checkup, LV_EVENT_VALUE_CHANGED, gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea);
-                              lv_obj_add_state(gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea, LV_STATE_FOCUSED);
-                              lv_obj_set_style_bg_color(gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
-                              lv_obj_set_style_text_align(gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea , LV_TEXT_ALIGN_CENTER, 0);
-                              //lv_style_set_text_font(&gui.tempProcessNode->process.processDetails->checkup->textAreaStyleCheckup, &lv_font_montserrat_18);
-                              lv_obj_add_style(gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea, &gui.tempProcessNode->process.processDetails->checkup->textAreaStyleCheckup, LV_PART_MAIN);
-                              lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupTankSizeTextArea, lv_color_hex(WHITE), 0);
-
-                              gui.tempProcessNode->process.processDetails->checkup->checkupChemistryVolumeLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupSelectTankChemistryContainer);         
-                              lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupChemistryVolumeLabel, checkupChemistryVolume_text); 
-                              lv_obj_set_width(gui.tempProcessNode->process.processDetails->checkup->checkupChemistryVolumeLabel, LV_SIZE_CONTENT);
-                              lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupChemistryVolumeLabel, &lv_font_montserrat_18, 0);              
-                              lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupChemistryVolumeLabel, LV_ALIGN_TOP_MID, 0, 110);
-
- 
-
-                        gui.tempProcessNode->process.processDetails->checkup->checkupStartButton = lv_button_create(gui.tempProcessNode->process.processDetails->checkup->checkupSelectTankChemistryContainer);
-                        lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupStartButton, BUTTON_PROCESS_WIDTH, BUTTON_PROCESS_HEIGHT);
-                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupStartButton, LV_ALIGN_BOTTOM_MID, 0, 10);
-                        lv_obj_add_event_cb(gui.tempProcessNode->process.processDetails->checkup->checkupStartButton, event_checkup, LV_EVENT_CLICKED, gui.tempProcessNode->process.processDetails->checkup->checkupSelectTankChemistryContainer);
-                        lv_obj_set_style_bg_color(gui.tempProcessNode->process.processDetails->checkup->checkupStartButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
-                        lv_obj_move_foreground(gui.tempProcessNode->process.processDetails->checkup->checkupStartButton);
-
-                                gui.tempProcessNode->process.processDetails->checkup->checkupStartButtonLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupStartButton);         
-                                lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStartButtonLabel, checkupStart_text); 
-                                lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupStartButtonLabel, &lv_font_montserrat_22, 0);              
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupStartButtonLabel, LV_ALIGN_CENTER, 0, 0);
-                                lv_obj_add_state(gui.tempProcessNode->process.processDetails->checkup->checkupStartButton, LV_STATE_DISABLED);
-
-                      isStepStatus0created = 1;
-                  }
-
-                  if(gui.tempProcessNode->process.processDetails->checkup->processStep == 1 && isStepStatus1created == 0){
-                        lv_obj_clean(gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer);
-                        gui.tempProcessNode->process.processDetails->checkup->checkupFillWaterContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer);
-                        lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupFillWaterContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupFillWaterContainer, LV_ALIGN_TOP_LEFT, -18, -18);
-                        lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupFillWaterContainer, 240, 265); 
-                        //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupFillWaterContainer, lv_palette_main(LV_PALETTE_GREEN), 0);
-                        lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupFillWaterContainer, LV_OPA_TRANSP, 0);
-
-
-                                gui.tempProcessNode->process.processDetails->checkup->checkupFillWaterLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupFillWaterContainer);         
-                                lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupFillWaterLabel, checkupFillWaterMachine_text); 
-                                lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupFillWaterLabel, &lv_font_montserrat_18, 0);              
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupFillWaterLabel, LV_ALIGN_CENTER, 0, -20);
-                                lv_obj_set_style_text_align(gui.tempProcessNode->process.processDetails->checkup->checkupFillWaterLabel , LV_TEXT_ALIGN_CENTER, 0);
-                                lv_label_set_long_mode(gui.tempProcessNode->process.processDetails->checkup->checkupFillWaterLabel, LV_LABEL_LONG_WRAP);
-                                lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupFillWaterLabel, 235, LV_SIZE_CONTENT);
-
-
-
-                                gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton = lv_button_create(gui.tempProcessNode->process.processDetails->checkup->checkupFillWaterContainer);
-                                lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton, BUTTON_PROCESS_WIDTH, BUTTON_PROCESS_HEIGHT);
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton, LV_ALIGN_BOTTOM_MID, 0, 10);
-                                lv_obj_add_event_cb(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton, event_checkup, LV_EVENT_CLICKED, gui.tempProcessNode->process.processDetails->checkup->checkupFillWaterContainer);
-                                lv_obj_set_style_bg_color(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
-                                lv_obj_move_foreground(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton);
-
-                                        gui.tempProcessNode->process.processDetails->checkup->checkupSkipButtonLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton);         
-                                        lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButtonLabel, checkupSkip_text); 
-                                        lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButtonLabel, &lv_font_montserrat_22, 0);              
-                                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButtonLabel, LV_ALIGN_CENTER, 0, 0);
-                  
-                      isStepStatus1created = 1;
-                  }
-
-
-                  if(gui.tempProcessNode->process.processDetails->checkup->processStep == 2 && isStepStatus2created == 0){
-                        lv_obj_clean(gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer);
-                        gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempsContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer);
-                        lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempsContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempsContainer, LV_ALIGN_TOP_LEFT, -18, -18);
-                        lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempsContainer, 240, 265); 
-                        //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempsContainer, lv_palette_main(LV_PALETTE_GREEN), 0);
-                        lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempsContainer, LV_OPA_TRANSP, 0);
-
-
-                                gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer);
-                                lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempContainer, LV_ALIGN_TOP_MID, 0, 0);
-                                lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempContainer, 200, 90); 
-                                //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempContainer, lv_palette_main(LV_PALETTE_GREEN), 0);
-                                lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempContainer, LV_OPA_TRANSP, 0);
-
-                                        gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempContainer);         
-                                        lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempLabel, checkupTargetTemp_text); 
-                                        lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempLabel, &lv_font_montserrat_20, 0);              
-                                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempLabel, LV_ALIGN_CENTER, 0, -30);
-
-                                        gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempContainer);
-
-                                        if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
-                                            lv_label_set_text_fmt(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempValue, "%"PRIi32"°C", gui.tempProcessNode->process.processDetails->temp); 
-                                        } else{
-                                               lv_label_set_text_fmt(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempValue, "%"PRIi32"°F", convertCelsiusoToFahrenheit(gui.tempProcessNode->process.processDetails->temp)); 
-                                              }
-
-                                        lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempValue, &lv_font_montserrat_28, 0);              
-                                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempValue, LV_ALIGN_CENTER, 0, 5);
-
-
-                                        gui.tempProcessNode->process.processDetails->checkup->checkupTargetToleranceTempValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempContainer);         
-                                        {
-                                            char buf[32];
-                                            snprintf(buf, sizeof(buf), "%s ~%.1f", checkupTargetToleranceTemp_text, gui.tempProcessNode->process.processDetails->tempTolerance);
-                                            lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTargetToleranceTempValue, buf);
-                                        }
-                                        lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupTargetToleranceTempValue, &lv_font_montserrat_20, 0);              
-                                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTargetToleranceTempValue, LV_ALIGN_CENTER, 0, 30);
-
-
-                                gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer);
-                                lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempContainer, LV_ALIGN_BOTTOM_LEFT, 0, -50);
-                                lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempContainer, 100, 80); 
-                                //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempContainer, lv_palette_main(LV_PALETTE_GREEN), 0);
-                                lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempContainer, LV_OPA_TRANSP, 0);
-
-                                        gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempContainer);         
-                                        lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempLabel, checkupWater_text); 
-                                        lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempLabel, &lv_font_montserrat_18, 0);              
-                                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempLabel, LV_ALIGN_CENTER, 0, -15);
-
-                                        gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempContainer);   
-
-                                        {
-                                            char buf[16];
-                                            float initWaterTemp = sim_getTemperature(TEMPERATURE_BATH_PIN);
-                                            if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
-                                                snprintf(buf, sizeof(buf), "%.1f°C", initWaterTemp);
-                                            } else{
-                                                snprintf(buf, sizeof(buf), "%.1f°F", initWaterTemp * 1.8f + 32.0f);
-                                            }
-                                            lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempValue, buf);
-                                        }
-
-                                        lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempValue, &lv_font_montserrat_20, 0);              
-                                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempValue, LV_ALIGN_CENTER, 0, 20);
-
-
-
-                                gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer);
-                                lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempContainer, LV_ALIGN_BOTTOM_RIGHT, 0, -50);
-                                lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempContainer, 100, 80); 
-                                //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempContainer, lv_palette_main(LV_PALETTE_GREEN), 0);
-                                lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempContainer, LV_OPA_TRANSP, 0);
-
-                                        gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempContainer);         
-                                        lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempLabel, checkupChemistry_text); 
-                                        lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempLabel, &lv_font_montserrat_18, 0);              
-                                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempLabel, LV_ALIGN_CENTER, 0, -15);
-
-                                        gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempContainer);         
-
-                                        {
-                                            char buf[16];
-                                            float initChemTemp = sim_getTemperature(TEMPERATURE_CHEMICAL_PIN);
-                                            if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
-                                                snprintf(buf, sizeof(buf), "%.1f°C", initChemTemp);
-                                            } else{
-                                                snprintf(buf, sizeof(buf), "%.1f°F", initChemTemp * 1.8f + 32.0f);
-                                            }
-                                            lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempValue, buf);
-                                        }
-
-                                        lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempValue, &lv_font_montserrat_20, 0);              
-                                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTargetChemistryTempValue, LV_ALIGN_CENTER, 0, 20);
-
-
-
-                                gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton = lv_button_create(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempsContainer);
-                                lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton, BUTTON_PROCESS_WIDTH, BUTTON_PROCESS_HEIGHT);
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton, LV_ALIGN_BOTTOM_MID, 0, 10);
-                                lv_obj_add_event_cb(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton, event_checkup, LV_EVENT_CLICKED, gui.tempProcessNode->process.processDetails->checkup->checkupTargetWaterTempContainer);
-                                lv_obj_set_style_bg_color(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
-                                lv_obj_move_foreground(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton);
-
-                                        gui.tempProcessNode->process.processDetails->checkup->checkupSkipButtonLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButton);
-                                        lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButtonLabel, checkupSkip_text);
-                                        lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButtonLabel, &lv_font_montserrat_22, 0);
-                                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupSkipButtonLabel, LV_ALIGN_CENTER, 0, 0);
-
-                                /* Heater status label (bottom of temps container) */
-                                gui.tempProcessNode->process.processDetails->checkup->checkupHeaterStatusLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTargetTempsContainer);
-                                lv_label_set_text_fmt(gui.tempProcessNode->process.processDetails->checkup->checkupHeaterStatusLabel, checkupHeaterStatusFmt_text, checkupHeaterOff_text);
-                                lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupHeaterStatusLabel, &lv_font_montserrat_16, 0);
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupHeaterStatusLabel, LV_ALIGN_BOTTOM_MID, 0, -35);
-
-                                /* Timeout label removed from UI — timeout logged to terminal only */
-                                gui.tempProcessNode->process.processDetails->checkup->checkupTempTimeoutLabel = NULL;
-
-                                /* Start temperature monitoring timer if temp control is enabled */
-                                if(gui.tempProcessNode->process.processDetails->isTempControlled) {
-                                    LV_LOG_USER("Temperature control enabled — starting temp timer (target=%"PRIu32"°C, tolerance=%.1f)",
-                                        gui.tempProcessNode->process.processDetails->temp,
-                                        gui.tempProcessNode->process.processDetails->tempTolerance);
-                                    gui.tempProcessNode->process.processDetails->checkup->tempTimeoutCounter = 0;
-                                    gui.tempProcessNode->process.processDetails->checkup->heaterOn = false;
-                                    gui.tempProcessNode->process.processDetails->checkup->currentWaterTemp = sim_getTemperature(TEMPERATURE_BATH_PIN);
-                                    gui.tempProcessNode->process.processDetails->checkup->currentChemTemp = sim_getTemperature(TEMPERATURE_CHEMICAL_PIN);
-                                    gui.tempProcessNode->process.processDetails->checkup->tempTimer = lv_timer_create(tempTimerCallback, 1000, NULL);
-                                } else {
-                                    gui.tempProcessNode->process.processDetails->checkup->tempTimer = NULL;
-                                    lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupHeaterStatusLabel, checkupNoTempControl_text);
-                                }
-
-                        isStepStatus2created = 1;
-                  }
-
-                  if(gui.tempProcessNode->process.processDetails->checkup->processStep == 3 && isStepStatus3created == 0){
-                        lv_obj_clean(gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer);
-                        gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer);
-                        lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingContainer, LV_ALIGN_TOP_LEFT, -18, -18);
-                        lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingContainer, 240, 265); 
-                        //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingContainer, lv_palette_main(LV_PALETTE_GREEN), 0);
-                        lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingContainer, LV_OPA_TRANSP, 0);
-                        
-                  
-                                gui.tempProcessNode->process.processDetails->checkup->checkupTankIsPresentContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingContainer);
-                                lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupTankIsPresentContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTankIsPresentContainer, LV_ALIGN_CENTER, 0, -55);
-                                lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupTankIsPresentContainer, 200, 80); 
-                                //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupTankIsPresentContainer, lv_palette_main(LV_PALETTE_GREEN), 0);
-                                lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupTankIsPresentContainer, LV_OPA_TRANSP, 0);
-
-                                        gui.tempProcessNode->process.processDetails->checkup->checkupTankIsPresentLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTankIsPresentContainer);         
-                                        lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTankIsPresentLabel, checkupTankPosition_text); 
-                                        lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupTankIsPresentLabel, &lv_font_montserrat_20, 0);              
-                                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTankIsPresentLabel, LV_ALIGN_CENTER, 0, -15);
-
-                                        gui.tempProcessNode->process.processDetails->checkup->checkupTankIsPresentValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupTankIsPresentContainer);         
-                                        lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupTankIsPresentValue, checkupYes_text); 
-                                        lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupTankIsPresentValue, &lv_font_montserrat_24, 0);              
-                                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupTankIsPresentValue, LV_ALIGN_CENTER, 0, 20);
-                  
-
-                                gui.tempProcessNode->process.processDetails->checkup->checkupFilmInPositionContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingContainer);
-                                lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupFilmInPositionContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupFilmInPositionContainer, LV_ALIGN_CENTER, 0, 40);
-                                lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupFilmInPositionContainer, 200, 80); 
-                                //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupFilmInPositionContainer, lv_palette_main(LV_PALETTE_GREEN), 0);
-                                lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupFilmInPositionContainer, LV_OPA_TRANSP, 0);
-
-                                        gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupFilmInPositionContainer);         
-                                        lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingLabel, checkupFilmRotation_text); 
-                                        lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingLabel, &lv_font_montserrat_20, 0);              
-                                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingLabel, LV_ALIGN_CENTER, 0, -15);
-
-                                        gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupFilmInPositionContainer);         
-                                        lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingValue, checkupChecking_text); 
-                                        lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingValue, &lv_font_montserrat_24, 0);              
-                                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingValue, LV_ALIGN_CENTER, 0, 20);
-
-
-                        gui.tempProcessNode->process.processDetails->checkup->checkupStartButton = lv_button_create(gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingContainer);
-                        lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupStartButton, BUTTON_PROCESS_WIDTH, BUTTON_PROCESS_HEIGHT);
-                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupStartButton, LV_ALIGN_BOTTOM_MID, 0, 10);
-                        lv_obj_add_event_cb(gui.tempProcessNode->process.processDetails->checkup->checkupStartButton, event_checkup, LV_EVENT_CLICKED, gui.tempProcessNode->process.processDetails->checkup->checkupFilmRotatingContainer);
-                        lv_obj_set_style_bg_color(gui.tempProcessNode->process.processDetails->checkup->checkupStartButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
-                        lv_obj_move_foreground(gui.tempProcessNode->process.processDetails->checkup->checkupStartButton);
-
-                                gui.tempProcessNode->process.processDetails->checkup->checkupStartButtonLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupStartButton);         
-                                lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStartButtonLabel, checkupStart_text); 
-                                lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupStartButtonLabel, &lv_font_montserrat_22, 0);              
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupStartButtonLabel, LV_ALIGN_CENTER, 0, 0);
-                  
-                      isStepStatus3created = 1;
-                  }
-
-                  if(gui.tempProcessNode->process.processDetails->checkup->processStep == 4 && isStepStatus4created == 0){
-                        tankFillTime = tmp_tanksSizesAndTimes[gui.tempProcessNode->process.processDetails->checkup->activeVolume_index - 1][gui.tempProcessNode->process.processDetails->checkup->tankSize -1][1];
-                        LV_LOG_USER("tankFillTime Volume %"PRIu32", size %"PRIu8", time %"PRIu8"",gui.tempProcessNode->process.processDetails->checkup->activeVolume_index -1,gui.tempProcessNode->process.processDetails->checkup->tankSize - 1,tankFillTime);
-                        
-                        gui.tempProcessNode->process.processDetails->checkup->isFilling = true;
-                        gui.tempProcessNode->process.processDetails->checkup->pumpTimer = lv_timer_create(pumpTimer, 1000,  NULL); //&referenceProcess
-                        lv_obj_add_state(gui.tempProcessNode->process.processDetails->checkup->checkupCloseButton, LV_STATE_DISABLED);
-
-                        lv_obj_clean(gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer);
-                        gui.tempProcessNode->process.processDetails->checkup->checkupProcessingContainer = lv_obj_create(gui.tempProcessNode->process.processDetails->checkup->checkupStepContainer);
-                        lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->checkupProcessingContainer, LV_OBJ_FLAG_SCROLLABLE); 
-                        lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupProcessingContainer, LV_ALIGN_TOP_LEFT, -18, -18);
-                        lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->checkupProcessingContainer, 240, 265); 
-                        //lv_obj_set_style_border_color(gui.tempProcessNode->process.processDetails->checkup->checkupProcessingContainer, lv_palette_main(LV_PALETTE_GREEN), 0);
-                        lv_obj_set_style_border_opa(gui.tempProcessNode->process.processDetails->checkup->checkupProcessingContainer, LV_OPA_TRANSP, 0);
-                        
-
-                                gui.tempProcessNode->process.processDetails->checkup->processArc = lv_arc_create(gui.tempProcessNode->process.processDetails->checkup->checkupProcessingContainer);
-                                lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->processArc, 220, 220);
-                                lv_arc_set_rotation(gui.tempProcessNode->process.processDetails->checkup->processArc, 140);
-                                lv_arc_set_bg_angles(gui.tempProcessNode->process.processDetails->checkup->processArc, 0, 260);
-                                lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->processArc, 0);
-                                lv_arc_set_range(gui.tempProcessNode->process.processDetails->checkup->processArc, 0, 100);
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->processArc, LV_ALIGN_CENTER, 0, 2);
-                                lv_obj_remove_style(gui.tempProcessNode->process.processDetails->checkup->processArc, NULL, LV_PART_KNOB);
-                                lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->processArc, LV_OBJ_FLAG_CLICKABLE);
-                                lv_obj_set_style_arc_color(gui.tempProcessNode->process.processDetails->checkup->processArc,lv_color_hex(GREEN) , LV_PART_INDICATOR);
-                                lv_obj_set_style_arc_color(gui.tempProcessNode->process.processDetails->checkup->processArc, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
-
-                                gui.tempProcessNode->process.processDetails->checkup->checkupProcessTimeLeftValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupProcessingContainer);         
-                                lv_label_set_text_fmt(gui.tempProcessNode->process.processDetails->checkup->checkupProcessTimeLeftValue, "%"PRIu32"m%"PRIu8"s", 
-                                  gui.tempProcessNode->process.processDetails->timeMins, gui.tempProcessNode->process.processDetails->timeSecs); 
-                                lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupProcessTimeLeftValue, &lv_font_montserrat_28, 0);              
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupProcessTimeLeftValue, LV_ALIGN_CENTER, 0, -60);
-
-                                gui.tempProcessNode->process.processDetails->checkup->checkupStepNameValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupProcessingContainer);         
-                                lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepNameValue, "...");
-                                lv_obj_set_style_text_align(gui.tempProcessNode->process.processDetails->checkup->checkupStepNameValue , LV_TEXT_ALIGN_CENTER, 0);
-                                lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupStepNameValue, &lv_font_montserrat_22, 0);              
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupStepNameValue, LV_ALIGN_CENTER, 0, -10);
-                                lv_obj_set_width(gui.tempProcessNode->process.processDetails->checkup->checkupStepNameValue, 170);
-                                lv_label_set_long_mode(gui.tempProcessNode->process.processDetails->checkup->checkupStepNameValue, LV_LABEL_LONG_SCROLL_CIRCULAR);
-
-                                gui.tempProcessNode->process.processDetails->checkup->checkupStepTimeLeftValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupProcessingContainer);         
-                                lv_label_set_text_fmt(gui.tempProcessNode->process.processDetails->checkup->checkupStepTimeLeftValue, "%dm%ds", 
-                                    gui.tempProcessNode->process.processDetails->stepElementsList.start->step.stepDetails->timeMins, 
-                                    gui.tempProcessNode->process.processDetails->stepElementsList.start->step.stepDetails->timeSecs); 
-                                lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupStepTimeLeftValue, &lv_font_montserrat_22, 0);              
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupStepTimeLeftValue, LV_ALIGN_CENTER, 0, 14);
-
-                                gui.tempProcessNode->process.processDetails->checkup->stepArc = lv_arc_create(gui.tempProcessNode->process.processDetails->checkup->checkupProcessingContainer);
-                                lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->stepArc, 220, 220);
-                                lv_arc_set_rotation(gui.tempProcessNode->process.processDetails->checkup->stepArc, 230);
-                                lv_arc_set_bg_angles(gui.tempProcessNode->process.processDetails->checkup->stepArc, 0, 80);
-                                lv_arc_set_value(gui.tempProcessNode->process.processDetails->checkup->stepArc, 0);
-                                lv_arc_set_range(gui.tempProcessNode->process.processDetails->checkup->stepArc, 0, 100);
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->stepArc, LV_ALIGN_CENTER, 0, 139);
-                                lv_obj_remove_style(gui.tempProcessNode->process.processDetails->checkup->stepArc, NULL, LV_PART_KNOB);
-                                lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->stepArc, LV_OBJ_FLAG_CLICKABLE);
-                                lv_obj_set_style_arc_color(gui.tempProcessNode->process.processDetails->checkup->stepArc,lv_color_hex(ORANGE_LIGHT) , LV_PART_INDICATOR);
-                                lv_obj_set_style_arc_color(gui.tempProcessNode->process.processDetails->checkup->stepArc, lv_color_hex(ORANGE_DARK), LV_PART_MAIN);
-                                lv_obj_move_foreground(gui.tempProcessNode->process.processDetails->checkup->stepArc);
-
-                                gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupProcessingContainer);         
-                                lv_label_set_text(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, checkupFilling_text);
-                                lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, &lv_font_montserrat_20, 0);              
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, LV_ALIGN_CENTER, 0, 69);
-                                lv_obj_add_flag(gui.tempProcessNode->process.processDetails->checkup->checkupStepKindValue, LV_OBJ_FLAG_HIDDEN);
-
-                                gui.tempProcessNode->process.processDetails->checkup->pumpArc = lv_arc_create(gui.tempProcessNode->process.processDetails->checkup->checkupProcessingContainer);
-                                lv_obj_set_size(gui.tempProcessNode->process.processDetails->checkup->pumpArc, 220, 220);
-                                lv_arc_set_rotation(gui.tempProcessNode->process.processDetails->checkup->pumpArc, 48);
-                                lv_arc_set_bg_angles(gui.tempProcessNode->process.processDetails->checkup->pumpArc, 0, 84);
-                                lv_arc_set_range(gui.tempProcessNode->process.processDetails->checkup->pumpArc, 0, 100);
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->pumpArc, LV_ALIGN_CENTER, 0, 2);
-                                lv_obj_remove_style(gui.tempProcessNode->process.processDetails->checkup->pumpArc, NULL, LV_PART_KNOB);
-                                lv_obj_remove_flag(gui.tempProcessNode->process.processDetails->checkup->pumpArc, LV_OBJ_FLAG_CLICKABLE);
-                                lv_obj_set_style_arc_color(gui.tempProcessNode->process.processDetails->checkup->pumpArc,lv_color_hex(LIGHT_BLUE) , LV_PART_INDICATOR);
-                                lv_obj_set_style_arc_color(gui.tempProcessNode->process.processDetails->checkup->pumpArc, lv_color_hex(BLUE_DARK), LV_PART_MAIN);
-                                lv_obj_move_foreground(gui.tempProcessNode->process.processDetails->checkup->pumpArc);
-                                lv_arc_set_mode(gui.tempProcessNode->process.processDetails->checkup->pumpArc, LV_ARC_MODE_REVERSE);
-
-                                gui.tempProcessNode->process.processDetails->checkup->checkupProcessCompleteLabel = lv_label_create(gui.tempProcessNode->process.processDetails->checkup->checkupProcessingContainer);         
-                                lv_obj_set_style_text_align(gui.tempProcessNode->process.processDetails->checkup->checkupProcessCompleteLabel , LV_TEXT_ALIGN_CENTER, 0);
-                                lv_obj_set_style_text_font(gui.tempProcessNode->process.processDetails->checkup->checkupProcessCompleteLabel, &lv_font_montserrat_22, 0);              
-                                lv_obj_align(gui.tempProcessNode->process.processDetails->checkup->checkupProcessCompleteLabel, LV_ALIGN_CENTER, 0, -30);
-                                lv_obj_add_flag(gui.tempProcessNode->process.processDetails->checkup->checkupProcessCompleteLabel, LV_OBJ_FLAG_HIDDEN);
-
-                      isStepStatus4created = 1;
-                  }
+            /* RIGHT SIDE OF SCREEN: Dispatch to appropriate sub-screen based on processStep */
+            if(ckup->data.processStep == 0) {
+                checkup_renderPreFlight(processToCheckup);
+            }
+
+            if(ckup->data.processStep == 1) {
+                checkup_renderFillWater(processToCheckup);
+            }
+
+            if(ckup->data.processStep == 2) {
+                checkup_renderReachTemp(processToCheckup);
+            }
+
+            if(ckup->data.processStep == 3) {
+                checkup_renderCheckFilm(processToCheckup);
+            }
+
+
+            if(ckup->data.processStep == 4) {
+                checkup_renderProcessing(processToCheckup);
+            }
 }

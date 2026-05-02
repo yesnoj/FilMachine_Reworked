@@ -11,19 +11,28 @@
 #include <sys/stat.h>
 
 #include "driver/sdmmc_host.h"
+#if defined(BOARD_JC4880P433)
+    #include "sd_pwr_ctrl_by_on_chip_ldo.h"
+#endif
 #include "esp_err.h"
-#include "esp_log.h" 
+#include "esp_log.h"
 #include "ff.h"
 #include "sdmmc_cmd.h"
-#include "driver/i2c.h"
+#if defined(BOARD_JC4880P433)
+    #include "driver/i2c_master.h"
+#else
+    #include "driver/i2c.h"
+#endif
 #include "driver/gpio.h"
 #include "driver/ledc.h"
 #include "esp_vfs_fat.h"
 #include "esp_heap_caps.h"
 
 #include "FilMachine.h"
+#include "ws_server.h"
 #include "mcp23017.h"
 #include "ds18b20.h"
+/* pca9685.h removed — pump now driven by DBH-12V H-bridge */
 
 #define LESS_THAN_10 1
 #define GREATER_THAN_9 2
@@ -35,8 +44,29 @@ extern uint8_t						initErrors;
 
 static const char			*TAG = "Accessory"; /* ESP Debug Message Tag */
 static mcp23017_t           mcp;                /* MCP23017 I/O expander handle */
-static ds18b20_t            ds_bath;            /* DS18B20 bath temperature sensor */
-static ds18b20_t            ds_chemical;        /* DS18B20 chemical temperature sensor */
+static ds18b20_bus_t        ds_bus;             /* DS18B20 shared OneWire bus (both sensors) */
+/* PCA9685 removed — pump speed now via LEDC on DBH-12V H-bridge channel B */
+
+static void process_list_set_time_label(processNode *process);
+
+/* ═══════════════════════════════════════════════
+ * Utility Helpers
+ * ═══════════════════════════════════════════════ */
+
+/** Round a value to the nearest step (e.g., roundToStep(77, 10) → 80) */
+int32_t roundToStep(int32_t value, int32_t step) {
+    int32_t remainder = value % step;
+    if (remainder == 0) return value;
+    return (remainder > step / 2) ? value + (step - remainder) : value - remainder;
+}
+
+/** Safely delete an LVGL timer and null-out the pointer */
+void safeTimerDelete(lv_timer_t **timer) {
+    if (timer != NULL && *timer != NULL) {
+        lv_timer_delete(*timer);
+        *timer = NULL;
+    }
+}
 
 /* LEDC PWM for motor ENA pin */
 #define MOTOR_LEDC_TIMER      LEDC_TIMER_0
@@ -50,6 +80,103 @@ static void motor_ledc_set_duty(uint8_t duty)
     ledc_set_duty(MOTOR_LEDC_MODE, MOTOR_LEDC_CHANNEL, duty);
     ledc_update_duty(MOTOR_LEDC_MODE, MOTOR_LEDC_CHANNEL);
 }
+
+/* ═══════════════════════════════════════════════
+ * Pump H-bridge control (DBH-12V channel B)
+ *
+ * Uses LEDC timer 1 / channel 1 (timer 0 / channel 0 = agitation motor).
+ * Same control scheme as the agitation motor:
+ *   IN1=HIGH, IN2=LOW + ENA=PWM  → forward  (filling)
+ *   IN1=LOW,  IN2=HIGH + ENA=PWM → reverse  (draining)
+ * ═══════════════════════════════════════════════ */
+#ifndef BOARD_SIMULATOR
+#define PUMP_LEDC_TIMER       LEDC_TIMER_1
+#define PUMP_LEDC_MODE        LEDC_LOW_SPEED_MODE
+#define PUMP_LEDC_CHANNEL     LEDC_CHANNEL_1
+#define PUMP_LEDC_FREQ_HZ     16000           /* 16 kHz — recommended for normal DC motors */
+#define PUMP_LEDC_RESOLUTION  LEDC_TIMER_8_BIT
+
+static void pump_ledc_init(void)
+{
+    ledc_timer_config_t timer_cfg = {
+        .speed_mode      = PUMP_LEDC_MODE,
+        .timer_num        = PUMP_LEDC_TIMER,
+        .duty_resolution  = PUMP_LEDC_RESOLUTION,
+        .freq_hz          = PUMP_LEDC_FREQ_HZ,
+        .clk_cfg          = LEDC_AUTO_CLK,
+    };
+    ESP_ERROR_CHECK(ledc_timer_config(&timer_cfg));
+
+    ledc_channel_config_t ch_cfg = {
+        .speed_mode = PUMP_LEDC_MODE,
+        .channel    = PUMP_LEDC_CHANNEL,
+        .timer_sel  = PUMP_LEDC_TIMER,
+        .intr_type  = LEDC_INTR_DISABLE,
+        .gpio_num   = PUMP_ENA_PIN,
+        .duty       = 0,
+        .hpoint     = 0,
+    };
+    ESP_ERROR_CHECK(ledc_channel_config(&ch_cfg));
+
+    /* Direction pins as GPIO output */
+    gpio_config_t io_conf = {
+        .pin_bit_mask = (1ULL << PUMP_IN1_PIN) | (1ULL << PUMP_IN2_PIN),
+        .mode         = GPIO_MODE_OUTPUT,
+        .pull_up_en   = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type    = GPIO_INTR_DISABLE,
+    };
+    ESP_ERROR_CHECK(gpio_config(&io_conf));
+    gpio_set_level(PUMP_IN1_PIN, 0);
+    gpio_set_level(PUMP_IN2_PIN, 0);
+
+    LV_LOG_USER("Pump H-bridge init OK — IN1=GPIO%d IN2=GPIO%d ENA=GPIO%d (%d Hz)",
+                PUMP_IN1_PIN, PUMP_IN2_PIN, PUMP_ENA_PIN, PUMP_LEDC_FREQ_HZ);
+}
+
+/**
+ * Run pump in specified direction at given speed.
+ * @param forward  true = filling (IN1=H, IN2=L), false = draining (IN1=L, IN2=H)
+ * @param duty     0-255 speed (8-bit). Capped at 250 (~98% max duty for DBH-12V safety)
+ */
+static void pump_run(bool forward, uint8_t duty)
+{
+    if (duty > 250) duty = 250;  /* DBH-12V: max 98% duty cycle */
+    gpio_set_level(PUMP_IN1_PIN, forward ? 1 : 0);
+    gpio_set_level(PUMP_IN2_PIN, forward ? 0 : 1);
+    ledc_set_duty(PUMP_LEDC_MODE, PUMP_LEDC_CHANNEL, duty);
+    ledc_update_duty(PUMP_LEDC_MODE, PUMP_LEDC_CHANNEL);
+    LV_LOG_USER("Pump: %s duty=%d", forward ? "FORWARD" : "REVERSE", duty);
+}
+
+/** Stop the pump (coast stop — both LOW) */
+static void pump_stop(void)
+{
+    ledc_set_duty(PUMP_LEDC_MODE, PUMP_LEDC_CHANNEL, 0);
+    ledc_update_duty(PUMP_LEDC_MODE, PUMP_LEDC_CHANNEL);
+    gpio_set_level(PUMP_IN1_PIN, 0);
+    gpio_set_level(PUMP_IN2_PIN, 0);
+    LV_LOG_USER("Pump: STOPPED");
+}
+
+/** Brake the pump (short-brake — both HIGH, duty=0) */
+static void __attribute__((unused)) pump_brake(void)
+{
+    ledc_set_duty(PUMP_LEDC_MODE, PUMP_LEDC_CHANNEL, 0);
+    ledc_update_duty(PUMP_LEDC_MODE, PUMP_LEDC_CHANNEL);
+    gpio_set_level(PUMP_IN1_PIN, 1);
+    gpio_set_level(PUMP_IN2_PIN, 1);
+    LV_LOG_USER("Pump: BRAKE");
+}
+#else
+/* Simulator stubs */
+static void pump_ledc_init(void) { LV_LOG_USER("Pump H-bridge init (stub)"); }
+static void pump_run(bool forward, uint8_t duty) {
+    LV_LOG_USER("Pump: %s duty=%d (stub)", forward ? "FORWARD" : "REVERSE", duty);
+}
+static void pump_stop(void) { LV_LOG_USER("Pump: STOPPED (stub)"); }
+static void __attribute__((unused)) pump_brake(void) { LV_LOG_USER("Pump: BRAKE (stub)"); }
+#endif /* BOARD_SIMULATOR */
 
 void rebootBoard(void) {
 	esp_restart();
@@ -90,8 +217,8 @@ lv_obj_t * create_radiobutton(lv_obj_t * mBoxParent, const char * txt, const int
     lv_obj_align(obj, LV_ALIGN_RIGHT_MID, x, y);
 
 
-    lv_coord_t font_h = lv_font_get_line_height(font);
-    lv_coord_t pad = (size - font_h) / 2;
+    int32_t font_h = lv_font_get_line_height(font);
+    int32_t pad = (size - font_h) / 2;
     lv_obj_set_style_pad_left(obj, pad, LV_PART_INDICATOR);
     lv_obj_set_style_pad_right(obj, pad, LV_PART_INDICATOR);
     lv_obj_set_style_pad_top(obj, pad, LV_PART_INDICATOR);
@@ -136,129 +263,156 @@ void event_checkbox_handler(lv_event_t * e) {
     }
 }
 
+/*--------------------------------------------------------------
+ *  Keyboard context — captured once on CLICKED, reused by
+ *  DEFOCUSED / CANCEL / READY so we never re-derive from globals.
+ *-------------------------------------------------------------*/
+static sKeyboardOwnerContext kbCtx = {0};
+
+static void kb_ctx_clear(void) {
+    memset(&kbCtx, 0, sizeof(kbCtx));
+}
+
+void kb_ctx_set(const sKeyboardOwnerContext *ctx) {
+    kbCtx = *ctx;
+}
+
+static const char *kb_owner_name(kbOwnerType owner) __attribute__((unused));
+static const char *kb_owner_name(kbOwnerType owner) {
+    switch(owner) {
+        case KB_OWNER_FILTER: return "filter";
+        case KB_OWNER_PROCESS: return "process";
+        case KB_OWNER_STEP: return "step";
+        case KB_OWNER_SETTINGS: return "settings";
+        default: return "unknown";
+    }
+}
+
+static void kb_commit_text(const char *kbText) {
+    if(kbText == NULL || kbCtx.owner == KB_OWNER_NONE) {
+        return;
+    }
+
+    if(kbCtx.textArea != NULL) {
+        lv_textarea_set_text(kbCtx.textArea, kbText);
+    }
+
+    switch(kbCtx.owner) {
+        case KB_OWNER_FILTER:
+            LV_LOG_USER("Press ok from filterPopup");
+            snprintf(gui.element.filterPopup.filterName,
+                     sizeof(gui.element.filterPopup.filterName), "%s", kbText);
+            break;
+
+        case KB_OWNER_PROCESS:
+            if(kbCtx.ownerData != NULL) {
+                sProcessDetail *pd = (sProcessDetail *)kbCtx.ownerData;
+                LV_LOG_USER("Press ok from processDetailNameTextArea");
+                if (strcmp(pd->data.processNameString, kbText) != 0) {
+                    snprintf(pd->data.processNameString, sizeof(pd->data.processNameString), "%s", kbText);
+                    pd->data.somethingChanged = true;
+                }
+            }
+            break;
+
+        case KB_OWNER_STEP:
+            if(kbCtx.ownerData != NULL) {
+                sStepDetail *sd = (sStepDetail *)kbCtx.ownerData;
+                LV_LOG_USER("Press ok from stepDetailNameTextArea");
+                if (strcmp(sd->data.stepNameString, kbText) != 0) {
+                    snprintf(sd->data.stepNameString, sizeof(sd->data.stepNameString), "%s", kbText);
+                    sd->data.somethingChanged = true;
+                }
+            }
+            break;
+
+        case KB_OWNER_SETTINGS:
+            /* Wi-Fi password entered from popup */
+            LV_LOG_USER("Wi-Fi password entered from keyboard");
+            snprintf(gui.element.wifiPopup.pendingPassword,
+                     sizeof(gui.element.wifiPopup.pendingPassword), "%s", kbText);
+            break;
+
+        default:
+            return;
+    }
+
+    if(kbCtx.saveButton != NULL) {
+        lv_obj_send_event(kbCtx.saveButton, LV_EVENT_REFRESH, NULL);
+    }
+}
+
 void event_keyboard(lv_event_t* e) {
 
   lv_event_code_t code = lv_event_get_code(e);
   lv_obj_t * obj = (lv_obj_t *)lv_event_get_target(e);
 
-  /* ── Handle keyboard mode switch (letters ↔ numbers) ── */
   if(code == LV_EVENT_VALUE_CHANGED) {
       uint32_t btn_id = lv_buttonmatrix_get_selected_button(gui.element.keyboardPopup.keyboard);
       if(btn_id != LV_BUTTONMATRIX_BUTTON_NONE) {
           const char *txt = lv_buttonmatrix_get_button_text(gui.element.keyboardPopup.keyboard, btn_id);
           if(txt != NULL && strcmp(txt, "123") == 0) {
-              /* Default handler already typed "123" into textarea — undo it */
               for(int i = 0; i < 3; i++) lv_textarea_delete_char(gui.element.keyboardPopup.keyboardTextArea);
               lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_2);
               LV_LOG_USER("Keyboard switched to numbers/symbols");
               return;
           }
-          else if(txt != NULL && strcmp(txt, "Abc") == 0) {
-              /* Default handler already typed "Abc" into textarea — undo it */
+          if(txt != NULL && strcmp(txt, "Abc") == 0) {
               for(int i = 0; i < 3; i++) lv_textarea_delete_char(gui.element.keyboardPopup.keyboardTextArea);
-              lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_1);
-              LV_LOG_USER("Keyboard switched to letters");
+              lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_3);
+              LV_LOG_USER("Keyboard switched to lowercase letters");
+              return;
+          }
+          if(txt != NULL && strcmp(txt, LV_SYMBOL_UP) == 0) {
+              /* Toggle uppercase ↔ lowercase */
+              lv_keyboard_mode_t cur = lv_keyboard_get_mode(gui.element.keyboardPopup.keyboard);
+              if(cur == LV_KEYBOARD_MODE_USER_3) {
+                  lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_1);
+                  LV_LOG_USER("Keyboard switched to UPPERCASE");
+              } else {
+                  lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_3);
+                  LV_LOG_USER("Keyboard switched to lowercase");
+              }
               return;
           }
       }
+      return;
   }
 
-   if(code == LV_EVENT_CLICKED){ 
-      if(obj == gui.element.filterPopup.mBoxNameTextArea){
-          LV_LOG_USER("LV_EVENT_FOCUSED on filterPopup.mBoxNameTextArea");
-          lv_obj_set_user_data(gui.element.keyboardPopup.keyboard,obj);
+  if(code == LV_EVENT_CLICKED) {
+      sKeyboardOwnerContext *ctx = (sKeyboardOwnerContext *)lv_event_get_user_data(e);
+      if(ctx != NULL && ctx->textArea == obj) {
+          LV_LOG_USER("LV_EVENT_FOCUSED on keyboard-managed textarea");
+          kbCtx = *ctx;
+          /* Set max length for the keyboard textarea (0 = use default) */
+          uint32_t maxLen = kbCtx.maxLength > 0 ? kbCtx.maxLength : MAX_PROC_NAME_LEN;
+          lv_textarea_set_max_length(gui.element.keyboardPopup.keyboardTextArea, maxLen);
+          showKeyboard(kbCtx.parentScreen, kbCtx.textArea);
+      }
+      return;
+  }
 
-          showKeyboard(gui.element.filterPopup.mBoxFilterPopupParent, obj);
+  if(code == LV_EVENT_DEFOCUSED) {
+      if(kbCtx.owner != KB_OWNER_NONE && obj == kbCtx.textArea) {
+          LV_LOG_USER("LV_EVENT_DEFOCUSED on %s textarea", kb_owner_name(kbCtx.owner));
+          hideKeyboard(kbCtx.parentScreen);
       }
-      if(gui.tempProcessNode != NULL && gui.tempProcessNode->process.processDetails != NULL &&
-         obj == gui.tempProcessNode->process.processDetails->processDetailNameTextArea){
-          LV_LOG_USER("LV_EVENT_FOCUSED on processDetailNameTextArea");
-          lv_obj_set_user_data(gui.element.keyboardPopup.keyboard,obj);
+      return;
+  }
 
-          showKeyboard(gui.tempProcessNode->process.processDetails->processDetailParent, obj);
+  if(code == LV_EVENT_CANCEL) {
+      if(kbCtx.owner != KB_OWNER_NONE) {
+          LV_LOG_USER("LV_EVENT_CANCEL on %s textarea", kb_owner_name(kbCtx.owner));
+          hideKeyboard(kbCtx.parentScreen);
       }
-      if(gui.tempStepNode != NULL && gui.tempStepNode->step.stepDetails != NULL &&
-         obj == gui.tempStepNode->step.stepDetails->stepDetailNamelTextArea){
-          LV_LOG_USER("LV_EVENT_FOCUSED on stepDetailNamelTextArea");
-          lv_obj_set_user_data(gui.element.keyboardPopup.keyboard,obj);
+      return;
+  }
 
-          showKeyboard(gui.tempStepNode->step.stepDetails->stepDetailParent, obj);
-      }
-   }
-
-  if(code == LV_EVENT_DEFOCUSED){
-      if(obj == gui.element.filterPopup.mBoxNameTextArea){
-          LV_LOG_USER("LV_EVENT_DEFOCUSED on filterPopup.mBoxNameTextArea");
-          hideKeyboard(gui.element.filterPopup.mBoxFilterPopupParent);
-      }
-      if(gui.tempProcessNode != NULL && gui.tempProcessNode->process.processDetails != NULL &&
-         obj == gui.tempProcessNode->process.processDetails->processDetailNameTextArea){
-          LV_LOG_USER("LV_EVENT_DEFOCUSED on processDetailNameTextArea");
-          hideKeyboard(gui.tempProcessNode->process.processDetails->processDetailParent);
-      }
-      if(gui.tempStepNode != NULL && gui.tempStepNode->step.stepDetails != NULL &&
-         obj == gui.tempStepNode->step.stepDetails->stepDetailNamelTextArea){
-          LV_LOG_USER("LV_EVENT_DEFOCUSED on stepDetailNamelTextArea");
-          hideKeyboard(gui.tempStepNode->step.stepDetails->stepDetailParent);
-      }
-   }
-
-  if (code == LV_EVENT_CANCEL) {
-      //after the LV_EVENT_FOCUSED, the caller send it self to the keyboard as userData
-      LV_LOG_USER("LV_EVENT_CANCEL PRESSED");
-      if(lv_obj_get_user_data(gui.element.keyboardPopup.keyboard) == gui.element.filterPopup.mBoxNameTextArea){
-          LV_LOG_USER("LV_EVENT_DEFOCUSED on filterPopup.mBoxNameTextArea");
-          hideKeyboard(gui.element.filterPopup.mBoxFilterPopupParent);
-      }
-      if(gui.tempProcessNode != NULL && gui.tempProcessNode->process.processDetails != NULL &&
-         lv_obj_get_user_data(gui.element.keyboardPopup.keyboard) == gui.tempProcessNode->process.processDetails->processDetailNameTextArea){
-          LV_LOG_USER("LV_EVENT_DEFOCUSED on processDetailNameTextArea");
-          hideKeyboard(gui.tempProcessNode->process.processDetails->processDetailParent);
-      }
-      if(gui.tempStepNode != NULL && gui.tempStepNode->step.stepDetails != NULL &&
-         lv_obj_get_user_data(gui.element.keyboardPopup.keyboard) == gui.tempStepNode->step.stepDetails->stepDetailNamelTextArea){
-          LV_LOG_USER("LV_EVENT_DEFOCUSED on stepDetailNamelTextArea");
-          hideKeyboard(gui.tempStepNode->step.stepDetails->stepDetailParent);
-      }
-    }
-    if (code == LV_EVENT_READY) {
+  if(code == LV_EVENT_READY) {
       LV_LOG_USER("LV_EVENT_READY PRESSED");
-
-            if(lv_obj_get_user_data(gui.element.keyboardPopup.keyboard) == gui.element.filterPopup.mBoxNameTextArea){
-              LV_LOG_USER("Press ok from filterPopup.mBoxFilterPopupParent");
-              lv_textarea_set_text(gui.element.filterPopup.mBoxNameTextArea, lv_textarea_get_text(gui.element.keyboardPopup.keyboardTextArea));
-              if(strlen(lv_textarea_get_text(gui.element.keyboardPopup.keyboardTextArea)) > 0) {
-              	if(gui.element.filterPopup.filterName != NULL ) free( gui.element.filterPopup.filterName );
-                gui.element.filterPopup.filterName = (char *)malloc(sizeof(char) * (strlen(lv_textarea_get_text(gui.element.keyboardPopup.keyboardTextArea)) + 1)); // Alloca memoria per la stringa, lunghezza_stringa è la lunghezza della stringa da assegnare
-
-                if(gui.element.filterPopup.filterName != NULL ) {
-                  strncpy(gui.element.filterPopup.filterName, lv_textarea_get_text(gui.element.keyboardPopup.keyboardTextArea), MAX_PROC_NAME_LEN);
-                  gui.element.filterPopup.filterName[strlen(lv_textarea_get_text(gui.element.keyboardPopup.keyboardTextArea))] = '\0';
-                }
-              } else if(gui.element.filterPopup.filterName != NULL ) {
-                free( gui.element.filterPopup.filterName );
-                gui.element.filterPopup.filterName = NULL;
-              }             
-              hideKeyboard(gui.element.filterPopup.mBoxFilterPopupParent);
-            }
-            if(gui.tempProcessNode != NULL && gui.tempProcessNode->process.processDetails != NULL &&
-               lv_obj_get_user_data(gui.element.keyboardPopup.keyboard) == gui.tempProcessNode->process.processDetails->processDetailNameTextArea){
-              LV_LOG_USER("Press ok from processDetailNameTextArea");
-              lv_textarea_set_text(gui.tempProcessNode->process.processDetails->processDetailNameTextArea, lv_textarea_get_text(gui.element.keyboardPopup.keyboardTextArea));
-
-              gui.tempProcessNode->process.processDetails->somethingChanged = true;
-              lv_obj_send_event(gui.tempProcessNode->process.processDetails->processSaveButton, LV_EVENT_REFRESH, NULL);
-              hideKeyboard(gui.tempProcessNode->process.processDetails->processDetailParent);
-            }
-            if(gui.tempStepNode != NULL && gui.tempStepNode->step.stepDetails != NULL &&
-               lv_obj_get_user_data(gui.element.keyboardPopup.keyboard) == gui.tempStepNode->step.stepDetails->stepDetailNamelTextArea){
-              LV_LOG_USER("Press ok from stepDetailNamelTextArea");
-              lv_textarea_set_text(gui.tempStepNode->step.stepDetails->stepDetailNamelTextArea, lv_textarea_get_text(gui.element.keyboardPopup.keyboardTextArea));
-              gui.tempStepNode->step.stepDetails->somethingChanged = true;
-              lv_obj_send_event( gui.tempStepNode->step.stepDetails->stepSaveButton, LV_EVENT_REFRESH, NULL);
-              hideKeyboard(gui.tempStepNode->step.stepDetails->stepDetailParent);
-            } 
-      }
+      kb_commit_text(lv_textarea_get_text(gui.element.keyboardPopup.keyboardTextArea));
+      hideKeyboard(kbCtx.parentScreen);
+  }
 }
 
 
@@ -280,17 +434,31 @@ void create_keyboard() {
 
 
     /* ── USER_1 : letter keyboard ── */
+    /* ── USER_1 : UPPERCASE letters (default) ── */
     static const char * kb_map[] = {"Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", " ", "\n",
                                     "A", "S", "D", "F", "G", "H", "J", "K", "L",  " ", "\n",
-                                    " "," ", "Z", "X", "C", "V", "B", "N", "M"," "," ","\n",
+                                    LV_SYMBOL_UP," ", "Z", "X", "C", "V", "B", "N", "M"," "," ","\n",
                                     LV_SYMBOL_CLOSE, LV_SYMBOL_BACKSPACE,  " ", "123", LV_SYMBOL_OK, NULL
                                    };
 
     static const lv_buttonmatrix_ctrl_t kb_ctrl[] = {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, LV_BUTTONMATRIX_CTRL_HIDDEN,
                                                      4, 4, 4, 4, 4, 4, 4, 4, 4, LV_BUTTONMATRIX_CTRL_HIDDEN,
-                                                     LV_BUTTONMATRIX_CTRL_HIDDEN, LV_BUTTONMATRIX_CTRL_HIDDEN, 4, 4, 4, 4, 4, 4, 4, LV_BUTTONMATRIX_CTRL_HIDDEN, LV_BUTTONMATRIX_CTRL_HIDDEN,
+                                                     2, LV_BUTTONMATRIX_CTRL_HIDDEN, 4, 4, 4, 4, 4, 4, 4, LV_BUTTONMATRIX_CTRL_HIDDEN, LV_BUTTONMATRIX_CTRL_HIDDEN,
                                                      2, 2, 4, 2, 2
                                                     };
+
+    /* ── USER_3 : lowercase letters ── */
+    static const char * kb_map_lower[] = {"q", "w", "e", "r", "t", "y", "u", "i", "o", "p", " ", "\n",
+                                          "a", "s", "d", "f", "g", "h", "j", "k", "l",  " ", "\n",
+                                          LV_SYMBOL_UP," ", "z", "x", "c", "v", "b", "n", "m"," "," ","\n",
+                                          LV_SYMBOL_CLOSE, LV_SYMBOL_BACKSPACE,  " ", "123", LV_SYMBOL_OK, NULL
+                                         };
+
+    static const lv_buttonmatrix_ctrl_t kb_ctrl_lower[] = {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, LV_BUTTONMATRIX_CTRL_HIDDEN,
+                                                           4, 4, 4, 4, 4, 4, 4, 4, 4, LV_BUTTONMATRIX_CTRL_HIDDEN,
+                                                           2, LV_BUTTONMATRIX_CTRL_HIDDEN, 4, 4, 4, 4, 4, 4, 4, LV_BUTTONMATRIX_CTRL_HIDDEN, LV_BUTTONMATRIX_CTRL_HIDDEN,
+                                                           2, 2, 4, 2, 2
+                                                          };
 
     /* ── USER_2 : number / symbol keyboard ── */
     static const char * kb_map_num[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", " ", "\n",
@@ -307,18 +475,20 @@ void create_keyboard() {
 
     lv_keyboard_set_map(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_1, kb_map, kb_ctrl);
     lv_keyboard_set_map(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_2, kb_map_num, kb_ctrl_num);
-    lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_1);
+    lv_keyboard_set_map(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_3, kb_map_lower, kb_ctrl_lower);
+    lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_3);
     
+    const ui_keyboard_layout_t *kb = &ui_get_profile()->keyboard;
     gui.element.keyboardPopup.keyboardTextArea = lv_textarea_create(gui.element.keyboardPopup.keyBoardParent);
-    lv_obj_align(gui.element.keyboardPopup.keyboardTextArea, LV_ALIGN_TOP_MID, 0, 10);
+    lv_obj_align(gui.element.keyboardPopup.keyboardTextArea, LV_ALIGN_TOP_MID, 0, kb->textarea_y);
     lv_textarea_set_placeholder_text(gui.element.keyboardPopup.keyboardTextArea, keyboard_placeholder_text);
-    lv_obj_set_size(gui.element.keyboardPopup.keyboardTextArea, lv_pct(90), 80);
+    lv_obj_set_size(gui.element.keyboardPopup.keyboardTextArea, lv_pct(90), kb->textarea_h);
     lv_obj_add_state(gui.element.keyboardPopup.keyboardTextArea, LV_STATE_FOCUSED);
     lv_textarea_set_max_length(gui.element.keyboardPopup.keyboardTextArea, MAX_PROC_NAME_LEN);
     lv_keyboard_set_textarea(gui.element.keyboardPopup.keyboard, gui.element.keyboardPopup.keyboardTextArea);
 
-    lv_obj_set_style_text_font(gui.element.keyboardPopup.keyboard, &lv_font_montserrat_26, 0);
-    lv_obj_set_style_text_font(gui.element.keyboardPopup.keyboardTextArea, &lv_font_montserrat_30, 0);
+    lv_obj_set_style_text_font(gui.element.keyboardPopup.keyboard, kb->keyboard_font, 0);
+    lv_obj_set_style_text_font(gui.element.keyboardPopup.keyboardTextArea, kb->textarea_font, 0);
     
     lv_obj_add_flag(gui.element.keyboardPopup.keyBoardParent, LV_OBJ_FLAG_HIDDEN);
 }
@@ -377,19 +547,47 @@ lv_obj_t * create_switch(lv_obj_t * parent, const char * icon, const char * txt,
 }
 
 
-void createQuestionMark(lv_obj_t * parent,lv_obj_t * element,lv_event_cb_t e, const int32_t x, const int32_t y) {
-	
+void createQuestionMark(lv_obj_t * parent, lv_obj_t * element, lv_event_cb_t e, const int32_t x, const int32_t y)
+{
     lv_obj_t *questionMark = lv_label_create(parent);
-    lv_obj_set_size(questionMark, lv_font_get_line_height(&FilMachineFontIcons_15) * 1.5, lv_font_get_line_height(&FilMachineFontIcons_15) * 1.5);       
+
+    #if (LCD_H_RES == 480) && (LCD_V_RES == 320)
+        const lv_font_t *qm_font = &FilMachineFontIcons_15;
+    #else
+        const lv_font_t *qm_font = &FilMachineFontIcons_30;
+    #endif
+
+    int32_t sz = (int32_t)((lv_font_get_line_height(qm_font) * 3) / 2);
+
+    lv_obj_set_size(questionMark, sz, sz);
     lv_label_set_text(questionMark, questionMark_icon);
     lv_obj_add_event_cb(questionMark, e, LV_EVENT_CLICKED, element);
-    lv_obj_set_style_text_font(questionMark, &FilMachineFontIcons_15, 0);                     
+    lv_obj_set_style_text_font(questionMark, qm_font, 0);
     lv_obj_align_to(questionMark, element, LV_ALIGN_OUT_RIGHT_MID, x, y);
     lv_obj_add_flag(questionMark, LV_OBJ_FLAG_CLICKABLE);
 }
 
-int32_t convertCelsiusoToFahrenheit( int32_t tempC ) {
-  return (int32_t)((float)tempC * 1.8 + 32 + 0.5); // Aggiunge 0.5 per l'approssimazione
+void createPopupBackdrop(lv_obj_t **parent, lv_obj_t **container, int32_t width, int32_t height) {
+    *parent = lv_obj_class_create_obj(&lv_msgbox_backdrop_class, lv_layer_top());
+    lv_obj_class_init_obj(*parent);
+    lv_obj_remove_flag(*parent, LV_OBJ_FLAG_IGNORE_LAYOUT);
+    lv_obj_set_size(*parent, LV_PCT(100), LV_PCT(100));
+
+    *container = lv_obj_create(*parent);
+    lv_obj_align(*container, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_size(*container, width, height);
+    lv_obj_remove_flag(*container, LV_OBJ_FLAG_SCROLLABLE);
+}
+
+void initTitleLineStyle(lv_style_t *style, uint32_t color) {
+    lv_style_init(style);
+    lv_style_set_line_width(style, ui_get_profile()->title_line_width);
+    lv_style_set_line_color(style, lv_color_hex(color));
+    lv_style_set_line_rounded(style, true);
+}
+
+int32_t convertCelsiusToFahrenheit( int32_t tempC ) {
+  return (int32_t)((float)tempC * 1.8 + 32 + 0.5); // Add 0.5 for rounding
 }
 
 uint32_t calc_buf_len( uint32_t maxVal, uint8_t extra_len ) {
@@ -422,84 +620,32 @@ uint32_t calc_buf_len( uint32_t maxVal, uint8_t extra_len ) {
 }
 
 char *createRollerValues(uint32_t minVal, uint32_t maxVal, const char* extra_str, bool isFahrenheit) {
-    // Calcola la lunghezza necessaria del buffer
+    // Calculate the required buffer length
     uint32_t buf_len = 0;
     for (uint32_t i = minVal; i <= maxVal; i++) {
-        int value = isFahrenheit ? convertCelsiusoToFahrenheit(i) : i;
+        int value = isFahrenheit ? convertCelsiusToFahrenheit(i) : i;
         buf_len += snprintf(NULL, 0, "%s%d\n", extra_str, value);
     }
-    buf_len -= 1; // Rimuovi l'ultimo '\n' per evitare lo spazio vuoto
+    buf_len -= 1; // Remove the last newline to avoid empty space
 
-    // Alloca memoria per il buffer
-    char *buf = (char *)malloc(buf_len + 1); // +1 per il terminatore nullo
+    // Allocate memory for the buffer
+    char *buf = (char *)malloc(buf_len + 1); // +1 for null terminator
     if (!buf) {
-        return NULL; // Gestione del fallimento della malloc
+        return NULL; // Handle malloc failure
     }
 
     // Popola il buffer con i valori
     uint32_t buf_ptr = 0;
     for (uint32_t i = minVal; i <= maxVal; i++) {
-        int value = isFahrenheit ? convertCelsiusoToFahrenheit( i ) : i;
+        int value = isFahrenheit ? convertCelsiusToFahrenheit( i ) : i;
         if (i == maxVal) {
             buf_ptr += snprintf(&buf[buf_ptr], (buf_len - buf_ptr + 1), "%s%d", extra_str, value);
         } else {
             buf_ptr += snprintf(&buf[buf_ptr], (buf_len - buf_ptr + 1), "%s%d\n", extra_str, value);
         }
     }
-    //LV_LOG_USER("Roller values :%s",buf);
     return buf;
 }
-
-/*
-char *createRollerValues(uint32_t minVal, uint32_t maxVal, const char* extra_str, bool isFahrenheit) {
-    // Calcola la lunghezza necessaria del buffer
-    uint32_t buf_len = 0;
-    for (uint32_t i = minVal; i <= maxVal; i++) {
-        buf_len += snprintf(NULL, 0, "%s%d\n", extra_str, i);
-    }
-    buf_len -= 1; // Rimuovi l'ultimo '\n' per evitare lo spazio vuoto
-
-    // Alloca memoria per il buffer
-    char *buf = (char *)malloc(buf_len + 1); // +1 per il terminatore nullo
-    if (!buf) {
-        return NULL; // Gestione del fallimento della malloc
-    }
-
-    // Popola il buffer con i valori
-    uint32_t buf_ptr = 0;
-    for (uint32_t i = minVal; i <= maxVal; i++) {
-        if (i == maxVal) {
-            buf_ptr += lv_snprintf(&buf[buf_ptr], (buf_len - buf_ptr + 1), "%s%d", extra_str, i);
-        } else {
-            buf_ptr += lv_snprintf(&buf[buf_ptr], (buf_len - buf_ptr + 1), "%s%d\n", extra_str, i);
-        }
-    }
-
-    return buf;
-}
-*/
-
-/*
-char *createRollerValues(uint32_t minVal, uint32_t maxVal, const char* extra_str) {
-    uint32_t buf_len = calc_buf_len(maxVal, strlen(extra_str));
-    uint32_t buf_ptr = 0;
-    char *buf = (char *)malloc(buf_len);
-
-    if (!buf) {
-        return NULL; // Handle malloc failure
-    }
-
-    for (uint32_t i = minVal; i <= maxVal; i++) {
-        if (i == maxVal) {
-            buf_ptr += lv_snprintf(&buf[buf_ptr], (buf_len - buf_ptr), "%s%d", extra_str, i);
-        } else {
-            buf_ptr += lv_snprintf(&buf[buf_ptr], (buf_len - buf_ptr), "%s%d\n", extra_str, i);
-        }
-    }
-    return buf;
-}
-
-*/
 void myLongEvent(lv_event_t * e, uint32_t howLongInMs) {
 	
     lv_event_code_t code = lv_event_get_code(e);
@@ -558,6 +704,7 @@ void* allocateAndInitializeNode(NodeType_t type) {
                     return NULL;
                 }
                 memset(process->process.processDetails->checkup, 0, sizeof(sCheckup));
+                process->process.processDetails->checkup->data.tankSize = gui.page.settings.settingsParams.tankSize > 0 ? gui.page.settings.settingsParams.tankSize : 2;
             } else {
                 // Handle memory allocation failure
                 return NULL;
@@ -584,7 +731,7 @@ void* isNodeInList(void* list, void* node, NodeType_t type) {
 
             while (current != NULL) {
                 if (current == (stepNode*)node) {
-                    return (void*)current;  // Nodo trovato
+                    return (void*)current;  // Node found
                 }
                 current = current->next;
             }
@@ -597,7 +744,7 @@ void* isNodeInList(void* list, void* node, NodeType_t type) {
 
             while (current != NULL) {
                 if (current == (processNode*)node) {
-                    return (void*)current;  // Nodo trovato
+                    return (void*)current;  // Node found
                 }
                 current = current->next;
             }
@@ -605,7 +752,7 @@ void* isNodeInList(void* list, void* node, NodeType_t type) {
         }
     }
 
-    // Nodo non trovato
+    // Node not found
     return NULL;
 }
 
@@ -621,20 +768,39 @@ void initGlobals( void ) {
   //gui.page.processes.processElementsList.size  = 0;
 
   // We only need to initialise the non-zero values
-  gui.element.cleanPopup.titleLinePoints[1].x = 200;
-  gui.element.filterPopup.titleLinePoints[1].x = 200;
-  gui.element.rollerPopup.titleLinePoints[1].x = 200;
-  gui.element.messagePopup.titleLinePoints[1].x = 200;
+  const ui_profile_t *ui = ui_get_profile();
+  gui.element.cleanPopup.titleLinePoints[1].x = ui->popups.clean_title_line_w;
+    gui.element.drainPopup.titleLinePoints[1].x = ui->popups.drain_title_line_w;
+    gui.element.selfcheckPopup.titleLinePoints[1].x = ui->popups.selfcheck_title_line_w;
+    gui.element.filterPopup.titleLinePoints[1].x = ui->popups.filter_title_line_w;
+    gui.element.rollerPopup.titleLinePoints[1].x = ui->popups.roller_title_line_w;
+    gui.element.messagePopup.titleLinePoints[1].x = ui->popups.message_title_line_w;
 
-  gui.page.processes.titleLinePoints[1].x = 310;
-  gui.page.settings.titleLinePoints[1].x = 310;
-  gui.page.tools.titleLinePoints[1].x = 310;
+    gui.page.processes.titleLinePoints[1].x = ui->common.title_line_w;
+    gui.page.settings.titleLinePoints[1].x = ui->common.title_line_w;
+    gui.page.tools.titleLinePoints[1].x = ui->common.title_line_w;
   
-  gui.element.rollerPopup.tempCelsiusOptions = createRollerValues(0,40,"",false);
-  gui.element.rollerPopup.tempFahrenheitOptions = createRollerValues(0,40,"",true);
+  /* Sensible defaults for settings (overridden by config file if present) */
+  gui.page.settings.settingsParams.tankSize = 2;           /* Medium */
+  gui.page.settings.settingsParams.pumpSpeed = 30;
+  gui.page.settings.settingsParams.chemContainerMl = 500;
+  gui.page.settings.settingsParams.wbContainerMl = 2000;
+  gui.page.settings.settingsParams.chemistryVolume = 2;    /* High */
+  gui.page.settings.settingsParams.filmRotationSpeedSetpoint = 50;
+  gui.page.settings.settingsParams.rotationIntervalSetpoint = 10;
+  gui.page.settings.settingsParams.calibratedTemp = 20;
+  gui.page.settings.settingsParams.multiRinseTime = 60;
+  gui.page.settings.settingsParams.drainFillOverlapSetpoint = 100;
+
+  gui.element.rollerPopup.tempCelsiusOptions = createRollerValues(TEMP_ROLLER_MIN,TEMP_ROLLER_MAX,"",false);
+  gui.element.rollerPopup.tempFahrenheitOptions = createRollerValues(TEMP_ROLLER_MIN,TEMP_ROLLER_MAX,"",true);
   gui.element.rollerPopup.minutesOptions = createRollerValues(0,240,"",false);
   gui.element.rollerPopup.secondsOptions = createRollerValues(0,59,"",false); 
-  gui.element.rollerPopup.tempToleranceOptions = createRollerValues(0,5,"0.",false);
+  /* Fixed tolerance values matching Flutter: ±0.3°, ±0.5°, ±1.0° */
+  {
+      const char *tol = "0.3\n0.5\n1.0";
+      gui.element.rollerPopup.tempToleranceOptions = strdup(tol);
+  }
 
   //gui.element.filterPopup.filterName = ""; // Not Required this will set this to some constant pointer which is not good...
   //gui.element.filterPopup.isColorFilter = FILM_TYPE_NA;   // This breaks filtering not needed
@@ -664,17 +830,18 @@ void showKeyboard(lv_obj_t * whoCallMe, lv_obj_t * textArea){
       else
         lv_textarea_set_text(gui.element.keyboardPopup.keyboardTextArea, "");
 
-      lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_1);
+      lv_keyboard_set_mode(gui.element.keyboardPopup.keyboard, LV_KEYBOARD_MODE_USER_3);
       lv_obj_remove_flag(gui.element.keyboardPopup.keyBoardParent, LV_OBJ_FLAG_HIDDEN);
       lv_obj_move_foreground(gui.element.keyboardPopup.keyBoardParent);
     } else lv_textarea_set_text(gui.element.keyboardPopup.keyboardTextArea, "");
 }
 
 void hideKeyboard(lv_obj_t * whoCallMe){
+    LV_UNUSED(whoCallMe);
     lv_obj_add_flag(gui.element.keyboardPopup.keyBoardParent, LV_OBJ_FLAG_HIDDEN);
     lv_obj_move_background(gui.element.keyboardPopup.keyBoardParent);
     lv_textarea_set_text(gui.element.keyboardPopup.keyboardTextArea, "");
-    //lv_obj_remove_flag(whoCallMe, LV_OBJ_FLAG_HIDDEN);
+    kb_ctx_clear();
 }
 
 #if LV_USE_LOG != 0
@@ -686,11 +853,70 @@ void my_print( lv_log_level_t level, const char * buf )
 #endif
 
 uint8_t SD_init() {
-	
-	sdmmc_host_t				host = SDSPI_HOST_DEFAULT();
-	sdmmc_card_t 				*card;
-	
-	host.slot = SDSPI_HOST_ID;
+
+    sdmmc_card_t *card;
+    esp_vfs_fat_sdmmc_mount_config_t mount = {
+        .format_if_mount_failed = false,
+        .max_files = 5,
+    };
+    LV_LOG_USER("Initialise SD Card");
+
+#if defined(SD_BUS_SDMMC)
+    /* ── P4: SDMMC 4-bit bus (much faster than SPI) ──
+     * The JC4880P433 board requires on-chip LDO channel 4 (3.3V)
+     * to power the SD card slot — without it the card won't respond.
+     * (Same pattern used by RetroESP32-P4 reference project.)
+     */
+
+    /* 1. Power the SD card via on-chip LDO */
+    sd_pwr_ctrl_ldo_config_t ldo_config = { .ldo_chan_id = 4 };
+    sd_pwr_ctrl_handle_t pwr_ctrl_handle = NULL;
+    esp_err_t ldo_ret = sd_pwr_ctrl_new_on_chip_ldo(&ldo_config, &pwr_ctrl_handle);
+    if (ldo_ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to init SD LDO power (ch4): %s", esp_err_to_name(ldo_ret));
+    }
+
+    /* 2. Configure SDMMC host — slot 0, default speed for reliable init */
+    sdmmc_host_t host = SDMMC_HOST_DEFAULT();
+    host.slot = SDMMC_HOST_SLOT_0;
+    host.max_freq_khz = SDMMC_FREQ_DEFAULT;
+    if (pwr_ctrl_handle) {
+        host.pwr_ctrl_handle = pwr_ctrl_handle;
+    }
+
+    /* 3. Configure slot pins (4-bit bus) */
+    sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
+    slot_config.clk = SD_MMC_CLK;
+    slot_config.cmd = SD_MMC_CMD;
+    slot_config.d0  = SD_MMC_D0;
+    slot_config.d1  = SD_MMC_D1;
+    slot_config.d2  = SD_MMC_D2;
+    slot_config.d3  = SD_MMC_D3;
+    slot_config.width = 4;
+    slot_config.cd  = SDMMC_SLOT_NO_CD;
+    slot_config.wp  = SDMMC_SLOT_NO_WP;
+    slot_config.flags |= SDMMC_SLOT_FLAG_INTERNAL_PULLUP;
+
+    /* 4. Mount with retry + power-cycle (some cards need a reset) */
+    ESP_LOGI(TAG, "Mounting filesystem (SDMMC 4-bit)");
+    esp_err_t mount_ret = ESP_FAIL;
+    for (int attempt = 0; attempt < 3; attempt++) {
+        mount_ret = esp_vfs_fat_sdmmc_mount("/sd", &host, &slot_config, &mount, &card);
+        if (mount_ret == ESP_OK) break;
+        ESP_LOGW(TAG, "SD mount attempt %d failed (%s), power-cycling...",
+                 attempt + 1, esp_err_to_name(mount_ret));
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
+    if (mount_ret != ESP_OK) {
+        LV_LOG_USER("Card Mount Failed (SDMMC) after 3 attempts");
+        return ESP_FAIL;
+    }
+
+#else
+    /* ── S3: SPI SD card ── */
+    sdmmc_host_t host = SDSPI_HOST_DEFAULT();
+    host.slot = SDSPI_HOST_ID;
+
     spi_bus_config_t bus_cfg = {
         .mosi_io_num = SD_MOSI,
         .miso_io_num = SD_MISO,
@@ -699,61 +925,39 @@ uint8_t SD_init() {
         .quadhd_io_num = -1,
         .max_transfer_sz = 4000,
     };
-	esp_vfs_fat_sdmmc_mount_config_t mount = {
-	        .format_if_mount_failed = false,
-	        .max_files = 5,
-	};
-    LV_LOG_USER("Initialise SD Card");
 
-    if( spi_bus_initialize(host.slot, &bus_cfg, SDSPI_DEFAULT_DMA) != ESP_OK ) {
-        ESP_LOGE(TAG, "Failed to initialise bus.");
+    if (spi_bus_initialize(host.slot, &bus_cfg, SDSPI_DEFAULT_DMA) != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialise SPI bus.");
         return ESP_FAIL;
     }
 
-    // This initializes the slot without card detect (CD) and write protect (WP) signals.
-    // Modify slot_config.gpio_cd and slot_config.gpio_wp if your board has these signals.
     sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
     slot_config.gpio_cs = SD_CS;
     slot_config.host_id = host.slot;
 
-    ESP_LOGI(TAG, "Mounting filesystem");
-    if( esp_vfs_fat_sdspi_mount( "/sd", &host, &slot_config, &mount, &card) != ESP_OK ) {
+    ESP_LOGI(TAG, "Mounting filesystem (SPI)");
+    if (esp_vfs_fat_sdspi_mount("/sd", &host, &slot_config, &mount, &card) != ESP_OK) {
         LV_LOG_USER("Card Mount Failed");
         return ESP_FAIL;
     }
- 
+#endif
+
     LV_LOG_USER("SD init okay.");
     sdmmc_card_print_info(stdout, card);
     return ESP_OK;
 }
-/*
-void createFile(fs::FS &fs, const char *path)
-{
-    LV_LOG_USER("Checking for file: %s", path);
 
-    // Controlla se il file esiste
-    if (!fs.exists(path))
-    {
-        LV_LOG_USER("File does not exist, creating file: %s", path);
-
-        // Crea il file se non esiste
-        File file = fs.open(path, FILE_WRITE);
-        if (!file)
-        {
-            LV_LOG_USER("Failed to create file");
-            return;
-        }
-        file.close(); // Chiudi subito dopo la creazione per assicurarti che il file esista
-    }
-    else
-    {
-        LV_LOG_USER("File already exists: %s", path);
-    }
-}
-*/
+#if defined(BOARD_JC4880P433)
+/* Global I2C master bus handle — used by init_touch() in FilMachine.c */
+i2c_master_bus_handle_t g_i2c_bus_handle = NULL;
+#endif
 
 void init_Pins_and_Buses( void ) {
 	
+#if defined(DISPLAY_DRIVER_ST7701)
+    /* P4: backlight is managed by st7701_lcd via LEDC PWM — skip GPIO init here */
+    ESP_LOGI(TAG, "LCD backlight: managed by st7701_lcd (LEDC PWM)");
+#else
     ESP_LOGI(TAG, "Turn off LCD backlight");
     gpio_config_t bk_gpio_config = {
         .mode = GPIO_MODE_OUTPUT,
@@ -761,14 +965,17 @@ void init_Pins_and_Buses( void ) {
     };
     ESP_ERROR_CHECK(gpio_config(&bk_gpio_config));
     gpio_set_level(LCD_BLK, LCD_BK_LIGHT_OFF_LEVEL);
+#endif
 
-    ESP_LOGI(TAG, "Set RD Pin High");		/* With out this the Display on the Makerfabs board will not function! */
+#if defined(DISPLAY_BUS_PARALLEL16)
+    ESP_LOGI(TAG, "Set RD Pin High");		/* Required for parallel-16 bus displays */
     gpio_config_t rd_gpio_config = {
         .mode = GPIO_MODE_OUTPUT,
         .pin_bit_mask = 1ULL << LCD_RD
     };
     ESP_ERROR_CHECK(gpio_config(&rd_gpio_config));
     gpio_set_level(LCD_RD, 1);
+#endif
 
 	if (SD_init()) {
 	    initErrors = INIT_ERROR_SD;
@@ -779,7 +986,21 @@ void init_Pins_and_Buses( void ) {
 	}
 
     /* Initialize I2C */
-    ESP_LOGI(TAG, "Initialize I2C");
+    ESP_LOGI(TAG, "Initialize I2C bus %d (SDA=%d, SCL=%d)", I2C_NUM, I2C_SDA, I2C_SCL);
+#if defined(BOARD_JC4880P433)
+    /* ESP32-P4: use the new I2C master driver (old API deprecated on P4).
+     * The GT911 managed component and MCP23017/PCA9685 still work via
+     * the legacy-compatible i2c_master_get_bus_handle() bridge. */
+    i2c_master_bus_config_t i2c_bus_cfg = {
+        .i2c_port = I2C_NUM,
+        .sda_io_num = I2C_SDA,
+        .scl_io_num = I2C_SCL,
+        .clk_source = I2C_CLK_SRC_DEFAULT,
+        .glitch_ignore_cnt = 7,
+        .flags.enable_internal_pullup = true,
+    };
+    ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_bus_cfg, &g_i2c_bus_handle));
+#else
     const i2c_config_t i2c_conf = {
         .mode = I2C_MODE_MASTER,
         .sda_io_num = I2C_SDA,
@@ -790,9 +1011,14 @@ void init_Pins_and_Buses( void ) {
     };
     ESP_ERROR_CHECK(i2c_param_config(I2C_NUM, &i2c_conf));
     ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM, i2c_conf.mode, 0, 0, 0));
+#endif
 
     /* Initialize MCP23017 I/O expander */
+#if defined(BOARD_JC4880P433)
+    if (mcp23017_init(&mcp, g_i2c_bus_handle, MCP23017_DEFAULT_ADDR) != ESP_OK) {
+#else
     if (mcp23017_init(&mcp, I2C_NUM, MCP23017_DEFAULT_ADDR) != ESP_OK) {
+#endif
         LV_LOG_USER("MCP23017 init ERROR!");
         initErrors = INIT_ERROR_I2C_MCP;
     } else {
@@ -801,18 +1027,25 @@ void init_Pins_and_Buses( void ) {
         initializeMotorPins();
     }
 
-    /* Initialize DS18B20 temperature sensors */
-    if (ds18b20_init(&ds_bath, TEMPERATURE_BATH_PIN) != ESP_OK) {
-        LV_LOG_USER("DS18B20 BATH sensor NOT found on GPIO%d", TEMPERATURE_BATH_PIN);
+    /* Initialize DS18B20 temperature sensors (both on same OneWire bus) */
+    if (ds18b20_init(&ds_bus, TEMPERATURE_BUS_PIN) != ESP_OK) {
+        LV_LOG_USER("DS18B20 bus NOT found on GPIO%d", TEMPERATURE_BUS_PIN);
     } else {
-        LV_LOG_USER("DS18B20 BATH sensor OK on GPIO%d", TEMPERATURE_BATH_PIN);
+        LV_LOG_USER("DS18B20 bus OK: %d sensor(s) on GPIO%d", ds_bus.sensor_count, TEMPERATURE_BUS_PIN);
+        for (int i = 0; i < ds_bus.sensor_count; i++) {
+            LV_LOG_USER("  sensor[%d] ROM=%02X%02X%02X%02X%02X%02X%02X%02X",
+                i, ds_bus.sensors[i].rom[0], ds_bus.sensors[i].rom[1],
+                ds_bus.sensors[i].rom[2], ds_bus.sensors[i].rom[3],
+                ds_bus.sensors[i].rom[4], ds_bus.sensors[i].rom[5],
+                ds_bus.sensors[i].rom[6], ds_bus.sensors[i].rom[7]);
+        }
+        if (ds_bus.sensor_count < 2) {
+            LV_LOG_USER("WARNING: expected 2 sensors (bath+chemical), found %d", ds_bus.sensor_count);
+        }
     }
 
-    if (ds18b20_init(&ds_chemical, TEMPERATURE_CHEMICAL_PIN) != ESP_OK) {
-        LV_LOG_USER("DS18B20 CHEMICAL sensor NOT found on GPIO%d", TEMPERATURE_CHEMICAL_PIN);
-    } else {
-        LV_LOG_USER("DS18B20 CHEMICAL sensor OK on GPIO%d", TEMPERATURE_CHEMICAL_PIN);
-    }
+    /* Initialize pump H-bridge (DBH-12V channel B) via LEDC PWM */
+    pump_ledc_init();
 
   if (initErrors) {
 
@@ -822,21 +1055,86 @@ void init_Pins_and_Buses( void ) {
   }
 }
 
+/* ── Read ONLY the machineSettings blob (no processes, no stats).
+ *    Used at boot to know splash preferences before the full UI is ready. ── */
+void readSettingsOnly(const char *path) {
+    FIL *fp = heap_caps_malloc(sizeof(FIL), MALLOC_CAP_SPIRAM);
+    if (!fp) {
+        LV_LOG_USER("readSettingsOnly: FAILED to alloc FIL struct");
+        return;
+    }
+    unsigned int br;
+    FRESULT res = f_open(fp, path, FA_READ | FA_OPEN_EXISTING);
+    if (res == FR_OK) {
+        if (f_read(fp, &gui.page.settings.settingsParams,
+                   sizeof(gui.page.settings.settingsParams), &br) == FR_OK) {
+            LV_LOG_USER("readSettingsOnly: loaded %u bytes (splashDefault=%d splashRandom=%d pal=%d style=%d cmx=%d seed=%"PRIu32")",
+                        (unsigned)br,
+                        gui.page.settings.settingsParams.splashDefault,
+                        gui.page.settings.settingsParams.splashRandom,
+                        gui.page.settings.settingsParams.splashPalette,
+                        gui.page.settings.settingsParams.splashShapeStyle,
+                        gui.page.settings.settingsParams.splashComplexity,
+                        gui.page.settings.settingsParams.splashSeed);
+        } else {
+            LV_LOG_USER("readSettingsOnly: f_read FAILED");
+        }
+        f_close(fp);
+    } else {
+        LV_LOG_USER("readSettingsOnly: f_open('%s') FAILED (res=%d) — using defaults", path, res);
+    }
+    free(fp);
+}
+
 void readConfigFile(const char *path, bool enableLog) {
-	
-	FIL				file, *fp;
+
+	FIL				*fp;
 	FRESULT			res;
 	unsigned int	bytes_read;
-	
-	fp = &file;
-	
-  	if( (res = f_open( fp, path, FA_READ | FA_OPEN_EXISTING )) == FR_OK ) {
+
+	/* Heap-allocate FIL to avoid stack overflow */
+	fp = heap_caps_malloc( sizeof(FIL), MALLOC_CAP_SPIRAM );
+	if (!fp) {
+		LV_LOG_USER("Error: cannot allocate FIL struct for read");
+		return;
+	}
+
+	/* ── Crash recovery: if .cfg is missing but .tmp exists, the previous
+	 *    write completed successfully but the rename was interrupted.
+	 *    Recover by renaming .tmp → .cfg before proceeding. ── */
+	res = f_open(fp, path, FA_READ | FA_OPEN_EXISTING);
+	if (res != FR_OK) {
+	    char tmpPath[64];
+	    snprintf(tmpPath, sizeof(tmpPath), "%s.tmp", path);
+	    FRESULT tmpRes = f_open(fp, tmpPath, FA_READ | FA_OPEN_EXISTING);
+	    if (tmpRes == FR_OK) {
+	        f_close(fp);
+	        f_rename(tmpPath, path);
+	        LV_LOG_USER("Recovered config from %s → %s", tmpPath, path);
+	        res = f_open(fp, path, FA_READ | FA_OPEN_EXISTING);
+	    }
+	}
+
+  	if( res == FR_OK ) {
 	    // Load Machine Settings
+	    /* Zero the struct first so new fields (Wi-Fi etc.) get safe defaults
+	     * when reading an older, shorter config file */
+	    memset(&gui.page.settings.settingsParams, 0, sizeof(gui.page.settings.settingsParams));
 	    if( (res = f_read( fp, &gui.page.settings.settingsParams, sizeof(gui.page.settings.settingsParams), &bytes_read ) ) !=  FR_OK ) {
 	      f_close( fp );
+	      free( fp );
 	      LV_LOG_USER("Configuration file error aborting load err: %d", res );
 	      return;
 	    }
+	    if(bytes_read < sizeof(gui.page.settings.settingsParams)) {
+	        LV_LOG_USER("Config file shorter than expected (%u < %u) — new fields use defaults",
+	                     bytes_read, (unsigned)sizeof(gui.page.settings.settingsParams));
+	    }
+	    ESP_LOGW(TAG, "[WiFi-Load] bytes_read=%u, struct_size=%u, enabled=%d, ssid='%s', pwd_len=%d",
+	                 bytes_read, (unsigned)sizeof(gui.page.settings.settingsParams),
+	                 gui.page.settings.settingsParams.wifiEnabled,
+	                 gui.page.settings.settingsParams.wifiSSID,
+	                 (int)strlen(gui.page.settings.settingsParams.wifiPassword));
 
 	    if(enableLog) {
 	        LV_LOG_USER("--- MACHINE PARAMS ---");
@@ -860,6 +1158,11 @@ void readConfigFile(const char *path, bool enableLog) {
 	//        LV_LOG_USER("size:%d",sizeof(gui.page.settings.settingsParams.drainFillOverlapSetpoint));
 	        LV_LOG_USER("multiRinseTime:%d",gui.page.settings.settingsParams.multiRinseTime);
 	//        LV_LOG_USER("size:%d",sizeof(gui.page.settings.settingsParams.multiRinseTime));
+	        LV_LOG_USER("tankSize:%d",gui.page.settings.settingsParams.tankSize);
+	        LV_LOG_USER("pumpSpeed:%d",gui.page.settings.settingsParams.pumpSpeed);
+	        LV_LOG_USER("chemContainerMl:%d",gui.page.settings.settingsParams.chemContainerMl);
+	        LV_LOG_USER("wbContainerMl:%d",gui.page.settings.settingsParams.wbContainerMl);
+	        LV_LOG_USER("chemistryVolume:%d",gui.page.settings.settingsParams.chemistryVolume);
 	    }   
 
 	    // Load Processes
@@ -883,14 +1186,18 @@ void readConfigFile(const char *path, bool enableLog) {
 	          LV_LOG_USER("Failed to allocate memory for process node");
 	          continue;
 	      }
-	      f_read( fp, &nodeP->process.processDetails->processNameString, sizeof(nodeP->process.processDetails->processNameString), &bytes_read );
-	      f_read( fp, &nodeP->process.processDetails->temp, sizeof(nodeP->process.processDetails->temp), &bytes_read );
-	      f_read( fp, &nodeP->process.processDetails->tempTolerance, sizeof(nodeP->process.processDetails->tempTolerance), &bytes_read );
-	      f_read( fp, &nodeP->process.processDetails->isTempControlled, sizeof(nodeP->process.processDetails->isTempControlled), &bytes_read );
-	      f_read( fp, &nodeP->process.processDetails->isPreferred, sizeof(nodeP->process.processDetails->isPreferred), &bytes_read );
-	      f_read( fp, &nodeP->process.processDetails->filmType, sizeof(nodeP->process.processDetails->filmType), &bytes_read );
-	      f_read( fp, &nodeP->process.processDetails->timeMins, sizeof(nodeP->process.processDetails->timeMins), &bytes_read );
-	      f_read( fp, &nodeP->process.processDetails->timeSecs, sizeof(nodeP->process.processDetails->timeSecs), &bytes_read );
+	      f_read( fp, &nodeP->process.processDetails->data.processNameString, sizeof(nodeP->process.processDetails->data.processNameString), &bytes_read );
+	      f_read( fp, &nodeP->process.processDetails->data.temp, sizeof(nodeP->process.processDetails->data.temp), &bytes_read );
+	      f_read( fp, &nodeP->process.processDetails->data.tempTolerance, sizeof(nodeP->process.processDetails->data.tempTolerance), &bytes_read );
+	      f_read( fp, &nodeP->process.processDetails->data.isTempControlled, sizeof(nodeP->process.processDetails->data.isTempControlled), &bytes_read );
+	      f_read( fp, &nodeP->process.processDetails->data.isPreferred, sizeof(nodeP->process.processDetails->data.isPreferred), &bytes_read );
+	      f_read( fp, &nodeP->process.processDetails->data.filmType, sizeof(nodeP->process.processDetails->data.filmType), &bytes_read );
+	      /* Clamp temp loaded from old files: if below roller minimum (15), default to 20°C */
+	      if (nodeP->process.processDetails->data.temp < 15) {
+	          nodeP->process.processDetails->data.temp = 20;
+	      }
+	      f_read( fp, &nodeP->process.processDetails->data.timeMins, sizeof(nodeP->process.processDetails->data.timeMins), &bytes_read );
+	      f_read( fp, &nodeP->process.processDetails->data.timeSecs, sizeof(nodeP->process.processDetails->data.timeSecs), &bytes_read );
 	
 	      if (processElementsList->start == NULL) {
 	        processElementsList->start = nodeP;
@@ -904,22 +1211,22 @@ void readConfigFile(const char *path, bool enableLog) {
 	
 	      if(enableLog){
 	        LV_LOG_USER("--- PROCESS PARAMS ---");
-	        LV_LOG_USER("processNameString:%s",nodeP->process.processDetails->processNameString);
-	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->processNameString));
-	        LV_LOG_USER("temp:%"PRIi32"",nodeP->process.processDetails->temp);
-	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->temp));
-	        LV_LOG_USER("tempTolerance:%f",nodeP->process.processDetails->tempTolerance);
-	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->tempTolerance));
-	        LV_LOG_USER("isTempControlled:%d",nodeP->process.processDetails->isTempControlled);
-	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->isTempControlled));
-	        LV_LOG_USER("isPreferred:%d",nodeP->process.processDetails->isPreferred);
-	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->isPreferred));
-	        LV_LOG_USER("filmType:%d",nodeP->process.processDetails->filmType);
-	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->filmType));
-	        LV_LOG_USER("timeMins:%"PRIu32"",nodeP->process.processDetails->timeMins);
-	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->timeMins));
-	        LV_LOG_USER("timeSecs:%d",nodeP->process.processDetails->timeSecs);
-	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->timeSecs));
+	        LV_LOG_USER("processNameString:%s",nodeP->process.processDetails->data.processNameString);
+	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->data.processNameString));
+	        LV_LOG_USER("temp:%"PRIi32"",nodeP->process.processDetails->data.temp);
+	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->data.temp));
+	        LV_LOG_USER("tempTolerance:%f",nodeP->process.processDetails->data.tempTolerance);
+	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->data.tempTolerance));
+	        LV_LOG_USER("isTempControlled:%d",nodeP->process.processDetails->data.isTempControlled);
+	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->data.isTempControlled));
+	        LV_LOG_USER("isPreferred:%d",nodeP->process.processDetails->data.isPreferred);
+	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->data.isPreferred));
+	        LV_LOG_USER("filmType:%d",nodeP->process.processDetails->data.filmType);
+	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->data.filmType));
+	        LV_LOG_USER("timeMins:%"PRIu32"",nodeP->process.processDetails->data.timeMins);
+	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->data.timeMins));
+	        LV_LOG_USER("timeSecs:%d",nodeP->process.processDetails->data.timeSecs);
+	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->data.timeSecs));
 	      }
 
 	      stepList *stepElementsList = &nodeP->process.processDetails->stepElementsList;
@@ -943,12 +1250,12 @@ void readConfigFile(const char *path, bool enableLog) {
 	          continue;
 	        }
 	
-	        f_read( fp, &nodeS->step.stepDetails->stepNameString, sizeof(nodeS->step.stepDetails->stepNameString), &bytes_read );
-	        f_read( fp, &nodeS->step.stepDetails->timeMins, sizeof(nodeS->step.stepDetails->timeMins), &bytes_read );
-	        f_read( fp, &nodeS->step.stepDetails->timeSecs, sizeof(nodeS->step.stepDetails->timeSecs), &bytes_read );
-	        f_read( fp, &nodeS->step.stepDetails->type, sizeof(nodeS->step.stepDetails->type), &bytes_read );
-	        f_read( fp, &nodeS->step.stepDetails->source, sizeof(nodeS->step.stepDetails->source), &bytes_read );
-	        f_read( fp, &nodeS->step.stepDetails->discardAfterProc, sizeof(nodeS->step.stepDetails->discardAfterProc), &bytes_read );
+	        f_read( fp, &nodeS->step.stepDetails->data.stepNameString, sizeof(nodeS->step.stepDetails->data.stepNameString), &bytes_read );
+	        f_read( fp, &nodeS->step.stepDetails->data.timeMins, sizeof(nodeS->step.stepDetails->data.timeMins), &bytes_read );
+	        f_read( fp, &nodeS->step.stepDetails->data.timeSecs, sizeof(nodeS->step.stepDetails->data.timeSecs), &bytes_read );
+	        f_read( fp, &nodeS->step.stepDetails->data.type, sizeof(nodeS->step.stepDetails->data.type), &bytes_read );
+	        f_read( fp, &nodeS->step.stepDetails->data.source, sizeof(nodeS->step.stepDetails->data.source), &bytes_read );
+	        f_read( fp, &nodeS->step.stepDetails->data.discardAfterProc, sizeof(nodeS->step.stepDetails->data.discardAfterProc), &bytes_read );
 	        
 	        if (stepElementsList->start == NULL) {
 	          stepElementsList->start = nodeS;
@@ -962,51 +1269,87 @@ void readConfigFile(const char *path, bool enableLog) {
 	
 	        if(enableLog){
 	          LV_LOG_USER("--- STEP PARAMS ---");
-	          LV_LOG_USER("stepNameString:%s",nodeS->step.stepDetails->stepNameString);
-	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->stepNameString));
-	          LV_LOG_USER("timeMins:%d",nodeS->step.stepDetails->timeMins);
-	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->timeMins));
-	          LV_LOG_USER("timeSecs:%d",nodeS->step.stepDetails->timeSecs);
-	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->timeSecs));
-	          LV_LOG_USER("type:%d",nodeS->step.stepDetails->type);
-	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->type));
-	          LV_LOG_USER("source:%d",nodeS->step.stepDetails->source);
-	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->source));
-	          LV_LOG_USER("discardAfterProc:%d",nodeS->step.stepDetails->discardAfterProc);
-	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->discardAfterProc));
+	          LV_LOG_USER("stepNameString:%s",nodeS->step.stepDetails->data.stepNameString);
+	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->data.stepNameString));
+	          LV_LOG_USER("timeMins:%d",nodeS->step.stepDetails->data.timeMins);
+	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->data.timeMins));
+	          LV_LOG_USER("timeSecs:%d",nodeS->step.stepDetails->data.timeSecs);
+	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->data.timeSecs));
+	          LV_LOG_USER("type:%d",nodeS->step.stepDetails->data.type);
+	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->data.type));
+	          LV_LOG_USER("source:%d",nodeS->step.stepDetails->data.source);
+	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->data.source));
+	          LV_LOG_USER("discardAfterProc:%d",nodeS->step.stepDetails->data.discardAfterProc);
+	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->data.discardAfterProc));
 	        }
 	
 	      }
 	
 	    }
+
+	    /* ── Machine statistics (appended after processes) ── */
+	    {
+	        unsigned int br = 0;
+	        f_read( fp, &gui.page.tools.machineStats.completed, sizeof(gui.page.tools.machineStats.completed), &br );
+	        if(br > 0) {
+	            f_read( fp, &gui.page.tools.machineStats.totalMins, sizeof(gui.page.tools.machineStats.totalMins), &br );
+	            f_read( fp, &gui.page.tools.machineStats.totalSecs, sizeof(gui.page.tools.machineStats.totalSecs), &br );
+	            f_read( fp, &gui.page.tools.machineStats.stopped,   sizeof(gui.page.tools.machineStats.stopped),   &br );
+	            f_read( fp, &gui.page.tools.machineStats.clean,     sizeof(gui.page.tools.machineStats.clean),     &br );
+	            LV_LOG_USER("Loaded stats: completed=%"PRIu32" totalMins=%"PRIu64" totalSecs=%"PRIu32" stopped=%"PRIu32" clean=%"PRIu32"",
+	                gui.page.tools.machineStats.completed, gui.page.tools.machineStats.totalMins,
+	                gui.page.tools.machineStats.totalSecs, gui.page.tools.machineStats.stopped, gui.page.tools.machineStats.clean);
+	        } else {
+	            LV_LOG_USER("No stats section in config (old format) — starting from zero");
+	        }
+	    }
+
 	    f_close( fp );
 	} else {
 		LV_LOG_USER("Failed to open configuration file for reading using default err: %d", res);
 	}
+	free( fp );  /* Release heap-allocated FIL struct */
 }
 
 void writeConfigFile( const char *path, bool enableLog ) {
-	
-	FIL				file, *fp;
+
+	FIL				*fp;
 	FRESULT			res;
 	unsigned int	bytes_written;
 
-	fp = &file;
+	/* Heap-allocate FIL to avoid stack overflow in sysMan task */
+	fp = heap_caps_malloc( sizeof(FIL), MALLOC_CAP_SPIRAM );
+	if (!fp) {
+		LV_LOG_USER("Error: cannot allocate FIL struct for write");
+		return;
+	}
 
-    if (initErrors == 0) {
-        LV_LOG_USER("Writing configuration file: %s", path);
-        res = f_unlink( path );
-        if(res != FR_OK && res != FR_NO_FILE) {
-            LV_LOG_USER("Error deleting configuration file: %s (res=%d)", path, res);
-        }
+    if (initErrors != INIT_ERROR_SD) {
+        /* ── Crash-safe write: write to .tmp, then rename ──
+         * If the system crashes mid-write, the original .cfg is preserved.
+         * On next boot, readConfigFile recovers from .tmp if .cfg is missing. */
+        char tmpPath[64];
+        snprintf(tmpPath, sizeof(tmpPath), "%s.tmp", path);
 
-        if( ( res = f_open( fp, path, FA_WRITE | FA_CREATE_NEW ) ) != FR_OK ) {
-            LV_LOG_USER("Failed to open file for writing");
+        /* Remove stale temp file if any */
+        f_unlink(tmpPath);
+
+        LV_LOG_USER("Writing configuration file: %s (via %s)", path, tmpPath);
+
+        if( ( res = f_open( fp, tmpPath, FA_WRITE | FA_CREATE_NEW ) ) != FR_OK ) {
+            LV_LOG_USER("Failed to open temp file for writing (res=%d)", res);
+            free(fp);
             return;
         }
 
         // Write Machine Parameters
+        LV_LOG_USER("Writing settingsParams: %zu bytes", sizeof(gui.page.settings.settingsParams));
+        ESP_LOGW(TAG, "[WiFi-Save] enabled=%d, ssid='%s', pwd_len=%d",
+                     gui.page.settings.settingsParams.wifiEnabled,
+                     gui.page.settings.settingsParams.wifiSSID,
+                     (int)strlen(gui.page.settings.settingsParams.wifiPassword));
         f_write( fp, &gui.page.settings.settingsParams, sizeof(gui.page.settings.settingsParams), &bytes_written );
+        LV_LOG_USER("settingsParams written OK: %u bytes", bytes_written);
 
         if (enableLog) {
             LV_LOG_USER("--- MACHINE PARAMS ---");
@@ -1022,155 +1365,191 @@ void writeConfigFile( const char *path, bool enableLog ) {
         }
 
         // Write Processes
+        LV_LOG_USER("Writing processes: count=%"PRIu32"", gui.page.processes.processElementsList.size);
         processNode *currentProcessNode = gui.page.processes.processElementsList.start;
         // Write process list size
         f_write( fp, &gui.page.processes.processElementsList.size, sizeof(gui.page.processes.processElementsList.size), &bytes_written );
 
         while (currentProcessNode != NULL) {
-            f_write( fp, currentProcessNode->process.processDetails->processNameString, sizeof(currentProcessNode->process.processDetails->processNameString), &bytes_written );
-            f_write( fp, &currentProcessNode->process.processDetails->temp, sizeof(currentProcessNode->process.processDetails->temp), &bytes_written );
-            f_write( fp, &currentProcessNode->process.processDetails->tempTolerance, sizeof(currentProcessNode->process.processDetails->tempTolerance), &bytes_written );
-            f_write( fp, &currentProcessNode->process.processDetails->isTempControlled, sizeof(currentProcessNode->process.processDetails->isTempControlled), &bytes_written );
-            f_write( fp, &currentProcessNode->process.processDetails->isPreferred, sizeof(currentProcessNode->process.processDetails->isPreferred), &bytes_written );
-            f_write( fp, &currentProcessNode->process.processDetails->filmType, sizeof(currentProcessNode->process.processDetails->filmType), &bytes_written );
-            f_write( fp, &currentProcessNode->process.processDetails->timeMins, sizeof(currentProcessNode->process.processDetails->timeMins), &bytes_written );
-            f_write( fp, &currentProcessNode->process.processDetails->timeSecs, sizeof(currentProcessNode->process.processDetails->timeSecs), &bytes_written );
+            f_write( fp, currentProcessNode->process.processDetails->data.processNameString, sizeof(currentProcessNode->process.processDetails->data.processNameString), &bytes_written );
+            f_write( fp, &currentProcessNode->process.processDetails->data.temp, sizeof(currentProcessNode->process.processDetails->data.temp), &bytes_written );
+            f_write( fp, &currentProcessNode->process.processDetails->data.tempTolerance, sizeof(currentProcessNode->process.processDetails->data.tempTolerance), &bytes_written );
+            f_write( fp, &currentProcessNode->process.processDetails->data.isTempControlled, sizeof(currentProcessNode->process.processDetails->data.isTempControlled), &bytes_written );
+            f_write( fp, &currentProcessNode->process.processDetails->data.isPreferred, sizeof(currentProcessNode->process.processDetails->data.isPreferred), &bytes_written );
+            f_write( fp, &currentProcessNode->process.processDetails->data.filmType, sizeof(currentProcessNode->process.processDetails->data.filmType), &bytes_written );
+            f_write( fp, &currentProcessNode->process.processDetails->data.timeMins, sizeof(currentProcessNode->process.processDetails->data.timeMins), &bytes_written );
+            f_write( fp, &currentProcessNode->process.processDetails->data.timeSecs, sizeof(currentProcessNode->process.processDetails->data.timeSecs), &bytes_written );
 
             if (enableLog) {
                 LV_LOG_USER("--- PROCESS PARAMS ---");
-                LV_LOG_USER("processNameString:%s", currentProcessNode->process.processDetails->processNameString);
-                LV_LOG_USER("temp:%"PRIu32"", currentProcessNode->process.processDetails->temp);
-                LV_LOG_USER("tempTolerance:%f", currentProcessNode->process.processDetails->tempTolerance);
-                LV_LOG_USER("isTempControlled:%d", currentProcessNode->process.processDetails->isTempControlled);
-                LV_LOG_USER("isPreferred:%d", currentProcessNode->process.processDetails->isPreferred);
-                LV_LOG_USER("filmType:%d", currentProcessNode->process.processDetails->filmType);
-                LV_LOG_USER("timeMins:%"PRIu32"", currentProcessNode->process.processDetails->timeMins);
-                LV_LOG_USER("timeSecs:%"PRIu8"", currentProcessNode->process.processDetails->timeSecs);
+                LV_LOG_USER("processNameString:%s", currentProcessNode->process.processDetails->data.processNameString);
+                LV_LOG_USER("temp:%"PRIu32"", currentProcessNode->process.processDetails->data.temp);
+                LV_LOG_USER("tempTolerance:%f", currentProcessNode->process.processDetails->data.tempTolerance);
+                LV_LOG_USER("isTempControlled:%d", currentProcessNode->process.processDetails->data.isTempControlled);
+                LV_LOG_USER("isPreferred:%d", currentProcessNode->process.processDetails->data.isPreferred);
+                LV_LOG_USER("filmType:%d", currentProcessNode->process.processDetails->data.filmType);
+                LV_LOG_USER("timeMins:%"PRIu32"", currentProcessNode->process.processDetails->data.timeMins);
+                LV_LOG_USER("timeSecs:%"PRIu8"", currentProcessNode->process.processDetails->data.timeSecs);
             }
 
             stepNode *currentStepNode = currentProcessNode->process.processDetails->stepElementsList.start;
             // Write step list size
             f_write( fp, &currentProcessNode->process.processDetails->stepElementsList.size, sizeof(currentProcessNode->process.processDetails->stepElementsList.size), &bytes_written );
             while (currentStepNode != NULL) {
-                f_write( fp, currentStepNode->step.stepDetails->stepNameString, sizeof(currentStepNode->step.stepDetails->stepNameString), &bytes_written );
-                f_write( fp, &currentStepNode->step.stepDetails->timeMins, sizeof(currentStepNode->step.stepDetails->timeMins), &bytes_written );
-                f_write( fp, &currentStepNode->step.stepDetails->timeSecs, sizeof(currentStepNode->step.stepDetails->timeSecs), &bytes_written );
-                f_write( fp, &currentStepNode->step.stepDetails->type, sizeof(currentStepNode->step.stepDetails->type), &bytes_written );
-                f_write( fp, &currentStepNode->step.stepDetails->source, sizeof(currentStepNode->step.stepDetails->source), &bytes_written );
-                f_write( fp, &currentStepNode->step.stepDetails->discardAfterProc, sizeof(currentStepNode->step.stepDetails->discardAfterProc), &bytes_written );
+                f_write( fp, currentStepNode->step.stepDetails->data.stepNameString, sizeof(currentStepNode->step.stepDetails->data.stepNameString), &bytes_written );
+                f_write( fp, &currentStepNode->step.stepDetails->data.timeMins, sizeof(currentStepNode->step.stepDetails->data.timeMins), &bytes_written );
+                f_write( fp, &currentStepNode->step.stepDetails->data.timeSecs, sizeof(currentStepNode->step.stepDetails->data.timeSecs), &bytes_written );
+                f_write( fp, &currentStepNode->step.stepDetails->data.type, sizeof(currentStepNode->step.stepDetails->data.type), &bytes_written );
+                f_write( fp, &currentStepNode->step.stepDetails->data.source, sizeof(currentStepNode->step.stepDetails->data.source), &bytes_written );
+                f_write( fp, &currentStepNode->step.stepDetails->data.discardAfterProc, sizeof(currentStepNode->step.stepDetails->data.discardAfterProc), &bytes_written );
 
                 if (enableLog) {
                     LV_LOG_USER("--- STEP PARAMS ---");
-                    LV_LOG_USER("stepNameString:%s", currentStepNode->step.stepDetails->stepNameString);
-                    LV_LOG_USER("timeMins:%d", currentStepNode->step.stepDetails->timeMins);
-                    LV_LOG_USER("timeSecs:%d", currentStepNode->step.stepDetails->timeSecs);
-                    LV_LOG_USER("type:%d", currentStepNode->step.stepDetails->type);
-                    LV_LOG_USER("source:%d", currentStepNode->step.stepDetails->source);
-                    LV_LOG_USER("discardAfterProc:%d", currentStepNode->step.stepDetails->discardAfterProc);
+                    LV_LOG_USER("stepNameString:%s", currentStepNode->step.stepDetails->data.stepNameString);
+                    LV_LOG_USER("timeMins:%d", currentStepNode->step.stepDetails->data.timeMins);
+                    LV_LOG_USER("timeSecs:%d", currentStepNode->step.stepDetails->data.timeSecs);
+                    LV_LOG_USER("type:%d", currentStepNode->step.stepDetails->data.type);
+                    LV_LOG_USER("source:%d", currentStepNode->step.stepDetails->data.source);
+                    LV_LOG_USER("discardAfterProc:%d", currentStepNode->step.stepDetails->data.discardAfterProc);
                 }
                 currentStepNode = currentStepNode->next;
             }
             currentProcessNode = currentProcessNode->next;
         }
+        /* ── Machine statistics (appended after processes) ── */
+        f_write( fp, &gui.page.tools.machineStats.completed,  sizeof(gui.page.tools.machineStats.completed),  &bytes_written );
+        f_write( fp, &gui.page.tools.machineStats.totalMins,   sizeof(gui.page.tools.machineStats.totalMins),   &bytes_written );
+        f_write( fp, &gui.page.tools.machineStats.totalSecs,   sizeof(gui.page.tools.machineStats.totalSecs),   &bytes_written );
+        f_write( fp, &gui.page.tools.machineStats.stopped,     sizeof(gui.page.tools.machineStats.stopped),     &bytes_written );
+        f_write( fp, &gui.page.tools.machineStats.clean,       sizeof(gui.page.tools.machineStats.clean),       &bytes_written );
+
         f_close( fp );
+
+        /* ── Atomic swap: delete old config, rename temp → config ──
+         * The old file is only deleted after the new one is fully written
+         * and closed. If we crash between unlink and rename, the .tmp
+         * file is still complete and will be recovered on next boot. */
+        res = f_unlink(path);
+        if (res != FR_OK && res != FR_NO_FILE) {
+            LV_LOG_USER("Warning: could not delete old config (res=%d)", res);
+        }
+        res = f_rename(tmpPath, path);
+        if (res != FR_OK) {
+            LV_LOG_USER("Error: f_rename(%s → %s) failed (res=%d)", tmpPath, path, res);
+            /* The .tmp file is still valid — will be recovered on next boot */
+        } else {
+            LV_LOG_USER("Config saved successfully: %s", path);
+        }
+
+        /* Notify connected WS clients (Flutter) about the updated data */
+        ws_broadcast_process_list();
+        ws_broadcast_state();
     }
+    free( fp );  /* Release heap-allocated FIL struct */
 }
 
 #define FILE_COPY_BUF_SIZE	4096
 bool copyAndRenameFile( const char* sourceFile, const char* destFile) {
-	
-	FIL				srcFile, dstFile, *sp, *dp;
+
+	/*
+	 * FIL structs are ~600+ bytes each (larger with LFN enabled).
+	 * Allocating on heap prevents stack overflow in sysMan task.
+	 */
+	FIL				*sp = NULL, *dp = NULL;
 	FRESULT			res;
 	unsigned int	bytes_read = 1, bytes_written, current_written;
-	char			*buf;
+	char			*buf = NULL;
 	bool			ret = false;
-	
-	//Prima di rimuovere la vecchia destinazione, verifica che la sorgente esista!
+
+	// Before removing the old destination, verify that the source exists!
 	if( f_stat( sourceFile, NULL ) != FR_OK ) {
-		LV_LOG_USER("Errore: il file sorgente non esiste!" );
+		LV_LOG_USER("Error: source file does not exist!" );
 		return ret;
 	}
-	
+
+	sp = heap_caps_malloc( sizeof(FIL), MALLOC_CAP_SPIRAM );
+	dp = heap_caps_malloc( sizeof(FIL), MALLOC_CAP_SPIRAM );
 	buf = malloc( FILE_COPY_BUF_SIZE );
-	if( !buf ) {
-		LV_LOG_USER("Errore durante l'allocazione del buffer di copia!" );
+	if( !sp || !dp || !buf ) {
+		LV_LOG_USER("Error during allocation (FIL/buf)!" );
+		free(sp); free(dp); free(buf);
 		return ret;
 	}
-	sp = &srcFile;
-	dp = &dstFile;
-	
-	// Verifica se il file di destinazione esiste già e rimuovilo se necessario
+
+	// Check if the destination file already exists and remove it if necessary
 	if( f_stat( destFile, NULL ) == FR_OK ) {
 		unlink( destFile );
 	}
-	// Apre il file sorgente in modalità lettura
+	// Open the source file in read mode
 	if( (res = f_open(sp, sourceFile, FA_READ) ) != FR_OK ) {
-	    LV_LOG_USER("Errore nell'apertura del file sorgente! err: %d", res);
+	    LV_LOG_USER("Error opening source file! err: %d", res);
 	    goto out1;
 	}
-	
-	// Crea o sovrascrive il file destinazione
+
+	// Create or overwrite the destination file
 	if( ( res = f_open( dp, destFile, FA_WRITE | FA_CREATE_ALWAYS ) ) != FR_OK ) {
-		LV_LOG_USER("Errore nell'apertura del file destinazione! err: %d", res);
+		LV_LOG_USER("Error opening destination file! err: %d", res);
 		f_close( sp );
 	    return false;
 	}
-	
-	// Legge il contenuto del file sorgente e lo scrive nel file destinazione
+
+	// Read the source file content and write it to the destination file
 	while( bytes_read >  0 ) {
 	    if( (res = f_read( sp, buf, FILE_COPY_BUF_SIZE, &bytes_read ) ) != FR_OK ) {
-			LV_LOG_USER( "Errore di lettura durante la copia! err:%d", res );
+			LV_LOG_USER( "Error reading during copy! err:%d", res );
 			goto out2;
 		}
 		current_written = 0;
 		
 		while( current_written < bytes_read ) {
 			if( (res = f_write( dp, buf, bytes_read - current_written, &bytes_written ) ) != FR_OK ) {
-				LV_LOG_USER( "Errore di scrittura durante la copia! err:%d", res );
+				LV_LOG_USER( "Error writing during copy! err:%d", res );
 				goto out2;
 			}
 			current_written += bytes_written;
 		}
 	}
 
-    // Chiude entrambi i file
+    // Close both files
 out2:
 	f_close( sp );
 	f_close( dp );
-	// Verifica se il file destinazione è stato creato correttamente e se non è vuoto
+	// Verify that the destination file was created correctly and is not empty
 	if( f_stat( destFile, NULL ) == FR_OK ) {
 		res = f_open( dp, destFile, FA_READ );
 	    if( res == FR_OK && f_size( dp ) > 0 ) {
 			f_close( dp );
-	        LV_LOG_USER("File copiato e rinominato con successo!");
+	        LV_LOG_USER("File copied and renamed successfully!");
 	        ret = true;
 	    } else {
-	        LV_LOG_USER("Errore: il file di destinazione è vuoto o non può essere letto.");
+	        LV_LOG_USER("Error: destination file is empty or cannot be read.");
 	    }
 	} else {
-	    LV_LOG_USER("Errore: il file di destinazione non è stato creato correttamente.");
+	    LV_LOG_USER("Error: destination file was not created correctly.");
 	}
 	
 out1:
 	free( buf );	// Free the transfer buffer
+	free( sp );		// Free heap-allocated FIL structs
+	free( dp );
 	return ret;
 }
 
-void calculateTotalTime(processNode *processNode){
+/* Data-only version: sums step durations into processData.timeMins/timeSecs.
+ * Safe to call from ANY thread (no LVGL calls). */
+void calculateTotalTimeData(processNode *processNode){
     uint32_t mins = 0;
     uint8_t  secs = 0;
 
      stepList *stepElementsList;
- //    memset( &stepElementsList, 0, sizeof( stepElementsList ) );  // Not required! 
-     stepElementsList = &(processNode->process.processDetails->stepElementsList);   
+     stepElementsList = &(processNode->process.processDetails->stepElementsList);
 
             stepNode *stepNode;
-//            memset( &stepNode, 0, sizeof( stepNode ) );  // Not Required
             stepNode = stepElementsList->start;
 
-            while(stepNode != NULL){                
-                mins += stepNode->step.stepDetails->timeMins;
-                secs += stepNode->step.stepDetails->timeSecs;
+            while(stepNode != NULL){
+                mins += stepNode->step.stepDetails->data.timeMins;
+                secs += stepNode->step.stepDetails->data.timeSecs;
 
                 if (secs >= 60) {
                     mins += secs / 60;
@@ -1178,27 +1557,34 @@ void calculateTotalTime(processNode *processNode){
                 }
                 stepNode = stepNode->next;
             }
-    processNode->process.processDetails->timeMins = mins;
-    processNode->process.processDetails->timeSecs = secs;
+    processNode->process.processDetails->data.timeMins = mins;
+    processNode->process.processDetails->data.timeSecs = secs;
+    LV_LOG_USER("Process %p has a total time of %"PRIu32"min:%"PRIu8"sec", processNode, mins, secs);
+}
 
-    lv_label_set_text_fmt(processNode->process.processDetails->processTotalTimeValue, "%"PRIu32"m%"PRIu8"s", processNode->process.processDetails->timeMins, 
-      processNode->process.processDetails->timeSecs); 
-    LV_LOG_USER("Process %p has a total tilme of %"PRIu32"min:%"PRIu8"sec", processNode, mins, secs);
+/* Full version: recalculates data AND updates the LVGL label.
+ * Must be called from the LVGL thread only! */
+void calculateTotalTime(processNode *processNode){
+    calculateTotalTimeData(processNode);
+
+    if(processNode->process.processDetails->processTotalTimeValue != NULL)
+        lv_label_set_text_fmt(processNode->process.processDetails->processTotalTimeValue, "%"PRIu32"m%"PRIu8"s", processNode->process.processDetails->data.timeMins,
+          processNode->process.processDetails->data.timeSecs);
 }
 
 
 
 uint8_t calculatePercentage(uint32_t minutes, uint8_t seconds, uint32_t total_minutes, uint8_t total_seconds) {
-    // Calcola il tempo totale in secondi
+    // Calculate total time in seconds
     uint32_t total_time_seconds = total_minutes * 60 + total_seconds;
 
-    // Calcola il tempo trascorso in secondi
+    // Calculate elapsed time in seconds
     uint32_t elapsed_time_seconds = minutes * 60 + seconds;
 
-    // Calcola la percentuale di tempo trascorso rispetto al tempo totale
+    // Calculate the percentage of elapsed time relative to total time
     uint8_t percentage = (uint8_t)((elapsed_time_seconds * 100) / total_time_seconds);
 
-    // Assicurati che la percentuale sia compresa tra 0 e 100
+    // Ensure that the percentage is between 0 and 100
  	if (percentage > 100) {		// It's unsigned so don't need to check less than 0
         percentage = 100;
     }
@@ -1212,27 +1598,28 @@ void updateProcessElement(processNode *process){
   if(existingProcess != NULL) {
       LV_LOG_USER("Updating process element in list");
       //Update time
-      lv_label_set_text_fmt(existingProcess->process.processTime, "%"PRIu32"m%"PRIu8"s", process->process.processDetails->timeMins, 
-        process->process.processDetails->timeSecs); 
+      process_list_set_time_label(existingProcess);
       
       //Update temp
       lv_obj_send_event(existingProcess->process.processElement, LV_EVENT_REFRESH, NULL);
 
 
-      if(process->process.processDetails->isTempControlled == false) {
+      if(process->process.processDetails->data.isTempControlled == false) {
           lv_obj_add_flag(process->process.processTempIcon, LV_OBJ_FLAG_HIDDEN);
           lv_obj_add_flag(process->process.processTemp, LV_OBJ_FLAG_HIDDEN);
-          lv_obj_align(process->process.processTimeIcon, LV_ALIGN_LEFT_MID, -10, 17);
-          lv_obj_align(process->process.processTime, LV_ALIGN_LEFT_MID, 12, 17);
+          lv_obj_align(process->process.processTimeIcon, LV_ALIGN_LEFT_MID, ui_get_profile()->process_element.time_icon_no_temp_x, ui_get_profile()->process_element.time_icon_y);
+          lv_obj_align(process->process.processTime, LV_ALIGN_LEFT_MID, ui_get_profile()->process_element.time_value_no_temp_x, ui_get_profile()->process_element.time_value_y);
+          lv_obj_set_width(process->process.processTime, ui_get_profile()->process_element.card_content_w - ui_get_profile()->process_element.time_value_no_temp_x - 18);
        } else {
-            lv_obj_align(process->process.processTime, LV_ALIGN_LEFT_MID, 87, 17);
-            lv_obj_align(process->process.processTimeIcon, LV_ALIGN_LEFT_MID, 65, 17);
-            lv_obj_clear_flag(process->process.processTempIcon, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_clear_flag(process->process.processTemp, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_align(process->process.processTime, LV_ALIGN_LEFT_MID, ui_get_profile()->process_element.time_value_x, ui_get_profile()->process_element.time_value_y);
+            lv_obj_align(process->process.processTimeIcon, LV_ALIGN_LEFT_MID, ui_get_profile()->process_element.time_icon_x, ui_get_profile()->process_element.time_icon_y);
+            lv_obj_set_width(process->process.processTime, ui_get_profile()->process_element.card_content_w - ui_get_profile()->process_element.time_value_x - 18);
+            lv_obj_remove_flag(process->process.processTempIcon, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_remove_flag(process->process.processTemp, LV_OBJ_FLAG_HIDDEN);
        }
  
       //Update preferred
-      if(process->process.processDetails->isPreferred == 1){
+      if(process->process.processDetails->data.isPreferred == 1){
             lv_obj_set_style_text_color(existingProcess->process.preferredIcon, lv_color_hex(RED), LV_PART_MAIN);
       }
       else{
@@ -1240,10 +1627,10 @@ void updateProcessElement(processNode *process){
       }
       
       //Update name
-      lv_label_set_text(existingProcess->process.processName, process->process.processDetails->processNameString);
+      lv_label_set_text(existingProcess->process.processName, process->process.processDetails->data.processNameString);
 
       //Update film type
-      lv_label_set_text(existingProcess->process.processTypeIcon, process->process.processDetails->filmType == BLACK_AND_WHITE_FILM ? blackwhite_icon : colorpalette_icon);
+      lv_label_set_text(existingProcess->process.processTypeIcon, process->process.processDetails->data.filmType == BLACK_AND_WHITE_FILM ? blackwhite_icon : colorpalette_icon);
 
 
   } 
@@ -1256,29 +1643,29 @@ void updateStepElement(processNode *referenceProcess, stepNode *step){
          LV_LOG_USER("Updating element element in list");
          
          //Update name
-         lv_label_set_text(existingStep->step.stepName, step->step.stepDetails->stepNameString);
+         lv_label_set_text(existingStep->step.stepName, step->step.stepDetails->data.stepNameString);
 
         //Update source
         char *temp[] = processSourceList;
-         lv_label_set_text_fmt(existingStep->step.sourceLabel, "From:%s", temp[step->step.stepDetails->source]); 
+         lv_label_set_text_fmt(existingStep->step.sourceLabel, stepSourceFmt_text, temp[step->step.stepDetails->data.source]); 
 
         //Update discard after icon
-         if(step->step.stepDetails->discardAfterProc){
+         if(step->step.stepDetails->data.discardAfterProc){
              lv_obj_set_style_text_color(existingStep->step.discardAfterIcon, lv_color_hex(WHITE), LV_PART_MAIN);
            } else {
              lv_obj_set_style_text_color(existingStep->step.discardAfterIcon, lv_color_hex(GREY), LV_PART_MAIN);
            }
 
           //Update type icon
-          if(step->step.stepDetails->type == CHEMISTRY)
+          if(step->step.stepDetails->data.type == CHEMISTRY)
               lv_label_set_text(existingStep->step.stepTypeIcon, chemical_icon);
-          if(step->step.stepDetails->type == RINSE)
+          if(step->step.stepDetails->data.type == RINSE)
               lv_label_set_text(existingStep->step.stepTypeIcon, rinse_icon);           
-          if(step->step.stepDetails->type == MULTI_RINSE)
+          if(step->step.stepDetails->data.type == MULTI_RINSE)
               lv_label_set_text(existingStep->step.stepTypeIcon, multiRinse_icon); 
 
           //Update time
-          lv_label_set_text_fmt(existingStep->step.stepTime, "%"PRIu8"m%"PRIu8"s", step->step.stepDetails->timeMins, step->step.stepDetails->timeSecs); 
+          lv_label_set_text_fmt(existingStep->step.stepTime, "%"PRIu8"m%"PRIu8"s", step->step.stepDetails->data.timeMins, step->step.stepDetails->data.timeSecs); 
       }
 }
 
@@ -1303,14 +1690,14 @@ uint32_t loadSDCardProcesses() {
 char* generateRandomCharArray(uint8_t length) {
 
 	char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-	char *randomArray; // Allocazione dinamica dell'array più uno per il terminatore di stringa
+	char *randomArray; // Dynamic allocation of the array plus one for the null terminator
 
 	randomArray = heap_caps_malloc( length + 1, MALLOC_CAP_SPIRAM );
 	if( randomArray == NULL ) return NULL;		// If allocation fails return NULL pointer
 	for (uint8_t i = 0; i < length; ++i) {
 		randomArray[i] = charset[random() % sizeof(charset)];
 	}
-	randomArray[length] = '\0'; // Aggiungi il terminatore di stringa
+	randomArray[length] = '\0'; // Add the null terminator
 	return randomArray;
 }
 
@@ -1325,20 +1712,22 @@ void initializeRelayPins(){
 
 void cleanRelayManager(uint8_t pumpFrom, uint8_t pumpTo, uint8_t pumpDir, bool activePump){
     if (activePump) {
+        /* Open source and destination valves via MCP23017 */
         mcp23017_digitalWrite(&mcp, pumpFrom, 1);
         LV_LOG_USER("From %d on : %d", pumpFrom, mcp23017_digitalRead(&mcp, pumpFrom));
         mcp23017_digitalWrite(&mcp, pumpTo, 1);
         LV_LOG_USER("To %d on : %d", pumpTo, mcp23017_digitalRead(&mcp, pumpTo));
-        mcp23017_digitalWrite(&mcp, pumpDir, 1);
-        LV_LOG_USER("Direction %d on : %d", pumpDir, mcp23017_digitalRead(&mcp, pumpDir));
+        /* Pump direction via DBH-12V H-bridge */
+        pump_run(pumpDir == PUMP_IN_RLY, PUMP_DEFAULT_SPEED);
     } else {
-        if (pumpFrom != INVALID_RELAY && pumpTo != INVALID_RELAY && pumpDir != INVALID_RELAY) {
+        /* Stop pump H-bridge */
+        pump_stop();
+        /* Close all valves */
+        if (pumpFrom != INVALID_RELAY && pumpTo != INVALID_RELAY) {
             mcp23017_digitalWrite(&mcp, pumpFrom, 0);
             LV_LOG_USER("From %d off : %d", pumpFrom, mcp23017_digitalRead(&mcp, pumpFrom));
             mcp23017_digitalWrite(&mcp, pumpTo, 0);
             LV_LOG_USER("To %d off : %d", pumpTo, mcp23017_digitalRead(&mcp, pumpTo));
-            mcp23017_digitalWrite(&mcp, pumpDir, 0);
-            LV_LOG_USER("Direction %d off : %d", pumpDir, mcp23017_digitalRead(&mcp, pumpDir));
         } else {
             for (uint8_t i = 0; i < RELAY_NUMBER; i++) {
                 mcp23017_digitalWrite(&mcp, i, 0);
@@ -1351,17 +1740,19 @@ void cleanRelayManager(uint8_t pumpFrom, uint8_t pumpTo, uint8_t pumpDir, bool a
 
 void sendValueToRelay(uint8_t pumpFrom, uint8_t pumpDir, bool activePump) {
     if (activePump) {
+        /* Open the source valve via MCP23017 relay */
         mcp23017_digitalWrite(&mcp, pumpFrom, 1);
         LV_LOG_USER("From %d on : %d", pumpFrom, mcp23017_digitalRead(&mcp, pumpFrom));
-        mcp23017_digitalWrite(&mcp, pumpDir, 1);
-        LV_LOG_USER("Direction %d on : %d", pumpDir, mcp23017_digitalRead(&mcp, pumpDir));
-        gui.tempProcessNode->process.processDetails->checkup->isAlreadyPumping = true;
+        /* Pump direction via DBH-12V H-bridge (not a relay anymore) */
+        pump_run(pumpDir == PUMP_IN_RLY, PUMP_DEFAULT_SPEED);
+        gui.tempProcessNode->process.processDetails->checkup->data.isAlreadyPumping = true;
     } else {
-        if (pumpFrom != INVALID_RELAY && pumpDir != INVALID_RELAY) {
+        /* Stop pump H-bridge */
+        pump_stop();
+        /* Close all valves */
+        if (pumpFrom != INVALID_RELAY) {
             mcp23017_digitalWrite(&mcp, pumpFrom, 0);
             LV_LOG_USER("From %d off : %d", pumpFrom, mcp23017_digitalRead(&mcp, pumpFrom));
-            mcp23017_digitalWrite(&mcp, pumpDir, 0);
-            LV_LOG_USER("Direction %d off : %d", pumpDir, mcp23017_digitalRead(&mcp, pumpDir));
         } else {
             for (uint8_t i = 0; i < RELAY_NUMBER; i++) {
                 mcp23017_digitalWrite(&mcp, i, 0);
@@ -1372,7 +1763,33 @@ void sendValueToRelay(uint8_t pumpFrom, uint8_t pumpDir, bool activePump) {
 }
 
 
+/* ── Motor direction helpers ──
+ * P4 board: IN1/IN2 are ESP32 GPIOs on the Expand IO header (direct control).
+ * Other boards: IN1/IN2 are MCP23017 pins (I2C expander). */
+static inline void motor_dir_set(uint8_t pin, uint8_t value)
+{
+#if defined(BOARD_JC4880P433)
+    gpio_set_level(pin, value);
+#else
+    mcp23017_digitalWrite(&mcp, pin, value);
+#endif
+}
+
 void initializeMotorPins(){
+#if defined(BOARD_JC4880P433)
+    /* IN1 and IN2 on ESP32 GPIOs (Expand IO header) */
+    gpio_config_t io_conf = {
+        .pin_bit_mask = (1ULL << MOTOR_IN1_PIN) | (1ULL << MOTOR_IN2_PIN),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    gpio_config(&io_conf);
+    gpio_set_level(MOTOR_IN1_PIN, 0);
+    gpio_set_level(MOTOR_IN2_PIN, 0);
+    LV_LOG_USER("Motor IN1 (GPIO %d) + IN2 (GPIO %d) init OK", MOTOR_IN1_PIN, MOTOR_IN2_PIN);
+#else
     /* IN1 and IN2 on MCP23017 */
     mcp23017_pinMode(&mcp, MOTOR_IN1_PIN, MCP23017_OUTPUT);
     mcp23017_digitalWrite(&mcp, MOTOR_IN1_PIN, 0);
@@ -1381,6 +1798,7 @@ void initializeMotorPins(){
     mcp23017_pinMode(&mcp, MOTOR_IN2_PIN, MCP23017_OUTPUT);
     mcp23017_digitalWrite(&mcp, MOTOR_IN2_PIN, 0);
     LV_LOG_USER("Motor pin init %d: %d", MOTOR_IN2_PIN, mcp23017_digitalRead(&mcp, MOTOR_IN2_PIN));
+#endif
 
     /* ENA on ESP32 GPIO via LEDC PWM (8-bit, 5kHz) */
     ledc_timer_config_t timer_conf = {
@@ -1411,15 +1829,15 @@ void stopMotor(uint8_t pin1, uint8_t pin2){
     motor_ledc_set_duty(dutyCycle);
     vTaskDelay(pdMS_TO_TICKS(10));
   }
-  mcp23017_digitalWrite(&mcp, pin1, 0);
-  mcp23017_digitalWrite(&mcp, pin2, 0);
+  motor_dir_set(pin1, 0);
+  motor_dir_set(pin2, 0);
   motor_ledc_set_duty(0);
   LV_LOG_USER("Run stopMotor");
 }
 
 void runMotorFW(uint8_t pin1, uint8_t pin2){
-  mcp23017_digitalWrite(&mcp, pin1, 1);
-  mcp23017_digitalWrite(&mcp, pin2, 0);
+  motor_dir_set(pin1, 1);
+  motor_dir_set(pin2, 0);
 
   for (uint8_t dutyCycle = MOTOR_MIN_ANALOG_VAL; dutyCycle <= sys.analogVal_rotationSpeedPercent; dutyCycle++) {
     motor_ledc_set_duty(dutyCycle);
@@ -1429,8 +1847,8 @@ void runMotorFW(uint8_t pin1, uint8_t pin2){
 }
 
 void runMotorRV(uint8_t pin1, uint8_t pin2){
-  mcp23017_digitalWrite(&mcp, pin1, 0);
-  mcp23017_digitalWrite(&mcp, pin2, 1);
+  motor_dir_set(pin1, 0);
+  motor_dir_set(pin2, 1);
 
   for (uint8_t dutyCycle = MOTOR_MIN_ANALOG_VAL; dutyCycle <= sys.analogVal_rotationSpeedPercent; dutyCycle++) {
     motor_ledc_set_duty(dutyCycle);
@@ -1469,31 +1887,7 @@ void setMotorSpeedDown(uint8_t pin, uint8_t spd){
 
 void initializeTemperatureSensor()
 {
-#if 0
-  if (!sensorTempBath.begin(TEMPERATURE_BATH_PIN)) {   // Indirizzo I2C del SHT30
-    LV_LOG_USER("Could not find a valid sensorTempBath sensor, check wiring!");
-  }
-  if (!sensorTempChemical.begin(TEMPERATURE_CHEMICAL_PIN)) {   // Indirizzo I2C del SHT30
-    LV_LOG_USER("Could not find a valid sensorTempBath sensor, check wiring!");
-  }
-#endif
 }
-#if 0
-float getTemperature(Adafruit_SHT31 tempSensor){
-	
-
-  float tempC = tempSensor.readTemperature();
-  float tempF = (tempC * 9.0 / 5.0) + 32.0;
-
-  if (!isnan(tempC)) {  // Controlla se la lettura è valida
-    LV_LOG_USER("Temp *C = %f | Temp *F = %f",tempC, tempF);
-    return tempC;
-  } else {
-    Serial.println("Failed to read temperature");
-    return -255; // A value to show it's broken!
-  }
-}
-#endif
 
 
 void testPin(uint8_t pin){
@@ -1509,22 +1903,21 @@ void testPin(uint8_t pin){
  * In the simulator, src/main.c provides non-weak overrides.
  * ═══════════════════════════════════════════════════ */
 #ifndef SIMULATOR_BUILD
-float sim_getTemperature(uint8_t sensorPin) {
+float sim_getTemperature(uint8_t sensorIndex) {
     float temp = -255.0f;
-    ds18b20_t *sensor = NULL;
 
-    if (sensorPin == TEMPERATURE_BATH_PIN) {
-        sensor = &ds_bath;
-    } else if (sensorPin == TEMPERATURE_CHEMICAL_PIN) {
-        sensor = &ds_chemical;
-    }
-
-    if (sensor && sensor->initialized) {
-        if (ds18b20_read_temp(sensor, &temp) != ESP_OK) {
-            LV_LOG_USER("DS18B20 read error on GPIO%d", sensorPin);
+    if (ds_bus.initialized && sensorIndex < ds_bus.sensor_count) {
+        if (ds18b20_read_temp(&ds_bus, sensorIndex, &temp) != ESP_OK) {
+            LV_LOG_USER("DS18B20 read error sensor[%d]", sensorIndex);
             temp = -255.0f;
         }
     }
+
+    /* Apply calibration offset to temperature reading */
+    extern struct gui_components gui;
+    float offset = gui.page.settings.settingsParams.tempCalibOffset / 10.0f;
+    temp += offset;
+
     return temp;
 }
 
@@ -1580,7 +1973,7 @@ void filterAndDisplayProcesses() {
 
     // Debugging info
     LV_LOG_USER("Filter %s, %d, %d, %d", 
-                gui.element.filterPopup.filterName ? gui.element.filterPopup.filterName : "", 
+                gui.element.filterPopup.filterName,
                 gui.element.filterPopup.isColorFilter, 
                 gui.element.filterPopup.isBnWFilter, 
                 gui.element.filterPopup.preferredOnly);
@@ -1589,8 +1982,8 @@ void filterAndDisplayProcesses() {
         bool isFiltered = true;
 
         // Check name filter
-        if (gui.element.filterPopup.filterName != NULL && strlen(gui.element.filterPopup.filterName) > 0) {
-            if (!caseInsensitiveStrstr(currentNode->process.processDetails->processNameString, gui.element.filterPopup.filterName)) {
+        if (strlen(gui.element.filterPopup.filterName) > 0) {
+            if (!caseInsensitiveStrstr(currentNode->process.processDetails->data.processNameString, gui.element.filterPopup.filterName)) {
                 isFiltered = false;
             }
         }
@@ -1599,18 +1992,18 @@ void filterAndDisplayProcesses() {
         if (gui.element.filterPopup.isColorFilter && gui.element.filterPopup.isBnWFilter) {
             /* Both selected — show all film types (no filtering needed) */
         } else if (gui.element.filterPopup.isColorFilter) {
-            if (currentNode->process.processDetails->filmType != COLOR_FILM) {
+            if (currentNode->process.processDetails->data.filmType != COLOR_FILM) {
                 isFiltered = false;
             }
         } else if (gui.element.filterPopup.isBnWFilter) {
-            if (currentNode->process.processDetails->filmType != BLACK_AND_WHITE_FILM) {
+            if (currentNode->process.processDetails->data.filmType != BLACK_AND_WHITE_FILM) {
                 isFiltered = false;
             }
         }
 
         // Check preferred status filter
         if (gui.element.filterPopup.preferredOnly) {
-            if (!currentNode->process.processDetails->isPreferred) {
+            if (!currentNode->process.processDetails->data.isPreferred) {
                 isFiltered = false;
             }
         }
@@ -1659,6 +2052,66 @@ void removeFiltersAndDisplayAllProcesses() {
     lv_obj_update_layout(gui.page.processes.processesListContainer);
 }
 
+/* ── Sub-object destroy functions (Point 4 refactor) ────────────── */
+
+void step_detail_destroy(sStepDetail *sd) {
+    if (sd == NULL) return;
+    /* Reset runtime style allocated during stepDetail() creation */
+    lv_style_reset(&sd->style_mBoxStepPopupTitleLine);
+    free(sd);
+}
+
+void checkup_destroy(sCheckup *ckup) {
+    if (ckup == NULL) return;
+    /* Stop all timers owned by this checkup */
+    safeTimerDelete(&ckup->processTimer);
+    safeTimerDelete(&ckup->pumpTimer);
+    safeTimerDelete(&ckup->tempTimer);
+    /* Reset runtime style */
+    lv_style_reset(&ckup->textAreaStyleCheckup);
+    free(ckup);
+}
+
+void process_detail_destroy(sProcessDetail *pd) {
+    if (pd == NULL) return;
+    /* Null out LVGL pointers to prevent stale access from async callbacks */
+    pd->processTotalTimeValue = NULL;
+    pd->processDetailParent   = NULL;
+    /* Reset runtime style allocated during processDetail() creation */
+    lv_style_reset(&pd->textAreaStyle);
+    /* Free all steps in the step list */
+    stepNode *s = pd->stepElementsList.start;
+    while (s != NULL) {
+        stepNode *next = s->next;
+        step_node_destroy(s);
+        s = next;
+    }
+    pd->stepElementsList.start = NULL;
+    pd->stepElementsList.end = NULL;
+    pd->stepElementsList.size = 0;
+    /* Free checkup */
+    checkup_destroy(pd->checkup);
+    pd->checkup = NULL;
+    /* Free self */
+    free(pd);
+}
+
+/* ── Node-level destroy functions (use sub-object destroyers) ──── */
+
+void step_node_destroy(stepNode *node) {
+    if (node == NULL) return;
+    step_detail_destroy(node->step.stepDetails);
+    node->step.stepDetails = NULL;
+    free(node);
+}
+
+void process_node_destroy(processNode *node) {
+    if (node == NULL) return;
+    process_detail_destroy(node->process.processDetails);
+    node->process.processDetails = NULL;
+    free(node);
+}
+
 void emptyList(void *list, NodeType_t type) {
     if (list == NULL) {
         return;
@@ -1666,38 +2119,27 @@ void emptyList(void *list, NodeType_t type) {
 
     if (type == PROCESS_NODE) {
         processList *plist = (processList *)list;
-        processNode *currentNode = plist->start;
 
+        /* Pre-cleanup: invalidate globals that may reference nodes about to be freed */
+        processNode *scan = plist->start;
+        while (scan != NULL) {
+            if (scan == gui.tempProcessNode) {
+                gui.tempProcessNode = NULL;
+            }
+            /* Stop any running timers before freeing the node */
+            if (scan->process.processDetails != NULL &&
+                scan->process.processDetails->checkup != NULL) {
+                safeTimerDelete(&scan->process.processDetails->checkup->processTimer);
+                safeTimerDelete(&scan->process.processDetails->checkup->pumpTimer);
+                safeTimerDelete(&scan->process.processDetails->checkup->tempTimer);
+            }
+            scan = scan->next;
+        }
+
+        processNode *currentNode = plist->start;
         while (currentNode != NULL) {
             processNode *nextNode = currentNode->next;
-
-            /* Free all steps inside this process first */
-            if (currentNode->process.processDetails != NULL) {
-                stepNode *stepCurrent = currentNode->process.processDetails->stepElementsList.start;
-                while (stepCurrent != NULL) {
-                    stepNode *stepNext = stepCurrent->next;
-                    if (stepCurrent->step.stepDetails != NULL) {
-                        free(stepCurrent->step.stepDetails);
-                        stepCurrent->step.stepDetails = NULL;
-                    }
-                    free(stepCurrent);
-                    stepCurrent = stepNext;
-                }
-                currentNode->process.processDetails->stepElementsList.start = NULL;
-                currentNode->process.processDetails->stepElementsList.end = NULL;
-                currentNode->process.processDetails->stepElementsList.size = 0;
-
-                /* Free checkup struct */
-                if (currentNode->process.processDetails->checkup != NULL) {
-                    free(currentNode->process.processDetails->checkup);
-                    currentNode->process.processDetails->checkup = NULL;
-                }
-                /* Free processDetails */
-                free(currentNode->process.processDetails);
-                currentNode->process.processDetails = NULL;
-            }
-            /* Free the process node itself */
-            free(currentNode);
+            process_node_destroy(currentNode);
             currentNode = nextNode;
         }
 
@@ -1707,16 +2149,20 @@ void emptyList(void *list, NodeType_t type) {
 
     } else if (type == STEP_NODE) {
         stepList *slist = (stepList *)list;
-        stepNode *currentNode = slist->start;
 
+        /* Pre-cleanup: invalidate globals that may reference step nodes about to be freed */
+        stepNode *scan = slist->start;
+        while (scan != NULL) {
+            if (scan == gui.tempStepNode) {
+                gui.tempStepNode = NULL;
+            }
+            scan = scan->next;
+        }
+
+        stepNode *currentNode = slist->start;
         while (currentNode != NULL) {
             stepNode *nextNode = currentNode->next;
-            /* Free stepDetails before the node */
-            if (currentNode->step.stepDetails != NULL) {
-                free(currentNode->step.stepDetails);
-                currentNode->step.stepDetails = NULL;
-            }
-            free(currentNode);
+            step_node_destroy(currentNode);
             currentNode = nextNode;
         }
 
@@ -1726,80 +2172,46 @@ void emptyList(void *list, NodeType_t type) {
     }
 }
 
-void readMachineStats(machineStatistics *machineStats) {  
-#if 0
-  // Apri il namespace "stats" in modalità RO
-  preferences.begin("stats", true);
-
-  // Leggi i valori dalla memoria, usa valori di default se non esistono
-  machineStats->completed = preferences.getULong("completed", 0);
-  machineStats->totalMins = preferences.getULong64("totalMins", 0);
-  machineStats->clean = preferences.getULong("clean", 0);
-  machineStats->stopped = preferences.getULong("stopped", 0);
-
-#if FILM_USE_LOG != 0
-  LV_LOG_USER("Get values: \ncompletedProcesses: %d \ntotalMins: %llu \ncompletedCleanCycle: %d \nstoppedProcesses: %d\n", 
-                machineStats->completed, 
-                machineStats->totalMins, 
-                machineStats->clean, 
-                machineStats->stopped);
-#endif
-  // Chiudi il namespace
-  preferences.end();
-#endif
+void readMachineStats(machineStatistics *machineStats) {
+    /* Stats are now read as part of readConfigFile — nothing extra needed */
+    (void)machineStats;
 }
 
 void writeMachineStats(machineStatistics *machineStats) {
-#if 0
-  // Apri il namespace "stats" in modalità RW
-  preferences.begin("stats", false);
-
-  // Scrivi i valori nella memoria
-  preferences.putUInt("completed", machineStats->completed);
-  preferences.putULong64("totalMins", machineStats->totalMins);
-  preferences.putUInt("clean",machineStats->clean);
-  preferences.putUInt("stopped", machineStats->stopped);
-
-  // Chiudi il namespace
-  preferences.end();
-
-  LV_LOG_USER("Set values: \ncompletedProcesses: %d \ntotalMins: %llu \ncompletedCleanCycle: %d \nstoppedProcesses: %d\n", 
-                machineStats->completed, 
-                machineStats->totalMins, 
-                machineStats->clean, 
-                machineStats->stopped);
-#endif
+    /* Rewrite the full config file which now includes stats at the end */
+    (void)machineStats;
+    writeConfigFile(FILENAME_SAVE, false);
 }
 
 
-uint32_t findRolleStringIndex(const char *target, const char *array) {
+uint32_t findRollerStringIndex(const char *target, const char *array) {
     const char *start = array;
     uint32_t index = 0;
 
     while (*start != '\0') {
-        // Troviamo la fine della stringa corrente
+        // Find the end of the current string
         const char *end = strchr(start, '\n');
         if (end == NULL) {
-            end = start + strlen(start);  // Se non troviamo '\n', prendiamo fino alla fine della stringa
+            end = start + strlen(start);  // If we don't find newline, take until the end of the string
         }
 
-        // Lunghezza della stringa corrente
+        // Length of the current string
         uint32_t length = end - start;
 
-        // Confrontiamo la sottostringa
+        // Compare the substring
         if (strncmp(start, target, length) == 0 && target[length] == '\0') {
             return index;
         }
 
-        // Passiamo alla prossima riga
+        // Move to the next line
         start = end;
         if (*start == '\n') {
-            start++;  // Salta il '\n' se lo troviamo
+            start++;  // Skip the newline if we find it
         }
         index++;
     }
 
-    return -1; // Stringa non trovata
+    return -1; // String not found
 }
 
 char* getRollerStringIndex(uint32_t index, const char *list) {
@@ -1814,8 +2226,7 @@ char* getRollerStringIndex(uint32_t index, const char *list) {
             if (result == NULL) {
                 return NULL; // Allocation failed
             }
-            strncpy(result, start, length);
-            result[length] = '\0';
+            snprintf(result, length + 1, "%.*s", (int)length, start);
             return result;
         }
         start = end + 1;
@@ -1838,53 +2249,53 @@ char* getRollerStringIndex(uint32_t index, const char *list) {
 }
 
 char* generateRandomSuffix(const char* baseName) {
-    static char newProcessName[MAX_PROC_NAME_LEN + 1]; // Include spazio per il carattere nullo
+    static char newProcessName[MAX_PROC_NAME_LEN + 1]; // Include space for the null terminator
 
-    // Controlla se baseName ha già un suffisso numerico
+    // Check if baseName already has a numeric suffix
     size_t len = strlen(baseName);
-    uint8_t suffix = 1; // Suffisso iniziale
+    uint8_t suffix = 1; // Initial suffix
 
-    // Calcola la lunghezza massima possibile per il nome base (senza suffisso)
-    size_t maxBaseLen = MAX_PROC_NAME_LEN - 4; // 4 caratteri per "_000"
+    // Calculate the maximum possible length for the base name (without suffix)
+    size_t maxBaseLen = MAX_PROC_NAME_LEN - 4; // 4 characters for "_000"
 
     if (len > maxBaseLen) {
-        // Se baseName è più lungo del massimo consentito per il nome base, accorcialo
-        strncpy(newProcessName, baseName, maxBaseLen); // Copia solo maxBaseLen caratteri
-        newProcessName[maxBaseLen] = '\0'; // Assicura che ci sia il terminatore nullo
-        len = maxBaseLen; // Aggiorna la lunghezza effettiva del nuovo nome base
+        // If baseName is longer than the maximum allowed for the base name, shorten it
+        memcpy(newProcessName, baseName, maxBaseLen);
+        newProcessName[maxBaseLen] = '\0';
+        len = maxBaseLen; // Update the effective length of the new base name
     } else {
-        // Altrimenti copialo direttamente
-        strncpy(newProcessName, baseName, sizeof(newProcessName)); // Copia tutta la stringa
-        newProcessName[sizeof(newProcessName) - 1] = '\0'; // Assicura che ci sia il terminatore nullo
+        // Otherwise copy it directly
+        memcpy(newProcessName, baseName, len);
+        newProcessName[len] = '\0';
     }
 
-    // Verifica se baseName ha già un suffisso numerico valido
+    // Check if baseName already has a valid numeric suffix
     if (len > 4 && baseName[len - 4] == '_' && isdigit((int)baseName[len - 3]) && isdigit((int)baseName[len - 2]) && isdigit((int)baseName[len - 1])) {
-        // Se baseName ha già un suffisso numerico, estrai il suffisso corrente
-        suffix = atoi(&baseName[len - 3]); // Ottieni il suffisso numerico
-        newProcessName[len - 4] = '\0'; // Rimuovi il suffisso numerico per creare il nuovo nome base
+        // If baseName already has a numeric suffix, extract the current suffix
+        suffix = atoi(&baseName[len - 3]); // Get the numeric suffix
+        newProcessName[len - 4] = '\0'; // Remove the numeric suffix to create the new base name
     }
 
     bool uniqueNameFound = false;
 
     while (!uniqueNameFound) {
-        // Crea il nuovo suffisso
-        char suffixStr[5]; // 4 caratteri per "_000" + 1 per il terminatore nullo
-        snprintf(suffixStr, sizeof(suffixStr), "_%03d", suffix); // Formatta il suffisso a tre cifre con zeri a sinistra se necessario
+        // Create the new suffix
+        char suffixStr[5]; // 4 characters for "_000" + 1 for the null terminator
+        snprintf(suffixStr, sizeof(suffixStr), "_%03d", suffix); // Format the suffix to three digits with leading zeros if necessary
 
-        // Concatena il suffisso al nuovo nome
+        // Concatenate the suffix to the new name
         strncat(newProcessName, suffixStr, sizeof(newProcessName) - strlen(newProcessName) - 1);
 
-        // Verifica se il nuovo nome con suffisso è unico nella lista
+        // Check if the new name with suffix is unique in the list
         uniqueNameFound = true;
         processNode *current = gui.page.processes.processElementsList.start;
         while (current != NULL) {
-            if (strcmp(current->process.processDetails->processNameString, newProcessName) == 0) {
+            if (strcmp(current->process.processDetails->data.processNameString, newProcessName) == 0) {
                 uniqueNameFound = false;
-                suffix++; // Incrementa il suffisso
-                // Rimuovi il suffisso aggiunto per ricominciare il ciclo e provare con un nuovo suffisso
-                size_t baseLen = strlen(newProcessName) - 4; // Lunghezza del nome base senza il suffisso
-                newProcessName[baseLen] = '\0'; // Termina la stringa dopo il nome base
+                suffix++; // Increment the suffix
+                // Remove the added suffix to restart the loop and try with a new suffix
+                size_t baseLen = strlen(newProcessName) - 4; // Length of the base name without the suffix
+                newProcessName[baseLen] = '\0'; // Terminate the string after the base name
                 break;
             }
             current = current->next;
@@ -1898,64 +2309,48 @@ sStepDetail *deepCopyStepDetail(sStepDetail *original) {
     if (original == NULL) return NULL;
     sStepDetail *copy = (sStepDetail*)malloc(sizeof(sStepDetail));
     if (copy == NULL) return NULL;
-    memcpy(copy, original, sizeof(sStepDetail));
 
-    /* Null-out LVGL widget pointers — they belong to the original and will be
-       recreated when the copy's step detail page is opened */
-    copy->stepDetailParent = NULL;
-    copy->mBoxStepPopupTitleLine = NULL;
-    copy->stepDetailNameContainer = NULL;
-    copy->stepDetailContainer = NULL;
-    copy->stepDurationContainer = NULL;
-    copy->stepTypeContainer = NULL;
-    copy->stepSourceContainer = NULL;
-    copy->stepDiscardAfterContainer = NULL;
-    copy->stepDetailLabel = NULL;
-    copy->stepDetailNamelLabel = NULL;
-    copy->stepDurationLabel = NULL;
-    copy->stepDurationMinLabel = NULL;
-    copy->stepSaveLabel = NULL;
-    copy->stepCancelLabel = NULL;
-    copy->stepTypeLabel = NULL;
-    copy->stepSourceLabel = NULL;
-    copy->stepTypeHelpIcon = NULL;
-    copy->stepSourceTempLabel = NULL;
-    copy->stepDiscardAfterLabel = NULL;
-    copy->stepSourceTempHelpIcon = NULL;
-    copy->stepSourceTempValue = NULL;
-    copy->stepDiscardAfterSwitch = NULL;
-    copy->stepSaveButton = NULL;
-    copy->stepCancelButton = NULL;
-    copy->stepSourceDropDownList = NULL;
-    copy->stepTypeDropDownList = NULL;
-    copy->dropDownListStyle = NULL;
-    copy->stepDetailSecTextArea = NULL;
-    copy->stepDetailMinTextArea = NULL;
-    copy->stepDetailNamelTextArea = NULL;
+    /* Zero entire struct (all UI pointers become NULL) then copy business data */
+    memset(copy, 0, sizeof(sStepDetail));
+    copy->data = original->data;
+    /* Context structs (nameKeyboardCtx, minRollerCtx, secRollerCtx) are already
+       zeroed by the memset above — they're in sStepDetail, not sStepData */
 
     return copy;
 }
 
-singleStep *deepCopySingleStep(singleStep *original) {
-    if (original == NULL) return NULL;
-    singleStep *copy = (singleStep*)malloc(sizeof(singleStep));
-    if (copy == NULL) return NULL;
-    memcpy(copy, original, sizeof(singleStep));
-    copy->stepDetails = deepCopyStepDetail(original->stepDetails);
-    // Copia profonda di eventuali strutture interne se necessario
-    return copy;
+/**
+ * Clone a singleStep in place: zero dst, then deep copy business data from src.
+ * Returns true on success, false on failure (dst is left zeroed on failure).
+ */
+bool single_step_clone(const singleStep *src, singleStep *dst) {
+    if (src == NULL || dst == NULL) return false;
+
+    /* Zero everything (NULLs all LVGL pointers, resets runtime flags) */
+    memset(dst, 0, sizeof(singleStep));
+
+    /* Deep copy the business data sub-struct */
+    dst->stepDetails = deepCopyStepDetail((sStepDetail *)src->stepDetails);
+    if (dst->stepDetails == NULL && src->stepDetails != NULL) {
+        return false;
+    }
+    return true;
 }
 
 stepNode *deepCopyStepNode(stepNode *original) {
     if (original == NULL) return NULL;
     stepNode *copy = (stepNode*)malloc(sizeof(stepNode));
     if (copy == NULL) return NULL;
-    memcpy(copy, original, sizeof(stepNode));
-    singleStep *tmpStep = deepCopySingleStep(&original->step);
-    if (tmpStep != NULL) {
-        copy->step = *tmpStep;
-        free(tmpStep);  /* Free the intermediate allocation */
+
+    /* Zero everything (NULLs next/prev pointers and all LVGL fields) */
+    memset(copy, 0, sizeof(stepNode));
+
+    /* Clone step content directly into copy — no intermediate allocation */
+    if (!single_step_clone(&original->step, &copy->step)) {
+        free(copy);
+        return NULL;
     }
+    /* next/prev are set by deepCopyStepList, not here */
     return copy;
 }
 
@@ -1970,7 +2365,19 @@ stepList deepCopyStepList(stepList original) {
 
     while (current != NULL) {
         stepNode *newNode = deepCopyStepNode(current);
-        if (newNode == NULL) break;
+        if (newNode == NULL) {
+            /* Rollback: free all already-copied nodes */
+            stepNode *cleanup = copy.start;
+            while (cleanup != NULL) {
+                stepNode *tmp = cleanup->next;
+                step_node_destroy(cleanup);
+                cleanup = tmp;
+            }
+            copy.start = NULL;
+            copy.end = NULL;
+            copy.size = 0;
+            return copy;
+        }
 
         newNode->prev = lastCopied;
         newNode->next = NULL;
@@ -1994,8 +2401,11 @@ sCheckup *deepCopyCheckup(sCheckup *original) {
     if (original == NULL) return NULL;
     sCheckup *copy = (sCheckup*)malloc(sizeof(sCheckup));
     if (copy == NULL) return NULL;
-    memcpy(copy, original, sizeof(sCheckup));
-    // Copia profonda di eventuali strutture interne se necessario
+
+    /* Zero entire struct (all UI pointers + timers become NULL) then copy business data */
+    memset(copy, 0, sizeof(sCheckup));
+    copy->data = original->data;
+
     return copy;
 }
 
@@ -2003,31 +2413,69 @@ sProcessDetail *deepCopyProcessDetail(sProcessDetail *original) {
     if (original == NULL) return NULL;
     sProcessDetail *copy =  (sProcessDetail*)malloc(sizeof(sProcessDetail));
     if (copy == NULL) return NULL;
-    memcpy(copy, original, sizeof(sProcessDetail));
+
+    /* Zero entire struct (all UI pointers become NULL) then copy business data */
+    memset(copy, 0, sizeof(sProcessDetail));
+    copy->data = original->data;
+    /* Context structs (nameKeyboardCtx, tempRollerCtx, toleranceRollerCtx) are already
+       zeroed by the memset above — they're in sProcessDetail, not sProcessData */
+
+    /* Deep copy sub-structures that need special handling */
     copy->stepElementsList = deepCopyStepList(original->stepElementsList);
+    if (copy->stepElementsList.size != original->stepElementsList.size) {
+        /* Step list copy failed (partial or total) — clean up */
+        free(copy);
+        return NULL;
+    }
+
     copy->checkup = deepCopyCheckup(original->checkup);
+    if (copy->checkup == NULL && original->checkup != NULL) {
+        /* Checkup copy failed — free step list and copy */
+        stepNode *cleanup = copy->stepElementsList.start;
+        while (cleanup != NULL) {
+            stepNode *tmp = cleanup->next;
+            step_node_destroy(cleanup);
+            cleanup = tmp;
+        }
+        free(copy);
+        return NULL;
+    }
+
     return copy;
 }
 
-singleProcess *deepCopySingleProcess(singleProcess *original) {
-    if (original == NULL) return NULL;
-    singleProcess *copy =  (singleProcess*)malloc(sizeof(singleProcess));
-    if (copy == NULL) return NULL;
-    memcpy(copy, original, sizeof(singleProcess));
-    copy->processDetails = deepCopyProcessDetail(original->processDetails);
-    return copy;
+/**
+ * Clone a singleProcess in place: zero dst, then deep copy business data from src.
+ * Returns true on success, false on failure (dst is left zeroed on failure).
+ */
+bool single_process_clone(const singleProcess *src, singleProcess *dst) {
+    if (src == NULL || dst == NULL) return false;
+
+    /* Zero everything (NULLs all LVGL pointers, resets runtime flags) */
+    memset(dst, 0, sizeof(singleProcess));
+
+    /* Deep copy the business data sub-struct */
+    dst->processDetails = deepCopyProcessDetail((sProcessDetail *)src->processDetails);
+    if (dst->processDetails == NULL && src->processDetails != NULL) {
+        return false;
+    }
+    return true;
 }
 
 struct processNode *deepCopyProcessNode(struct processNode *original) {
     if (original == NULL) return NULL;
     struct processNode *copy = (processNode*)malloc(sizeof(struct processNode));
     if (copy == NULL) return NULL;
-    memcpy(copy, original, sizeof(struct processNode));
-    singleProcess *tmpProc = deepCopySingleProcess(&original->process);
-    if (tmpProc != NULL) {
-        copy->process = *tmpProc;
-        free(tmpProc);  /* Free the intermediate allocation */
+
+    /* Zero everything (NULLs next/prev pointers and all LVGL fields) */
+    memset(copy, 0, sizeof(struct processNode));
+
+    /* Clone process content directly into copy — no intermediate allocation */
+    if (!single_process_clone(&original->process, &copy->process)) {
+        free(copy);
+        return NULL;
     }
+    /* next/prev are set by caller, not here */
     return copy;
 }
 
@@ -2049,10 +2497,10 @@ uint8_t getValueForChemicalSource(uint8_t source) {
 }
 
 void getMinutesAndSeconds(uint8_t containerFillingTime, const bool containerToClean[3]) {
-    // Moltiplica containerFillingTime per 2
+    // Multiply containerFillingTime by 2
     uint32_t totalTime = (containerFillingTime * 2) * gui.element.cleanPopup.cleanCycles;
 
-    // Conta il numero di contenitori selezionati
+    // Count the number of selected containers
     uint8_t selectedContainersCount = 0;
     for (uint8_t i = 0; i < 3; ++i) {
         if (containerToClean[i]) {
@@ -2060,10 +2508,10 @@ void getMinutesAndSeconds(uint8_t containerFillingTime, const bool containerToCl
         }
     }
 
-    // Moltiplica il tempo totale per il numero di contenitori selezionati
+    // Multiply total time by the number of selected containers
     totalTime *= selectedContainersCount;
 
-    // Calcola minuti e secondi
+    // Calculate minutes and seconds
     gui.element.cleanPopup.totalMins = totalTime / 60;
     gui.element.cleanPopup.totalSecs = totalTime % 60;
 }
@@ -2078,15 +2526,15 @@ uint8_t getRandomRotationInterval() {
     uint8_t variation = (baseTime * randomPercentage) / 100;
     
     // Calculate the intervals
-    uint8_t minValue = baseTime - variation; // Minimo valore che può essere restituito
-//    uint8_t maxValue = baseTime;             // Massimo valore che può essere restituito
+    uint8_t minValue = baseTime - variation; // Minimum value that can be returned
+//    uint8_t maxValue = baseTime;             // Maximum value that can be returned
 
     // Calculate the offset between [-variation, variation]
     int8_t randomOffset = (rand() % (2 * variation + 1)) - variation; // [ -variation, variation ]
-    
+
     uint8_t result = minValue + randomOffset;
-    
-    // Limit values between 5 and 60 seconds, the min e max value for rotationIntervalSetpoint.
+
+    // Limit values between 5 and 60 seconds, the min and max value for rotationIntervalSetpoint.
     if (result > 60) {
         result = 60;
     }
@@ -2102,10 +2550,10 @@ uint8_t getRandomRotationInterval() {
 
 void pwmLedTest(){
    LV_LOG_USER("pwmLedTest");
-   mcp23017_digitalWrite(&mcp, MOTOR_IN1_PIN, 0);
-   mcp23017_digitalWrite(&mcp, MOTOR_IN2_PIN, 1);
+   motor_dir_set(MOTOR_IN1_PIN, 0);
+   motor_dir_set(MOTOR_IN2_PIN, 1);
 
-   for (uint8_t dutyCycle = MOTOR_MIN_ANALOG_VAL; dutyCycle <= MOTOR_MAX_ANALOG_VAL; dutyCycle++) {
+   for (uint16_t dutyCycle = MOTOR_MIN_ANALOG_VAL; dutyCycle <= MOTOR_MAX_ANALOG_VAL; dutyCycle++) {
     motor_ledc_set_duty(dutyCycle);
     LV_LOG_USER("dutyCycle %d", dutyCycle);
     vTaskDelay(pdMS_TO_TICKS(10));
@@ -2117,8 +2565,8 @@ void pwmLedTest(){
     vTaskDelay(pdMS_TO_TICKS(10));
   }
 
-  mcp23017_digitalWrite(&mcp, MOTOR_IN1_PIN, 0);
-  mcp23017_digitalWrite(&mcp, MOTOR_IN2_PIN, 0);
+  motor_dir_set(MOTOR_IN1_PIN, 0);
+  motor_dir_set(MOTOR_IN2_PIN, 0);
   motor_ledc_set_duty(0);
 }
 
@@ -2126,3 +2574,138 @@ uint8_t mapPercentageToValue(uint8_t percentage, uint8_t minPercent, uint8_t max
     uint8_t value = ((percentage - minPercent) * (MOTOR_MAX_ANALOG_VAL - MOTOR_MIN_ANALOG_VAL)) / (maxPercent - minPercent) + MOTOR_MIN_ANALOG_VAL;
     return value;
 }
+
+uint16_t calculateFillTime(uint16_t capacityMl, uint8_t pumpSpeedPercent) {
+    if (pumpSpeedPercent == 0) pumpSpeedPercent = 30;
+    /* Pump max = 15L/min = 250 ml/s */
+    /* flow = 250 * pumpSpeed / 100 */
+    /* time = capacity / flow = capacity * 100 / (250 * pumpSpeed) */
+    uint32_t timeMs = (uint32_t)capacityMl * 100 * 1000 / (250 * pumpSpeedPercent);
+    uint16_t timeSec = (timeMs + 500) / 1000; /* round to nearest second */
+    if (timeSec < 1) timeSec = 1;
+    return timeSec;
+}
+
+uint16_t getContainerFillTime(void) {
+    uint16_t ml = gui.page.settings.settingsParams.chemContainerMl;
+    uint8_t spd = gui.page.settings.settingsParams.pumpSpeed;
+    if (ml == 0) ml = 500;
+    if (spd == 0) spd = 30;
+    return calculateFillTime(ml, spd);
+}
+
+uint16_t getWbFillTime(void) {
+    uint16_t ml = gui.page.settings.settingsParams.wbContainerMl;
+    uint8_t spd = gui.page.settings.settingsParams.pumpSpeed;
+    if (ml == 0) ml = 2000;
+    if (spd == 0) spd = 30;
+    return calculateFillTime(ml, spd);
+}
+
+static uint16_t process_list_fill_time_seconds(void) {
+    uint8_t volume_index = gui.page.settings.settingsParams.chemistryVolume;
+    uint8_t tank_size = gui.page.settings.settingsParams.tankSize;
+    uint16_t table[2][3][2] = tanksSizesAndTimes;
+
+    if(volume_index < 1 || volume_index > 2) volume_index = 2;
+    if(tank_size < 1 || tank_size > 3) tank_size = 2;
+
+    return table[volume_index - 1][tank_size - 1][1];
+}
+
+static uint32_t process_list_overlap_credit_seconds(uint16_t fill_time_seconds) {
+    uint32_t overlap_pct = gui.page.settings.settingsParams.drainFillOverlapSetpoint;
+    if (overlap_pct > 100U) overlap_pct = 100U;
+    return (((uint32_t)fill_time_seconds * 2U) * overlap_pct) / 100U;
+}
+
+static uint32_t process_list_adjusted_processing_seconds(const stepNode *step, uint16_t fill_time_seconds) {
+    if(step == NULL || step->step.stepDetails == NULL) return 0U;
+
+    uint32_t recipe_seconds = ((uint32_t)step->step.stepDetails->data.timeMins * 60U) +
+                              (uint32_t)step->step.stepDetails->data.timeSecs;
+    uint32_t overlap_credit = process_list_overlap_credit_seconds(fill_time_seconds);
+    return (recipe_seconds > overlap_credit) ? (recipe_seconds - overlap_credit) : 0U;
+}
+
+static uint32_t process_list_estimated_runtime_seconds(const processNode *process) {
+    if(process == NULL || process->process.processDetails == NULL) return 0U;
+
+    uint16_t fill_time_seconds = process_list_fill_time_seconds();
+    uint32_t total_seconds = 0U;
+
+    for(stepNode *step = process->process.processDetails->stepElementsList.start; step != NULL; step = step->next) {
+        total_seconds += ((uint32_t)fill_time_seconds * 2U);
+        total_seconds += process_list_adjusted_processing_seconds(step, fill_time_seconds);
+    }
+
+    return total_seconds;
+}
+
+static void process_list_set_time_label(processNode *process) {
+    if(process == NULL || process->process.processTime == NULL || process->process.processDetails == NULL) return;
+
+    uint32_t estimated_seconds = process_list_estimated_runtime_seconds(process);
+    int steps = process->process.processDetails->stepElementsList.size;
+    lv_label_set_text_fmt(process->process.processTime,
+        "%" PRIu32 "m%" PRIu8 "s / ~%" PRIu32 "m%" PRIu32 "s - %d step%s",
+        process->process.processDetails->data.timeMins,
+        process->process.processDetails->data.timeSecs,
+        estimated_seconds / 60U,
+        estimated_seconds % 60U,
+        steps, steps == 1 ? "" : "s");
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  Alarm  (moved from alarm.c)
+ *  The simulator keeps its own implementation in src/main.c.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+#ifndef SIMULATOR_BUILD
+
+static lv_timer_t *s_alarm_timer = NULL;
+
+void buzzer_beep(void)
+{
+    /*
+     * Hardware buzzer implementation is not wired here yet.
+     * Keep this as a safe no-op so alarm logic links and runs.
+     */
+}
+
+static void alarm_timer_cb(lv_timer_t *t)
+{
+    (void)t;
+    buzzer_beep();
+}
+
+void alarm_start_persistent(void)
+{
+    buzzer_beep();
+
+    if (gui.page.settings.settingsParams.isPersistentAlarm)
+    {
+        if (s_alarm_timer == NULL)
+        {
+            s_alarm_timer = lv_timer_create(alarm_timer_cb, 10000, NULL);
+        }
+        else
+        {
+            lv_timer_resume(s_alarm_timer);
+        }
+    }
+}
+
+void alarm_stop(void)
+{
+    if (s_alarm_timer != NULL)
+    {
+        lv_timer_pause(s_alarm_timer);
+    }
+}
+
+bool alarm_is_active(void)
+{
+    return (s_alarm_timer != NULL) && (lv_timer_get_paused(s_alarm_timer) == false);
+}
+
+#endif /* SIMULATOR_BUILD */

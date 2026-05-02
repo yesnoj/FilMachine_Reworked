@@ -3,6 +3,15 @@
  *
  * Tests the write/read cycle of the configuration file (FatFS stub → sd/FilMachine.cfg).
  * Verifies that processes, steps, and settings survive a save/load round-trip.
+ *
+ * IMPORTANT: These tests use emptyList() instead of deleteProcessElement() to
+ * clear the process list.  deleteProcessElement() calls lv_obj_delete() on the
+ * processElement LVGL object, which is NULL for nodes created by readConfigFile
+ * or test_generate_data (they have no UI).  lv_obj_delete(NULL) dereferences a
+ * NULL pointer (LVGL 9 has no NULL guard), causing a segfault.
+ *
+ * emptyList() frees nodes via process_node_destroy() which only touches data,
+ * styles, and timers — never LVGL widget objects.
  */
 
 #include "test_runner.h"
@@ -11,6 +20,21 @@
 
 /* Test-specific config filename to avoid corrupting the main one */
 #define TEST_CONFIG_FILE "/FilMachine_Test.cfg"
+
+
+/* ═══════════════════════════════════════════════
+ * Helper: safely clear the process list and reload from a config file.
+ *
+ * readConfigFile() resets list pointers (start=NULL, end=NULL, size=0) BEFORE
+ * reading, which leaks any existing nodes.  We call emptyList() first to
+ * properly free the old nodes and avoid heap leaks.
+ * ═══════════════════════════════════════════════ */
+static void safe_clear_and_reload(const char *path)
+{
+    processList *list = &gui.page.processes.processElementsList;
+    emptyList(list, PROCESS_NODE);
+    readConfigFile(path, false);
+}
 
 
 /* ═══════════════════════════════════════════════
@@ -27,8 +51,7 @@ static void test_config_write_read(void)
     /* Save first process name and step count for later comparison */
     processNode *first = list->start;
     char saved_name[MAX_PROC_NAME_LEN + 1];
-    strncpy(saved_name, first->process.processDetails->processNameString, MAX_PROC_NAME_LEN);
-    saved_name[MAX_PROC_NAME_LEN] = '\0';
+    snprintf(saved_name, sizeof(saved_name), "%s", first->process.processDetails->data.processNameString);
     int32_t saved_step_count = first->process.processDetails->stepElementsList.size;
 
     test_printf("         [INFO] Saving %d processes (first: \"%s\", %d steps)\n",
@@ -38,15 +61,8 @@ static void test_config_write_read(void)
     writeConfigFile(TEST_CONFIG_FILE, false);
     test_pump(100);
 
-    /* Now clear ALL processes from the list by deleting from the end */
-    while (list->size > 0) {
-        processNode *last = list->end;
-        deleteProcessElement(last);
-    }
-    TEST_ASSERT_EQ((int)list->size, 0, "list should be empty after clearing");
-
-    /* Read back the config */
-    readConfigFile(TEST_CONFIG_FILE, false);
+    /* Clear all processes safely (no LVGL access) and read back */
+    safe_clear_and_reload(TEST_CONFIG_FILE);
     test_pump(100);
 
     /* Verify process count restored */
@@ -58,7 +74,7 @@ static void test_config_write_read(void)
     /* Verify first process name */
     processNode *restored_first = list->start;
     TEST_ASSERT_NOT_NULL(restored_first, "first restored process should exist");
-    TEST_ASSERT_STR_EQ(restored_first->process.processDetails->processNameString,
+    TEST_ASSERT_STR_EQ(restored_first->process.processDetails->data.processNameString,
                        saved_name, "first process name should match");
 
     /* Verify step count */
@@ -73,60 +89,206 @@ static void test_config_write_read(void)
 
 
 /* ═══════════════════════════════════════════════
- * Test 2: Settings survive config round-trip
+ * Test 2: ALL 10 settings fields survive config round-trip
  * ═══════════════════════════════════════════════ */
 static void test_settings_persistence(void)
 {
-    TEST_BEGIN("Persistence — settings survive write/read cycle");
+    TEST_BEGIN("Persistence — ALL 10 settings fields survive write/read cycle");
 
     struct machineSettings *s = &gui.page.settings.settingsParams;
 
-    /* Modify some settings to known values */
-    s->tempUnit = FAHRENHEIT_TEMP;
-    s->filmRotationSpeedSetpoint = 77;
-    s->rotationIntervalSetpoint = 42;
-    s->randomSetpoint = 33;
-    s->isPersistentAlarm = true;
-    s->isProcessAutostart = true;
+    /* Save originals to restore later */
+    struct machineSettings saved = *s;
 
-    test_printf("         [INFO] Set tempUnit=%d, speed=%d, interval=%d, random=%d\n",
-           s->tempUnit, s->filmRotationSpeedSetpoint,
-           s->rotationIntervalSetpoint, s->randomSetpoint);
+    /* Set ALL 10 fields to distinctive, non-default values */
+    s->tempUnit                  = FAHRENHEIT_TEMP;   /* 1 */
+    s->waterInlet                = true;              /* 2 */
+    s->calibratedTemp            = 22;                /* 3 */
+    s->filmRotationSpeedSetpoint = 77;                /* 4 */
+    s->rotationIntervalSetpoint  = 42;                /* 5 */
+    s->randomSetpoint            = 33;                /* 6 */
+    s->isPersistentAlarm         = true;              /* 7 */
+    s->isProcessAutostart        = true;              /* 8 */
+    s->drainFillOverlapSetpoint  = 55;                /* 9 */
+    s->multiRinseTime            = 120;               /* 10 */
+
+    test_printf("         [INFO] Set all 10 fields: tempUnit=%d water=%d cal=%d speed=%d "
+                "interval=%d random=%d alarm=%d autostart=%d overlap=%d rinse=%d\n",
+           s->tempUnit, s->waterInlet, s->calibratedTemp,
+           s->filmRotationSpeedSetpoint, s->rotationIntervalSetpoint,
+           s->randomSetpoint, s->isPersistentAlarm, s->isProcessAutostart,
+           s->drainFillOverlapSetpoint, s->multiRinseTime);
 
     /* Write config */
     writeConfigFile(TEST_CONFIG_FILE, false);
     test_pump(100);
 
-    /* Alter the settings to different values */
-    s->tempUnit = CELSIUS_TEMP;
+    /* Clobber ALL 10 fields to opposite values */
+    s->tempUnit                  = CELSIUS_TEMP;
+    s->waterInlet                = false;
+    s->calibratedTemp            = 0;
     s->filmRotationSpeedSetpoint = 0;
-    s->rotationIntervalSetpoint = 0;
-    s->randomSetpoint = 0;
-    s->isPersistentAlarm = false;
-    s->isProcessAutostart = false;
+    s->rotationIntervalSetpoint  = 0;
+    s->randomSetpoint            = 0;
+    s->isPersistentAlarm         = false;
+    s->isProcessAutostart        = false;
+    s->drainFillOverlapSetpoint  = 0;
+    s->multiRinseTime            = 0;
 
-    /* Read back */
-    readConfigFile(TEST_CONFIG_FILE, false);
+    /* Read back (safe_clear_and_reload frees old process nodes first) */
+    safe_clear_and_reload(TEST_CONFIG_FILE);
     test_pump(100);
 
-    /* Verify settings were restored */
+    /* Verify ALL 10 fields restored */
     TEST_ASSERT_EQ((int)s->tempUnit, (int)FAHRENHEIT_TEMP,
                    "tempUnit should be restored to Fahrenheit");
+    TEST_ASSERT_EQ((int)s->waterInlet, 1,
+                   "waterInlet should be restored to true");
+    TEST_ASSERT_EQ((int)s->calibratedTemp, 22,
+                   "calibratedTemp should be restored to 22");
     TEST_ASSERT_EQ((int)s->filmRotationSpeedSetpoint, 77,
-                   "rotation speed should be restored");
+                   "rotation speed should be restored to 77");
     TEST_ASSERT_EQ((int)s->rotationIntervalSetpoint, 42,
-                   "rotation interval should be restored");
+                   "rotation interval should be restored to 42");
     TEST_ASSERT_EQ((int)s->randomSetpoint, 33,
-                   "random setpoint should be restored");
+                   "random setpoint should be restored to 33");
     TEST_ASSERT_EQ((int)s->isPersistentAlarm, 1,
-                   "persistent alarm should be restored");
+                   "persistent alarm should be restored to true");
     TEST_ASSERT_EQ((int)s->isProcessAutostart, 1,
-                   "autostart should be restored");
+                   "autostart should be restored to true");
+    TEST_ASSERT_EQ((int)s->drainFillOverlapSetpoint, 55,
+                   "drain/fill overlap should be restored to 55");
+    TEST_ASSERT_EQ((int)s->multiRinseTime, 120,
+                   "multiRinseTime should be restored to 120");
 
-    /* Reset settings back to sensible defaults for subsequent tests */
-    s->tempUnit = CELSIUS_TEMP;
-    s->isPersistentAlarm = false;
-    s->isProcessAutostart = false;
+    test_printf("         [INFO] All 10 settings fields verified OK\n");
+
+    /* Restore original settings for subsequent tests */
+    *s = saved;
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
+ * Test 2b: Per-process data fields survive round-trip
+ * ═══════════════════════════════════════════════ */
+static void test_process_data_persistence(void)
+{
+    TEST_BEGIN("Persistence — per-process fields survive write/read cycle");
+
+    processList *list = &gui.page.processes.processElementsList;
+    TEST_ASSERT(list->size > 0, "need at least one process");
+
+    processNode *orig = list->start;
+    sProcessData *od = &orig->process.processDetails->data;
+
+    /* Snapshot all data fields of first process */
+    char saved_name[MAX_PROC_NAME_LEN + 1];
+    snprintf(saved_name, sizeof(saved_name), "%s", od->processNameString);
+    int32_t saved_temp    = od->temp;
+    float   saved_tol     = od->tempTolerance;
+    uint8_t saved_tc      = od->isTempControlled;
+    uint8_t saved_pref    = od->isPreferred;
+    uint8_t saved_ft      = od->filmType;
+    uint32_t saved_mins   = od->timeMins;
+    uint8_t saved_secs    = od->timeSecs;
+
+    test_printf("         [INFO] Snapshot: \"%s\" temp=%d tol=%.1f tc=%d pref=%d ft=%d %dm%ds\n",
+                saved_name, (int)saved_temp, (double)saved_tol,
+                saved_tc, saved_pref, saved_ft, (int)saved_mins, saved_secs);
+
+    /* Write */
+    writeConfigFile(TEST_CONFIG_FILE, false);
+    test_pump(100);
+
+    /* Clear safely and reload */
+    safe_clear_and_reload(TEST_CONFIG_FILE);
+    test_pump(100);
+
+    TEST_ASSERT(list->size > 0, "at least one process restored");
+    processNode *rest = list->start;
+    sProcessData *rd = &rest->process.processDetails->data;
+
+    TEST_ASSERT_STR_EQ(rd->processNameString, saved_name, "name matches");
+    TEST_ASSERT_EQ((int)rd->temp, (int)saved_temp, "temp matches");
+    TEST_ASSERT(rd->tempTolerance == saved_tol, "tempTolerance matches");
+    TEST_ASSERT_EQ((int)rd->isTempControlled, (int)saved_tc, "isTempControlled matches");
+    TEST_ASSERT_EQ((int)rd->isPreferred, (int)saved_pref, "isPreferred matches");
+    TEST_ASSERT_EQ((int)rd->filmType, (int)saved_ft, "filmType matches");
+    TEST_ASSERT_EQ((int)rd->timeMins, (int)saved_mins, "timeMins matches");
+    TEST_ASSERT_EQ((int)rd->timeSecs, (int)saved_secs, "timeSecs matches");
+
+    test_printf("         [INFO] All 8 process data fields verified OK\n");
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
+ * Test 2c: Per-step data fields survive round-trip
+ * ═══════════════════════════════════════════════ */
+static void test_step_data_persistence(void)
+{
+    TEST_BEGIN("Persistence — per-step fields survive write/read cycle");
+
+    processList *list = &gui.page.processes.processElementsList;
+    TEST_ASSERT(list->size > 0, "need at least one process");
+
+    processNode *proc = list->start;
+    stepList *sl = &proc->process.processDetails->stepElementsList;
+    TEST_ASSERT(sl->size > 0, "first process needs at least one step");
+
+    /* Snapshot ALL step data for first process */
+    int32_t n = sl->size;
+    /* Allocate temp arrays on stack (max 30 steps) */
+    char    sn_names[MAX_STEP_ELEMENTS][MAX_PROC_NAME_LEN + 1];
+    uint8_t sn_mins[MAX_STEP_ELEMENTS];
+    uint8_t sn_secs[MAX_STEP_ELEMENTS];
+    uint8_t sn_type[MAX_STEP_ELEMENTS];
+    uint8_t sn_src[MAX_STEP_ELEMENTS];
+    uint8_t sn_disc[MAX_STEP_ELEMENTS];
+
+    stepNode *s = sl->start;
+    for (int i = 0; i < n && s != NULL; i++, s = s->next) {
+        snprintf(sn_names[i], sizeof(sn_names[i]), "%s", s->step.stepDetails->data.stepNameString);
+        sn_mins[i] = s->step.stepDetails->data.timeMins;
+        sn_secs[i] = s->step.stepDetails->data.timeSecs;
+        sn_type[i] = s->step.stepDetails->data.type;
+        sn_src[i]  = s->step.stepDetails->data.source;
+        sn_disc[i] = s->step.stepDetails->data.discardAfterProc;
+    }
+
+    test_printf("         [INFO] Snapshot %d steps from \"%s\"\n",
+                (int)n, proc->process.processDetails->data.processNameString);
+
+    /* Write, clear safely, read back */
+    writeConfigFile(TEST_CONFIG_FILE, false);
+    test_pump(100);
+    safe_clear_and_reload(TEST_CONFIG_FILE);
+    test_pump(100);
+
+    TEST_ASSERT(list->size > 0, "process list restored");
+    processNode *rproc = list->start;
+    stepList *rsl = &rproc->process.processDetails->stepElementsList;
+    TEST_ASSERT_EQ((int)rsl->size, (int)n, "step count matches");
+
+    /* Verify each step field-by-field */
+    stepNode *rs = rsl->start;
+    int verified = 0;
+    for (int i = 0; i < n && rs != NULL; i++, rs = rs->next) {
+        sStepData *d = &rs->step.stepDetails->data;
+        TEST_ASSERT_STR_EQ(d->stepNameString, sn_names[i], "step name matches");
+        TEST_ASSERT_EQ(d->timeMins, sn_mins[i], "step timeMins matches");
+        TEST_ASSERT_EQ(d->timeSecs, sn_secs[i], "step timeSecs matches");
+        TEST_ASSERT_EQ(d->type,     sn_type[i], "step type matches");
+        TEST_ASSERT_EQ(d->source,   sn_src[i],  "step source matches");
+        TEST_ASSERT_EQ(d->discardAfterProc, sn_disc[i], "step discard matches");
+        verified++;
+    }
+
+    test_printf("         [INFO] All 6 fields x %d steps = %d checks verified OK\n",
+                verified, verified * 6);
 
     TEST_END();
 }
@@ -162,6 +324,108 @@ static void test_missing_config_no_crash(void)
 
 
 /* ═══════════════════════════════════════════════
+ * Test 4: Statistics persistence (completed, totalMins, stopped, clean)
+ * ═══════════════════════════════════════════════ */
+static void test_stats_persistence(void)
+{
+    TEST_BEGIN("Persistence — statistics survive write/read cycle");
+
+    machineStatistics *stats = &gui.page.tools.machineStats;
+
+    /* Save originals */
+    uint32_t orig_completed = stats->completed;
+    uint64_t orig_totalMins = stats->totalMins;
+    uint32_t orig_totalSecs = stats->totalSecs;
+    uint32_t orig_stopped   = stats->stopped;
+    uint32_t orig_clean     = stats->clean;
+
+    /* Set distinctive values */
+    stats->completed = 5;
+    stats->totalMins = 120;
+    stats->totalSecs = 45;
+    stats->stopped   = 2;
+    stats->clean     = 3;
+
+    test_printf("         [INFO] Set stats: completed=%d, totalMins=%llu, totalSecs=%u, stopped=%d, clean=%d\n",
+                stats->completed, (unsigned long long)stats->totalMins,
+                (unsigned)stats->totalSecs, stats->stopped, stats->clean);
+
+    /* Write config */
+    writeConfigFile(TEST_CONFIG_FILE, false);
+    test_pump(100);
+
+    /* Clobber stats to 0 */
+    stats->completed = 0;
+    stats->totalMins = 0;
+    stats->totalSecs = 0;
+    stats->stopped   = 0;
+    stats->clean     = 0;
+
+    /* Load back */
+    safe_clear_and_reload(TEST_CONFIG_FILE);
+    test_pump(100);
+
+    /* Verify all stats restored */
+    test_printf("         [INFO] Restored stats: completed=%d, totalMins=%llu, totalSecs=%u, stopped=%d, clean=%d\n",
+                stats->completed, (unsigned long long)stats->totalMins,
+                (unsigned)stats->totalSecs, stats->stopped, stats->clean);
+    TEST_ASSERT_EQ((int)stats->completed, 5, "completed count should be restored");
+    TEST_ASSERT_EQ((int)stats->totalMins, 120, "totalMins should be restored");
+    TEST_ASSERT_EQ((int)stats->totalSecs, 45, "totalSecs should be restored");
+    TEST_ASSERT_EQ((int)stats->stopped, 2, "stopped count should be restored");
+    TEST_ASSERT_EQ((int)stats->clean, 3, "clean count should be restored");
+
+    /* Restore originals */
+    stats->completed = orig_completed;
+    stats->totalMins = orig_totalMins;
+    stats->totalSecs = orig_totalSecs;
+    stats->stopped   = orig_stopped;
+    stats->clean     = orig_clean;
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
+ * Test 5: Temperature calibration offset persistence
+ * ═══════════════════════════════════════════════ */
+static void test_tempCalibOffset_persistence(void)
+{
+    TEST_BEGIN("Persistence — tempCalibOffset survives write/read cycle");
+
+    struct machineSettings *s = &gui.page.settings.settingsParams;
+
+    /* Save original */
+    int8_t orig_offset = s->tempCalibOffset;
+
+    /* Set to a known value (-15 = -1.5°C) */
+    s->tempCalibOffset = -15;
+    test_printf("         [INFO] Set tempCalibOffset = %d (= -1.5°C)\n", s->tempCalibOffset);
+
+    /* Write config */
+    writeConfigFile(TEST_CONFIG_FILE, false);
+    test_pump(100);
+
+    /* Clear to 0 */
+    s->tempCalibOffset = 0;
+
+    /* Load back */
+    safe_clear_and_reload(TEST_CONFIG_FILE);
+    test_pump(100);
+
+    /* Verify restored */
+    test_printf("         [INFO] Restored tempCalibOffset = %d\n", s->tempCalibOffset);
+    TEST_ASSERT_EQ((int)s->tempCalibOffset, -15,
+                   "tempCalibOffset should be restored to -15");
+
+    /* Restore original */
+    s->tempCalibOffset = orig_offset;
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
  * Suite Entry Point
  * ═══════════════════════════════════════════════ */
 void test_suite_persistence(void)
@@ -170,5 +434,9 @@ void test_suite_persistence(void)
 
     test_config_write_read();
     test_settings_persistence();
+    test_process_data_persistence();
+    test_step_data_persistence();
     test_missing_config_no_crash();
+    test_stats_persistence();
+    test_tempCalibOffset_persistence();
 }

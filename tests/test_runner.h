@@ -121,7 +121,7 @@ static inline void test_printf(const char *fmt, ...)
 
 
 /* ═══════════════════════════════════════════════
- * UI Coordinate Constants (480x320 display)
+ * UI Coordinate Constants (800x480 display)
  * ═══════════════════════════════════════════════ */
 
 /* Home page — startButton is 60x60 at BOTTOM_RIGHT(-10,-7) → center (440,283) */
@@ -248,6 +248,27 @@ void test_suite_edge_cases(void);
 
 /** test_utilities.c — pure utility functions, mappings, conversions */
 void test_suite_utilities(void);
+
+/** test_destroy_and_lifecycle.c — destroy functions, lifecycle, clone-in-place */
+void test_suite_destroy_and_lifecycle(void);
+
+/** test_selfcheck.c — self-check diagnostic popup */
+void test_suite_selfcheck(void);
+
+/** test_ota.c — OTA firmware update (SD + Wi-Fi) */
+void test_suite_ota(void);
+
+/** test_new_settings.c — new settings fields (pump, tank, container, WB, chem volume) */
+void test_suite_new_settings(void);
+
+/** test_ui_profile.c — UI profile values, sensor stubs, board constants */
+void test_suite_ui_profile(void);
+
+/** test_websocket.c — WebSocket server, JSON serialization, state broadcasts */
+void test_suite_websocket(void);
+
+/** test_live_sync.c — Live sync, real-time updates, tolerance roller, deferred free */
+void test_suite_live_sync(void);
 
 
 /* ═══════════════════════════════════════════════

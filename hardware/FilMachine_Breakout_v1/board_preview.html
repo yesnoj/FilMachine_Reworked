@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FilMachine Breakout Board v1.0 — Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; color: #e0e0e0; font-family: 'Segoe UI', system-ui, sans-serif; padding: 20px; }
+  h1 { text-align: center; color: #00d4ff; margin-bottom: 5px; font-size: 1.6em; }
+  .subtitle { text-align: center; color: #888; margin-bottom: 20px; font-size: 0.9em; }
+  .board-container { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-bottom: 20px; }
+
+  svg { filter: drop-shadow(0 4px 20px rgba(0,0,0,0.5)); }
+
+  .info-panel { max-width: 900px; margin: 0 auto; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+  .info-card { background: #16213e; border: 1px solid #334; border-radius: 8px; padding: 15px; }
+  .info-card h3 { color: #00d4ff; margin-bottom: 8px; font-size: 0.95em; }
+  .info-card table { width: 100%; font-size: 0.82em; }
+  .info-card td { padding: 2px 6px; border-bottom: 1px solid #223; }
+  .info-card td:first-child { color: #aaa; white-space: nowrap; }
+  .info-card td:last-child { color: #fff; }
+
+  .bom-table { width: 100%; max-width: 900px; margin: 0 auto; border-collapse: collapse; font-size: 0.82em; }
+  .bom-table th { background: #0a4d68; color: #fff; padding: 8px; text-align: left; }
+  .bom-table td { padding: 6px 8px; border-bottom: 1px solid #223; }
+  .bom-table tr:hover { background: #16213e; }
+
+  .warning { background: #3d2100; border: 1px solid #ff8c00; border-radius: 8px; padding: 12px 16px; margin: 15px auto; max-width: 900px; font-size: 0.85em; color: #ffcc80; }
+  .warning strong { color: #ff8c00; }
+
+  .tooltip { position: absolute; background: #000c; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; pointer-events: none; display: none; z-index: 100; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<h1>FilMachine Breakout Board v1.0</h1>
+<p class="subtitle">JC4880P433 &mdash; J9 Expand IO Breakout &mdash; 70mm &times; 50mm, 2-layer FR4</p>
+
+<div class="board-container">
+<!-- ═══ SVG Board Top View ═══ -->
+<svg width="520" height="380" viewBox="-10 -10 540 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="pcbGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a5c2a"/>
+      <stop offset="100%" stop-color="#0d3318"/>
+    </linearGradient>
+    <filter id="shadow"><feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.4"/></filter>
+  </defs>
+
+  <text x="260" y="-2" text-anchor="middle" fill="#888" font-size="11">TOP VIEW (component side)</text>
+
+  <!-- Board outline -->
+  <rect x="0" y="10" width="520" height="370" rx="3" fill="url(#pcbGrad)" stroke="#2a8c44" stroke-width="2" filter="url(#shadow)"/>
+
+  <!-- Mounting holes -->
+  <circle cx="22" cy="32" r="6" fill="#111" stroke="#666" stroke-width="1"/>
+  <circle cx="498" cy="32" r="6" fill="#111" stroke="#666" stroke-width="1"/>
+  <circle cx="22" cy="358" r="6" fill="#111" stroke="#666" stroke-width="1"/>
+  <circle cx="498" cy="358" r="6" fill="#111" stroke="#666" stroke-width="1"/>
+
+  <!-- ── J1: 2×13 Female Header (center) ── -->
+  <rect x="215" y="90" width="90" height="210" rx="2" fill="#1a1a1a" stroke="#ffcc00" stroke-width="1.5"/>
+  <text x="260" y="82" text-anchor="middle" fill="#ffcc00" font-size="11" font-weight="bold">J1 — J9 CONNECTOR</text>
+  <text x="260" y="315" text-anchor="middle" fill="#aaa" font-size="9">2×13 Female 2.54mm</text>
+
+  <!-- J9 pins -->
+  <g id="j9pins">
+    <!-- Odd column (left) -->
+    <g fill="#cc9900" font-size="7" text-anchor="end">
+      <circle cx="240" cy="108" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="220" y="111" fill="#ff9999">1: 3V3</text>
+      <circle cx="240" cy="124" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="220" y="127" fill="#aaa">3: IO1</text>
+      <circle cx="240" cy="140" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="220" y="143" fill="#aaa">5: IO3</text>
+      <circle cx="240" cy="156" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="220" y="159" fill="#ff6666">7: MTR_IN1</text>
+      <circle cx="240" cy="172" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="220" y="175" fill="#ff6666">9: MTR_IN2</text>
+      <circle cx="240" cy="188" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="220" y="191" fill="#66ccff">11: TEMP</text>
+      <circle cx="240" cy="204" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="220" y="207" fill="#66ff66">13: FLOW</text>
+      <circle cx="240" cy="220" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="220" y="223" fill="#99ccff">15: H2O_MIN</text>
+      <circle cx="240" cy="236" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="220" y="239" fill="#ff6666">17: MTR_ENA</text>
+      <circle cx="240" cy="252" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="220" y="255" fill="#aaa">19: IO21</text>
+      <circle cx="240" cy="268" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="220" y="271" fill="#aaa">21: IO22</text>
+      <circle cx="240" cy="284" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="220" y="287" fill="#ffcc00">23: SDA</text>
+      <circle cx="240" cy="300" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="220" y="303" fill="#ffcc00">25: SCL</text>
+    </g>
+    <!-- Even column (right) -->
+    <g fill="#cc9900" font-size="7" text-anchor="start">
+      <circle cx="280" cy="108" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="300" y="111" fill="#ff3333">2: 5V</text>
+      <circle cx="280" cy="124" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="300" y="127" fill="#aaa">4: IO0</text>
+      <circle cx="280" cy="140" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="300" y="143" fill="#aaa">6: IO2</text>
+      <circle cx="280" cy="156" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="300" y="159" fill="#aaa">8: IO4</text>
+      <circle cx="280" cy="172" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="300" y="175" fill="#aaa">10: IO6</text>
+      <circle cx="280" cy="188" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="300" y="191" fill="#cc66ff">12: HALL</text>
+      <circle cx="280" cy="204" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="300" y="207" fill="#666">14: GND</text>
+      <circle cx="280" cy="220" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="300" y="223" fill="#99ccff">16: H2O_MAX</text>
+      <circle cx="280" cy="236" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="300" y="239" fill="#666">18: GND</text>
+      <circle cx="280" cy="252" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="300" y="255" fill="#ff9999">20: 3V3</text>
+      <circle cx="280" cy="268" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="300" y="271" fill="#666">22: GND</text>
+      <circle cx="280" cy="284" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="300" y="287" fill="#ff9999">24: 3V3</text>
+      <circle cx="280" cy="300" r="3.5" fill="#b8860b" stroke="#ffd700" stroke-width="0.8"/><text x="300" y="303" fill="#666">26: GND</text>
+    </g>
+  </g>
+
+  <!-- ── LEFT SIDE: Motor / Temp / Flow terminals ── -->
+  <!-- J2: MOTOR -->
+  <rect x="15" y="50" width="80" height="30" rx="2" fill="#333" stroke="#ff6666" stroke-width="1.5"/>
+  <text x="55" y="45" text-anchor="middle" fill="#ff6666" font-size="10" font-weight="bold">J2 MOTOR</text>
+  <g font-size="7" fill="#ccc" text-anchor="middle">
+    <rect x="22" y="55" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="30" y="68">ENA</text>
+    <rect x="42" y="55" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="50" y="68">IN1</text>
+    <rect x="62" y="55" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="70" y="68">IN2</text>
+  </g>
+
+  <!-- J3: TEMP -->
+  <rect x="15" y="120" width="80" height="30" rx="2" fill="#333" stroke="#66ccff" stroke-width="1.5"/>
+  <text x="55" y="115" text-anchor="middle" fill="#66ccff" font-size="10" font-weight="bold">J3 TEMP</text>
+  <g font-size="7" fill="#ccc" text-anchor="middle">
+    <rect x="22" y="125" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="30" y="138">DATA</text>
+    <rect x="42" y="125" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="50" y="138">3V3</text>
+    <rect x="62" y="125" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="70" y="138">GND</text>
+  </g>
+
+  <!-- J4: FLOW -->
+  <rect x="15" y="190" width="80" height="30" rx="2" fill="#333" stroke="#66ff66" stroke-width="1.5"/>
+  <text x="55" y="185" text-anchor="middle" fill="#66ff66" font-size="10" font-weight="bold">J4 FLOW</text>
+  <g font-size="7" fill="#ccc" text-anchor="middle">
+    <rect x="22" y="195" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="30" y="208">SIG</text>
+    <rect x="42" y="195" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="50" y="208">3V3</text>
+    <rect x="62" y="195" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="70" y="208">GND</text>
+  </g>
+
+  <!-- ── RIGHT SIDE: I2C / Water / Hall terminals ── -->
+  <!-- J5: I2C -->
+  <rect x="420" y="50" width="90" height="30" rx="2" fill="#333" stroke="#ffcc00" stroke-width="1.5"/>
+  <text x="465" y="45" text-anchor="middle" fill="#ffcc00" font-size="10" font-weight="bold">J5 I2C</text>
+  <g font-size="7" fill="#ccc" text-anchor="middle">
+    <rect x="425" y="55" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="433" y="68">SDA</text>
+    <rect x="445" y="55" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="453" y="68">SCL</text>
+    <rect x="465" y="55" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="473" y="68">3V3</text>
+    <rect x="485" y="55" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="493" y="68">GND</text>
+  </g>
+
+  <!-- J6: WATER -->
+  <rect x="420" y="135" width="90" height="30" rx="2" fill="#333" stroke="#99ccff" stroke-width="1.5"/>
+  <text x="465" y="130" text-anchor="middle" fill="#99ccff" font-size="10" font-weight="bold">J6 WATER</text>
+  <g font-size="7" fill="#ccc" text-anchor="middle">
+    <rect x="425" y="140" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="433" y="153">MIN</text>
+    <rect x="445" y="140" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="453" y="153">MAX</text>
+    <rect x="465" y="140" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="473" y="153">3V3</text>
+    <rect x="485" y="140" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="493" y="153">GND</text>
+  </g>
+
+  <!-- J7: HALL -->
+  <rect x="420" y="215" width="80" height="30" rx="2" fill="#333" stroke="#cc66ff" stroke-width="1.5"/>
+  <text x="460" y="210" text-anchor="middle" fill="#cc66ff" font-size="10" font-weight="bold">J7 HALL</text>
+  <g font-size="7" fill="#ccc" text-anchor="middle">
+    <rect x="425" y="220" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="433" y="233">SIG</text>
+    <rect x="445" y="220" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="453" y="233">3V3</text>
+    <rect x="465" y="220" width="16" height="18" rx="1" fill="#555" stroke="#888"/><text x="473" y="233">GND</text>
+  </g>
+
+  <!-- ── J8: Spare GPIO header (right edge) ── -->
+  <rect x="475" y="270" width="30" height="95" rx="2" fill="#222" stroke="#aaa" stroke-width="1"/>
+  <text x="490" y="265" text-anchor="middle" fill="#aaa" font-size="9" font-weight="bold">J8 SPARE</text>
+  <g font-size="6.5" fill="#aaa" text-anchor="end">
+    <circle cx="490" cy="280" r="2.5" fill="#444" stroke="#aaa"/><text x="483" y="283">IO0</text>
+    <circle cx="490" cy="292" r="2.5" fill="#444" stroke="#aaa"/><text x="483" y="295">IO1</text>
+    <circle cx="490" cy="304" r="2.5" fill="#444" stroke="#aaa"/><text x="483" y="307">IO2</text>
+    <circle cx="490" cy="316" r="2.5" fill="#444" stroke="#aaa"/><text x="483" y="319">IO3</text>
+    <circle cx="490" cy="328" r="2.5" fill="#444" stroke="#aaa"/><text x="483" y="331">IO4</text>
+    <circle cx="490" cy="340" r="2.5" fill="#444" stroke="#aaa"/><text x="483" y="343">IO6</text>
+    <circle cx="490" cy="352" r="2.5" fill="#444" stroke="#aaa"/><text x="483" y="355">IO21</text>
+    <circle cx="490" cy="364" r="2.5" fill="#444" stroke="#aaa"/><text x="479" y="367">IO22</text>
+  </g>
+
+  <!-- ── J10: Power Terminal (bottom center) ── -->
+  <rect x="170" y="335" width="100" height="30" rx="2" fill="#333" stroke="#ff3333" stroke-width="1.5"/>
+  <text x="220" y="330" text-anchor="middle" fill="#ff3333" font-size="10" font-weight="bold">J10 POWER</text>
+  <g font-size="7" fill="#ccc" text-anchor="middle">
+    <rect x="177" y="340" width="18" height="18" rx="1" fill="#555" stroke="#888"/><text x="186" y="353">5V</text>
+    <rect x="199" y="340" width="18" height="18" rx="1" fill="#555" stroke="#888"/><text x="208" y="353">3V3</text>
+    <rect x="221" y="340" width="18" height="18" rx="1" fill="#555" stroke="#888"/><text x="230" y="353">GND</text>
+    <rect x="243" y="340" width="18" height="18" rx="1" fill="#555" stroke="#888"/><text x="252" y="353">GND</text>
+  </g>
+
+  <!-- ── SMD Passives ── -->
+  <!-- R1, R2: I2C pullups -->
+  <rect x="370" y="85" width="8" height="4" rx="0.5" fill="#4a3000" stroke="#aa8800" stroke-width="0.5"/>
+  <text x="374" y="80" text-anchor="middle" fill="#aa8800" font-size="6">R1 4k7</text>
+  <rect x="385" y="85" width="8" height="4" rx="0.5" fill="#4a3000" stroke="#aa8800" stroke-width="0.5"/>
+  <text x="389" y="80" text-anchor="middle" fill="#aa8800" font-size="6">R2 4k7</text>
+
+  <!-- R3: OneWire pullup -->
+  <rect x="110" y="132" width="8" height="4" rx="0.5" fill="#4a3000" stroke="#aa8800" stroke-width="0.5"/>
+  <text x="114" y="128" text-anchor="middle" fill="#aa8800" font-size="6">R3 4k7</text>
+
+  <!-- C1: I2C decoupling -->
+  <rect x="405" y="85" width="4" height="8" rx="0.5" fill="#003366" stroke="#4488cc" stroke-width="0.5"/>
+  <text x="407" y="80" text-anchor="middle" fill="#4488cc" font-size="6">C1</text>
+
+  <!-- C2: Power decoupling -->
+  <rect x="145" y="345" width="4" height="8" rx="0.5" fill="#003366" stroke="#4488cc" stroke-width="0.5"/>
+  <text x="147" y="340" text-anchor="middle" fill="#4488cc" font-size="6">C2</text>
+
+  <!-- Board title -->
+  <text x="260" y="385" text-anchor="middle" fill="#2a8c44" font-size="8" font-style="italic">FilMachine Breakout v1.0</text>
+
+  <!-- Dimensions -->
+  <g stroke="#666" stroke-width="0.5" fill="none" stroke-dasharray="3,3">
+    <line x1="0" y1="5" x2="520" y2="5"/>
+    <text x="260" y="3" text-anchor="middle" fill="#666" font-size="8" stroke="none">70mm</text>
+    <line x1="-5" y1="10" x2="-5" y2="380"/>
+    <text x="-7" y="195" text-anchor="middle" fill="#666" font-size="8" stroke="none" transform="rotate(-90,-7,195)">50mm</text>
+  </g>
+</svg>
+</div>
+
+<div class="warning">
+  <strong>IMPORTANTE:</strong> I pin di alimentazione del J9 (pin 1, 2, 14, 18, 20, 22, 24, 26) sono basati sulla
+  convenzione tipica dei connettori Guition. <strong>VERIFICA con un multimetro</strong> prima del primo collegamento
+  che 3V3, 5V e GND siano sui pin corretti!
+</div>
+
+<div class="info-panel">
+<div class="info-grid">
+  <div class="info-card">
+    <h3>Specifiche PCB</h3>
+    <table>
+      <tr><td>Dimensioni</td><td>70mm &times; 50mm</td></tr>
+      <tr><td>Layer</td><td>2 (F.Cu + B.Cu)</td></tr>
+      <tr><td>Spessore</td><td>1.6mm FR4</td></tr>
+      <tr><td>Finitura</td><td>HASL (lead-free)</td></tr>
+      <tr><td>Solder mask</td><td>Verde</td></tr>
+      <tr><td>Fori di fissaggio</td><td>4&times; M2 (angoli)</td></tr>
+    </table>
+  </div>
+  <div class="info-card">
+    <h3>Connettore J9 &rarr; Gruppi funzionali</h3>
+    <table>
+      <tr><td>J2 MOTOR</td><td>ENA (PWM), IN1, IN2</td></tr>
+      <tr><td>J3 TEMP</td><td>DS18B20 DATA + power</td></tr>
+      <tr><td>J4 FLOW</td><td>YF-S201 SIG + power</td></tr>
+      <tr><td>J5 I2C</td><td>SDA, SCL, 3V3, GND (MCP23017 + PCA9685)</td></tr>
+      <tr><td>J6 WATER</td><td>XKC-Y21 MIN/MAX + power</td></tr>
+      <tr><td>J7 HALL</td><td>KY-003 SIG + power</td></tr>
+      <tr><td>J8 SPARE</td><td>8 GPIO liberi (header)</td></tr>
+      <tr><td>J10 PWR</td><td>5V, 3V3, GND, GND extra</td></tr>
+    </table>
+  </div>
+  <div class="info-card">
+    <h3>Componenti passivi integrati</h3>
+    <table>
+      <tr><td>R1</td><td>4.7k&Omega; &mdash; I2C SDA pull-up a 3V3</td></tr>
+      <tr><td>R2</td><td>4.7k&Omega; &mdash; I2C SCL pull-up a 3V3</td></tr>
+      <tr><td>R3</td><td>4.7k&Omega; &mdash; OneWire pull-up a 3V3</td></tr>
+      <tr><td>C1</td><td>100nF &mdash; I2C bus decoupling</td></tr>
+      <tr><td>C2</td><td>100nF &mdash; Power rail decoupling</td></tr>
+    </table>
+  </div>
+  <div class="info-card">
+    <h3>Costi stimati</h3>
+    <table>
+      <tr><td>PCB (5 pz, JLCPCB)</td><td>~$2-5</td></tr>
+      <tr><td>Componenti (1 board)</td><td>~$2-3</td></tr>
+      <tr><td>Spedizione</td><td>$8-20</td></tr>
+      <tr><td><strong>Totale primo lotto</strong></td><td><strong>~$15-25</strong></td></tr>
+    </table>
+  </div>
+</div>
+
+<h3 style="color:#00d4ff; margin: 15px 0 10px;">Bill of Materials</h3>
+<table class="bom-table">
+  <tr><th>Ref</th><th>Qty</th><th>Valore</th><th>Package</th><th>Descrizione</th><th>~Costo</th></tr>
+  <tr><td>J1</td><td>1</td><td>2&times;13 F</td><td>2.54mm TH</td><td>Female pin header per innesto su J9</td><td>$0.30</td></tr>
+  <tr><td>J2</td><td>1</td><td>3P</td><td>KF301 5.08mm</td><td>MOTOR: ENA / IN1 / IN2</td><td>$0.20</td></tr>
+  <tr><td>J3</td><td>1</td><td>3P</td><td>KF301 5.08mm</td><td>TEMP: DATA / 3V3 / GND</td><td>$0.20</td></tr>
+  <tr><td>J4</td><td>1</td><td>3P</td><td>KF301 5.08mm</td><td>FLOW: SIG / 3V3 / GND</td><td>$0.20</td></tr>
+  <tr><td>J5</td><td>1</td><td>4P</td><td>KF301 5.08mm</td><td>I2C: SDA / SCL / 3V3 / GND</td><td>$0.25</td></tr>
+  <tr><td>J6</td><td>1</td><td>4P</td><td>KF301 5.08mm</td><td>WATER: MIN / MAX / 3V3 / GND</td><td>$0.25</td></tr>
+  <tr><td>J7</td><td>1</td><td>3P</td><td>KF301 5.08mm</td><td>HALL: SIG / 3V3 / GND</td><td>$0.20</td></tr>
+  <tr><td>J8</td><td>1</td><td>1&times;8 M</td><td>2.54mm TH</td><td>Spare GPIO header</td><td>$0.10</td></tr>
+  <tr><td>J10</td><td>1</td><td>4P</td><td>KF301 5.08mm</td><td>POWER: 5V / 3V3 / GND / GND</td><td>$0.25</td></tr>
+  <tr><td>R1</td><td>1</td><td>4.7k&Omega;</td><td>0805 SMD</td><td>I2C SDA pull-up</td><td>$0.01</td></tr>
+  <tr><td>R2</td><td>1</td><td>4.7k&Omega;</td><td>0805 SMD</td><td>I2C SCL pull-up</td><td>$0.01</td></tr>
+  <tr><td>R3</td><td>1</td><td>4.7k&Omega;</td><td>0805 SMD</td><td>OneWire pull-up</td><td>$0.01</td></tr>
+  <tr><td>C1</td><td>1</td><td>100nF</td><td>0805 SMD</td><td>I2C decoupling</td><td>$0.01</td></tr>
+  <tr><td>C2</td><td>1</td><td>100nF</td><td>0805 SMD</td><td>Power decoupling</td><td>$0.01</td></tr>
+  <tr><td>MH1-4</td><td>4</td><td>M2</td><td>2.2mm hole</td><td>Fori di fissaggio</td><td>&mdash;</td></tr>
+</table>
+</div>
+
+</body>
+</html>

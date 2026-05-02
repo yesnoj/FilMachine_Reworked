@@ -14,7 +14,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "esp_err.h"
-#include "driver/i2c.h"
+
+#if defined(BOARD_JC4880P433)
+    #include "driver/i2c_master.h"
+#else
+    #include "driver/i2c.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,7 +59,11 @@ extern "C" {
 /* ── Handle ── */
 typedef struct {
     uint8_t     addr;       /* 7-bit I2C address */
-    i2c_port_t  port;       /* I2C port number */
+#if defined(BOARD_JC4880P433)
+    i2c_master_dev_handle_t dev_handle;  /* New I2C master device handle */
+#else
+    i2c_port_t  port;       /* I2C port number (legacy API) */
+#endif
     uint8_t     iodir[2];   /* Cached IODIR registers [A, B] */
     uint8_t     olat[2];    /* Cached output latch [A, B] */
     uint8_t     gppu[2];    /* Cached pull-up registers [A, B] */
@@ -63,11 +72,15 @@ typedef struct {
 /**
  * @brief Initialize the MCP23017
  * @param dev       Pointer to device handle (will be populated)
- * @param port      I2C port number (e.g. I2C_NUM_0)
+ * @param port      I2C port number (e.g. I2C_NUM_0) — ignored on P4
  * @param addr      7-bit I2C address (default 0x20)
  * @return ESP_OK on success, ESP_FAIL if device not responding
  */
+#if defined(BOARD_JC4880P433)
+esp_err_t mcp23017_init(mcp23017_t *dev, i2c_master_bus_handle_t bus, uint8_t addr);
+#else
 esp_err_t mcp23017_init(mcp23017_t *dev, i2c_port_t port, uint8_t addr);
+#endif
 
 /**
  * @brief Set pin direction

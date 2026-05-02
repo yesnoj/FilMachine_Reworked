@@ -33,7 +33,7 @@ static void save_close(void)
     sProcessDetail *pd = gui.tempProcessNode->process.processDetails;
 
     if (pd->stepElementsList.size > 0 && pd->processSaveButton) {
-        pd->somethingChanged = true;
+        pd->data.somethingChanged = true;
         lv_obj_send_event(pd->processSaveButton, LV_EVENT_REFRESH, NULL);
         test_pump(100);
         test_click_obj(pd->processSaveButton);
@@ -69,19 +69,19 @@ static void test_create_step_full(void)
     sStepDetail *sd = gui.tempStepNode->step.stepDetails;
 
     /* Set step fields */
-    lv_textarea_set_text(sd->stepDetailNamelTextArea, "Test Bleach");
-    gui.tempStepNode->step.stepDetails->timeMins = 8;
-    gui.tempStepNode->step.stepDetails->timeSecs = 45;
+    lv_textarea_set_text(sd->stepDetailNameTextArea, "Test Bleach");
+    gui.tempStepNode->step.stepDetails->data.timeMins = 8;
+    gui.tempStepNode->step.stepDetails->data.timeSecs = 45;
     lv_textarea_set_text(sd->stepDetailMinTextArea, "8");
     lv_textarea_set_text(sd->stepDetailSecTextArea, "45");
 
     /* Set type to CHEMISTRY (0) */
     lv_dropdown_set_selected(sd->stepTypeDropDownList, 0);
-    sd->type = CHEMISTRY;
+    sd->data.type = CHEMISTRY;
 
     /* Set source */
-    lv_dropdown_set_selected(sd->stepSourceDropDownList, 1);
-    sd->source = 1;
+    lv_dropdown_set_selected(sd->stepSourceDropDownList, SOURCE_C2);
+    sd->data.source = SOURCE_C2;
 
     test_pump(100);
 
@@ -102,7 +102,7 @@ static void test_create_step_full(void)
     /* Verify step data */
     stepNode *last_step = pd->stepElementsList.end;
     TEST_ASSERT_NOT_NULL(last_step, "last step should exist");
-    TEST_ASSERT_STR_EQ(last_step->step.stepDetails->stepNameString,
+    TEST_ASSERT_STR_EQ(last_step->step.stepDetails->data.stepNameString,
                        "Test Bleach", "step name should match");
 
     save_close();
@@ -136,9 +136,9 @@ static void test_edit_step(void)
     TEST_ASSERT_NOT_NULL(sd, "step details should exist");
 
     /* Modify name and time */
-    lv_textarea_set_text(sd->stepDetailNamelTextArea, "Edited Step");
-    sd->timeMins = 10;
-    sd->timeSecs = 0;
+    lv_textarea_set_text(sd->stepDetailNameTextArea, "Edited Step");
+    sd->data.timeMins = 10;
+    sd->data.timeSecs = 0;
     lv_textarea_set_text(sd->stepDetailMinTextArea, "10");
     lv_textarea_set_text(sd->stepDetailSecTextArea, "0");
     test_pump(100);
@@ -150,7 +150,7 @@ static void test_edit_step(void)
     test_pump(500);
 
     /* Verify name was updated */
-    TEST_ASSERT_STR_EQ(first_step->step.stepDetails->stepNameString,
+    TEST_ASSERT_STR_EQ(first_step->step.stepDetails->data.stepNameString,
                        "Edited Step", "step name should be updated");
 
     save_close();
@@ -213,9 +213,9 @@ static void test_create_multiple_steps(void)
         TEST_ASSERT_NOT_NULL(gui.tempStepNode, "tempStepNode should be set");
         sStepDetail *sd = gui.tempStepNode->step.stepDetails;
 
-        lv_textarea_set_text(sd->stepDetailNamelTextArea, names[i]);
-        sd->timeMins = mins[i];
-        sd->timeSecs = 0;
+        lv_textarea_set_text(sd->stepDetailNameTextArea, names[i]);
+        sd->data.timeMins = mins[i];
+        sd->data.timeSecs = 0;
         lv_textarea_set_text(sd->stepDetailMinTextArea, mins[i] == 2 ? "2" : mins[i] == 3 ? "3" : "1");
         lv_textarea_set_text(sd->stepDetailSecTextArea, "0");
         test_pump(100);
@@ -295,8 +295,8 @@ static void test_total_time_calculation(void)
     uint32_t total_secs = 0;
     stepNode *s = pd->stepElementsList.start;
     while (s != NULL) {
-        total_mins += s->step.stepDetails->timeMins;
-        total_secs += s->step.stepDetails->timeSecs;
+        total_mins += s->step.stepDetails->data.timeMins;
+        total_secs += s->step.stepDetails->data.timeSecs;
         s = s->next;
     }
     /* Normalize seconds overflow */
@@ -306,15 +306,15 @@ static void test_total_time_calculation(void)
     test_printf("         [INFO] Calculated total: %dmin %dsec\n",
            (int)total_mins, (int)total_secs);
     test_printf("         [INFO] Process reports: %dmin %dsec\n",
-           (int)pd->timeMins, (int)pd->timeSecs);
+           (int)pd->data.timeMins, (int)pd->data.timeSecs);
 
-    TEST_ASSERT_EQ((int)pd->timeMins, (int)total_mins,
+    TEST_ASSERT_EQ((int)pd->data.timeMins, (int)total_mins,
                    "process timeMins should match sum of step minutes");
-    TEST_ASSERT_EQ((int)pd->timeSecs, (int)total_secs,
+    TEST_ASSERT_EQ((int)pd->data.timeSecs, (int)total_secs,
                    "process timeSecs should match sum of step seconds");
 
     /* Close without saving */
-    pd->somethingChanged = false;
+    pd->data.somethingChanged = false;
     lv_obj_clear_state(pd->processDetailCloseButton, LV_STATE_DISABLED);
     test_click_obj(pd->processDetailCloseButton);
     test_pump(500);

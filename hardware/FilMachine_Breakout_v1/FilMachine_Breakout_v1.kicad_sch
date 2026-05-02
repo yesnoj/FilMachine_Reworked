@@ -1,0 +1,361 @@
+(kicad_sch
+  (version 20231120)
+  (generator "FilMachine_Breakout_Generator")
+  (generator_version "1.0")
+  (uuid "674a9b03-aa31-6c7e-592c-26e8eb3a7ffc")
+  (paper "A4")
+
+  (title_block
+    (title "FilMachine Breakout Board v1.0")
+    (date "2026-04-06")
+    (rev "1.0")
+    (comment 1 "Breakout for GUITION JC4880P433 J9 Expand IO")
+    (comment 2 "ESP32-P4 FilMachine project")
+  )
+
+
+  ;; ── Power Flags ──
+  (text "FilMachine Breakout Board v1.0\nJ9 Expand IO → Screw Terminals + Passives"
+    (exclude_from_sim no) (at 40 20 0)
+    (effects (font (size 2.54 2.54)) (justify left))
+    (uuid "0a4f729b-9891-dda3-0d42-04929e5d2dac")
+  )
+
+
+  ;; ── J1: J9 Connector (2×13 female pin header) ──
+  (symbol
+    (lib_id "Connector_Generic:Conn_02x13_Odd_Even")
+    (at 80 80 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "75e05687-8950-f012-6dce-fd6be5d4c5ee")
+    (property "Reference" "J1"
+      (at 80 60 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Value" "J9_Expand_IO_2x13"
+      (at 80 62 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical"
+      (at 80 80 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+  )
+
+
+  ;; ── J2: MOTOR (3-pin screw terminal) ──
+  (symbol
+    (lib_id "Connector_Generic:Conn_01x03")
+    (at 30 50 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (uuid "54c9f64f-8fdd-9624-5bba-f1777849235a")
+    (property "Reference" "J2"
+      (at 30 47 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Value" "MOTOR_3P_5.08mm"
+      (at 30 59.62 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "TerminalBlock:TerminalBlock_bornier-3_P5.08mm"
+      (at 30 50 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+  )
+
+
+  ;; ── J3: TEMP (3-pin screw terminal) ──
+  (symbol
+    (lib_id "Connector_Generic:Conn_01x03")
+    (at 30 70 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (uuid "f0613739-7b81-310e-13a8-6c6425e2d82a")
+    (property "Reference" "J3"
+      (at 30 67 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Value" "TEMP_3P_5.08mm"
+      (at 30 79.62 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "TerminalBlock:TerminalBlock_bornier-3_P5.08mm"
+      (at 30 70 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+  )
+
+
+  ;; ── J4: FLOW (3-pin screw terminal) ──
+  (symbol
+    (lib_id "Connector_Generic:Conn_01x03")
+    (at 30 90 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (uuid "83cead29-1cb9-76db-65d1-4d417dcba7b7")
+    (property "Reference" "J4"
+      (at 30 87 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Value" "FLOW_3P_5.08mm"
+      (at 30 99.62 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "TerminalBlock:TerminalBlock_bornier-3_P5.08mm"
+      (at 30 90 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+  )
+
+
+  ;; ── J5: I2C (4-pin screw terminal) ──
+  (symbol
+    (lib_id "Connector_Generic:Conn_01x04")
+    (at 30 110 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (uuid "41203ba1-2eb3-d085-bb12-cc38775afe65")
+    (property "Reference" "J5"
+      (at 30 107 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Value" "I2C_4P_5.08mm"
+      (at 30 122.16 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "TerminalBlock:TerminalBlock_bornier-4_P5.08mm"
+      (at 30 110 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+  )
+
+
+  ;; ── J6: WATER (4-pin screw terminal) ──
+  (symbol
+    (lib_id "Connector_Generic:Conn_01x04")
+    (at 30 130 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (uuid "9a85fa4e-4e81-fef5-8606-82cd67fe885b")
+    (property "Reference" "J6"
+      (at 30 127 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Value" "WATER_4P_5.08mm"
+      (at 30 142.16 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "TerminalBlock:TerminalBlock_bornier-4_P5.08mm"
+      (at 30 130 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+  )
+
+
+  ;; ── J7: HALL (3-pin screw terminal) ──
+  (symbol
+    (lib_id "Connector_Generic:Conn_01x03")
+    (at 30 150 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (uuid "b008173f-5df7-781f-18b4-cb1a7dd08a45")
+    (property "Reference" "J7"
+      (at 30 147 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Value" "HALL_3P_5.08mm"
+      (at 30 159.62 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "TerminalBlock:TerminalBlock_bornier-3_P5.08mm"
+      (at 30 150 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+  )
+
+
+  ;; ── J8: Spare GPIO (1×8 pin header) ──
+  (symbol
+    (lib_id "Connector_Generic:Conn_01x08")
+    (at 140 70 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (uuid "bfc10646-c8be-4460-9f86-60ff1ee9c166")
+    (property "Reference" "J8"
+      (at 140 67 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Value" "SPARE_GPIO_1x8"
+      (at 140 92 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical"
+      (at 140 70 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+  )
+
+
+  ;; ── R1: 4.7k (I2C SDA pull-up) ──
+  (symbol
+    (lib_id "Device:R")
+    (at 130 125 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (uuid "7995e795-bbc9-8add-ccfc-b157d322a3be")
+    (property "Reference" "R1"
+      (at 132 125 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Value" "4.7k"
+      (at 136 125 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric"
+      (at 130 125 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+  )
+
+
+  ;; ── R2: 4.7k (I2C SCL pull-up) ──
+  (symbol
+    (lib_id "Device:R")
+    (at 130 133 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (uuid "dc18a789-c94b-1be4-9c64-d1e631244672")
+    (property "Reference" "R2"
+      (at 132 133 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Value" "4.7k"
+      (at 136 133 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric"
+      (at 130 133 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+  )
+
+
+  ;; ── R3: 4.7k (OneWire pull-up) ──
+  (symbol
+    (lib_id "Device:R")
+    (at 130 141 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (uuid "71dafbd3-fdf7-afef-f43c-c0b6f7b5f0dc")
+    (property "Reference" "R3"
+      (at 132 141 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Value" "4.7k"
+      (at 136 141 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric"
+      (at 130 141 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+  )
+
+
+  ;; ── C1: 100nF (I2C decoupling) ──
+  (symbol
+    (lib_id "Device:C")
+    (at 130 150 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (uuid "ffebfc99-4934-8613-2d43-e3a24b1447d1")
+    (property "Reference" "C1"
+      (at 132 150 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Value" "100nF"
+      (at 136 150 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+      (at 130 150 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+  )
+
+
+  ;; ── C2: 100nF (Power decoupling) ──
+  (symbol
+    (lib_id "Device:C")
+    (at 130 158 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (uuid "2f4dfbda-6d54-10e3-62c5-70835dc1a09b")
+    (property "Reference" "C2"
+      (at 132 158 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Value" "100nF"
+      (at 136 158 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+      (at 130 158 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+  )
+
+
+  ;; ── J9: Power breakout (1×4: 5V, 3V3, GND, GND) ──
+  (symbol
+    (lib_id "Connector_Generic:Conn_01x04")
+    (at 140 100 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (uuid "b9952e7d-4573-02f9-4fca-f6cc3862800a")
+    (property "Reference" "J9"
+      (at 140 97 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Value" "PWR_5V_3V3_GND"
+      (at 140 112 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "TerminalBlock:TerminalBlock_bornier-4_P5.08mm"
+      (at 140 100 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+  )
+
+)

@@ -33,9 +33,9 @@ CHEMICAL_TYPE_DEVELOP = 0
 CHEMICAL_TYPE_RINSE = 1
 CHEMICAL_TYPE_MULTI_RINSE = 2
 
-# Film types (filmType_t enum)
-FILM_TYPE_COLOR = 0
-FILM_TYPE_BW = 1
+# Film types (filmType_t enum) — matches FilMachine.h: BLACK_AND_WHITE_FILM=0, COLOR_FILM=1
+FILM_TYPE_BW = 0
+FILM_TYPE_COLOR = 1
 
 # Chemical sources
 SOURCE_C1 = 0
@@ -157,8 +157,28 @@ DEFAULT_SETTINGS = {
     "randomSetpoint": 20,
     "isPersistentAlarm": 1,
     "isProcessAutostart": 0,
-    "drainFillOverlapSetpoint": 0,
-    "multiRinseTime": 60
+    "drainFillOverlapSetpoint": 100,
+    "multiRinseTime": 60,
+    "tankSize": 2,
+    "pumpSpeed": 30,
+    "chemContainerMl": 500,
+    "wbContainerMl": 2000,
+    "chemistryVolume": 2,
+    "tempCalibOffset": 0,
+    # ── Splash screen settings ──
+    "splashRandom": 0,
+    "splashPalette": 3,       # Deep Ocean
+    "splashShapeStyle": 0,
+    "splashComplexity": 40,
+    "splashSeed": 0,
+    "splashDefault": 1,       # Use default splash
+    # ── Wi-Fi settings ──
+    "wifiEnabled": 0,
+    "wifiSSID": "",
+    "wifiPassword": "",
+    # ── Display settings ──
+    "brightness": 100,
+    "dimTimeout": 30,
 }
 
 def random_settings():
@@ -166,13 +186,30 @@ def random_settings():
         "tempUnit": random.randint(0, 1),
         "waterInlet": random.randint(0, 1),
         "calibratedTemp": random.randint(0, 40),
-        "filmRotationSpeedSetpoint": random.randrange(10, 100, 10),
-        "rotationIntervalSetpoint": random.randrange(10, 60, 10),
+        "filmRotationSpeedSetpoint": random.randrange(10, 101, 10),
+        "rotationIntervalSetpoint": random.randrange(10, 61, 10),
         "randomSetpoint": random.randrange(0, 101, 20),
         "isPersistentAlarm": random.randint(0, 1),
         "isProcessAutostart": random.randint(0, 1),
-        "drainFillOverlapSetpoint": random.randrange(0, 100, 50),
-        "multiRinseTime": random.randrange(60, 181, 30)
+        "drainFillOverlapSetpoint": random.randrange(0, 101, 10),
+        "multiRinseTime": random.randrange(60, 181, 30),
+        "tankSize": random.randint(1, 3),
+        "pumpSpeed": random.randrange(10, 101, 10),
+        "chemContainerMl": random.choice([250, 500, 750, 1000, 1250, 1500]),
+        "wbContainerMl": random.choice([1000, 1500, 2000, 2500, 3000]),
+        "chemistryVolume": random.randint(1, 2),
+        "splashRandom": random.randint(0, 1),
+        "splashPalette": random.randint(0, 9),
+        "splashShapeStyle": random.randint(0, 5),
+        "splashComplexity": random.randrange(20, 101, 20),
+        "splashSeed": random.randint(1, 0xFFFFFFFF),
+        "splashDefault": random.randint(0, 1),
+        "tempCalibOffset": random.randint(-20, 20),
+        "wifiEnabled": 0,
+        "wifiSSID": "",
+        "wifiPassword": "",
+        "brightness": random.randrange(50, 101, 10),
+        "dimTimeout": random.choice([0, 15, 30, 60]),
     }
 
 # ═══════════════════════════════════════════════
@@ -262,6 +299,28 @@ def write_settings(f, s):
     f.write(struct.pack('<B', s["isProcessAutostart"]))
     f.write(struct.pack('<B', s["drainFillOverlapSetpoint"]))
     f.write(struct.pack('<B', s["multiRinseTime"]))
+    f.write(struct.pack('<B', s["tankSize"]))          # uint8_t (1=Small, 2=Medium, 3=Large)
+    f.write(struct.pack('<B', s["pumpSpeed"]))
+    f.write(struct.pack('<H', s["chemContainerMl"]))   # uint16_t
+    f.write(struct.pack('<H', s["wbContainerMl"]))     # uint16_t
+    f.write(struct.pack('<B', s["chemistryVolume"]))    # uint8_t (1=Low, 2=High)
+    f.write(struct.pack('<b', s.get("tempCalibOffset", 0)))  # int8_t (tenths of degree)
+    # ── Splash screen settings ──
+    f.write(struct.pack('<B', s.get("splashRandom", 0)))      # bool
+    f.write(struct.pack('<B', s.get("splashPalette", 3)))     # uint8_t (0–9, default 3 = Deep Ocean)
+    f.write(struct.pack('<B', s.get("splashShapeStyle", 0)))  # uint8_t (0–5)
+    f.write(struct.pack('<B', s.get("splashComplexity", 40))) # uint8_t (20–100)
+    f.write(struct.pack('<L', s.get("splashSeed", 0)))        # uint32_t
+    f.write(struct.pack('<B', s.get("splashDefault", 1)))     # bool (default = true)
+    # ── Wi-Fi settings ──
+    f.write(struct.pack('<B', s.get("wifiEnabled", 0)))      # bool
+    ssid = s.get("wifiSSID", "").encode('ASCII')[:32]
+    f.write(ssid.ljust(33, b'\x00'))                          # char[33]
+    pwd = s.get("wifiPassword", "").encode('ASCII')[:64]
+    f.write(pwd.ljust(65, b'\x00'))                           # char[65]
+    # ── Display settings ──
+    f.write(struct.pack('<B', s.get("brightness", 100)))     # uint8_t (10-100%)
+    f.write(struct.pack('<B', s.get("dimTimeout", 30)))      # uint8_t (seconds, 0=disabled)
 
 def write_process(f, p):
     f.write(p["processNameString"].encode('ASCII').ljust(MAX_PROC_NAME_LEN + 1, b'\x00'))
@@ -284,12 +343,23 @@ def write_step(f, s):
     f.write(struct.pack('<B', s["source"]))           # uint8_t
     f.write(struct.pack('<B', s["discardAfterProc"])) # uint8_t
 
-def write_config(filename, settings, processes):
+def write_stats(f, stats=None):
+    """Write machine statistics at the end of the config file"""
+    if stats is None:
+        stats = {"completed": 0, "totalMins": 0, "totalSecs": 0, "stopped": 0, "clean": 0}
+    f.write(struct.pack('<I', stats["completed"]))    # uint32_t
+    f.write(struct.pack('<Q', stats["totalMins"]))     # uint64_t
+    f.write(struct.pack('<I', stats.get("totalSecs", 0)))  # uint32_t (new)
+    f.write(struct.pack('<I', stats["stopped"]))       # uint32_t
+    f.write(struct.pack('<I', stats["clean"]))          # uint32_t
+
+def write_config(filename, settings, processes, stats=None):
     with open(filename, "wb") as f:
         write_settings(f, settings)
         f.write(struct.pack('<l', len(processes)))    # int32_t (processList.size)
         for p in processes:
             write_process(f, p)
+        write_stats(f, stats)  # Machine statistics
     print(f"  Written: {filename} ({os.path.getsize(filename)} bytes, {len(processes)} processes)")
 
 # ═══════════════════════════════════════════════
@@ -332,8 +402,21 @@ def main():
     backup_path = os.path.join(args.output, 'FilMachine_Backup.cfg')
     json_path = os.path.join(args.output, 'FilMachine.json')
 
-    write_config(cfg_path, settings, processes)
-    write_config(backup_path, settings, processes)
+    # Generate random stats when using random settings
+    stats = None
+    if args.random_settings:
+        import random as rng
+        stats = {
+            "completed": rng.randint(1, 50),
+            "totalMins": rng.randint(10, 2000),
+            "totalSecs": rng.randint(0, 59),
+            "stopped": rng.randint(0, 10),
+            "clean": rng.randint(0, 20),
+        }
+        print(f"  Stats: completed={stats['completed']}, totalMins={stats['totalMins']}, totalSecs={stats['totalSecs']}, stopped={stats['stopped']}, clean={stats['clean']}")
+
+    write_config(cfg_path, settings, processes, stats)
+    write_config(backup_path, settings, processes, stats)
 
     # JSON for human inspection
     data = {"settingsParams": settings, "processes": processes}

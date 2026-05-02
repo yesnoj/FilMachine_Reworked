@@ -163,7 +163,7 @@ static void test_close_after_steps(void)
 
     /* After step modifications, somethingChanged may be true → close button disabled.
        Save first to re-enable the close button. */
-    if (pd->somethingChanged && pd->processSaveButton != NULL &&
+    if (pd->data.somethingChanged && pd->processSaveButton != NULL &&
         pd->stepElementsList.size > 0) {
         test_printf("         [INFO] Saving process before close (somethingChanged=true)\n");
         test_click_obj(pd->processSaveButton);

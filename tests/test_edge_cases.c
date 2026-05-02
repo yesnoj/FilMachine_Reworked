@@ -18,22 +18,22 @@ static void test_temp_conversion(void)
     TEST_BEGIN("Utility — Celsius to Fahrenheit conversion");
 
     /* 0°C = 32°F */
-    int32_t f0 = convertCelsiusoToFahrenheit(0);
+    int32_t f0 = convertCelsiusToFahrenheit(0);
     test_printf("         [INFO] 0°C → %d°F (expected 32)\n", (int)f0);
     TEST_ASSERT_EQ(f0, 32, "0°C should be 32°F");
 
     /* 100°C = 212°F */
-    int32_t f100 = convertCelsiusoToFahrenheit(100);
+    int32_t f100 = convertCelsiusToFahrenheit(100);
     test_printf("         [INFO] 100°C → %d°F (expected 212)\n", (int)f100);
     TEST_ASSERT_EQ(f100, 212, "100°C should be 212°F");
 
     /* 20°C = 68°F */
-    int32_t f20 = convertCelsiusoToFahrenheit(20);
+    int32_t f20 = convertCelsiusToFahrenheit(20);
     test_printf("         [INFO] 20°C → %d°F (expected 68)\n", (int)f20);
     TEST_ASSERT_EQ(f20, 68, "20°C should be 68°F");
 
     /* 38°C = 100°F (rounded: 38*1.8+32 = 100.4 → 101 with +0.5 rounding) */
-    int32_t f38 = convertCelsiusoToFahrenheit(38);
+    int32_t f38 = convertCelsiusToFahrenheit(38);
     test_printf("         [INFO] 38°C → %d°F (expected ~100-101)\n", (int)f38);
     TEST_ASSERT(f38 >= 100 && f38 <= 101, "38°C should be ~100-101°F");
 
@@ -123,20 +123,20 @@ static void test_deep_copy_step(void)
     TEST_ASSERT_NOT_NULL(copy, "deep copy should not return NULL");
 
     /* Verify fields match */
-    TEST_ASSERT_STR_EQ(copy->step.stepDetails->stepNameString,
-                       orig->step.stepDetails->stepNameString,
+    TEST_ASSERT_STR_EQ(copy->step.stepDetails->data.stepNameString,
+                       orig->step.stepDetails->data.stepNameString,
                        "copied step name should match original");
-    TEST_ASSERT_EQ(copy->step.stepDetails->timeMins,
-                   orig->step.stepDetails->timeMins,
+    TEST_ASSERT_EQ(copy->step.stepDetails->data.timeMins,
+                   orig->step.stepDetails->data.timeMins,
                    "copied timeMins should match");
-    TEST_ASSERT_EQ(copy->step.stepDetails->timeSecs,
-                   orig->step.stepDetails->timeSecs,
+    TEST_ASSERT_EQ(copy->step.stepDetails->data.timeSecs,
+                   orig->step.stepDetails->data.timeSecs,
                    "copied timeSecs should match");
-    TEST_ASSERT_EQ(copy->step.stepDetails->type,
-                   orig->step.stepDetails->type,
+    TEST_ASSERT_EQ(copy->step.stepDetails->data.type,
+                   orig->step.stepDetails->data.type,
                    "copied type should match");
-    TEST_ASSERT_EQ(copy->step.stepDetails->source,
-                   orig->step.stepDetails->source,
+    TEST_ASSERT_EQ(copy->step.stepDetails->data.source,
+                   orig->step.stepDetails->data.source,
                    "copied source should match");
 
     /* Verify it's a separate allocation (different pointers) */
@@ -145,13 +145,12 @@ static void test_deep_copy_step(void)
                 "copy stepDetails should be different pointer");
 
     test_printf("         [INFO] Deep copy step verified: \"%s\" (%d:%02d)\n",
-                copy->step.stepDetails->stepNameString,
-                (int)copy->step.stepDetails->timeMins,
-                (int)copy->step.stepDetails->timeSecs);
+                copy->step.stepDetails->data.stepNameString,
+                (int)copy->step.stepDetails->data.timeMins,
+                (int)copy->step.stepDetails->data.timeSecs);
 
-    /* Clean up — free the copy (manually, since it's not in any list) */
-    free(copy->step.stepDetails);
-    free(copy);
+    /* Clean up — destroy the copy (not in any list) */
+    step_node_destroy(copy);
 
     TEST_END();
 }
@@ -171,16 +170,16 @@ static void test_deep_copy_process(void)
     TEST_ASSERT_NOT_NULL(copy, "deep copy should not return NULL");
 
     /* Verify name */
-    TEST_ASSERT_STR_EQ(copy->process.processDetails->processNameString,
-                       orig->process.processDetails->processNameString,
+    TEST_ASSERT_STR_EQ(copy->process.processDetails->data.processNameString,
+                       orig->process.processDetails->data.processNameString,
                        "copied name should match original");
 
     /* Verify temperature fields */
-    TEST_ASSERT_EQ(copy->process.processDetails->temp,
-                   orig->process.processDetails->temp,
+    TEST_ASSERT_EQ(copy->process.processDetails->data.temp,
+                   orig->process.processDetails->data.temp,
                    "copied temp should match");
-    TEST_ASSERT_EQ(copy->process.processDetails->filmType,
-                   orig->process.processDetails->filmType,
+    TEST_ASSERT_EQ(copy->process.processDetails->data.filmType,
+                   orig->process.processDetails->data.filmType,
                    "copied filmType should match");
 
     /* Verify step count matches */
@@ -193,16 +192,8 @@ static void test_deep_copy_process(void)
     /* Different pointers */
     TEST_ASSERT(copy != orig, "copy should be different pointer");
 
-    /* Clean up — free copied process steps then process */
-    stepNode *s = copy->process.processDetails->stepElementsList.start;
-    while (s != NULL) {
-        stepNode *next = s->next;
-        if (s->step.stepDetails) free(s->step.stepDetails);
-        free(s);
-        s = next;
-    }
-    free(copy->process.processDetails);
-    free(copy);
+    /* Clean up — use centralized destroy (frees steps, checkup, details, node) */
+    process_node_destroy(copy);
 
     TEST_END();
 }
@@ -224,8 +215,8 @@ static void test_step_type_source_fields(void)
     /* Walk all steps and verify type/source are within valid ranges */
     int step_idx = 0;
     while (s != NULL) {
-        uint8_t type = s->step.stepDetails->type;
-        uint8_t source = s->step.stepDetails->source;
+        uint8_t type = s->step.stepDetails->data.type;
+        uint8_t source = s->step.stepDetails->data.source;
 
         /* Type should be 0=CHEMISTRY, 1=RINSE, or 2=MULTI_RINSE */
         TEST_ASSERT(type <= 2, "step type should be 0-2");
@@ -234,7 +225,7 @@ static void test_step_type_source_fields(void)
         TEST_ASSERT(source <= 4, "step source should be 0-4");
 
         test_printf("         [INFO] Step %d: type=%d source=%d discard=%d\n",
-                    step_idx, type, source, s->step.stepDetails->discardAfterProc);
+                    step_idx, type, source, s->step.stepDetails->data.discardAfterProc);
 
         s = s->next;
         step_idx++;
@@ -257,24 +248,23 @@ static void test_process_name_max_length(void)
 
     /* Save original name */
     char original_name[MAX_PROC_NAME_LEN + 1];
-    strncpy(original_name, proc->process.processDetails->processNameString, MAX_PROC_NAME_LEN);
-    original_name[MAX_PROC_NAME_LEN] = '\0';
+    snprintf(original_name, sizeof(original_name), "%s", proc->process.processDetails->data.processNameString);
 
     /* Set name to exactly MAX_PROC_NAME_LEN chars */
     char max_name[MAX_PROC_NAME_LEN + 1];
     memset(max_name, 'A', MAX_PROC_NAME_LEN);
     max_name[MAX_PROC_NAME_LEN] = '\0';
 
-    strncpy(proc->process.processDetails->processNameString, max_name, MAX_PROC_NAME_LEN);
+    snprintf(proc->process.processDetails->data.processNameString, sizeof(proc->process.processDetails->data.processNameString), "%s", max_name);
     test_printf("         [INFO] Set %d-char name\n", (int)strlen(max_name));
 
     /* Verify it was stored */
-    int len = strlen(proc->process.processDetails->processNameString);
+    int len = strlen(proc->process.processDetails->data.processNameString);
     TEST_ASSERT(len <= MAX_PROC_NAME_LEN, "stored name should not exceed max");
     test_printf("         [INFO] Stored name length: %d (max=%d)\n", len, MAX_PROC_NAME_LEN);
 
     /* Restore original name */
-    strncpy(proc->process.processDetails->processNameString, original_name, MAX_PROC_NAME_LEN);
+    snprintf(proc->process.processDetails->data.processNameString, sizeof(proc->process.processDetails->data.processNameString), "%s", original_name);
 
     TEST_END();
 }
@@ -368,6 +358,526 @@ static void test_step_list_integrity(void)
 
 
 /* ═══════════════════════════════════════════════
+ * Test 10: Deep copy step — modifying copy doesn't affect original
+ * ═══════════════════════════════════════════════ */
+static void test_deep_copy_step_isolation(void)
+{
+    TEST_BEGIN("Deep copy — step copy is isolated from original");
+
+    processNode *proc = gui.page.processes.processElementsList.start;
+    TEST_ASSERT_NOT_NULL(proc, "first process should exist");
+    stepNode *orig = proc->process.processDetails->stepElementsList.start;
+    TEST_ASSERT_NOT_NULL(orig, "first step should exist");
+
+    /* Save original values */
+    uint8_t orig_mins = orig->step.stepDetails->data.timeMins;
+    uint8_t orig_secs = orig->step.stepDetails->data.timeSecs;
+    uint8_t orig_type = orig->step.stepDetails->data.type;
+    char orig_name[MAX_PROC_NAME_LEN + 1];
+    snprintf(orig_name, sizeof(orig_name), "%s", orig->step.stepDetails->data.stepNameString);
+
+    /* Deep copy */
+    stepNode *copy = deepCopyStepNode(orig);
+    TEST_ASSERT_NOT_NULL(copy, "deep copy should succeed");
+
+    /* Modify ALL data fields in the copy */
+    copy->step.stepDetails->data.timeMins = 99;
+    copy->step.stepDetails->data.timeSecs = 59;
+    copy->step.stepDetails->data.type = MULTI_RINSE;
+    copy->step.stepDetails->data.source = SOURCE_WASTE;
+    copy->step.stepDetails->data.discardAfterProc = true;
+    copy->step.stepDetails->data.somethingChanged = true;
+    copy->step.stepDetails->data.isEditMode = true;
+    snprintf(copy->step.stepDetails->data.stepNameString,
+             sizeof(copy->step.stepDetails->data.stepNameString), "MODIFIED");
+
+    /* Verify original is UNCHANGED */
+    TEST_ASSERT_EQ(orig->step.stepDetails->data.timeMins, orig_mins,
+                   "original timeMins must be unchanged");
+    TEST_ASSERT_EQ(orig->step.stepDetails->data.timeSecs, orig_secs,
+                   "original timeSecs must be unchanged");
+    TEST_ASSERT_EQ(orig->step.stepDetails->data.type, orig_type,
+                   "original type must be unchanged");
+    TEST_ASSERT_STR_EQ(orig->step.stepDetails->data.stepNameString, orig_name,
+                       "original name must be unchanged");
+
+    test_printf("         [INFO] Modified copy (99:59), original still (%d:%02d) — isolated OK\n",
+                (int)orig_mins, (int)orig_secs);
+
+    step_node_destroy(copy);
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
+ * Test 11: Deep copy process — modifying copy doesn't affect original
+ * ═══════════════════════════════════════════════ */
+static void test_deep_copy_process_isolation(void)
+{
+    TEST_BEGIN("Deep copy — process copy is isolated from original");
+
+    processNode *orig = gui.page.processes.processElementsList.start;
+    TEST_ASSERT_NOT_NULL(orig, "first process should exist");
+
+    /* Save original values */
+    uint32_t orig_temp = orig->process.processDetails->data.temp;
+    bool orig_preferred = orig->process.processDetails->data.isPreferred;
+    uint8_t orig_film = orig->process.processDetails->data.filmType;
+    char orig_name[MAX_PROC_NAME_LEN + 1];
+    snprintf(orig_name, sizeof(orig_name), "%s",
+             orig->process.processDetails->data.processNameString);
+
+    /* Deep copy */
+    processNode *copy = deepCopyProcessNode(orig);
+    TEST_ASSERT_NOT_NULL(copy, "deep copy should succeed");
+
+    /* Modify ALL data fields in the copy */
+    copy->process.processDetails->data.temp = 99;
+    copy->process.processDetails->data.tempTolerance = 9.9f;
+    copy->process.processDetails->data.isTempControlled = !orig->process.processDetails->data.isTempControlled;
+    copy->process.processDetails->data.isPreferred = !orig_preferred;
+    copy->process.processDetails->data.filmType = (orig_film == 0) ? 1 : 0;
+    copy->process.processDetails->data.somethingChanged = true;
+    copy->process.processDetails->data.timeMins = 999;
+    copy->process.processDetails->data.timeSecs = 59;
+    snprintf(copy->process.processDetails->data.processNameString,
+             sizeof(copy->process.processDetails->data.processNameString), "MODIFIED");
+
+    /* Verify original is UNCHANGED */
+    TEST_ASSERT_EQ(orig->process.processDetails->data.temp, orig_temp,
+                   "original temp must be unchanged");
+    TEST_ASSERT_EQ(orig->process.processDetails->data.isPreferred, orig_preferred,
+                   "original isPreferred must be unchanged");
+    TEST_ASSERT_EQ(orig->process.processDetails->data.filmType, orig_film,
+                   "original filmType must be unchanged");
+    TEST_ASSERT_STR_EQ(orig->process.processDetails->data.processNameString, orig_name,
+                       "original name must be unchanged");
+
+    test_printf("         [INFO] Modified copy temp=99, original temp=%d — isolated OK\n",
+                (int)orig_temp);
+
+    /* Cleanup — use centralized destroy */
+    process_node_destroy(copy);
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
+ * Test 12: Deep copy step — UI pointers are NULL after copy
+ * ═══════════════════════════════════════════════ */
+static void test_deep_copy_step_ui_null(void)
+{
+    TEST_BEGIN("Deep copy — step UI pointers are NULL in copy");
+
+    processNode *proc = gui.page.processes.processElementsList.start;
+    TEST_ASSERT_NOT_NULL(proc, "first process should exist");
+    stepNode *orig = proc->process.processDetails->stepElementsList.start;
+    TEST_ASSERT_NOT_NULL(orig, "first step should exist");
+
+    stepNode *copy = deepCopyStepNode(orig);
+    TEST_ASSERT_NOT_NULL(copy, "deep copy should succeed");
+
+    /* The memset(0) in deepCopyStepDetail zeroes ALL LVGL pointers */
+    TEST_ASSERT_NULL(copy->step.stepDetails->stepDetailParent,
+                     "copied stepDetailParent should be NULL");
+    TEST_ASSERT_NULL(copy->step.stepDetails->stepSaveButton,
+                     "copied stepSaveButton should be NULL");
+    TEST_ASSERT_NULL(copy->step.stepDetails->stepCancelButton,
+                     "copied stepCancelButton should be NULL");
+    TEST_ASSERT_NULL(copy->step.stepDetails->stepDetailNameTextArea,
+                     "copied stepDetailNameTextArea should be NULL");
+    TEST_ASSERT_NULL(copy->step.stepDetails->stepTypeDropDownList,
+                     "copied stepTypeDropDownList should be NULL");
+    TEST_ASSERT_NULL(copy->step.stepDetails->stepSourceDropDownList,
+                     "copied stepSourceDropDownList should be NULL");
+
+    /* But data fields ARE copied */
+    TEST_ASSERT_STR_EQ(copy->step.stepDetails->data.stepNameString,
+                       orig->step.stepDetails->data.stepNameString,
+                       "data.stepNameString should still be copied");
+    TEST_ASSERT_EQ(copy->step.stepDetails->data.timeMins,
+                   orig->step.stepDetails->data.timeMins,
+                   "data.timeMins should still be copied");
+
+    test_printf("         [INFO] 6 UI pointers NULL, data fields preserved — OK\n");
+
+    step_node_destroy(copy);
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
+ * Test 13: Deep copy process — UI pointers are NULL after copy
+ * ═══════════════════════════════════════════════ */
+static void test_deep_copy_process_ui_null(void)
+{
+    TEST_BEGIN("Deep copy — process UI pointers are NULL in copy");
+
+    processNode *orig = gui.page.processes.processElementsList.start;
+    TEST_ASSERT_NOT_NULL(orig, "first process should exist");
+
+    processNode *copy = deepCopyProcessNode(orig);
+    TEST_ASSERT_NOT_NULL(copy, "deep copy should succeed");
+
+    /* processDetail LVGL pointers should all be NULL */
+    TEST_ASSERT_NULL(copy->process.processDetails->processDetailParent,
+                     "processDetailParent should be NULL");
+    TEST_ASSERT_NULL(copy->process.processDetails->processStepsContainer,
+                     "processStepsContainer should be NULL");
+    TEST_ASSERT_NULL(copy->process.processDetails->processSaveButton,
+                     "processSaveButton should be NULL");
+    TEST_ASSERT_NULL(copy->process.processDetails->processRunButton,
+                     "processRunButton should be NULL");
+    TEST_ASSERT_NULL(copy->process.processDetails->processDetailNameTextArea,
+                     "processDetailNameTextArea should be NULL");
+
+    /* Data fields ARE preserved */
+    TEST_ASSERT_STR_EQ(copy->process.processDetails->data.processNameString,
+                       orig->process.processDetails->data.processNameString,
+                       "data.processNameString should be copied");
+    TEST_ASSERT_EQ(copy->process.processDetails->data.temp,
+                   orig->process.processDetails->data.temp,
+                   "data.temp should be copied");
+
+    test_printf("         [INFO] 5 UI pointers NULL, data fields preserved — OK\n");
+
+    /* Cleanup — use centralized destroy */
+    process_node_destroy(copy);
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
+ * Test 14: Deep copy checkup — data preserved, UI NULL
+ * ═══════════════════════════════════════════════ */
+static void test_deep_copy_checkup(void)
+{
+    TEST_BEGIN("Deep copy — checkup data preserved, UI pointers NULL");
+
+    /* Create a checkup with known data values */
+    sCheckup original;
+    memset(&original, 0, sizeof(sCheckup));
+    original.data.isProcessing      = true;
+    original.data.processStep       = 3;
+    original.data.activeVolume_index = 1;
+    original.data.tankSize          = 2;
+    original.data.stopNow           = false;
+    original.data.stopAfter         = true;
+    original.data.isFilling         = true;
+    original.data.isAlreadyPumping  = false;
+    original.data.isDeveloping      = true;
+    original.data.stepFillWaterStatus  = 1;
+    original.data.stepReachTempStatus  = 2;
+    original.data.stepCheckFilmStatus  = 0;
+    original.data.currentWaterTemp  = 38.5f;
+    original.data.currentChemTemp   = 37.2f;
+    original.data.heaterOn          = true;
+    original.data.tempTimeoutCounter = 42;
+    /* Set a fake UI pointer to verify it's NOT copied */
+    original.checkupParent = (lv_obj_t *)0xDEADBEEF;
+
+    sCheckup *copy = deepCopyCheckup(&original);
+    TEST_ASSERT_NOT_NULL(copy, "deepCopyCheckup should succeed");
+
+    /* Verify ALL 16 data fields */
+    TEST_ASSERT_EQ(copy->data.isProcessing, true, "isProcessing");
+    TEST_ASSERT_EQ(copy->data.processStep, 3, "processStep");
+    TEST_ASSERT_EQ(copy->data.activeVolume_index, 1, "activeVolume_index");
+    TEST_ASSERT_EQ(copy->data.tankSize, 2, "tankSize");
+    TEST_ASSERT_EQ(copy->data.stopNow, false, "stopNow");
+    TEST_ASSERT_EQ(copy->data.stopAfter, true, "stopAfter");
+    TEST_ASSERT_EQ(copy->data.isFilling, true, "isFilling");
+    TEST_ASSERT_EQ(copy->data.isAlreadyPumping, false, "isAlreadyPumping");
+    TEST_ASSERT_EQ(copy->data.isDeveloping, true, "isDeveloping");
+    TEST_ASSERT_EQ(copy->data.stepFillWaterStatus, 1, "stepFillWaterStatus");
+    TEST_ASSERT_EQ(copy->data.stepReachTempStatus, 2, "stepReachTempStatus");
+    TEST_ASSERT_EQ(copy->data.stepCheckFilmStatus, 0, "stepCheckFilmStatus");
+    TEST_ASSERT(copy->data.currentWaterTemp > 38.4f && copy->data.currentWaterTemp < 38.6f,
+                "currentWaterTemp ~38.5");
+    TEST_ASSERT(copy->data.currentChemTemp > 37.1f && copy->data.currentChemTemp < 37.3f,
+                "currentChemTemp ~37.2");
+    TEST_ASSERT_EQ(copy->data.heaterOn, true, "heaterOn");
+    TEST_ASSERT_EQ(copy->data.tempTimeoutCounter, 42, "tempTimeoutCounter");
+
+    /* UI pointers must be NULL (memset zeroed them) */
+    TEST_ASSERT_NULL(copy->checkupParent, "checkupParent should be NULL (not 0xDEADBEEF)");
+    TEST_ASSERT_NULL(copy->checkupContainer, "checkupContainer should be NULL");
+    TEST_ASSERT_NULL(copy->processTimer, "processTimer should be NULL");
+    TEST_ASSERT_NULL(copy->checkupStartButton, "checkupStartButton should be NULL");
+
+    test_printf("         [INFO] All 16 checkup data fields preserved, UI pointers NULL — OK\n");
+
+    free(copy);
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
+ * Test 15: Deep copy NULL safety — all functions handle NULL
+ * ═══════════════════════════════════════════════ */
+static void test_deep_copy_null_safety(void)
+{
+    TEST_BEGIN("Deep copy — NULL inputs return NULL safely");
+
+    /* Every deepCopy function should return NULL on NULL input */
+    sStepDetail *sd = deepCopyStepDetail(NULL);
+    TEST_ASSERT_NULL(sd, "deepCopyStepDetail(NULL) should return NULL");
+
+    singleStep dummyStep;
+    TEST_ASSERT_EQ(single_step_clone(NULL, &dummyStep), false, "single_step_clone(NULL, dst) should return false");
+    TEST_ASSERT_EQ(single_step_clone(&dummyStep, NULL), false, "single_step_clone(src, NULL) should return false");
+
+    stepNode *sn = deepCopyStepNode(NULL);
+    TEST_ASSERT_NULL(sn, "deepCopyStepNode(NULL) should return NULL");
+
+    sCheckup *ck = deepCopyCheckup(NULL);
+    TEST_ASSERT_NULL(ck, "deepCopyCheckup(NULL) should return NULL");
+
+    sProcessDetail *pd = deepCopyProcessDetail(NULL);
+    TEST_ASSERT_NULL(pd, "deepCopyProcessDetail(NULL) should return NULL");
+
+    singleProcess dummyProc;
+    TEST_ASSERT_EQ(single_process_clone(NULL, &dummyProc), false, "single_process_clone(NULL, dst) should return false");
+    TEST_ASSERT_EQ(single_process_clone(&dummyProc, NULL), false, "single_process_clone(src, NULL) should return false");
+
+    processNode *pn = deepCopyProcessNode(NULL);
+    TEST_ASSERT_NULL(pn, "deepCopyProcessNode(NULL) should return NULL");
+
+    /* deepCopyStepList with empty list should return empty list */
+    stepList empty_list = {.start = NULL, .end = NULL, .size = 0};
+    stepList copied_empty = deepCopyStepList(empty_list);
+    TEST_ASSERT_EQ(copied_empty.size, 0, "empty list copy should have size 0");
+    TEST_ASSERT_NULL(copied_empty.start, "empty list copy start should be NULL");
+    TEST_ASSERT_NULL(copied_empty.end, "empty list copy end should be NULL");
+
+    test_printf("         [INFO] All 8 NULL-safety checks passed\n");
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
+ * Test 16: Deep copy step list — doubly-linked integrity
+ * ═══════════════════════════════════════════════ */
+static void test_deep_copy_step_list_integrity(void)
+{
+    TEST_BEGIN("Deep copy — step list maintains doubly-linked integrity");
+
+    processNode *proc = gui.page.processes.processElementsList.start;
+    TEST_ASSERT_NOT_NULL(proc, "first process should exist");
+
+    stepList orig_list = proc->process.processDetails->stepElementsList;
+    TEST_ASSERT(orig_list.size > 0, "need at least one step");
+
+    /* Deep copy the step list */
+    stepList copy_list = deepCopyStepList(orig_list);
+    TEST_ASSERT_EQ(copy_list.size, orig_list.size, "copied size should match");
+
+    /* Walk forward */
+    int fwd = 0;
+    stepNode *s = copy_list.start;
+    stepNode *last = NULL;
+    while (s != NULL) {
+        /* Verify prev pointer is correct */
+        TEST_ASSERT(s->prev == last, "prev pointer should point to previous node");
+        last = s;
+        fwd++;
+        s = s->next;
+    }
+    TEST_ASSERT_EQ(fwd, (int)copy_list.size, "forward walk should match size");
+    TEST_ASSERT(last == copy_list.end, "last node should be list end");
+
+    /* Walk backward */
+    int bwd = 0;
+    s = copy_list.end;
+    while (s != NULL) {
+        bwd++;
+        s = s->prev;
+    }
+    TEST_ASSERT_EQ(bwd, (int)copy_list.size, "backward walk should match size");
+
+    /* Verify data is preserved for each node */
+    stepNode *orig_node = orig_list.start;
+    stepNode *copy_node = copy_list.start;
+    int idx = 0;
+    while (orig_node != NULL && copy_node != NULL) {
+        TEST_ASSERT(copy_node != orig_node, "copy nodes must be different pointers");
+        TEST_ASSERT_STR_EQ(copy_node->step.stepDetails->data.stepNameString,
+                           orig_node->step.stepDetails->data.stepNameString,
+                           "step names should match");
+        TEST_ASSERT_EQ(copy_node->step.stepDetails->data.timeMins,
+                       orig_node->step.stepDetails->data.timeMins,
+                       "timeMins should match");
+        idx++;
+        orig_node = orig_node->next;
+        copy_node = copy_node->next;
+    }
+
+    test_printf("         [INFO] Copied list: fwd=%d, bwd=%d, %d nodes data-verified — OK\n",
+                fwd, bwd, idx);
+
+    /* Cleanup */
+    s = copy_list.start;
+    while (s != NULL) {
+        stepNode *next = s->next;
+        step_node_destroy(s);
+        s = next;
+    }
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
+ * Test 17: sStepData sub-struct — all fields accessible via .data
+ * ═══════════════════════════════════════════════ */
+static void test_step_data_substruct(void)
+{
+    TEST_BEGIN("Sub-struct — sStepData field access and assignment");
+
+    /* Create two sStepData structs and verify assignment copies all fields */
+    sStepData a;
+    memset(&a, 0, sizeof(sStepData));
+    snprintf(a.stepNameString, sizeof(a.stepNameString), "TestStep");
+    a.somethingChanged = true;
+    a.isEditMode = true;
+    a.timeMins = 12;
+    a.timeSecs = 45;
+    a.type = RINSE;
+    a.source = SOURCE_C3;
+    a.discardAfterProc = true;
+
+    /* Simple struct assignment — this is what deepCopyStepDetail uses */
+    sStepData b = a;
+
+    TEST_ASSERT_STR_EQ(b.stepNameString, "TestStep", "name copied via assignment");
+    TEST_ASSERT_EQ(b.somethingChanged, true, "somethingChanged copied");
+    TEST_ASSERT_EQ(b.isEditMode, true, "isEditMode copied");
+    TEST_ASSERT_EQ(b.timeMins, 12, "timeMins copied");
+    TEST_ASSERT_EQ(b.timeSecs, 45, "timeSecs copied");
+    TEST_ASSERT_EQ(b.type, RINSE, "type copied");
+    TEST_ASSERT_EQ(b.source, SOURCE_C3, "source copied");
+    TEST_ASSERT_EQ(b.discardAfterProc, true, "discardAfterProc copied");
+
+    /* Modify b, verify a is unchanged */
+    b.timeMins = 0;
+    b.type = CHEMISTRY;
+    snprintf(b.stepNameString, sizeof(b.stepNameString), "Changed");
+    TEST_ASSERT_EQ(a.timeMins, 12, "original timeMins unchanged after modifying copy");
+    TEST_ASSERT_EQ(a.type, RINSE, "original type unchanged");
+    TEST_ASSERT_STR_EQ(a.stepNameString, "TestStep", "original name unchanged");
+
+    test_printf("         [INFO] All 8 sStepData fields: assign + isolate verified\n");
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
+ * Test 18: sProcessData sub-struct — all fields accessible via .data
+ * ═══════════════════════════════════════════════ */
+static void test_process_data_substruct(void)
+{
+    TEST_BEGIN("Sub-struct — sProcessData field access and assignment");
+
+    sProcessData a;
+    memset(&a, 0, sizeof(sProcessData));
+    snprintf(a.processNameString, sizeof(a.processNameString), "TestProc");
+    a.temp = 38;
+    a.tempTolerance = 0.3f;
+    a.isTempControlled = true;
+    a.isPreferred = true;
+    a.somethingChanged = false;
+    a.filmType = BLACK_AND_WHITE_FILM;
+    a.timeMins = 20;
+    a.timeSecs = 30;
+
+    sProcessData b = a;
+
+    TEST_ASSERT_STR_EQ(b.processNameString, "TestProc", "name copied");
+    TEST_ASSERT_EQ(b.temp, 38, "temp copied");
+    TEST_ASSERT(b.tempTolerance > 0.29f && b.tempTolerance < 0.31f, "tempTolerance copied");
+    TEST_ASSERT_EQ(b.isTempControlled, true, "isTempControlled copied");
+    TEST_ASSERT_EQ(b.isPreferred, true, "isPreferred copied");
+    TEST_ASSERT_EQ(b.somethingChanged, false, "somethingChanged copied");
+    TEST_ASSERT_EQ(b.filmType, 0, "filmType copied");
+    TEST_ASSERT_EQ(b.timeMins, 20, "timeMins copied");
+    TEST_ASSERT_EQ(b.timeSecs, 30, "timeSecs copied");
+
+    /* Modify b, verify a unchanged */
+    b.temp = 0;
+    b.isPreferred = false;
+    TEST_ASSERT_EQ(a.temp, 38, "original temp unchanged");
+    TEST_ASSERT_EQ(a.isPreferred, true, "original isPreferred unchanged");
+
+    test_printf("         [INFO] All 9 sProcessData fields: assign + isolate verified\n");
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
+ * Test 19: sCheckupData sub-struct — all fields accessible via .data
+ * ═══════════════════════════════════════════════ */
+static void test_checkup_data_substruct(void)
+{
+    TEST_BEGIN("Sub-struct — sCheckupData field access and assignment");
+
+    sCheckupData a;
+    memset(&a, 0, sizeof(sCheckupData));
+    a.isProcessing      = true;
+    a.processStep       = 5;
+    a.activeVolume_index = 1;
+    a.tankSize          = 3;
+    a.stopNow           = false;
+    a.stopAfter         = true;
+    a.isFilling         = true;
+    a.isAlreadyPumping  = false;
+    a.isDeveloping      = true;
+    a.stepFillWaterStatus  = 2;
+    a.stepReachTempStatus  = 1;
+    a.stepCheckFilmStatus  = 0;
+    a.currentWaterTemp  = 25.5f;
+    a.currentChemTemp   = 24.0f;
+    a.heaterOn          = true;
+    a.tempTimeoutCounter = 100;
+
+    sCheckupData b = a;
+
+    TEST_ASSERT_EQ(b.isProcessing, true, "isProcessing");
+    TEST_ASSERT_EQ(b.processStep, 5, "processStep");
+    TEST_ASSERT_EQ(b.activeVolume_index, 1, "activeVolume_index");
+    TEST_ASSERT_EQ(b.tankSize, 3, "tankSize");
+    TEST_ASSERT_EQ(b.stopNow, false, "stopNow");
+    TEST_ASSERT_EQ(b.stopAfter, true, "stopAfter");
+    TEST_ASSERT_EQ(b.isFilling, true, "isFilling");
+    TEST_ASSERT_EQ(b.isAlreadyPumping, false, "isAlreadyPumping");
+    TEST_ASSERT_EQ(b.isDeveloping, true, "isDeveloping");
+    TEST_ASSERT_EQ(b.stepFillWaterStatus, 2, "stepFillWaterStatus");
+    TEST_ASSERT_EQ(b.stepReachTempStatus, 1, "stepReachTempStatus");
+    TEST_ASSERT_EQ(b.stepCheckFilmStatus, 0, "stepCheckFilmStatus");
+    TEST_ASSERT(b.currentWaterTemp > 25.4f && b.currentWaterTemp < 25.6f, "currentWaterTemp");
+    TEST_ASSERT(b.currentChemTemp > 23.9f && b.currentChemTemp < 24.1f, "currentChemTemp");
+    TEST_ASSERT_EQ(b.heaterOn, true, "heaterOn");
+    TEST_ASSERT_EQ(b.tempTimeoutCounter, 100, "tempTimeoutCounter");
+
+    /* Modify b, verify a unchanged */
+    b.processStep = 0;
+    b.currentWaterTemp = 0.0f;
+    b.heaterOn = false;
+    TEST_ASSERT_EQ(a.processStep, 5, "original processStep unchanged");
+    TEST_ASSERT(a.currentWaterTemp > 25.4f, "original currentWaterTemp unchanged");
+    TEST_ASSERT_EQ(a.heaterOn, true, "original heaterOn unchanged");
+
+    test_printf("         [INFO] All 16 sCheckupData fields: assign + isolate verified\n");
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
  * Suite Entry Point
  * ═══════════════════════════════════════════════ */
 void test_suite_edge_cases(void)
@@ -383,4 +893,16 @@ void test_suite_edge_cases(void)
     test_process_name_max_length();
     test_process_order_integrity();
     test_step_list_integrity();
+
+    /* New tests for Points 4/5/16/17 refactoring */
+    test_deep_copy_step_isolation();
+    test_deep_copy_process_isolation();
+    test_deep_copy_step_ui_null();
+    test_deep_copy_process_ui_null();
+    test_deep_copy_checkup();
+    test_deep_copy_null_safety();
+    test_deep_copy_step_list_integrity();
+    test_step_data_substruct();
+    test_process_data_substruct();
+    test_checkup_data_substruct();
 }

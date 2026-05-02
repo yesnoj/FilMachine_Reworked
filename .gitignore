@@ -1,7 +1,60 @@
+## ═══════════════════════════════════════════════
+## FilMachine_Reworked — .gitignore
+## ═══════════════════════════════════════════════
+
+## Build directories
 build/
+build2/
+build800/
+
+## LVGL library (submodule or vendored)
 lvgl/
+
+## Simulator data
 sim_data/
+sd/
+
+## macOS junk
 .DS_Store
+**/.DS_Store
+._*
+
+## Compiled objects
 *.o
 *.d
+
+## Test output
 test_results/
+
+## ESP-IDF managed components (downloaded automatically)
+managed_components/
+
+## ESP-IDF backup config
+sdkconfig.old
+
+## Temporary / generated
+sd_backup/
+zi*
+*.zip
+*.pyc
+__pycache__/
+
+## Patch scripts and backups (one-shot, already applied)
+patch_*.py
+*.bak_dbh12v
+*.bak
+
+## Resources / demo files (large, not source code)
+/resources/
+
+## IDE / editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+## ESP-IDF local config
+sdkconfig
+!sdkconfig.defaults
+!sdkconfig.defaults.*

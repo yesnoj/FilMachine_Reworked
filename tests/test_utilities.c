@@ -2,7 +2,7 @@
  * test_utilities.c — Utility & Lookup Function Tests
  *
  * Tests pure/utility functions that don't depend on UI state:
- * findRolleStringIndex, getValueForChemicalSource, mapPercentageToValue,
+ * findRollerStringIndex, getValueForChemicalSource, mapPercentageToValue,
  * getRandomRotationInterval, calculateTotalTime, emptyList, toLowerCase.
  */
 
@@ -12,11 +12,11 @@
 
 
 /* ═══════════════════════════════════════════════
- * Test 1: findRolleStringIndex — string lookup in newline-delimited list
+ * Test 1: findRollerStringIndex — string lookup in newline-delimited list
  * ═══════════════════════════════════════════════ */
 static void test_find_roller_string_index(void)
 {
-    TEST_BEGIN("Utility — findRolleStringIndex lookup");
+    TEST_BEGIN("Utility — findRollerStringIndex lookup");
 
     /* Build a newline-delimited list like roller popups use */
     const char *list = "10\n20\n30\n40\n50";
@@ -24,23 +24,23 @@ static void test_find_roller_string_index(void)
     uint32_t idx;
 
     /* First element */
-    idx = findRolleStringIndex("10", list);
-    test_printf("         [INFO] findRolleStringIndex(\"10\") = %u\n", (unsigned)idx);
+    idx = findRollerStringIndex("10", list);
+    test_printf("         [INFO] findRollerStringIndex(\"10\") = %u\n", (unsigned)idx);
     TEST_ASSERT_EQ((int)idx, 0, "first element should be at index 0");
 
     /* Middle element */
-    idx = findRolleStringIndex("30", list);
-    test_printf("         [INFO] findRolleStringIndex(\"30\") = %u\n", (unsigned)idx);
+    idx = findRollerStringIndex("30", list);
+    test_printf("         [INFO] findRollerStringIndex(\"30\") = %u\n", (unsigned)idx);
     TEST_ASSERT_EQ((int)idx, 2, "\"30\" should be at index 2");
 
     /* Last element */
-    idx = findRolleStringIndex("50", list);
-    test_printf("         [INFO] findRolleStringIndex(\"50\") = %u\n", (unsigned)idx);
+    idx = findRollerStringIndex("50", list);
+    test_printf("         [INFO] findRollerStringIndex(\"50\") = %u\n", (unsigned)idx);
     TEST_ASSERT_EQ((int)idx, 4, "last element should be at index 4");
 
     /* Not found — should return (uint32_t)-1 */
-    idx = findRolleStringIndex("99", list);
-    test_printf("         [INFO] findRolleStringIndex(\"99\") = %u (expect %u)\n",
+    idx = findRollerStringIndex("99", list);
+    test_printf("         [INFO] findRollerStringIndex(\"99\") = %u (expect %u)\n",
                 (unsigned)idx, (unsigned)(uint32_t)-1);
     TEST_ASSERT_EQ((int)idx, (int)(uint32_t)-1, "missing element should return -1");
 
@@ -158,16 +158,16 @@ static void test_calculate_total_time(void)
     TEST_ASSERT_NOT_NULL(p, "need at least one process");
 
     /* Save old values */
-    uint32_t old_mins = p->process.processDetails->timeMins;
-    uint8_t  old_secs = p->process.processDetails->timeSecs;
+    uint32_t old_mins = p->process.processDetails->data.timeMins;
+    uint8_t  old_secs = p->process.processDetails->data.timeSecs;
 
     /* Calculate expected total manually */
     uint32_t expected_mins = 0;
     uint8_t  expected_secs = 0;
     stepNode *s = p->process.processDetails->stepElementsList.start;
     while (s != NULL) {
-        expected_mins += s->step.stepDetails->timeMins;
-        expected_secs += s->step.stepDetails->timeSecs;
+        expected_mins += s->step.stepDetails->data.timeMins;
+        expected_secs += s->step.stepDetails->data.timeSecs;
         if (expected_secs >= 60) {
             expected_mins += expected_secs / 60;
             expected_secs  = expected_secs % 60;
@@ -187,12 +187,12 @@ static void test_calculate_total_time(void)
     calculateTotalTime(p);
 
     test_printf("         [INFO] calculateTotalTime: %"PRIu32"m %ds (expected %"PRIu32"m %ds)\n",
-                p->process.processDetails->timeMins,
-                p->process.processDetails->timeSecs,
+                p->process.processDetails->data.timeMins,
+                p->process.processDetails->data.timeSecs,
                 expected_mins, expected_secs);
-    TEST_ASSERT_EQ((int)p->process.processDetails->timeMins, (int)expected_mins,
+    TEST_ASSERT_EQ((int)p->process.processDetails->data.timeMins, (int)expected_mins,
                    "total minutes should match manual sum");
-    TEST_ASSERT_EQ((int)p->process.processDetails->timeSecs, (int)expected_secs,
+    TEST_ASSERT_EQ((int)p->process.processDetails->data.timeSecs, (int)expected_secs,
                    "total seconds should match manual sum");
 
     /* Cleanup temp label and restore original */
@@ -202,8 +202,8 @@ static void test_calculate_total_time(void)
     }
 
     /* Restore original time values */
-    p->process.processDetails->timeMins = old_mins;
-    p->process.processDetails->timeSecs = old_secs;
+    p->process.processDetails->data.timeMins = old_mins;
+    p->process.processDetails->data.timeSecs = old_secs;
 
     TEST_END();
 }
@@ -224,8 +224,8 @@ static void test_empty_step_list(void)
     TEST_ASSERT_NOT_NULL(s1, "s1 allocated");
     TEST_ASSERT_NOT_NULL(s2, "s2 allocated");
 
-    strncpy(s1->step.stepDetails->stepNameString, "TempStep1", MAX_PROC_NAME_LEN);
-    strncpy(s2->step.stepDetails->stepNameString, "TempStep2", MAX_PROC_NAME_LEN);
+    snprintf(s1->step.stepDetails->data.stepNameString, sizeof(s1->step.stepDetails->data.stepNameString), "%s", "TempStep1");
+    snprintf(s2->step.stepDetails->data.stepNameString, sizeof(s2->step.stepDetails->data.stepNameString), "%s", "TempStep2");
 
     /* Link them: s1 → s2 */
     s1->prev = NULL;
@@ -291,7 +291,7 @@ static void test_filter_both_film_types(void)
 
     /* Set filter: both Color AND B&W → should show ALL processes */
     gui.page.processes.isFiltered = false;
-    gui.element.filterPopup.filterName     = "";
+    gui.element.filterPopup.filterName[0]  = '\0';
     gui.element.filterPopup.isColorFilter  = true;
     gui.element.filterPopup.isBnWFilter    = true;
     gui.element.filterPopup.preferredOnly  = false;
@@ -321,6 +321,65 @@ static void test_filter_both_film_types(void)
 
 
 /* ═══════════════════════════════════════════════
+ * Test 9: Drain/Fill Overlap calculation
+ * ═══════════════════════════════════════════════ */
+static void test_drain_fill_overlap_calculation(void)
+{
+    TEST_BEGIN("Utility — drain/fill overlap time calculation");
+
+    /* This tests the adjustment of step time based on drain/fill overlap.
+     * The formula is: adjustedTime = stepTime - (overlap% / 100) * 2 * fillTime
+     *
+     * Test 1: overlap=0% → adjusted time = stepTime (no change)
+     * Test 2: overlap=100% → adjusted time = stepTime - 2*fillTime (full overlap)
+     * Test 3: overlap=50% → adjusted time should be between the two
+     */
+
+    struct machineSettings *s = &gui.page.settings.settingsParams;
+    uint8_t old_overlap = s->drainFillOverlapSetpoint;
+
+    /* For this test, we'll use calculateFillTime to get a known fill time */
+    uint16_t fill_time_ms = calculateFillTime(s->chemContainerMl, s->pumpSpeed);
+    test_printf("         [INFO] fillTime for %d ml at %d%% pump = %d ms\n",
+                s->chemContainerMl, s->pumpSpeed, fill_time_ms);
+
+    /* Test 1: 0% overlap — adjusted should equal original stepTime */
+    s->drainFillOverlapSetpoint = 0;
+    uint32_t step_time = 60000; /* 60 seconds */
+    /* adjustedTime = 60000 - (0/100) * 2 * fill_time = 60000 */
+    uint32_t adjusted_0pct = step_time - (0 * 2 * fill_time_ms) / 100;
+    test_printf("         [INFO] 0%% overlap: %lu ms → %lu ms (expect %lu ms)\n",
+                (unsigned long)step_time, (unsigned long)adjusted_0pct, (unsigned long)step_time);
+    TEST_ASSERT_EQ((int)adjusted_0pct, (int)step_time,
+                   "0% overlap should result in unchanged time");
+
+    /* Test 2: 100% overlap — adjusted = stepTime - 2*fillTime */
+    s->drainFillOverlapSetpoint = 100;
+    uint32_t adjusted_100pct = step_time - (100 * 2 * fill_time_ms) / 100;
+    test_printf("         [INFO] 100%% overlap: %lu ms → %lu ms (deduction: %lu ms)\n",
+                (unsigned long)step_time, (unsigned long)adjusted_100pct,
+                (unsigned long)(2 * fill_time_ms));
+    TEST_ASSERT(adjusted_100pct < step_time,
+                "100% overlap should result in shorter adjusted time");
+    TEST_ASSERT((int)adjusted_100pct == (int)(step_time - 2 * fill_time_ms),
+                "100% overlap should deduct 2*fillTime");
+
+    /* Test 3: 50% overlap — should be in between */
+    s->drainFillOverlapSetpoint = 50;
+    uint32_t adjusted_50pct = step_time - (50 * 2 * fill_time_ms) / 100;
+    test_printf("         [INFO] 50%% overlap: %lu ms → %lu ms\n",
+                (unsigned long)step_time, (unsigned long)adjusted_50pct);
+    TEST_ASSERT(adjusted_50pct > adjusted_100pct && adjusted_50pct < step_time,
+                "50% overlap should be between 0% and 100%");
+
+    /* Restore original */
+    s->drainFillOverlapSetpoint = old_overlap;
+
+    TEST_END();
+}
+
+
+/* ═══════════════════════════════════════════════
  * Suite Entry Point
  * ═══════════════════════════════════════════════ */
 void test_suite_utilities(void)
@@ -335,4 +394,5 @@ void test_suite_utilities(void)
     test_empty_step_list();
     test_to_lower_case();
     test_filter_both_film_types();
+    test_drain_fill_overlap_calculation();
 }

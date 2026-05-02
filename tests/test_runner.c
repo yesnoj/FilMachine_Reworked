@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 
 #include "test_runner.h"
+#include "page_splash.h"
 #include "lvgl.h"
 
 /* Need access to gesture fields on the SDL mouse indev */
@@ -61,9 +62,15 @@ __attribute__((weak)) void pwmLedTest(void) { }
 __attribute__((weak)) void cleanRelayManager(uint8_t a, uint8_t b, uint8_t c, bool d) { }
 __attribute__((weak)) void sendValueToRelay(uint8_t a, uint8_t b, bool c) { }
 __attribute__((weak)) void rebootBoard(void) { }
+__attribute__((weak)) void buzzer_beep(void) { }
+__attribute__((weak)) void alarm_start_persistent(void) { }
+__attribute__((weak)) void alarm_stop(void) { }
+__attribute__((weak)) bool alarm_is_active(void) { return false; }
+__attribute__((weak)) void tools_pause_timer(void) { }
+__attribute__((weak)) void tools_resume_timer(void) { }
 
 /* Temperature control stubs for tests (no simulation needed) */
-float sim_getTemperature(uint8_t sensorPin) { return 20.0f; }
+float sim_getTemperature(uint8_t sensorIndex) { return 20.0f; }
 void  sim_setHeater(bool on) { }
 void  sim_resetTemperatures(void) { }
 
@@ -76,12 +83,12 @@ static void add_step_to_process(processNode *proc, const char *name,
 {
     stepNode *s = (stepNode *)allocateAndInitializeNode(STEP_NODE);
     if (!s) return;
-    strncpy(s->step.stepDetails->stepNameString, name, MAX_PROC_NAME_LEN);
-    s->step.stepDetails->timeMins = mins;
-    s->step.stepDetails->timeSecs = secs;
-    s->step.stepDetails->type     = type;
-    s->step.stepDetails->source   = source;
-    s->step.stepDetails->discardAfterProc = discard;
+    snprintf(s->step.stepDetails->data.stepNameString, sizeof(s->step.stepDetails->data.stepNameString), "%s", name);
+    s->step.stepDetails->data.timeMins = mins;
+    s->step.stepDetails->data.timeSecs = secs;
+    s->step.stepDetails->data.type     = type;
+    s->step.stepDetails->data.source   = source;
+    s->step.stepDetails->data.discardAfterProc = discard;
     s->prev = NULL;
     s->next = NULL;
 
@@ -116,14 +123,14 @@ void test_generate_data(void)
 
     /* ── Process 1: "Test C41" (Color) ── */
     processNode *p1 = (processNode *)allocateAndInitializeNode(PROCESS_NODE);
-    strncpy(p1->process.processDetails->processNameString, "Test C41", MAX_PROC_NAME_LEN);
-    p1->process.processDetails->temp            = 38;
-    p1->process.processDetails->tempTolerance   = 0.3f;
-    p1->process.processDetails->isTempControlled = 1;
-    p1->process.processDetails->isPreferred     = 1;
-    p1->process.processDetails->filmType        = 0;  /* Color */
-    p1->process.processDetails->timeMins        = 20;
-    p1->process.processDetails->timeSecs        = 0;
+    snprintf(p1->process.processDetails->data.processNameString, sizeof(p1->process.processDetails->data.processNameString), "%s", "Test C41");
+    p1->process.processDetails->data.temp            = 38;
+    p1->process.processDetails->data.tempTolerance   = 0.3f;
+    p1->process.processDetails->data.isTempControlled = 1;
+    p1->process.processDetails->data.isPreferred     = 1;
+    p1->process.processDetails->data.filmType        = COLOR_FILM;
+    p1->process.processDetails->data.timeMins        = 20;
+    p1->process.processDetails->data.timeSecs        = 0;
     add_step_to_process(p1, "Pre-wash",  1, 0,  1, 3, 1);
     add_step_to_process(p1, "Developer", 3, 15, 0, 0, 0);
     add_step_to_process(p1, "Bleach",    6, 30, 0, 1, 0);
@@ -134,14 +141,14 @@ void test_generate_data(void)
 
     /* ── Process 2: "Test B&W" (B&W) ── */
     processNode *p2 = (processNode *)allocateAndInitializeNode(PROCESS_NODE);
-    strncpy(p2->process.processDetails->processNameString, "Test B&W", MAX_PROC_NAME_LEN);
-    p2->process.processDetails->temp            = 20;
-    p2->process.processDetails->tempTolerance   = 0.5f;
-    p2->process.processDetails->isTempControlled = 1;
-    p2->process.processDetails->isPreferred     = 1;
-    p2->process.processDetails->filmType        = 1;  /* B&W */
-    p2->process.processDetails->timeMins        = 15;
-    p2->process.processDetails->timeSecs        = 0;
+    snprintf(p2->process.processDetails->data.processNameString, sizeof(p2->process.processDetails->data.processNameString), "%s", "Test B&W");
+    p2->process.processDetails->data.temp            = 20;
+    p2->process.processDetails->data.tempTolerance   = 0.5f;
+    p2->process.processDetails->data.isTempControlled = 1;
+    p2->process.processDetails->data.isPreferred     = 1;
+    p2->process.processDetails->data.filmType        = BLACK_AND_WHITE_FILM;
+    p2->process.processDetails->data.timeMins        = 15;
+    p2->process.processDetails->data.timeSecs        = 0;
     add_step_to_process(p2, "Developer", 8, 0,  0, 0, 1);
     add_step_to_process(p2, "Stop Bath", 1, 0,  0, 1, 0);
     add_step_to_process(p2, "Fixer",     5, 0,  0, 2, 0);
@@ -150,14 +157,14 @@ void test_generate_data(void)
 
     /* ── Process 3: "Quick Test" (B&W, no temp control) ── */
     processNode *p3 = (processNode *)allocateAndInitializeNode(PROCESS_NODE);
-    strncpy(p3->process.processDetails->processNameString, "Quick Test", MAX_PROC_NAME_LEN);
-    p3->process.processDetails->temp            = 24;
-    p3->process.processDetails->tempTolerance   = 1.0f;
-    p3->process.processDetails->isTempControlled = 0;
-    p3->process.processDetails->isPreferred     = 0;
-    p3->process.processDetails->filmType        = 1;
-    p3->process.processDetails->timeMins        = 10;
-    p3->process.processDetails->timeSecs        = 0;
+    snprintf(p3->process.processDetails->data.processNameString, sizeof(p3->process.processDetails->data.processNameString), "%s", "Quick Test");
+    p3->process.processDetails->data.temp            = 24;
+    p3->process.processDetails->data.tempTolerance   = 1.0f;
+    p3->process.processDetails->data.isTempControlled = 0;
+    p3->process.processDetails->data.isPreferred     = 0;
+    p3->process.processDetails->data.filmType        = BLACK_AND_WHITE_FILM;
+    p3->process.processDetails->data.timeMins        = 10;
+    p3->process.processDetails->data.timeSecs        = 0;
     add_step_to_process(p3, "Developer", 5, 0, 0, 0, 1);
     add_step_to_process(p3, "Fixer",     3, 0, 0, 1, 0);
     add_step_to_process(p3, "Rinse",     2, 0, 1, 3, 1);
@@ -231,8 +238,9 @@ int main(int argc, char *argv[])
     /* Create shared keyboard */
     create_keyboard();
 
-    /* Launch the home page */
-    homePage();
+    /* Launch splash screen (play callback → menu) */
+    lv_obj_t *splash = splash_screen_create();
+    lv_scr_load(splash);
 
     /* Load saved configuration */
     readConfigFile(FILENAME_SAVE, false);
@@ -263,8 +271,15 @@ int main(int argc, char *argv[])
     test_suite_settings();
     test_suite_filter();
     test_suite_tools();
+    test_suite_new_settings();
+    test_suite_selfcheck();
+    test_suite_ota();
+    test_suite_ui_profile();
     test_suite_edge_cases();
     test_suite_utilities();
+    test_suite_destroy_and_lifecycle();
+    test_suite_websocket();
+    test_suite_live_sync();
 
     /* ── Summary ── */
     int result = test_summary();

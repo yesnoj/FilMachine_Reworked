@@ -1,0 +1,31 @@
+==========================================================================================
+FilMachine Breakout Board v1.0 — Bill of Materials
+==========================================================================================
+Ref      Qty   Value        Package              Description                         ~Cost
+------------------------------------------------------------------------------------------
+J1       1     2x13F        2.54mm TH            Female pin header 2×13              $0.30
+J2       1     3P 5.08mm    KF301-3P             MOTOR: ENA/IN1/IN2                  $0.20
+J3       1     3P 5.08mm    KF301-3P             TEMP: DATA/3V3/GND                  $0.20
+J4       1     3P 5.08mm    KF301-3P             FLOW: SIG/3V3/GND                   $0.20
+J5       1     4P 5.08mm    KF301-4P             I2C: SDA/SCL/3V3/GND                $0.25
+J6       1     4P 5.08mm    KF301-4P             WATER: MIN/MAX/3V3/GND              $0.25
+J7       1     3P 5.08mm    KF301-3P             HALL: SIG/3V3/GND                   $0.20
+J8       1     1x8M         2.54mm TH            Spare GPIO header 1×8               $0.10
+J10      1     4P 5.08mm    KF301-4P             POWER: 5V/3V3/GND/GND               $0.25
+R1       1     4.7kΩ        0805 SMD             I2C SDA pull-up to 3V3              $0.01
+R2       1     4.7kΩ        0805 SMD             I2C SCL pull-up to 3V3              $0.01
+R3       1     4.7kΩ        0805 SMD             OneWire pull-up to 3V3              $0.01
+C1       1     100nF        0805 SMD             I2C bus decoupling                  $0.01
+C2       1     100nF        0805 SMD             Power rail decoupling               $0.01
+MH1-4    4     M2           2.2mm hole           Mounting holes                      —
+------------------------------------------------------------------------------------------
+TOTAL COMPONENTS: 15                          PCB + components ≈ $2-3 per board
+
+NOTES:
+  - PCB: 70×50mm, 2-layer, 1.6mm FR4, HASL finish
+  - Screw terminals: KF301 or Phoenix MKDS-1.5 series (5.08mm pitch)
+  - SMD passives: 0805 (hand-solderable)
+  - J1 MUST be female header to plug onto J9 male pins on the GUITION board
+  - VERIFY J9 power pin mapping (1,2,14,18,20,22,24,26) against your board!
+    The assumed mapping (3V3/5V/GND) is based on typical convention.
+    Measure with a multimeter before first power-on.

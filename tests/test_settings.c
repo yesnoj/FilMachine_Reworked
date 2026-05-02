@@ -42,7 +42,7 @@ static void test_settings_elements_exist(void)
                          "rotation speed slider should exist");
     TEST_ASSERT_NOT_NULL(gui.page.settings.filmRotationInversionIntervalSlider,
                          "inversion interval slider should exist");
-    TEST_ASSERT_NOT_NULL(gui.page.settings.filmRandomlSlider,
+    TEST_ASSERT_NOT_NULL(gui.page.settings.filmRandomSlider,
                          "random slider should exist");
     TEST_ASSERT_NOT_NULL(gui.page.settings.drainFillTimeSlider,
                          "drain/fill time slider should exist");
@@ -222,9 +222,9 @@ static void test_randomness_slider(void)
     test_printf("         [INFO] Old randomness: %d\n", old_val);
 
     /* Set to 60 (rounds to nearest 20 → 60) */
-    lv_slider_set_value(gui.page.settings.filmRandomlSlider, 60, LV_ANIM_OFF);
+    lv_slider_set_value(gui.page.settings.filmRandomSlider, 60, LV_ANIM_OFF);
     test_pump(50);
-    lv_obj_send_event(gui.page.settings.filmRandomlSlider,
+    lv_obj_send_event(gui.page.settings.filmRandomSlider,
                       LV_EVENT_VALUE_CHANGED, NULL);
     test_pump(100);
 
@@ -233,8 +233,8 @@ static void test_randomness_slider(void)
                    "randomness should be 60 after slider change");
 
     /* Restore */
-    lv_slider_set_value(gui.page.settings.filmRandomlSlider, old_val, LV_ANIM_OFF);
-    lv_obj_send_event(gui.page.settings.filmRandomlSlider,
+    lv_slider_set_value(gui.page.settings.filmRandomSlider, old_val, LV_ANIM_OFF);
+    lv_obj_send_event(gui.page.settings.filmRandomSlider,
                       LV_EVENT_VALUE_CHANGED, NULL);
     test_pump(100);
 
@@ -373,7 +373,67 @@ static void test_multi_rinse_time_slider(void)
     TEST_END();
 }
 
-/* ── Test 12: Switch back to processes for next tests ── */
+/* ── Test 12: Default settings values after initGlobals ── */
+static void test_default_settings_values(void)
+{
+    TEST_BEGIN("Settings — default values verified");
+
+    struct machineSettings *s = &gui.page.settings.settingsParams;
+
+    /* According to requirements, after initGlobals() these should be:
+     * tankSize == 2 (Medium)
+     * pumpSpeed == 30
+     * chemContainerMl == 500
+     * wbContainerMl == 2000
+     * drainFillOverlapSetpoint == 100 */
+
+    test_printf("         [INFO] tankSize=%d, pumpSpeed=%d, chemMl=%d, wbMl=%d, overlap=%d\n",
+                s->tankSize, s->pumpSpeed, s->chemContainerMl, s->wbContainerMl,
+                s->drainFillOverlapSetpoint);
+
+    TEST_ASSERT_EQ((int)s->tankSize, 2,
+                   "tankSize should default to 2 (Medium)");
+    TEST_ASSERT_EQ((int)s->pumpSpeed, 30,
+                   "pumpSpeed should default to 30");
+    TEST_ASSERT_EQ((int)s->chemContainerMl, 500,
+                   "chemContainerMl should default to 500");
+    TEST_ASSERT_EQ((int)s->wbContainerMl, 2000,
+                   "wbContainerMl should default to 2000");
+    TEST_ASSERT_EQ((int)s->drainFillOverlapSetpoint, 100,
+                   "drainFillOverlapSetpoint should default to 100");
+
+    TEST_END();
+}
+
+
+/* ── Test 13: Temperature calibration offset is accessible ── */
+static void test_tempCalibOffset_accessible(void)
+{
+    TEST_BEGIN("Settings — tempCalibOffset field is accessible");
+
+    struct machineSettings *s = &gui.page.settings.settingsParams;
+    int8_t old_offset = s->tempCalibOffset;
+
+    /* Verify we can set and read the offset */
+    s->tempCalibOffset = -20;
+    test_printf("         [INFO] Set tempCalibOffset to -20\n");
+    TEST_ASSERT_EQ((int)s->tempCalibOffset, -20,
+                   "tempCalibOffset should be set to -20");
+
+    /* Set a positive value */
+    s->tempCalibOffset = 10;
+    test_printf("         [INFO] Set tempCalibOffset to 10\n");
+    TEST_ASSERT_EQ((int)s->tempCalibOffset, 10,
+                   "tempCalibOffset should be set to 10");
+
+    /* Restore original */
+    s->tempCalibOffset = old_offset;
+
+    TEST_END();
+}
+
+
+/* ── Test 14: Switch back to processes for next tests ── */
 static void test_settings_return_to_processes(void)
 {
     TEST_BEGIN("Settings — return to Processes tab");
@@ -405,5 +465,7 @@ void test_suite_settings(void)
     test_autostart_switch();
     test_drain_fill_slider();
     test_multi_rinse_time_slider();
+    test_default_settings_values();
+    test_tempCalibOffset_accessible();
     test_settings_return_to_processes();
 }
