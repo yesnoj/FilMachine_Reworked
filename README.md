@@ -599,28 +599,28 @@ All external peripherals connect through the board's 2×13 Expand IO header (JP1
 
 | JP1 Pin | GPIO | Function |
 |---------|------|----------|
-| 1, 3 | — | VCC 3.3V (2 pins) |
-| 2, 4 | — | VCC 5V (2 pins) |
-| 5, 6, 16 | — | GND (3 pins) |
-| 7 | 52 | Flow meter (YF-S201) |
-| 8 | 33 | Motor IN1 (H-bridge ch.A direction A) |
-| 9 | 51 | Pump ENA (LEDC PWM speed) |
-| 10 | 31 | Hall sensor (KY-003) |
-| 11 | 50 | Pump IN2 (H-bridge ch.B direction B) |
-| 12 | 30 | Water level max |
-| 13 | 49 | Pump IN1 (H-bridge ch.B direction A) |
-| 14 | 29 | Water level min (XKC-Y21) |
-| 15 | 35 | DS18B20 OneWire (temperature) |
-| 17 | 34 | Motor IN2 (H-bridge ch.A direction B) |
-| 18 | — | ESP_3V3 |
-| 19 | 32 | Motor ENA (LEDC PWM speed) |
-| 20 | — | C6_U0RXD (ESP32-C6) |
-| 21 | 28 | Test / spare |
-| 22 | — | C6_U0TXD (ESP32-C6) |
-| 23 | 7 | I2C SDA (shared bus) |
-| 24 | — | C6_IO9 (ESP32-C6) |
-| 25 | 8 | I2C SCL (shared bus) |
-| 26 | — | C6_CHIP_PU (ESP32-C6) |
+| 1, 3 | — | VCC 3.3V output (2 pins) — (power) |
+| 2, 4 | — | VCC 5V output (2 pins) — (power) |
+| 5, 6, 16 | — | GND (3 pins) — (power) |
+| 7 | 52 | Flow meter (YF-S201) — (used in code) |
+| 8 | 33 | Motor IN1, H-bridge ch.A direction A — (used in code) |
+| 9 | 51 | Pump ENA, LEDC PWM speed — (used in code) |
+| 10 | 31 | Hall sensor (KY-003) — (used in code) |
+| 11 | 50 | Pump IN2, H-bridge ch.B direction B — (used in code) |
+| 12 | 30 | Water level max — (used in code) |
+| 13 | 49 | Pump IN1, H-bridge ch.B direction A — (used in code) |
+| 14 | 29 | Water level min (XKC-Y21) — (used in code) |
+| 15 | 35 | DS18B20 OneWire, 2 sensors on shared bus — (used in code) |
+| 17 | 34 | Motor IN2, H-bridge ch.A direction B — (used in code) |
+| 18 | — | ESP_3V3 — (power, not used in code) |
+| 19 | 32 | Motor ENA, LEDC PWM speed — (used in code) |
+| 20 | — | C6_U0RXD (ESP32-C6) — (not used in code) |
+| 21 | 28 | Test / spare — (not used in code) |
+| 22 | — | C6_U0TXD (ESP32-C6) — (not used in code) |
+| 23 | 7 | I2C SDA, shared bus: touch + MCP23017 — (used in code) |
+| 24 | — | C6_IO9 (ESP32-C6) — (not used in code) |
+| 25 | 8 | I2C SCL, shared bus: touch + MCP23017 — (used in code) |
+| 26 | — | C6_CHIP_PU (ESP32-C6) — (not used in code) |
 
 All 12 P4 GPIO pins on JP1 are allocated — GPIO 28 is the only spare.
 
