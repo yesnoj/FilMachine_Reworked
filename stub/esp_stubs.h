@@ -109,7 +109,7 @@ static inline esp_err_t esp_lcd_new_i80_bus(const void *c, void **h) { return ES
 static inline esp_err_t esp_lcd_new_panel_io_i80(void *b, const void *c, void **h) { return ESP_OK; }
 static inline esp_err_t esp_lcd_panel_draw_bitmap(void *h, int x1, int y1, int x2, int y2, const void *d) { return ESP_OK; }
 
-/* I2C */
+/* I2C — Legacy API (kept for backward compatibility) */
 #define I2C_MODE_MASTER 0
 typedef int i2c_port_t;
 #define I2C_NUM_0 0
@@ -129,7 +129,7 @@ typedef struct {
 static inline esp_err_t i2c_param_config(int p, const i2c_config_t *c) { return ESP_OK; }
 static inline esp_err_t i2c_driver_install(int p, int m, int rx, int tx, int f) { return ESP_OK; }
 
-/* I2C command-level API */
+/* I2C — Legacy command-level API */
 typedef void* i2c_cmd_handle_t;
 static inline i2c_cmd_handle_t i2c_cmd_link_create(void) { return NULL; }
 static inline void i2c_cmd_link_delete(i2c_cmd_handle_t cmd) { (void)cmd; }
@@ -141,6 +141,43 @@ static inline esp_err_t i2c_master_read_byte(i2c_cmd_handle_t cmd, uint8_t *data
     return ESP_OK;
 }
 static inline esp_err_t i2c_master_cmd_begin(int port, i2c_cmd_handle_t cmd, uint32_t ticks) { return ESP_OK; }
+
+/* I2C — New Master API (ESP-IDF 5.x, used by ESP32-P4 path) */
+typedef void* i2c_master_bus_handle_t;
+typedef void* i2c_master_dev_handle_t;
+#define I2C_CLK_SRC_DEFAULT 0
+#define I2C_ADDR_BIT_LEN_7  0
+typedef struct {
+    int i2c_port;
+    int sda_io_num;
+    int scl_io_num;
+    int clk_source;
+    int glitch_ignore_cnt;
+    struct { bool enable_internal_pullup; } flags;
+} i2c_master_bus_config_t;
+typedef struct {
+    int dev_addr_length;
+    uint16_t device_address;
+    uint32_t scl_speed_hz;
+} i2c_device_config_t;
+static inline esp_err_t i2c_new_master_bus(const i2c_master_bus_config_t *c, i2c_master_bus_handle_t *h) {
+    *h = (void*)1; /* non-NULL dummy handle */
+    return ESP_OK;
+}
+static inline esp_err_t i2c_master_bus_add_device(i2c_master_bus_handle_t bus, const i2c_device_config_t *c, i2c_master_dev_handle_t *h) {
+    (void)bus;
+    *h = (void*)1; /* non-NULL dummy handle */
+    return ESP_OK;
+}
+static inline esp_err_t i2c_master_transmit(i2c_master_dev_handle_t dev, const uint8_t *data, size_t len, int timeout_ms) {
+    (void)dev; (void)data; (void)len; (void)timeout_ms;
+    return ESP_OK;
+}
+static inline esp_err_t i2c_master_transmit_receive(i2c_master_dev_handle_t dev, const uint8_t *tx, size_t tx_len, uint8_t *rx, size_t rx_len, int timeout_ms) {
+    (void)dev; (void)tx; (void)tx_len; (void)timeout_ms;
+    if (rx && rx_len > 0) memset(rx, 0, rx_len);
+    return ESP_OK;
+}
 
 /* SPI / SD Card */
 #define SPI3_HOST 2
