@@ -567,6 +567,12 @@ The version displayed in Tools → Software version is read at runtime from the 
 
 ## Hardware Specifications
 
+### System Architecture
+
+<p align="center">
+  <img src="docs/hardware_architecture.svg" alt="FilMachine Hardware Architecture" width="100%">
+</p>
+
 ### Target Board
 
 **Guition JC4880P433** (`-DBOARD_JC4880P433`) — the only supported hardware board.
