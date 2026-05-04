@@ -1,8 +1,8 @@
 # FilMachine — Automated Film Development Machine
 
-FilMachine is an automated film processing machine designed for photographic film development. It handles the entire process: chemical baths, water rinses, temperature regulation, and motor-driven film agitation — all controlled through a 3.5" color touchscreen display.
+FilMachine is an automated film processing machine designed for photographic film development. It handles the entire process: chemical baths, water rinses, temperature regulation, and motor-driven film agitation — all controlled through a 4.3" color touchscreen display.
 
-The project includes a **desktop simulator** (SDL2 + LVGL) that reproduces the full touchscreen UI on macOS/Linux, enabling rapid development and testing without physical hardware, plus an **automated test suite** with 180 tests. A **Flutter companion app** connects via WebSocket and provides full remote control from any mobile device on the same network.
+The project includes a **desktop simulator** (SDL2 + LVGL) that reproduces the full touchscreen UI on macOS/Linux, enabling rapid development and testing without physical hardware, plus an **automated test suite** (19 suites). A **Flutter companion app** connects via WebSocket and provides full remote control from any mobile device on the same network.
 
 ---
 
@@ -81,7 +81,7 @@ FilMachine_Reworked/
 │   ├── FilMachine.c               #   ESP32 entry point — board-conditional display/touch init
 │   ├── accessories.c              #   Utilities — linked lists, deep copy, config I/O, keyboard
 │   ├── ota_update.c               #   OTA firmware update (SD card + Wi-Fi web server)
-│   ├── sensors.c                  #   Additional sensors (flow meter, water level, hall effect)
+│   ├── ws_server.c                #   WebSocket server for Flutter companion app
 │   └── ui_profile.c               #   Centralized UI layout constants (800×480)
 │
 ├── c_pages/                       # UI pages (screens)
@@ -108,18 +108,20 @@ FilMachine_Reworked/
 │   ├── element_otaWifiPopup.c     #   Wi-Fi OTA update popup (IP + PIN + progress)
 │   └── element_wifiPopup.c       #   Wi-Fi connection popup (scan, connect, status)
 │
-├── c_fonts/                       # Custom icon fonts (5 sizes: 15/20/30/40/100px)
-│   │                              #   + 8 custom splash title fonts (size 48px each)
-├── drivers/                       # Custom peripheral drivers
+├── c_fonts/                       # Custom icon fonts (7 sizes: 15/20/30/40/50/60/100px)
+│   │                              #   + 8 custom splash title fonts (48px) + Montserrat 64
+├── drivers/                       # Custom peripheral drivers (ESP-IDF compatible)
 │   ├── include/                   #   Driver headers (mcp23017.h, ds18b20.h, pca9685.h)
 │   ├── mcp23017.c                 #   I2C 16-bit I/O expander (Adafruit solenoid driver)
-│   ├── pca9685.c                  #   I2C PWM controller (legacy, kept for reference)
+│   ├── pca9685.c                  #   I2C 12-bit PWM controller (legacy, kept for reference)
 │   ├── ds18b20.c                  #   OneWire temperature sensor (shared bus)
 │   └── sensors.c                  #   Flow meter, water level, hall effect sensors
 │
 ├── components/                    # ESP32-P4 specific hardware drivers
 │   ├── st7701_lcd/                #   ST7701S MIPI-DSI LCD driver (480×800)
-│   └── ppa_engine/                #   PPA hardware 2D accelerator (rotate, scale, fill, blend)
+│   ├── ppa_engine/                #   PPA hardware 2D accelerator (rotate, scale, fill, blend)
+│   ├── driver/                    #   ESP-IDF driver compatibility shims
+│   └── espressif__esp_lcd_touch/  #   Touch panel abstraction layer
 │
 ├── src/
 │   └── main.c                     # Simulator entry point (SDL2 display, main loop,
@@ -159,25 +161,21 @@ FilMachine_Reworked/
 ├── lvgl_config/
 │   └── lv_conf.h                  # LVGL configuration (RGB565, 256KB heap, dark theme)
 │
-├── sd/                            # SD card simulation directory
-│   ├── FilMachine.cfg             #   Binary config (processes + settings + stats)
-│   ├── FilMachine_Backup.cfg      #   Backup copy (created by Export)
-│   └── FilMachine.json            #   Human-readable JSON export
-│
-├── scripts/
-│   └── genFilMachineCFG.py        # Config generator (realistic film recipes)
-├── resources/                     # Hardware datasheets & font usage docs
-│
-├── CMakeLists.txt                 # Dual-target build (ESP-IDF P4 + simulator/tests)
-├── sdkconfig.defaults             # ESP-IDF shared defaults
-├── sdkconfig.defaults.esp32p4     # ESP-IDF defaults for ESP32-P4 target
-├── setup.sh                       # Project initialization script
-├── flash.sh                       # Flash firmware to ESP32 board
 ├── boards/                        # Board-specific hardware definitions
 │   ├── board.h                    #   Board selector (includes correct board header)
 │   ├── board_jc4880p433.h         #   JC4880P433 pin assignments, peripherals, H-bridge config
 │   └── board_simulator.h          #   Simulator stubs (matching pin constants)
-└── wiring_philosophy.md           # Hardware design philosophy
+│
+├── scripts/
+│   └── genFilMachineCFG.py        # Config generator (realistic film recipes)
+│
+├── CMakeLists.txt                 # Dual-target build (ESP-IDF P4 + simulator/tests)
+├── partitions.csv                 # Custom OTA partition table (16 MB flash)
+├── sdkconfig.defaults             # ESP-IDF shared defaults
+├── sdkconfig.defaults.esp32p4     # ESP-IDF defaults for ESP32-P4 target
+├── setup.sh                       # Project initialization script
+├── flash.sh                       # Flash firmware to ESP32 board
+└── flash_p4.sh                    # Flash helper for ESP32-P4 target
 ```
 
 ---
@@ -224,7 +222,7 @@ Requires the [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/) t
 **Important:** run `idf.py` from the **project root**, not from `build800/`.
 
 ```bash
-cd FilMachine_Simulator_v2
+cd FilMachine_Reworked
 . $HOME/esp/esp-idf-v5.5/export.sh     # Must be ESP-IDF 5.5.x or later
 
 # First-time setup: set target to esp32p4 (creates sdkconfig from defaults)
@@ -595,31 +593,36 @@ The JC4880P433's physical display is 480×800 in portrait orientation. FilMachin
 
 Touch coordinates from the GT911 (which reports in 480×800 portrait) are inverse-mapped back to 800×480 LVGL coordinates. All of this is transparent to the UI code.
 
-### Expand IO Header (J9) — JC4880P433 Pin Assignments
+### Expand IO Header (JP1) — JC4880P433 Pin Assignments
 
-All external peripherals connect through the board's 2×13 Expand IO header (J9):
+All external peripherals connect through the board's 2×13 Expand IO header (JP1):
 
-| J9 Pin | GPIO | Function |
-|--------|------|----------|
-| 1 | — | VCC 3.3V |
-| 2 | — | VCC 5V |
-| 7 | 33 | Motor IN1 (H-bridge direction A) |
-| 9 | 34 | Motor IN2 (H-bridge direction B) |
-| 11 | 35 | DS18B20 OneWire (temperature) |
-| 12 | 20 | Hall sensor (KY-003) |
-| 13 | 36 | Flow meter (YF-S201) |
-| 14 | — | GND |
-| 15 | 37 | Water level min (XKC-Y21) |
-| 16 | 38 | Water level max |
-| 17 | 24 | Motor ENA (LEDC PWM speed) |
+| JP1 Pin | GPIO | Function |
+|---------|------|----------|
+| 1, 3 | — | VCC 3.3V (2 pins) |
+| 2, 4 | — | VCC 5V (2 pins) |
+| 5, 6, 16 | — | GND (3 pins) |
+| 7 | 52 | Flow meter (YF-S201) |
+| 8 | 33 | Motor IN1 (H-bridge ch.A direction A) |
+| 9 | 51 | Pump ENA (LEDC PWM speed) |
+| 10 | 31 | Hall sensor (KY-003) |
+| 11 | 50 | Pump IN2 (H-bridge ch.B direction B) |
+| 12 | 30 | Water level max |
+| 13 | 49 | Pump IN1 (H-bridge ch.B direction A) |
+| 14 | 29 | Water level min (XKC-Y21) |
+| 15 | 35 | DS18B20 OneWire (temperature) |
+| 17 | 34 | Motor IN2 (H-bridge ch.A direction B) |
+| 18 | — | ESP_3V3 |
+| 19 | 32 | Motor ENA (LEDC PWM speed) |
+| 20 | — | C6_U0RXD (ESP32-C6) |
+| 21 | 28 | Test / spare |
+| 22 | — | C6_U0TXD (ESP32-C6) |
 | 23 | 7 | I2C SDA (shared bus) |
+| 24 | — | C6_IO9 (ESP32-C6) |
 | 25 | 8 | I2C SCL (shared bus) |
+| 26 | — | C6_CHIP_PU (ESP32-C6) |
 
-| 4 | 0 | Pump IN1 (H-bridge ch.B direction A) |
-| 3 | 1 | Pump IN2 (H-bridge ch.B direction B) |
-| 6 | 2 | Pump ENA (LEDC PWM speed) |
-
-Spare pins on header: GPIO 3, 4, 6, 22.
+All 12 P4 GPIO pins on JP1 are allocated — GPIO 28 is the only spare.
 
 ### Shared Peripherals (all boards)
 
@@ -695,7 +698,7 @@ make -j$(sysctl -n hw.ncpu) filmachine_sim # Build simulator (parallel)
 
 # ── Tests ────────────────────────────────────────────────
 make -j$(sysctl -n hw.ncpu) filmachine_test  # Build tests (parallel)
-./filmachine_test                            # Run all 180 tests
+./filmachine_test                            # Run all 19 test suites
 
 # ── Firmware (ESP32-P4) ──────────────────────────────────
 cd ~/Documents/GitHub/FilMachine_Reworked       # Must be in project root!

@@ -87,25 +87,25 @@
 #define AUDIO_PA_PIN                11      /* Power Amplifier enable (active high) */
 
 /* ═══════════════════════════════════════════════
- * Motor — DC motor with H-bridge
- * All pins routed via the Expand IO header (J9).
+ * Motor — DC motor with H-bridge (DBH-12V channel A)
+ * All pins routed via the Expand IO header (JP1).
  * ═══════════════════════════════════════════════ */
 #define MOTOR_PIN_NUMBER            3
-#define MOTOR_ENA_PIN               24      /* PWM speed control — J9 pin 17 */
-#define MOTOR_IN1_PIN               33      /* H-bridge direction A — J9 pin 7 */
-#define MOTOR_IN2_PIN               34      /* H-bridge direction B — J9 pin 9 */
+#define MOTOR_ENA_PIN               32      /* PWM speed control — JP1 pin 19 */
+#define MOTOR_IN1_PIN               33      /* H-bridge direction A — JP1 pin 8 */
+#define MOTOR_IN2_PIN               34      /* H-bridge direction B — JP1 pin 17 */
 
 /* ═══════════════════════════════════════════════
  * Temperature — DS18B20 OneWire
  * ═══════════════════════════════════════════════ */
-#define TEMPERATURE_BUS_PIN         35      /* OneWire data — J9 pin 11 */
+#define TEMPERATURE_BUS_PIN         35      /* OneWire data — JP1 pin 15 */
 #define TEMPERATURE_SENSOR_BATH     0
 #define TEMPERATURE_SENSOR_CHEMICAL 1
 
 /* ═══════════════════════════════════════════════
  * Solenoid driver — Adafruit I2C 8-Ch Solenoid Driver (#6318)
  * MCP23017-based, I2C address 0x20, on shared bus (GPIO 7/8).
- * Connected via J9 pins 23 (SDA) / 25 (SCL) + 3.3V/GND.
+ * Connected via JP1 pins 23 (SDA) / 25 (SCL) + 3.3V/GND.
  * Drop-in replacement for discrete relay board — same chip,
  * same address, same register layout.
  * ═══════════════════════════════════════════════ */
@@ -141,26 +141,26 @@
  * board works that way, swap PUMP_ENA_PIN with PUMP_IN1/IN2_PIN
  * and adjust pump_run() in accessories.c accordingly.
  *
- * Pins allocated from J9 spare GPIOs.
+ * Pins allocated from JP1 Expand IO header.
  * ═══════════════════════════════════════════════ */
 #define HAS_PUMP_HBRIDGE            1
-#define PUMP_IN1_PIN                0       /* J9 pin 4 — pump direction A */
-#define PUMP_IN2_PIN                1       /* J9 pin 3 — pump direction B */
-#define PUMP_ENA_PIN                2       /* J9 pin 6 — pump PWM speed  */
+#define PUMP_IN1_PIN                49      /* JP1 pin 13 — pump direction A */
+#define PUMP_IN2_PIN                50      /* JP1 pin 11 — pump direction B */
+#define PUMP_ENA_PIN                51      /* JP1 pin 9  — pump PWM speed  */
 
 /* ═══════════════════════════════════════════════
  * Additional sensors
- * All pins routed via the Expand IO header (J9).
+ * All pins routed via the Expand IO header (JP1).
  * ═══════════════════════════════════════════════ */
 #define HAS_FLOW_METER              1
-#define FLOW_METER_PIN              36      /* YF-S201 pulse output — J9 pin 13 */
+#define FLOW_METER_PIN              52      /* YF-S201 pulse output — JP1 pin 7 */
 
 #define HAS_WATER_LEVEL_SENSOR      1
-#define WATER_LEVEL_PIN             37      /* XKC-Y21 (min level) — J9 pin 15 */
-#define WATER_LEVEL_2_PIN           38      /* Second level (max) — J9 pin 16 */
+#define WATER_LEVEL_PIN             29      /* XKC-Y21 (min level) — JP1 pin 14 */
+#define WATER_LEVEL_2_PIN           30      /* Second level (max) — JP1 pin 12 */
 
 #define HAS_HALL_SENSOR             1
-#define HALL_SENSOR_PIN             20      /* KY-003 / A3144 — J9 pin 12 */
+#define HALL_SENSOR_PIN             31      /* KY-003 / A3144 — JP1 pin 10 */
 
 /* ═══════════════════════════════════════════════
  * Wi-Fi — ESP32-C6 companion chip via SDIO (ESP-Hosted)
@@ -181,14 +181,14 @@
 #define WIFI_C6_RESET_PIN           54      /* P4 GPIO to reset ESP32-C6 */
 
 /* ═══════════════════════════════════════════════
- * Spare pins on Expand IO header (J9) — available for future use:
- *   GPIO 3 (pin 5), 4 (pin 8), 6 (pin 10), 22 (pin 21)
- *   (GPIO 0,1,2 now used by pump H-bridge)
+ * Spare pins on Expand IO header (JP1):
+ *   GPIO 28 (pin 21) — currently assigned as TEST_PIN
+ *   All other JP1 GPIO pins are allocated.
  *
- * Not on header but free on ESP32-P4:
- *   GPIO 25-32, 45-47, 49-53
+ * Not on JP1 header but free on ESP32-P4:
+ *   GPIO 20, 21, 22, 25, 26, 27, 36, 37, 38, 45, 46, 47, 53
  * ═══════════════════════════════════════════════ */
 
-#define TEST_PIN                    21      /* J9 pin 19 — spare on header */
+#define TEST_PIN                    28      /* JP1 pin 21 — spare on header */
 
 #endif /* BOARD_JC4880P433_H */
