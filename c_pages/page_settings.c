@@ -38,11 +38,12 @@ uint8_t analogVal_rotationSpeedPercent;
 #define Y_DRAIN_FILL                 (Y_FILM_RANDOM + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
 #define Y_MULTI_RINSE                (Y_DRAIN_FILL + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
 #define Y_PUMP_SPEED                 (Y_MULTI_RINSE + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
+#define Y_INVERT_PUMP                (Y_PUMP_SPEED + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
 #if defined(DISPLAY_DRIVER_ST7701)
-#define Y_BRIGHTNESS                 (Y_PUMP_SPEED + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
+#define Y_BRIGHTNESS                 (Y_INVERT_PUMP + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #define Y_PERSISTENT_ALARM           (Y_BRIGHTNESS + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
 #else
-#define Y_PERSISTENT_ALARM           (Y_PUMP_SPEED + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
+#define Y_PERSISTENT_ALARM           (Y_INVERT_PUMP + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #endif
 #define Y_TANK_SIZE                  (Y_PERSISTENT_ALARM + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #define Y_CHEM_CONTAINER_ML          (Y_TANK_SIZE + SETTINGS_H_ROW + SETTINGS_GAP_Y)
@@ -106,6 +107,9 @@ void event_settingPopupMBox(lv_event_t * e){
     if(data == gui.page.settings.pumpSpeedLabel) {
         messagePopupCreate(messagePopupDetailTitle_text,pumpSpeedAlertMBox_text,NULL,NULL,NULL);
     }
+    if(data == gui.page.settings.invertPumpLabel) {
+        messagePopupCreate(messagePopupDetailTitle_text,invertPumpAlertMBox_text,NULL,NULL,NULL);
+    }
     if(data == gui.page.settings.brightnessLabel) {
         messagePopupCreate(messagePopupDetailTitle_text,brightnessAlertMBox_text,NULL,NULL,NULL);
     }
@@ -140,7 +144,7 @@ void event_settings_handler(lv_event_t * e)
 
     /*Do nothing if the container was clicked*/
 
-    if(act_cb == cont && cont != gui.page.settings.waterInletSwitch && cont != gui.page.settings.tempSensorTuneButton && cont != gui.page.settings.filmRotationSpeedSlider && cont != gui.page.settings.filmRotationInversionIntervalSlider && cont != gui.page.settings.filmRandomSlider && cont != gui.page.settings.persistentAlarmSwitch && cont != gui.page.settings.autostartSwitch && cont != gui.page.settings.drainFillTimeSlider && cont != gui.page.settings.multiRinseTimeSlider && cont != gui.page.settings.tankSizeTextArea && cont != gui.page.settings.pumpSpeedSlider && cont != gui.page.settings.brightnessSlider && cont != gui.page.settings.chemContainerMlTextArea && cont != gui.page.settings.wbContainerMlTextArea && cont != gui.page.settings.chemVolumeTextArea && cont != gui.page.settings.splashButton && cont != gui.page.settings.wifiButton && cont != gui.page.settings.resetButton)
+    if(act_cb == cont && cont != gui.page.settings.waterInletSwitch && cont != gui.page.settings.tempSensorTuneButton && cont != gui.page.settings.filmRotationSpeedSlider && cont != gui.page.settings.filmRotationInversionIntervalSlider && cont != gui.page.settings.filmRandomSlider && cont != gui.page.settings.persistentAlarmSwitch && cont != gui.page.settings.invertPumpSwitch && cont != gui.page.settings.autostartSwitch && cont != gui.page.settings.drainFillTimeSlider && cont != gui.page.settings.multiRinseTimeSlider && cont != gui.page.settings.tankSizeTextArea && cont != gui.page.settings.pumpSpeedSlider && cont != gui.page.settings.brightnessSlider && cont != gui.page.settings.chemContainerMlTextArea && cont != gui.page.settings.wbContainerMlTextArea && cont != gui.page.settings.chemVolumeTextArea && cont != gui.page.settings.splashButton && cont != gui.page.settings.wifiButton && cont != gui.page.settings.resetButton)
       return;
 
     if(act_cb == gui.page.settings.tempUnitCelsiusRadioButton || act_cb == gui.page.settings.tempUnitFahrenheitRadioButton){
@@ -241,6 +245,14 @@ void event_settings_handler(lv_event_t * e)
       if(code == LV_EVENT_VALUE_CHANGED) {
           LV_LOG_USER("Persistent Alarm: %s", lv_obj_has_state(act_cb, LV_STATE_CHECKED) ? "On" : "Off");
           gui.page.settings.settingsParams.isPersistentAlarm = lv_obj_has_state(act_cb, LV_STATE_CHECKED);
+          qSysAction( SAVE_PROCESS_CONFIG );
+        }
+    }
+
+    if(act_cb == gui.page.settings.invertPumpSwitch){
+      if(code == LV_EVENT_VALUE_CHANGED) {
+          LV_LOG_USER("Invert Pump: %s", lv_obj_has_state(act_cb, LV_STATE_CHECKED) ? "On" : "Off");
+          gui.page.settings.settingsParams.invertPump = lv_obj_has_state(act_cb, LV_STATE_CHECKED);
           qSysAction( SAVE_PROCESS_CONFIG );
         }
     }
@@ -411,6 +423,7 @@ void event_settings_handler(lv_event_t * e)
             p->multiRinseTime = 60;
             p->tankSize = 2;               /* Medium */
             p->pumpSpeed = 30;
+            p->invertPump = false;
             p->brightness = 100;
             p->dimTimeout = 30;
             p->chemContainerMl = 500;
@@ -778,6 +791,30 @@ gui.page.settings.pumpSpeedContainer = lv_obj_create(parent);
         lv_obj_add_event_cb(gui.page.settings.pumpSpeedSlider, event_settings_handler, LV_EVENT_RELEASED, gui.page.settings.pumpSpeedValueLabel);
         lv_label_set_text_fmt(gui.page.settings.pumpSpeedValueLabel, "%d%%", gui.page.settings.settingsParams.pumpSpeed);
 
+/* ── Invert Pump switch ── */
+  gui.page.settings.invertPumpContainer = lv_obj_create(parent);
+  lv_obj_align(gui.page.settings.invertPumpContainer, LV_ALIGN_TOP_LEFT, SETTINGS_LEFT_X, Y_INVERT_PUMP);
+  lv_obj_set_size(gui.page.settings.invertPumpContainer, UI_SETTINGS->row_w, SETTINGS_H_ROW);
+  lv_obj_remove_flag(gui.page.settings.invertPumpContainer, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_style_border_opa(gui.page.settings.invertPumpContainer, LV_OPA_TRANSP, 0);
+
+        gui.page.settings.invertPumpLabel = lv_label_create(gui.page.settings.invertPumpContainer);
+        lv_label_set_text(gui.page.settings.invertPumpLabel, invertPump_text);
+        lv_obj_set_style_text_font(gui.page.settings.invertPumpLabel, UI_SETTINGS->label_font, 0);
+        lv_obj_align(gui.page.settings.invertPumpLabel, LV_ALIGN_LEFT_MID, UI_SETTINGS->row_label_x, UI_SETTINGS->row_label_y);
+
+        createQuestionMark(gui.page.settings.invertPumpContainer, gui.page.settings.invertPumpLabel, event_settingPopupMBox, UI_SETTINGS->help_icon_x, UI_SETTINGS->help_icon_y);
+
+        gui.page.settings.invertPumpSwitch = lv_switch_create(gui.page.settings.invertPumpContainer);
+        lv_obj_set_size(gui.page.settings.invertPumpSwitch, UI_SETTINGS->toggle_switch_w, UI_SETTINGS->toggle_switch_h);
+        lv_obj_add_event_cb(gui.page.settings.invertPumpSwitch, event_settings_handler, LV_EVENT_VALUE_CHANGED, gui.page.settings.invertPumpSwitch);
+        lv_obj_align(gui.page.settings.invertPumpSwitch, LV_ALIGN_RIGHT_MID, UI_SETTINGS->switch_x, UI_SETTINGS->switch_y);
+        lv_obj_set_style_bg_color(gui.page.settings.invertPumpSwitch, lv_palette_darken(LV_PALETTE_GREY, 3), LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_color(gui.page.settings.invertPumpSwitch, lv_color_hex(ORANGE), LV_PART_KNOB | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_color(gui.page.settings.invertPumpSwitch, lv_color_hex(ORANGE_DARK), LV_PART_INDICATOR | LV_STATE_CHECKED);
+        if (gui.page.settings.settingsParams.invertPump)
+            lv_obj_add_state(gui.page.settings.invertPumpSwitch, LV_STATE_CHECKED);
+
 /* ── Brightness slider ── */
 #if defined(DISPLAY_DRIVER_ST7701)
 gui.page.settings.brightnessContainer = lv_obj_create(parent);
@@ -1073,6 +1110,11 @@ void refreshSettingsUI(void)
         lv_obj_add_state(gui.page.settings.persistentAlarmSwitch, LV_STATE_CHECKED);
     else
         lv_obj_remove_state(gui.page.settings.persistentAlarmSwitch, LV_STATE_CHECKED);
+
+    if (p->invertPump)
+        lv_obj_add_state(gui.page.settings.invertPumpSwitch, LV_STATE_CHECKED);
+    else
+        lv_obj_remove_state(gui.page.settings.invertPumpSwitch, LV_STATE_CHECKED);
 
     if (p->isProcessAutostart)
         lv_obj_add_state(gui.page.settings.autostartSwitch, LV_STATE_CHECKED);

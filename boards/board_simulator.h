@@ -94,13 +94,13 @@
 /* ═══════════════════════════════════════════════
  * Relay board — stubs (printf only)
  * ═══════════════════════════════════════════════ */
-#define RELAY_NUMBER                6       /* Channels 0-5; pump moved to H-bridge */
-#define HEATER_RLY                  0
-#define C1_RLY                      1
-#define C2_RLY                      2
-#define C3_RLY                      3
-#define WB_RLY                      4
-#define WASTE_RLY                   5
+#define RELAY_NUMBER                5       /* Valve channels on MCP23017 port A (pins 0-4) */
+#define C1_RLY                      0
+#define C2_RLY                      1
+#define C3_RLY                      2
+#define WB_RLY                      3
+#define WASTE_RLY                   4
+#define HEATER_RLY                  7       /* Port A pin 7 — drives external relay for heater */
 #define PUMP_IN_RLY                 254     /* Logical: pump forward (filling) */
 #define PUMP_OUT_RLY                253     /* Logical: pump reverse (draining) */
 #define INVALID_RELAY               255

@@ -1,0 +1,242 @@
+{
+  "settingsParams": {
+    "tempUnit": 0,
+    "waterInlet": 1,
+    "calibratedTemp": 20,
+    "filmRotationSpeedSetpoint": 50,
+    "rotationIntervalSetpoint": 10,
+    "randomSetpoint": 20,
+    "isPersistentAlarm": 1,
+    "isProcessAutostart": 0,
+    "drainFillOverlapSetpoint": 100,
+    "multiRinseTime": 60,
+    "tankSize": 2,
+    "pumpSpeed": 30,
+    "chemContainerMl": 500,
+    "wbContainerMl": 2000,
+    "chemistryVolume": 2,
+    "tempCalibOffset": 0,
+    "splashRandom": 0,
+    "splashPalette": 3,
+    "splashShapeStyle": 0,
+    "splashComplexity": 40,
+    "splashSeed": 0,
+    "splashDefault": 1,
+    "wifiEnabled": 0,
+    "wifiSSID": "",
+    "wifiPassword": "",
+    "brightness": 100,
+    "dimTimeout": 30,
+    "invertPump": 0
+  },
+  "processes": [
+    {
+      "processNameString": "gNISKDqQoD",
+      "temp": 39,
+      "tempTolerance": 0.9,
+      "isTempControlled": 0,
+      "isPreferred": 0,
+      "filmType": 1,
+      "timeMins": 48,
+      "timeSecs": 21,
+      "steps": [
+        {
+          "stepNameString": "yQMZuPjQEifmgrOCl",
+          "timeMins": 7,
+          "timeSecs": 1,
+          "type": 1,
+          "source": 1,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "JcHTBQSPUZsBlTKKGi",
+          "timeMins": 9,
+          "timeSecs": 58,
+          "type": 1,
+          "source": 2,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "jIbtcDU",
+          "timeMins": 11,
+          "timeSecs": 30,
+          "type": 1,
+          "source": 1,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "yBPUiQspFXOVRUimEHK",
+          "timeMins": 3,
+          "timeSecs": 21,
+          "type": 2,
+          "source": 2,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "CsyoPFrupCvGA",
+          "timeMins": 7,
+          "timeSecs": 27,
+          "type": 1,
+          "source": 2,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "sqgyYMYD",
+          "timeMins": 9,
+          "timeSecs": 4,
+          "type": 0,
+          "source": 3,
+          "discardAfterProc": 0
+        }
+      ]
+    },
+    {
+      "processNameString": "DGPKD",
+      "temp": 40,
+      "tempTolerance": 0.9,
+      "isTempControlled": 1,
+      "isPreferred": 0,
+      "filmType": 1,
+      "timeMins": 28,
+      "timeSecs": 22,
+      "steps": [
+        {
+          "stepNameString": "gOGCIzZ",
+          "timeMins": 2,
+          "timeSecs": 32,
+          "type": 0,
+          "source": 2,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "PziUkGinEoH",
+          "timeMins": 10,
+          "timeSecs": 18,
+          "type": 1,
+          "source": 0,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "xodDnuGxkElFEwtvNn",
+          "timeMins": 1,
+          "timeSecs": 52,
+          "type": 0,
+          "source": 0,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "pEfXECeWPcgxtISYqzC",
+          "timeMins": 13,
+          "timeSecs": 40,
+          "type": 0,
+          "source": 2,
+          "discardAfterProc": 1
+        }
+      ]
+    },
+    {
+      "processNameString": "tTvRJxWRxvaTQpNn",
+      "temp": 38,
+      "tempTolerance": 0.0,
+      "isTempControlled": 0,
+      "isPreferred": 0,
+      "filmType": 1,
+      "timeMins": 43,
+      "timeSecs": 32,
+      "steps": [
+        {
+          "stepNameString": "QVYnLiKBINtiUwFhpr",
+          "timeMins": 3,
+          "timeSecs": 10,
+          "type": 2,
+          "source": 2,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "LLwISWWALtrCT",
+          "timeMins": 4,
+          "timeSecs": 38,
+          "type": 0,
+          "source": 0,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "jSCMHffxwdcNl",
+          "timeMins": 15,
+          "timeSecs": 38,
+          "type": 1,
+          "source": 3,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "OwFdZnyQ",
+          "timeMins": 9,
+          "timeSecs": 13,
+          "type": 2,
+          "source": 2,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "mtRHCofb",
+          "timeMins": 10,
+          "timeSecs": 53,
+          "type": 2,
+          "source": 3,
+          "discardAfterProc": 1
+        }
+      ]
+    },
+    {
+      "processNameString": "WTxSOvRmhSZ",
+      "temp": 38,
+      "tempTolerance": 0.6,
+      "isTempControlled": 1,
+      "isPreferred": 0,
+      "filmType": 1,
+      "timeMins": 43,
+      "timeSecs": 53,
+      "steps": [
+        {
+          "stepNameString": "AAVDKzyZZa",
+          "timeMins": 11,
+          "timeSecs": 45,
+          "type": 0,
+          "source": 2,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "ndjVrTznzbVPlmNUV",
+          "timeMins": 15,
+          "timeSecs": 17,
+          "type": 0,
+          "source": 2,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "MFtNjHIpFJayXcTzRout",
+          "timeMins": 2,
+          "timeSecs": 48,
+          "type": 1,
+          "source": 3,
+          "discardAfterProc": 0
+        },
+        {
+          "stepNameString": "IuMQntpNNqiim",
+          "timeMins": 13,
+          "timeSecs": 49,
+          "type": 2,
+          "source": 2,
+          "discardAfterProc": 1
+        },
+        {
+          "stepNameString": "IykdLeIHOy",
+          "timeMins": 0,
+          "timeSecs": 14,
+          "type": 1,
+          "source": 0,
+          "discardAfterProc": 1
+        }
+      ]
+    }
+  ]
+}

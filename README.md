@@ -104,7 +104,7 @@ FilMachine_Reworked/
 │   ├── element_cleanPopup.c       #   Cleaning process UI with timer
 │   ├── element_drainPopup.c       #   Drain process UI with animated tank bars
 │   ├── element_splashPopup.c      #   Splash screen config popup with live preview
-│   ├── element_selfcheckPopup.c   #   Self-check diagnostic wizard (7-phase hardware test)
+│   ├── element_selfcheckPopup.c   #   Self-check diagnostic wizard (8-phase hardware test)
 │   ├── element_otaWifiPopup.c     #   Wi-Fi OTA update popup (IP + PIN + progress)
 │   └── element_wifiPopup.c       #   Wi-Fi connection popup (scan, connect, status)
 │
@@ -291,7 +291,7 @@ The simulator opens an 800×480 window that reproduces the exact touchscreen int
 - Export/Import (backup to `sd/FilMachine_Backup.cfg`)
 - Drain machine with animated tank-level bars and relay management
 - Clean machine with per-container rinse cycles and arc progress
-- Self-check diagnostic wizard with 7-phase hardware test simulation
+- Self-check diagnostic wizard with 8-phase hardware test simulation (temp sensors, pump, heater, valves, containers, motor)
 - OTA update UI (SD card check + Wi-Fi popup with simulated IP/PIN/progress)
 - Simulated temperature readings with heater model and calibration offset
 - Persistent alarm sound (SDL audio 880Hz beep, repeats every 10s until dismissed)
@@ -494,7 +494,8 @@ All fonts are converted from TTF/OTF to LVGL `.c` bitmap arrays using `lv_font_c
 | Process autostart | Auto-start when temperature reached | On/Off |
 | Drain/fill overlap | How much of fill/drain time counts as processing time (100% recommended) | 0–100% |
 | Multi-rinse cycle time | Duration of each rinse in multi-rinse steps | 60–180s |
-| Pump speed | Water pump speed percentage | 0–100% |
+| Pump speed | Water pump speed percentage | 10–100% |
+| Invert pump | Invert H-bridge direction to compensate for pump physical switch position | On/Off |
 | Tank size | Default developing tank size | S (500ml) / M (700ml) / L (1000ml) |
 | Container size | Chemistry container capacity | 250–2000 ml |
 | Water bath size | Water bath capacity | 1000–5000 ml |
@@ -508,7 +509,7 @@ All settings are saved automatically to the SD card when changed. Slider values 
 
 - **Clean machine** — Automated cleaning cycle: select which containers to clean (C1, C2, C3), set the number of rinse cycles, and optionally drain the water bath when done. Each cycle fills the container with water from the water bath and then drains it back, with real-time progress shown via arc animations and remaining-time countdown.
 - **Drain machine** — Drains all containers (C1, C2, C3, WB) to waste sequentially. A confirmation screen lists the affected containers; once started, four colored tank bars animate from full to empty in real time, showing which container is currently draining, a ">> WASTE <<" indicator, and a countdown timer. The drain can be stopped at any time via the Stop button.
-- **Self-check** — Guided hardware diagnostic wizard that tests all machine components in 7 phases: temperature sensors (5s), water pump (20s), heater (30s), valves (10s), and the three containers C1/C2/C3 (10s each). The UI is split in two panels: a task list on the left showing icons per phase (check for done, dot for pending/skipped/stopped) and a detail panel on the right with phase description, real-time sensor data, countdown timer, and a progress bar. Three buttons control the flow: Stop (halts current phase), Start/Re-run (begins or repeats a phase), and Next (skips to the next phase). Each phase's state (done, skipped, stopped) is saved and visible when revisiting. When all phases complete successfully the title shows "Self-check complete!" in green; if any were skipped or stopped it shows "Self-check finished" in orange.
+- **Self-check** — Guided hardware diagnostic wizard that tests all machine components in 8 phases: temperature sensors (5s), water pump (10s), heater (30s), valves (10s), the three containers C1/C2/C3 (10s each), and agitation motor (10s). The UI is split in two panels: a task list on the left showing icons per phase (check for done, dot for pending/skipped/stopped) and a detail panel on the right with phase description, real-time sensor data, countdown timer, and a progress bar. Three buttons control the flow: Stop (halts current phase), Start/Re-run (begins or repeats a phase), and Next (skips to the next phase). Each phase's state (done, skipped, stopped) is saved and visible when revisiting. When all phases complete successfully the title shows "Self-check complete!" in green; if any were skipped or stopped it shows "Self-check finished" in orange.
 - **Import/Export** — Backup and restore configuration to SD card
 - **Statistics** — Completed processes, total time, cleaning cycles, stopped processes
 - **Software info** — Firmware version (read from the running binary, also shown on the splash screen) and serial number
@@ -634,12 +635,12 @@ All 12 P4 GPIO pins on JP1 are allocated — GPIO 28 is the only spare.
 
 | Component | Detail |
 |-----------|--------|
-| **Solenoid Driver** | Adafruit I2C 8-Ch Solenoid Driver (#6318) — MCP23017 @ 0x20, 6 channels (heater, C1–C3, water bath, waste) |
+| **Solenoid Driver** | Adafruit I2C 8-Ch Solenoid Driver (#6318) — MCP23017 @ 0x20, Port A: 5 valve channels (C1–C3, water bath, waste on pins 0–4) + heater relay trigger (pin 7), Port B: 4-ch relay board (pins 8–11, all spare) |
 | **Motor Driver** | DBH-12V dual DC motor driver — channel A: agitation motor, channel B: pump |
 | **Temperature** | 2× DS18B20 OneWire sensors (chemical bath + water bath) on shared bus |
 | **Motor** | DC motor with H-bridge (DBH-12V ch.A), PWM speed control (ENA on ESP32 LEDC, IN1/IN2 on GPIO) |
 | **Pump** | DC pump with H-bridge (DBH-12V ch.B), direction reversal for fill/drain (replaces solenoid pump valves) |
-| **Valves** | Heater, 3 chemical valves (C1/C2/C3), water bath, waste — driven by MCP23017 solenoid driver |
+| **Valves** | 5 solenoid valves (C1/C2/C3, water bath, waste) on MCP23017 Port A pins 0–4 via MOSFET driver. Heater on pin 7 (drives external relay for high-current load) |
 | **Power** | USB Type-C 5.0V |
 
 ### Chemical Container Layout

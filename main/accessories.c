@@ -143,6 +143,8 @@ static void pump_ledc_init(void)
 static void pump_run(bool forward, uint8_t duty)
 {
     if (duty > 250) duty = 250;  /* DBH-12V: max 98% duty cycle */
+    /* Apply user inversion setting to compensate for physical pump switch */
+    if (gui.page.settings.settingsParams.invertPump) forward = !forward;
     gpio_set_level(PUMP_IN1_PIN, forward ? 1 : 0);
     gpio_set_level(PUMP_IN2_PIN, forward ? 0 : 1);
     ledc_set_duty(PUMP_LEDC_MODE, PUMP_LEDC_CHANNEL, duty);
@@ -784,6 +786,7 @@ void initGlobals( void ) {
   /* Sensible defaults for settings (overridden by config file if present) */
   gui.page.settings.settingsParams.tankSize = 2;           /* Medium */
   gui.page.settings.settingsParams.pumpSpeed = 30;
+  gui.page.settings.settingsParams.invertPump = false;
   gui.page.settings.settingsParams.chemContainerMl = 500;
   gui.page.settings.settingsParams.wbContainerMl = 2000;
   gui.page.settings.settingsParams.chemistryVolume = 2;    /* High */

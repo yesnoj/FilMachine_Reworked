@@ -290,6 +290,8 @@ typedef enum {
 #define tankSizeLarge_text                  "L"
 #define pumpSpeed_text                      "Pump speed"
 #define pumpSpeedAlertMBox_text             "Set the pump speed percentage.\nHigher values = faster fill/drain."
+#define invertPump_text                     "Invert pump"
+#define invertPumpAlertMBox_text            "Invert the pump rotation direction.\nUse this to compensate for the\nphysical switch position on the pump."
 #define brightness_text                     "Brightness"
 #define brightnessAlertMBox_text            "Set the LCD backlight brightness.\nAuto-dim: 1min \xe2\x86\x92 50%, 5min \xe2\x86\x92 20%,\n10min \xe2\x86\x92 off. Touch to wake."
 #define chemContainerMl_text                "Chemistry container"
@@ -583,6 +585,8 @@ struct __attribute__ ((packed)) machineSettings {
 	/* ── Display settings (added last for binary config compatibility) ── */
 	uint8_t					brightness;         /* 10-100% LCD backlight brightness */
 	uint8_t					dimTimeout;         /* LEGACY — kept for binary config compat; dimming is now fixed 60/300/600s */
+	/* ── New fields go here (end of struct) to preserve binary config compatibility ── */
+	bool					invertPump;         /* true = invert pump H-bridge direction */
 };
 
 
@@ -1356,6 +1360,10 @@ struct sSettings {
 	lv_obj_t                *pumpSpeedLabel;
 	lv_obj_t                *pumpSpeedSlider;
 	lv_obj_t                *pumpSpeedValueLabel;
+
+	lv_obj_t                *invertPumpContainer;
+	lv_obj_t                *invertPumpLabel;
+	lv_obj_t                *invertPumpSwitch;
 
 	lv_obj_t                *brightnessContainer;
 	lv_obj_t                *brightnessLabel;

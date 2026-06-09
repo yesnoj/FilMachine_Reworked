@@ -179,6 +179,8 @@ DEFAULT_SETTINGS = {
     # ── Display settings ──
     "brightness": 100,
     "dimTimeout": 30,
+    # ── New fields (end of struct) ──
+    "invertPump": 0,
 }
 
 def random_settings():
@@ -321,6 +323,8 @@ def write_settings(f, s):
     # ── Display settings ──
     f.write(struct.pack('<B', s.get("brightness", 100)))     # uint8_t (10-100%)
     f.write(struct.pack('<B', s.get("dimTimeout", 30)))      # uint8_t (seconds, 0=disabled)
+    # ── New fields (end of struct for binary compat) ──
+    f.write(struct.pack('<B', s.get("invertPump", 0)))       # bool (invert pump direction)
 
 def write_process(f, p):
     f.write(p["processNameString"].encode('ASCII').ljust(MAX_PROC_NAME_LEN + 1, b'\x00'))
@@ -371,30 +375,44 @@ def main():
     parser.add_argument('--processes', type=int, default=None, help='Number of processes to generate')
     parser.add_argument('--output', type=str, default='.', help='Output directory')
     parser.add_argument('--random-settings', action='store_true', help='Randomize machine settings')
+    parser.add_argument('--from-json', type=str, default=None, metavar='FILE',
+                        help='Import settings and processes from an existing FilMachine.json')
     args = parser.parse_args()
 
     os.makedirs(args.output, exist_ok=True)
 
-    # Settings
-    settings = random_settings() if args.random_settings else DEFAULT_SETTINGS
-
-    # Processes
-    if args.realistic:
-        processes = [convert_realistic_process(p) for p in REALISTIC_PROCESSES]
-        if args.processes and args.processes > len(processes):
-            # Add random processes to fill up
-            for _ in range(args.processes - len(processes)):
-                processes.append(generate_random_process())
+    # ── Import from existing JSON ──
+    if args.from_json:
+        with open(args.from_json, 'r') as jf:
+            jdata = json.load(jf)
+        settings = {**DEFAULT_SETTINGS, **jdata.get("settingsParams", {})}
+        processes = jdata.get("processes", [])
+        # Limit to max
+        processes = processes[:MAX_PROC_ELEMENTS]
+        print(f"\nImporting from: {args.from_json}")
+        print(f"  Settings: imported ({len(jdata.get('settingsParams', {}))} keys)")
+        print(f"  Processes: {len(processes)}")
     else:
-        count = args.processes or 4
-        processes = [generate_random_process() for _ in range(count)]
+        # Settings
+        settings = random_settings() if args.random_settings else DEFAULT_SETTINGS
 
-    # Limit to max
-    processes = processes[:MAX_PROC_ELEMENTS]
+        # Processes
+        if args.realistic:
+            processes = [convert_realistic_process(p) for p in REALISTIC_PROCESSES]
+            if args.processes and args.processes > len(processes):
+                # Add random processes to fill up
+                for _ in range(args.processes - len(processes)):
+                    processes.append(generate_random_process())
+        else:
+            count = args.processes or 4
+            processes = [generate_random_process() for _ in range(count)]
 
-    print(f"\nGenerating FilMachine configuration:")
-    print(f"  Settings: {'random' if args.random_settings else 'default'}")
-    print(f"  Processes: {len(processes)} ({'realistic' if args.realistic else 'random'})")
+        # Limit to max
+        processes = processes[:MAX_PROC_ELEMENTS]
+
+        print(f"\nGenerating FilMachine configuration:")
+        print(f"  Settings: {'random' if args.random_settings else 'default'}")
+        print(f"  Processes: {len(processes)} ({'realistic' if args.realistic else 'random'})")
     print()
 
     # Write files
