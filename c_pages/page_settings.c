@@ -11,6 +11,7 @@
 #endif
 
 extern struct gui_components gui;
+extern struct sys_components sys;
 
 static uint8_t current_value;
 static uint8_t new_value;
@@ -189,6 +190,7 @@ void event_settings_handler(lv_event_t * e)
             minVal_rotationSpeedPercent = lv_slider_get_min_value(gui.page.settings.filmRotationSpeedSlider);
             maxVal_rotationSpeedPercent = lv_slider_get_max_value(gui.page.settings.filmRotationSpeedSlider);
             analogVal_rotationSpeedPercent = mapPercentageToValue(new_value, minVal_rotationSpeedPercent, maxVal_rotationSpeedPercent);
+            sys.analogVal_rotationSpeedPercent = analogVal_rotationSpeedPercent;
 
             lv_slider_set_value(act_cb, new_value, LV_ANIM_OFF);
             lv_label_set_text_fmt((lv_obj_t*)lv_event_get_user_data(e), "%d%%", new_value);
@@ -1082,6 +1084,12 @@ void refreshSettingsUI(void)
                         p->filmRotationSpeedSetpoint, LV_ANIM_OFF);
     lv_label_set_text_fmt(gui.page.settings.filmRotationSpeedValueLabel,
                           "%d%%", p->filmRotationSpeedSetpoint);
+
+    /* Compute analog motor speed from loaded setpoint (slider range 10-100) */
+    sys.analogVal_rotationSpeedPercent = mapPercentageToValue(
+        p->filmRotationSpeedSetpoint, 10, 100);
+    LV_LOG_USER("Motor analog speed synced: %d%% -> %d",
+                p->filmRotationSpeedSetpoint, sys.analogVal_rotationSpeedPercent);
 
     lv_slider_set_value(gui.page.settings.filmRotationInversionIntervalSlider,
                         p->rotationIntervalSetpoint, LV_ANIM_OFF);

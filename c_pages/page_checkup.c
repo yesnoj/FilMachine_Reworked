@@ -249,6 +249,8 @@ void event_checkup(lv_event_t * e){
         safeTimerDelete(&ckup->tempTimer);
         /* Safety: always turn off the heater when leaving checkup */
         sim_setHeater(false);
+        /* Safety: stop motor if user exits during step 3 rotation check */
+        motor_set_stop();
 
         /* Reset static state for next process run */
         resetStuffBeforeNextProcess();
@@ -1226,6 +1228,10 @@ static void checkup_renderCheckFilm(processNode *proc) {
         lv_label_set_text(ckup->checkupStartButtonLabel, checkupStart_text);
         lv_obj_set_style_text_font(ckup->checkupStartButtonLabel, ui->stage_title_font, 0);
         lv_obj_align(ckup->checkupStartButtonLabel, LV_ALIGN_CENTER, 0, 0);
+
+        /* Start motor so user can verify film rotation before process begins */
+        motor_set_forward(180);
+        LV_LOG_USER("Check film: motor started for rotation check");
 
         isStepStatus3created = 1;
     }

@@ -84,15 +84,16 @@ static void motor_ledc_set_duty(uint8_t duty)
 /* ═══════════════════════════════════════════════
  * Pump H-bridge control (DBH-12V channel B)
  *
- * Uses LEDC timer 1 / channel 1 (timer 0 / channel 0 = agitation motor).
+ * Uses LEDC timer 2 / channel 2.
+ * Timer 0 / Channel 0 = agitation motor, Timer 1 / Channel 1 = backlight.
  * Same control scheme as the agitation motor:
  *   IN1=HIGH, IN2=LOW + ENA=PWM  → forward  (filling)
  *   IN1=LOW,  IN2=HIGH + ENA=PWM → reverse  (draining)
  * ═══════════════════════════════════════════════ */
 #ifndef BOARD_SIMULATOR
-#define PUMP_LEDC_TIMER       LEDC_TIMER_1
+#define PUMP_LEDC_TIMER       LEDC_TIMER_2       /* Timer 1 / Channel 1 = backlight! */
 #define PUMP_LEDC_MODE        LEDC_LOW_SPEED_MODE
-#define PUMP_LEDC_CHANNEL     LEDC_CHANNEL_1
+#define PUMP_LEDC_CHANNEL     LEDC_CHANNEL_2     /* Channel 1 = backlight! */
 #define PUMP_LEDC_FREQ_HZ     16000           /* 16 kHz — recommended for normal DC motors */
 #define PUMP_LEDC_RESOLUTION  LEDC_TIMER_8_BIT
 
@@ -787,6 +788,7 @@ void initGlobals( void ) {
   gui.page.settings.settingsParams.wbContainerMl = 2000;
   gui.page.settings.settingsParams.chemistryVolume = 2;    /* High */
   gui.page.settings.settingsParams.filmRotationSpeedSetpoint = 50;
+  sys.analogVal_rotationSpeedPercent = mapPercentageToValue(50, 10, 100);
   gui.page.settings.settingsParams.rotationIntervalSetpoint = 10;
   gui.page.settings.settingsParams.calibratedTemp = 20;
   gui.page.settings.settingsParams.multiRinseTime = 60;
@@ -1026,6 +1028,19 @@ void init_Pins_and_Buses( void ) {
         initializeRelayPins();
         initializeMotorPins();
     }
+
+#if defined(BOARD_JC4880P433)
+    /* I2C bus recovery — ensure SDA/SCL are released before GT911 touch init.
+     * MCP23017 transactions at 400kHz can occasionally leave the bus in a bad
+     * state (SDA held low). This reset clears any stuck condition so the
+     * GT911 touch controller (100kHz) initializes reliably. */
+    esp_err_t bus_rst = i2c_master_bus_reset(g_i2c_bus_handle);
+    if (bus_rst != ESP_OK) {
+        LV_LOG_USER("I2C bus reset warning (0x%x) — GT911 may fail", bus_rst);
+    } else {
+        LV_LOG_USER("I2C bus reset OK — bus ready for GT911 touch");
+    }
+#endif
 
     /* Initialize DS18B20 temperature sensors (both on same OneWire bus) */
     if (ds18b20_init(&ds_bus, TEMPERATURE_BUS_PIN) != ESP_OK) {
@@ -1702,13 +1717,80 @@ char* generateRandomCharArray(uint8_t length) {
 }
 
 void initializeRelayPins(){
+    /* Port A: solenoid valve channels (pins 0-5 via Adafruit #6318 MOSFETs) */
     for (uint8_t i = 0; i < RELAY_NUMBER; i++) {
         mcp23017_pinMode(&mcp, i, MCP23017_OUTPUT);
         mcp23017_digitalWrite(&mcp, i, 0);
         LV_LOG_USER("Relay pin %d init: %d", i, mcp23017_digitalRead(&mcp, i));
     }
+#if defined(PORTB_RELAY_COUNT)
+    /* Port B: external relay board channels (pins 8-11, active HIGH) */
+    for (uint8_t i = 0; i < PORTB_RELAY_COUNT; i++) {
+        uint8_t pin = PORTB_RELAY_START + i;
+        mcp23017_pinMode(&mcp, pin, MCP23017_OUTPUT);
+        mcp23017_digitalWrite(&mcp, pin, 0);
+        LV_LOG_USER("PortB relay pin %d init: %d", pin, mcp23017_digitalRead(&mcp, pin));
+    }
+#endif
 }
 
+void setValveState(uint8_t relayPin, bool open) {
+    if (relayPin >= RELAY_NUMBER) return;
+    mcp23017_digitalWrite(&mcp, relayPin, open ? 1 : 0);
+}
+
+void closeAllValves(void) {
+    for (uint8_t i = 0; i < RELAY_NUMBER; i++) {
+        mcp23017_digitalWrite(&mcp, i, 0);
+    }
+}
+
+/* ── Motor direction helpers ──
+ * P4 board: IN1/IN2 are ESP32 GPIOs on the Expand IO header (direct control).
+ * Other boards: IN1/IN2 are MCP23017 pins (I2C expander). */
+static inline void motor_dir_set(uint8_t pin, uint8_t value)
+{
+#if defined(BOARD_JC4880P433)
+    gpio_set_level(pin, value);
+#else
+    mcp23017_digitalWrite(&mcp, pin, value);
+#endif
+}
+
+/* ── Non-blocking motor control (safe to call from LVGL timer callbacks) ── */
+void motor_set_forward(uint8_t duty) {
+    motor_dir_set(MOTOR_IN1_PIN, 1);
+    motor_dir_set(MOTOR_IN2_PIN, 0);
+    motor_ledc_set_duty(duty);
+    LV_LOG_USER("Motor: FORWARD duty=%d", duty);
+}
+
+void motor_set_reverse(uint8_t duty) {
+    motor_dir_set(MOTOR_IN1_PIN, 0);
+    motor_dir_set(MOTOR_IN2_PIN, 1);
+    motor_ledc_set_duty(duty);
+    LV_LOG_USER("Motor: REVERSE duty=%d", duty);
+}
+
+void motor_set_stop(void) {
+    motor_ledc_set_duty(0);
+    motor_dir_set(MOTOR_IN1_PIN, 0);
+    motor_dir_set(MOTOR_IN2_PIN, 0);
+    LV_LOG_USER("Motor: STOPPED");
+}
+
+/* ── Non-blocking pump control (safe to call from LVGL timer callbacks) ── */
+void pump_set_forward(uint8_t duty) {
+    pump_run(true, duty);
+}
+
+void pump_set_reverse(uint8_t duty) {
+    pump_run(false, duty);
+}
+
+void pump_set_stop(void) {
+    pump_stop();
+}
 
 void cleanRelayManager(uint8_t pumpFrom, uint8_t pumpTo, uint8_t pumpDir, bool activePump){
     if (activePump) {
@@ -1762,18 +1844,6 @@ void sendValueToRelay(uint8_t pumpFrom, uint8_t pumpDir, bool activePump) {
     }
 }
 
-
-/* ── Motor direction helpers ──
- * P4 board: IN1/IN2 are ESP32 GPIOs on the Expand IO header (direct control).
- * Other boards: IN1/IN2 are MCP23017 pins (I2C expander). */
-static inline void motor_dir_set(uint8_t pin, uint8_t value)
-{
-#if defined(BOARD_JC4880P433)
-    gpio_set_level(pin, value);
-#else
-    mcp23017_digitalWrite(&mcp, pin, value);
-#endif
-}
 
 void initializeMotorPins(){
 #if defined(BOARD_JC4880P433)

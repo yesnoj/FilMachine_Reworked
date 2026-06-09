@@ -178,6 +178,10 @@ static inline esp_err_t i2c_master_transmit_receive(i2c_master_dev_handle_t dev,
     if (rx && rx_len > 0) memset(rx, 0, rx_len);
     return ESP_OK;
 }
+static inline esp_err_t i2c_master_bus_reset(i2c_master_bus_handle_t bus) {
+    (void)bus;
+    return ESP_OK;
+}
 
 /* SPI / SD Card */
 #define SPI3_HOST 2

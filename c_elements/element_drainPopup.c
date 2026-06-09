@@ -7,6 +7,12 @@
  */
 #include <string.h>
 #include "FilMachine.h"
+#include "esp_log.h"
+#if defined(DISPLAY_DRIVER_ST7701)
+#include "st7701_lcd.h"
+#endif
+
+static const char *TAG = "DrainProc";
 
 extern struct gui_components gui;
 
@@ -43,6 +49,11 @@ static void drain_timer_cb(lv_timer_t *timer) {
         cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
         safeTimerDelete(&dp->drainTimer);
         dp->isDraining = false;
+
+        ESP_LOGW(TAG, "Drain STOPPED by user");
+#if defined(DISPLAY_DRIVER_ST7701)
+        st7701_lcd_set_dim_inhibit(false); /* Re-enable auto-dimming */
+#endif
 
         lv_label_set_text(dp->drainStatusLabel, drainStopped_text);
         lv_label_set_text(dp->drainTimeLabel, "");
@@ -105,7 +116,10 @@ static void drain_timer_cb(lv_timer_t *timer) {
             /* Start persistent alarm after all containers are drained */
             alarm_start_persistent();
 
-            LV_LOG_USER("Drain complete – all containers drained");
+            ESP_LOGI(TAG, "=== DRAIN PROCESS FINISHED ===");
+#if defined(DISPLAY_DRIVER_ST7701)
+            st7701_lcd_set_dim_inhibit(false); /* Re-enable auto-dimming */
+#endif
         } else {
             /* ── Start next tank ── */
             uint8_t next = dp->currentTank;
@@ -129,6 +143,10 @@ static void drain_reset(void) {
         cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
         safeTimerDelete(&dp->drainTimer);
     }
+
+#if defined(DISPLAY_DRIVER_ST7701)
+    st7701_lcd_set_dim_inhibit(false); /* Safety: always re-enable on reset */
+#endif
 
     /* Bars back to 100 % */
     for (int i = 0; i < NUM_TANKS; i++) {
@@ -195,6 +213,11 @@ static void drain_start(void) {
     lv_label_set_text(dp->drainStopButtonLabel, buttonStop_text);
     lv_obj_set_style_bg_color(dp->drainStopButton,
                               lv_color_hex(RED_DARK), LV_PART_MAIN);
+
+    ESP_LOGI(TAG, "=== DRAIN PROCESS STARTED ===");
+#if defined(DISPLAY_DRIVER_ST7701)
+    st7701_lcd_set_dim_inhibit(true);   /* Keep screen on during draining */
+#endif
 
     /* Start pump for C1 */
     cleanRelayManager(

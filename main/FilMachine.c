@@ -169,6 +169,10 @@ static void lvgl_touch_cb(lv_indev_t * indev, lv_indev_data_t * data)
 
     /* Read touch controller data */
     esp_lcd_touch_handle_t tp = lv_indev_get_user_data(indev);
+    if (tp == NULL) {
+        data->state = LV_INDEV_STATE_RELEASED;
+        return;   /* Touch not available — skip silently */
+    }
     esp_lcd_touch_read_data(tp);
 
     /* Get coordinates — still using deprecated API until esp_lcd_touch 2.0 migration */
@@ -266,7 +270,13 @@ static esp_lcd_touch_handle_t init_touch(void)
     ESP_LOGI(TAG, "Initialize touch controller GT911");
     esp_lcd_panel_io_i2c_config_t tp_io_config = ESP_LCD_TOUCH_IO_I2C_GT911_CONFIG();
     tp_io_config.scl_speed_hz = 100000;
-    ESP_ERROR_CHECK(esp_lcd_new_panel_io_i2c(g_i2c_bus_handle, &tp_io_config, &tp_io_handle));
+
+    esp_err_t ret = esp_lcd_new_panel_io_i2c(g_i2c_bus_handle, &tp_io_config, &tp_io_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "GT911 I2C panel IO failed (0x%x) — touch DISABLED", ret);
+        ESP_LOGW(TAG, "Check I2C bus: MCP23017 or other device may hold SDA/SCL low");
+        return NULL;
+    }
 
     /* Physical panel is 480×800 portrait. Coordinate remapping to
      * 800×480 landscape is done in lvgl_touch_cb(), so we report raw
@@ -282,8 +292,15 @@ static esp_lcd_touch_handle_t init_touch(void)
             .mirror_y = 0,
         },
     };
-    ESP_ERROR_CHECK(esp_lcd_touch_new_i2c_gt911(tp_io_handle, &tp_cfg, &tp));
 
+    ret = esp_lcd_touch_new_i2c_gt911(tp_io_handle, &tp_cfg, &tp);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "GT911 driver init failed (0x%x) — touch DISABLED", ret);
+        ESP_LOGW(TAG, "Check I2C bus: MCP23017 or other device may hold SDA/SCL low");
+        return NULL;
+    }
+
+    ESP_LOGI(TAG, "GT911 touch controller initialized OK");
     return tp;
 }
 
@@ -440,8 +457,11 @@ ESP_LOGI(TAG, "Initialise LVGL library");
      * st7701_lcd_init() already turns it on at 100%.
      * Use st7701_lcd_set_brightness(0..100) to adjust. */
 
-    /* Board-specific touch init */
+    /* Board-specific touch init (soft-fail: returns NULL if I2C bus is busy/stuck) */
     esp_lcd_touch_handle_t tp = init_touch();
+    if (tp == NULL) {
+        ESP_LOGW(TAG, "Touch disabled — GUI will load without touch input");
+    }
 
 #if defined(DISPLAY_DRIVER_ST7701)
     /* P4: Double-buffered partial rendering with small PSRAM buffers.

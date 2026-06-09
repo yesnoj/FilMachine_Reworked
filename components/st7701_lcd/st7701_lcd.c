@@ -34,10 +34,14 @@
 /* Backlight pin — matches LCD_BLK from board header (GPIO 23 on JC4880P433) */
 #define EXAMPLE_PIN_NUM_BK_LIGHT                GPIO_NUM_23
 
-/* LEDC PWM configuration for backlight dimming */
-#define BL_LEDC_TIMER       LEDC_TIMER_1       /* Timer 0 used by motor in accessories.c */
+/* LEDC PWM configuration for backlight dimming
+ *   Timer 0 / Channel 0 = agitation motor  (accessories.c)
+ *   Timer 1 / Channel 1 = backlight        (HERE)
+ *   Timer 2 / Channel 2 = pump H-bridge    (accessories.c)
+ */
+#define BL_LEDC_TIMER       LEDC_TIMER_1
 #define BL_LEDC_MODE        LEDC_LOW_SPEED_MODE
-#define BL_LEDC_CHANNEL     LEDC_CHANNEL_1     /* Channel 0 used by motor in accessories.c */
+#define BL_LEDC_CHANNEL     LEDC_CHANNEL_1
 #define BL_LEDC_DUTY_RES    LEDC_TIMER_10_BIT  /* 0–1023, enough for smooth dimming */
 #define BL_LEDC_FREQ_HZ     25000              /* 25 kHz — above audible range, no coil whine */
 #define BL_DUTY_MAX         ((1 << 10) - 1)    /* 1023 */

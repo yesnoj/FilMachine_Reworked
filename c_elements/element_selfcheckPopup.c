@@ -15,11 +15,14 @@
  */
 #include <string.h>
 #include "FilMachine.h"
+#include "esp_log.h"
+
+static const char *TAG = "SelfCheck";
 
 extern struct gui_components gui;
 
 /* ── Phase configuration ─────────────────────────────────── */
-#define SC_NUM_PHASES 7
+#define SC_NUM_PHASES 8
 
 #define SC_PENDING   0
 #define SC_RUNNING   1
@@ -29,7 +32,8 @@ extern struct gui_components gui;
 
 static const char *phaseNames[] = {
     "Temp. sensors", "Water pump", "Heater", "Valves",
-    "Container C1", "Container C2", "Container C3"
+    "Container C1", "Container C2", "Container C3",
+    "Agitation motor"
 };
 
 static const char *phaseDescriptions[] = {
@@ -39,10 +43,11 @@ static const char *phaseDescriptions[] = {
     "Opening/closing each valve\nsequentially. Listen for clicks.",
     "Pumping water through C1.\nVerify flow visually.",
     "Pumping water through C2.\nVerify flow visually.",
-    "Pumping water through C3.\nVerify flow visually."
+    "Pumping water through C3.\nVerify flow visually.",
+    "Spinning motor forward then\nreverse. Verify rotation."
 };
 
-static const int32_t phaseDurations[] = { 5, 20, 30, 10, 10, 10, 10 };
+static const int32_t phaseDurations[] = { 5, 10, 30, 10, 10, 10, 10, 10 };
 
 static uint8_t phaseState[SC_NUM_PHASES];
 static char    phaseSavedStatus[SC_NUM_PHASES][40]; /* saved status text per phase */
@@ -58,6 +63,21 @@ static void sc_update_buttons(void);
 
 /* ── Color for stopped state (grey) ────────────────────── */
 #define SC_STOPPED_COLOR 0x888888
+
+/* ── Valve relay indices for Self Check valve test ───── */
+static const uint8_t sc_valve_relays[] = { C1_RLY, C2_RLY, C3_RLY, WB_RLY, WASTE_RLY };
+#define SC_NUM_VALVES 5
+static int8_t sc_last_valve = -1;  /* tracks which valve is currently open (-1 = none) */
+
+/* ── Stop all hardware actuators (valves + pump) ──────── */
+static void sc_stop_all_hw(void) {
+    closeAllValves();
+    cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
+    pump_set_stop();
+    motor_set_stop();
+    sc_last_valve = -1;
+    ESP_LOGI(TAG, "All HW stopped (valves closed, pump off, motor off)");
+}
 
 /* ── Check if all phases are non-pending ────────────────── */
 static bool sc_all_finished(void) {
@@ -200,6 +220,7 @@ static void sc_reset(void) {
         safeTimerDelete(&sc->checkTimer);
         sc->isRunning = false;
     }
+    sc_stop_all_hw();   /* Safety: ensure all valves closed + pump off on reset */
     memset(phaseState, SC_PENDING, sizeof(phaseState));
     memset(phaseSavedStatus, 0, sizeof(phaseSavedStatus));
     sc->currentPhase = 0;
@@ -242,10 +263,34 @@ static void sc_timer_cb(lv_timer_t *timer) {
                 wt / 10, wt % 10, ct / 10, ct % 10);
             break;
         }
-        case 1:
-            lv_label_set_text(sc->phaseStatus, selfCheckPumpRunning_text);
+        case 1: {
+            /* Pump test: 1-4s forward, 5s pause, 6-9s reverse, 10s done */
+            int sub = sc->phaseElapsed;
+            #define SC_PUMP_TEST_DUTY 180  /* ~70% speed for test */
+            if (sub <= 4) {
+                if (sub == 1) {
+                    pump_set_forward(SC_PUMP_TEST_DUTY);
+                    ESP_LOGI(TAG, "Pump test: FORWARD at duty %d", SC_PUMP_TEST_DUTY);
+                }
+                lv_label_set_text(sc->phaseStatus, "Pump forward...");
+            } else if (sub == 5) {
+                pump_set_stop();
+                lv_label_set_text(sc->phaseStatus, "Pausing...");
+                ESP_LOGI(TAG, "Pump test: PAUSE");
+            } else if (sub <= 9) {
+                if (sub == 6) {
+                    pump_set_reverse(SC_PUMP_TEST_DUTY);
+                    ESP_LOGI(TAG, "Pump test: REVERSE at duty %d", SC_PUMP_TEST_DUTY);
+                }
+                lv_label_set_text(sc->phaseStatus, "Pump reverse...");
+            } else {
+                pump_set_stop();
+                lv_label_set_text(sc->phaseStatus, "Pump OK");
+                ESP_LOGI(TAG, "Pump test: STOPPED");
+            }
             snprintf(phaseSavedStatus[phase], sizeof(phaseSavedStatus[phase]), "Pump OK");
             break;
+        }
         case 2: {
             int t = 200 + (sc->phaseElapsed * 15);
             lv_label_set_text_fmt(sc->phaseStatus, selfCheckTempFmt_text, t / 10, t % 10);
@@ -256,19 +301,92 @@ static void sc_timer_cb(lv_timer_t *timer) {
         case 3: {
             const char *valves[] = {"C1", "C2", "C3", "WB", "WASTE"};
             int vi = sc->phaseElapsed / 2;
-            if (vi >= 5) vi = 4;
+            if (vi >= SC_NUM_VALVES) vi = SC_NUM_VALVES - 1;
             lv_label_set_text_fmt(sc->phaseStatus, selfCheckValveFmt_text, valves[vi]);
             snprintf(phaseSavedStatus[phase], sizeof(phaseSavedStatus[phase]), "All valves OK");
+
+            /* ── Actually toggle valves via public API ── */
+            if (vi != sc_last_valve) {
+                /* Close previous valve */
+                if (sc_last_valve >= 0 && sc_last_valve < SC_NUM_VALVES) {
+                    setValveState(sc_valve_relays[sc_last_valve], false);
+                    ESP_LOGI(TAG, "Valve %s OFF (relay %d)", valves[sc_last_valve], sc_valve_relays[sc_last_valve]);
+                }
+                /* Open new valve */
+                setValveState(sc_valve_relays[vi], true);
+                sc_last_valve = vi;
+                ESP_LOGI(TAG, "Valve %s ON  (relay %d)", valves[vi], sc_valve_relays[vi]);
+            }
             break;
         }
         case 4: case 5: case 6: {
             int sub = sc->phaseElapsed;
+            /* Map phase 4→C1, 5→C2, 6→C3 */
+            uint8_t containerSrc = (phase == 4) ? C1 : (phase == 5) ? C2 : C3;
+            const char *cName    = (phase == 4) ? "C1" : (phase == 5) ? "C2" : "C3";
             const char *msg;
-            if (sub <= 3) msg = "Filling tank from WB...";
-            else if (sub <= 6) msg = "Filling container...";
-            else msg = "Draining to waste...";
+
+            if (sub <= 3) {
+                msg = "Filling from WB...";
+                /* Pump WB → Container (forward) */
+                if (sub == 1) {
+                    cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
+                    cleanRelayManager(getValueForChemicalSource(WB),
+                                      getValueForChemicalSource(containerSrc),
+                                      PUMP_IN_RLY, true);
+                    ESP_LOGI(TAG, "%s: pumping WB → %s (fill)", cName, cName);
+                }
+            } else if (sub <= 6) {
+                msg = "Draining back to WB...";
+                /* Pump Container → WB (reverse) */
+                if (sub == 4) {
+                    cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
+                    cleanRelayManager(getValueForChemicalSource(containerSrc),
+                                      getValueForChemicalSource(WB),
+                                      PUMP_OUT_RLY, true);
+                    ESP_LOGI(TAG, "%s: pumping %s → WB (drain back)", cName, cName);
+                }
+            } else {
+                msg = "Draining to waste...";
+                /* Pump WB → Waste */
+                if (sub == 7) {
+                    cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
+                    cleanRelayManager(getValueForChemicalSource(WB),
+                                      getValueForChemicalSource(WASTE),
+                                      PUMP_IN_RLY, true);
+                    ESP_LOGI(TAG, "%s: pumping WB → WASTE", cName);
+                }
+            }
             lv_label_set_text(sc->phaseStatus, msg);
             snprintf(phaseSavedStatus[phase], sizeof(phaseSavedStatus[phase]), "Flow OK");
+            break;
+        }
+        case 7: {
+            /* Agitation motor test: 1-4s forward, 5s pause, 6-9s reverse, 10s done */
+            int sub = sc->phaseElapsed;
+            #define SC_MOTOR_TEST_DUTY 180  /* ~70% speed for test */
+            if (sub <= 4) {
+                if (sub == 1) {
+                    motor_set_forward(SC_MOTOR_TEST_DUTY);
+                    ESP_LOGI(TAG, "Motor test: FORWARD at duty %d", SC_MOTOR_TEST_DUTY);
+                }
+                lv_label_set_text(sc->phaseStatus, "Forward...");
+            } else if (sub == 5) {
+                motor_set_stop();
+                lv_label_set_text(sc->phaseStatus, "Pausing...");
+                ESP_LOGI(TAG, "Motor test: PAUSE");
+            } else if (sub <= 9) {
+                if (sub == 6) {
+                    motor_set_reverse(SC_MOTOR_TEST_DUTY);
+                    ESP_LOGI(TAG, "Motor test: REVERSE at duty %d", SC_MOTOR_TEST_DUTY);
+                }
+                lv_label_set_text(sc->phaseStatus, "Reverse...");
+            } else {
+                motor_set_stop();
+                lv_label_set_text(sc->phaseStatus, "Motor OK");
+                ESP_LOGI(TAG, "Motor test: STOPPED");
+            }
+            snprintf(phaseSavedStatus[phase], sizeof(phaseSavedStatus[phase]), "Motor OK");
             break;
         }
     }
@@ -306,6 +424,9 @@ static void sc_complete_phase(void) {
     sc->isRunning = false;
     phaseState[sc->currentPhase] = SC_DONE;
 
+    /* Stop any hardware that was running in this phase */
+    sc_stop_all_hw();
+
     /* Show Done immediately with green */
     lv_label_set_text(sc->phaseStatus, selfCheckDone_text);
     lv_obj_set_style_text_color(sc->phaseStatus, lv_color_hex(GREEN), 0);
@@ -322,7 +443,8 @@ static void sc_complete_phase(void) {
         sc_show_finish_message();
     }
 
-    LV_LOG_USER("Self-check: Phase %d complete", sc->currentPhase);
+    ESP_LOGI(TAG, "Phase %d (%s) complete", sc->currentPhase,
+             phaseNames[sc->currentPhase]);
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -347,12 +469,14 @@ void event_selfcheckPopup(lv_event_t *e) {
         if (sc->isRunning) {
             safeTimerDelete(&sc->checkTimer);
             sc->isRunning = false;
+            sc_stop_all_hw();   /* Close valves, stop pump */
             phaseState[sc->currentPhase] = SC_STOPPED;
             lv_label_set_text(sc->phaseStatus, selfCheckStopped_text);
             lv_obj_set_style_text_color(sc->phaseStatus, lv_color_hex(SC_STOPPED_COLOR), 0);
             lv_label_set_text(sc->phaseTimer, "");
             sc_update_left_icons();
             sc_update_buttons();
+            ESP_LOGW(TAG, "Phase %d STOPPED by user", sc->currentPhase);
         }
         return;
     }

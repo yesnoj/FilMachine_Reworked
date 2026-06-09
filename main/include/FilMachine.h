@@ -386,6 +386,7 @@ typedef enum {
 #define selfCheckContainer1_text                "Container C1"
 #define selfCheckContainer2_text                "Container C2"
 #define selfCheckContainer3_text                "Container C3"
+#define selfCheckMotor_text                     "Agitation motor"
 #define selfCheckRunning_text                   "Running..."
 #define selfCheckDone_text                      "Done"
 #define selfCheckComplete_text                  "Self-check complete!"
@@ -1123,8 +1124,8 @@ struct sSelfcheckPopup {
 	/* Left panel - task list */
 	lv_obj_t			*leftPanel;
 	lv_obj_t			*tasksLabel;
-	lv_obj_t			*phaseIcon[7];
-	lv_obj_t			*phaseNameLabel[7];
+	lv_obj_t			*phaseIcon[8];
+	lv_obj_t			*phaseNameLabel[8];
 
 	/* Right panel - current phase */
 	lv_obj_t			*rightPanel;
@@ -1813,6 +1814,14 @@ char *ftoa(char *a, float f, uint8_t precisione);
 uint8_t getValueForChemicalSource(uint8_t source);
 void getMinutesAndSeconds(uint8_t containerFillingTime, const bool containerToClean[3]);
 void cleanRelayManager(uint8_t pumpFrom, uint8_t pumpTo,uint8_t pumpDir,bool activePump);
+void setValveState(uint8_t relayPin, bool open);
+void closeAllValves(void);
+void motor_set_forward(uint8_t duty);
+void motor_set_reverse(uint8_t duty);
+void motor_set_stop(void);
+void pump_set_forward(uint8_t duty);
+void pump_set_reverse(uint8_t duty);
+void pump_set_stop(void);
 uint8_t getRandomRotationInterval();
 uint8_t mapPercentageToValue(uint8_t percentage, uint8_t minPercent, uint8_t maxPercent);
 void pwmLedTest();

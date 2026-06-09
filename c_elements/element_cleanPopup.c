@@ -6,7 +6,12 @@
 
 //ESSENTIAL INCLUDES
 #include "FilMachine.h"
+#include "esp_log.h"
+#if defined(DISPLAY_DRIVER_ST7701)
+#include "st7701_lcd.h"
+#endif
 
+static const char *TAG = "CleanProc";
 
 extern struct gui_components gui;
 
@@ -416,6 +421,10 @@ void event_cleanPopup(lv_event_t * e) {
   if(code == LV_EVENT_RELEASED){
     if(obj == gui.element.cleanPopup.cleanRunButton){
       if (containerSelected){
+            ESP_LOGI(TAG, "=== CLEANING PROCESS STARTED ===");
+#if defined(DISPLAY_DRIVER_ST7701)
+            st7701_lcd_set_dim_inhibit(true);   /* Keep screen on during cleaning */
+#endif
             resetStuffBeforeNextProcess();
 
             lv_obj_add_flag(gui.element.cleanPopup.cleanSettingsContainer, LV_OBJ_FLAG_HIDDEN);
@@ -449,7 +458,10 @@ void event_cleanPopup(lv_event_t * e) {
 	if(obj == gui.element.cleanPopup.cleanStopButton) {
 		if(gui.element.cleanPopup.stopNowPressed == false) {
 	    	if(processPercentage != 100) {
-	       		LV_LOG_USER("Stopped processTimer");
+	       		ESP_LOGW(TAG, "Cleaning STOPPED by user");
+#if defined(DISPLAY_DRIVER_ST7701)
+		      st7701_lcd_set_dim_inhibit(false); /* Re-enable auto-dimming */
+#endif
 		      //lv_timer_delete(gui.element.cleanPopup.pumpTimer);
 		      gui.element.cleanPopup.stopNowPressed = true;
 		      alarm_stop();
@@ -468,6 +480,10 @@ void event_cleanPopup(lv_event_t * e) {
 				lv_label_set_text(gui.element.cleanPopup.cleanTitle, cleanPopupTitle_text);
 			}
 		} else {
+			ESP_LOGI(TAG, "=== CLEANING PROCESS FINISHED ===");
+#if defined(DISPLAY_DRIVER_ST7701)
+			st7701_lcd_set_dim_inhibit(false); /* Re-enable auto-dimming */
+#endif
 			alarm_stop();
 			lv_obj_add_flag(gui.element.cleanPopup.cleanRemainingTimeValue, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_add_flag(gui.element.cleanPopup.cleanProcessContainer, LV_OBJ_FLAG_HIDDEN);
@@ -479,7 +495,7 @@ void event_cleanPopup(lv_event_t * e) {
 			lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanStopButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
 			lv_label_set_text(gui.element.cleanPopup.cleanStopButtonLabel, cleanStopButton_text);
 		}
-	}    
+	}
 }
   
 if(obj == gui.element.cleanPopup.cleanDrainWaterSwitch){

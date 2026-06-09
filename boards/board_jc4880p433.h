@@ -109,13 +109,26 @@
  * Drop-in replacement for discrete relay board — same chip,
  * same address, same register layout.
  * ═══════════════════════════════════════════════ */
-#define RELAY_NUMBER                6       /* Channels 0-5 on MCP23017; pump moved to H-bridge */
-#define HEATER_RLY                  0
+/* Port A — solenoid valves via Adafruit #6318 MOSFET channels (3.6A max)
+ * Pin 0 = free (heater moved to port B relay board) */
+#define RELAY_NUMBER                6       /* Valve channels on MCP23017 port A */
 #define C1_RLY                      1
 #define C2_RLY                      2
 #define C3_RLY                      3
 #define WB_RLY                      4
 #define WASTE_RLY                   5
+
+/* Port B — external relay board (10A per channel, for high-power loads)
+ * 4-channel relay board connected to MCP23017 port B pins 8-11.
+ * Active HIGH (relay board jumpered to high-level trigger).
+ * JD-VCC on relay board powered from 12V (separate from logic VCC). */
+#define PORTB_RELAY_START           8       /* First port B pin */
+#define PORTB_RELAY_COUNT           4       /* 4-channel relay board */
+#define HEATER_RLY                  8       /* Port B pin 0 — relay ch.1: heater (100W/8.3A) */
+#define RELAY_SPARE_1               9       /* Port B pin 1 — relay ch.2: spare */
+#define RELAY_SPARE_2               10      /* Port B pin 2 — relay ch.3: spare */
+#define RELAY_SPARE_3               11      /* Port B pin 3 — relay ch.4: spare */
+
 /* Pump direction is now handled by DBH-12V H-bridge channel B.
  * These constants are kept as logical direction markers so that
  * page_checkup.c and element_cleanPopup.c need no changes. */
