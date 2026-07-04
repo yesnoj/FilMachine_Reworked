@@ -21,6 +21,8 @@ extern "C" {
 void     sensors_flow_init(void);
 float    sensors_flow_get_litres_per_min(void);
 uint32_t sensors_flow_get_pulse_count(void);
+uint32_t sensors_flow_get_total_pulses(void);   /* monotonic since init */
+uint32_t sensors_flow_pulses_per_litre(void);
 void     sensors_flow_reset(void);
 
 /* ── Water level (XKC-Y21) ── */

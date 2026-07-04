@@ -403,6 +403,7 @@ typedef struct {
     int maintenance_clean_y;
     int maintenance_drain_y;
     int maintenance_selfcheck_y;
+    int maintenance_fill_y;
     int utilities_import_y;
     int utilities_export_y;
     int statistics_completed_y;

@@ -394,6 +394,24 @@ typedef enum {
 #define drainDrainingFmt_text                   "Draining: %s"
 #define drainDrainingC1_text                    "Draining: C1"
 
+/* Machine fill (Maintenance) texts */
+#define fillBath_text                           "Fill bath"
+#define fillPopupTitle_text                     "Fill water bath"
+#define fillStatusReady_text                    "Press Start to fill"
+#define fillStart_text                          "Start"
+#define fillStatusRunning_text                  "Filling... stops when full"
+#define fillStatusFull_text                     "Water bath full"
+#define fillStatusStopped_text                  "Fill stopped"
+#define fillStatusTimeout_text                  "Timed out - check sensor"
+#define fillStatusNoFlow_text                   "No water flow - check inlet"
+#define fillStatusNoLevel_text                  "Flow OK but bath not filling"
+#define fillStatusDoneNoMax_text                "Target reached - MAX not confirmed"
+#define fillFlow_fmt                            "Flow: %.1f L/min"
+#define fillVolume_fmt                          "%lu / %d ml"
+#define fillInfo_fmt                            "%lu / %d ml    %.1f L/min"
+#define fillStop_text                           "Stop"
+#define fillClose_text                          "Close"
+
 /* Self-check popup texts */
 #define selfCheck_text                          "Self-check"
 #define selfCheckTasks_text                     "Tasks:"
@@ -1032,6 +1050,21 @@ struct sCalibPopup {
 	lv_timer_t          *liveTimer;
 };
 
+struct sFillPopup {
+	lv_obj_t            *parent;
+	lv_obj_t            *container;
+	lv_obj_t            *title;
+	lv_obj_t            *statusLabel;
+	lv_obj_t            *levelBar;           /* water-bath level bargraph */
+	lv_obj_t            *flowLabel;          /* live inlet flow rate */
+	lv_obj_t            *actionButton;       /* Stop while filling, Close when done */
+	lv_obj_t            *actionButtonLabel;
+	lv_style_t          style_barIndic;
+	lv_style_t          style_titleLine;
+	lv_point_precise_t  titleLinePoints[2];
+	lv_timer_t          *liveTimer;
+};
+
 struct sCleanPopup {
 	/* LVGL objects */
 	lv_style_t			    style_cleanTitleLine;
@@ -1477,6 +1510,7 @@ struct sTools {
 	lv_obj_t 	        	*toolsCleaningContainer;
 	lv_obj_t 	        	*toolsDrainingContainer;
 	lv_obj_t 	        	*toolsSelfcheckContainer;
+	lv_obj_t 	        	*toolsFillContainer;
 	lv_obj_t 	        	*toolsImportContainer;
 	lv_obj_t 	        	*toolsExportContainer;
 
@@ -1484,6 +1518,7 @@ struct sTools {
 	lv_obj_t 	        	*toolsCleaningLabel;
 	lv_obj_t 	        	*toolsDrainingLabel;
 	lv_obj_t 	        	*toolsSelfcheckLabel;
+	lv_obj_t 	        	*toolsFillLabel;
 	lv_obj_t 	        	*toolsImportLabel;
 	lv_obj_t 	        	*toolsExportLabel;
 
@@ -1493,6 +1528,8 @@ struct sTools {
   lv_obj_t 	        	*toolsDrainingButtonLabel;
 	lv_obj_t 	        	*toolsSelfcheckButton;
   lv_obj_t 	        	*toolsSelfcheckButtonLabel;
+	lv_obj_t 	        	*toolsFillButton;
+  lv_obj_t 	        	*toolsFillButtonLabel;
 	lv_obj_t 	        	*toolsImportButton;
   lv_obj_t 	          *toolsImportButtonLabel;
 	lv_obj_t 	        	*toolsExportButton;
@@ -1591,6 +1628,7 @@ struct sElements {
 	struct sRollerPopup			rollerPopup;
 	struct sSpeedPopup			speedPopup;
 	struct sCalibPopup			calibPopup;
+	struct sFillPopup			fillPopup;
   struct sKeyboardPopup   keyboardPopup;
   struct sSplashPopup     splashPopup;
   struct sWifiPopup       wifiPopup;
@@ -1780,6 +1818,38 @@ int8_t  getChemCalibOffset(void);
  * DS18B20 bus; the UI reads getCachedTemperature() which never blocks. */
 float   getCachedTemperature(uint8_t sensorIndex);
 void    temperaturePollerStart(void);
+
+/* ── Machine (water-bath) fill: open WB valve, meter the volume in ──
+ * The water inlet is already pressurized, so no pump is used — we only open the
+ * WB valve. The flow meter integrates the dispensed volume and the fill stops
+ * once FILL_TARGET_ML has gone in (the MAX level switch is a safety backstop).
+ * If no flow is seen shortly after opening the valve, the fill aborts.
+ *
+ * FILL_TARGET_ML: 5000 for the 5-litre bath (500 for a small bench test). */
+#ifndef FILL_TARGET_ML
+#define FILL_TARGET_ML   5000
+#endif
+/* Bench testing: set to 1 to ignore the MAX float switch (rely on metered
+ * volume only) while the MAX sensor wiring is being sorted out. */
+#ifndef FILL_IGNORE_MAX
+#define FILL_IGNORE_MAX  0
+#endif
+#define FILL_IDLE        0
+#define FILL_RUNNING     1
+#define FILL_FULL        2   /* target reached (or MAX tripped), MAX confirmed  */
+#define FILL_STOPPED     3
+#define FILL_TIMEOUT     4
+#define FILL_NOFLOW      5   /* flow meter saw no water after opening the valve */
+#define FILL_NOLEVEL     6   /* flow OK but low float never wetted (not filling)*/
+#define FILL_DONE_NOMAX  7   /* target volume in, but MAX switch not confirmed  */
+void     machineFillStart(void);
+void     machineFillStop(void);
+int      machineFillState(void);
+float    machineFillFlowLpm(void);   /* live inlet flow rate, L/min           */
+uint32_t machineFillVolumeMl(void);  /* metered volume dispensed so far, ml    */
+int      machineFillProgress(void);  /* 0..100 = volume / FILL_TARGET_ML       */
+bool     machineFillBathFull(void);  /* true = MAX float already wet right now  */
+void     fillPopupCreate(void);   /* @file element_fillPopup.c */
 // @file accessories.c
 uint8_t pumpPercentToDuty(uint8_t pct);
 // @file ota_update.c

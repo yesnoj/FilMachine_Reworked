@@ -88,6 +88,7 @@ else()
         c_elements/element_rollerPopup.c
         c_elements/element_speedPopup.c
         c_elements/element_calibPopup.c
+        c_elements/element_fillPopup.c
         c_elements/element_cleanPopup.c
         c_elements/element_drainPopup.c
         c_elements/element_selfcheckPopup.c

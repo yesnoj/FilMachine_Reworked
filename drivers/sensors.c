@@ -30,12 +30,14 @@ static const char __attribute__((unused)) *TAG = "sensors";
 
 #define FLOW_PULSES_PER_LITRE   450
 
-static volatile uint32_t flow_pulse_count = 0;
+static volatile uint32_t flow_pulse_count = 0;   /* consumed+reset by rate reader */
+static volatile uint32_t flow_total_pulses = 0;  /* monotonic; for volume integ.  */
 static int64_t            flow_last_read_us = 0;
 
 static void IRAM_ATTR flow_meter_isr(void *arg)
 {
     flow_pulse_count++;
+    flow_total_pulses++;
 }
 
 void sensors_flow_init(void)
@@ -57,6 +59,7 @@ void sensors_flow_init(void)
     ESP_ERROR_CHECK(gpio_isr_handler_add(FLOW_METER_PIN, flow_meter_isr, NULL));
 
     flow_pulse_count = 0;
+    flow_total_pulses = 0;
     flow_last_read_us = esp_timer_get_time();
     ESP_LOGI(TAG, "Flow meter initialised on GPIO %d", FLOW_METER_PIN);
 }
@@ -81,9 +84,22 @@ uint32_t sensors_flow_get_pulse_count(void)
     return flow_pulse_count;
 }
 
+/* Monotonic total since init — safe to read from several places (not reset by
+ * the rate reader); use pulse deltas to integrate dispensed volume. */
+uint32_t sensors_flow_get_total_pulses(void)
+{
+    return flow_total_pulses;
+}
+
+uint32_t sensors_flow_pulses_per_litre(void)
+{
+    return FLOW_PULSES_PER_LITRE;
+}
+
 void sensors_flow_reset(void)
 {
     flow_pulse_count = 0;
+    flow_total_pulses = 0;
     flow_last_read_us = esp_timer_get_time();
 }
 
@@ -91,6 +107,8 @@ void sensors_flow_reset(void)
 void     sensors_flow_init(void) {}
 float    sensors_flow_get_litres_per_min(void) { return 0.0f; }
 uint32_t sensors_flow_get_pulse_count(void) { return 0; }
+uint32_t sensors_flow_get_total_pulses(void) { return 0; }
+uint32_t sensors_flow_pulses_per_litre(void) { return 450; }
 void     sensors_flow_reset(void) {}
 #endif
 
@@ -178,6 +196,8 @@ bool sensors_hall_magnet_detected(void) { return true; }  /* assume spinning */
 void     sensors_flow_init(void) {}
 float    sensors_flow_get_litres_per_min(void) { return 2.5f; }
 uint32_t sensors_flow_get_pulse_count(void) { return 0; }
+uint32_t sensors_flow_get_total_pulses(void) { return 0; }
+uint32_t sensors_flow_pulses_per_litre(void) { return 450; }
 void     sensors_flow_reset(void) {}
 
 void sensors_water_level_init(void) {}

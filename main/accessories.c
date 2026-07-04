@@ -1825,7 +1825,17 @@ void valveSelfTest(void) {
     LV_LOG_USER("=== Channel self-test done ===");
 }
 
-#if defined(BOARD_JC4880P433) && SENSOR_SELFTEST_ON_BOOT
+#if defined(BOARD_JC4880P433)
+/* Bring up the extra-sensor GPIOs/ISR. Always done at boot (independent of the
+ * self-test log) because the Maintenance fill relies on the flow + level
+ * sensors being live. */
+static void sensors_hw_init(void) {
+    sensors_hall_init();
+    sensors_flow_init();
+    sensors_water_level_init();
+}
+
+#if SENSOR_SELFTEST_ON_BOOT
 /* Periodic live log of the extra sensors — verify wiring by watching the monitor:
  * wave a magnet at the Hall, fill/empty for water level, spin the impeller for flow. */
 static void sensor_log_task(void *arg) {
@@ -1842,15 +1852,136 @@ static void sensor_log_task(void *arg) {
 }
 
 void sensorsSelfTestInit(void) {
-    sensors_hall_init();
-    sensors_flow_init();
-    sensors_water_level_init();
+    sensors_hw_init();
     xTaskCreate(sensor_log_task, "sensorlog", 3072, NULL, 3, NULL);
     LV_LOG_USER("Sensor live-log started (Hall/water/flow every 500ms)");
 }
 #else
+void sensorsSelfTestInit(void) { sensors_hw_init(); }
+#endif
+
+#else
 void sensorsSelfTestInit(void) {}
 #endif
+
+/* ── Machine (water-bath) fill ──
+ * Maintenance action: open the WB valve and meter the incoming water with the
+ * flow sensor, stopping once FILL_TARGET_ML has been dispensed. The MAX level
+ * switch is a safety backstop (stop early if it trips), plus a safety timeout
+ * and a manual Stop. The water inlet is already pressurized, so NO pump is
+ * used. If no flow is seen within a short grace period after opening the valve,
+ * the fill aborts (closed tap / no mains pressure).
+ *
+ * This is standalone and does NOT touch the process state machine, so it must
+ * not go through sendValueToRelay (that dereferences the active process node,
+ * which is NULL outside a running process). */
+#define MACHINE_FILL_TIMEOUT_MS   600000    /* 10 min safety cap (5 L bath)      */
+#define FILL_FLOW_GRACE_MS        4000      /* window to see flow start          */
+#define FILL_FLOW_MIN_PULSES      3         /* pulses that confirm real flow     */
+#define FILL_MIN_CONFIRM_PCT      40        /* by this % of target, low float must wet */
+
+static volatile int      s_fillState    = FILL_IDLE;
+static volatile bool     s_fillStopReq  = false;
+static volatile uint32_t s_fillVolumeMl = 0;
+static volatile float    s_fillFlowLpm  = 0.0f;
+
+int      machineFillState(void)   { return s_fillState; }
+void     machineFillStop(void)    { s_fillStopReq = true; }
+float    machineFillFlowLpm(void) { return s_fillFlowLpm; }
+uint32_t machineFillVolumeMl(void){ return s_fillVolumeMl; }
+
+int machineFillProgress(void) {
+    long p = (long)s_fillVolumeMl * 100 / FILL_TARGET_ML;
+    if (p > 100) p = 100;
+    if (p < 0)   p = 0;
+    return (int)p;
+}
+
+/* Is the bath already full right now (MAX float wet)? Used by the popup to show
+ * "full" immediately on open instead of offering Start. */
+bool machineFillBathFull(void) {
+#if defined(BOARD_JC4880P433)
+    return FILL_IGNORE_MAX ? false : sensors_water_level_max_detected();
+#else
+    return false;
+#endif
+}
+
+#if defined(BOARD_JC4880P433)
+static void machine_fill_task(void *arg) {
+    (void)arg;
+    s_fillStopReq  = false;
+    s_fillVolumeMl = 0;
+    s_fillFlowLpm  = 0.0f;
+    s_fillState    = FILL_RUNNING;
+    ESP_LOGI(TAG, "Machine fill: opening WB valve, target %d ml", FILL_TARGET_ML);
+
+    mcp23017_digitalWrite(&mcp, WB_RLY, 1);          /* open water-bath valve   */
+
+    const uint32_t ppl        = sensors_flow_pulses_per_litre();   /* ~450     */
+    const uint32_t startTotal = sensors_flow_get_total_pulses();
+    const uint32_t minConfirmMl = (uint32_t)FILL_TARGET_ML * FILL_MIN_CONFIRM_PCT / 100;
+    uint32_t       prevTotal  = startTotal;
+    bool           flowConfirmed = false;
+    bool           minConfirmed  = false;
+    int            elapsed     = 0;
+
+    for (;;) {
+        uint32_t total   = sensors_flow_get_total_pulses();
+        uint32_t dPulses = total - startTotal;                     /* since start */
+
+        /* Integrated volume dispensed so far, in ml. */
+        s_fillVolumeMl = (uint32_t)(((uint64_t)dPulses * 1000) / ppl);
+
+        /* Instantaneous flow rate over the 200 ms tick (L/min). */
+        uint32_t stepPulses = total - prevTotal;
+        prevTotal = total;
+        s_fillFlowLpm = ((float)stepPulses / ppl) * (60.0f / 0.2f);
+
+        bool maxWet = FILL_IGNORE_MAX ? false : sensors_water_level_max_detected();
+
+        /* Stop at the FIRST of: MAX float trips (hard safety, never overshoot)
+         * or the metered target volume is reached. When the target is hit we
+         * also cross-check the MAX float to confirm the level is really there. */
+        if (maxWet)                              { s_fillState = FILL_FULL;    break; }
+        if (s_fillVolumeMl >= FILL_TARGET_ML) {
+            s_fillState = (FILL_IGNORE_MAX || maxWet) ? FILL_FULL : FILL_DONE_NOMAX;
+            break;
+        }
+        if (s_fillStopReq)                       { s_fillState = FILL_STOPPED; break; }
+        if (elapsed >= MACHINE_FILL_TIMEOUT_MS)  { s_fillState = FILL_TIMEOUT; break; }
+
+        /* Flow-meter watchdog: confirm water is actually moving after we open
+         * the valve; if not, the inlet has no water — abort. */
+        if (!flowConfirmed && dPulses >= FILL_FLOW_MIN_PULSES) flowConfirmed = true;
+        if (!flowConfirmed && elapsed >= FILL_FLOW_GRACE_MS)   { s_fillState = FILL_NOFLOW; break; }
+
+        /* Level cross-check: flow is going in, so by the time we've metered a
+         * fraction of the target the low float must be wet — otherwise water is
+         * flowing but the bath isn't filling (leak / wrong valve / bad sensor). */
+        if (!minConfirmed && sensors_water_level_detected())          minConfirmed = true;
+        if (!minConfirmed && s_fillVolumeMl >= minConfirmMl)          { s_fillState = FILL_NOLEVEL; break; }
+
+        vTaskDelay(pdMS_TO_TICKS(200));
+        elapsed += 200;
+    }
+
+    s_fillFlowLpm = 0.0f;
+    mcp23017_digitalWrite(&mcp, WB_RLY, 0);          /* close valve             */
+    ESP_LOGI(TAG, "Machine fill ended (state=%d, %lu ml)", s_fillState, (unsigned long)s_fillVolumeMl);
+    vTaskDelete(NULL);
+}
+#endif
+
+void machineFillStart(void) {
+    if (s_fillState == FILL_RUNNING) return;
+#if defined(BOARD_JC4880P433)
+    xTaskCreate(machine_fill_task, "mfill", 3072, NULL, 5, NULL);
+#else
+    s_fillVolumeMl = FILL_TARGET_ML;   /* sim: pretend the target went in */
+    s_fillState    = FILL_FULL;
+#endif
+}
 
 /* ── Motor direction helpers ──
  * P4 board: IN1/IN2 are ESP32 GPIOs on the Expand IO header (direct control).

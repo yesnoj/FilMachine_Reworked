@@ -82,6 +82,10 @@ void event_toolsElement(lv_event_t * e) {
                   lv_obj_remove_flag(gui.element.selfcheckPopup.selfcheckPopupParent, LV_OBJ_FLAG_HIDDEN);
               }
           }
+      if(obj == gui.page.tools.toolsFillButton){
+              LV_LOG_USER("PRESSED gui.page.tools.toolsFillButton");
+              fillPopupCreate();
+          }
       if(obj == gui.page.tools.toolsExportButton){
               LV_LOG_USER("PRESSED gui.page.tools.toolsExportButton");
 			  messagePopupCreate(exportConfigAndProcesses_text,exportConfigAndProcessesMBox_text, checkupNo_text, checkupYes_text, obj);
@@ -201,6 +205,30 @@ static void initTools_maintenance(lv_obj_t *parent) {
   lv_label_set_text(gui.page.tools.toolsSelfcheckButtonLabel, play_icon);
   lv_obj_set_style_text_font(gui.page.tools.toolsSelfcheckButtonLabel, ui->button_icon_font, 0);
   lv_obj_align(gui.page.tools.toolsSelfcheckButtonLabel, LV_ALIGN_CENTER, 0, 0);
+
+  /* Fill bath: open the WB valve + pump, stop automatically on the MAX level sensor */
+  gui.page.tools.toolsFillContainer = lv_obj_create(parent);
+  lv_obj_align(gui.page.tools.toolsFillContainer, LV_ALIGN_TOP_LEFT, ui->item_row_x, ui->maintenance_fill_y);
+  lv_obj_set_size(gui.page.tools.toolsFillContainer, ui->item_row_w, ui->action_row_h);
+  lv_obj_remove_flag(gui.page.tools.toolsFillContainer, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_scroll_dir(gui.page.tools.toolsFillContainer, LV_DIR_VER);
+  lv_obj_set_style_border_opa(gui.page.tools.toolsFillContainer, LV_OPA_TRANSP, 0);
+
+  gui.page.tools.toolsFillLabel = lv_label_create(gui.page.tools.toolsFillContainer);
+  lv_label_set_text(gui.page.tools.toolsFillLabel, fillBath_text);
+  lv_obj_set_style_text_font(gui.page.tools.toolsFillLabel, ui->item_font, 0);
+  lv_obj_align(gui.page.tools.toolsFillLabel, LV_ALIGN_LEFT_MID, ui->item_label_x, ui->item_label_y);
+
+  gui.page.tools.toolsFillButton = lv_button_create(gui.page.tools.toolsFillContainer);
+  lv_obj_set_size(gui.page.tools.toolsFillButton, ui->action_btn_w, BUTTON_PROCESS_HEIGHT);
+  lv_obj_align(gui.page.tools.toolsFillButton, LV_ALIGN_RIGHT_MID, ui->item_btn_x, ui->item_label_y);
+  lv_obj_add_event_cb(gui.page.tools.toolsFillButton, event_toolsElement, LV_EVENT_CLICKED, gui.page.tools.toolsFillButton);
+  lv_obj_set_style_bg_color(gui.page.tools.toolsFillButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
+
+  gui.page.tools.toolsFillButtonLabel = lv_label_create(gui.page.tools.toolsFillButton);
+  lv_label_set_text(gui.page.tools.toolsFillButtonLabel, play_icon);
+  lv_obj_set_style_text_font(gui.page.tools.toolsFillButtonLabel, ui->button_icon_font, 0);
+  lv_obj_align(gui.page.tools.toolsFillButtonLabel, LV_ALIGN_CENTER, 0, 0);
 }
 
 static void initTools_utilities(lv_obj_t *parent) {
