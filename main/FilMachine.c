@@ -424,6 +424,11 @@ void app_main( void ) {
 
 lv_display_t *our_display;
 
+    /* First thing: force the H-bridge (motor + pump) control pins LOW so the
+     * driver stays OFF from the earliest moment the app runs, minimising the
+     * power-on twitch before the full motor/pump init. */
+    hbridge_safe_init();
+
     initGlobals();
 
     /* ── NVS flash: needed for Wi-Fi credential persistence ── */

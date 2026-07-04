@@ -32,6 +32,8 @@ void sim_ui_debug_tag(lv_obj_t *obj, const char *name);
 #define MAX_MOTOR_SPD				200
 #define MOTOR_MIN_ANALOG_VAL		90      /* Lowered from 150: widens usable slider range. Re-tune if motor stalls at low duty. */
 #define MOTOR_MAX_ANALOG_VAL		255
+#define MOTOR_KICK_DUTY				170                    /* breakaway kick duty (overcomes stiction on start); ~67%, above the ~145 breakaway */
+#define MOTOR_KICK_MS				100                    /* breakaway kick duration in ms */
 
 /* Pump speed (0-255, 8-bit duty cycle) */
 #define PUMP_DEFAULT_SPEED          200     /* Fallback only (e.g. checkup/manual actions) */
@@ -1816,6 +1818,7 @@ void updateProcessElement(processNode *process);
 void updateStepElement(processNode *referenceProcess, stepNode *step);
 uint32_t loadSDCardProcesses();
 char *generateRandomCharArray(uint8_t length);
+void hbridge_safe_init(void);
 void initializeRelayPins();
 void sendValueToRelay(uint8_t pumpFrom, uint8_t pumpDir, bool activePump);
 void initializeMotorPins();
@@ -1867,6 +1870,7 @@ void closeAllValves(void);
 void motor_set_forward(uint8_t duty);
 void motor_set_reverse(uint8_t duty);
 void motor_set_stop(void);
+void motor_start_kicked(bool forward, uint8_t target_duty);
 void pump_set_forward(uint8_t duty);
 void pump_set_reverse(uint8_t duty);
 void pump_set_stop(void);

@@ -67,10 +67,14 @@ static void event_speedTestSwitch(lv_event_t *e)
 {
     (void)e;
     struct sSpeedPopup *sp = &gui.element.speedPopup;
-    if (lv_obj_has_state(sp->testSwitch, LV_STATE_CHECKED))
-        speed_apply_live();
-    else
+    if (lv_obj_has_state(sp->testSwitch, LV_STATE_CHECKED)) {
+        if (!sp->isPump)
+            motor_start_kicked(true, mapPercentageToValue(sp->percent, 10, 100));  /* breakaway kick from rest */
+        else
+            speed_apply_live();
+    } else {
         speed_stop();
+    }
 }
 
 /* SET pressed: stop, save, refresh the settings row, persist, close, then confirm. */

@@ -1813,6 +1813,19 @@ void motor_set_stop(void) {
     LV_LOG_USER("Motor: STOPPED");
 }
 
+/* Start the motor from rest with a brief full-power kick to break away static
+ * friction, then settle to the target duty. Lets low speeds start reliably.
+ * Blocking for MOTOR_KICK_MS — call from a task/UI callback, not an ISR. */
+void motor_start_kicked(bool forward, uint8_t target_duty) {
+    if (target_duty == 0) { motor_set_stop(); return; }
+    if (forward) motor_set_forward(MOTOR_KICK_DUTY);
+    else         motor_set_reverse(MOTOR_KICK_DUTY);
+    vTaskDelay(pdMS_TO_TICKS(MOTOR_KICK_MS));
+    if (forward) motor_set_forward(target_duty);
+    else         motor_set_reverse(target_duty);
+    LV_LOG_USER("Motor: kicked start -> duty=%d (%s)", target_duty, forward ? "FWD" : "REV");
+}
+
 /* ── Non-blocking pump control (safe to call from LVGL timer callbacks) ── */
 void pump_set_forward(uint8_t duty) {
     pump_run(true, duty);
@@ -1879,6 +1892,33 @@ void sendValueToRelay(uint8_t pumpFrom, uint8_t pumpDir, bool activePump) {
 }
 
 
+/* Earliest-possible safe state for the DBH-12V H-bridge control pins.
+ * Called as the very first thing in app_main so the motor + pump direction/
+ * enable lines are driven LOW (driver OFF) as soon as the app starts, instead
+ * of floating for ~2 s until the full motor/pump init runs. Reduces (but cannot
+ * fully remove) the power-on twitch — external pull-downs still recommended to
+ * cover the ROM-bootloader window before app_main runs. */
+void hbridge_safe_init(void){
+#if defined(BOARD_JC4880P433)
+    gpio_config_t io = {
+        .pin_bit_mask = (1ULL << MOTOR_IN1_PIN) | (1ULL << MOTOR_IN2_PIN) | (1ULL << MOTOR_ENA_PIN) |
+                        (1ULL << PUMP_IN1_PIN)  | (1ULL << PUMP_IN2_PIN)  | (1ULL << PUMP_ENA_PIN),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_ENABLE,   /* hold LOW even if a pin is later left as input */
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    gpio_config(&io);
+    gpio_set_level(MOTOR_IN1_PIN, 0);
+    gpio_set_level(MOTOR_IN2_PIN, 0);
+    gpio_set_level(MOTOR_ENA_PIN, 0);
+    gpio_set_level(PUMP_IN1_PIN, 0);
+    gpio_set_level(PUMP_IN2_PIN, 0);
+    gpio_set_level(PUMP_ENA_PIN, 0);
+    LV_LOG_USER("H-bridge pins forced LOW (safe boot state)");
+#endif
+}
+
 void initializeMotorPins(){
 #if defined(BOARD_JC4880P433)
     /* IN1 and IN2 on ESP32 GPIOs (Expand IO header) */
@@ -1943,22 +1983,22 @@ void runMotorFW(uint8_t pin1, uint8_t pin2){
   motor_dir_set(pin1, 1);
   motor_dir_set(pin2, 0);
 
-  for (uint8_t dutyCycle = MOTOR_MIN_ANALOG_VAL; dutyCycle <= sys.analogVal_rotationSpeedPercent; dutyCycle++) {
-    motor_ledc_set_duty(dutyCycle);
-    vTaskDelay(pdMS_TO_TICKS(10));
-  }
-  LV_LOG_USER("Run runMotorFW at speed %d", sys.analogVal_rotationSpeedPercent);
+  /* Breakaway kick, then settle to the set speed (overcomes stiction at low speeds) */
+  motor_ledc_set_duty(MOTOR_KICK_DUTY);
+  vTaskDelay(pdMS_TO_TICKS(MOTOR_KICK_MS));
+  motor_ledc_set_duty(sys.analogVal_rotationSpeedPercent);
+  LV_LOG_USER("Run runMotorFW: kick then speed %d", sys.analogVal_rotationSpeedPercent);
 }
 
 void runMotorRV(uint8_t pin1, uint8_t pin2){
   motor_dir_set(pin1, 0);
   motor_dir_set(pin2, 1);
 
-  for (uint8_t dutyCycle = MOTOR_MIN_ANALOG_VAL; dutyCycle <= sys.analogVal_rotationSpeedPercent; dutyCycle++) {
-    motor_ledc_set_duty(dutyCycle);
-    vTaskDelay(pdMS_TO_TICKS(10));
-  }
-  LV_LOG_USER("Run runMotorRV at speed %d", sys.analogVal_rotationSpeedPercent);
+  /* Breakaway kick, then settle to the set speed (overcomes stiction at low speeds) */
+  motor_ledc_set_duty(MOTOR_KICK_DUTY);
+  vTaskDelay(pdMS_TO_TICKS(MOTOR_KICK_MS));
+  motor_ledc_set_duty(sys.analogVal_rotationSpeedPercent);
+  LV_LOG_USER("Run runMotorRV: kick then speed %d", sys.analogVal_rotationSpeedPercent);
 }
 
 void setMotorSpeed(uint8_t pin, uint8_t spd){
