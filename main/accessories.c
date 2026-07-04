@@ -27,6 +27,9 @@
 #include "driver/ledc.h"
 #include "esp_vfs_fat.h"
 #include "esp_heap_caps.h"
+#ifndef SIMULATOR_BUILD
+#include "audio.h"
+#endif
 
 #include "FilMachine.h"
 #include "ws_server.h"
@@ -805,6 +808,7 @@ void initGlobals( void ) {
   gui.page.settings.settingsParams.tankSize = 2;           /* Medium */
   gui.page.settings.settingsParams.pumpSpeed = 30;
   gui.page.settings.settingsParams.invertPump = false;
+  gui.page.settings.settingsParams.volume = 60;
   gui.page.settings.settingsParams.chemContainerMl = 500;
   gui.page.settings.settingsParams.wbContainerMl = 2000;
   gui.page.settings.settingsParams.chemistryVolume = 2;    /* High */
@@ -1060,6 +1064,15 @@ void init_Pins_and_Buses( void ) {
         LV_LOG_USER("I2C bus reset warning (0x%x) — GT911 may fail", bus_rst);
     } else {
         LV_LOG_USER("I2C bus reset OK — bus ready for GT911 touch");
+    }
+
+    /* ── Audio: ES8311 codec on the shared I2C bus ── */
+    if (audio_init(g_i2c_bus_handle) != ESP_OK) {
+        LV_LOG_USER("ES8311 audio init FAILED — no sound");
+    } else {
+        uint8_t vol = gui.page.settings.settingsParams.volume;
+        audio_set_volume(vol ? vol : 60);
+        LV_LOG_USER("ES8311 audio init OK");
     }
 #endif
 
@@ -2757,10 +2770,8 @@ static lv_timer_t *s_alarm_timer = NULL;
 
 void buzzer_beep(void)
 {
-    /*
-     * Hardware buzzer implementation is not wired here yet.
-     * Keep this as a safe no-op so alarm logic links and runs.
-     */
+    /* Short beep via the ES8311 codec. */
+    audio_play_tone(2000, 120);
 }
 
 static void alarm_timer_cb(lv_timer_t *t)

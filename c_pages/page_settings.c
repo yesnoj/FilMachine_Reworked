@@ -41,9 +41,11 @@ uint8_t analogVal_rotationSpeedPercent;
 #define Y_INVERT_PUMP                (Y_PUMP_SPEED + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
 #if defined(DISPLAY_DRIVER_ST7701)
 #define Y_BRIGHTNESS                 (Y_INVERT_PUMP + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_PERSISTENT_ALARM           (Y_BRIGHTNESS + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
+#define Y_VOLUME                     (Y_BRIGHTNESS + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
+#define Y_PERSISTENT_ALARM           (Y_VOLUME + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #else
-#define Y_PERSISTENT_ALARM           (Y_INVERT_PUMP + SETTINGS_H_ROW + SETTINGS_GAP_Y)
+#define Y_VOLUME                     (Y_INVERT_PUMP + SETTINGS_H_ROW + SETTINGS_GAP_Y)
+#define Y_PERSISTENT_ALARM           (Y_VOLUME + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #endif
 #define Y_TANK_SIZE                  (Y_PERSISTENT_ALARM + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #define Y_CHEM_CONTAINER_ML          (Y_TANK_SIZE + SETTINGS_H_ROW + SETTINGS_GAP_Y)
@@ -112,6 +114,9 @@ void event_settingPopupMBox(lv_event_t * e){
     }
     if(data == gui.page.settings.brightnessLabel) {
         messagePopupCreate(messagePopupDetailTitle_text,brightnessAlertMBox_text,NULL,NULL,NULL);
+    }
+    if(data == gui.page.settings.volumeLabel) {
+        messagePopupCreate(messagePopupDetailTitle_text,volumeAlertMBox_text,NULL,NULL,NULL);
     }
     if(data == gui.page.settings.chemContainerMlLabel) {
         messagePopupCreate(messagePopupDetailTitle_text,chemContainerMlAlertMBox_text,NULL,NULL,NULL);
@@ -425,7 +430,7 @@ void event_settings_handler(lv_event_t * e)
             p->pumpSpeed = 30;
             p->invertPump = false;
             p->brightness = 100;
-            p->dimTimeout = 30;
+            p->volume = 60;
             p->chemContainerMl = 500;
             p->wbContainerMl = 2000;
             p->chemistryVolume = 2;         /* High */
@@ -579,6 +584,8 @@ static void event_speedTuneButton(lv_event_t *e)
         speedPopupCreate(true, gui.page.settings.settingsParams.pumpSpeed);
     else if (btn == gui.page.settings.motorSpeedTuneButton)
         speedPopupCreate(false, gui.page.settings.settingsParams.filmRotationSpeedSetpoint);
+    else if (btn == gui.page.settings.volumeTuneButton)
+        volumePopupCreate(gui.page.settings.settingsParams.volume);
 }
 
 static void initSettings_sliders(lv_obj_t *parent)
@@ -854,6 +861,36 @@ gui.page.settings.brightnessContainer = lv_obj_create(parent);
         lv_obj_add_event_cb(gui.page.settings.brightnessSlider, event_settings_handler, LV_EVENT_RELEASED, gui.page.settings.brightnessValueLabel);
         lv_label_set_text_fmt(gui.page.settings.brightnessValueLabel, "%d%%", gui.page.settings.settingsParams.brightness);
 #endif
+
+/* ── Volume (TUNE popup, plays a tone as you scroll) ── */
+gui.page.settings.volumeContainer = lv_obj_create(parent);
+  lv_obj_align(gui.page.settings.volumeContainer, LV_ALIGN_TOP_LEFT, SETTINGS_LEFT_X, Y_VOLUME);
+  lv_obj_set_size(gui.page.settings.volumeContainer, UI_SETTINGS->row_w, SETTINGS_H_ROW);
+  lv_obj_remove_flag(gui.page.settings.volumeContainer, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_style_border_opa(gui.page.settings.volumeContainer, LV_OPA_TRANSP, 0);
+
+        gui.page.settings.volumeLabel = lv_label_create(gui.page.settings.volumeContainer);
+        lv_label_set_text(gui.page.settings.volumeLabel, volume_text);
+        lv_obj_set_style_text_font(gui.page.settings.volumeLabel, UI_SETTINGS->label_font, 0);
+        lv_obj_align(gui.page.settings.volumeLabel, LV_ALIGN_LEFT_MID, UI_SETTINGS->row_label_x, UI_SETTINGS->row_label_y);
+
+        createQuestionMark(gui.page.settings.volumeContainer, gui.page.settings.volumeLabel, event_settingPopupMBox, UI_SETTINGS->help_icon_x, UI_SETTINGS->help_icon_y);
+
+        gui.page.settings.volumeTuneButton = lv_button_create(gui.page.settings.volumeContainer);
+        lv_obj_set_size(gui.page.settings.volumeTuneButton, BUTTON_TUNE_WIDTH, BUTTON_TUNE_HEIGHT);
+        lv_obj_align(gui.page.settings.volumeTuneButton, LV_ALIGN_RIGHT_MID, UI_SETTINGS->tune_button_x, UI_SETTINGS->tune_button_y);
+        lv_obj_set_style_bg_color(gui.page.settings.volumeTuneButton, lv_color_hex(ORANGE), LV_PART_MAIN);
+        lv_obj_add_event_cb(gui.page.settings.volumeTuneButton, event_speedTuneButton, LV_EVENT_CLICKED, NULL);
+
+        gui.page.settings.volumeTuneButtonLabel = lv_label_create(gui.page.settings.volumeTuneButton);
+        lv_label_set_text(gui.page.settings.volumeTuneButtonLabel, tuneButton_text);
+        lv_obj_set_style_text_font(gui.page.settings.volumeTuneButtonLabel, UI_SETTINGS->button_font, 0);
+        lv_obj_align(gui.page.settings.volumeTuneButtonLabel, LV_ALIGN_CENTER, 0, 0);
+
+        gui.page.settings.volumeValueLabel = lv_label_create(gui.page.settings.volumeContainer);
+        lv_obj_set_style_text_font(gui.page.settings.volumeValueLabel, UI_SETTINGS->value_font, 0);
+        lv_label_set_text_fmt(gui.page.settings.volumeValueLabel, "%d%%", gui.page.settings.settingsParams.volume);
+        lv_obj_align_to(gui.page.settings.volumeValueLabel, gui.page.settings.volumeTuneButton, LV_ALIGN_OUT_LEFT_MID, -12, 0);
 
 /* ── Chemistry container capacity ── */
 gui.page.settings.chemContainerMlContainer = lv_obj_create(parent);
@@ -1159,6 +1196,9 @@ void refreshSettingsUI(void)
     lv_label_set_text_fmt(gui.page.settings.multiRinseTimeValueLabel,
                           "%ds", p->multiRinseTime);
 
+    /* ── Volume (TUNE popup) ── */
+    lv_label_set_text_fmt(gui.page.settings.volumeValueLabel, "%d%%", p->volume);
+
     /* ── Tank size textarea ── */
     {
         uint8_t tsIdx = p->tankSize;
@@ -1175,7 +1215,7 @@ void refreshSettingsUI(void)
     /* ── Brightness slider ── */
 #if defined(DISPLAY_DRIVER_ST7701)
     /* Safe defaults for old configs (fields zeroed by memset in readConfigFile) */
-    if (p->dimTimeout == 0) p->dimTimeout = 30;   /* default 30s dim */
+    if (p->volume == 0)     p->volume = 60;       /* default audio volume */
     if (p->brightness < 10) p->brightness = 100;  /* default full brightness */
     lv_slider_set_value(gui.page.settings.brightnessSlider,
                         p->brightness, LV_ANIM_OFF);

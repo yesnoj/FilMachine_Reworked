@@ -294,6 +294,9 @@ typedef enum {
 #define pumpSpeedAlertMBox_text             "Set the pump speed percentage.\nHigher values = faster fill/drain."
 #define speedTestSwitch_text                "Test"
 #define speedSetPopupTitle_text             "Speed set"
+#define volume_text                         "Volume"
+#define volumeAlertMBox_text                "Set the speaker volume.\nThe tone plays as you scroll so you can hear it."
+#define volumeSetPopupTitle_text            "Volume set"
 #define invertPump_text                     "Invert pump"
 #define invertPumpAlertMBox_text            "Invert the pump rotation direction.\nUse this to compensate for the\nphysical switch position on the pump."
 #define brightness_text                     "Brightness"
@@ -588,7 +591,7 @@ struct __attribute__ ((packed)) machineSettings {
 	char					wifiPassword[65];   /* Password (max 64 chars + NUL) */
 	/* ── Display settings (added last for binary config compatibility) ── */
 	uint8_t					brightness;         /* 10-100% LCD backlight brightness */
-	uint8_t					dimTimeout;         /* LEGACY — kept for binary config compat; dimming is now fixed 60/300/600s */
+	uint8_t					volume;             /* 0-100% audio output volume (was legacy dimTimeout — same byte, config-compatible) */
 	/* ── New fields go here (end of struct) to preserve binary config compatibility ── */
 	bool					invertPump;         /* true = invert pump H-bridge direction */
 };
@@ -1390,6 +1393,12 @@ struct sSettings {
 	lv_obj_t                *invertPumpLabel;
 	lv_obj_t                *invertPumpSwitch;
 
+	lv_obj_t                *volumeContainer;
+	lv_obj_t                *volumeLabel;
+	lv_obj_t                *volumeTuneButton;
+	lv_obj_t                *volumeTuneButtonLabel;
+	lv_obj_t                *volumeValueLabel;
+
 	lv_obj_t                *brightnessContainer;
 	lv_obj_t                *brightnessLabel;
 	lv_obj_t                *brightnessSlider;
@@ -1731,6 +1740,7 @@ void tools_resume_timer(void);
 void tools_delete_timer(void);
 // @file element_speedPopup.c
 void speedPopupCreate(bool isPump, uint8_t currentPercent);
+void volumePopupCreate(uint8_t currentPercent);
 // @file accessories.c
 uint8_t pumpPercentToDuty(uint8_t pct);
 // @file ota_update.c

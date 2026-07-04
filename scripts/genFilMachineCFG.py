@@ -176,9 +176,9 @@ DEFAULT_SETTINGS = {
     "wifiEnabled": 0,
     "wifiSSID": "",
     "wifiPassword": "",
-    # ── Display settings ──
+    # ── Display / audio settings ──
     "brightness": 100,
-    "dimTimeout": 30,
+    "volume": 60,
     # ── New fields (end of struct) ──
     "invertPump": 0,
 }
@@ -211,7 +211,7 @@ def random_settings():
         "wifiSSID": "",
         "wifiPassword": "",
         "brightness": random.randrange(50, 101, 10),
-        "dimTimeout": random.choice([0, 15, 30, 60]),
+        "volume": random.choice([40, 60, 80, 100]),
     }
 
 # ═══════════════════════════════════════════════
@@ -322,7 +322,7 @@ def write_settings(f, s):
     f.write(pwd.ljust(65, b'\x00'))                           # char[65]
     # ── Display settings ──
     f.write(struct.pack('<B', s.get("brightness", 100)))     # uint8_t (10-100%)
-    f.write(struct.pack('<B', s.get("dimTimeout", 30)))      # uint8_t (seconds, 0=disabled)
+    f.write(struct.pack('<B', s.get("volume", 60)))          # uint8_t audio volume (0-100%, same byte as legacy dimTimeout)
     # ── New fields (end of struct for binary compat) ──
     f.write(struct.pack('<B', s.get("invertPump", 0)))       # bool (invert pump direction)
 

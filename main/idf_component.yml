@@ -4,6 +4,10 @@ dependencies:
   # ── Touch driver ──
   espressif/esp_lcd_touch_gt911: "*"      # GT911 capacitive
 
+  # ── Audio (ES8311 codec over I2S + power amplifier) ──
+  # Pinned to the version the board vendor's demo uses (avoids surprise majors).
+  espressif/esp_codec_dev: "1.2.*"
+
   # ── Networking ──
   espressif/mdns: "*"
 

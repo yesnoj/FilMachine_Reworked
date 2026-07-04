@@ -208,3 +208,134 @@ void speedPopupCreate(bool isPump, uint8_t currentPercent)
     lv_obj_set_style_text_font(setLbl, ui->confirm_btn_font, 0);
     lv_obj_align(setLbl, LV_ALIGN_CENTER, 0, 0);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+ *  Volume popup — same roller styling, no Test switch.
+ *  The tone plays on every roller change so you hear the volume.
+ *  Reuses the shared speedPopup struct (only one popup open at a time).
+ * ═══════════════════════════════════════════════════════════════ */
+#ifndef SIMULATOR_BUILD
+#include "audio.h"
+#endif
+
+static void volume_apply(uint8_t pct)
+{
+#ifndef SIMULATOR_BUILD
+    audio_set_volume(pct);
+    audio_play_tone(1000, 90);
+#else
+    (void)pct;   /* simulator: no ES8311, popup is silent */
+#endif
+}
+
+static void event_volumeRoller(lv_event_t *e)
+{
+    (void)e;
+    struct sSpeedPopup *sp = &gui.element.speedPopup;
+    uint32_t idx = lv_roller_get_selected(sp->roller);
+    sp->percent = (uint8_t)(idx * 5);          /* 0..100 % step 5 */
+    volume_apply(sp->percent);
+}
+
+static void event_volumeSet(lv_event_t *e)
+{
+    (void)e;
+    struct sSpeedPopup *sp = &gui.element.speedPopup;
+    uint8_t percent = sp->percent;
+
+    gui.page.settings.settingsParams.volume = percent;
+    if (sp->targetValueLabel)
+        lv_label_set_text_fmt(sp->targetValueLabel, "%d%%", percent);
+
+    LV_LOG_USER("Volume SET: %d%%", percent);
+    qSysAction(SAVE_PROCESS_CONFIG);
+
+    lv_style_reset(&sp->style_titleLine);
+    lv_style_reset(&sp->style_roller);
+    lv_msgbox_close(sp->parent);
+    sp->parent = NULL;
+
+    {
+        static char msg[48];
+        snprintf(msg, sizeof(msg), "Volume set to %d%%", percent);
+        messagePopupCreate(volumeSetPopupTitle_text, msg, NULL, NULL, NULL);
+    }
+}
+
+void volumePopupCreate(uint8_t currentPercent)
+{
+    struct sSpeedPopup *sp = &gui.element.speedPopup;
+    const ui_roller_popup_layout_t *ui = &ui_get_profile()->roller_popup;
+    const int      rollerH = ui_get_profile()->popups.roller_wheel_h;
+    const uint32_t accent  = ORANGE;
+
+    if (sp->parent != NULL) {
+        LV_LOG_USER("Volume popup already open, skipping duplicate");
+        return;
+    }
+
+    if (currentPercent > 100) currentPercent = 100;
+    currentPercent = (uint8_t)((currentPercent / 5) * 5);   /* snap to step 5 */
+
+    sp->percent = currentPercent;
+    sp->targetValueLabel = gui.page.settings.volumeValueLabel;
+
+    /* Build roller options "0%\n5%\n...\n100%". */
+    {
+        char  *p   = sp->options;
+        size_t rem = sizeof(sp->options);
+        for (int v = 0; v <= 100; v += 5) {
+            int n = snprintf(p, rem, "%d%%%s", v, (v < 100) ? "\n" : "");
+            if (n < 0 || (size_t)n >= rem) break;
+            p += n; rem -= (size_t)n;
+        }
+    }
+
+    createPopupBackdrop(&sp->parent, &sp->container,
+                        ui_get_profile()->popups.roller_w,
+                        ui->wheel_container_y + rollerH + ui->confirm_btn_h + 60);
+
+    sp->title = lv_label_create(sp->container);
+    lv_label_set_text(sp->title, volume_text);
+    lv_obj_set_style_text_font(sp->title, ui->title_font, 0);
+    lv_obj_align(sp->title, LV_ALIGN_TOP_MID, ui->title_x, ui->title_y);
+
+    lv_style_init(&sp->style_titleLine);
+    lv_style_set_line_width(&sp->style_titleLine, ui_get_profile()->title_line_width);
+    lv_style_set_line_rounded(&sp->style_titleLine, true);
+    sp->titleLinePoints[0].x = 0; sp->titleLinePoints[0].y = 0;
+    sp->titleLinePoints[1].x = ui_get_profile()->popups.roller_title_line_w; sp->titleLinePoints[1].y = 0;
+    lv_obj_t *titleLine = lv_line_create(sp->container);
+    lv_line_set_points(titleLine, sp->titleLinePoints, 2);
+    lv_obj_add_style(titleLine, &sp->style_titleLine, 0);
+    lv_obj_align(titleLine, LV_ALIGN_TOP_MID, ui->title_line_x, ui->title_line_y);
+
+    lv_style_init(&sp->style_roller);
+    lv_style_set_text_font(&sp->style_roller, ui->wheel_font);
+    lv_style_set_bg_color(&sp->style_roller, lv_color_hex(accent));
+    lv_style_set_border_width(&sp->style_roller, ui_get_profile()->title_line_width);
+    lv_style_set_border_color(&sp->style_roller, lv_color_hex(accent));
+
+    sp->roller = lv_roller_create(sp->container);
+    lv_roller_set_options(sp->roller, sp->options, LV_ROLLER_MODE_NORMAL);
+    lv_roller_set_visible_row_count(sp->roller, ui->wheel_visible_rows);
+    lv_obj_set_width(sp->roller, ui->wheel_w);
+    lv_obj_set_height(sp->roller, rollerH);
+    lv_obj_align(sp->roller, LV_ALIGN_TOP_MID, ui->wheel_container_x, ui->wheel_container_y);
+    lv_roller_set_selected(sp->roller, (uint16_t)(currentPercent / 5), LV_ANIM_OFF);
+    lv_obj_add_event_cb(sp->roller, event_volumeRoller, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_add_style(sp->roller, &sp->style_roller, LV_PART_SELECTED);
+    lv_obj_set_style_text_font(sp->roller, ui->wheel_normal_font, LV_PART_MAIN);
+    lv_obj_set_style_border_color(sp->roller, lv_color_hex(WHITE), LV_PART_MAIN);
+
+    /* SET button — directly below the roller (no Test row) */
+    sp->setButton = lv_button_create(sp->container);
+    lv_obj_set_size(sp->setButton, ui->confirm_btn_w, ui->confirm_btn_h);
+    lv_obj_align_to(sp->setButton, sp->roller, LV_ALIGN_OUT_BOTTOM_MID, 0, 16);
+    lv_obj_add_event_cb(sp->setButton, event_volumeSet, LV_EVENT_CLICKED, NULL);
+
+    lv_obj_t *volSetLbl = lv_label_create(sp->setButton);
+    lv_label_set_text(volSetLbl, tuneRollerButton_text);   /* "SET" */
+    lv_obj_set_style_text_font(volSetLbl, ui->confirm_btn_font, 0);
+    lv_obj_align(volSetLbl, LV_ALIGN_CENTER, 0, 0);
+}

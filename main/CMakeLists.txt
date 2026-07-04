@@ -8,7 +8,7 @@ set(P4_DEPS st7701_lcd ppa_engine)
 # ESP32-P4: use individual esp_driver_* components instead of the legacy
 # "driver" compat wrapper, which would pull in the old i2c.c and conflict
 # with the new esp_driver_i2c used by GT911 touch.
-set(DRIVER_DEPS esp_driver_gpio esp_driver_ledc esp_driver_i2c esp_driver_spi)
+set(DRIVER_DEPS esp_driver_gpio esp_driver_ledc esp_driver_i2c esp_driver_spi esp_driver_i2s)
 
 idf_component_register(
     SRC_DIRS
@@ -24,6 +24,7 @@ idf_component_register(
     REQUIRES
         fatfs
         sdmmc
+        esp_codec_dev
         ${DRIVER_DEPS}
     PRIV_REQUIRES
         app_update
