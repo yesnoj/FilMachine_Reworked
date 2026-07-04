@@ -164,16 +164,17 @@ void fillPopupCreate(void)
     lv_obj_add_style(line, &fp->style_titleLine, 0);
     lv_obj_align(line, LV_ALIGN_TOP_MID, 0, ui->title_line_y);
 
-    /* X close button (top-right) — always lets you leave the popup */
+    /* X close button (top-right) — same look/placement as the Self-check popup */
+    const ui_selfcheck_popup_layout_t *scui = &ui_get_profile()->selfcheck_popup;
     lv_obj_t *closeBtn = lv_button_create(fp->container);
-    lv_obj_set_size(closeBtn, 46, 46);
-    lv_obj_align(closeBtn, LV_ALIGN_TOP_RIGHT, -6, 6);
+    lv_obj_set_size(closeBtn, scui->close_w, scui->close_h);
+    lv_obj_align(closeBtn, LV_ALIGN_TOP_RIGHT, scui->close_x, scui->close_y);
     lv_obj_set_style_bg_color(closeBtn, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
     lv_obj_add_event_cb(closeBtn, event_fillClose, LV_EVENT_CLICKED, NULL);
     lv_obj_move_foreground(closeBtn);
     lv_obj_t *closeLbl = lv_label_create(closeBtn);
     lv_label_set_text(closeLbl, closePopup_icon);
-    lv_obj_set_style_text_font(closeLbl, ui_get_profile()->tools.button_icon_font, 0);
+    lv_obj_set_style_text_font(closeLbl, scui->close_icon_font, 0);
     lv_obj_align(closeLbl, LV_ALIGN_CENTER, 0, 0);
 
     /* Live status */
