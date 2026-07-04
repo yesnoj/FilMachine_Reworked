@@ -1,6 +1,6 @@
 dependencies:
   espressif/eppp_link:
-    component_hash: 9472e6825f4bb71eca2b39cf1bc92659c1ac60bfd7416560ad033a7dd8641b17
+    component_hash: 04f7f31868b8ae6014c96132740a192d09611a6e46aaa7038c865ffc7e26b38f
     dependencies:
     - name: espressif/esp_serial_slave_link
       registry_url: https://components.espressif.com
@@ -12,7 +12,7 @@ dependencies:
     source:
       registry_url: https://components.espressif.com
       type: service
-    version: 1.1.4
+    version: 1.1.5
   espressif/esp_hosted:
     component_hash: e23eb702781c804a62909e5394da0641a2bff9adccec6673a7bff60ce8c8b756
     dependencies:
@@ -26,7 +26,7 @@ dependencies:
   espressif/esp_lcd_touch:
     dependencies: []
     source:
-      path: /Users/francescoprochilo/Desktop/FilMachine_Simulator_v2/components/espressif__esp_lcd_touch
+      path: /Users/francescoprochilo/Documents/GitHub/FilMachine_Reworked/components/espressif__esp_lcd_touch
       type: local
     version: 1.2.1
   espressif/esp_lcd_touch_gt911:
@@ -74,7 +74,7 @@ dependencies:
       type: service
     version: 1.5.0
   espressif/mdns:
-    component_hash: 1ebe3bd675bb9d1c58f52bc0b609b32f74e572b01c328f9e61282040c775495c
+    component_hash: e81ca7a7f53ea34e78274df054da692c272e1315572876b237b1748e267c013b
     dependencies:
     - name: idf
       require: private
@@ -82,7 +82,7 @@ dependencies:
     source:
       registry_url: https://components.espressif.com/
       type: service
-    version: 1.11.0
+    version: 1.11.3
   espressif/wifi_remote_over_eppp:
     component_hash: 06d8bc15348bbd21f1390daace36ed5adcf6026c93c5b69decc55fa04df2711a
     dependencies:
@@ -115,6 +115,6 @@ direct_dependencies:
 - espressif/mdns
 - idf
 - lvgl/lvgl
-manifest_hash: 8b6a477aac210aa90349c77133937f27587100f8cd007917916cd217514343e2
+manifest_hash: fb38249977bc9415e3d87f64b923a9ded09d790b29ba0e24de3cbbcaf3648466
 target: esp32p4
 version: 2.0.0

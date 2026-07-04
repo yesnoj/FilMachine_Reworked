@@ -298,7 +298,7 @@ static void add_title_and_play(lv_obj_t *scr, uint32_t text_color, uint32_t acce
     lv_obj_align_to(lbl_sub, lbl_title, tp->sub_align, ss->subtitle_x, ss->subtitle_y);
 
     lv_obj_t *lbl_ver = lv_label_create(scr);
-    lv_label_set_text(lbl_ver, splashVersion_text);
+    lv_label_set_text(lbl_ver, ota_get_running_version());  /* Single source of truth — same value as Tools page */
     lv_obj_set_style_text_font(lbl_ver, &lv_font_montserrat_12, 0);
     lv_obj_set_style_text_color(lbl_ver, lv_color_hex(text_color), 0);
     lv_obj_set_style_text_opa(lbl_ver, 100, 0);

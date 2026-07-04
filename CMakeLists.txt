@@ -30,6 +30,15 @@ else()
     set(CMAKE_C_STANDARD 11)
     set(CMAKE_C_STANDARD_REQUIRED ON)
 
+    # Firmware version — single source of truth (same file ESP-IDF uses on the board).
+    # Injected as FW_VERSION_STR so the simulator shows the identical value.
+    if(EXISTS "${CMAKE_SOURCE_DIR}/version.txt")
+        file(STRINGS "${CMAKE_SOURCE_DIR}/version.txt" FW_VERSION_STR LIMIT_COUNT 1)
+        string(STRIP "${FW_VERSION_STR}" FW_VERSION_STR)
+        add_definitions(-DFW_VERSION_STR="${FW_VERSION_STR}")
+        message(STATUS "FilMachine version: ${FW_VERSION_STR}")
+    endif()
+
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(SDL2 REQUIRED sdl2)
     link_directories(${SDL2_LIBRARY_DIRS} /opt/homebrew/lib)
@@ -64,7 +73,6 @@ else()
         main/ui_profile.c
         drivers/mcp23017.c
         drivers/ds18b20.c
-        drivers/pca9685.c
         drivers/sensors.c
         c_pages/page_menu.c
         c_pages/page_processes.c
@@ -78,6 +86,7 @@ else()
         c_elements/element_filterPopup.c
         c_elements/element_messagePopup.c
         c_elements/element_rollerPopup.c
+        c_elements/element_speedPopup.c
         c_elements/element_cleanPopup.c
         c_elements/element_drainPopup.c
         c_elements/element_selfcheckPopup.c

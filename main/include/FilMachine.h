@@ -30,11 +30,13 @@ void sim_ui_debug_tag(lv_obj_t *obj, const char *name);
 
 /* Motor speed limits (independent of board) */
 #define MAX_MOTOR_SPD				200
-#define MOTOR_MIN_ANALOG_VAL		150
+#define MOTOR_MIN_ANALOG_VAL		90      /* Lowered from 150: widens usable slider range. Re-tune if motor stalls at low duty. */
 #define MOTOR_MAX_ANALOG_VAL		255
 
-/* Pump default speed (0-255, 8-bit duty cycle) */
-#define PUMP_DEFAULT_SPEED          200
+/* Pump speed (0-255, 8-bit duty cycle) */
+#define PUMP_DEFAULT_SPEED          200     /* Fallback only (e.g. checkup/manual actions) */
+#define PUMP_MIN_ANALOG_VAL         150     /* Duty at pumpSpeed=10%. Measured stall/start ~148 on the bench, so 10% now already moves. */
+#define PUMP_MAX_ANALOG_VAL         250     /* Duty at pumpSpeed=100% (DBH-12V safe max) */
 
 /* LCD timing (used by parallel-bus boards, ignored by QSPI/simulator) */
 #ifndef LCD_PIXEL_CLOCK_HZ
@@ -290,6 +292,8 @@ typedef enum {
 #define tankSizeLarge_text                  "L"
 #define pumpSpeed_text                      "Pump speed"
 #define pumpSpeedAlertMBox_text             "Set the pump speed percentage.\nHigher values = faster fill/drain."
+#define speedTestSwitch_text                "Test"
+#define speedSetPopupTitle_text             "Speed set"
 #define invertPump_text                     "Invert pump"
 #define invertPumpAlertMBox_text            "Invert the pump rotation direction.\nUse this to compensate for the\nphysical switch position on the pump."
 #define brightness_text                     "Brightness"
@@ -980,6 +984,23 @@ struct sRollerPopup {
 	char                *tempToleranceOptions;  
 };
 
+/* Dedicated popup to tune Pump/Motor speed with a roller + live-test switch. */
+struct sSpeedPopup {
+	lv_obj_t            *parent;
+	lv_obj_t            *container;
+	lv_obj_t            *title;
+	lv_obj_t            *roller;
+	lv_obj_t            *testSwitch;
+	lv_obj_t            *setButton;
+	lv_obj_t            *targetValueLabel;   /* settings-page "%d%%" label to update on Set */
+	lv_style_t          style_titleLine;
+	lv_style_t          style_roller;
+	lv_point_precise_t  titleLinePoints[2];
+	bool                isPump;              /* true = pump, false = agitation motor */
+	uint8_t             percent;             /* currently selected speed % */
+	char                options[128];        /* roller options string "10%\n15%\n...\n100%" */
+};
+
 struct sCleanPopup {
 	/* LVGL objects */
 	lv_style_t			    style_cleanTitleLine;
@@ -1339,6 +1360,8 @@ struct sSettings {
 	lv_obj_t 	        	*waterInletSwitch;
 
 	lv_obj_t 	        	*filmRotationSpeedSlider;
+	lv_obj_t 	        	*motorSpeedTuneButton;
+	lv_obj_t 	        	*motorSpeedTuneButtonLabel;
 	lv_obj_t 	        	*filmRotationInversionIntervalSlider;
 	lv_obj_t 	        	*filmRandomSlider;
 	lv_obj_t 	        	*drainFillTimeSlider;
@@ -1359,6 +1382,8 @@ struct sSettings {
 	lv_obj_t                *pumpSpeedContainer;
 	lv_obj_t                *pumpSpeedLabel;
 	lv_obj_t                *pumpSpeedSlider;
+	lv_obj_t                *pumpSpeedTuneButton;
+	lv_obj_t                *pumpSpeedTuneButtonLabel;
 	lv_obj_t                *pumpSpeedValueLabel;
 
 	lv_obj_t                *invertPumpContainer;
@@ -1527,6 +1552,7 @@ struct sElements {
   struct sOtaProgressPopup otaProgressPopup;
 	struct sMessagePopup 		messagePopup;
 	struct sRollerPopup			rollerPopup;
+	struct sSpeedPopup			speedPopup;
   struct sKeyboardPopup   keyboardPopup;
   struct sSplashPopup     splashPopup;
   struct sWifiPopup       wifiPopup;
@@ -1703,6 +1729,10 @@ void tools(void);
 void tools_pause_timer(void);
 void tools_resume_timer(void);
 void tools_delete_timer(void);
+// @file element_speedPopup.c
+void speedPopupCreate(bool isPump, uint8_t currentPercent);
+// @file accessories.c
+uint8_t pumpPercentToDuty(uint8_t pct);
 // @file ota_update.c
 const char *ota_get_running_version(void);
 int         ota_get_progress(void);

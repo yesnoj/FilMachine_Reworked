@@ -41,7 +41,11 @@ static lv_timer_t *sim_ota_timer = NULL;
 static void sim_ota_timer_cb(lv_timer_t *timer);
 
 const char *ota_get_running_version(void) {
+#ifdef FW_VERSION_STR
+    return FW_VERSION_STR;   /* Injected from version.txt by the simulator CMakeLists */
+#else
     return softwareVersionValue_text;
+#endif
 }
 
 int ota_get_progress(void) {

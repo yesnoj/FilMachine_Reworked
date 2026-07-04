@@ -11,5 +11,8 @@ dependencies:
   # Required for ESP32-P4 which has no native Wi-Fi.
   # The esp_hosted component provides the SDIO transport layer,
   # and esp_wifi_remote wraps the standard esp_wifi API over it.
-  espressif/esp_hosted: "*"
-  espressif/esp_wifi_remote: "*"
+  # PINNED: newer releases (esp_hosted 2.12.9 / esp_wifi_remote 1.6.1) bootloop
+  # with an xTaskCreateStaticPinnedToCore stack assert during add_esp_wifi_remote_channels.
+  # These are the last known-good versions — do NOT loosen to "*" without re-testing on the board.
+  espressif/esp_hosted: "==2.12.3"
+  espressif/esp_wifi_remote: "==1.5.0"

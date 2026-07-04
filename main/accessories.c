@@ -175,11 +175,29 @@ static void __attribute__((unused)) pump_brake(void)
 /* Simulator stubs */
 static void pump_ledc_init(void) { LV_LOG_USER("Pump H-bridge init (stub)"); }
 static void pump_run(bool forward, uint8_t duty) {
+    /* Mirror real behaviour so the invert setting can be tested in the simulator */
+    if (gui.page.settings.settingsParams.invertPump) forward = !forward;
     LV_LOG_USER("Pump: %s duty=%d (stub)", forward ? "FORWARD" : "REVERSE", duty);
 }
 static void pump_stop(void) { LV_LOG_USER("Pump: STOPPED (stub)"); }
 static void __attribute__((unused)) pump_brake(void) { LV_LOG_USER("Pump: BRAKE (stub)"); }
 #endif /* BOARD_SIMULATOR */
+
+/* Map an arbitrary pump-speed percentage (10-100%) to H-bridge duty (PUMP_MIN..PUMP_MAX).
+ * Public so the speed-tuning popup can drive a live test at any selected value. */
+uint8_t pumpPercentToDuty(uint8_t pct)
+{
+    if (pct < 10)  pct = 10;
+    if (pct > 100) pct = 100;
+    return (uint8_t)(((uint16_t)(pct - 10) * (PUMP_MAX_ANALOG_VAL - PUMP_MIN_ANALOG_VAL)) / 90
+                     + PUMP_MIN_ANALOG_VAL);
+}
+
+/* Map the saved pump-speed setting to duty. */
+static uint8_t pumpSpeedToDuty(void)
+{
+    return pumpPercentToDuty(gui.page.settings.settingsParams.pumpSpeed);
+}
 
 void rebootBoard(void) {
 	esp_restart();
@@ -1803,7 +1821,7 @@ void cleanRelayManager(uint8_t pumpFrom, uint8_t pumpTo, uint8_t pumpDir, bool a
         mcp23017_digitalWrite(&mcp, pumpTo, 1);
         LV_LOG_USER("To %d on : %d", pumpTo, mcp23017_digitalRead(&mcp, pumpTo));
         /* Pump direction via DBH-12V H-bridge */
-        pump_run(pumpDir == PUMP_IN_RLY, PUMP_DEFAULT_SPEED);
+        pump_run(pumpDir == PUMP_IN_RLY, pumpSpeedToDuty());
     } else {
         /* Stop pump H-bridge */
         pump_stop();
@@ -1829,7 +1847,7 @@ void sendValueToRelay(uint8_t pumpFrom, uint8_t pumpDir, bool activePump) {
         mcp23017_digitalWrite(&mcp, pumpFrom, 1);
         LV_LOG_USER("From %d on : %d", pumpFrom, mcp23017_digitalRead(&mcp, pumpFrom));
         /* Pump direction via DBH-12V H-bridge (not a relay anymore) */
-        pump_run(pumpDir == PUMP_IN_RLY, PUMP_DEFAULT_SPEED);
+        pump_run(pumpDir == PUMP_IN_RLY, pumpSpeedToDuty());
         gui.tempProcessNode->process.processDetails->checkup->data.isAlreadyPumping = true;
     } else {
         /* Stop pump H-bridge */

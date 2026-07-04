@@ -122,6 +122,10 @@ set_config CONFIG_LWIP_UDP_RECVMBOX_SIZE 64
 set_config CONFIG_LWIP_TCPIP_RECVMBOX_SIZE 64
 set_config CONFIG_LWIP_TCP_SACK_OUT y
 
+# Auto-increment firmware version (BUILD field of version.txt) before every build
+echo "=== Bumping firmware version ==="
+bash "$SCRIPT_DIR/scripts/bump_version.sh"
+
 # Force kconfig to re-resolve dependencies (ensures PSRAM 200M sticks)
 echo "=== Reconfiguring (resolving kconfig dependencies) ==="
 idf.py -D CMAKE_C_FLAGS="-DBOARD_JC4880P433" reconfigure

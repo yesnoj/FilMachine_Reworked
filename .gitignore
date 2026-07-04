@@ -6,6 +6,7 @@
 build/
 build2/
 build800/
+build_sim/
 
 ## LVGL library (submodule or vendored)
 lvgl/
@@ -43,6 +44,9 @@ __pycache__/
 patch_*.py
 *.bak_dbh12v
 *.bak
+*.simv2_bak
+*.random_bak
+*.old_apr2026
 
 ## Resources / demo files (large, not source code)
 /resources/

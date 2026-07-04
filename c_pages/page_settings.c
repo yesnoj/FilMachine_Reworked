@@ -571,6 +571,16 @@ static void initSettings_switches(lv_obj_t *parent)
 }
 
 
+/* Dedicated handler for the Pump/Motor speed TUNE buttons — opens the speed popup. */
+static void event_speedTuneButton(lv_event_t *e)
+{
+    lv_obj_t *btn = (lv_obj_t *)lv_event_get_target(e);
+    if (btn == gui.page.settings.pumpSpeedTuneButton)
+        speedPopupCreate(true, gui.page.settings.settingsParams.pumpSpeed);
+    else if (btn == gui.page.settings.motorSpeedTuneButton)
+        speedPopupCreate(false, gui.page.settings.settingsParams.filmRotationSpeedSetpoint);
+}
+
 static void initSettings_sliders(lv_obj_t *parent)
 {
   gui.page.settings.filmRotationSpeedContainer = lv_obj_create(parent);
@@ -586,23 +596,21 @@ static void initSettings_sliders(lv_obj_t *parent)
 
         createQuestionMark(gui.page.settings.filmRotationSpeedContainer,gui.page.settings.filmRotationSpeedLabel,event_settingPopupMBox, UI_SETTINGS->help_icon_x, UI_SETTINGS->help_icon_y);
 
-        gui.page.settings.filmRotationSpeedSlider = lv_slider_create(gui.page.settings.filmRotationSpeedContainer);
-        lv_obj_set_width(gui.page.settings.filmRotationSpeedSlider, UI_SETTINGS->slider_w);
-        lv_obj_align(gui.page.settings.filmRotationSpeedSlider, LV_ALIGN_TOP_LEFT, UI_SETTINGS->slider_x_offset, UI_SETTINGS->slider_y);
-        lv_obj_set_style_anim_duration(gui.page.settings.filmRotationSpeedSlider, 2000, 0);
-        lv_obj_set_style_bg_color(gui.page.settings.filmRotationSpeedSlider,lv_color_hex(ORANGE) , LV_PART_KNOB);
-        lv_obj_set_style_bg_color(gui.page.settings.filmRotationSpeedSlider,lv_color_hex(ORANGE_LIGHT) , LV_PART_INDICATOR);
-        lv_obj_set_style_bg_color(gui.page.settings.filmRotationSpeedSlider, lv_palette_lighten(LV_PALETTE_GREY, 3), LV_PART_MAIN);
-        lv_slider_set_range(gui.page.settings.filmRotationSpeedSlider, 10, 100);
-        lv_slider_set_value(gui.page.settings.filmRotationSpeedSlider, gui.page.settings.settingsParams.filmRotationSpeedSetpoint, LV_ANIM_OFF);
+        gui.page.settings.motorSpeedTuneButton = lv_button_create(gui.page.settings.filmRotationSpeedContainer);
+        lv_obj_set_size(gui.page.settings.motorSpeedTuneButton, BUTTON_TUNE_WIDTH, BUTTON_TUNE_HEIGHT);
+        lv_obj_align(gui.page.settings.motorSpeedTuneButton, LV_ALIGN_RIGHT_MID, UI_SETTINGS->tune_button_x, UI_SETTINGS->tune_button_y);
+        lv_obj_set_style_bg_color(gui.page.settings.motorSpeedTuneButton, lv_color_hex(ORANGE), LV_PART_MAIN);
+        lv_obj_add_event_cb(gui.page.settings.motorSpeedTuneButton, event_speedTuneButton, LV_EVENT_CLICKED, NULL);
 
+        gui.page.settings.motorSpeedTuneButtonLabel = lv_label_create(gui.page.settings.motorSpeedTuneButton);
+        lv_label_set_text(gui.page.settings.motorSpeedTuneButtonLabel, tuneButton_text);
+        lv_obj_set_style_text_font(gui.page.settings.motorSpeedTuneButtonLabel, UI_SETTINGS->button_font, 0);
+        lv_obj_align(gui.page.settings.motorSpeedTuneButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
         gui.page.settings.filmRotationSpeedValueLabel = lv_label_create(gui.page.settings.filmRotationSpeedContainer);
         lv_obj_set_style_text_font(gui.page.settings.filmRotationSpeedValueLabel, UI_SETTINGS->value_font, 0);
-        lv_obj_align(gui.page.settings.filmRotationSpeedValueLabel, LV_ALIGN_TOP_RIGHT, UI_SETTINGS->row_value_x, UI_SETTINGS->row_value_y);
-        lv_obj_add_event_cb(gui.page.settings.filmRotationSpeedSlider, event_settings_handler, LV_EVENT_VALUE_CHANGED, gui.page.settings.filmRotationSpeedValueLabel);
-        lv_obj_add_event_cb(gui.page.settings.filmRotationSpeedSlider, event_settings_handler, LV_EVENT_RELEASED, gui.page.settings.filmRotationSpeedValueLabel);
         lv_label_set_text_fmt(gui.page.settings.filmRotationSpeedValueLabel, "%d%%", gui.page.settings.settingsParams.filmRotationSpeedSetpoint);
+        lv_obj_align_to(gui.page.settings.filmRotationSpeedValueLabel, gui.page.settings.motorSpeedTuneButton, LV_ALIGN_OUT_LEFT_MID, -12, 0);
 
 
 
@@ -774,22 +782,21 @@ gui.page.settings.pumpSpeedContainer = lv_obj_create(parent);
 
         createQuestionMark(gui.page.settings.pumpSpeedContainer, gui.page.settings.pumpSpeedLabel, event_settingPopupMBox, UI_SETTINGS->help_icon_x, UI_SETTINGS->help_icon_y);
 
-        gui.page.settings.pumpSpeedSlider = lv_slider_create(gui.page.settings.pumpSpeedContainer);
-        lv_obj_set_width(gui.page.settings.pumpSpeedSlider, UI_SETTINGS->slider_w);
-        lv_obj_align(gui.page.settings.pumpSpeedSlider, LV_ALIGN_TOP_LEFT, UI_SETTINGS->slider_x_offset, UI_SETTINGS->slider_y);
-        lv_obj_set_style_anim_duration(gui.page.settings.pumpSpeedSlider, 2000, 0);
-        lv_obj_set_style_bg_color(gui.page.settings.pumpSpeedSlider, lv_color_hex(ORANGE), LV_PART_KNOB);
-        lv_obj_set_style_bg_color(gui.page.settings.pumpSpeedSlider, lv_color_hex(ORANGE_LIGHT), LV_PART_INDICATOR);
-        lv_obj_set_style_bg_color(gui.page.settings.pumpSpeedSlider, lv_palette_lighten(LV_PALETTE_GREY, 3), LV_PART_MAIN);
-        lv_slider_set_range(gui.page.settings.pumpSpeedSlider, 10, 100);
-        lv_slider_set_value(gui.page.settings.pumpSpeedSlider, gui.page.settings.settingsParams.pumpSpeed, LV_ANIM_OFF);
+        gui.page.settings.pumpSpeedTuneButton = lv_button_create(gui.page.settings.pumpSpeedContainer);
+        lv_obj_set_size(gui.page.settings.pumpSpeedTuneButton, BUTTON_TUNE_WIDTH, BUTTON_TUNE_HEIGHT);
+        lv_obj_align(gui.page.settings.pumpSpeedTuneButton, LV_ALIGN_RIGHT_MID, UI_SETTINGS->tune_button_x, UI_SETTINGS->tune_button_y);
+        lv_obj_set_style_bg_color(gui.page.settings.pumpSpeedTuneButton, lv_color_hex(ORANGE), LV_PART_MAIN);
+        lv_obj_add_event_cb(gui.page.settings.pumpSpeedTuneButton, event_speedTuneButton, LV_EVENT_CLICKED, NULL);
+
+        gui.page.settings.pumpSpeedTuneButtonLabel = lv_label_create(gui.page.settings.pumpSpeedTuneButton);
+        lv_label_set_text(gui.page.settings.pumpSpeedTuneButtonLabel, tuneButton_text);
+        lv_obj_set_style_text_font(gui.page.settings.pumpSpeedTuneButtonLabel, UI_SETTINGS->button_font, 0);
+        lv_obj_align(gui.page.settings.pumpSpeedTuneButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
         gui.page.settings.pumpSpeedValueLabel = lv_label_create(gui.page.settings.pumpSpeedContainer);
         lv_obj_set_style_text_font(gui.page.settings.pumpSpeedValueLabel, UI_SETTINGS->value_font, 0);
-        lv_obj_align(gui.page.settings.pumpSpeedValueLabel, LV_ALIGN_TOP_RIGHT, UI_SETTINGS->row_value_x, UI_SETTINGS->row_value_y);
-        lv_obj_add_event_cb(gui.page.settings.pumpSpeedSlider, event_settings_handler, LV_EVENT_VALUE_CHANGED, gui.page.settings.pumpSpeedValueLabel);
-        lv_obj_add_event_cb(gui.page.settings.pumpSpeedSlider, event_settings_handler, LV_EVENT_RELEASED, gui.page.settings.pumpSpeedValueLabel);
         lv_label_set_text_fmt(gui.page.settings.pumpSpeedValueLabel, "%d%%", gui.page.settings.settingsParams.pumpSpeed);
+        lv_obj_align_to(gui.page.settings.pumpSpeedValueLabel, gui.page.settings.pumpSpeedTuneButton, LV_ALIGN_OUT_LEFT_MID, -12, 0);
 
 /* ── Invert Pump switch ── */
   gui.page.settings.invertPumpContainer = lv_obj_create(parent);
@@ -1122,8 +1129,7 @@ void refreshSettingsUI(void)
         lv_obj_remove_state(gui.page.settings.autostartSwitch, LV_STATE_CHECKED);
 
     /* ── Sliders + value labels ── */
-    lv_slider_set_value(gui.page.settings.filmRotationSpeedSlider,
-                        p->filmRotationSpeedSetpoint, LV_ANIM_OFF);
+    /* Pump/Motor speed use a TUNE popup now — just refresh the value label. */
     lv_label_set_text_fmt(gui.page.settings.filmRotationSpeedValueLabel,
                           "%d%%", p->filmRotationSpeedSetpoint);
 
@@ -1162,9 +1168,7 @@ void refreshSettingsUI(void)
         lv_textarea_set_text(gui.page.settings.tankSizeTextArea, sizes[tsIdx - 1]);
     }
 
-    /* ── Pump speed slider ── */
-    lv_slider_set_value(gui.page.settings.pumpSpeedSlider,
-                        p->pumpSpeed, LV_ANIM_OFF);
+    /* ── Pump speed (TUNE popup now — just refresh the value label) ── */
     lv_label_set_text_fmt(gui.page.settings.pumpSpeedValueLabel,
                           "%d%%", p->pumpSpeed);
 
