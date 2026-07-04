@@ -181,6 +181,7 @@ DEFAULT_SETTINGS = {
     "volume": 60,
     # ── New fields (end of struct) ──
     "invertPump": 0,
+    "chemCalibOffset": 0,
 }
 
 def random_settings():
@@ -212,6 +213,7 @@ def random_settings():
         "wifiPassword": "",
         "brightness": random.randrange(50, 101, 10),
         "volume": random.choice([40, 60, 80, 100]),
+        "chemCalibOffset": 0,
     }
 
 # ═══════════════════════════════════════════════
@@ -325,6 +327,7 @@ def write_settings(f, s):
     f.write(struct.pack('<B', s.get("volume", 60)))          # uint8_t audio volume (0-100%, same byte as legacy dimTimeout)
     # ── New fields (end of struct for binary compat) ──
     f.write(struct.pack('<B', s.get("invertPump", 0)))       # bool (invert pump direction)
+    f.write(struct.pack('<b', s.get("chemCalibOffset", 0)))  # int8_t chemical temp offset (tenths of degree)
 
 def write_process(f, p):
     f.write(p["processNameString"].encode('ASCII').ljust(MAX_PROC_NAME_LEN + 1, b'\x00'))

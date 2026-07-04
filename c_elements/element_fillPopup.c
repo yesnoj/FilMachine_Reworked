@@ -48,11 +48,24 @@ static void fill_popup_close(void)
     fp->parent = NULL;
 }
 
+/* Manual fill (no inlet): status is driven by the floats, not by volume. */
+static const char *fill_manual_status(int state)
+{
+    switch (state) {
+        case FILL_FULL:    return fillStatusFull_text;
+        case FILL_STOPPED: return fillStatusStopped_text;
+        case FILL_TIMEOUT: return fillStatusTimeout_text;
+        default:           return (machineFillLevelPct() >= 50) ? fillManualFilling_text
+                                                                : fillManualPour_text;
+    }
+}
+
 /* Popup phase: waiting for Start, filling, or finished. */
 #define FP_READY    0
 #define FP_RUNNING  1
 #define FP_DONE     2
-static int s_phase = FP_READY;
+static int  s_phase  = FP_READY;
+static bool s_manual = false;   /* true = fill by hand, floats only */
 
 static void fill_set_button(lv_obj_t *btn, lv_obj_t *lbl, const char *text, uint32_t color)
 {
@@ -70,10 +83,17 @@ static void fill_live_cb(lv_timer_t *t)
     if (s_phase != FP_RUNNING) return;   /* only refresh while actually filling */
 
     int state = machineFillState();
-    lv_label_set_text(fp->statusLabel, fill_status_text(state));
-    lv_label_set_text_fmt(fp->flowLabel, fillInfo_fmt,
-                          (unsigned long)machineFillVolumeMl(), FILL_TARGET_ML, machineFillFlowLpm());
-    lv_bar_set_value(fp->levelBar, machineFillProgress(), LV_ANIM_ON);
+
+    if (s_manual) {
+        /* Manual: floats only — no flow/volume readout. */
+        lv_label_set_text(fp->statusLabel, fill_manual_status(state));
+        lv_bar_set_value(fp->levelBar, machineFillLevelPct(), LV_ANIM_ON);
+    } else {
+        lv_label_set_text(fp->statusLabel, fill_status_text(state));
+        lv_label_set_text_fmt(fp->flowLabel, fillInfo_fmt,
+                              (unsigned long)machineFillVolumeMl(), FILL_TARGET_ML, machineFillFlowLpm());
+        lv_bar_set_value(fp->levelBar, machineFillProgress(), LV_ANIM_ON);
+    }
 
     if (state != FILL_RUNNING) {
         s_phase = FP_DONE;
@@ -89,14 +109,23 @@ static void event_fillAction(lv_event_t *e)
 
     if (s_phase == FP_READY) {
         s_phase = FP_RUNNING;
-        machineFillStart();                       /* opens the valve, starts metering */
-        lv_label_set_text(fp->statusLabel, fill_status_text(FILL_RUNNING));
+        machineFillStart();   /* inlet: open valve + meter; manual: watch floats */
+        lv_label_set_text(fp->statusLabel,
+                          s_manual ? fill_manual_status(FILL_RUNNING) : fill_status_text(FILL_RUNNING));
         fill_set_button(fp->actionButton, fp->actionButtonLabel, fillStop_text, RED);
     } else if (s_phase == FP_RUNNING) {
         machineFillStop();
     } else {
         fill_popup_close();
     }
+}
+
+/* Always-available X: leave the popup at any time (stops the fill first). */
+static void event_fillClose(lv_event_t *e)
+{
+    (void)e;
+    if (s_phase == FP_RUNNING) machineFillStop();   /* close the valve on the way out */
+    fill_popup_close();
 }
 
 void fillPopupCreate(void)
@@ -110,6 +139,10 @@ void fillPopupCreate(void)
     }
 
     createPopupBackdrop(&fp->parent, &fp->container, FILL_POPUP_W, FILL_POPUP_H);
+
+    /* Mode: with the water inlet connected we meter volume via the flow sensor;
+     * without it the bath is filled by hand and we use the floats only. */
+    s_manual = machineFillManual();
 
     /* If the bath is already full, skip Start and show "full" straight away. */
     bool alreadyFull = machineFillBathFull();
@@ -131,6 +164,18 @@ void fillPopupCreate(void)
     lv_obj_add_style(line, &fp->style_titleLine, 0);
     lv_obj_align(line, LV_ALIGN_TOP_MID, 0, ui->title_line_y);
 
+    /* X close button (top-right) — always lets you leave the popup */
+    lv_obj_t *closeBtn = lv_button_create(fp->container);
+    lv_obj_set_size(closeBtn, 46, 46);
+    lv_obj_align(closeBtn, LV_ALIGN_TOP_RIGHT, -6, 6);
+    lv_obj_set_style_bg_color(closeBtn, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
+    lv_obj_add_event_cb(closeBtn, event_fillClose, LV_EVENT_CLICKED, NULL);
+    lv_obj_move_foreground(closeBtn);
+    lv_obj_t *closeLbl = lv_label_create(closeBtn);
+    lv_label_set_text(closeLbl, closePopup_icon);
+    lv_obj_set_style_text_font(closeLbl, ui_get_profile()->tools.button_icon_font, 0);
+    lv_obj_align(closeLbl, LV_ALIGN_CENTER, 0, 0);
+
     /* Live status */
     fp->statusLabel = lv_label_create(fp->container);
     lv_obj_set_style_text_font(fp->statusLabel, ui->confirm_btn_font, 0);
@@ -150,17 +195,20 @@ void fillPopupCreate(void)
     lv_obj_set_size(fp->levelBar, FILL_BAR_W, FILL_BAR_H);
     lv_obj_align(fp->levelBar, LV_ALIGN_CENTER, 0, FILL_BAR_Y);
     lv_bar_set_range(fp->levelBar, 0, 100);
-    lv_bar_set_value(fp->levelBar, alreadyFull ? 100 : 0, LV_ANIM_OFF);
+    lv_bar_set_value(fp->levelBar,
+                     alreadyFull ? 100 : (s_manual ? machineFillLevelPct() : 0), LV_ANIM_OFF);
     lv_obj_set_style_bg_opa(fp->levelBar, LV_OPA_COVER, LV_PART_MAIN);
     lv_obj_set_style_bg_color(fp->levelBar, lv_color_hex(0x3A3A3A), LV_PART_MAIN);
     lv_obj_set_style_radius(fp->levelBar, LV_RADIUS_CIRCLE, LV_PART_MAIN);
     lv_obj_add_style(fp->levelBar, &fp->style_barIndic, LV_PART_INDICATOR);
 
-    /* Metered volume + live inlet flow rate (from the flow meter) */
+    /* Metered volume + live inlet flow rate (from the flow meter). Not shown in
+     * manual mode, where there is no flow meter reading. */
     fp->flowLabel = lv_label_create(fp->container);
     lv_obj_set_style_text_font(fp->flowLabel, ui->confirm_btn_font, 0);
     lv_label_set_text_fmt(fp->flowLabel, fillInfo_fmt, 0UL, FILL_TARGET_ML, 0.0f);
     lv_obj_align_to(fp->flowLabel, fp->levelBar, LV_ALIGN_OUT_BOTTOM_MID, 0, 16);
+    if (s_manual) lv_obj_add_flag(fp->flowLabel, LV_OBJ_FLAG_HIDDEN);
 
     /* Action button: Start (ready) → Stop (running) → Close (done).
      * If already full, open straight into the Close state. */

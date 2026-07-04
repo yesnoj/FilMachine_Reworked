@@ -182,7 +182,7 @@ void event_settings_handler(lv_event_t * e)
           LV_LOG_USER("TUNE Long click - Resetting calibration (bath + chemical)");
           gui.page.settings.settingsParams.tempCalibOffset = 0;
           gui.page.settings.settingsParams.calibratedTemp = 20; /* default */
-          setChemCalibOffset(0);   /* also clears the chemical offset in NVS */
+          setChemCalibOffset(0);   /* also clears the chemical offset (config) */
           qSysAction(SAVE_PROCESS_CONFIG);
           messagePopupCreate(calibrationResetPopupTitle_text, calibrationResetPopupBody_text, NULL, NULL, NULL);
         }
@@ -434,6 +434,7 @@ void event_settings_handler(lv_event_t * e)
             p->wbContainerMl = 2000;
             p->chemistryVolume = 2;         /* High */
             p->tempCalibOffset = 0;
+            p->chemCalibOffset = 0;
 
             /* Update all UI widgets to reflect the new values */
             refreshSettingsUI();

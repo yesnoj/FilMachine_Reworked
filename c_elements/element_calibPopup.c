@@ -101,7 +101,7 @@ static void event_calibSet(lv_event_t *e)
     }
     if (chemReading > -100.0f) {
         float rawChem = chemReading - (getChemCalibOffset() / 10.0f);
-        setChemCalibOffset((int8_t)((trueChem - rawChem) * 10.0f));   /* persists to NVS */
+        setChemCalibOffset((int8_t)((trueChem - rawChem) * 10.0f));   /* saved with the config */
     }
 
     qSysAction(SAVE_PROCESS_CONFIG);   /* persists the bath offset via the config */

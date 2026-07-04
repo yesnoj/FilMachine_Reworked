@@ -810,6 +810,7 @@ void initGlobals( void ) {
   gui.page.settings.settingsParams.tankSize = 2;           /* Medium */
   gui.page.settings.settingsParams.pumpSpeed = 30;
   gui.page.settings.settingsParams.invertPump = false;
+  gui.page.settings.settingsParams.chemCalibOffset = 0;
   gui.page.settings.settingsParams.volume = 60;
   gui.page.settings.settingsParams.chemContainerMl = 500;
   gui.page.settings.settingsParams.wbContainerMl = 2000;
@@ -1245,11 +1246,21 @@ void readConfigFile(const char *path, bool enableLog) {
 	    processElementsList->size = 0;    
 	    // Read process list size
 	    f_read( fp, &processElementsList->size, sizeof(processElementsList->size), &bytes_read );
+	    /* Unconditional diagnostic: settingsSize tells us the firmware struct
+	     * layout; rawProcessCount should equal the number of recipes in the file.
+	     * If rawProcessCount is huge (e.g. 2048) the firmware struct is a
+	     * different size than the config was generated for → rebuild needed. */
+	    ESP_LOGW(TAG, "[CONFIG] path=%s  settingsSize=%u  rawProcessCount=%"PRIi32,
+	             path, (unsigned)sizeof(gui.page.settings.settingsParams), processElementsList->size);
 	    if(enableLog) LV_LOG_USER("Number of Processes:%"PRIi32"", processElementsList->size);
 		
-		if( processElementsList->size > MAX_PROC_ELEMENTS ) {
-			LV_LOG_USER("Warning: File may be corrupt number of processes(%"PRIi32") capped to %d", processElementsList->size, MAX_PROC_ELEMENTS);
-			processElementsList->size = MAX_PROC_ELEMENTS;		// Damage limitation in the event of problems 
+		if( processElementsList->size < 0 || processElementsList->size > MAX_PROC_ELEMENTS ) {
+			/* An out-of-range count means the config is corrupt or the config/
+			 * firmware struct layouts don't match (e.g. a config generated for a
+			 * different settings size). Don't read garbage — load zero processes. */
+			LV_LOG_USER("Config corrupt or firmware/config mismatch (process count=%"PRIi32") — loading no processes",
+			            processElementsList->size);
+			processElementsList->size = 0;
 		}
 	    for(int32_t process = 0; process < processElementsList->size; process++){
 	      if(enableLog) LV_LOG_USER("Process:%"PRIi32"", process);
@@ -1260,6 +1271,9 @@ void readConfigFile(const char *path, bool enableLog) {
 	          continue;
 	      }
 	      f_read( fp, &nodeP->process.processDetails->data.processNameString, sizeof(nodeP->process.processDetails->data.processNameString), &bytes_read );
+	      /* Defensive: guarantee the name is NUL-terminated so a corrupt/misaligned
+	       * config can never make a label printf run off the end and crash. */
+	      nodeP->process.processDetails->data.processNameString[sizeof(nodeP->process.processDetails->data.processNameString) - 1] = '\0';
 	      f_read( fp, &nodeP->process.processDetails->data.temp, sizeof(nodeP->process.processDetails->data.temp), &bytes_read );
 	      f_read( fp, &nodeP->process.processDetails->data.tempTolerance, sizeof(nodeP->process.processDetails->data.tempTolerance), &bytes_read );
 	      f_read( fp, &nodeP->process.processDetails->data.isTempControlled, sizeof(nodeP->process.processDetails->data.isTempControlled), &bytes_read );
@@ -1907,6 +1921,24 @@ bool machineFillBathFull(void) {
 #endif
 }
 
+/* Coarse level from the two floats (0 empty / 50 above low / 100 at max), for
+ * the manual-fill bargraph when there is no flow meter reading. */
+int machineFillLevelPct(void) {
+#if defined(BOARD_JC4880P433)
+    if (sensors_water_level_max_detected()) return 100;
+    if (sensors_water_level_detected())     return 50;
+    return 0;
+#else
+    return (s_fillState == FILL_FULL) ? 100 : 0;
+#endif
+}
+
+/* Manual fill mode: no pressurized inlet connected, so the user fills the bath
+ * by hand and we rely only on the level floats (no valve, no flow metering). */
+bool machineFillManual(void) {
+    return !gui.page.settings.settingsParams.waterInlet;
+}
+
 #if defined(BOARD_JC4880P433)
 static void machine_fill_task(void *arg) {
     (void)arg;
@@ -1914,6 +1946,24 @@ static void machine_fill_task(void *arg) {
     s_fillVolumeMl = 0;
     s_fillFlowLpm  = 0.0f;
     s_fillState    = FILL_RUNNING;
+
+    /* No pressurized inlet → the user fills by hand; watch the floats only,
+     * no valve and no flow metering. Stop when the MAX float is wet. */
+    if (machineFillManual()) {
+        ESP_LOGI(TAG, "Machine fill: MANUAL mode (fill by hand), watching floats");
+        int elapsed = 0;
+        for (;;) {
+            if (sensors_water_level_max_detected())  { s_fillState = FILL_FULL;    break; }
+            if (s_fillStopReq)                       { s_fillState = FILL_STOPPED; break; }
+            if (elapsed >= MACHINE_FILL_TIMEOUT_MS)  { s_fillState = FILL_TIMEOUT; break; }
+            vTaskDelay(pdMS_TO_TICKS(200));
+            elapsed += 200;
+        }
+        ESP_LOGI(TAG, "Machine fill (manual) ended (state=%d)", s_fillState);
+        vTaskDelete(NULL);
+        return;
+    }
+
     ESP_LOGI(TAG, "Machine fill: opening WB valve, target %d ml", FILL_TARGET_ML);
 
     mcp23017_digitalWrite(&mcp, WB_RLY, 1);          /* open water-bath valve   */
@@ -2251,41 +2301,21 @@ void testPin(uint8_t pin){
  * In the simulator, src/main.c provides non-weak overrides.
  * ═══════════════════════════════════════════════════ */
 /* ── Per-sensor temperature calibration offsets (compiled in both builds) ──
- * Bath offset lives in settingsParams.tempCalibOffset (persisted in the config).
- * Chemical offset is kept here and persisted in NVS (device-specific trim, so it
- * doesn't need the config/microSD to change). Both are in tenths of a degree. */
-static int8_t s_chemCalibOffset = 0;
-
-#ifndef SIMULATOR_BUILD
-#define CAL_NVS_NS    "cal"
-#define CAL_NVS_CHEM  "chemoff"
-#endif
-
+ * Both the bath (settingsParams.tempCalibOffset) and the chemical
+ * (settingsParams.chemCalibOffset) offsets now live in the config file, so they
+ * travel with the machine config and are persisted by SAVE_PROCESS_CONFIG.
+ * Both are in tenths of a degree. */
 void loadChemCalibOffset(void) {
-#ifndef SIMULATOR_BUILD
-    nvs_handle_t h;
-    if (nvs_open(CAL_NVS_NS, NVS_READONLY, &h) == ESP_OK) {
-        int8_t v = 0;
-        if (nvs_get_i8(h, CAL_NVS_CHEM, &v) == ESP_OK) s_chemCalibOffset = v;
-        nvs_close(h);
-    }
-#endif
-    LV_LOG_USER("Chem calib offset loaded: %d (tenths)", s_chemCalibOffset);
+    /* Kept for call-site compatibility. The chemical offset is loaded as part of
+     * readConfigFile now (it is a settingsParams field), so nothing to do here. */
 }
 
 void setChemCalibOffset(int8_t offsetTenths) {
-    s_chemCalibOffset = offsetTenths;
-#ifndef SIMULATOR_BUILD
-    nvs_handle_t h;
-    if (nvs_open(CAL_NVS_NS, NVS_READWRITE, &h) == ESP_OK) {
-        nvs_set_i8(h, CAL_NVS_CHEM, offsetTenths);
-        nvs_commit(h);
-        nvs_close(h);
-    }
-#endif
+    gui.page.settings.settingsParams.chemCalibOffset = offsetTenths;
+    /* Persisted when the caller saves the config (SAVE_PROCESS_CONFIG). */
 }
 
-int8_t getChemCalibOffset(void) { return s_chemCalibOffset; }
+int8_t getChemCalibOffset(void) { return gui.page.settings.settingsParams.chemCalibOffset; }
 
 /* ── Cached temperature — the UI reads this, and it never blocks ── */
 static float s_cachedTemp[2] = { -255.0f, -255.0f };
@@ -2344,7 +2374,7 @@ float sim_getTemperature(uint8_t sensorIndex) {
     /* Apply the per-sensor calibration offset (bath vs chemical). */
     extern struct gui_components gui;
     float offset = (sensorIndex == TEMPERATURE_SENSOR_CHEMICAL)
-                       ? (s_chemCalibOffset / 10.0f)
+                       ? (gui.page.settings.settingsParams.chemCalibOffset / 10.0f)
                        : (gui.page.settings.settingsParams.tempCalibOffset / 10.0f);
     if (raw > -100.0f) raw += offset;
 

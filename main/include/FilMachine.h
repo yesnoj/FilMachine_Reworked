@@ -398,6 +398,8 @@ typedef enum {
 #define fillBath_text                           "Fill bath"
 #define fillPopupTitle_text                     "Fill water bath"
 #define fillStatusReady_text                    "Press Start to fill"
+#define fillManualPour_text                     "Pour water into the bath"
+#define fillManualFilling_text                  "Filling by hand..."
 #define fillStart_text                          "Start"
 #define fillStatusRunning_text                  "Filling... stops when full"
 #define fillStatusFull_text                     "Water bath full"
@@ -623,6 +625,7 @@ struct __attribute__ ((packed)) machineSettings {
 	uint8_t					volume;             /* 0-100% audio output volume (was legacy dimTimeout — same byte, config-compatible) */
 	/* ── New fields go here (end of struct) to preserve binary config compatibility ── */
 	bool					invertPump;         /* true = invert pump H-bridge direction */
+	int8_t					chemCalibOffset;    /* Chemical-sensor temp offset, tenths °C (in config file) */
 };
 
 
@@ -1848,7 +1851,9 @@ int      machineFillState(void);
 float    machineFillFlowLpm(void);   /* live inlet flow rate, L/min           */
 uint32_t machineFillVolumeMl(void);  /* metered volume dispensed so far, ml    */
 int      machineFillProgress(void);  /* 0..100 = volume / FILL_TARGET_ML       */
+int      machineFillLevelPct(void);  /* 0/50/100 from the MIN/MAX floats        */
 bool     machineFillBathFull(void);  /* true = MAX float already wet right now  */
+bool     machineFillManual(void);    /* true = no inlet, fill by hand (floats)  */
 void     fillPopupCreate(void);   /* @file element_fillPopup.c */
 // @file accessories.c
 uint8_t pumpPercentToDuty(uint8_t pct);
