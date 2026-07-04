@@ -176,14 +176,13 @@ void event_settings_handler(lv_event_t * e)
     if(act_cb == gui.page.settings.tempSensorTuneButton){
       if(code == LV_EVENT_SHORT_CLICKED) {
           LV_LOG_USER("TUNE short click");
-          rollerPopupCreate(gui.element.rollerPopup.tempCelsiusOptions,tuneTempPopupTitle_text,gui.page.settings.tempSensorTuneButton,
-                            gui.page.settings.settingsParams.calibratedTemp >= TEMP_ROLLER_MIN ? gui.page.settings.settingsParams.calibratedTemp - TEMP_ROLLER_MIN : 0,
-                            ORANGE);
+          calibPopupCreate();   /* dual bath+chemical calibration popup */
         }
       if(code == LV_EVENT_LONG_PRESSED) {
-          LV_LOG_USER("TUNE Long click - Resetting calibration");
+          LV_LOG_USER("TUNE Long click - Resetting calibration (bath + chemical)");
           gui.page.settings.settingsParams.tempCalibOffset = 0;
           gui.page.settings.settingsParams.calibratedTemp = 20; /* default */
+          setChemCalibOffset(0);   /* also clears the chemical offset in NVS */
           qSysAction(SAVE_PROCESS_CONFIG);
           messagePopupCreate(calibrationResetPopupTitle_text, calibrationResetPopupBody_text, NULL, NULL, NULL);
         }

@@ -48,7 +48,12 @@ void sensors_flow_init(void)
         .intr_type    = GPIO_INTR_POSEDGE,
     };
     ESP_ERROR_CHECK(gpio_config(&io_conf));
-    ESP_ERROR_CHECK(gpio_install_isr_service(0));
+    /* The GPIO ISR service may already be installed (e.g. by the GT911 touch
+     * driver) — ESP_ERR_INVALID_STATE just means "already there", not an error. */
+    esp_err_t isr_ret = gpio_install_isr_service(0);
+    if (isr_ret != ESP_OK && isr_ret != ESP_ERR_INVALID_STATE) {
+        ESP_ERROR_CHECK(isr_ret);
+    }
     ESP_ERROR_CHECK(gpio_isr_handler_add(FLOW_METER_PIN, flow_meter_isr, NULL));
 
     flow_pulse_count = 0;

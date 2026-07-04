@@ -35,6 +35,13 @@ void sim_ui_debug_tag(lv_obj_t *obj, const char *name);
 #define MOTOR_KICK_DUTY				170                    /* breakaway kick duty (overcomes stiction on start); ~67%, above the ~145 breakaway */
 #define MOTOR_KICK_MS				100                    /* breakaway kick duration in ms */
 
+/* Boot valve self-test — opens then closes each valve in sequence at power-on. */
+#define VALVE_SELFTEST_ON_BOOT		1                      /* set to 0 to disable */
+#define SENSOR_SELFTEST_ON_BOOT		1                      /* live-log Hall/water-level/flow every 500ms (set 0 to disable) */
+#define VALVE_SELFTEST_LAST_PIN		7                      /* last Port-A channel tested (7 = heater incl.; set to 4 for valves only) */
+#define VALVE_SELFTEST_ON_MS		500                    /* how long each channel stays on */
+#define VALVE_SELFTEST_OFF_MS		250                    /* pause between channels */
+
 /* Pump speed (0-255, 8-bit duty cycle) */
 #define PUMP_DEFAULT_SPEED          200     /* Fallback only (e.g. checkup/manual actions) */
 #define PUMP_MIN_ANALOG_VAL         150     /* Duty at pumpSpeed=10%. Measured stall/start ~148 on the bench, so 10% now already moves. */
@@ -471,6 +478,8 @@ typedef enum {
 #define softwareCredits_text 						"Credits"
 #define softwareCreditsValue_text 					"Credit to Frank P. \nand \nPete B."
 #define calibrationPopupTitle_text					"Calibration"
+#define calibBath_text								"Bath"
+#define calibChem_text								"Chemical"
 #define calibrationResetPopupTitle_text				"Calibration Reset"
 #define calibrationResetPopupBody_text				"Temperature calibration has been reset to default values."
 
@@ -1004,6 +1013,23 @@ struct sSpeedPopup {
 	bool                isPump;              /* true = pump, false = agitation motor */
 	uint8_t             percent;             /* currently selected speed % */
 	char                options[128];        /* roller options string "10%\n15%\n...\n100%" */
+};
+
+/* Dual temperature calibration popup (bath + chemical) with live sensor readings. */
+struct sCalibPopup {
+	lv_obj_t            *parent;
+	lv_obj_t            *container;
+	lv_obj_t            *title;
+	lv_obj_t            *rollerBath;
+	lv_obj_t            *rollerChem;
+	lv_obj_t            *bathReadLabel;
+	lv_obj_t            *chemReadLabel;
+	lv_obj_t            *setButton;
+	lv_style_t          style_titleLine;
+	lv_style_t          style_rollerBath;
+	lv_style_t          style_rollerChem;
+	lv_point_precise_t  titleLinePoints[2];
+	lv_timer_t          *liveTimer;
 };
 
 struct sCleanPopup {
@@ -1564,6 +1590,7 @@ struct sElements {
 	struct sMessagePopup 		messagePopup;
 	struct sRollerPopup			rollerPopup;
 	struct sSpeedPopup			speedPopup;
+	struct sCalibPopup			calibPopup;
   struct sKeyboardPopup   keyboardPopup;
   struct sSplashPopup     splashPopup;
   struct sWifiPopup       wifiPopup;
@@ -1743,6 +1770,16 @@ void tools_delete_timer(void);
 // @file element_speedPopup.c
 void speedPopupCreate(bool isPump, uint8_t currentPercent);
 void volumePopupCreate(uint8_t currentPercent);
+// @file element_calibPopup.c
+void calibPopupCreate(void);
+// @file accessories.c — per-sensor temperature calibration offsets
+void    loadChemCalibOffset(void);
+void    setChemCalibOffset(int8_t offsetTenths);
+int8_t  getChemCalibOffset(void);
+/* Temperature: a background poller is the SOLE reader of the (slow, blocking)
+ * DS18B20 bus; the UI reads getCachedTemperature() which never blocks. */
+float   getCachedTemperature(uint8_t sensorIndex);
+void    temperaturePollerStart(void);
 // @file accessories.c
 uint8_t pumpPercentToDuty(uint8_t pct);
 // @file ota_update.c
@@ -1867,6 +1904,8 @@ void getMinutesAndSeconds(uint8_t containerFillingTime, const bool containerToCl
 void cleanRelayManager(uint8_t pumpFrom, uint8_t pumpTo,uint8_t pumpDir,bool activePump);
 void setValveState(uint8_t relayPin, bool open);
 void closeAllValves(void);
+void valveSelfTest(void);
+void sensorsSelfTestInit(void);
 void motor_set_forward(uint8_t duty);
 void motor_set_reverse(uint8_t duty);
 void motor_set_stop(void);

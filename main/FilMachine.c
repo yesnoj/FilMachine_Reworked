@@ -442,6 +442,9 @@ lv_display_t *our_display;
     ESP_ERROR_CHECK(nvs_ret);
     ESP_LOGI(TAG, "NVS flash initialized");
 
+    /* Load the chemical-sensor calibration offset (bath offset comes from config). */
+    loadChemCalibOffset();
+
 init_Pins_and_Buses();
 
 ESP_LOGI(TAG, "Initialise LVGL library");

@@ -39,6 +39,13 @@
 
 /* ── Low-level OneWire helpers ── */
 
+/* Bit-level OneWire timing is microsecond-critical: a task switch or interrupt
+ * mid-bit corrupts the read. Wrap each bit's sensitive window in a short critical
+ * section (interrupts disabled only a few µs per bit). */
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+static portMUX_TYPE ow_mux = portMUX_INITIALIZER_UNLOCKED;
+
 static void ow_pin_output(int gpio)
 {
     gpio_set_direction(gpio, GPIO_MODE_OUTPUT);
@@ -85,16 +92,19 @@ static bool ow_reset(int gpio)
  */
 static void ow_write_bit(int gpio, uint8_t bit)
 {
+    portENTER_CRITICAL(&ow_mux);
     ow_pin_output(gpio);
     ow_pin_low(gpio);
 
     if (bit) {
         esp_rom_delay_us(OW_WRITE1_LOW_US);
-        ow_pin_input(gpio);    /* release — pulled HIGH by external resistor */
+        ow_pin_input(gpio);    /* release — pulled HIGH by the pull-up resistor */
+        portEXIT_CRITICAL(&ow_mux);
         esp_rom_delay_us(OW_WRITE1_HIGH_US);
     } else {
         esp_rom_delay_us(OW_WRITE0_LOW_US);
         ow_pin_input(gpio);    /* release */
+        portEXIT_CRITICAL(&ow_mux);
         esp_rom_delay_us(OW_WRITE0_HIGH_US);
     }
 }
@@ -106,6 +116,7 @@ static uint8_t ow_read_bit(int gpio)
 {
     uint8_t bit;
 
+    portENTER_CRITICAL(&ow_mux);
     ow_pin_output(gpio);
     ow_pin_low(gpio);
     esp_rom_delay_us(OW_READ_INIT_US);
@@ -114,8 +125,9 @@ static uint8_t ow_read_bit(int gpio)
     esp_rom_delay_us(OW_READ_SAMPLE_US);
 
     bit = ow_pin_read(gpio) ? 1 : 0;
-    esp_rom_delay_us(OW_READ_REST_US);
+    portEXIT_CRITICAL(&ow_mux);
 
+    esp_rom_delay_us(OW_READ_REST_US);
     return bit;
 }
 
@@ -324,10 +336,12 @@ esp_err_t ds18b20_read_temp(ds18b20_bus_t *bus, uint8_t index, float *temp_c)
     ow_write_byte(gpio, DS18B20_CMD_CONVERT_T);
 
     /* Wait for conversion — default 12-bit takes max 750ms.
-     * Poll the bus: DS18B20 pulls LOW while converting, releases when done. */
-    int timeout = 80000;  /* ~800ms in 10us increments */
+     * Poll the bus: DS18B20 pulls LOW while converting, releases when done.
+     * Use vTaskDelay (NOT a busy-wait) so the scheduler keeps running LVGL/touch
+     * during the ~750ms — otherwise this task hogs the core and the UI freezes. */
+    int timeout = 90;  /* ~900ms in 10ms increments */
     while (timeout > 0) {
-        esp_rom_delay_us(10);
+        vTaskDelay(pdMS_TO_TICKS(10));
         timeout--;
         if (ow_read_bit(gpio) == 1) break;  /* conversion done */
     }
@@ -349,14 +363,24 @@ esp_err_t ds18b20_read_temp(ds18b20_bus_t *bus, uint8_t index, float *temp_c)
     }
     ow_write_byte(gpio, DS18B20_CMD_READ_SCRATCH);
 
+    /* Read just the two temperature bytes. Reading the full 9-byte scratchpad to
+     * verify the CRC proved unreliable on this OneWire bus (the extended read is
+     * consistently corrupted by bit-bang timing), while the 2-byte read is solid.
+     * We validate by range instead, and the caller keeps the last good value. */
     uint8_t lsb = ow_read_byte(gpio);
     uint8_t msb = ow_read_byte(gpio);
 
-    /* Convert raw 16-bit value to temperature.
-     * DS18B20 12-bit: resolution = 0.0625°C, signed two's complement. */
+    /* DS18B20 12-bit: resolution = 0.0625°C, signed two's complement. */
     int16_t raw = (int16_t)((msb << 8) | lsb);
-    *temp_c = raw * 0.0625f;
+    float t = raw * 0.0625f;
 
-    ESP_LOGD(TAG, "GPIO%d[%d]: raw=0x%04X temp=%.2f°C", gpio, index, (uint16_t)raw, *temp_c);
+    /* Reject out-of-range garbage (valid range is -55..+125 C), e.g. 0x1250 -> 293. */
+    if (t < -55.0f || t > 125.0f) {
+        ESP_LOGW(TAG, "GPIO%d[%d]: out-of-range %.2f C — dropping read", gpio, index, t);
+        return ESP_FAIL;
+    }
+
+    *temp_c = t;
+    ESP_LOGD(TAG, "GPIO%d[%d]: raw=0x%04X temp=%.2f C", gpio, index, (uint16_t)raw, t);
     return ESP_OK;
 }

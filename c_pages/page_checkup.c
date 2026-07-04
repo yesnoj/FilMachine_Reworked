@@ -405,9 +405,9 @@ void tempTimerCallback(lv_timer_t * timer) {
     sCheckup *ckup = pn->process.processDetails->checkup;
     sProcessDetail *pd = pn->process.processDetails;
 
-    /* Read current temperatures */
-    ckup->data.currentWaterTemp = sim_getTemperature(TEMPERATURE_SENSOR_BATH);
-    ckup->data.currentChemTemp  = sim_getTemperature(TEMPERATURE_SENSOR_CHEMICAL);
+    /* Read current temperatures from the cache (background poller reads the bus). */
+    ckup->data.currentWaterTemp = getCachedTemperature(TEMPERATURE_SENSOR_BATH);
+    ckup->data.currentChemTemp  = getCachedTemperature(TEMPERATURE_SENSOR_CHEMICAL);
 
     /* Update UI with live values (use snprintf — LVGL builtin sprintf lacks %f) */
     {
@@ -1096,7 +1096,7 @@ static void checkup_renderReachTemp(processNode *proc) {
 
         {
             char buf[16];
-            float initWaterTemp = sim_getTemperature(TEMPERATURE_SENSOR_BATH);
+            float initWaterTemp = getCachedTemperature(TEMPERATURE_SENSOR_BATH);
             if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
                 snprintf(buf, sizeof(buf), "%.1f°C", initWaterTemp);
             } else{
@@ -1123,7 +1123,7 @@ static void checkup_renderReachTemp(processNode *proc) {
 
         {
             char buf[16];
-            float initChemTemp = sim_getTemperature(TEMPERATURE_SENSOR_CHEMICAL);
+            float initChemTemp = getCachedTemperature(TEMPERATURE_SENSOR_CHEMICAL);
             if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
                 snprintf(buf, sizeof(buf), "%.1f°C", initChemTemp);
             } else{
@@ -1161,8 +1161,8 @@ static void checkup_renderReachTemp(processNode *proc) {
                 proc->process.processDetails->data.tempTolerance);
             ckup->data.tempTimeoutCounter = 0;
             ckup->data.heaterOn = false;
-            ckup->data.currentWaterTemp = sim_getTemperature(TEMPERATURE_SENSOR_BATH);
-            ckup->data.currentChemTemp = sim_getTemperature(TEMPERATURE_SENSOR_CHEMICAL);
+            ckup->data.currentWaterTemp = getCachedTemperature(TEMPERATURE_SENSOR_BATH);
+            ckup->data.currentChemTemp = getCachedTemperature(TEMPERATURE_SENSOR_CHEMICAL);
             ckup->tempTimer = lv_timer_create(tempTimerCallback, 1000, proc);
         } else {
             ckup->tempTimer = NULL;
@@ -1642,7 +1642,7 @@ void checkup(processNode *processToCheckup) {
 
                           {
                               char buf[16];
-                              float waterTemp = sim_getTemperature(TEMPERATURE_SENSOR_BATH);
+                              float waterTemp = getCachedTemperature(TEMPERATURE_SENSOR_BATH);
                               if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
                                   snprintf(buf, sizeof(buf), "%.1f°C", waterTemp);
                               } else{

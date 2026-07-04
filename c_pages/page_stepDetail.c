@@ -564,7 +564,7 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
                   sd->stepSourceTempValue = lv_label_create(sd->stepSourceContainer);
                   {
                       char tempBuf[16];
-                      float chemTemp = sim_getTemperature(TEMPERATURE_SENSOR_CHEMICAL);
+                      float chemTemp = getCachedTemperature(TEMPERATURE_SENSOR_CHEMICAL);
                       if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP){
                           snprintf(tempBuf, sizeof(tempBuf), "%.1f°C", chemTemp);
                       } else {

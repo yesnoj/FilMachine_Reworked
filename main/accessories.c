@@ -29,7 +29,9 @@
 #include "esp_heap_caps.h"
 #ifndef SIMULATOR_BUILD
 #include "audio.h"
+#include "nvs.h"
 #endif
+#include "sensors.h"
 
 #include "FilMachine.h"
 #include "ws_server.h"
@@ -1040,18 +1042,34 @@ void init_Pins_and_Buses( void ) {
     ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM, i2c_conf.mode, 0, 0, 0));
 #endif
 
-    /* Initialize MCP23017 I/O expander */
+    /* Initialize MCP23017 I/O expander (Adafruit #6318 solenoid driver) */
+    esp_err_t mcp_ret;
 #if defined(BOARD_JC4880P433)
-    if (mcp23017_init(&mcp, g_i2c_bus_handle, MCP23017_DEFAULT_ADDR) != ESP_OK) {
+    /* The MCP23017 on the #6318 can be left holding SDA low after a P4 soft-reset
+     * (the expander itself doesn't reset with the MCU), so the very first probe
+     * may NACK -> "not found". Recover the bus and retry a few times before
+     * giving up, so valves/heater don't silently drop out on some boots. */
+    mcp_ret = ESP_FAIL;
+    for (int attempt = 1; attempt <= 3; attempt++) {
+        i2c_master_bus_reset(g_i2c_bus_handle);
+        vTaskDelay(pdMS_TO_TICKS(20));
+        mcp_ret = mcp23017_init(&mcp, g_i2c_bus_handle, MCP23017_DEFAULT_ADDR);
+        if (mcp_ret == ESP_OK) break;
+        LV_LOG_USER("MCP23017 probe %d/3 failed (0x%x) — bus reset + retry", attempt, mcp_ret);
+    }
 #else
-    if (mcp23017_init(&mcp, I2C_NUM, MCP23017_DEFAULT_ADDR) != ESP_OK) {
+    mcp_ret = mcp23017_init(&mcp, I2C_NUM, MCP23017_DEFAULT_ADDR);
 #endif
+    if (mcp_ret != ESP_OK) {
         LV_LOG_USER("MCP23017 init ERROR!");
         initErrors = INIT_ERROR_I2C_MCP;
     } else {
         LV_LOG_USER("MCP23017 init OK at 0x%02X", MCP23017_DEFAULT_ADDR);
         initializeRelayPins();
         initializeMotorPins();
+#if VALVE_SELFTEST_ON_BOOT
+        valveSelfTest();
+#endif
     }
 
 #if defined(BOARD_JC4880P433)
@@ -1092,6 +1110,12 @@ void init_Pins_and_Buses( void ) {
             LV_LOG_USER("WARNING: expected 2 sensors (bath+chemical), found %d", ds_bus.sensor_count);
         }
     }
+
+    /* Extra sensors (Hall / water level / flow) + live-log for bench testing */
+    sensorsSelfTestInit();
+
+    /* Background temperature poller — the ONLY reader of the DS18B20 bus */
+    temperaturePollerStart();
 
     /* Initialize pump H-bridge (DBH-12V channel B) via LEDC PWM */
     pump_ledc_init();
@@ -1779,6 +1803,55 @@ void closeAllValves(void) {
     }
 }
 
+/* Boot self-test: turn on then off each Port-A channel of the #6318 in sequence
+ * so you can verify the wiring at power-on (red LED + click per channel).
+ * Cycles channels 0..VALVE_SELFTEST_LAST_PIN. NOTE: pin 7 is the HEATER relay,
+ * not a valve — it is included on purpose but flagged in the log. */
+void valveSelfTest(void) {
+    LV_LOG_USER("=== Channel self-test: cycling 0..%d ===", VALVE_SELFTEST_LAST_PIN);
+    /* Make sure every tested channel is an output, starting OFF. */
+    for (uint8_t i = 0; i <= VALVE_SELFTEST_LAST_PIN; i++) {
+        mcp23017_pinMode(&mcp, i, MCP23017_OUTPUT);
+        mcp23017_digitalWrite(&mcp, i, 0);
+    }
+    for (uint8_t i = 0; i <= VALVE_SELFTEST_LAST_PIN; i++) {
+        mcp23017_digitalWrite(&mcp, i, 1);
+        LV_LOG_USER("Channel %d: ON%s", i, (i == HEATER_RLY) ? "  <-- HEATER" : "");
+        vTaskDelay(pdMS_TO_TICKS(VALVE_SELFTEST_ON_MS));
+        mcp23017_digitalWrite(&mcp, i, 0);
+        LV_LOG_USER("Channel %d: OFF", i);
+        vTaskDelay(pdMS_TO_TICKS(VALVE_SELFTEST_OFF_MS));
+    }
+    LV_LOG_USER("=== Channel self-test done ===");
+}
+
+#if defined(BOARD_JC4880P433) && SENSOR_SELFTEST_ON_BOOT
+/* Periodic live log of the extra sensors — verify wiring by watching the monitor:
+ * wave a magnet at the Hall, fill/empty for water level, spin the impeller for flow. */
+static void sensor_log_task(void *arg) {
+    (void)arg;
+    for (;;) {
+        ESP_LOGI(TAG, "SENSORS  Hall=%-6s  WaterMin=%-3s  WaterMax=%-4s  Flow=%.2f L/min (%lu pulses)",
+                 sensors_hall_magnet_detected()      ? "MAGNET" : "away",
+                 sensors_water_level_detected()      ? "WET"    : "dry",
+                 sensors_water_level_max_detected()  ? "FULL"   : "no",
+                 sensors_flow_get_litres_per_min(),
+                 (unsigned long)sensors_flow_get_pulse_count());
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
+}
+
+void sensorsSelfTestInit(void) {
+    sensors_hall_init();
+    sensors_flow_init();
+    sensors_water_level_init();
+    xTaskCreate(sensor_log_task, "sensorlog", 3072, NULL, 3, NULL);
+    LV_LOG_USER("Sensor live-log started (Hall/water/flow every 500ms)");
+}
+#else
+void sensorsSelfTestInit(void) {}
+#endif
+
 /* ── Motor direction helpers ──
  * P4 board: IN1/IN2 are ESP32 GPIOs on the Expand IO header (direct control).
  * Other boards: IN1/IN2 are MCP23017 pins (I2C expander). */
@@ -2046,23 +2119,106 @@ void testPin(uint8_t pin){
  * On real hardware (ESP32), these will call the actual sensor/relay.
  * In the simulator, src/main.c provides non-weak overrides.
  * ═══════════════════════════════════════════════════ */
+/* ── Per-sensor temperature calibration offsets (compiled in both builds) ──
+ * Bath offset lives in settingsParams.tempCalibOffset (persisted in the config).
+ * Chemical offset is kept here and persisted in NVS (device-specific trim, so it
+ * doesn't need the config/microSD to change). Both are in tenths of a degree. */
+static int8_t s_chemCalibOffset = 0;
+
 #ifndef SIMULATOR_BUILD
+#define CAL_NVS_NS    "cal"
+#define CAL_NVS_CHEM  "chemoff"
+#endif
+
+void loadChemCalibOffset(void) {
+#ifndef SIMULATOR_BUILD
+    nvs_handle_t h;
+    if (nvs_open(CAL_NVS_NS, NVS_READONLY, &h) == ESP_OK) {
+        int8_t v = 0;
+        if (nvs_get_i8(h, CAL_NVS_CHEM, &v) == ESP_OK) s_chemCalibOffset = v;
+        nvs_close(h);
+    }
+#endif
+    LV_LOG_USER("Chem calib offset loaded: %d (tenths)", s_chemCalibOffset);
+}
+
+void setChemCalibOffset(int8_t offsetTenths) {
+    s_chemCalibOffset = offsetTenths;
+#ifndef SIMULATOR_BUILD
+    nvs_handle_t h;
+    if (nvs_open(CAL_NVS_NS, NVS_READWRITE, &h) == ESP_OK) {
+        nvs_set_i8(h, CAL_NVS_CHEM, offsetTenths);
+        nvs_commit(h);
+        nvs_close(h);
+    }
+#endif
+}
+
+int8_t getChemCalibOffset(void) { return s_chemCalibOffset; }
+
+/* ── Cached temperature — the UI reads this, and it never blocks ── */
+static float s_cachedTemp[2] = { -255.0f, -255.0f };
+
+float getCachedTemperature(uint8_t sensorIndex) {
+    if (sensorIndex >= 2) return -255.0f;
+#ifdef SIMULATOR_BUILD
+    s_cachedTemp[sensorIndex] = sim_getTemperature(sensorIndex);  /* sim read is fast */
+#endif
+    return s_cachedTemp[sensorIndex];
+}
+
+#ifndef SIMULATOR_BUILD
+/* Sole reader of the slow DS18B20 bus: refreshes the cache in the background so
+ * no UI/LVGL context ever blocks on a conversion (that froze touch + rollers). */
+static void temperature_poller_task(void *arg) {
+    (void)arg;
+    for (;;) {
+        (void)sim_getTemperature(TEMPERATURE_SENSOR_BATH);
+        (void)sim_getTemperature(TEMPERATURE_SENSOR_CHEMICAL);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+#endif
+
+void temperaturePollerStart(void) {
+#ifndef SIMULATOR_BUILD
+    xTaskCreate(temperature_poller_task, "tpoll", 3072, NULL, 4, NULL);
+    LV_LOG_USER("Temperature poller started");
+#endif
+}
+
+#ifndef SIMULATOR_BUILD
+/* Last good raw reading per sensor (before offset) — rides over occasional
+ * OneWire glitches instead of flashing an error value. */
+static float s_lastGoodRaw[2] = { -255.0f, -255.0f };
+
 float sim_getTemperature(uint8_t sensorIndex) {
-    float temp = -255.0f;
+    float raw = -255.0f;
+    bool  ok  = false;
 
     if (ds_bus.initialized && sensorIndex < ds_bus.sensor_count) {
-        if (ds18b20_read_temp(&ds_bus, sensorIndex, &temp) != ESP_OK) {
-            LV_LOG_USER("DS18B20 read error sensor[%d]", sensorIndex);
-            temp = -255.0f;
+        if (ds18b20_read_temp(&ds_bus, sensorIndex, &raw) == ESP_OK) {
+            ok = true;
+            if (sensorIndex < 2) s_lastGoodRaw[sensorIndex] = raw;
         }
     }
 
-    /* Apply calibration offset to temperature reading */
-    extern struct gui_components gui;
-    float offset = gui.page.settings.settingsParams.tempCalibOffset / 10.0f;
-    temp += offset;
+    if (!ok) {
+        /* Reuse the last valid reading if we have one; only surface an error
+         * value if this sensor has never read correctly. */
+        raw = (sensorIndex < 2 && s_lastGoodRaw[sensorIndex] > -100.0f)
+                  ? s_lastGoodRaw[sensorIndex] : -255.0f;
+    }
 
-    return temp;
+    /* Apply the per-sensor calibration offset (bath vs chemical). */
+    extern struct gui_components gui;
+    float offset = (sensorIndex == TEMPERATURE_SENSOR_CHEMICAL)
+                       ? (s_chemCalibOffset / 10.0f)
+                       : (gui.page.settings.settingsParams.tempCalibOffset / 10.0f);
+    if (raw > -100.0f) raw += offset;
+
+    if (sensorIndex < 2) s_cachedTemp[sensorIndex] = raw;   /* refresh UI cache */
+    return raw;
 }
 
 void sim_setHeater(bool on) {
