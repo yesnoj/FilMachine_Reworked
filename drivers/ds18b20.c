@@ -41,10 +41,21 @@
 
 /* Bit-level OneWire timing is microsecond-critical: a task switch or interrupt
  * mid-bit corrupts the read. Wrap each bit's sensitive window in a short critical
- * section (interrupts disabled only a few µs per bit). */
+ * section (interrupts disabled only a few µs per bit). On the PC simulator there
+ * is no FreeRTOS, so these become no-ops (the driver isn't used there anyway). */
+#ifdef ESP_PLATFORM
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 static portMUX_TYPE ow_mux = portMUX_INITIALIZER_UNLOCKED;
+#define OW_ENTER_CRITICAL()   portENTER_CRITICAL(&ow_mux)
+#define OW_EXIT_CRITICAL()    portEXIT_CRITICAL(&ow_mux)
+#define OW_DELAY_MS(ms)       vTaskDelay(pdMS_TO_TICKS(ms))
+#else
+#include <unistd.h>
+#define OW_ENTER_CRITICAL()   ((void)0)
+#define OW_EXIT_CRITICAL()    ((void)0)
+#define OW_DELAY_MS(ms)       usleep((ms) * 1000)
+#endif
 
 static void ow_pin_output(int gpio)
 {
@@ -92,19 +103,19 @@ static bool ow_reset(int gpio)
  */
 static void ow_write_bit(int gpio, uint8_t bit)
 {
-    portENTER_CRITICAL(&ow_mux);
+    OW_ENTER_CRITICAL();
     ow_pin_output(gpio);
     ow_pin_low(gpio);
 
     if (bit) {
         esp_rom_delay_us(OW_WRITE1_LOW_US);
         ow_pin_input(gpio);    /* release — pulled HIGH by the pull-up resistor */
-        portEXIT_CRITICAL(&ow_mux);
+        OW_EXIT_CRITICAL();
         esp_rom_delay_us(OW_WRITE1_HIGH_US);
     } else {
         esp_rom_delay_us(OW_WRITE0_LOW_US);
         ow_pin_input(gpio);    /* release */
-        portEXIT_CRITICAL(&ow_mux);
+        OW_EXIT_CRITICAL();
         esp_rom_delay_us(OW_WRITE0_HIGH_US);
     }
 }
@@ -116,7 +127,7 @@ static uint8_t ow_read_bit(int gpio)
 {
     uint8_t bit;
 
-    portENTER_CRITICAL(&ow_mux);
+    OW_ENTER_CRITICAL();
     ow_pin_output(gpio);
     ow_pin_low(gpio);
     esp_rom_delay_us(OW_READ_INIT_US);
@@ -125,7 +136,7 @@ static uint8_t ow_read_bit(int gpio)
     esp_rom_delay_us(OW_READ_SAMPLE_US);
 
     bit = ow_pin_read(gpio) ? 1 : 0;
-    portEXIT_CRITICAL(&ow_mux);
+    OW_EXIT_CRITICAL();
 
     esp_rom_delay_us(OW_READ_REST_US);
     return bit;
@@ -341,7 +352,7 @@ esp_err_t ds18b20_read_temp(ds18b20_bus_t *bus, uint8_t index, float *temp_c)
      * during the ~750ms — otherwise this task hogs the core and the UI freezes. */
     int timeout = 90;  /* ~900ms in 10ms increments */
     while (timeout > 0) {
-        vTaskDelay(pdMS_TO_TICKS(10));
+        OW_DELAY_MS(10);
         timeout--;
         if (ow_read_bit(gpio) == 1) break;  /* conversion done */
     }
