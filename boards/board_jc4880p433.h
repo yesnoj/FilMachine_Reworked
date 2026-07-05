@@ -151,6 +151,22 @@
 #define HEATER1_PIN                 14      /* B6 — heater MOSFET 1 */
 #define HEATER2_PIN                 15      /* B7 — heater MOSFET 2 */
 
+/* ── Power-rail monitoring (future custom board) ──
+ * The 12V/5V/3.3V rails must be scaled below the ADC full-scale (~2.5V @ 12dB)
+ * with resistor dividers, each feeding an ADC1 channel. When the custom board
+ * provides them, set HAS_RAIL_MONITOR to 1 and fill in the channels + divider
+ * ratios (ratio = (R_top + R_bottom) / R_bottom). The diagnostics "Power rails"
+ * panel then shows live voltages; until then it shows "n/a". */
+#define HAS_RAIL_MONITOR            0
+#if HAS_RAIL_MONITOR
+#define RAIL_12V_ADC_CH             ADC_CHANNEL_0
+#define RAIL_12V_DIVIDER            6.0f     /* e.g. 100k/20k → 6.0 */
+#define RAIL_5V_ADC_CH              ADC_CHANNEL_1
+#define RAIL_5V_DIVIDER             3.0f     /* e.g. 20k/10k → 3.0 */
+#define RAIL_3V3_ADC_CH             ADC_CHANNEL_2
+#define RAIL_3V3_DIVIDER            2.0f     /* e.g. 10k/10k → 2.0 */
+#endif
+
 /* Pump direction is now handled by DBH-12V H-bridge channel B.
  * These constants are kept as logical direction markers so that
  * page_checkup.c and element_cleanPopup.c need no changes. */

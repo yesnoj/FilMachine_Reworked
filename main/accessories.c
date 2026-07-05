@@ -1850,6 +1850,17 @@ void setValveState(uint8_t relayPin, bool open) {
     mcp23017_digitalWrite(&mcp, relayPin, open ? 1 : 0);
 }
 
+/* Direct MCP output write for the diagnostics page (heaters on Port B, etc.).
+ * Exposed because the mcp handle is file-static. */
+void debugMcpWrite(uint8_t pin, bool on) {
+    mcp23017_digitalWrite(&mcp, pin, on ? 1 : 0);
+}
+
+/* MCP23017 presence for the diagnostics page. */
+bool debugMcpPresent(void) {
+    return initErrors != INIT_ERROR_I2C_MCP;
+}
+
 void closeAllValves(void) {
     for (uint8_t i = 0; i < RELAY_NUMBER; i++) {
         mcp23017_digitalWrite(&mcp, i, 0);

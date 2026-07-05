@@ -115,6 +115,8 @@
 #define HEATER1_PIN                 14
 #define HEATER2_PIN                 15
 
+#define HAS_RAIL_MONITOR            0       /* no ADC in the simulator */
+
 #define PUMP_IN_RLY                 254     /* Logical: pump forward (filling) */
 #define PUMP_OUT_RLY                253     /* Logical: pump reverse (draining) */
 #define INVALID_RELAY               255

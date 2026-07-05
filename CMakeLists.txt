@@ -82,6 +82,7 @@ else()
         c_pages/page_settings.c
         c_pages/page_tools.c
         c_pages/page_checkup.c
+        c_pages/page_debug.c
         c_elements/element_process.c
         c_elements/element_step.c
         c_elements/element_filterPopup.c

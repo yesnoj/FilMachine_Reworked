@@ -2012,6 +2012,12 @@ void getMinutesAndSeconds(uint8_t containerFillingTime, const bool containerToCl
 void cleanRelayManager(uint8_t pumpFrom, uint8_t pumpTo,uint8_t pumpDir,bool activePump);
 void setValveState(uint8_t relayPin, bool open);
 void closeAllValves(void);
+
+/* ── Peripheral diagnostics page (2-finger gesture on the splash) ── */
+void    debugScreenCreate(void);            /* build + show the diagnostics screen */
+void    debugMcpWrite(uint8_t pin, bool on);/* direct MCP output write (heaters etc.) */
+bool    debugMcpPresent(void);              /* MCP23017 detected on the I2C bus */
+uint8_t ui_active_touch_points(void);       /* simultaneous touch points (board only) */
 void valveSelfTest(void);
 void sensorsSelfTestInit(void);
 void motor_set_forward(uint8_t duty);

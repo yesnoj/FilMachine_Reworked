@@ -161,10 +161,15 @@ static void increase_lvgl_tick(void *arg) {
     lv_tick_inc(LVGL_TICK_PERIOD_MS);
 }
 
+/* Number of simultaneous touch points last reported (for the 2-finger
+ * diagnostics gesture on the splash). Updated every touch read. */
+static volatile uint8_t s_active_touch_points = 0;
+uint8_t ui_active_touch_points(void) { return s_active_touch_points; }
+
 static void lvgl_touch_cb(lv_indev_t * indev, lv_indev_data_t * data)
 {
-    uint16_t touchpad_x[1] = {0};
-    uint16_t touchpad_y[1] = {0};
+    uint16_t touchpad_x[2] = {0, 0};
+    uint16_t touchpad_y[2] = {0, 0};
     uint8_t touchpad_cnt = 0;
 
     /* Read touch controller data */
@@ -175,11 +180,13 @@ static void lvgl_touch_cb(lv_indev_t * indev, lv_indev_data_t * data)
     }
     esp_lcd_touch_read_data(tp);
 
-    /* Get coordinates — still using deprecated API until esp_lcd_touch 2.0 migration */
+    /* Get coordinates — read up to 2 points so we can detect the 2-finger
+     * diagnostics gesture; only point[0] drives the LVGL pointer. */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    bool touchpad_pressed = esp_lcd_touch_get_coordinates(tp, touchpad_x, touchpad_y, NULL, &touchpad_cnt, 1);
+    bool touchpad_pressed = esp_lcd_touch_get_coordinates(tp, touchpad_x, touchpad_y, NULL, &touchpad_cnt, 2);
 #pragma GCC diagnostic pop
+    s_active_touch_points = touchpad_cnt;
 
     if (touchpad_pressed && touchpad_cnt > 0) {
 #if defined(DISPLAY_DRIVER_ST7701)
@@ -430,6 +437,42 @@ void runMotorTask() {
     stopMotorManTask = false;
 }
 
+#if ENABLE_BOOT_ERRORS
+/* Blocking boot-error screen shown instead of the splash when a critical
+ * peripheral failed to initialise (SD / I2C). Tap anywhere to reboot.
+ * Gated by ENABLE_BOOT_ERRORS (0 during development → not compiled in). */
+static void boot_error_reboot_cb(lv_event_t *e) { (void)e; rebootBoard(); }
+
+static void boot_error_screen(uint8_t err)
+{
+    const char *msg;
+    switch (err) {
+        case INIT_ERROR_SD:      msg = initSDError_text;   break;
+        case INIT_ERROR_I2C_MCP:
+        case INIT_ERROR_I2C_ADS: msg = initI2CError_text;  break;
+        case INIT_ERROR_WIRE:    msg = initWIREError_text; break;
+        default:                 msg = initI2CError_text;  break;
+    }
+
+    lv_obj_t *scr = lv_obj_create(NULL);
+    lv_obj_remove_flag(scr, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_color(scr, lv_color_hex(0x7F0000), 0);
+    lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, 0);
+    lv_obj_add_flag(scr, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(scr, boot_error_reboot_cb, LV_EVENT_CLICKED, NULL);
+
+    lv_obj_t *lbl = lv_label_create(scr);
+    lv_label_set_text(lbl, msg);
+    lv_obj_set_style_text_color(lbl, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_text_font(lbl, &lv_font_montserrat_20, 0);
+    lv_obj_set_style_text_align(lbl, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_center(lbl);
+
+    lv_screen_load(scr);
+    ESP_LOGE(TAG, "BOOT ERROR screen shown (initErrors=%u)", err);
+}
+#endif /* ENABLE_BOOT_ERRORS */
+
 void app_main( void ) {
 
 lv_display_t *our_display;
@@ -550,15 +593,25 @@ create_keyboard();
     /* Pre-load settings so splash knows if random mode is enabled */
     readSettingsOnly(FILENAME_SAVE);
 
-    /* Show splash screen — play button calls readConfigFile → menu → refreshSettingsUI */
-    lv_obj_t * splash = splash_screen_create();
-    lv_screen_load(splash);
-
-    /* Deferred valve self-test: the display/splash is up now, so cycle the
-     * solenoids in the background sysMan task instead of blocking boot. */
-#if VALVE_SELFTEST_ON_BOOT
-    qSysAction(SELFTEST_VALVES);
+    /* A critical init failure (SD / I2C) shows a blocking error screen instead
+     * of the splash — but only when ENABLE_BOOT_ERRORS is on (off in dev; the
+     * errors are still detected and logged either way). */
+#if ENABLE_BOOT_ERRORS
+    if (initErrors != 0) {
+        boot_error_screen(initErrors);
+    } else
 #endif
+    {
+        /* Show splash screen — play button calls readConfigFile → menu → refreshSettingsUI */
+        lv_obj_t * splash = splash_screen_create();
+        lv_screen_load(splash);
+
+        /* Deferred valve self-test: the display/splash is up now, so cycle the
+         * solenoids in the background sysMan task instead of blocking boot. */
+#if VALVE_SELFTEST_ON_BOOT
+        qSysAction(SELFTEST_VALVES);
+#endif
+    }
 
     while (1) {
         // lv_timer_handler returns ms until next call is needed

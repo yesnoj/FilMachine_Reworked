@@ -26,6 +26,9 @@ extern struct gui_components gui;
 
 static lv_obj_t *splash_scr = NULL;
 
+/* Forward decl: stop the board 2-finger poll timer (defined with the gesture). */
+static void splash_stop_gesture(void);
+
 /* ═══════════════════════════════════════════════
  * Simple seeded PRNG (xorshift32)
  * ═══════════════════════════════════════════════ */
@@ -114,6 +117,7 @@ static void wifi_init_task(void *arg)
 static void splash_play_event_cb(lv_event_t * e)
 {
     if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    splash_stop_gesture();   /* leaving the splash — stop the 2-finger poll */
     readConfigFile(FILENAME_SAVE, false);
     menu();
     refreshSettingsUI();
@@ -534,6 +538,60 @@ static void create_random_splash(lv_obj_t *scr, uint32_t seed,
 }
 
 /* ═══════════════════════════════════════════════
+ * Diagnostics entry — hold 2 fingers on the splash (board) or press the
+ * DBG button (simulator) to open the peripheral diagnostics page.
+ * ═══════════════════════════════════════════════ */
+#ifdef ESP_PLATFORM
+static lv_timer_t *s_two_finger_timer = NULL;
+#endif
+
+static void splash_stop_gesture(void)
+{
+#ifdef ESP_PLATFORM
+    if (s_two_finger_timer) { lv_timer_delete(s_two_finger_timer); s_two_finger_timer = NULL; }
+#endif
+}
+
+static void splash_open_debug(void)
+{
+    splash_stop_gesture();
+    lv_obj_t *old = splash_scr;
+    splash_scr = NULL;
+    debugScreenCreate();          /* loads its own screen */
+    if (old) lv_obj_delete(old);  /* drop the splash we came from */
+}
+
+#ifdef ESP_PLATFORM
+#define DBG_GESTURE_FINGERS   2
+#define DBG_GESTURE_HOLD_MS   3000
+
+static void debug_gesture_poll(lv_timer_t *t)
+{
+    (void)t;
+    static uint32_t hold_start = 0;
+    /* Two fingers held on the splash for 3s opens the diagnostics page.
+     * (Touch AFTER the splash appears — the GT911 calibrates out fingers that
+     * are already down at power-on. Note: the touch read is capped at 2 points,
+     * so the gesture uses 2 fingers.) */
+    if (ui_active_touch_points() >= DBG_GESTURE_FINGERS) {
+        uint32_t now = lv_tick_get();
+        if (hold_start == 0) hold_start = now ? now : 1;
+        else if (lv_tick_elaps(hold_start) >= DBG_GESTURE_HOLD_MS) {
+            hold_start = 0;
+            splash_open_debug();
+        }
+    } else {
+        hold_start = 0;   /* lifted / fewer fingers → restart the hold timer */
+    }
+}
+#else
+static void splash_dbg_event_cb(lv_event_t *e)
+{
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) splash_open_debug();
+}
+#endif
+
+/* ═══════════════════════════════════════════════
  * Public API
  * ═══════════════════════════════════════════════ */
 lv_obj_t * splash_screen_create(void)
@@ -581,11 +639,29 @@ lv_obj_t * splash_screen_create(void)
         LV_LOG_USER("SPLASH CUSTOM: creation OK");
     }
 
+    /* Diagnostics trigger */
+#ifdef ESP_PLATFORM
+    if (s_two_finger_timer) lv_timer_delete(s_two_finger_timer);
+    s_two_finger_timer = lv_timer_create(debug_gesture_poll, 300, NULL);
+#else
+    {
+        lv_obj_t *dbg = lv_button_create(splash_scr);
+        lv_obj_set_size(dbg, 64, 34);
+        lv_obj_align(dbg, LV_ALIGN_TOP_LEFT, 6, 6);
+        lv_obj_set_style_bg_opa(dbg, LV_OPA_50, 0);
+        lv_obj_add_event_cb(dbg, splash_dbg_event_cb, LV_EVENT_CLICKED, NULL);
+        lv_obj_t *dl = lv_label_create(dbg);
+        lv_label_set_text(dl, "DBG");
+        lv_obj_center(dl);
+    }
+#endif
+
     return splash_scr;
 }
 
 void splash_screen_delete(void)
 {
+    splash_stop_gesture();
     if (splash_scr) {
         lv_obj_delete(splash_scr);
         splash_scr = NULL;
