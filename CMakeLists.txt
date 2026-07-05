@@ -55,6 +55,19 @@ else()
         )
     endif()
 
+    # LVGL ships ARM Helium/NEON assembly (.S) that its CMake globs
+    # unconditionally. We build with LV_USE_DRAW_SW_ASM = NONE, so these files
+    # are never referenced — but a non-ARM assembler (e.g. MinGW `as` on Windows
+    # CI) chokes on them. Remove them so LVGL builds as pure portable C on every
+    # host. Safe on macOS/ARM too, since the software blend path is used.
+    file(GLOB_RECURSE _LVGL_ASM_FILES "${CMAKE_SOURCE_DIR}/lvgl/src/*.S")
+    foreach(_asm ${_LVGL_ASM_FILES})
+        # Blank the file rather than delete it, so it works whether LVGL globs
+        # or lists the sources explicitly. An empty .S assembles to nothing.
+        file(WRITE ${_asm} "/* ASM disabled for portable (non-ARM) build */\n")
+        message(STATUS "Neutralised LVGL ASM: ${_asm}")
+    endforeach()
+
     # LVGL ≥9.5 uses LV_BUILD_CONF_DIR; keep LV_CONF_PATH for compat with older tags
     set(LV_CONF_PATH "${CMAKE_SOURCE_DIR}/lvgl_config/lv_conf.h" CACHE STRING "" FORCE)
     set(LV_BUILD_CONF_DIR "${CMAKE_SOURCE_DIR}/lvgl_config" CACHE STRING "" FORCE)
