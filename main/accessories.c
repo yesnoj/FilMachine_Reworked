@@ -37,6 +37,7 @@
 #include "ws_server.h"
 #include "mcp23017.h"
 #include "ds18b20.h"
+#include "mini_json.h"
 /* pca9685.h removed — pump now driven by DBH-12V H-bridge */
 
 #define LESS_THAN_10 1
@@ -811,9 +812,9 @@ void initGlobals( void ) {
   gui.page.settings.settingsParams.pumpSpeed = 30;
   gui.page.settings.settingsParams.invertPump = false;
   gui.page.settings.settingsParams.chemCalibOffset = 0;
+  gui.page.settings.settingsParams.chemCalibFillSecs = 0;   /* uncalibrated (was chemContainerMl) */
+  gui.page.settings.settingsParams.wbCalibFillSecs = 0;     /* uncalibrated (was wbContainerMl) */
   gui.page.settings.settingsParams.volume = 60;
-  gui.page.settings.settingsParams.chemContainerMl = 500;
-  gui.page.settings.settingsParams.wbContainerMl = 2000;
   gui.page.settings.settingsParams.chemistryVolume = 2;    /* High */
   gui.page.settings.settingsParams.filmRotationSpeedSetpoint = 50;
   sys.analogVal_rotationSpeedPercent = mapPercentageToValue(50, 10, 100);
@@ -1068,9 +1069,11 @@ void init_Pins_and_Buses( void ) {
         LV_LOG_USER("MCP23017 init OK at 0x%02X", MCP23017_DEFAULT_ADDR);
         initializeRelayPins();
         initializeMotorPins();
-#if VALVE_SELFTEST_ON_BOOT
-        valveSelfTest();
-#endif
+        initializeChemLevelPins();
+        /* NOTE: the valve self-test used to run here and blocked boot for
+         * ~3.75s before the display came up. It is now deferred: app_main posts
+         * SELFTEST_VALVES to sysMan right after the splash loads, so the display
+         * appears immediately and the valves cycle in the background. */
     }
 
 #if defined(BOARD_JC4880P433)
@@ -1129,297 +1132,256 @@ void init_Pins_and_Buses( void ) {
   }
 }
 
-/* ── Read ONLY the machineSettings blob (no processes, no stats).
+/* Read an entire (small) file into a freshly heap-allocated, NUL-terminated
+ * buffer. Returns NULL on any failure. Caller frees. Recovers from a leftover
+ * .tmp if the main file is missing (crash-safe write was interrupted). */
+static char *slurpConfigFile(const char *path) {
+    FIL *fp = heap_caps_malloc(sizeof(FIL), MALLOC_CAP_SPIRAM);
+    if (!fp) return NULL;
+
+    FRESULT res = f_open(fp, path, FA_READ | FA_OPEN_EXISTING);
+    if (res != FR_OK) {
+        char tmpPath[80];
+        snprintf(tmpPath, sizeof(tmpPath), "%s.tmp", path);
+        if (f_open(fp, tmpPath, FA_READ | FA_OPEN_EXISTING) == FR_OK) {
+            f_close(fp);
+            f_rename(tmpPath, path);
+            LV_LOG_USER("Recovered config from %s -> %s", tmpPath, path);
+            res = f_open(fp, path, FA_READ | FA_OPEN_EXISTING);
+        }
+    }
+    if (res != FR_OK) { free(fp); return NULL; }
+
+    long fsize = f_size(fp);
+    if (fsize <= 0 || fsize > (1 << 20)) { f_close(fp); free(fp); return NULL; }
+
+    char *text = heap_caps_malloc((size_t)fsize + 1, MALLOC_CAP_SPIRAM);
+    if (!text) { f_close(fp); free(fp); return NULL; }
+
+    unsigned int br = 0;
+    f_read(fp, text, (unsigned int)fsize, &br);
+    text[br] = '\0';
+    f_close(fp);
+    free(fp);
+    return text;
+}
+
+/* Populate settingsParams from a parsed "settingsParams" JSON object. When a
+ * key is absent the (sensible) default is used, so partial/older files load
+ * cleanly. sp may be NULL — then nothing is written (caller keeps defaults). */
+static void jsonApplySettings(struct machineSettings *S, mj_node *sp) {
+    if (!sp) return;
+    S->tempUnit                  = (tempUnit_t) mj_int(mj_get(sp, "tempUnit"), CELSIUS_TEMP);
+    S->waterInlet                = mj_bool(mj_get(sp, "waterInlet"), false);
+    S->calibratedTemp            = (uint8_t) mj_int(mj_get(sp, "calibratedTemp"), 0);
+    S->filmRotationSpeedSetpoint = (uint8_t) mj_int(mj_get(sp, "filmRotationSpeedSetpoint"), 50);
+    S->rotationIntervalSetpoint  = (uint8_t) mj_int(mj_get(sp, "rotationIntervalSetpoint"), 0);
+    S->randomSetpoint            = (uint8_t) mj_int(mj_get(sp, "randomSetpoint"), 0);
+    S->isPersistentAlarm         = mj_bool(mj_get(sp, "isPersistentAlarm"), false);
+    S->isProcessAutostart        = mj_bool(mj_get(sp, "isProcessAutostart"), false);
+    S->drainFillOverlapSetpoint  = (uint8_t) mj_int(mj_get(sp, "drainFillOverlapSetpoint"), 0);
+    S->multiRinseTime            = (uint8_t) mj_int(mj_get(sp, "multiRinseTime"), 0);
+    S->tankSize                  = (uint8_t) mj_int(mj_get(sp, "tankSize"), 2);
+    S->pumpSpeed                 = (uint8_t) mj_int(mj_get(sp, "pumpSpeed"), 50);
+    S->chemCalibFillSecs         = (uint16_t) mj_int(mj_get(sp, "chemCalibFillSecs"), 0);
+    S->wbCalibFillSecs           = (uint16_t) mj_int(mj_get(sp, "wbCalibFillSecs"), 0);
+    S->chemistryVolume           = (uint8_t) mj_int(mj_get(sp, "chemistryVolume"), 1);
+    S->tempCalibOffset           = (int16_t) mj_int(mj_get(sp, "tempCalibOffset"), 0);
+    S->splashRandom              = mj_bool(mj_get(sp, "splashRandom"), false);
+    S->splashPalette             = (uint8_t) mj_int(mj_get(sp, "splashPalette"), 0);
+    S->splashShapeStyle          = (uint8_t) mj_int(mj_get(sp, "splashShapeStyle"), 0);
+    S->splashComplexity          = (uint8_t) mj_int(mj_get(sp, "splashComplexity"), 60);
+    S->splashSeed                = (uint32_t) mj_double(mj_get(sp, "splashSeed"), 0);
+    S->splashDefault             = mj_bool(mj_get(sp, "splashDefault"), true);
+    S->wifiEnabled               = mj_bool(mj_get(sp, "wifiEnabled"), false);
+    strncpy(S->wifiSSID,     mj_str(mj_get(sp, "wifiSSID"), ""),     sizeof(S->wifiSSID) - 1);
+    strncpy(S->wifiPassword, mj_str(mj_get(sp, "wifiPassword"), ""), sizeof(S->wifiPassword) - 1);
+    S->brightness                = (uint8_t) mj_int(mj_get(sp, "brightness"), 80);
+    S->volume                    = (uint8_t) mj_int(mj_get(sp, "volume"), 50);
+    S->invertPump                = mj_bool(mj_get(sp, "invertPump"), false);
+    S->chemCalibOffset           = (int16_t) mj_int(mj_get(sp, "chemCalibOffset"), 0);
+}
+
+/* ── Read ONLY the machineSettings block (no processes, no stats).
  *    Used at boot to know splash preferences before the full UI is ready. ── */
 void readSettingsOnly(const char *path) {
-    FIL *fp = heap_caps_malloc(sizeof(FIL), MALLOC_CAP_SPIRAM);
-    if (!fp) {
-        LV_LOG_USER("readSettingsOnly: FAILED to alloc FIL struct");
+    char *text = slurpConfigFile(path);
+    if (!text) {
+        LV_LOG_USER("readSettingsOnly: could not read '%s' — using defaults", path);
         return;
     }
-    unsigned int br;
-    FRESULT res = f_open(fp, path, FA_READ | FA_OPEN_EXISTING);
-    if (res == FR_OK) {
-        if (f_read(fp, &gui.page.settings.settingsParams,
-                   sizeof(gui.page.settings.settingsParams), &br) == FR_OK) {
-            LV_LOG_USER("readSettingsOnly: loaded %u bytes (splashDefault=%d splashRandom=%d pal=%d style=%d cmx=%d seed=%"PRIu32")",
-                        (unsigned)br,
-                        gui.page.settings.settingsParams.splashDefault,
-                        gui.page.settings.settingsParams.splashRandom,
-                        gui.page.settings.settingsParams.splashPalette,
-                        gui.page.settings.settingsParams.splashShapeStyle,
-                        gui.page.settings.settingsParams.splashComplexity,
-                        gui.page.settings.settingsParams.splashSeed);
-        } else {
-            LV_LOG_USER("readSettingsOnly: f_read FAILED");
-        }
-        f_close(fp);
-    } else {
-        LV_LOG_USER("readSettingsOnly: f_open('%s') FAILED (res=%d) — using defaults", path, res);
+    mj_node *root = mj_parse(text);
+    if (!root) {
+        LV_LOG_USER("readSettingsOnly: JSON parse failed — using defaults");
+        free(text);
+        return;
     }
-    free(fp);
+    struct machineSettings *S = &gui.page.settings.settingsParams;
+    memset(S, 0, sizeof(*S));
+    jsonApplySettings(S, mj_get(root, "settingsParams"));
+    LV_LOG_USER("readSettingsOnly: splashDefault=%d splashRandom=%d pal=%d style=%d cmx=%d seed=%"PRIu32,
+                S->splashDefault, S->splashRandom, S->splashPalette,
+                S->splashShapeStyle, S->splashComplexity, S->splashSeed);
+    mj_free(root);
+    free(text);
 }
 
 void readConfigFile(const char *path, bool enableLog) {
 
-	FIL				*fp;
-	FRESULT			res;
-	unsigned int	bytes_read;
+    char *text = slurpConfigFile(path);
+    if (!text) {
+        LV_LOG_USER("Failed to read configuration file '%s' - using defaults", path);
+        return;
+    }
 
-	/* Heap-allocate FIL to avoid stack overflow */
-	fp = heap_caps_malloc( sizeof(FIL), MALLOC_CAP_SPIRAM );
-	if (!fp) {
-		LV_LOG_USER("Error: cannot allocate FIL struct for read");
-		return;
-	}
+    mj_node *root = mj_parse(text);
+    if (!root) {
+        LV_LOG_USER("Config JSON parse failed - using defaults");
+        free(text);
+        return;
+    }
 
-	/* ── Crash recovery: if .cfg is missing but .tmp exists, the previous
-	 *    write completed successfully but the rename was interrupted.
-	 *    Recover by renaming .tmp → .cfg before proceeding. ── */
-	res = f_open(fp, path, FA_READ | FA_OPEN_EXISTING);
-	if (res != FR_OK) {
-	    char tmpPath[64];
-	    snprintf(tmpPath, sizeof(tmpPath), "%s.tmp", path);
-	    FRESULT tmpRes = f_open(fp, tmpPath, FA_READ | FA_OPEN_EXISTING);
-	    if (tmpRes == FR_OK) {
-	        f_close(fp);
-	        f_rename(tmpPath, path);
-	        LV_LOG_USER("Recovered config from %s → %s", tmpPath, path);
-	        res = f_open(fp, path, FA_READ | FA_OPEN_EXISTING);
-	    }
-	}
+    /* ── settingsParams ── */
+    struct machineSettings *S = &gui.page.settings.settingsParams;
+    memset(S, 0, sizeof(*S));
+    mj_node *sp = mj_get(root, "settingsParams");
+    jsonApplySettings(S, sp);
+    if (!sp) LV_LOG_USER("Config has no settingsParams - settings use defaults");
+    ESP_LOGW(TAG, "[WiFi-Load] enabled=%d, ssid='%s', pwd_len=%d",
+             S->wifiEnabled, S->wifiSSID, (int)strlen(S->wifiPassword));
 
-  	if( res == FR_OK ) {
-	    // Load Machine Settings
-	    /* Zero the struct first so new fields (Wi-Fi etc.) get safe defaults
-	     * when reading an older, shorter config file */
-	    memset(&gui.page.settings.settingsParams, 0, sizeof(gui.page.settings.settingsParams));
-	    if( (res = f_read( fp, &gui.page.settings.settingsParams, sizeof(gui.page.settings.settingsParams), &bytes_read ) ) !=  FR_OK ) {
-	      f_close( fp );
-	      free( fp );
-	      LV_LOG_USER("Configuration file error aborting load err: %d", res );
-	      return;
-	    }
-	    if(bytes_read < sizeof(gui.page.settings.settingsParams)) {
-	        LV_LOG_USER("Config file shorter than expected (%u < %u) — new fields use defaults",
-	                     bytes_read, (unsigned)sizeof(gui.page.settings.settingsParams));
-	    }
-	    ESP_LOGW(TAG, "[WiFi-Load] bytes_read=%u, struct_size=%u, enabled=%d, ssid='%s', pwd_len=%d",
-	                 bytes_read, (unsigned)sizeof(gui.page.settings.settingsParams),
-	                 gui.page.settings.settingsParams.wifiEnabled,
-	                 gui.page.settings.settingsParams.wifiSSID,
-	                 (int)strlen(gui.page.settings.settingsParams.wifiPassword));
+    /* ── processes[] with nested steps[] ── */
+    processList *pl = &gui.page.processes.processElementsList;
+    pl->start = NULL; pl->end = NULL; pl->size = 0;
+    mj_node *procs = mj_get(root, "processes");
+    if (procs && procs->type == MJ_ARR) {
+        for (mj_node *pc = procs->child; pc != NULL; pc = pc->next) {
+            if (pl->size >= MAX_PROC_ELEMENTS) {
+                LV_LOG_USER("Process count capped at %d", MAX_PROC_ELEMENTS);
+                break;
+            }
+            processNode *nodeP = (processNode*) allocateAndInitializeNode(PROCESS_NODE);
+            if (nodeP == NULL) { LV_LOG_USER("Failed to allocate process node"); continue; }
+            sProcessData *d = &nodeP->process.processDetails->data;
 
-	    if(enableLog) {
-	        LV_LOG_USER("--- MACHINE PARAMS ---");
-	        LV_LOG_USER("tempUnit:%d",gui.page.settings.settingsParams.tempUnit);
-	//        LV_LOG_USER("size:%d",sizeof(gui.page.settings.settingsParams.tempUnit));
-	        LV_LOG_USER("waterInlet:%d",gui.page.settings.settingsParams.waterInlet);
-	//        LV_LOG_USER("size:%d",sizeof(gui.page.settings.settingsParams.waterInlet));
-	        LV_LOG_USER("calibratedTemp:%d",gui.page.settings.settingsParams.calibratedTemp);
-	//        LV_LOG_USER("size:%d",sizeof(gui.page.settings.settingsParams.calibratedTemp));
-	        LV_LOG_USER("filmRotationSpeedSetpoint:%d",gui.page.settings.settingsParams.filmRotationSpeedSetpoint);
-	//        LV_LOG_USER("size:%d",sizeof(gui.page.settings.settingsParams.filmRotationSpeedSetpoint));
-	        LV_LOG_USER("rotationIntervalSetpoint:%d",gui.page.settings.settingsParams.rotationIntervalSetpoint);
-	//        LV_LOG_USER("size:%d",sizeof(gui.page.settings.settingsParams.rotationIntervalSetpoint));
-	        LV_LOG_USER("randomSetpoint:%d",gui.page.settings.settingsParams.randomSetpoint);
-	//        LV_LOG_USER("size:%d",sizeof(gui.page.settings.settingsParams.randomSetpoint));
-	        LV_LOG_USER("isPersistentAlarm:%d",gui.page.settings.settingsParams.isPersistentAlarm);
-	//        LV_LOG_USER("size:%d",sizeof(gui.page.settings.settingsParams.isPersistentAlarm));
-	        LV_LOG_USER("isProcessAutostart:%d",gui.page.settings.settingsParams.isProcessAutostart);
-	//        LV_LOG_USER("size:%d",sizeof(gui.page.settings.settingsParams.isProcessAutostart));
-	        LV_LOG_USER("drainFillOverlapSetpoint:%d",gui.page.settings.settingsParams.drainFillOverlapSetpoint);
-	//        LV_LOG_USER("size:%d",sizeof(gui.page.settings.settingsParams.drainFillOverlapSetpoint));
-	        LV_LOG_USER("multiRinseTime:%d",gui.page.settings.settingsParams.multiRinseTime);
-	//        LV_LOG_USER("size:%d",sizeof(gui.page.settings.settingsParams.multiRinseTime));
-	        LV_LOG_USER("tankSize:%d",gui.page.settings.settingsParams.tankSize);
-	        LV_LOG_USER("pumpSpeed:%d",gui.page.settings.settingsParams.pumpSpeed);
-	        LV_LOG_USER("chemContainerMl:%d",gui.page.settings.settingsParams.chemContainerMl);
-	        LV_LOG_USER("wbContainerMl:%d",gui.page.settings.settingsParams.wbContainerMl);
-	        LV_LOG_USER("chemistryVolume:%d",gui.page.settings.settingsParams.chemistryVolume);
-	    }   
+            strncpy(d->processNameString, mj_str(mj_get(pc, "name"), ""), sizeof(d->processNameString) - 1);
+            d->processNameString[sizeof(d->processNameString) - 1] = '\0';
+            d->temp             = (uint32_t) mj_int(mj_get(pc, "temp"), 20);
+            if (d->temp < 15) d->temp = 20;
+            d->tempTolerance    = (float) mj_double(mj_get(pc, "tempTolerance"), 0.5);
+            d->isTempControlled = mj_bool(mj_get(pc, "isTempControlled"), false);
+            d->isPreferred      = mj_bool(mj_get(pc, "isPreferred"), false);
+            d->filmType         = (filmType_t) mj_int(mj_get(pc, "filmType"), BLACK_AND_WHITE_FILM);
+            d->timeMins         = (uint32_t) mj_int(mj_get(pc, "timeMins"), 0);
+            d->timeSecs         = (uint8_t) mj_int(mj_get(pc, "timeSecs"), 0);
 
-	    // Load Processes
-	    processList *processElementsList = &gui.page.processes.processElementsList;
-	    processElementsList->start = NULL;
-	    processElementsList->end = NULL;
-	    processElementsList->size = 0;    
-	    // Read process list size
-	    f_read( fp, &processElementsList->size, sizeof(processElementsList->size), &bytes_read );
-	    /* Unconditional diagnostic: settingsSize tells us the firmware struct
-	     * layout; rawProcessCount should equal the number of recipes in the file.
-	     * If rawProcessCount is huge (e.g. 2048) the firmware struct is a
-	     * different size than the config was generated for → rebuild needed. */
-	    ESP_LOGW(TAG, "[CONFIG] path=%s  settingsSize=%u  rawProcessCount=%"PRIi32,
-	             path, (unsigned)sizeof(gui.page.settings.settingsParams), processElementsList->size);
-	    if(enableLog) LV_LOG_USER("Number of Processes:%"PRIi32"", processElementsList->size);
-		
-		if( processElementsList->size < 0 || processElementsList->size > MAX_PROC_ELEMENTS ) {
-			/* An out-of-range count means the config is corrupt or the config/
-			 * firmware struct layouts don't match (e.g. a config generated for a
-			 * different settings size). Don't read garbage — load zero processes. */
-			LV_LOG_USER("Config corrupt or firmware/config mismatch (process count=%"PRIi32") — loading no processes",
-			            processElementsList->size);
-			processElementsList->size = 0;
-		}
-	    for(int32_t process = 0; process < processElementsList->size; process++){
-	      if(enableLog) LV_LOG_USER("Process:%"PRIi32"", process);
-	
-	      processNode *nodeP = (processNode*) allocateAndInitializeNode(PROCESS_NODE);
-	      if (nodeP == NULL) {
-	          LV_LOG_USER("Failed to allocate memory for process node");
-	          continue;
-	      }
-	      f_read( fp, &nodeP->process.processDetails->data.processNameString, sizeof(nodeP->process.processDetails->data.processNameString), &bytes_read );
-	      /* Defensive: guarantee the name is NUL-terminated so a corrupt/misaligned
-	       * config can never make a label printf run off the end and crash. */
-	      nodeP->process.processDetails->data.processNameString[sizeof(nodeP->process.processDetails->data.processNameString) - 1] = '\0';
-	      f_read( fp, &nodeP->process.processDetails->data.temp, sizeof(nodeP->process.processDetails->data.temp), &bytes_read );
-	      f_read( fp, &nodeP->process.processDetails->data.tempTolerance, sizeof(nodeP->process.processDetails->data.tempTolerance), &bytes_read );
-	      f_read( fp, &nodeP->process.processDetails->data.isTempControlled, sizeof(nodeP->process.processDetails->data.isTempControlled), &bytes_read );
-	      f_read( fp, &nodeP->process.processDetails->data.isPreferred, sizeof(nodeP->process.processDetails->data.isPreferred), &bytes_read );
-	      f_read( fp, &nodeP->process.processDetails->data.filmType, sizeof(nodeP->process.processDetails->data.filmType), &bytes_read );
-	      /* Clamp temp loaded from old files: if below roller minimum (15), default to 20°C */
-	      if (nodeP->process.processDetails->data.temp < 15) {
-	          nodeP->process.processDetails->data.temp = 20;
-	      }
-	      f_read( fp, &nodeP->process.processDetails->data.timeMins, sizeof(nodeP->process.processDetails->data.timeMins), &bytes_read );
-	      f_read( fp, &nodeP->process.processDetails->data.timeSecs, sizeof(nodeP->process.processDetails->data.timeSecs), &bytes_read );
-	
-	      if (processElementsList->start == NULL) {
-	        processElementsList->start = nodeP;
-	        nodeP->prev = NULL;
-	      } else {
-	        processElementsList->end->next = nodeP;
-	        nodeP->prev = processElementsList->end;
-	      }
-	      processElementsList->end = nodeP;
-	      processElementsList->end->next = NULL;
-	
-	      if(enableLog){
-	        LV_LOG_USER("--- PROCESS PARAMS ---");
-	        LV_LOG_USER("processNameString:%s",nodeP->process.processDetails->data.processNameString);
-	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->data.processNameString));
-	        LV_LOG_USER("temp:%"PRIi32"",nodeP->process.processDetails->data.temp);
-	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->data.temp));
-	        LV_LOG_USER("tempTolerance:%f",nodeP->process.processDetails->data.tempTolerance);
-	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->data.tempTolerance));
-	        LV_LOG_USER("isTempControlled:%d",nodeP->process.processDetails->data.isTempControlled);
-	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->data.isTempControlled));
-	        LV_LOG_USER("isPreferred:%d",nodeP->process.processDetails->data.isPreferred);
-	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->data.isPreferred));
-	        LV_LOG_USER("filmType:%d",nodeP->process.processDetails->data.filmType);
-	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->data.filmType));
-	        LV_LOG_USER("timeMins:%"PRIu32"",nodeP->process.processDetails->data.timeMins);
-	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->data.timeMins));
-	        LV_LOG_USER("timeSecs:%d",nodeP->process.processDetails->data.timeSecs);
-	//        LV_LOG_USER("size:%d",sizeof(nodeP->process.processDetails->data.timeSecs));
-	      }
+            if (pl->start == NULL) { pl->start = nodeP; nodeP->prev = NULL; }
+            else { pl->end->next = nodeP; nodeP->prev = pl->end; }
+            pl->end = nodeP; nodeP->next = NULL;
+            pl->size++;
 
-	      stepList *stepElementsList = &nodeP->process.processDetails->stepElementsList;
-	      stepElementsList->start = NULL;
-	      stepElementsList->end = NULL;
-	      stepElementsList->size = 0;
-	
-	      // Write step list size
-	      f_read( fp, &stepElementsList->size, sizeof(stepElementsList->size), &bytes_read );
-	      if(enableLog) LV_LOG_USER("Process Steps:%d", stepElementsList->size);
-		  if( stepElementsList->size > MAX_STEP_ELEMENTS ) {
-		  	LV_LOG_USER("Warning: File may be corrupt number of steps(%"PRIu16") capped to %d", stepElementsList->size, MAX_STEP_ELEMENTS);
-		  	stepElementsList->size = MAX_STEP_ELEMENTS;		// Damage limitation in the event of problems 
-		  }
+            stepList *sl = &nodeP->process.processDetails->stepElementsList;
+            sl->start = NULL; sl->end = NULL; sl->size = 0;
+            mj_node *steps = mj_get(pc, "steps");
+            if (steps && steps->type == MJ_ARR) {
+                for (mj_node *stp = steps->child; stp != NULL; stp = stp->next) {
+                    if (sl->size >= MAX_STEP_ELEMENTS) {
+                        LV_LOG_USER("Step count capped at %d", MAX_STEP_ELEMENTS);
+                        break;
+                    }
+                    stepNode *nodeS = (stepNode*) allocateAndInitializeNode(STEP_NODE);
+                    if (nodeS == NULL) { LV_LOG_USER("Failed to allocate step node"); continue; }
+                    sStepData *s = &nodeS->step.stepDetails->data;
 
-	      for(int32_t step = 0; step < stepElementsList->size; step++){                
-	        if(enableLog) LV_LOG_USER("Step:%"PRIi32"", step);
-	        stepNode *nodeS = (stepNode*) allocateAndInitializeNode(STEP_NODE);
-	        if (nodeS == NULL) {
-	          LV_LOG_USER("Failed to allocate memory for step node");
-	          continue;
-	        }
-	
-	        f_read( fp, &nodeS->step.stepDetails->data.stepNameString, sizeof(nodeS->step.stepDetails->data.stepNameString), &bytes_read );
-	        f_read( fp, &nodeS->step.stepDetails->data.timeMins, sizeof(nodeS->step.stepDetails->data.timeMins), &bytes_read );
-	        f_read( fp, &nodeS->step.stepDetails->data.timeSecs, sizeof(nodeS->step.stepDetails->data.timeSecs), &bytes_read );
-	        f_read( fp, &nodeS->step.stepDetails->data.type, sizeof(nodeS->step.stepDetails->data.type), &bytes_read );
-	        f_read( fp, &nodeS->step.stepDetails->data.source, sizeof(nodeS->step.stepDetails->data.source), &bytes_read );
-	        f_read( fp, &nodeS->step.stepDetails->data.discardAfterProc, sizeof(nodeS->step.stepDetails->data.discardAfterProc), &bytes_read );
-	        
-	        if (stepElementsList->start == NULL) {
-	          stepElementsList->start = nodeS;
-	          nodeS->prev = NULL;
-	        } else {
-	          stepElementsList->end->next = nodeS;
-	          nodeS->prev = stepElementsList->end;
-	        }
-	        stepElementsList->end = nodeS;
-	        stepElementsList->end->next = NULL;
-	
-	        if(enableLog){
-	          LV_LOG_USER("--- STEP PARAMS ---");
-	          LV_LOG_USER("stepNameString:%s",nodeS->step.stepDetails->data.stepNameString);
-	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->data.stepNameString));
-	          LV_LOG_USER("timeMins:%d",nodeS->step.stepDetails->data.timeMins);
-	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->data.timeMins));
-	          LV_LOG_USER("timeSecs:%d",nodeS->step.stepDetails->data.timeSecs);
-	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->data.timeSecs));
-	          LV_LOG_USER("type:%d",nodeS->step.stepDetails->data.type);
-	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->data.type));
-	          LV_LOG_USER("source:%d",nodeS->step.stepDetails->data.source);
-	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->data.source));
-	          LV_LOG_USER("discardAfterProc:%d",nodeS->step.stepDetails->data.discardAfterProc);
-	//          LV_LOG_USER("size:%d",sizeof(nodeS->step.stepDetails->data.discardAfterProc));
-	        }
-	
-	      }
-	
-	    }
+                    strncpy(s->stepNameString, mj_str(mj_get(stp, "stepNameString"), ""), sizeof(s->stepNameString) - 1);
+                    s->stepNameString[sizeof(s->stepNameString) - 1] = '\0';
+                    s->timeMins         = (uint8_t) mj_int(mj_get(stp, "timeMins"), 0);
+                    s->timeSecs         = (uint8_t) mj_int(mj_get(stp, "timeSecs"), 0);
+                    s->type             = (chemicalType_t) mj_int(mj_get(stp, "type"), CHEMISTRY);
+                    s->source           = (uint8_t) mj_int(mj_get(stp, "source"), 0);
+                    s->discardAfterProc = (uint8_t) mj_int(mj_get(stp, "discardAfterProc"), 0);
 
-	    /* ── Machine statistics (appended after processes) ── */
-	    {
-	        unsigned int br = 0;
-	        f_read( fp, &gui.page.tools.machineStats.completed, sizeof(gui.page.tools.machineStats.completed), &br );
-	        if(br > 0) {
-	            f_read( fp, &gui.page.tools.machineStats.totalMins, sizeof(gui.page.tools.machineStats.totalMins), &br );
-	            f_read( fp, &gui.page.tools.machineStats.totalSecs, sizeof(gui.page.tools.machineStats.totalSecs), &br );
-	            f_read( fp, &gui.page.tools.machineStats.stopped,   sizeof(gui.page.tools.machineStats.stopped),   &br );
-	            f_read( fp, &gui.page.tools.machineStats.clean,     sizeof(gui.page.tools.machineStats.clean),     &br );
-	            LV_LOG_USER("Loaded stats: completed=%"PRIu32" totalMins=%"PRIu64" totalSecs=%"PRIu32" stopped=%"PRIu32" clean=%"PRIu32"",
-	                gui.page.tools.machineStats.completed, gui.page.tools.machineStats.totalMins,
-	                gui.page.tools.machineStats.totalSecs, gui.page.tools.machineStats.stopped, gui.page.tools.machineStats.clean);
-	        } else {
-	            LV_LOG_USER("No stats section in config (old format) — starting from zero");
-	        }
-	    }
+                    if (sl->start == NULL) { sl->start = nodeS; nodeS->prev = NULL; }
+                    else { sl->end->next = nodeS; nodeS->prev = sl->end; }
+                    sl->end = nodeS; nodeS->next = NULL;
+                    sl->size++;
+                }
+            }
+        }
+    }
 
-	    f_close( fp );
-	} else {
-		LV_LOG_USER("Failed to open configuration file for reading using default err: %d", res);
-	}
-	free( fp );  /* Release heap-allocated FIL struct */
+    /* ── machineStats ── */
+    mj_node *ms = mj_get(root, "machineStats");
+    machineStatistics *M = &gui.page.tools.machineStats;
+    if (ms) {
+        M->completed = (uint32_t) mj_double(mj_get(ms, "completed"), 0);
+        M->totalMins = (uint64_t) mj_double(mj_get(ms, "totalMins"), 0);
+        M->totalSecs = (uint32_t) mj_double(mj_get(ms, "totalSecs"), 0);
+        M->stopped   = (uint32_t) mj_double(mj_get(ms, "stopped"), 0);
+        M->clean     = (uint32_t) mj_double(mj_get(ms, "clean"), 0);
+    } else {
+        LV_LOG_USER("No machineStats in config - starting from zero");
+    }
+
+    LV_LOG_USER("Config JSON loaded: %"PRIi32" processes", pl->size);
+    if (enableLog) LV_LOG_USER("tempUnit=%d waterInlet=%d pumpSpeed=%d chemCalibFillSecs=%d wbCalibFillSecs=%d",
+                               (int)S->tempUnit, S->waterInlet, S->pumpSpeed,
+                               S->chemCalibFillSecs, S->wbCalibFillSecs);
+
+    mj_free(root);
+    free(text);
+}
+
+/* ── JSON config helpers ───────────────────────────────────────────────
+ * The config is now a plain JSON document (no binary struct, no cJSON).
+ * Writing streams the JSON to the file with small snprintf fragments;
+ * reading slurps the whole file and parses it with the mini_json parser. */
+
+/* Append a NUL-terminated string to the open config file. */
+static void cfgWrite(FIL *fp, const char *s) {
+    unsigned int bw;
+    f_write(fp, s, (unsigned int)strlen(s), &bw);
+}
+
+/* Escape a string for inclusion inside JSON double quotes. */
+static void jsonEscape(const char *in, char *out, size_t outsz) {
+    size_t o = 0;
+    if (outsz == 0) return;
+    for (const unsigned char *p = (const unsigned char *)(in ? in : ""); *p && o + 7 < outsz; p++) {
+        unsigned char c = *p;
+        switch (c) {
+            case '"':  out[o++] = '\\'; out[o++] = '"';  break;
+            case '\\': out[o++] = '\\'; out[o++] = '\\'; break;
+            case '\n': out[o++] = '\\'; out[o++] = 'n';  break;
+            case '\r': out[o++] = '\\'; out[o++] = 'r';  break;
+            case '\t': out[o++] = '\\'; out[o++] = 't';  break;
+            default:
+                if (c < 0x20) o += (size_t)snprintf(out + o, outsz - o, "\\u%04x", c);
+                else          out[o++] = (char)c;
+        }
+    }
+    out[o] = '\0';
 }
 
 void writeConfigFile( const char *path, bool enableLog ) {
+    (void)enableLog;
+    FIL     *fp;
+    FRESULT  res;
 
-	FIL				*fp;
-	FRESULT			res;
-	unsigned int	bytes_written;
-
-	/* Heap-allocate FIL to avoid stack overflow in sysMan task */
-	fp = heap_caps_malloc( sizeof(FIL), MALLOC_CAP_SPIRAM );
-	if (!fp) {
-		LV_LOG_USER("Error: cannot allocate FIL struct for write");
-		return;
-	}
+    /* Heap-allocate FIL to avoid stack overflow in sysMan task */
+    fp = heap_caps_malloc( sizeof(FIL), MALLOC_CAP_SPIRAM );
+    if (!fp) {
+        LV_LOG_USER("Error: cannot allocate FIL struct for write");
+        return;
+    }
 
     if (initErrors != INIT_ERROR_SD) {
         /* ── Crash-safe write: write to .tmp, then rename ──
-         * If the system crashes mid-write, the original .cfg is preserved.
-         * On next boot, readConfigFile recovers from .tmp if .cfg is missing. */
-        char tmpPath[64];
+         * If the system crashes mid-write, the previous config is preserved.
+         * On next boot, readConfigFile recovers from .tmp if the file is missing. */
+        char tmpPath[80];
         snprintf(tmpPath, sizeof(tmpPath), "%s.tmp", path);
-
-        /* Remove stale temp file if any */
-        f_unlink(tmpPath);
+        f_unlink(tmpPath);   /* remove any stale temp */
 
         LV_LOG_USER("Writing configuration file: %s (via %s)", path, tmpPath);
 
@@ -1429,100 +1391,135 @@ void writeConfigFile( const char *path, bool enableLog ) {
             return;
         }
 
-        // Write Machine Parameters
-        LV_LOG_USER("Writing settingsParams: %zu bytes", sizeof(gui.page.settings.settingsParams));
-        ESP_LOGW(TAG, "[WiFi-Save] enabled=%d, ssid='%s', pwd_len=%d",
-                     gui.page.settings.settingsParams.wifiEnabled,
-                     gui.page.settings.settingsParams.wifiSSID,
-                     (int)strlen(gui.page.settings.settingsParams.wifiPassword));
-        f_write( fp, &gui.page.settings.settingsParams, sizeof(gui.page.settings.settingsParams), &bytes_written );
-        LV_LOG_USER("settingsParams written OK: %u bytes", bytes_written);
+        struct machineSettings *S = &gui.page.settings.settingsParams;
+        char buf[900];
+        char escSsid[80], escPwd[160];
 
-        if (enableLog) {
-            LV_LOG_USER("--- MACHINE PARAMS ---");
-            LV_LOG_USER("tempUnit:%d", gui.page.settings.settingsParams.tempUnit);
-            LV_LOG_USER("waterInlet:%d", gui.page.settings.settingsParams.waterInlet);
-            LV_LOG_USER("calibratedTemp:%d", gui.page.settings.settingsParams.calibratedTemp);
-            LV_LOG_USER("filmRotationSpeedSetpoint:%d", gui.page.settings.settingsParams.filmRotationSpeedSetpoint);
-            LV_LOG_USER("rotationIntervalSetpoint:%d", gui.page.settings.settingsParams.rotationIntervalSetpoint);
-            LV_LOG_USER("randomSetpoint:%d", gui.page.settings.settingsParams.randomSetpoint);
-            LV_LOG_USER("isPersistentAlarm:%d", gui.page.settings.settingsParams.isPersistentAlarm);
-            LV_LOG_USER("isProcessAutostart:%d", gui.page.settings.settingsParams.isProcessAutostart);
-            LV_LOG_USER("drainFillOverlapSetpoint:%d", gui.page.settings.settingsParams.drainFillOverlapSetpoint);
-        }
+        /* ── settingsParams ── */
+        snprintf(buf, sizeof(buf),
+            "{\n"
+            "  \"settingsParams\": {\n"
+            "    \"tempUnit\": %d,\n"
+            "    \"waterInlet\": %d,\n"
+            "    \"calibratedTemp\": %u,\n"
+            "    \"filmRotationSpeedSetpoint\": %u,\n"
+            "    \"rotationIntervalSetpoint\": %u,\n"
+            "    \"randomSetpoint\": %u,\n"
+            "    \"isPersistentAlarm\": %d,\n"
+            "    \"isProcessAutostart\": %d,\n"
+            "    \"drainFillOverlapSetpoint\": %u,\n"
+            "    \"multiRinseTime\": %u,\n"
+            "    \"tankSize\": %u,\n"
+            "    \"pumpSpeed\": %u,\n",
+            (int)S->tempUnit, S->waterInlet ? 1 : 0, S->calibratedTemp,
+            S->filmRotationSpeedSetpoint, S->rotationIntervalSetpoint, S->randomSetpoint,
+            S->isPersistentAlarm ? 1 : 0, S->isProcessAutostart ? 1 : 0,
+            S->drainFillOverlapSetpoint, S->multiRinseTime, S->tankSize, S->pumpSpeed);
+        cfgWrite(fp, buf);
 
-        // Write Processes
-        LV_LOG_USER("Writing processes: count=%"PRIu32"", gui.page.processes.processElementsList.size);
-        processNode *currentProcessNode = gui.page.processes.processElementsList.start;
-        // Write process list size
-        f_write( fp, &gui.page.processes.processElementsList.size, sizeof(gui.page.processes.processElementsList.size), &bytes_written );
+        snprintf(buf, sizeof(buf),
+            "    \"chemCalibFillSecs\": %u,\n"
+            "    \"wbCalibFillSecs\": %u,\n"
+            "    \"chemistryVolume\": %u,\n"
+            "    \"tempCalibOffset\": %d,\n"
+            "    \"splashRandom\": %d,\n"
+            "    \"splashPalette\": %u,\n"
+            "    \"splashShapeStyle\": %u,\n"
+            "    \"splashComplexity\": %u,\n"
+            "    \"splashSeed\": %lu,\n"
+            "    \"splashDefault\": %d,\n"
+            "    \"wifiEnabled\": %d,\n",
+            S->chemCalibFillSecs, S->wbCalibFillSecs, S->chemistryVolume,
+            (int)S->tempCalibOffset, S->splashRandom ? 1 : 0, S->splashPalette,
+            S->splashShapeStyle, S->splashComplexity, (unsigned long)S->splashSeed,
+            S->splashDefault ? 1 : 0, S->wifiEnabled ? 1 : 0);
+        cfgWrite(fp, buf);
 
-        while (currentProcessNode != NULL) {
-            f_write( fp, currentProcessNode->process.processDetails->data.processNameString, sizeof(currentProcessNode->process.processDetails->data.processNameString), &bytes_written );
-            f_write( fp, &currentProcessNode->process.processDetails->data.temp, sizeof(currentProcessNode->process.processDetails->data.temp), &bytes_written );
-            f_write( fp, &currentProcessNode->process.processDetails->data.tempTolerance, sizeof(currentProcessNode->process.processDetails->data.tempTolerance), &bytes_written );
-            f_write( fp, &currentProcessNode->process.processDetails->data.isTempControlled, sizeof(currentProcessNode->process.processDetails->data.isTempControlled), &bytes_written );
-            f_write( fp, &currentProcessNode->process.processDetails->data.isPreferred, sizeof(currentProcessNode->process.processDetails->data.isPreferred), &bytes_written );
-            f_write( fp, &currentProcessNode->process.processDetails->data.filmType, sizeof(currentProcessNode->process.processDetails->data.filmType), &bytes_written );
-            f_write( fp, &currentProcessNode->process.processDetails->data.timeMins, sizeof(currentProcessNode->process.processDetails->data.timeMins), &bytes_written );
-            f_write( fp, &currentProcessNode->process.processDetails->data.timeSecs, sizeof(currentProcessNode->process.processDetails->data.timeSecs), &bytes_written );
+        jsonEscape(S->wifiSSID, escSsid, sizeof(escSsid));
+        jsonEscape(S->wifiPassword, escPwd, sizeof(escPwd));
+        snprintf(buf, sizeof(buf),
+            "    \"wifiSSID\": \"%s\",\n"
+            "    \"wifiPassword\": \"%s\",\n"
+            "    \"brightness\": %u,\n"
+            "    \"volume\": %u,\n"
+            "    \"invertPump\": %d,\n"
+            "    \"chemCalibOffset\": %d\n"
+            "  },\n",
+            escSsid, escPwd, S->brightness, S->volume,
+            S->invertPump ? 1 : 0, (int)S->chemCalibOffset);
+        cfgWrite(fp, buf);
 
-            if (enableLog) {
-                LV_LOG_USER("--- PROCESS PARAMS ---");
-                LV_LOG_USER("processNameString:%s", currentProcessNode->process.processDetails->data.processNameString);
-                LV_LOG_USER("temp:%"PRIu32"", currentProcessNode->process.processDetails->data.temp);
-                LV_LOG_USER("tempTolerance:%f", currentProcessNode->process.processDetails->data.tempTolerance);
-                LV_LOG_USER("isTempControlled:%d", currentProcessNode->process.processDetails->data.isTempControlled);
-                LV_LOG_USER("isPreferred:%d", currentProcessNode->process.processDetails->data.isPreferred);
-                LV_LOG_USER("filmType:%d", currentProcessNode->process.processDetails->data.filmType);
-                LV_LOG_USER("timeMins:%"PRIu32"", currentProcessNode->process.processDetails->data.timeMins);
-                LV_LOG_USER("timeSecs:%"PRIu8"", currentProcessNode->process.processDetails->data.timeSecs);
+        /* ── processes[] ── */
+        cfgWrite(fp, "  \"processes\": [");
+        processNode *pn = gui.page.processes.processElementsList.start;
+        bool firstP = true;
+        while (pn != NULL) {
+            sProcessData *d = &pn->process.processDetails->data;
+            char escName[48];
+            jsonEscape(d->processNameString, escName, sizeof(escName));
+            snprintf(buf, sizeof(buf),
+                "%s\n    {\n"
+                "      \"name\": \"%s\",\n"
+                "      \"temp\": %lu,\n"
+                "      \"tempTolerance\": %.4g,\n"
+                "      \"isTempControlled\": %d,\n"
+                "      \"isPreferred\": %d,\n"
+                "      \"filmType\": %d,\n"
+                "      \"timeMins\": %lu,\n"
+                "      \"timeSecs\": %u,\n"
+                "      \"steps\": [",
+                firstP ? "" : ",", escName, (unsigned long)d->temp,
+                (double)d->tempTolerance, d->isTempControlled ? 1 : 0,
+                d->isPreferred ? 1 : 0, (int)d->filmType,
+                (unsigned long)d->timeMins, d->timeSecs);
+            cfgWrite(fp, buf);
+            firstP = false;
+
+            stepNode *sn = pn->process.processDetails->stepElementsList.start;
+            bool firstS = true;
+            while (sn != NULL) {
+                sStepData *s = &sn->step.stepDetails->data;
+                char escS[48];
+                jsonEscape(s->stepNameString, escS, sizeof(escS));
+                snprintf(buf, sizeof(buf),
+                    "%s\n        { \"stepNameString\": \"%s\", \"timeMins\": %u, \"timeSecs\": %u, "
+                    "\"type\": %d, \"source\": %u, \"discardAfterProc\": %u }",
+                    firstS ? "" : ",", escS, s->timeMins, s->timeSecs,
+                    (int)s->type, s->source, s->discardAfterProc);
+                cfgWrite(fp, buf);
+                firstS = false;
+                sn = sn->next;
             }
-
-            stepNode *currentStepNode = currentProcessNode->process.processDetails->stepElementsList.start;
-            // Write step list size
-            f_write( fp, &currentProcessNode->process.processDetails->stepElementsList.size, sizeof(currentProcessNode->process.processDetails->stepElementsList.size), &bytes_written );
-            while (currentStepNode != NULL) {
-                f_write( fp, currentStepNode->step.stepDetails->data.stepNameString, sizeof(currentStepNode->step.stepDetails->data.stepNameString), &bytes_written );
-                f_write( fp, &currentStepNode->step.stepDetails->data.timeMins, sizeof(currentStepNode->step.stepDetails->data.timeMins), &bytes_written );
-                f_write( fp, &currentStepNode->step.stepDetails->data.timeSecs, sizeof(currentStepNode->step.stepDetails->data.timeSecs), &bytes_written );
-                f_write( fp, &currentStepNode->step.stepDetails->data.type, sizeof(currentStepNode->step.stepDetails->data.type), &bytes_written );
-                f_write( fp, &currentStepNode->step.stepDetails->data.source, sizeof(currentStepNode->step.stepDetails->data.source), &bytes_written );
-                f_write( fp, &currentStepNode->step.stepDetails->data.discardAfterProc, sizeof(currentStepNode->step.stepDetails->data.discardAfterProc), &bytes_written );
-
-                if (enableLog) {
-                    LV_LOG_USER("--- STEP PARAMS ---");
-                    LV_LOG_USER("stepNameString:%s", currentStepNode->step.stepDetails->data.stepNameString);
-                    LV_LOG_USER("timeMins:%d", currentStepNode->step.stepDetails->data.timeMins);
-                    LV_LOG_USER("timeSecs:%d", currentStepNode->step.stepDetails->data.timeSecs);
-                    LV_LOG_USER("type:%d", currentStepNode->step.stepDetails->data.type);
-                    LV_LOG_USER("source:%d", currentStepNode->step.stepDetails->data.source);
-                    LV_LOG_USER("discardAfterProc:%d", currentStepNode->step.stepDetails->data.discardAfterProc);
-                }
-                currentStepNode = currentStepNode->next;
-            }
-            currentProcessNode = currentProcessNode->next;
+            cfgWrite(fp, firstS ? " ]\n    }" : "\n      ]\n    }");
+            pn = pn->next;
         }
-        /* ── Machine statistics (appended after processes) ── */
-        f_write( fp, &gui.page.tools.machineStats.completed,  sizeof(gui.page.tools.machineStats.completed),  &bytes_written );
-        f_write( fp, &gui.page.tools.machineStats.totalMins,   sizeof(gui.page.tools.machineStats.totalMins),   &bytes_written );
-        f_write( fp, &gui.page.tools.machineStats.totalSecs,   sizeof(gui.page.tools.machineStats.totalSecs),   &bytes_written );
-        f_write( fp, &gui.page.tools.machineStats.stopped,     sizeof(gui.page.tools.machineStats.stopped),     &bytes_written );
-        f_write( fp, &gui.page.tools.machineStats.clean,       sizeof(gui.page.tools.machineStats.clean),       &bytes_written );
+        cfgWrite(fp, firstP ? " ],\n" : "\n  ],\n");
+
+        /* ── machineStats ── */
+        machineStatistics *M = &gui.page.tools.machineStats;
+        snprintf(buf, sizeof(buf),
+            "  \"machineStats\": {\n"
+            "    \"completed\": %lu,\n"
+            "    \"totalMins\": %llu,\n"
+            "    \"totalSecs\": %lu,\n"
+            "    \"stopped\": %lu,\n"
+            "    \"clean\": %lu\n"
+            "  }\n"
+            "}\n",
+            (unsigned long)M->completed, (unsigned long long)M->totalMins,
+            (unsigned long)M->totalSecs, (unsigned long)M->stopped, (unsigned long)M->clean);
+        cfgWrite(fp, buf);
 
         f_close( fp );
 
-        /* ── Atomic swap: delete old config, rename temp → config ──
-         * The old file is only deleted after the new one is fully written
-         * and closed. If we crash between unlink and rename, the .tmp
-         * file is still complete and will be recovered on next boot. */
+        /* ── Atomic swap: delete old config, rename temp → config ── */
         res = f_unlink(path);
         if (res != FR_OK && res != FR_NO_FILE) {
             LV_LOG_USER("Warning: could not delete old config (res=%d)", res);
         }
         res = f_rename(tmpPath, path);
         if (res != FR_OK) {
-            LV_LOG_USER("Error: f_rename(%s → %s) failed (res=%d)", tmpPath, path, res);
+            LV_LOG_USER("Error: f_rename(%s -> %s) failed (res=%d)", tmpPath, path, res);
             /* The .tmp file is still valid — will be recovered on next boot */
         } else {
             LV_LOG_USER("Config saved successfully: %s", path);
@@ -1795,7 +1792,7 @@ void initializeRelayPins(){
         mcp23017_digitalWrite(&mcp, i, 0);
         LV_LOG_USER("Relay pin %d init: %d", i, mcp23017_digitalRead(&mcp, i));
     }
-#if defined(PORTB_RELAY_COUNT)
+#if defined(PORTB_RELAY_COUNT) && !defined(HAS_CHEM_LEVEL_SENSORS)
     /* Port B: external relay board channels (pins 8-11, active HIGH) */
     for (uint8_t i = 0; i < PORTB_RELAY_COUNT; i++) {
         uint8_t pin = PORTB_RELAY_START + i;
@@ -1803,6 +1800,48 @@ void initializeRelayPins(){
         mcp23017_digitalWrite(&mcp, pin, 0);
         LV_LOG_USER("PortB relay pin %d init: %d", pin, mcp23017_digitalRead(&mcp, pin));
     }
+#endif
+}
+
+/* Port B repurposed: 6 chemistry level sensors (B0-B5, input + pull-up) and
+ * 2 heater MOSFETs (B6-B7, output). Called once after the MCP is up. */
+void initializeChemLevelPins(void){
+#if defined(HAS_CHEM_LEVEL_SENSORS)
+    const uint8_t sensorPins[] = {
+        CHEM1_MIN_PIN, CHEM1_MAX_PIN,
+        CHEM2_MIN_PIN, CHEM2_MAX_PIN,
+        CHEM3_MIN_PIN, CHEM3_MAX_PIN,
+    };
+    for (uint8_t i = 0; i < sizeof(sensorPins); i++)
+        mcp23017_pinMode(&mcp, sensorPins[i], MCP23017_INPUT_PULLUP);
+#endif
+#if defined(HAS_DUAL_HEATER)
+    mcp23017_pinMode(&mcp, HEATER1_PIN, MCP23017_OUTPUT);
+    mcp23017_pinMode(&mcp, HEATER2_PIN, MCP23017_OUTPUT);
+    mcp23017_digitalWrite(&mcp, HEATER1_PIN, 0);
+    mcp23017_digitalWrite(&mcp, HEATER2_PIN, 0);
+#endif
+    LV_LOG_USER("Port B init: chem level inputs (B0-B5) + heater outputs (B6-B7)");
+}
+
+/* Chemistry container level: index 0=C1, 1=C2, 2=C3. XKC-Y21 NPN → LOW = water. */
+bool chemLevelMinDetected(uint8_t container){
+#if defined(HAS_CHEM_LEVEL_SENSORS) && defined(BOARD_JC4880P433)
+    static const uint8_t pins[] = { CHEM1_MIN_PIN, CHEM2_MIN_PIN, CHEM3_MIN_PIN };
+    if (container >= CHEM_LEVEL_CONTAINERS) return false;
+    return mcp23017_digitalRead(&mcp, pins[container]) == 0;
+#else
+    (void)container; return false;
+#endif
+}
+
+bool chemLevelMaxDetected(uint8_t container){
+#if defined(HAS_CHEM_LEVEL_SENSORS) && defined(BOARD_JC4880P433)
+    static const uint8_t pins[] = { CHEM1_MAX_PIN, CHEM2_MAX_PIN, CHEM3_MAX_PIN };
+    if (container >= CHEM_LEVEL_CONTAINERS) return false;
+    return mcp23017_digitalRead(&mcp, pins[container]) == 0;
+#else
+    (void)container; return false;
 #endif
 }
 
@@ -1892,12 +1931,13 @@ void sensorsSelfTestInit(void) {}
 #define MACHINE_FILL_TIMEOUT_MS   600000    /* 10 min safety cap (5 L bath)      */
 #define FILL_FLOW_GRACE_MS        4000      /* window to see flow start          */
 #define FILL_FLOW_MIN_PULSES      3         /* pulses that confirm real flow     */
-#define FILL_MIN_CONFIRM_PCT      40        /* by this % of target, low float must wet */
+#define FILL_MIN_CONFIRM_MS       20000     /* low float must wet within this after flow starts */
 
 static volatile int      s_fillState    = FILL_IDLE;
 static volatile bool     s_fillStopReq  = false;
 static volatile uint32_t s_fillVolumeMl = 0;
 static volatile float    s_fillFlowLpm  = 0.0f;
+static uint8_t           s_fillTarget   = FILL_TARGET_WB;  /* WB or a chem container */
 
 int      machineFillState(void)   { return s_fillState; }
 void     machineFillStop(void)    { s_fillStopReq = true; }
@@ -1915,16 +1955,24 @@ int machineFillProgress(void) {
  * "full" immediately on open instead of offering Start. */
 bool machineFillBathFull(void) {
 #if defined(BOARD_JC4880P433)
-    return FILL_IGNORE_MAX ? false : sensors_water_level_max_detected();
+    if (FILL_IGNORE_MAX) return false;
+    return (s_fillTarget == FILL_TARGET_CHEM) ? chemLevelMaxDetected(0)
+                                              : sensors_water_level_max_detected();
 #else
     return false;
 #endif
 }
 
 /* Coarse level from the two floats (0 empty / 50 above low / 100 at max), for
- * the manual-fill bargraph when there is no flow meter reading. */
+ * the level-based bargraph when there is no flow meter reading. Reads the WB
+ * floats or the chem container floats depending on the active fill target. */
 int machineFillLevelPct(void) {
 #if defined(BOARD_JC4880P433)
+    if (s_fillTarget == FILL_TARGET_CHEM) {
+        if (chemLevelMaxDetected(0)) return 100;
+        if (chemLevelMinDetected(0)) return 50;
+        return 0;
+    }
     if (sensors_water_level_max_detected()) return 100;
     if (sensors_water_level_detected())     return 50;
     return 0;
@@ -1933,9 +1981,10 @@ int machineFillLevelPct(void) {
 #endif
 }
 
-/* Manual fill mode: no pressurized inlet connected, so the user fills the bath
- * by hand and we rely only on the level floats (no valve, no flow metering). */
+/* "Manual/level" display: no flow meter, use the floats. Always true for a chem
+ * container (pump-driven, no flow meter); for the WB it depends on the inlet. */
 bool machineFillManual(void) {
+    if (s_fillTarget == FILL_TARGET_CHEM) return true;
     return !gui.page.settings.settingsParams.waterInlet;
 }
 
@@ -1947,10 +1996,38 @@ static void machine_fill_task(void *arg) {
     s_fillFlowLpm  = 0.0f;
     s_fillState    = FILL_RUNNING;
 
+    /* Chemistry container: pump water from the WB into container C1 and watch
+     * that container's own floats. Times MIN→MAX to calibrate the chem fill. */
+    if (s_fillTarget == FILL_TARGET_CHEM) {
+        ESP_LOGI(TAG, "Chem fill: WB -> C1 (pump), watching C1 floats");
+        cleanRelayManager(getValueForChemicalSource(WB), getValueForChemicalSource(0), PUMP_IN_RLY, true);
+        int elapsed = 0, minWetMs = -1;
+        for (;;) {
+            if (minWetMs < 0 && chemLevelMinDetected(0)) minWetMs = elapsed;
+            if (chemLevelMaxDetected(0)) {
+                s_fillState = FILL_FULL;
+#if CLEAN_USE_LEVEL_SENSORS
+                if (minWetMs >= 0) recordFillCalibration(false, (uint16_t)((elapsed - minWetMs) / 1000));
+#endif
+                break;
+            }
+            if (s_fillStopReq)                      { s_fillState = FILL_STOPPED; break; }
+            if (elapsed >= MACHINE_FILL_TIMEOUT_MS) { s_fillState = FILL_TIMEOUT; break; }
+            vTaskDelay(pdMS_TO_TICKS(200));
+            elapsed += 200;
+        }
+        cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
+        ESP_LOGI(TAG, "Chem fill ended (state=%d)", s_fillState);
+        vTaskDelete(NULL);
+        return;
+    }
+
     /* No pressurized inlet → the user fills by hand; watch the floats only,
      * no valve and no flow metering. Stop when the MAX float is wet. */
     if (machineFillManual()) {
         ESP_LOGI(TAG, "Machine fill: MANUAL mode (fill by hand), watching floats");
+        /* Manual mode: hand-filling isn't a controlled pump flow, so its MIN→MAX
+         * time is meaningless — do NOT calibrate here. The floats still stop it. */
         int elapsed = 0;
         for (;;) {
             if (sensors_water_level_max_detected())  { s_fillState = FILL_FULL;    break; }
@@ -1970,15 +2047,16 @@ static void machine_fill_task(void *arg) {
 
     const uint32_t ppl        = sensors_flow_pulses_per_litre();   /* ~450     */
     const uint32_t startTotal = sensors_flow_get_total_pulses();
-    const uint32_t minConfirmMl = (uint32_t)FILL_TARGET_ML * FILL_MIN_CONFIRM_PCT / 100;
     uint32_t       prevTotal  = startTotal;
     bool           flowConfirmed = false;
     bool           minConfirmed  = false;
     int            elapsed     = 0;
+    int            minWetMs    = -1;   /* time the MIN float first wet (MIN→MAX calibration) */
 
     for (;;) {
         uint32_t total   = sensors_flow_get_total_pulses();
         uint32_t dPulses = total - startTotal;                     /* since start */
+        if (minWetMs < 0 && sensors_water_level_detected()) minWetMs = elapsed;
 
         /* Integrated volume dispensed so far, in ml. */
         s_fillVolumeMl = (uint32_t)(((uint64_t)dPulses * 1000) / ppl);
@@ -1990,12 +2068,14 @@ static void machine_fill_task(void *arg) {
 
         bool maxWet = FILL_IGNORE_MAX ? false : sensors_water_level_max_detected();
 
-        /* Stop at the FIRST of: MAX float trips (hard safety, never overshoot)
-         * or the metered target volume is reached. When the target is hit we
-         * also cross-check the MAX float to confirm the level is really there. */
-        if (maxWet)                              { s_fillState = FILL_FULL;    break; }
-        if (s_fillVolumeMl >= FILL_TARGET_ML) {
-            s_fillState = (FILL_IGNORE_MAX || maxWet) ? FILL_FULL : FILL_DONE_NOMAX;
+        /* Stop when the MAX float trips (we don't know the capacity, so there is
+         * no volume target — the sensor is the source of truth). The metered
+         * volume + flow rate are shown only for information. */
+        if (maxWet) {
+            s_fillState = FILL_FULL;
+#if CLEAN_USE_LEVEL_SENSORS
+            if (minWetMs >= 0) recordFillCalibration(true, (uint16_t)((elapsed - minWetMs) / 1000));
+#endif
             break;
         }
         if (s_fillStopReq)                       { s_fillState = FILL_STOPPED; break; }
@@ -2006,11 +2086,10 @@ static void machine_fill_task(void *arg) {
         if (!flowConfirmed && dPulses >= FILL_FLOW_MIN_PULSES) flowConfirmed = true;
         if (!flowConfirmed && elapsed >= FILL_FLOW_GRACE_MS)   { s_fillState = FILL_NOFLOW; break; }
 
-        /* Level cross-check: flow is going in, so by the time we've metered a
-         * fraction of the target the low float must be wet — otherwise water is
-         * flowing but the bath isn't filling (leak / wrong valve / bad sensor). */
+        /* Level cross-check: flow is going in, so the low float must wet within a
+         * short window — otherwise water flows but the bath isn't filling. */
         if (!minConfirmed && sensors_water_level_detected())          minConfirmed = true;
-        if (!minConfirmed && s_fillVolumeMl >= minConfirmMl)          { s_fillState = FILL_NOLEVEL; break; }
+        if (!minConfirmed && elapsed >= FILL_MIN_CONFIRM_MS)          { s_fillState = FILL_NOLEVEL; break; }
 
         vTaskDelay(pdMS_TO_TICKS(200));
         elapsed += 200;
@@ -2023,8 +2102,14 @@ static void machine_fill_task(void *arg) {
 }
 #endif
 
-void machineFillStart(void) {
+/* Set the active fill target up front (before Start) so the popup's target-aware
+ * helpers — machineFillManual/LevelPct/BathFull — reflect the right tank/sensors
+ * and the inlet check is evaluated for the correct target. */
+void machineFillSetTarget(uint8_t target) { s_fillTarget = target; }
+
+void machineFillStart(uint8_t target) {
     if (s_fillState == FILL_RUNNING) return;
+    s_fillTarget = target;
 #if defined(BOARD_JC4880P433)
     xTaskCreate(machine_fill_task, "mfill", 3072, NULL, 5, NULL);
 #else
@@ -2230,7 +2315,7 @@ void stopMotor(uint8_t pin1, uint8_t pin2){
   motor_dir_set(pin1, 0);
   motor_dir_set(pin2, 0);
   motor_ledc_set_duty(0);
-  LV_LOG_USER("Run stopMotor");
+  ESP_LOGI(TAG, "Run stopMotor");
 }
 
 void runMotorFW(uint8_t pin1, uint8_t pin2){
@@ -2241,7 +2326,7 @@ void runMotorFW(uint8_t pin1, uint8_t pin2){
   motor_ledc_set_duty(MOTOR_KICK_DUTY);
   vTaskDelay(pdMS_TO_TICKS(MOTOR_KICK_MS));
   motor_ledc_set_duty(sys.analogVal_rotationSpeedPercent);
-  LV_LOG_USER("Run runMotorFW: kick then speed %d", sys.analogVal_rotationSpeedPercent);
+  ESP_LOGI(TAG, "Run runMotorFW: kick then speed %d", sys.analogVal_rotationSpeedPercent);
 }
 
 void runMotorRV(uint8_t pin1, uint8_t pin2){
@@ -2252,7 +2337,7 @@ void runMotorRV(uint8_t pin1, uint8_t pin2){
   motor_ledc_set_duty(MOTOR_KICK_DUTY);
   vTaskDelay(pdMS_TO_TICKS(MOTOR_KICK_MS));
   motor_ledc_set_duty(sys.analogVal_rotationSpeedPercent);
-  LV_LOG_USER("Run runMotorRV: kick then speed %d", sys.analogVal_rotationSpeedPercent);
+  ESP_LOGI(TAG, "Run runMotorRV: kick then speed %d", sys.analogVal_rotationSpeedPercent);
 }
 
 void setMotorSpeed(uint8_t pin, uint8_t spd){
@@ -2310,12 +2395,12 @@ void loadChemCalibOffset(void) {
      * readConfigFile now (it is a settingsParams field), so nothing to do here. */
 }
 
-void setChemCalibOffset(int8_t offsetTenths) {
+void setChemCalibOffset(int16_t offsetTenths) {
     gui.page.settings.settingsParams.chemCalibOffset = offsetTenths;
     /* Persisted when the caller saves the config (SAVE_PROCESS_CONFIG). */
 }
 
-int8_t getChemCalibOffset(void) { return gui.page.settings.settingsParams.chemCalibOffset; }
+int16_t getChemCalibOffset(void) { return gui.page.settings.settingsParams.chemCalibOffset; }
 
 /* ── Cached temperature — the UI reads this, and it never blocks ── */
 static float s_cachedTemp[2] = { -255.0f, -255.0f };
@@ -2383,8 +2468,18 @@ float sim_getTemperature(uint8_t sensorIndex) {
 }
 
 void sim_setHeater(bool on) {
+#if defined(HAS_DUAL_HEATER)
+    /* Two heater MOSFET modules on Port B (B6/B7), driven together. */
+    mcp23017_digitalWrite(&mcp, HEATER1_PIN, on ? 1 : 0);
+    mcp23017_digitalWrite(&mcp, HEATER2_PIN, on ? 1 : 0);
+#else
     mcp23017_digitalWrite(&mcp, HEATER_RLY, on ? 1 : 0);
-    LV_LOG_USER("Heater %s (pin %d = %d)", on ? "ON" : "OFF", HEATER_RLY, mcp23017_digitalRead(&mcp, HEATER_RLY));
+#endif
+#if defined(HAS_DUAL_HEATER)
+    LV_LOG_USER("Heater %s (B6/B7)", on ? "ON" : "OFF");
+#else
+    LV_LOG_USER("Heater %s (pin %d)", on ? "ON" : "OFF", HEATER_RLY);
+#endif
 }
 
 void sim_resetTemperatures(void) {
@@ -3048,19 +3143,37 @@ uint16_t calculateFillTime(uint16_t capacityMl, uint8_t pumpSpeedPercent) {
 }
 
 uint16_t getContainerFillTime(void) {
-    uint16_t ml = gui.page.settings.settingsParams.chemContainerMl;
+    /* Prefer the real measured time (self-calibrated from the MIN/MAX sensors);
+     * fall back to a nominal capacity-based estimate until a measurement exists. */
+    if (gui.page.settings.settingsParams.chemCalibFillSecs > 0)
+        return gui.page.settings.settingsParams.chemCalibFillSecs;
     uint8_t spd = gui.page.settings.settingsParams.pumpSpeed;
-    if (ml == 0) ml = 500;
     if (spd == 0) spd = 30;
-    return calculateFillTime(ml, spd);
+    return calculateFillTime(500, spd);      /* nominal chem container = 500 ml */
 }
 
 uint16_t getWbFillTime(void) {
-    uint16_t ml = gui.page.settings.settingsParams.wbContainerMl;
+    if (gui.page.settings.settingsParams.wbCalibFillSecs > 0)
+        return gui.page.settings.settingsParams.wbCalibFillSecs;
     uint8_t spd = gui.page.settings.settingsParams.pumpSpeed;
-    if (ml == 0) ml = 2000;
     if (spd == 0) spd = 30;
-    return calculateFillTime(ml, spd);
+    return calculateFillTime(2000, spd);     /* nominal water bath = 2000 ml */
+}
+
+/* Store a measured fill time (seconds). Called once a fill completes on the
+ * float sensors, so subsequent bargraphs animate on the real duration. */
+void recordFillCalibration(bool isWb, uint16_t secs) {
+    struct machineSettings *S = &gui.page.settings.settingsParams;
+    if (secs < 1) return;
+    if (secs > 3600) secs = 3600;
+    /* Read/write the field directly — no pointer into the packed struct
+     * (address-of-packed-member is UB on strict-align targets / -Werror). */
+    uint16_t cur = isWb ? S->wbCalibFillSecs : S->chemCalibFillSecs;
+    if (cur == secs) return;                /* no change → skip the SD write */
+    if (isWb) S->wbCalibFillSecs = secs;
+    else      S->chemCalibFillSecs = secs;
+    qSysAction(SAVE_PROCESS_CONFIG);
+    LV_LOG_USER("Fill calibration saved: %s = %u s", isWb ? "WB" : "chem", secs);
 }
 
 static uint16_t process_list_fill_time_seconds(void) {

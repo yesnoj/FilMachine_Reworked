@@ -13,20 +13,33 @@
 extern struct gui_components gui;
 
 /* ── Layout (tweak here if columns/roller/button don't sit right) ── */
-#define CALIB_POPUP_W     600
-#define CALIB_POPUP_H     420
+#define CALIB_POPUP_W     680    /* wide enough for 3 msgbox-sized buttons with gaps */
+#define CALIB_POPUP_H     470    /* tall enough to keep buttons clear of the read labels */
 #define CALIB_COL_DX      140    /* horizontal offset of each column from centre */
 #define CALIB_NAME_Y      56     /* Y of the "Bath"/"Chemical" name labels */
 #define CALIB_ROLLER_Y    96     /* Y of the rollers (moved up to free the bottom) */
 #define CALIB_ROLLER_W    150
 #define CALIB_ROLLER_H    165
 #define CALIB_READ_DY     12     /* gap roller -> current-temperature label below it */
-#define CALIB_SET_Y       (-16)  /* SET button offset from bottom */
+#define CALIB_SET_Y       (-14)  /* button row offset from bottom (matches Clean) */
+#define CALIB_BTN_MARGIN  15     /* side margin for the Cancel/Reset/Set row (matches Clean) */
 
 static void set_read_label(lv_obj_t *lbl, float t)
 {
     if (t > -100.0f) lv_label_set_text_fmt(lbl, "%.1f C", t);
     else             lv_label_set_text(lbl, "--");
+}
+
+/* Convert a degrees-C correction into a clamped tenths-of-degree offset.
+ * The store is int16 (so no more int8 overflow), but we still bound it to a
+ * sane ±30°C: a bigger correction means the sensor is faulty, not miscalibrated. */
+#define CALIB_OFFSET_MAX_TENTHS  300
+static int16_t calib_offset_tenths(float deltaDegrees)
+{
+    float tenths = deltaDegrees * 10.0f;
+    if (tenths >  CALIB_OFFSET_MAX_TENTHS) tenths =  CALIB_OFFSET_MAX_TENTHS;
+    if (tenths < -CALIB_OFFSET_MAX_TENTHS) tenths = -CALIB_OFFSET_MAX_TENTHS;
+    return (int16_t)tenths;
 }
 
 static uint16_t temp_to_sel(float reading)
@@ -71,6 +84,26 @@ static void calib_popup_close(void)
     cp->parent = NULL;
 }
 
+/* Cancel: close without changing any calibration. */
+static void event_calibCancel(lv_event_t *e)
+{
+    (void)e;
+    calib_popup_close();
+}
+
+/* Reset: clear both offsets (bath + chemical), persist, close, then confirm.
+ * Replaces the old hard-to-find long-press on the TUNE button. */
+static void event_calibReset(lv_event_t *e)
+{
+    (void)e;
+    gui.page.settings.settingsParams.tempCalibOffset = 0;
+    gui.page.settings.settingsParams.calibratedTemp  = 20;   /* default */
+    setChemCalibOffset(0);
+    qSysAction(SAVE_PROCESS_CONFIG);
+    calib_popup_close();
+    messagePopupCreate(calibrationResetPopupTitle_text, calibrationResetPopupBody_text, NULL, NULL, NULL);
+}
+
 /* Refresh the two live readings ~1x/second. */
 static void calib_live_cb(lv_timer_t *t)
 {
@@ -96,12 +129,12 @@ static void event_calibSet(lv_event_t *e)
     /* Only recalibrate a sensor that is actually reading. */
     if (bathReading > -100.0f) {
         float rawBath = bathReading - (gui.page.settings.settingsParams.tempCalibOffset / 10.0f);
-        gui.page.settings.settingsParams.tempCalibOffset = (int8_t)((trueBath - rawBath) * 10.0f);
+        gui.page.settings.settingsParams.tempCalibOffset = calib_offset_tenths(trueBath - rawBath);
         gui.page.settings.settingsParams.calibratedTemp  = (uint8_t)trueBath;
     }
     if (chemReading > -100.0f) {
         float rawChem = chemReading - (getChemCalibOffset() / 10.0f);
-        setChemCalibOffset((int8_t)((trueChem - rawChem) * 10.0f));   /* saved with the config */
+        setChemCalibOffset(calib_offset_tenths(trueChem - rawChem));   /* saved with the config */
     }
 
     qSysAction(SAVE_PROCESS_CONFIG);   /* persists the bath offset via the config */
@@ -179,15 +212,39 @@ void calibPopupCreate(void)
     lv_obj_align_to(cp->chemReadLabel, cp->rollerChem, LV_ALIGN_OUT_BOTTOM_MID, 0, CALIB_READ_DY);
     set_read_label(cp->chemReadLabel, cRead);
 
-    /* SET button */
+    /* Bottom buttons — same size/font/colours as the Clean popup.
+       Cancel (left, red) closes; Reset (middle, orange) clears; Set (right, green) applies. */
+    const lv_font_t *btnFont = ui_get_profile()->clean_popup.button_font;
+
+    lv_obj_t *cancelBtn = lv_button_create(cp->container);
+    lv_obj_set_size(cancelBtn, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
+    lv_obj_align(cancelBtn, LV_ALIGN_BOTTOM_LEFT, CALIB_BTN_MARGIN, CALIB_SET_Y);
+    lv_obj_set_style_bg_color(cancelBtn, lv_color_hex(RED_DARK), LV_PART_MAIN);
+    lv_obj_add_event_cb(cancelBtn, event_calibCancel, LV_EVENT_CLICKED, NULL);
+    lv_obj_t *cancelLbl = lv_label_create(cancelBtn);
+    lv_label_set_text(cancelLbl, buttonCancel_text);
+    lv_obj_set_style_text_font(cancelLbl, btnFont, 0);
+    lv_obj_align(cancelLbl, LV_ALIGN_CENTER, 0, 0);
+
+    lv_obj_t *resetBtn = lv_button_create(cp->container);
+    lv_obj_set_size(resetBtn, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
+    lv_obj_align(resetBtn, LV_ALIGN_BOTTOM_MID, 0, CALIB_SET_Y);
+    lv_obj_set_style_bg_color(resetBtn, lv_color_hex(ORANGE), LV_PART_MAIN);
+    lv_obj_add_event_cb(resetBtn, event_calibReset, LV_EVENT_CLICKED, NULL);
+    lv_obj_t *resetLbl = lv_label_create(resetBtn);
+    lv_label_set_text(resetLbl, calibResetButton_text);
+    lv_obj_set_style_text_font(resetLbl, btnFont, 0);
+    lv_obj_align(resetLbl, LV_ALIGN_CENTER, 0, 0);
+
     cp->setButton = lv_button_create(cp->container);
-    lv_obj_set_size(cp->setButton, ui->confirm_btn_w, ui->confirm_btn_h);
-    lv_obj_align(cp->setButton, LV_ALIGN_BOTTOM_MID, 0, CALIB_SET_Y);
+    lv_obj_set_size(cp->setButton, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
+    lv_obj_align(cp->setButton, LV_ALIGN_BOTTOM_RIGHT, -CALIB_BTN_MARGIN, CALIB_SET_Y);
+    lv_obj_set_style_bg_color(cp->setButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
     lv_obj_add_event_cb(cp->setButton, event_calibSet, LV_EVENT_CLICKED, NULL);
 
     lv_obj_t *setLbl = lv_label_create(cp->setButton);
-    lv_label_set_text(setLbl, tuneRollerButton_text);   /* "SET" */
-    lv_obj_set_style_text_font(setLbl, ui->confirm_btn_font, 0);
+    lv_label_set_text(setLbl, tuneRollerButton_text);   /* "Set" */
+    lv_obj_set_style_text_font(setLbl, btnFont, 0);
     lv_obj_align(setLbl, LV_ALIGN_CENTER, 0, 0);
 
     /* Live reading refresh */

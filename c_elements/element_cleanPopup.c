@@ -271,6 +271,22 @@ void cleanPumpTimer(lv_timer_t * timer) {
         stepSecs = containerFillTime % 60;
         stepPercentage = calculatePercentage(minutesStepElapsed, secondsStepElapsed, stepMins, stepSecs);
 
+#if CLEAN_USE_LEVEL_SENSORS
+        /* #13: finish the fill/drain step as soon as the container's float sensor
+         * confirms the target level, instead of waiting out the time estimate.
+         * Filling (dir 1): MAX wet = full. Draining (dir -1): MIN dry = empty.
+         * containerIndex 0/1/2 = C1/C2/C3. Disabled by default (see the flag). */
+        if (gui.element.cleanPopup.stepDirection == 1) {
+            if (chemLevelMaxDetected(containerIndex)) {
+                /* Full confirmed: remember the real fill time for the bargraph. */
+                recordFillCalibration(false, (uint16_t)(minutesStepElapsed * 60 + secondsStepElapsed));
+                stepPercentage = 100;
+            }
+        } else {
+            if (!chemLevelMinDetected(containerIndex)) stepPercentage = 100;
+        }
+#endif
+
         cycleMins = ((containerFillTime * 2) * gui.element.cleanPopup.cleanCycles) / 60;
         cycleSecs = ((containerFillTime * 2) * gui.element.cleanPopup.cleanCycles) % 60;
         cyclePercentage = calculatePercentage(minutesCycleElapsed, secondsCycleElapsed, cycleMins, cycleSecs);
@@ -697,7 +713,7 @@ void cleanPopup (void){
               
                       gui.element.cleanPopup.cleanRunButton = lv_button_create(gui.element.cleanPopup.cleanContainer);
                       lv_obj_set_size(gui.element.cleanPopup.cleanRunButton, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
-                      lv_obj_align(gui.element.cleanPopup.cleanRunButton, LV_ALIGN_BOTTOM_LEFT, ui->run_button_x , ui->run_button_y);
+                      lv_obj_align(gui.element.cleanPopup.cleanRunButton, LV_ALIGN_BOTTOM_RIGHT, ui->cancel_button_x , ui->cancel_button_y);
                       lv_obj_add_event_cb(gui.element.cleanPopup.cleanRunButton, event_cleanPopup, LV_EVENT_RELEASED, NULL);
                       lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanRunButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
                       lv_obj_add_state(gui.element.cleanPopup.cleanRunButton, LV_STATE_DISABLED);
@@ -711,7 +727,7 @@ void cleanPopup (void){
 
                       gui.element.cleanPopup.cleanCancelButton = lv_button_create(gui.element.cleanPopup.cleanContainer);
                       lv_obj_set_size(gui.element.cleanPopup.cleanCancelButton, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
-                      lv_obj_align(gui.element.cleanPopup.cleanCancelButton, LV_ALIGN_BOTTOM_RIGHT, ui->cancel_button_x , ui->cancel_button_y);
+                      lv_obj_align(gui.element.cleanPopup.cleanCancelButton, LV_ALIGN_BOTTOM_LEFT, ui->run_button_x , ui->run_button_y);
                       lv_obj_add_event_cb(gui.element.cleanPopup.cleanCancelButton, event_cleanPopup, LV_EVENT_RELEASED, NULL);
                       lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanCancelButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
 

@@ -383,22 +383,22 @@ static void test_default_settings_values(void)
     /* According to requirements, after initGlobals() these should be:
      * tankSize == 2 (Medium)
      * pumpSpeed == 30
-     * chemContainerMl == 500
-     * wbContainerMl == 2000
+     * chemCalibFillSecs == 0 (uncalibrated; was chemContainerMl)
+     * wbCalibFillSecs == 0 (uncalibrated; was wbContainerMl)
      * drainFillOverlapSetpoint == 100 */
 
-    test_printf("         [INFO] tankSize=%d, pumpSpeed=%d, chemMl=%d, wbMl=%d, overlap=%d\n",
-                s->tankSize, s->pumpSpeed, s->chemContainerMl, s->wbContainerMl,
+    test_printf("         [INFO] tankSize=%d, pumpSpeed=%d, chemCalibSecs=%d, wbCalibSecs=%d, overlap=%d\n",
+                s->tankSize, s->pumpSpeed, s->chemCalibFillSecs, s->wbCalibFillSecs,
                 s->drainFillOverlapSetpoint);
 
     TEST_ASSERT_EQ((int)s->tankSize, 2,
                    "tankSize should default to 2 (Medium)");
     TEST_ASSERT_EQ((int)s->pumpSpeed, 30,
                    "pumpSpeed should default to 30");
-    TEST_ASSERT_EQ((int)s->chemContainerMl, 500,
-                   "chemContainerMl should default to 500");
-    TEST_ASSERT_EQ((int)s->wbContainerMl, 2000,
-                   "wbContainerMl should default to 2000");
+    TEST_ASSERT_EQ((int)s->chemCalibFillSecs, 0,
+                   "chemCalibFillSecs should default to 0 (uncalibrated)");
+    TEST_ASSERT_EQ((int)s->wbCalibFillSecs, 0,
+                   "wbCalibFillSecs should default to 0 (uncalibrated)");
     TEST_ASSERT_EQ((int)s->drainFillOverlapSetpoint, 100,
                    "drainFillOverlapSetpoint should default to 100");
 
@@ -412,7 +412,7 @@ static void test_tempCalibOffset_accessible(void)
     TEST_BEGIN("Settings — tempCalibOffset field is accessible");
 
     struct machineSettings *s = &gui.page.settings.settingsParams;
-    int8_t old_offset = s->tempCalibOffset;
+    int16_t old_offset = s->tempCalibOffset;
 
     /* Verify we can set and read the offset */
     s->tempCalibOffset = -20;

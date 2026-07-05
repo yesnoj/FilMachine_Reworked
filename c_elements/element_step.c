@@ -464,6 +464,11 @@ void event_stepElement(lv_event_t *e) {
         return;
     }
 
+    /* Read-only process: steps can be tapped to view (SHORT_CLICKED opens the
+     * detail read-only) but not swiped, deleted, duplicated or reordered. */
+    bool editMode = (data->process.processDetails != NULL) &&
+                    data->process.processDetails->editMode;
+
     if (code == LV_EVENT_PRESSED) {
         currentNode->step.gestureHandled = false;
         lv_indev_get_point(indev, &press_point);
@@ -547,7 +552,7 @@ void event_stepElement(lv_event_t *e) {
         }
     }
 
-    if (code == LV_EVENT_GESTURE && currentNode->step.longPressHandled == false) {
+    if (editMode && code == LV_EVENT_GESTURE && currentNode->step.longPressHandled == false) {
         stepElement_handleGesture(currentNode, obj, dir, data);
     }
 
@@ -555,11 +560,11 @@ void event_stepElement(lv_event_t *e) {
         stepElement_handleClick(currentNode, obj, data, indev, press_point);
     }
 
-    if (code == LV_EVENT_LONG_PRESSED && currentNode->step.swipedLeft == false && currentNode->step.swipedRight == false && data->process.processDetails->stepElementsList.size > 1) {
+    if (editMode && code == LV_EVENT_LONG_PRESSED && currentNode->step.swipedLeft == false && currentNode->step.swipedRight == false && data->process.processDetails->stepElementsList.size > 1) {
         stepElement_handleLongPress(currentNode, obj, data);
     }
 
-    if (code == LV_EVENT_LONG_PRESSED_REPEAT && currentNode->step.swipedLeft == false && currentNode->step.swipedRight == false) {
+    if (editMode && code == LV_EVENT_LONG_PRESSED_REPEAT && currentNode->step.swipedLeft == false && currentNode->step.swipedRight == false) {
         currentNode->step.longPressHandled = true;
         stepElement_handleDrag(currentNode, obj, data);
     }

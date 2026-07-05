@@ -338,10 +338,13 @@ static void test_drain_fill_overlap_calculation(void)
     struct machineSettings *s = &gui.page.settings.settingsParams;
     uint8_t old_overlap = s->drainFillOverlapSetpoint;
 
-    /* For this test, we'll use calculateFillTime to get a known fill time */
-    uint16_t fill_time_ms = calculateFillTime(s->chemContainerMl, s->pumpSpeed);
+    /* For this test, we'll use calculateFillTime to get a known fill time.
+     * Container capacity is no longer stored (calibration replaced it), so use
+     * the chem fallback capacity of 500 ml. */
+    const uint16_t chem_fallback_ml = 500;
+    uint16_t fill_time_ms = calculateFillTime(chem_fallback_ml, s->pumpSpeed);
     test_printf("         [INFO] fillTime for %d ml at %d%% pump = %d ms\n",
-                s->chemContainerMl, s->pumpSpeed, fill_time_ms);
+                chem_fallback_ml, s->pumpSpeed, fill_time_ms);
 
     /* Test 1: 0% overlap — adjusted should equal original stepTime */
     s->drainFillOverlapSetpoint = 0;

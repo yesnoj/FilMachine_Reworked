@@ -38,7 +38,7 @@ void sim_ui_debug_tag(lv_obj_t *obj, const char *name);
 /* Boot valve self-test — opens then closes each valve in sequence at power-on. */
 #define VALVE_SELFTEST_ON_BOOT		1                      /* set to 0 to disable */
 #define SENSOR_SELFTEST_ON_BOOT		1                      /* live-log Hall/water-level/flow every 500ms (set 0 to disable) */
-#define VALVE_SELFTEST_LAST_PIN		7                      /* last Port-A channel tested (7 = heater incl.; set to 4 for valves only) */
+#define VALVE_SELFTEST_LAST_PIN		4                      /* valves only (0-4). Pins 5-6 unused, heater moved to Port B — skip 5-7 */
 #define VALVE_SELFTEST_ON_MS		500                    /* how long each channel stays on */
 #define VALVE_SELFTEST_OFF_MS		250                    /* pause between channels */
 
@@ -67,8 +67,8 @@ void sim_ui_debug_tag(lv_obj_t *obj, const char *name);
 #endif
 
 /* System defines */
-#define FILENAME_SAVE				"/FilMachine.cfg"
-#define FILENAME_BACKUP				"/FilMachine_Backup.cfg"
+#define FILENAME_SAVE				"/FilMachine.json"
+#define FILENAME_BACKUP				"/FilMachine_Backup.json"
 #define MAX_STEP_ELEMENTS			30
 #define MAX_PROC_ELEMENTS			50
 #define CONTAINER_FILLING_TIME		10		//Need to be calibrated
@@ -145,6 +145,9 @@ typedef enum {
 #define settingsReset_text                      "Reset to Defaults"
 #define settingsResetPopupTitle_text             "Settings Reset"
 #define settingsResetPopupBody_text              "All settings restored\nto factory defaults."
+#define settingsResetConfirmTitle_text           "Reset settings?"
+#define settingsResetConfirmBody_text            "Restore ALL settings to\nfactory defaults?"
+#define buttonOk_text                            "OK"
 #define wifiPopupTitle_text                     "Wi-Fi"
 #define wifiScan_text                           "Scan"
 #define wifiConnect_text                        "Connect"
@@ -208,6 +211,7 @@ typedef enum {
 #define closePopup_icon				"\xEF\x80\x8D"
 #define play_icon					"\xEF\x81\x8B"
 #define save_icon					"\xEF\x83\x87"
+#define processModify_text			"Edit"
 #define trash_icon					"\xEF\x8B\xAD"
 #define chemical_icon				"\xEF\x83\x83"
 #define rinse_icon                  "\xEF\x8B\x8C"
@@ -396,11 +400,15 @@ typedef enum {
 
 /* Machine fill (Maintenance) texts */
 #define fillBath_text                           "Fill bath"
+#define fillChem_text                           "Fill chem"
 #define fillPopupTitle_text                     "Fill water bath"
-#define fillStatusReady_text                    "Press Start to fill"
+#define fillChemPopupTitle_text                 "Fill chemistry container"
+#define fillChemFilling_text                    "Filling chemistry..."
+#define fillStatusReady_text                    "Press Run to fill"
 #define fillManualPour_text                     "Pour water into the bath"
 #define fillManualFilling_text                  "Filling by hand..."
-#define fillStart_text                          "Start"
+#define fillStart_text                          "Run"
+#define fillCancel_text                         "Cancel"
 #define fillStatusRunning_text                  "Filling... stops when full"
 #define fillStatusFull_text                     "Water bath full"
 #define fillStatusStopped_text                  "Fill stopped"
@@ -409,8 +417,8 @@ typedef enum {
 #define fillStatusNoLevel_text                  "Flow OK but bath not filling"
 #define fillStatusDoneNoMax_text                "Target reached - MAX not confirmed"
 #define fillFlow_fmt                            "Flow: %.1f L/min"
-#define fillVolume_fmt                          "%lu / %d ml"
-#define fillInfo_fmt                            "%lu / %d ml    %.1f L/min"
+#define fillVolume_fmt                          "%lu ml"
+#define fillInfo_fmt                            "%lu ml    %.1f L/min"
 #define fillStop_text                           "Stop"
 #define fillClose_text                          "Close"
 
@@ -458,7 +466,8 @@ typedef enum {
 #define setSecondsPopupTitle_text 					"Set seconds"
 #define tuneTempPopupTitle_text 					"Set temperature"
 #define tuneTolerancePopupTitle_text 				"Set tolerance"
-#define tuneRollerButton_text 						"SET"
+#define tuneRollerButton_text 						"Set"
+#define calibResetButton_text 						"Reset"
 #define messagePopupDetailTitle_text 				"Detail information"
 #define deleteButton_text 							"Delete"
 #define deletePopupTitle_text 						"Delete element"
@@ -605,10 +614,10 @@ struct __attribute__ ((packed)) machineSettings {
 	uint8_t					multiRinseTime;
 	uint8_t					tankSize;       // 1=Small, 2=Medium, 3=Large
 	uint8_t					pumpSpeed;          // 10-100% pump speed
-	uint16_t				chemContainerMl;    // Chemistry container capacity in ml (250-2000)
-	uint16_t				wbContainerMl;      // Water bath capacity in ml (1000-5000)
+	uint16_t				chemCalibFillSecs;  // Measured C1/C2/C3 fill time in s, 0=uncal (was chemContainerMl)
+	uint16_t				wbCalibFillSecs;    // Measured WB fill time in s, 0=uncal (was wbContainerMl)
 	uint8_t					chemistryVolume;    // 1=Low, 2=High
-	int8_t					tempCalibOffset;    /* Calibration offset in tenths of degree (e.g., -15 = -1.5°C) */
+	int16_t					tempCalibOffset;    /* Calibration offset in tenths of degree (e.g., -15 = -1.5°C). int16 to avoid overflow (was int8, wrapped past ±12.7°C) */
 	/* ── Splash screen settings ── */
 	bool					splashRandom;       /* true = randomize palette/shape/complexity/seed each boot */
 	uint8_t					splashPalette;      /* 0–9 palette index */
@@ -625,7 +634,7 @@ struct __attribute__ ((packed)) machineSettings {
 	uint8_t					volume;             /* 0-100% audio output volume (was legacy dimTimeout — same byte, config-compatible) */
 	/* ── New fields go here (end of struct) to preserve binary config compatibility ── */
 	bool					invertPump;         /* true = invert pump H-bridge direction */
-	int8_t					chemCalibOffset;    /* Chemical-sensor temp offset, tenths °C (in config file) */
+	int16_t					chemCalibOffset;    /* Chemical-sensor temp offset, tenths °C (in config file). int16 to avoid overflow */
 };
 
 
@@ -874,6 +883,7 @@ typedef struct sCheckup{
   	lv_timer_t    		*processTimer;
   	lv_timer_t    		*pumpTimer;
 	lv_timer_t    		*tempTimer;
+	lv_timer_t    		*checkupFilmTimer;   /* Hall-based tank rotation check */
 
 	/* Business data (deep-copyable as a single block) */
 	sCheckupData        data;
@@ -942,9 +952,13 @@ typedef struct sProcessDetail {
 	lv_obj_t			*processRunButton;
 	lv_obj_t			*processSaveButton;
 	lv_obj_t			*processNewStepButton;
+	lv_obj_t			*processModifyButton;   /* toggles read-only <-> edit; shares Save's slot */
+	lv_obj_t			*processModifyLabel;
 
 	lv_obj_t			*processTempTextArea;
 	lv_obj_t			*processToleranceTextArea;
+
+	bool				editMode;               /* true = fields editable; false = read-only (view) */
 
 	/* Non-data params (require special deep copy handling) */
     stepList          	stepElementsList;  /* Process steps list */
@@ -1514,6 +1528,7 @@ struct sTools {
 	lv_obj_t 	        	*toolsDrainingContainer;
 	lv_obj_t 	        	*toolsSelfcheckContainer;
 	lv_obj_t 	        	*toolsFillContainer;
+	lv_obj_t 	        	*toolsFillChemContainer;
 	lv_obj_t 	        	*toolsImportContainer;
 	lv_obj_t 	        	*toolsExportContainer;
 
@@ -1533,6 +1548,9 @@ struct sTools {
   lv_obj_t 	        	*toolsSelfcheckButtonLabel;
 	lv_obj_t 	        	*toolsFillButton;
   lv_obj_t 	        	*toolsFillButtonLabel;
+	lv_obj_t 	        	*toolsFillChemLabel;
+	lv_obj_t 	        	*toolsFillChemButton;
+  lv_obj_t 	        	*toolsFillChemButtonLabel;
 	lv_obj_t 	        	*toolsImportButton;
   lv_obj_t 	          *toolsImportButtonLabel;
 	lv_obj_t 	        	*toolsExportButton;
@@ -1688,6 +1706,7 @@ typedef struct _LVGLObjectScale {
 #define RELOAD_CFG                  0x0003
 #define EXPORT_CFG					0x0004
 #define TANK_ROTATION               0x0005
+#define SELFTEST_VALVES             0x0006   /* deferred boot valve self-test (runs in sysMan, off the display path) */
 
 /* Our Fonts */
 LV_FONT_DECLARE(FilMachineFontIcons_15);
@@ -1798,6 +1817,7 @@ void event_settings_handler(lv_event_t *e);
 void initSettings(void);
 void settings(void);
 void refreshSettingsUI(void);
+void settingsApplyFactoryDefaults(void);   /* restore all settings + refresh UI + save */
 // @file page_stepDetail.c
 void event_stepDetail(lv_event_t *e);
 void stepDetail(processNode *referenceNode, stepNode *currentNode);
@@ -1815,8 +1835,8 @@ void volumePopupCreate(uint8_t currentPercent);
 void calibPopupCreate(void);
 // @file accessories.c — per-sensor temperature calibration offsets
 void    loadChemCalibOffset(void);
-void    setChemCalibOffset(int8_t offsetTenths);
-int8_t  getChemCalibOffset(void);
+void    setChemCalibOffset(int16_t offsetTenths);
+int16_t getChemCalibOffset(void);
 /* Temperature: a background poller is the SOLE reader of the (slow, blocking)
  * DS18B20 bus; the UI reads getCachedTemperature() which never blocks. */
 float   getCachedTemperature(uint8_t sensorIndex);
@@ -1837,6 +1857,13 @@ void    temperaturePollerStart(void);
 #ifndef FILL_IGNORE_MAX
 #define FILL_IGNORE_MAX  0
 #endif
+/* Clean/drain bargraphs: when 1, the per-container min/max float sensors finish
+ * each fill/drain step as soon as the container is really full/empty (instead of
+ * waiting out the capacity-based time estimate). Keep 0 until the 6 chem sensors
+ * are installed and verified — without sensors the readings would be ambiguous. */
+#ifndef CLEAN_USE_LEVEL_SENSORS
+#define CLEAN_USE_LEVEL_SENSORS  0
+#endif
 #define FILL_IDLE        0
 #define FILL_RUNNING     1
 #define FILL_FULL        2   /* target reached (or MAX tripped), MAX confirmed  */
@@ -1845,7 +1872,10 @@ void    temperaturePollerStart(void);
 #define FILL_NOFLOW      5   /* flow meter saw no water after opening the valve */
 #define FILL_NOLEVEL     6   /* flow OK but low float never wetted (not filling)*/
 #define FILL_DONE_NOMAX  7   /* target volume in, but MAX switch not confirmed  */
-void     machineFillStart(void);
+#define FILL_TARGET_WB    0   /* water bath (inlet/manual, level or flow) */
+#define FILL_TARGET_CHEM  1   /* a chemistry container filled from the WB by pump */
+void     machineFillStart(uint8_t target);
+void     machineFillSetTarget(uint8_t target);   /* set target before Start (popup helpers) */
 void     machineFillStop(void);
 int      machineFillState(void);
 float    machineFillFlowLpm(void);   /* live inlet flow rate, L/min           */
@@ -1854,7 +1884,7 @@ int      machineFillProgress(void);  /* 0..100 = volume / FILL_TARGET_ML       *
 int      machineFillLevelPct(void);  /* 0/50/100 from the MIN/MAX floats        */
 bool     machineFillBathFull(void);  /* true = MAX float already wet right now  */
 bool     machineFillManual(void);    /* true = no inlet, fill by hand (floats)  */
-void     fillPopupCreate(void);   /* @file element_fillPopup.c */
+void     fillPopupCreate(uint8_t target);   /* @file element_fillPopup.c (FILL_TARGET_*) */
 // @file accessories.c
 uint8_t pumpPercentToDuty(uint8_t pct);
 // @file ota_update.c
@@ -1934,6 +1964,9 @@ void hbridge_safe_init(void);
 void initializeRelayPins();
 void sendValueToRelay(uint8_t pumpFrom, uint8_t pumpDir, bool activePump);
 void initializeMotorPins();
+void initializeChemLevelPins(void);              /* Port B: 6 chem sensors + 2 heaters */
+bool chemLevelMinDetected(uint8_t container);    /* container 0..2 (C1..C3), true=water */
+bool chemLevelMaxDetected(uint8_t container);
 void stopMotor(uint8_t pin1, uint8_t pin2);
 void runMotorFW(uint8_t pin1, uint8_t pin2);
 void runMotorRV(uint8_t pin1, uint8_t pin2);
@@ -1998,6 +2031,9 @@ bool copyAndRenameFile( const char* sourceFile, const char* destFile );
 uint16_t calculateFillTime(uint16_t capacityMl, uint8_t pumpSpeedPercent);
 uint16_t getContainerFillTime(void);
 uint16_t getWbFillTime(void);
+/* Self-calibration: store the real measured fill time (seconds) once a fill
+ * completes on the MIN/MAX sensors, so bargraphs use the true time next run. */
+void     recordFillCalibration(bool isWb, uint16_t secs);
 
 /* Buzzer / alarm API */
 void buzzer_beep(void);            /* play a short beep (hardware or simulator) */

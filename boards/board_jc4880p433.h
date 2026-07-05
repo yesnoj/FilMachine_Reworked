@@ -131,6 +131,26 @@
 #define RELAY_SPARE_3               10      /* Port B pin 2 — relay ch.3: spare */
 #define RELAY_SPARE_4               11      /* Port B pin 3 — relay ch.4: spare */
 
+/* ── Port B repurposed: chemistry level sensors + heater MOSFETs ──
+ * MCP23017 pin numbering: Port B = pins 8..15 (B0=8 … B7=15). Port B pins are
+ * raw push-pull GPIO (broken out on the Adafruit #6318 bottom edge), unlike
+ * Port A which is behind the board's MOSFET drivers.
+ *
+ * B0-B5: 3 chemistry containers × (min, max) XKC-Y21 sensors (INPUT + pull-up,
+ *        LOW = water). B6-B7: 2 heater MOSFET modules (OUTPUT, HIGH = on). */
+#define HAS_CHEM_LEVEL_SENSORS      1
+#define CHEM_LEVEL_CONTAINERS       3
+#define CHEM1_MIN_PIN               8       /* B0 */
+#define CHEM1_MAX_PIN               9       /* B1 */
+#define CHEM2_MIN_PIN               10      /* B2 */
+#define CHEM2_MAX_PIN               11      /* B3 */
+#define CHEM3_MIN_PIN               12      /* B4 */
+#define CHEM3_MAX_PIN               13      /* B5 */
+
+#define HAS_DUAL_HEATER             1
+#define HEATER1_PIN                 14      /* B6 — heater MOSFET 1 */
+#define HEATER2_PIN                 15      /* B7 — heater MOSFET 2 */
+
 /* Pump direction is now handled by DBH-12V H-bridge channel B.
  * These constants are kept as logical direction markers so that
  * page_checkup.c and element_cleanPopup.c need no changes. */

@@ -25,6 +25,7 @@ typedef enum {
     MSGPOP_OWNER_OTA_SD,
     MSGPOP_OWNER_WIFI_FORGET,
     MSGPOP_OWNER_PROCESS_DISCARD,
+    MSGPOP_OWNER_SETTINGS_RESET,
 } message_popup_owner_t;
 
 typedef struct {
@@ -139,6 +140,11 @@ static void message_popup_prepare_ctx(void *whoCallMe)
 
     if (whoCallMe == &gui) {
         g_msg_ctx.type = MSGPOP_OWNER_DELETE_ALL;
+        return;
+    }
+
+    if (whoCallMe == gui.page.settings.resetButton) {
+        g_msg_ctx.type = MSGPOP_OWNER_SETTINGS_RESET;
         return;
     }
 
@@ -338,6 +344,12 @@ static void message_popup_button1_clicked(lv_obj_t *mboxCont)
             message_popup_close(mboxCont);
             break;
 
+        case MSGPOP_OWNER_SETTINGS_RESET:
+            /* Cancel (left) — do NOT reset, just close */
+            LV_LOG_USER("Settings reset cancelled");
+            message_popup_close(mboxCont);
+            break;
+
         case MSGPOP_OWNER_WIFI_FORGET:
             /* Forget WiFi — clear saved credentials (SD + NVS) */
             gui.page.settings.settingsParams.wifiSSID[0] = '\0';
@@ -503,6 +515,15 @@ static void message_popup_button2_clicked(lv_obj_t *mboxCont)
         case MSGPOP_OWNER_WIFI_FORGET:
             /* Cancel forget — just close */
             message_popup_close(mboxCont);
+            break;
+
+        case MSGPOP_OWNER_SETTINGS_RESET:
+            /* OK (right) — perform the factory reset, then confirm */
+            LV_LOG_USER("Settings reset confirmed");
+            message_popup_close(mboxCont);
+            settingsApplyFactoryDefaults();
+            messagePopupCreate(settingsResetPopupTitle_text,
+                               settingsResetPopupBody_text, NULL, NULL, NULL);
             break;
 
         case MSGPOP_OWNER_PROCESS_DISCARD: {

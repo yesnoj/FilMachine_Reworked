@@ -561,16 +561,18 @@ void wifiPopupCreate(void) {
     lv_label_set_long_mode(p->statusLabel, LV_LABEL_LONG_WRAP);
     lv_obj_align(p->statusLabel, LV_ALIGN_TOP_MID, 0, WF->status_y);
 
-    /* Scan button — icon only */
+    /* Scan button — icon only, same size as the close button but mirrored to
+     * the opposite (top-left) corner. */
     p->scanButton = lv_button_create(p->popupContainer);
-    lv_obj_set_size(p->scanButton, WF->scan_btn_w, WF->scan_btn_h);
-    lv_obj_align(p->scanButton, LV_ALIGN_TOP_RIGHT, ui->close_x, WF->scan_btn_y);
+    lv_obj_set_size(p->scanButton, ui->close_w, ui->close_h);
+    lv_obj_align(p->scanButton, LV_ALIGN_TOP_LEFT, -ui->close_x, ui->close_y);
     lv_obj_add_event_cb(p->scanButton, event_wifiPopup, LV_EVENT_CLICKED, NULL);
     lv_obj_set_style_bg_color(p->scanButton, lv_color_hex(ORANGE), LV_PART_MAIN);
+    lv_obj_move_foreground(p->scanButton);
 
     p->scanButtonLabel = lv_label_create(p->scanButton);
     lv_label_set_text(p->scanButtonLabel, LV_SYMBOL_REFRESH);
-    lv_obj_set_style_text_font(p->scanButtonLabel, WF->scan_btn_font, 0);
+    lv_obj_set_style_text_font(p->scanButtonLabel, WF->scan_btn_font, 0);   /* has the refresh glyph */
     lv_obj_align(p->scanButtonLabel, LV_ALIGN_CENTER, 0, 0);
 
     /* Scrollable list container for scan results */

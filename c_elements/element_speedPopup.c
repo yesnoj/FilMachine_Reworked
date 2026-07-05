@@ -19,6 +19,8 @@ extern struct sys_components sys;
 #define SPEED_ROLLER_TO_SWITCH   12   /* gap roller -> Test switch */
 #define SPEED_SWITCH_TO_SET      14   /* gap Test switch -> SET button */
 #define SPEED_POPUP_BOTTOM       96   /* Test row + gaps + margins (SET button height added separately) */
+#define TUNE_BTN_MX              15   /* button side margin (matches Clean popup) */
+#define TUNE_BTN_MY              10   /* button bottom margin (matches Clean popup) */
 
 /* Apply the currently selected speed to the real hardware (live test). */
 static void speed_apply_live(void)
@@ -112,6 +114,13 @@ static void event_speedSet(lv_event_t *e)
     }
 }
 
+/* Cancel: stop the hardware (in case Test was on) and close without saving. */
+static void event_speedCancel(lv_event_t *e)
+{
+    (void)e;
+    speed_popup_close();
+}
+
 void speedPopupCreate(bool isPump, uint8_t currentPercent)
 {
     struct sSpeedPopup *sp = &gui.element.speedPopup;
@@ -150,7 +159,7 @@ void speedPopupCreate(bool isPump, uint8_t currentPercent)
     /* Popup height sized to the content: title area + roller + Test row + SET. */
     createPopupBackdrop(&sp->parent, &sp->container,
                         ui_get_profile()->popups.roller_w,
-                        ui->wheel_container_y + rollerH + ui->confirm_btn_h + SPEED_POPUP_BOTTOM);
+                        ui->wheel_container_y + rollerH + BUTTON_MBOX_HEIGHT + SPEED_POPUP_BOTTOM);
 
     /* Title */
     sp->title = lv_label_create(sp->container);
@@ -201,15 +210,29 @@ void speedPopupCreate(bool isPump, uint8_t currentPercent)
     lv_obj_set_style_text_font(testLbl, ui->title_font, 0);
     lv_obj_align_to(testLbl, sp->testSwitch, LV_ALIGN_OUT_LEFT_MID, -10, 0);
 
-    /* SET button — below the Test row */
+    /* Bottom buttons — same size/font/position/colours as the Clean popup:
+       Cancel (left, red) closes without saving; Set (right, green) applies. */
+    const lv_font_t *btnFont = ui_get_profile()->clean_popup.button_font;
+
+    lv_obj_t *cancelBtn = lv_button_create(sp->container);
+    lv_obj_set_size(cancelBtn, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
+    lv_obj_align(cancelBtn, LV_ALIGN_BOTTOM_LEFT, TUNE_BTN_MX, TUNE_BTN_MY);
+    lv_obj_set_style_bg_color(cancelBtn, lv_color_hex(RED_DARK), LV_PART_MAIN);
+    lv_obj_add_event_cb(cancelBtn, event_speedCancel, LV_EVENT_CLICKED, NULL);
+    lv_obj_t *cancelLbl = lv_label_create(cancelBtn);
+    lv_label_set_text(cancelLbl, buttonCancel_text);
+    lv_obj_set_style_text_font(cancelLbl, btnFont, 0);
+    lv_obj_align(cancelLbl, LV_ALIGN_CENTER, 0, 0);
+
     sp->setButton = lv_button_create(sp->container);
-    lv_obj_set_size(sp->setButton, ui->confirm_btn_w, ui->confirm_btn_h);
-    lv_obj_align_to(sp->setButton, sp->testSwitch, LV_ALIGN_OUT_BOTTOM_MID, -24, SPEED_SWITCH_TO_SET);
+    lv_obj_set_size(sp->setButton, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
+    lv_obj_align(sp->setButton, LV_ALIGN_BOTTOM_RIGHT, -TUNE_BTN_MX, TUNE_BTN_MY);
+    lv_obj_set_style_bg_color(sp->setButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
     lv_obj_add_event_cb(sp->setButton, event_speedSet, LV_EVENT_CLICKED, NULL);
 
     lv_obj_t *setLbl = lv_label_create(sp->setButton);
-    lv_label_set_text(setLbl, tuneRollerButton_text);   /* "SET" */
-    lv_obj_set_style_text_font(setLbl, ui->confirm_btn_font, 0);
+    lv_label_set_text(setLbl, tuneRollerButton_text);   /* "Set" */
+    lv_obj_set_style_text_font(setLbl, btnFont, 0);
     lv_obj_align(setLbl, LV_ALIGN_CENTER, 0, 0);
 }
 
@@ -266,6 +289,21 @@ static void event_volumeSet(lv_event_t *e)
     }
 }
 
+/* Cancel: restore the real output volume to the saved value (the roller
+ * previews it live) and close without saving. */
+static void event_volumeCancel(lv_event_t *e)
+{
+    (void)e;
+    struct sSpeedPopup *sp = &gui.element.speedPopup;
+#ifndef SIMULATOR_BUILD
+    audio_set_volume(gui.page.settings.settingsParams.volume);
+#endif
+    lv_style_reset(&sp->style_titleLine);
+    lv_style_reset(&sp->style_roller);
+    lv_msgbox_close(sp->parent);
+    sp->parent = NULL;
+}
+
 void volumePopupCreate(uint8_t currentPercent)
 {
     struct sSpeedPopup *sp = &gui.element.speedPopup;
@@ -297,7 +335,7 @@ void volumePopupCreate(uint8_t currentPercent)
 
     createPopupBackdrop(&sp->parent, &sp->container,
                         ui_get_profile()->popups.roller_w,
-                        ui->wheel_container_y + rollerH + ui->confirm_btn_h + 60);
+                        ui->wheel_container_y + rollerH + BUTTON_MBOX_HEIGHT + 60);
 
     sp->title = lv_label_create(sp->container);
     lv_label_set_text(sp->title, volume_text);
@@ -332,14 +370,27 @@ void volumePopupCreate(uint8_t currentPercent)
     lv_obj_set_style_text_font(sp->roller, ui->wheel_normal_font, LV_PART_MAIN);
     lv_obj_set_style_border_color(sp->roller, lv_color_hex(WHITE), LV_PART_MAIN);
 
-    /* SET button — directly below the roller (no Test row) */
+    /* Bottom buttons — same size/font/position/colours as the Clean popup. */
+    const lv_font_t *btnFont = ui_get_profile()->clean_popup.button_font;
+
+    lv_obj_t *volCancelBtn = lv_button_create(sp->container);
+    lv_obj_set_size(volCancelBtn, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
+    lv_obj_align(volCancelBtn, LV_ALIGN_BOTTOM_LEFT, TUNE_BTN_MX, TUNE_BTN_MY);
+    lv_obj_set_style_bg_color(volCancelBtn, lv_color_hex(RED_DARK), LV_PART_MAIN);
+    lv_obj_add_event_cb(volCancelBtn, event_volumeCancel, LV_EVENT_CLICKED, NULL);
+    lv_obj_t *volCancelLbl = lv_label_create(volCancelBtn);
+    lv_label_set_text(volCancelLbl, buttonCancel_text);
+    lv_obj_set_style_text_font(volCancelLbl, btnFont, 0);
+    lv_obj_align(volCancelLbl, LV_ALIGN_CENTER, 0, 0);
+
     sp->setButton = lv_button_create(sp->container);
-    lv_obj_set_size(sp->setButton, ui->confirm_btn_w, ui->confirm_btn_h);
-    lv_obj_align_to(sp->setButton, sp->roller, LV_ALIGN_OUT_BOTTOM_MID, 0, 16);
+    lv_obj_set_size(sp->setButton, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
+    lv_obj_align(sp->setButton, LV_ALIGN_BOTTOM_RIGHT, -TUNE_BTN_MX, TUNE_BTN_MY);
+    lv_obj_set_style_bg_color(sp->setButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
     lv_obj_add_event_cb(sp->setButton, event_volumeSet, LV_EVENT_CLICKED, NULL);
 
     lv_obj_t *volSetLbl = lv_label_create(sp->setButton);
-    lv_label_set_text(volSetLbl, tuneRollerButton_text);   /* "SET" */
-    lv_obj_set_style_text_font(volSetLbl, ui->confirm_btn_font, 0);
+    lv_label_set_text(volSetLbl, tuneRollerButton_text);   /* "Set" */
+    lv_obj_set_style_text_font(volSetLbl, btnFont, 0);
     lv_obj_align(volSetLbl, LV_ALIGN_CENTER, 0, 0);
 }

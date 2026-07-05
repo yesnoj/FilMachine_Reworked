@@ -7,6 +7,7 @@
  */
 #include <string.h>
 #include "FilMachine.h"
+#include "sensors.h"   /* sensors_water_level_detected (WB drain sensor gate) */
 #include "esp_log.h"
 #if defined(DISPLAY_DRIVER_ST7701)
 #include "st7701_lcd.h"
@@ -87,8 +88,16 @@ static void drain_timer_cb(lv_timer_t *timer) {
         lv_label_set_text_fmt(dp->drainTimeLabel,
                               "Time left: %lds", (long)rem);
 
-    /* --- Current tank finished? ------------------------- */
-    if (dp->tankElapsed >= tt) {
+    /* --- Current tank finished? (time estimate, or the float says empty) --- */
+    bool sensorEmpty = false;
+#if CLEAN_USE_LEVEL_SENSORS
+    /* #13: finish a drain as soon as the float says the tank is empty (MIN dry)
+     * instead of waiting out the time estimate. Chem containers use their own
+     * floats; the WB uses the water-bath MIN sensor. */
+    if (tank < CHEM_LEVEL_CONTAINERS) sensorEmpty = !chemLevelMinDetected(tank);
+    else                              sensorEmpty = !sensors_water_level_detected();
+#endif
+    if (dp->tankElapsed >= tt || sensorEmpty) {
         cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
         lv_bar_set_value(dp->tankBar[tank], 0, LV_ANIM_OFF);
 

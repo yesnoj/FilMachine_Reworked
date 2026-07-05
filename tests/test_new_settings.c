@@ -74,54 +74,9 @@ static void test_settings_tank_size_exists(void)
 }
 
 
-/* ═══════════════════════════════════════════════
- * Test 3: Container size UI elements exist
- * ═══════════════════════════════════════════════ */
-static void test_settings_container_size_exists(void)
-{
-    TEST_BEGIN("Settings — container size textarea exists");
-
-    TEST_ASSERT_NOT_NULL(gui.page.settings.chemContainerMlContainer,
-                         "container size container should exist");
-    TEST_ASSERT_NOT_NULL(gui.page.settings.chemContainerMlLabel,
-                         "container size label should exist");
-    TEST_ASSERT_NOT_NULL(gui.page.settings.chemContainerMlTextArea,
-                         "container size text area should exist");
-
-    const char *label = lv_label_get_text(gui.page.settings.chemContainerMlLabel);
-    TEST_ASSERT_STR_EQ(label, chemContainerMl_text, "label should say 'Container size'");
-
-    const char *value = lv_textarea_get_text(gui.page.settings.chemContainerMlTextArea);
-    TEST_ASSERT_NOT_NULL(value, "container size value should not be NULL");
-    test_printf("         [INFO] Container size value: %s\n", value);
-
-    TEST_END();
-}
-
-
-/* ═══════════════════════════════════════════════
- * Test 4: Water bath size UI elements exist
- * ═══════════════════════════════════════════════ */
-static void test_settings_wb_size_exists(void)
-{
-    TEST_BEGIN("Settings — water bath size textarea exists");
-
-    TEST_ASSERT_NOT_NULL(gui.page.settings.wbContainerMlContainer,
-                         "WB size container should exist");
-    TEST_ASSERT_NOT_NULL(gui.page.settings.wbContainerMlLabel,
-                         "WB size label should exist");
-    TEST_ASSERT_NOT_NULL(gui.page.settings.wbContainerMlTextArea,
-                         "WB size text area should exist");
-
-    const char *label = lv_label_get_text(gui.page.settings.wbContainerMlLabel);
-    TEST_ASSERT_STR_EQ(label, wbContainerMl_text, "label should say 'Water bath size'");
-
-    const char *value = lv_textarea_get_text(gui.page.settings.wbContainerMlTextArea);
-    TEST_ASSERT_NOT_NULL(value, "WB size value should not be NULL");
-    test_printf("         [INFO] Water bath size value: %s\n", value);
-
-    TEST_END();
-}
+/* Tests 3 & 4 (container-size / water-bath-size textareas) were removed:
+ * those Settings rows no longer exist — capacity was replaced by the calibrated
+ * fill flow (TUNE / Maintenance → Fill), so there is nothing to assert here. */
 
 
 /* ═══════════════════════════════════════════════
@@ -168,15 +123,15 @@ static void test_settings_new_defaults(void)
                 "tank size should be 1, 2, or 3");
     test_printf("         [INFO] tankSize=%d\n", s->tankSize);
 
-    /* Container ml: 250–2000 */
-    TEST_ASSERT(s->chemContainerMl >= 250 && s->chemContainerMl <= 2000,
-                "container ml should be 250–2000");
-    test_printf("         [INFO] chemContainerMl=%d\n", s->chemContainerMl);
+    /* Chem calibrated fill time: 0 (uncalibrated) up to 3600 s */
+    TEST_ASSERT(s->chemCalibFillSecs <= 3600,
+                "chem calib fill secs should be 0–3600");
+    test_printf("         [INFO] chemCalibFillSecs=%d\n", s->chemCalibFillSecs);
 
-    /* WB ml: 1000–5000 */
-    TEST_ASSERT(s->wbContainerMl >= 1000 && s->wbContainerMl <= 5000,
-                "WB ml should be 1000–5000");
-    test_printf("         [INFO] wbContainerMl=%d\n", s->wbContainerMl);
+    /* WB calibrated fill time: 0 (uncalibrated) up to 3600 s */
+    TEST_ASSERT(s->wbCalibFillSecs <= 3600,
+                "WB calib fill secs should be 0–3600");
+    test_printf("         [INFO] wbCalibFillSecs=%d\n", s->wbCalibFillSecs);
 
     /* Chemistry volume: 1=Low, 2=High */
     TEST_ASSERT(s->chemistryVolume >= 1 && s->chemistryVolume <= 2,
@@ -220,8 +175,7 @@ void test_suite_new_settings(void)
 
     test_settings_pump_speed_exists();
     test_settings_tank_size_exists();
-    test_settings_container_size_exists();
-    test_settings_wb_size_exists();
+    /* container-size / wb-size row tests removed (rows no longer exist) */
     test_settings_chem_volume_exists();
     test_settings_new_defaults();
     test_settings_selfcheck_button();

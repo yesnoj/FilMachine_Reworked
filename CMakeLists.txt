@@ -68,6 +68,7 @@ else()
 
     set(FILMACHINE_SOURCES
         main/accessories.c
+        main/mini_json.c
         main/ota_update.c
         main/ws_server.c
         main/ui_profile.c

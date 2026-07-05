@@ -2,16 +2,20 @@
 """
 genFilMachineCFG.py — Generate FilMachine configuration files
 
-Generates binary .cfg files compatible with readConfigFile/writeConfigFile,
-plus a human-readable .json for inspection.
+The firmware now uses a JSON-only config (readConfigFile/writeConfigFile parse
+and emit FilMachine.json — no binary .cfg). This script writes FilMachine.json
+and FilMachine_Backup.json in exactly the schema the firmware expects:
+    { "settingsParams": {...}, "processes": [ {name, ..., steps:[...]} ], "machineStats": {...} }
 
 Usage:
-    python3 genFilMachineCFG.py                    # Random data
-    python3 genFilMachineCFG.py --realistic        # Realistic film dev processes
-    python3 genFilMachineCFG.py --processes 10     # Custom number of processes
-    python3 genFilMachineCFG.py --output sd/       # Custom output directory
+    python3 genFilMachineCFG.py --realistic --output sd/   # Realistic film dev processes
+    python3 genFilMachineCFG.py --processes 10             # Custom number of processes
+    python3 genFilMachineCFG.py --output sd/               # Custom output directory
 
-Place the generated files in the simulator's sd/ folder.
+Place the generated files in the simulator's sd/ folder or copy them to the
+board's microSD for first boot.
+
+(The binary write_* helpers below are retained for reference but unused.)
 """
 
 import struct
@@ -161,8 +165,8 @@ DEFAULT_SETTINGS = {
     "multiRinseTime": 60,
     "tankSize": 2,
     "pumpSpeed": 30,
-    "chemContainerMl": 500,
-    "wbContainerMl": 2000,
+    "chemCalibFillSecs": 0,
+    "wbCalibFillSecs": 0,
     "chemistryVolume": 2,
     "tempCalibOffset": 0,
     # ── Splash screen settings ──
@@ -198,8 +202,8 @@ def random_settings():
         "multiRinseTime": random.randrange(60, 181, 30),
         "tankSize": random.randint(1, 3),
         "pumpSpeed": random.randrange(10, 101, 10),
-        "chemContainerMl": random.choice([250, 500, 750, 1000, 1250, 1500]),
-        "wbContainerMl": random.choice([1000, 1500, 2000, 2500, 3000]),
+        "chemCalibFillSecs": 0,
+        "wbCalibFillSecs": 0,
         "chemistryVolume": random.randint(1, 2),
         "splashRandom": random.randint(0, 1),
         "splashPalette": random.randint(0, 9),
@@ -248,7 +252,7 @@ def generate_random_steps(count=None):
 def generate_random_process():
     steps, total_mins, total_secs = generate_random_steps()
     return {
-        "processNameString": random_string(random.randint(5, MAX_PROC_NAME_LEN)),
+        "name": random_string(random.randint(5, MAX_PROC_NAME_LEN)),
         "temp": random.randint(20, 40),
         "tempTolerance": float(random.randint(0, 10)) / 10,
         "isTempControlled": random.randint(0, 1),
@@ -278,7 +282,7 @@ def convert_realistic_process(p):
     total_mins += total_secs // 60
     total_secs = total_secs % 60
     return {
-        "processNameString": p["name"][:MAX_PROC_NAME_LEN],
+        "name": p["name"][:MAX_PROC_NAME_LEN],
         "temp": p["temp"],
         "tempTolerance": p["tolerance"],
         "isTempControlled": p["tempControlled"],
@@ -305,8 +309,8 @@ def write_settings(f, s):
     f.write(struct.pack('<B', s["multiRinseTime"]))
     f.write(struct.pack('<B', s["tankSize"]))          # uint8_t (1=Small, 2=Medium, 3=Large)
     f.write(struct.pack('<B', s["pumpSpeed"]))
-    f.write(struct.pack('<H', s["chemContainerMl"]))   # uint16_t
-    f.write(struct.pack('<H', s["wbContainerMl"]))     # uint16_t
+    f.write(struct.pack('<H', s.get("chemCalibFillSecs", 0)))  # uint16_t chem fill time (s), was chemContainerMl
+    f.write(struct.pack('<H', s.get("wbCalibFillSecs", 0)))    # uint16_t WB fill time (s), was wbContainerMl
     f.write(struct.pack('<B', s["chemistryVolume"]))    # uint8_t (1=Low, 2=High)
     f.write(struct.pack('<b', s.get("tempCalibOffset", 0)))  # int8_t (tenths of degree)
     # ── Splash screen settings ──
@@ -418,13 +422,12 @@ def main():
         print(f"  Processes: {len(processes)} ({'realistic' if args.realistic else 'random'})")
     print()
 
-    # Write files
-    cfg_path = os.path.join(args.output, 'FilMachine.cfg')
-    backup_path = os.path.join(args.output, 'FilMachine_Backup.cfg')
+    # Write files — the firmware now uses JSON only (no binary .cfg).
     json_path = os.path.join(args.output, 'FilMachine.json')
+    backup_path = os.path.join(args.output, 'FilMachine_Backup.json')
 
-    # Generate random stats when using random settings
-    stats = None
+    # Statistics (random only when requested, otherwise all zero)
+    stats = {"completed": 0, "totalMins": 0, "totalSecs": 0, "stopped": 0, "clean": 0}
     if args.random_settings:
         import random as rng
         stats = {
@@ -436,14 +439,14 @@ def main():
         }
         print(f"  Stats: completed={stats['completed']}, totalMins={stats['totalMins']}, totalSecs={stats['totalSecs']}, stopped={stats['stopped']}, clean={stats['clean']}")
 
-    write_config(cfg_path, settings, processes, stats)
-    write_config(backup_path, settings, processes, stats)
-
-    # JSON for human inspection
-    data = {"settingsParams": settings, "processes": processes}
+    # Full config document, exactly the schema readConfigFile() parses.
+    data = {"settingsParams": settings, "processes": processes, "machineStats": stats}
     with open(json_path, "w") as f:
         json.dump(data, f, indent=2)
-    print(f"  Written: {json_path}")
+    with open(backup_path, "w") as f:
+        json.dump(data, f, indent=2)
+    print(f"  Written: {json_path} ({os.path.getsize(json_path)} bytes, {len(processes)} processes)")
+    print(f"  Written: {backup_path}")
 
     print(f"\nDone! Files are in: {os.path.abspath(args.output)}/")
 

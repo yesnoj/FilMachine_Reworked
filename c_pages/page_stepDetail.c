@@ -332,6 +332,29 @@ void event_stepDetail(lv_event_t * e)
 *    STEP DETAIL
 *********************/
 
+/* When the parent process is read-only, open the step detail for viewing only:
+ * value fields can't be tapped, dropdowns/switch are disabled and Save is
+ * hidden (Cancel stays, to close). */
+static void step_detail_apply_readonly(sStepDetail *sd) {
+    if (sd == NULL) return;
+    bool ro = (sd->parentProcess != NULL) &&
+              (sd->parentProcess->process.processDetails != NULL) &&
+              (sd->parentProcess->process.processDetails->editMode == false);
+    if (!ro) return;
+
+    lv_obj_t *fields[] = {
+        sd->stepDetailNameTextArea,
+        sd->stepDetailMinTextArea, sd->stepDetailSecTextArea,
+    };
+    for (unsigned i = 0; i < sizeof(fields) / sizeof(fields[0]); i++)
+        if (fields[i]) lv_obj_remove_flag(fields[i], LV_OBJ_FLAG_CLICKABLE);
+
+    if (sd->stepTypeDropDownList)   lv_obj_add_state(sd->stepTypeDropDownList, LV_STATE_DISABLED);
+    if (sd->stepSourceDropDownList) lv_obj_add_state(sd->stepSourceDropDownList, LV_STATE_DISABLED);
+    if (sd->stepDiscardAfterSwitch) lv_obj_add_state(sd->stepDiscardAfterSwitch, LV_STATE_DISABLED);
+    if (sd->stepSaveButton)         lv_obj_add_flag(sd->stepSaveButton, LV_OBJ_FLAG_HIDDEN);
+}
+
 void stepDetail(processNode * referenceNode, stepNode * currentNode)
 {
 /*********************
@@ -625,5 +648,7 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
             lv_obj_set_style_text_font(sd->stepCancelLabel, ui->button_font, 0);
             lv_obj_align(sd->stepCancelLabel, LV_ALIGN_CENTER, 0, 0);
 
+    /* If the parent process is read-only, lock this step detail for viewing. */
+    step_detail_apply_readonly(sd);
 }
 

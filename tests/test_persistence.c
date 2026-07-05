@@ -396,7 +396,7 @@ static void test_tempCalibOffset_persistence(void)
     struct machineSettings *s = &gui.page.settings.settingsParams;
 
     /* Save original */
-    int8_t orig_offset = s->tempCalibOffset;
+    int16_t orig_offset = s->tempCalibOffset;
 
     /* Set to a known value (-15 = -1.5°C) */
     s->tempCalibOffset = -15;

@@ -37,6 +37,17 @@ static bool process_detail_is_valid(sProcessDetail *pd) {
     return (name != NULL && strlen(name) > 0);
 }
 
+/* Enable Save (and disable Run until saved) whenever the process is valid.
+ * Called directly by every change handler so ANY edited parameter enables Save,
+ * without relying on REFRESH-event routing. */
+static void process_detail_update_save_enabled(sProcessDetail *pd) {
+    if (pd == NULL || pd->processSaveButton == NULL) return;
+    if (process_detail_is_valid(pd)) {
+        lv_obj_remove_state(pd->processSaveButton, LV_STATE_DISABLED);
+        if (pd->processRunButton) lv_obj_add_state(pd->processRunButton, LV_STATE_DISABLED);
+    }
+}
+
 /*--------------------------------------------------------------
  *  Sub-functions for event_processDetail  (Point 3 refactor)
  *-------------------------------------------------------------*/
@@ -104,7 +115,7 @@ static void process_detail_set_film_type(processNode *pn, filmType_t ft) {
         LV_LOG_USER("Pressed processBnWLabel %d", pd->data.filmType);
     }
 
-    lv_obj_send_event(pd->processSaveButton, LV_EVENT_REFRESH, NULL);
+    process_detail_update_save_enabled(pd);
 }
 
 /** Toggle the preferred flag on the process */
@@ -120,7 +131,73 @@ static void process_detail_toggle_preferred(processNode *pn) {
     }
     pd->data.somethingChanged = true;
 
-    lv_obj_send_event(pd->processSaveButton, LV_EVENT_REFRESH, NULL);
+    process_detail_update_save_enabled(pd);
+}
+
+/** Apply the read-only / edit lock across every editable widget of the detail.
+ *  Read-only (editMode=false): value fields can't be tapped, the temp-control
+ *  switch is disabled, the add-step + Save buttons are hidden and the Modify
+ *  button is shown. Edit mode is the inverse. Steps are gated separately in
+ *  element_step.c via this same pd->editMode flag. */
+static void process_detail_apply_edit_mode(sProcessDetail *pd) {
+    if (pd == NULL) return;
+    bool edit = pd->editMode;
+
+    /* Value fields: enable/disable tap-to-edit. */
+    lv_obj_t *fields[] = {
+        pd->processDetailNameTextArea,
+        pd->processTempTextArea,      pd->processTempContainer,
+        pd->processToleranceTextArea, pd->processToleranceContainer,
+        pd->processColorLabel,        pd->processBnWLabel,
+        pd->processPreferredLabel,
+    };
+    for (unsigned i = 0; i < sizeof(fields) / sizeof(fields[0]); i++) {
+        if (!fields[i]) continue;
+        if (edit) lv_obj_add_flag(fields[i], LV_OBJ_FLAG_CLICKABLE);
+        else      lv_obj_remove_flag(fields[i], LV_OBJ_FLAG_CLICKABLE);
+    }
+
+    /* Name textarea: no blinking cursor / focus while read-only. */
+    if (pd->processDetailNameTextArea) {
+        lv_obj_t *ta = pd->processDetailNameTextArea;
+        if (edit) {
+            lv_obj_set_style_opa(ta, LV_OPA_COVER, LV_PART_CURSOR);
+        } else {
+            lv_obj_remove_state(ta, LV_STATE_FOCUSED);
+            lv_obj_set_style_opa(ta, LV_OPA_TRANSP, LV_PART_CURSOR);
+        }
+    }
+
+    /* Visual cue: fade the editable controls (film icons, heart, switch) when
+       read-only so the mode is obvious at a glance. */
+    lv_opa_t dim = edit ? LV_OPA_COVER : LV_OPA_40;
+    lv_obj_t *dimmed[] = {
+        pd->processColorLabel, pd->processBnWLabel, pd->processPreferredLabel,
+        pd->processTempControlSwitch,
+    };
+    for (unsigned i = 0; i < sizeof(dimmed) / sizeof(dimmed[0]); i++)
+        if (dimmed[i]) lv_obj_set_style_opa(dimmed[i], dim, 0);
+
+    /* Temp-control switch: also non-toggle when read-only. */
+    if (pd->processTempControlSwitch) {
+        if (edit) lv_obj_remove_state(pd->processTempControlSwitch, LV_STATE_DISABLED);
+        else      lv_obj_add_state(pd->processTempControlSwitch, LV_STATE_DISABLED);
+    }
+
+    /* Add-step + Save shown only while editing; Modify shown only read-only.
+       Save and Modify share the same slot (left of Play). */
+    if (pd->processNewStepButton) {
+        if (edit) lv_obj_remove_flag(pd->processNewStepButton, LV_OBJ_FLAG_HIDDEN);
+        else      lv_obj_add_flag(pd->processNewStepButton, LV_OBJ_FLAG_HIDDEN);
+    }
+    if (pd->processSaveButton) {
+        if (edit) lv_obj_remove_flag(pd->processSaveButton, LV_OBJ_FLAG_HIDDEN);
+        else      lv_obj_add_flag(pd->processSaveButton, LV_OBJ_FLAG_HIDDEN);
+    }
+    if (pd->processModifyButton) {
+        if (edit) lv_obj_add_flag(pd->processModifyButton, LV_OBJ_FLAG_HIDDEN);
+        else      lv_obj_remove_flag(pd->processModifyButton, LV_OBJ_FLAG_HIDDEN);
+    }
 }
 
 /** Handle Save button: persist process data and update UI */
@@ -157,6 +234,10 @@ static void process_detail_save(processNode *pn) {
         if (gui.page.processes.isFiltered == 1)
             filterAndDisplayProcesses();
         LV_LOG_USER("Pressed processSaveButton");
+
+        /* Back to read-only after a successful save. */
+        pd->editMode = false;
+        process_detail_apply_edit_mode(pd);
     } else {
         lv_obj_add_state(pd->processSaveButton, LV_STATE_DISABLED);
         lv_obj_add_state(pd->processRunButton, LV_STATE_DISABLED);
@@ -200,7 +281,7 @@ static void process_detail_handle_temp_control(processNode *pn, lv_obj_t *obj) {
         lv_obj_add_state(pd->processToleranceTextArea, LV_STATE_DISABLED);
     }
 
-    lv_obj_send_event(pd->processSaveButton, LV_EVENT_REFRESH, NULL);
+    process_detail_update_save_enabled(pd);
 }
 
 /** Handle FOCUSED event: open roller popup for temperature / tolerance */
@@ -284,6 +365,11 @@ void event_processDetail(lv_event_t * e) {
     if(widget == pd->processPreferredLabel)       process_detail_toggle_preferred(pn);
     if(widget == pd->processSaveButton)           process_detail_save(pn);
     if(widget == pd->processRunButton)            process_detail_run(pn);
+    if(widget == pd->processModifyButton) {
+        LV_LOG_USER("Pressed processModifyButton — enabling edit mode");
+        pd->editMode = true;
+        process_detail_apply_edit_mode(pd);
+    }
     if(widget == pd->processNewStepButton) {
         LV_LOG_USER("Pressed processNewStepButton");
         stepDetail(pn, NULL);
@@ -511,6 +597,10 @@ if(existingProcess != NULL) {
   const ui_process_detail_layout_t *ui = &ui_get_profile()->process_detail;
   processNode *pn = gui.tempProcessNode;
   sProcessDetail *pd = pn->process.processDetails;
+
+  /* New process (not yet in the list) opens editable; an existing one opens
+   * read-only until the user presses Modify. */
+  pd->editMode = (existingProcess == NULL);
 
   /* Snapshot current process so we can restore on discard (data + steps) */
   process_detail_free_backup();
@@ -820,6 +910,19 @@ if(existingProcess != NULL) {
                           lv_obj_set_style_text_font(pd->processSaveLabel, ui->button_icon_font, 0);
                           lv_obj_align(pd->processSaveLabel, LV_ALIGN_CENTER, 0, 0);
 
+                  /* Modify button — same slot/size as Save (left of Play). Shown
+                     only in read-only; pressing it unlocks the fields. */
+                  pd->processModifyButton = lv_button_create(pd->processDetailContainer);
+                  lv_obj_set_size(pd->processModifyButton, ui->save_w, ui->save_h);
+                  lv_obj_align(pd->processModifyButton, LV_ALIGN_BOTTOM_RIGHT, ui->save_x, ui->save_y);
+                  lv_obj_add_event_cb(pd->processModifyButton, event_processDetail, LV_EVENT_CLICKED, pn);
+                  lv_obj_set_style_bg_color(pd->processModifyButton, lv_color_hex(ORANGE), LV_PART_MAIN);
+
+                          pd->processModifyLabel = lv_label_create(pd->processModifyButton);
+                          lv_label_set_text(pd->processModifyLabel, processModify_text);
+                          lv_obj_set_style_text_font(pd->processModifyLabel, ui_get_profile()->clean_popup.button_font, 0);
+                          lv_obj_align(pd->processModifyLabel, LV_ALIGN_CENTER, 0, 0);
+
 
                   pd->processRunButton = lv_button_create(pd->processDetailContainer);
                   lv_obj_set_size(pd->processRunButton, ui->run_w, ui->run_h);
@@ -849,4 +952,7 @@ if(existingProcess != NULL) {
                   tempSize ++;
                 }
             }
+
+  /* Lock/unlock all fields to match the initial mode (new=edit, existing=read-only). */
+  process_detail_apply_edit_mode(pd);
 }

@@ -6,6 +6,7 @@
 
 //ESSENTIAL INCLUDES
 #include "FilMachine.h"
+#include "sensors.h"      /* sensors_hall_magnet_detected (tank rotation check) */
 #if defined(DISPLAY_DRIVER_ST7701)
 #include "st7701_lcd.h"
 #endif
@@ -199,6 +200,7 @@ void event_checkup(lv_event_t * e){
       }
       else if(ckup->data.processStep == 3){
         LV_LOG_USER("User pressed checkupStartButton on Step 3");
+        safeTimerDelete(&ckup->checkupFilmTimer);   /* stop the rotation-check poll */
         ckup->data.isProcessing = 1;
         ckup->data.processStep = 4;
         ckup->data.stepFillWaterStatus = 2;
@@ -247,6 +249,7 @@ void event_checkup(lv_event_t * e){
         safeTimerDelete(&ckup->processTimer);
         safeTimerDelete(&ckup->pumpTimer);
         safeTimerDelete(&ckup->tempTimer);
+        safeTimerDelete(&ckup->checkupFilmTimer);
         /* Safety: always turn off the heater when leaving checkup */
         sim_setHeater(false);
         /* Safety: stop motor if user exits during step 3 rotation check */
@@ -301,6 +304,37 @@ void processTimer(lv_timer_t * timer) {
     processNode *pn = (processNode *)lv_timer_get_user_data(timer);
     if(pn == NULL || pn->process.processDetails == NULL || pn->process.processDetails->checkup == NULL) return;
     sCheckup *ckup = pn->process.processDetails->checkup;
+
+    /* ── Live water temperature + thermostat during development ──
+     * The temperature is read from the (non-blocking) cache; the "Water temp"
+     * readout is refreshed every tick instead of being frozen at step start.
+     * If the process is temperature-controlled, the heater is driven bang-bang
+     * to hold the bath at target — a real thermostat during the whole develop. */
+    {
+        sProcessDetail *pd = pn->process.processDetails;
+        ckup->data.currentWaterTemp = getCachedTemperature(TEMPERATURE_SENSOR_BATH);
+        ckup->data.currentChemTemp  = getCachedTemperature(TEMPERATURE_SENSOR_CHEMICAL);
+
+        if(ckup->checkupWaterTempValue != NULL) {
+            char tbuf[16];
+            if(gui.page.settings.settingsParams.tempUnit == CELSIUS_TEMP)
+                snprintf(tbuf, sizeof(tbuf), "%.1f°C", ckup->data.currentWaterTemp);
+            else
+                snprintf(tbuf, sizeof(tbuf), "%.1f°F", ckup->data.currentWaterTemp * 1.8f + 32.0f);
+            lv_label_set_text(ckup->checkupWaterTempValue, tbuf);
+        }
+
+        if(pd->data.isTempControlled) {
+            float targetTemp = (float)pd->data.temp;
+            float tol = pd->data.tempTolerance;
+            if(tol < 0.5f) tol = 0.5f;
+            if(ckup->data.currentWaterTemp < targetTemp - tol) {
+                if(!ckup->data.heaterOn) { sim_setHeater(true);  ckup->data.heaterOn = true;  }
+            } else if(ckup->data.currentWaterTemp >= targetTemp) {
+                if(ckup->data.heaterOn)  { sim_setHeater(false); ckup->data.heaterOn = false; }
+            }
+        }
+    }
 
     char *tmp_processSourceList[] = processSourceList;
     uint16_t fill_time_seconds = checkup_get_tank_fill_time_seconds(ckup);
@@ -389,6 +423,41 @@ void processTimer(lv_timer_t * timer) {
     else{
         safeTimerDelete(&ckup->processTimer);
     }
+}
+
+/* ── Tank rotation check (Hall sensor) ──
+ * The agitation motor spins the tank; a magnet on the tank passes the Hall
+ * sensor once per revolution. Seeing periodic Hall edges means the tank is
+ * present AND rotating — that gates the START button so the process can only
+ * begin once the tank is confirmed spinning. On the simulator (no real Hall)
+ * we always allow START so the flow can still be exercised. */
+#define FILM_ROT_WINDOW_TICKS   15   /* ~3 s at 200 ms/tick without an edge → stopped */
+
+static bool s_filmLastHall  = false;
+static int  s_filmRotWindow = 0;
+
+void filmCheckTimer(lv_timer_t * timer) {
+    processNode *pn = (processNode *)lv_timer_get_user_data(timer);
+    if(pn == NULL || pn->process.processDetails == NULL || pn->process.processDetails->checkup == NULL) return;
+    sCheckup *ckup = pn->process.processDetails->checkup;
+    if(ckup->checkupStartButton == NULL) return;
+
+#if defined(BOARD_JC4880P433)
+    bool hall = sensors_hall_magnet_detected();
+    if(hall != s_filmLastHall) { s_filmLastHall = hall; s_filmRotWindow = FILM_ROT_WINDOW_TICKS; }
+    else if(s_filmRotWindow > 0) s_filmRotWindow--;
+    bool rotating = (s_filmRotWindow > 0);
+#else
+    bool rotating = true;   /* simulator: no real Hall — allow START */
+#endif
+
+    if(ckup->checkupFilmRotatingValue != NULL)
+        lv_label_set_text(ckup->checkupFilmRotatingValue, rotating ? checkupYes_text : checkupNo_text);
+    if(ckup->checkupTankIsPresentValue != NULL)
+        lv_label_set_text(ckup->checkupTankIsPresentValue, rotating ? checkupYes_text : checkupNo_text);
+
+    if(rotating) lv_obj_remove_state(ckup->checkupStartButton, LV_STATE_DISABLED);
+    else         lv_obj_add_state(ckup->checkupStartButton, LV_STATE_DISABLED);
 }
 
 /* ═══════════════════════════════════════════════
@@ -546,7 +615,15 @@ void handleFirstStep(processNode *pn) {
 void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
     sCheckup* checkup = pn->process.processDetails->checkup;
     if (isLastStep) {
-        pumpFrom = getValueForChemicalSource(WASTE);//last step go into the waste
+        /* Drain the last step's chemistry: to WASTE if it is marked
+         * discard-after-processing, otherwise back to its origin container.
+         * currentStep is NULL at this point, so the just-used step is the last
+         * node in the step list. */
+        stepNode *lastStep = pn->process.processDetails->stepElementsList.end;
+        if (lastStep != NULL && lastStep->step.stepDetails->data.discardAfterProc == false)
+            pumpFrom = getValueForChemicalSource(lastStep->step.stepDetails->data.source);
+        else
+            pumpFrom = getValueForChemicalSource(WASTE);
         pumpDir = PUMP_OUT_RLY;
         LV_LOG_USER("Last step");
         if (tankPercentage < 100) {
@@ -1232,6 +1309,15 @@ static void checkup_renderCheckFilm(processNode *proc) {
         /* Start motor so user can verify film rotation before process begins */
         motor_set_forward(180);
         LV_LOG_USER("Check film: motor started for rotation check");
+
+        /* Gate START on the Hall sensor: keep it disabled until rotation is
+         * confirmed, and poll the Hall every 200 ms (task #9). */
+        lv_obj_add_state(ckup->checkupStartButton, LV_STATE_DISABLED);
+        lv_label_set_text(ckup->checkupFilmRotatingValue, checkupChecking_text);
+        s_filmLastHall = false;
+        s_filmRotWindow = 0;
+        safeTimerDelete(&ckup->checkupFilmTimer);
+        ckup->checkupFilmTimer = lv_timer_create(filmCheckTimer, 200, proc);
 
         isStepStatus3created = 1;
     }

@@ -344,6 +344,14 @@ case RELOAD_CFG:
           if( copyAndRenameFile( FILENAME_BACKUP, FILENAME_SAVE) ) rebootBoard();
 break;
 
+case SELFTEST_VALVES:
+          /* Deferred boot valve self-test — runs here (background task) so it
+           * doesn't hold up the display coming up in app_main. */
+#if VALVE_SELFTEST_ON_BOOT
+          valveSelfTest();
+#endif
+break;
+
       default:
           LV_LOG_USER( "Unknown System Manager Request!");
           break;
@@ -372,7 +380,9 @@ void motorMan(void *arg) {
 
         if (xQueueReceive(sys.motorActionQ, &msg, interval)) {
             // Aggiungi qui le cose da fare ogni intervallo
+            ESP_LOGI(TAG, "motorMan: queue msg received (agitation skipped this tick)");
         } else {
+            ESP_LOGI(TAG, "motorMan: agitation tick, rotation=%d", rotation);
             switch(rotation) {
                 case 1:
                     runMotorFW(MOTOR_IN1_PIN, MOTOR_IN2_PIN);
@@ -543,6 +553,12 @@ create_keyboard();
     /* Show splash screen — play button calls readConfigFile → menu → refreshSettingsUI */
     lv_obj_t * splash = splash_screen_create();
     lv_screen_load(splash);
+
+    /* Deferred valve self-test: the display/splash is up now, so cycle the
+     * solenoids in the background sysMan task instead of blocking boot. */
+#if VALVE_SELFTEST_ON_BOOT
+    qSysAction(SELFTEST_VALVES);
+#endif
 
     while (1) {
         // lv_timer_handler returns ms until next call is needed

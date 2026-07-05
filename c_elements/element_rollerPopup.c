@@ -129,7 +129,11 @@ void event_Roller(lv_event_t * e)
               /* Remove any existing offset to get the true raw reading */
               float rawWithoutOffset = rawTemp - (gui.page.settings.settingsParams.tempCalibOffset / 10.0f);
               float newOffset = (float)gui.page.settings.settingsParams.calibratedTemp - rawWithoutOffset;
-              gui.page.settings.settingsParams.tempCalibOffset = (int8_t)(newOffset * 10.0f);
+              float newOffsetTenths = newOffset * 10.0f;
+              /* Clamp to ±30°C — int16 store, no overflow (was int8, wrapped past ±12.7°C) */
+              if (newOffsetTenths >  300.0f) newOffsetTenths =  300.0f;
+              if (newOffsetTenths < -300.0f) newOffsetTenths = -300.0f;
+              gui.page.settings.settingsParams.tempCalibOffset = (int16_t)newOffsetTenths;
               LV_LOG_USER("Calibration: entered=%u, raw=%.1f, offset=%.2f, offsetTenths=%d",
                          gui.page.settings.settingsParams.calibratedTemp, rawWithoutOffset, newOffset,
                          gui.page.settings.settingsParams.tempCalibOffset);
@@ -275,38 +279,7 @@ void event_Roller(lv_event_t * e)
               }
               return;
             }
-            /* ── Settings Chemistry Container Capacity roller ── */
-            if((lv_obj_t *)data == gui.page.settings.chemContainerMlTextArea) {
-              uint32_t sel = isScrolled ? rollerSelected : lv_roller_get_selected(gui.element.rollerPopup.roller);
-              uint16_t vals[] = {250, 500, 750, 1000, 1250, 1500};
-              if(sel > 5) sel = 1;
-              LV_LOG_USER("SET Chemistry Container: %d ml", vals[sel]);
-              gui.page.settings.settingsParams.chemContainerMl = vals[sel];
-              { char buf[16]; snprintf(buf, sizeof(buf), "%dml", vals[sel]); lv_textarea_set_text(gui.page.settings.chemContainerMlTextArea, buf); }
-              isScrolled = false;
-              lv_style_reset(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
-              lv_style_reset(&gui.element.rollerPopup.style_roller);
-              lv_msgbox_close(gui.element.rollerPopup.mBoxRollerParent);
-              gui.element.rollerPopup.mBoxRollerParent = NULL;
-              qSysAction(SAVE_PROCESS_CONFIG);
-              return;
-            }
-            /* ── Settings Water Bath Capacity roller ── */
-            if((lv_obj_t *)data == gui.page.settings.wbContainerMlTextArea) {
-              uint32_t sel = isScrolled ? rollerSelected : lv_roller_get_selected(gui.element.rollerPopup.roller);
-              uint16_t vals[] = {1000, 1500, 2000, 2500, 3000, 3500, 4000, 5000};
-              if(sel > 7) sel = 1;
-              LV_LOG_USER("SET Water Bath: %d ml", vals[sel]);
-              gui.page.settings.settingsParams.wbContainerMl = vals[sel];
-              { char buf[16]; snprintf(buf, sizeof(buf), "%dml", vals[sel]); lv_textarea_set_text(gui.page.settings.wbContainerMlTextArea, buf); }
-              isScrolled = false;
-              lv_style_reset(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
-              lv_style_reset(&gui.element.rollerPopup.style_roller);
-              lv_msgbox_close(gui.element.rollerPopup.mBoxRollerParent);
-              gui.element.rollerPopup.mBoxRollerParent = NULL;
-              qSysAction(SAVE_PROCESS_CONFIG);
-              return;
-            }
+            /* Chem/WB capacity rollers removed — self-calibrated fill times. */
             /* ── Settings Chemistry Volume roller ── */
             if((lv_obj_t *)data == gui.page.settings.chemVolumeTextArea) {
               const char *vols[] = chemVolumeValues;

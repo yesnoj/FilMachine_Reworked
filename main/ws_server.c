@@ -492,8 +492,8 @@ static int build_state_json(char *buf, int bufsize) {
         "\"multiRinseTime\":%u,"
         "\"tankSize\":%u,"
         "\"pumpSpeed\":%u,"
-        "\"chemContainerMl\":%u,"
-        "\"wbContainerMl\":%u,"
+        "\"chemCalibFillSecs\":%u,"
+        "\"wbCalibFillSecs\":%u,"
         "\"chemistryVolume\":%u,"
         /* Wi-Fi */
         "\"wifiEnabled\":%s,"
@@ -558,8 +558,8 @@ static int build_state_json(char *buf, int bufsize) {
         (unsigned)s->multiRinseTime,
         (unsigned)s->tankSize,
         (unsigned)s->pumpSpeed,
-        (unsigned)s->chemContainerMl,
-        (unsigned)s->wbContainerMl,
+        (unsigned)s->chemCalibFillSecs,
+        (unsigned)s->wbCalibFillSecs,
         (unsigned)s->chemistryVolume,
         s->wifiEnabled ? "true" : "false",
         esc_ssid,
@@ -719,7 +719,7 @@ static void ws_handle_command(const char *msg, int len) {
         if (KEY_IS("tempUnit"))             s->tempUnit = (tempUnit_t)atoi(vs);
         else if (KEY_IS("waterInlet"))      s->waterInlet = (strstr(vs, "true") != NULL);
         else if (KEY_IS("calibratedTemp"))  s->calibratedTemp = (uint8_t)atoi(vs);
-        else if (KEY_IS("tempCalibOffset")) s->tempCalibOffset = (int8_t)atoi(vs);
+        else if (KEY_IS("tempCalibOffset")) s->tempCalibOffset = (int16_t)atoi(vs);
         else if (KEY_IS("filmRotationSpeed"))  s->filmRotationSpeedSetpoint = (uint8_t)atoi(vs);
         else if (KEY_IS("rotationInterval"))   s->rotationIntervalSetpoint = (uint8_t)atoi(vs);
         else if (KEY_IS("random"))             s->randomSetpoint = (uint8_t)atoi(vs);
@@ -729,8 +729,8 @@ static void ws_handle_command(const char *msg, int len) {
         else if (KEY_IS("multiRinseTime"))     s->multiRinseTime = (uint8_t)atoi(vs);
         else if (KEY_IS("tankSize"))           s->tankSize = (uint8_t)atoi(vs);
         else if (KEY_IS("pumpSpeed"))          s->pumpSpeed = (uint8_t)atoi(vs);
-        else if (KEY_IS("chemContainerMl"))    s->chemContainerMl = (uint16_t)atoi(vs);
-        else if (KEY_IS("wbContainerMl"))      s->wbContainerMl = (uint16_t)atoi(vs);
+        else if (KEY_IS("chemCalibFillSecs"))  s->chemCalibFillSecs = (uint16_t)atoi(vs);
+        else if (KEY_IS("wbCalibFillSecs"))    s->wbCalibFillSecs = (uint16_t)atoi(vs);
         else if (KEY_IS("chemistryVolume"))    s->chemistryVolume = (uint8_t)atoi(vs);
         else if (KEY_IS("wifiEnabled"))        s->wifiEnabled = (strstr(vs, "true") != NULL);
         else {
@@ -762,8 +762,8 @@ static void ws_handle_command(const char *msg, int len) {
         s->multiRinseTime = 60;
         s->tankSize = 2;
         s->pumpSpeed = 30;
-        s->chemContainerMl = 500;
-        s->wbContainerMl = 2000;
+        s->chemCalibFillSecs = 0;
+        s->wbCalibFillSecs = 0;
         s->chemistryVolume = 2;
         qSysAction(SAVE_PROCESS_CONFIG);
         ws_broadcast_state();

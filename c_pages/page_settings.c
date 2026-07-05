@@ -48,9 +48,9 @@ uint8_t analogVal_rotationSpeedPercent;
 #define Y_PERSISTENT_ALARM           (Y_VOLUME + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #endif
 #define Y_TANK_SIZE                  (Y_PERSISTENT_ALARM + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_CHEM_CONTAINER_ML          (Y_TANK_SIZE + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_WB_CONTAINER_ML            (Y_CHEM_CONTAINER_ML + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_CHEM_VOLUME                (Y_WB_CONTAINER_ML + SETTINGS_H_ROW + SETTINGS_GAP_Y)
+/* Chem/WB capacity rows removed — fill times are now self-calibrated from the
+ * MIN/MAX sensors (Maintenance fills). Chem volume follows tank size directly. */
+#define Y_CHEM_VOLUME                (Y_TANK_SIZE + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #define Y_SPLASH_SCREEN              (Y_CHEM_VOLUME + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #define Y_WIFI_ROW                   (Y_SPLASH_SCREEN + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #define Y_RESET_ROW                  (Y_WIFI_ROW + SETTINGS_H_ROW + SETTINGS_GAP_Y)
@@ -139,6 +139,39 @@ void event_settingPopupMBox(lv_event_t * e){
 }
 
 
+/* Restore every setting to its factory default, refresh the UI and persist.
+ * Called from the reset-confirmation popup (OK button). */
+void settingsApplyFactoryDefaults(void)
+{
+    struct machineSettings *p = &gui.page.settings.settingsParams;
+
+    /* Same values as initGlobals in accessories.c */
+    p->tempUnit = 0;               /* Celsius */
+    p->waterInlet = false;
+    p->calibratedTemp = 20;
+    p->filmRotationSpeedSetpoint = 50;
+    p->rotationIntervalSetpoint = 10;
+    p->randomSetpoint = 0;
+    p->isPersistentAlarm = false;
+    p->isProcessAutostart = false;
+    p->drainFillOverlapSetpoint = 100;
+    p->multiRinseTime = 60;
+    p->tankSize = 2;               /* Medium */
+    p->pumpSpeed = 30;
+    p->invertPump = false;
+    p->brightness = 100;
+    p->volume = 60;
+    p->chemistryVolume = 2;         /* High */
+    p->tempCalibOffset = 0;
+    p->chemCalibOffset = 0;
+    p->chemCalibFillSecs = 0;       /* uncalibrated (was chemContainerMl) */
+    p->wbCalibFillSecs = 0;         /* uncalibrated (was wbContainerMl) */
+
+    refreshSettingsUI();            /* update all UI widgets */
+    qSysAction(SAVE_PROCESS_CONFIG);/* persist to SD */
+    LV_LOG_USER("Settings restored to factory defaults");
+}
+
 void event_settings_handler(lv_event_t * e)
 {
     uint32_t * active_id = (uint32_t *)lv_event_get_user_data(e);
@@ -176,16 +209,10 @@ void event_settings_handler(lv_event_t * e)
     if(act_cb == gui.page.settings.tempSensorTuneButton){
       if(code == LV_EVENT_SHORT_CLICKED) {
           LV_LOG_USER("TUNE short click");
-          calibPopupCreate();   /* dual bath+chemical calibration popup */
+          calibPopupCreate();   /* dual bath+chemical calibration popup (Cancel/Reset/Set inside) */
         }
-      if(code == LV_EVENT_LONG_PRESSED) {
-          LV_LOG_USER("TUNE Long click - Resetting calibration (bath + chemical)");
-          gui.page.settings.settingsParams.tempCalibOffset = 0;
-          gui.page.settings.settingsParams.calibratedTemp = 20; /* default */
-          setChemCalibOffset(0);   /* also clears the chemical offset (config) */
-          qSysAction(SAVE_PROCESS_CONFIG);
-          messagePopupCreate(calibrationResetPopupTitle_text, calibrationResetPopupBody_text, NULL, NULL, NULL);
-        }
+      /* Calibration reset moved into the popup (Reset button) — the old
+       * long-press shortcut was hard to discover, so it was removed. */
     }
 
     if (act_cb == gui.page.settings.filmRotationSpeedSlider) {
@@ -353,29 +380,7 @@ void event_settings_handler(lv_event_t * e)
         }
     }
 
-    if(act_cb == gui.page.settings.chemContainerMlTextArea) {
-        if(code == LV_EVENT_FOCUSED) {
-            if(gui.element.rollerPopup.mBoxRollerParent != NULL) return;
-            LV_LOG_USER("Set Chemistry Container Capacity");
-            uint16_t val = gui.page.settings.settingsParams.chemContainerMl;
-            uint32_t idx = 0;
-            uint16_t vals[] = {250, 500, 750, 1000, 1250, 1500};
-            for(int i = 0; i < 6; i++) { if(vals[i] == val) { idx = i; break; } }
-            rollerPopupCreate(chemContainerMlList, chemContainerMl_text, act_cb, idx, ORANGE);
-        }
-    }
-
-    if(act_cb == gui.page.settings.wbContainerMlTextArea) {
-        if(code == LV_EVENT_FOCUSED) {
-            if(gui.element.rollerPopup.mBoxRollerParent != NULL) return;
-            LV_LOG_USER("Set Water Bath Capacity");
-            uint16_t val = gui.page.settings.settingsParams.wbContainerMl;
-            uint32_t idx = 0;
-            uint16_t vals[] = {1000, 1500, 2000, 2500, 3000, 3500, 4000, 5000};
-            for(int i = 0; i < 8; i++) { if(vals[i] == val) { idx = i; break; } }
-            rollerPopupCreate(wbContainerMlList, wbContainerMl_text, act_cb, idx, ORANGE);
-        }
-    }
+    /* Chem/WB capacity rollers removed — self-calibrated via Maintenance fills. */
 
     if(act_cb == gui.page.settings.chemVolumeTextArea) {
         if(code == LV_EVENT_FOCUSED) {
@@ -406,46 +411,16 @@ void event_settings_handler(lv_event_t * e)
         }
     }
 
-    /* ── Reset to Defaults button ── */
+    /* ── Reset to Defaults button — confirm first, only reset on OK ── */
     if(act_cb == gui.page.settings.resetButton) {
         if(code == LV_EVENT_CLICKED) {
-            LV_LOG_USER("PRESSED resetButton — restoring factory defaults");
-
-            struct machineSettings *p = &gui.page.settings.settingsParams;
-
-            /* Restore all settings to factory defaults
-             * (same values as initGlobals in accessories.c) */
-            p->tempUnit = 0;               /* Celsius */
-            p->waterInlet = false;
-            p->calibratedTemp = 20;
-            p->filmRotationSpeedSetpoint = 50;
-            p->rotationIntervalSetpoint = 10;
-            p->randomSetpoint = 0;
-            p->isPersistentAlarm = false;
-            p->isProcessAutostart = false;
-            p->drainFillOverlapSetpoint = 100;
-            p->multiRinseTime = 60;
-            p->tankSize = 2;               /* Medium */
-            p->pumpSpeed = 30;
-            p->invertPump = false;
-            p->brightness = 100;
-            p->volume = 60;
-            p->chemContainerMl = 500;
-            p->wbContainerMl = 2000;
-            p->chemistryVolume = 2;         /* High */
-            p->tempCalibOffset = 0;
-            p->chemCalibOffset = 0;
-
-            /* Update all UI widgets to reflect the new values */
-            refreshSettingsUI();
-
-            /* Persist to SD */
-            qSysAction(SAVE_PROCESS_CONFIG);
-
-            /* Show confirmation popup */
-            messagePopupCreate(settingsResetPopupTitle_text,
-                               settingsResetPopupBody_text,
-                               NULL, NULL, NULL);
+            LV_LOG_USER("PRESSED resetButton — asking confirmation");
+            /* Cancel (left) closes; OK (right) triggers the actual reset via
+             * the settings-reset owner in element_messagePopup.c. */
+            messagePopupCreate(settingsResetConfirmTitle_text,
+                               settingsResetConfirmBody_text,
+                               buttonCancel_text, buttonOk_text,
+                               gui.page.settings.resetButton);
         }
     }
 
@@ -892,53 +867,8 @@ gui.page.settings.volumeContainer = lv_obj_create(parent);
         lv_label_set_text_fmt(gui.page.settings.volumeValueLabel, "%d%%", gui.page.settings.settingsParams.volume);
         lv_obj_align_to(gui.page.settings.volumeValueLabel, gui.page.settings.volumeTuneButton, LV_ALIGN_OUT_LEFT_MID, -12, 0);
 
-/* ── Chemistry container capacity ── */
-gui.page.settings.chemContainerMlContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.settings.chemContainerMlContainer, LV_ALIGN_TOP_LEFT, SETTINGS_LEFT_X, Y_CHEM_CONTAINER_ML);
-  lv_obj_set_size(gui.page.settings.chemContainerMlContainer, UI_SETTINGS->row_w, SETTINGS_H_ROW);
-  lv_obj_remove_flag(gui.page.settings.chemContainerMlContainer, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_style_border_opa(gui.page.settings.chemContainerMlContainer, LV_OPA_TRANSP, 0);
-
-        gui.page.settings.chemContainerMlLabel = lv_label_create(gui.page.settings.chemContainerMlContainer);
-        lv_label_set_text(gui.page.settings.chemContainerMlLabel, chemContainerMl_text);
-        lv_obj_set_style_text_font(gui.page.settings.chemContainerMlLabel, UI_SETTINGS->label_font, 0);
-        lv_obj_align(gui.page.settings.chemContainerMlLabel, LV_ALIGN_LEFT_MID, UI_SETTINGS->row_label_x, UI_SETTINGS->row_label_y);
-
-        gui.page.settings.chemContainerMlTextArea = lv_textarea_create(gui.page.settings.chemContainerMlContainer);
-        lv_obj_set_size(gui.page.settings.chemContainerMlTextArea, UI_SETTINGS->textarea_w, UI_SETTINGS->textarea_h);
-        lv_obj_align(gui.page.settings.chemContainerMlTextArea, LV_ALIGN_RIGHT_MID, UI_SETTINGS->textarea_x, UI_SETTINGS->textarea_y);
-        lv_textarea_set_one_line(gui.page.settings.chemContainerMlTextArea, true);
-        lv_obj_set_scrollbar_mode(gui.page.settings.chemContainerMlTextArea, LV_SCROLLBAR_MODE_OFF);
-        lv_obj_set_style_bg_color(gui.page.settings.chemContainerMlTextArea, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
-        lv_obj_set_style_text_align(gui.page.settings.chemContainerMlTextArea, LV_TEXT_ALIGN_CENTER, 0);
-        lv_obj_set_style_text_font(gui.page.settings.chemContainerMlTextArea, UI_SETTINGS->label_font, 0);
-        lv_obj_set_style_border_color(gui.page.settings.chemContainerMlTextArea, lv_color_hex(ORANGE), 0);
-        lv_obj_add_event_cb(gui.page.settings.chemContainerMlTextArea, event_settings_handler, LV_EVENT_FOCUSED, NULL);
-        { char buf[16]; snprintf(buf, sizeof(buf), "%dml", gui.page.settings.settingsParams.chemContainerMl); lv_textarea_set_text(gui.page.settings.chemContainerMlTextArea, buf); }
-
-/* ── Water bath capacity ── */
-gui.page.settings.wbContainerMlContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.settings.wbContainerMlContainer, LV_ALIGN_TOP_LEFT, SETTINGS_LEFT_X, Y_WB_CONTAINER_ML);
-  lv_obj_set_size(gui.page.settings.wbContainerMlContainer, UI_SETTINGS->row_w, SETTINGS_H_ROW);
-  lv_obj_remove_flag(gui.page.settings.wbContainerMlContainer, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_style_border_opa(gui.page.settings.wbContainerMlContainer, LV_OPA_TRANSP, 0);
-
-        gui.page.settings.wbContainerMlLabel = lv_label_create(gui.page.settings.wbContainerMlContainer);
-        lv_label_set_text(gui.page.settings.wbContainerMlLabel, wbContainerMl_text);
-        lv_obj_set_style_text_font(gui.page.settings.wbContainerMlLabel, UI_SETTINGS->label_font, 0);
-        lv_obj_align(gui.page.settings.wbContainerMlLabel, LV_ALIGN_LEFT_MID, UI_SETTINGS->row_label_x, UI_SETTINGS->row_label_y);
-
-        gui.page.settings.wbContainerMlTextArea = lv_textarea_create(gui.page.settings.wbContainerMlContainer);
-        lv_obj_set_size(gui.page.settings.wbContainerMlTextArea, UI_SETTINGS->textarea_w, UI_SETTINGS->textarea_h);
-        lv_obj_align(gui.page.settings.wbContainerMlTextArea, LV_ALIGN_RIGHT_MID, UI_SETTINGS->textarea_x, UI_SETTINGS->textarea_y);
-        lv_textarea_set_one_line(gui.page.settings.wbContainerMlTextArea, true);
-        lv_obj_set_scrollbar_mode(gui.page.settings.wbContainerMlTextArea, LV_SCROLLBAR_MODE_OFF);
-        lv_obj_set_style_bg_color(gui.page.settings.wbContainerMlTextArea, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
-        lv_obj_set_style_text_align(gui.page.settings.wbContainerMlTextArea, LV_TEXT_ALIGN_CENTER, 0);
-        lv_obj_set_style_text_font(gui.page.settings.wbContainerMlTextArea, UI_SETTINGS->label_font, 0);
-        lv_obj_set_style_border_color(gui.page.settings.wbContainerMlTextArea, lv_color_hex(ORANGE), 0);
-        lv_obj_add_event_cb(gui.page.settings.wbContainerMlTextArea, event_settings_handler, LV_EVENT_FOCUSED, NULL);
-        { char buf[16]; snprintf(buf, sizeof(buf), "%dml", gui.page.settings.settingsParams.wbContainerMl); lv_textarea_set_text(gui.page.settings.wbContainerMlTextArea, buf); }
+/* Chem/WB capacity rows removed — fill times are self-calibrated via the
+ * Maintenance fills (WB fill bath / chem container fill) using the floats. */
 
 /* ── Chemistry volume ── */
 gui.page.settings.chemVolumeContainer = lv_obj_create(parent);
@@ -1225,11 +1155,7 @@ void refreshSettingsUI(void)
     st7701_lcd_set_dim_timeout(60, 300, 600);  /* 1min→50%, 5min→20%, 10min→off */
 #endif
 
-    /* ── Chemistry container capacity ── */
-    { char buf[16]; snprintf(buf, sizeof(buf), "%dml", p->chemContainerMl); lv_textarea_set_text(gui.page.settings.chemContainerMlTextArea, buf); }
-
-    /* ── Water bath capacity ── */
-    { char buf[16]; snprintf(buf, sizeof(buf), "%dml", p->wbContainerMl); lv_textarea_set_text(gui.page.settings.wbContainerMlTextArea, buf); }
+    /* Chem/WB capacity rows removed (self-calibrated fill times). */
 
     /* ── Chemistry volume ── */
     {

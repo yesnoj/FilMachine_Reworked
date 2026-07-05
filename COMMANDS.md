@@ -91,6 +91,19 @@ python3 scripts/genFilMachineCFG.py --from-json scripts/FilMachine.json --output
 Il simulatore legge `sd/FilMachine.cfg` relativo alla dir da cui lo lanci.
 Se all'avvio compaiono warning "File may be corrupt", il `.cfg` in `sd/` è di un formato struct vecchio: rigeneralo con lo script.
 
+### Copiare il config sulla microSD della board
+
+Dopo aver rigenerato `sd/FilMachine.json` (config JSON-only), copialo sulla microSD (il nome del volume di default è `NO NAME` — adatta se diverso). **Il `sync` + `eject` sono obbligatori**, altrimenti macOS non flusha la scrittura e la board rilegge il file vecchio:
+
+```bash
+cp ~/Documents/GitHub/FilMachine_Reworked/sd/FilMachine.json        "/Volumes/NO NAME/FilMachine.json"
+cp ~/Documents/GitHub/FilMachine_Reworked/sd/FilMachine_Backup.json "/Volumes/NO NAME/FilMachine_Backup.json"
+sync && diskutil eject "/Volumes/NO NAME"
+```
+
+Verifica all'avvio nel monitor: `Config JSON loaded: <N> processes`.
+`settingsSize` deve combaciare col firmware e `rawProcessCount` col numero di processi nel file (se leggi un numero enorme, firmware e config non sono allineati → rigenera + rebuild pulito).
+
 ---
 
 ## 5. Pulizia

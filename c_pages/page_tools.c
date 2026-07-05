@@ -84,7 +84,11 @@ void event_toolsElement(lv_event_t * e) {
           }
       if(obj == gui.page.tools.toolsFillButton){
               LV_LOG_USER("PRESSED gui.page.tools.toolsFillButton");
-              fillPopupCreate();
+              fillPopupCreate(FILL_TARGET_WB);
+          }
+      if(obj == gui.page.tools.toolsFillChemButton){
+              LV_LOG_USER("PRESSED gui.page.tools.toolsFillChemButton");
+              fillPopupCreate(FILL_TARGET_CHEM);
           }
       if(obj == gui.page.tools.toolsExportButton){
               LV_LOG_USER("PRESSED gui.page.tools.toolsExportButton");
@@ -229,6 +233,30 @@ static void initTools_maintenance(lv_obj_t *parent) {
   lv_label_set_text(gui.page.tools.toolsFillButtonLabel, play_icon);
   lv_obj_set_style_text_font(gui.page.tools.toolsFillButtonLabel, ui->button_icon_font, 0);
   lv_obj_align(gui.page.tools.toolsFillButtonLabel, LV_ALIGN_CENTER, 0, 0);
+
+  /* Fill chemistry container: pump water from the WB into C1, calibrate its time */
+  gui.page.tools.toolsFillChemContainer = lv_obj_create(parent);
+  lv_obj_align(gui.page.tools.toolsFillChemContainer, LV_ALIGN_TOP_LEFT, ui->item_row_x, ui->maintenance_fillchem_y);
+  lv_obj_set_size(gui.page.tools.toolsFillChemContainer, ui->item_row_w, ui->action_row_h);
+  lv_obj_remove_flag(gui.page.tools.toolsFillChemContainer, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_scroll_dir(gui.page.tools.toolsFillChemContainer, LV_DIR_VER);
+  lv_obj_set_style_border_opa(gui.page.tools.toolsFillChemContainer, LV_OPA_TRANSP, 0);
+
+  gui.page.tools.toolsFillChemLabel = lv_label_create(gui.page.tools.toolsFillChemContainer);
+  lv_label_set_text(gui.page.tools.toolsFillChemLabel, fillChem_text);
+  lv_obj_set_style_text_font(gui.page.tools.toolsFillChemLabel, ui->item_font, 0);
+  lv_obj_align(gui.page.tools.toolsFillChemLabel, LV_ALIGN_LEFT_MID, ui->item_label_x, ui->item_label_y);
+
+  gui.page.tools.toolsFillChemButton = lv_button_create(gui.page.tools.toolsFillChemContainer);
+  lv_obj_set_size(gui.page.tools.toolsFillChemButton, ui->action_btn_w, BUTTON_PROCESS_HEIGHT);
+  lv_obj_align(gui.page.tools.toolsFillChemButton, LV_ALIGN_RIGHT_MID, ui->item_btn_x, ui->item_label_y);
+  lv_obj_add_event_cb(gui.page.tools.toolsFillChemButton, event_toolsElement, LV_EVENT_CLICKED, gui.page.tools.toolsFillChemButton);
+  lv_obj_set_style_bg_color(gui.page.tools.toolsFillChemButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
+
+  gui.page.tools.toolsFillChemButtonLabel = lv_label_create(gui.page.tools.toolsFillChemButton);
+  lv_label_set_text(gui.page.tools.toolsFillChemButtonLabel, play_icon);
+  lv_obj_set_style_text_font(gui.page.tools.toolsFillChemButtonLabel, ui->button_icon_font, 0);
+  lv_obj_align(gui.page.tools.toolsFillChemButtonLabel, LV_ALIGN_CENTER, 0, 0);
 }
 
 static void initTools_utilities(lv_obj_t *parent) {

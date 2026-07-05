@@ -101,6 +101,20 @@
 #define WB_RLY                      3
 #define WASTE_RLY                   4
 #define HEATER_RLY                  7       /* Port A pin 7 — drives external relay for heater */
+
+/* Port B: chemistry level sensors (B0-B5) + heater MOSFETs (B6-B7) */
+#define HAS_CHEM_LEVEL_SENSORS      1
+#define CHEM_LEVEL_CONTAINERS       3
+#define CHEM1_MIN_PIN               8
+#define CHEM1_MAX_PIN               9
+#define CHEM2_MIN_PIN               10
+#define CHEM2_MAX_PIN               11
+#define CHEM3_MIN_PIN               12
+#define CHEM3_MAX_PIN               13
+#define HAS_DUAL_HEATER             1
+#define HEATER1_PIN                 14
+#define HEATER2_PIN                 15
+
 #define PUMP_IN_RLY                 254     /* Logical: pump forward (filling) */
 #define PUMP_OUT_RLY                253     /* Logical: pump reverse (draining) */
 #define INVALID_RELAY               255

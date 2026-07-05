@@ -252,15 +252,16 @@ static void sc_timer_cb(lv_timer_t *timer) {
     /* Phase-specific status */
     switch (phase) {
         case 0: {
-            int wt = 200 + (sc->phaseElapsed * 5);
-            int ct = 198 + (sc->phaseElapsed * 4);
-            lv_label_set_text_fmt(sc->phaseStatus,
-                "Water: %d.%d C\nChemistry: %d.%d C",
-                wt / 10, wt % 10, ct / 10, ct % 10);
-            /* Save last status */
+            /* Real DS18B20 readings (cached, non-blocking). "--" if a sensor is
+             * absent / not reading. */
+            float wt = getCachedTemperature(TEMPERATURE_SENSOR_BATH);
+            float ct = getCachedTemperature(TEMPERATURE_SENSOR_CHEMICAL);
+            char wb[10], cb[10];
+            if (wt > -100.0f) snprintf(wb, sizeof(wb), "%.1f C", wt); else snprintf(wb, sizeof(wb), "--");
+            if (ct > -100.0f) snprintf(cb, sizeof(cb), "%.1f C", ct); else snprintf(cb, sizeof(cb), "--");
+            lv_label_set_text_fmt(sc->phaseStatus, "Water: %s\nChemistry: %s", wb, cb);
             snprintf(phaseSavedStatus[phase], sizeof(phaseSavedStatus[phase]),
-                "Water: %d.%d C\nChemistry: %d.%d C",
-                wt / 10, wt % 10, ct / 10, ct % 10);
+                     "Water: %s\nChemistry: %s", wb, cb);
             break;
         }
         case 1: {
@@ -292,10 +293,13 @@ static void sc_timer_cb(lv_timer_t *timer) {
             break;
         }
         case 2: {
-            int t = 200 + (sc->phaseElapsed * 15);
-            lv_label_set_text_fmt(sc->phaseStatus, selfCheckTempFmt_text, t / 10, t % 10);
-            snprintf(phaseSavedStatus[phase], sizeof(phaseSavedStatus[phase]),
-                "Final: %d.%d C", t / 10, t % 10);
+            /* Heater phase: show the real bath temperature. (Actual heater
+             * actuation + rising-check comes with the 2-MOSFET heater work.) */
+            float t = getCachedTemperature(TEMPERATURE_SENSOR_BATH);
+            char tb[12];
+            if (t > -100.0f) snprintf(tb, sizeof(tb), "%.1f C", t); else snprintf(tb, sizeof(tb), "--");
+            lv_label_set_text_fmt(sc->phaseStatus, "Water bath: %s", tb);
+            snprintf(phaseSavedStatus[phase], sizeof(phaseSavedStatus[phase]), "Water bath: %s", tb);
             break;
         }
         case 3: {
