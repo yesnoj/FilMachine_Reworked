@@ -1026,6 +1026,24 @@ static void ws_handle_command(const char *msg, int len) {
  * ═══════════════════════════════════════════════════════════════════ */
 #ifdef SIMULATOR_BUILD
 
+#if defined(_WIN32)
+/* ── Windows simulator ──
+ * The POSIX-socket WebSocket server below isn't ported to Winsock. The remote
+ * control feature is simply disabled on Windows; the rest of the simulator
+ * (UI, processes, everything on screen) runs normally. Provide no-op stubs so
+ * the public API still links. */
+bool ws_server_start(uint16_t port) { (void)port; return false; }
+void ws_server_stop(void) {}
+bool ws_server_is_running(void) { return false; }
+int  ws_server_client_count(void) { return 0; }
+void ws_broadcast_state(void) {}
+void ws_broadcast_process_list(void) {}
+void ws_broadcast_event(const char *event_name, const char *json_data) {
+    (void)event_name; (void)json_data;
+}
+
+#else /* POSIX simulator (macOS / Linux) */
+
 /* Simulator: lv_async_call is safe (single-threaded SDL event loop) */
 static void ws_queue_lvgl_action(void (*fn)(void *), void *arg) {
     lv_async_call(fn, arg);
@@ -1505,6 +1523,8 @@ void ws_broadcast_event(const char *event_name, const char *json_data) {
     sim_send_all(buf, n);
 }
 
+
+#endif /* _WIN32 vs POSIX simulator */
 
 /* ═══════════════════════════════════════════════════════════════════
  *  FIRMWARE BUILD — real ESP-IDF httpd WebSocket server

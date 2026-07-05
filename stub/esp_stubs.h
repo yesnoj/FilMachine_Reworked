@@ -260,10 +260,15 @@ static inline void esp_restart(void) { printf("[SIM] esp_restart() — ignoring\
 #define LOW 0
 #endif
 
-/* itoa — non-standard, not available on macOS */
+/* itoa — non-standard. macOS/Linux libc don't provide it, so we supply a
+ * simple base-10 stub. Windows/MinGW already declares a real itoa() in
+ * <stdlib.h>, so skip the stub there to avoid a redeclaration conflict. */
+#if !defined(_WIN32)
 static inline char* itoa(int val, char* buf, int base) {
+    (void)base;
     sprintf(buf, "%d", val);
     return buf;
 }
+#endif
 
 #endif /* ESP_STUBS_H */
