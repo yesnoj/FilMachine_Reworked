@@ -438,6 +438,8 @@ Each process contains steps. A step represents one phase: "Developer", "Stop Bat
 
 For each step you configure: name, duration (minimum 30 seconds), chemical type (Chemistry / Rinse / Multi-Rinse), source container (C1, C2, C3, or WB), and whether to discard the chemical after use.
 
+The three step types behave differently during execution: a **Chemistry** step fills once from a container and soaks for the whole step time (liquid recovered or discarded per the flag). A **Rinse** step fills once (from any source), soaks, and always discards to waste at the end. A **Multi-Rinse** step is not a single soak: the tank is repeatedly filled with fresh water (always from the water bath), agitated for one *cycle* — the "Multi-rinse cycle time" setting — then fully drained to waste, over and over until the step's total duration elapses. If the total time isn't an exact multiple of the cycle time, the last cycle runs longer so the step still ends exactly on time. This matches the Adeo dev.a behaviour and is ideal for final washes where the water must be changed frequently.
+
 - **Add:** Tap "+" below the step list
 - **Edit:** Tap a step to modify it
 - **Duplicate:** Swipe left on a step
@@ -778,7 +780,7 @@ All data is stored on the SD card as a single **JSON** file, `FilMachine.json` (
 ```json
 {
   "settingsParams": {
-    "tempUnit": 0, "waterInlet": 1, "calibratedTemp": 20,
+    "tempUnit": 0, "waterInlet": 1,
     "filmRotationSpeedSetpoint": 50, "rotationIntervalSetpoint": 10, "randomSetpoint": 20,
     "isPersistentAlarm": 1, "isProcessAutostart": 0, "drainFillOverlapSetpoint": 100,
     "multiRinseTime": 60, "tankSize": 2, "pumpSpeed": 30,

@@ -481,7 +481,6 @@ static int build_state_json(char *buf, int bufsize) {
         /* Settings */
         "\"tempUnit\":%d,"
         "\"waterInlet\":%s,"
-        "\"calibratedTemp\":%u,"
         "\"tempCalibOffset\":%d,"
         "\"filmRotationSpeed\":%u,"
         "\"rotationInterval\":%u,"
@@ -547,7 +546,6 @@ static int build_state_json(char *buf, int bufsize) {
         "}}",
         (int)s->tempUnit,
         s->waterInlet ? "true" : "false",
-        (unsigned)s->calibratedTemp,
         (int)s->tempCalibOffset,
         (unsigned)s->filmRotationSpeedSetpoint,
         (unsigned)s->rotationIntervalSetpoint,
@@ -718,7 +716,6 @@ static void ws_handle_command(const char *msg, int len) {
 
         if (KEY_IS("tempUnit"))             s->tempUnit = (tempUnit_t)atoi(vs);
         else if (KEY_IS("waterInlet"))      s->waterInlet = (strstr(vs, "true") != NULL);
-        else if (KEY_IS("calibratedTemp"))  s->calibratedTemp = (uint8_t)atoi(vs);
         else if (KEY_IS("tempCalibOffset")) s->tempCalibOffset = (int16_t)atoi(vs);
         else if (KEY_IS("filmRotationSpeed"))  s->filmRotationSpeedSetpoint = (uint8_t)atoi(vs);
         else if (KEY_IS("rotationInterval"))   s->rotationIntervalSetpoint = (uint8_t)atoi(vs);
@@ -751,7 +748,6 @@ static void ws_handle_command(const char *msg, int len) {
         struct machineSettings *s = &gui.page.settings.settingsParams;
         s->tempUnit = 0;
         s->waterInlet = false;
-        s->calibratedTemp = 20;
         s->tempCalibOffset = 0;
         s->filmRotationSpeedSetpoint = 50;
         s->rotationIntervalSetpoint = 10;

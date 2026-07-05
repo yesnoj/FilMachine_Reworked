@@ -103,7 +103,7 @@ static void test_settings_persistence(void)
     /* Set ALL 10 fields to distinctive, non-default values */
     s->tempUnit                  = FAHRENHEIT_TEMP;   /* 1 */
     s->waterInlet                = true;              /* 2 */
-    s->calibratedTemp            = 22;                /* 3 */
+    s->tempCalibOffset           = 22;                /* 3 */
     s->filmRotationSpeedSetpoint = 77;                /* 4 */
     s->rotationIntervalSetpoint  = 42;                /* 5 */
     s->randomSetpoint            = 33;                /* 6 */
@@ -114,7 +114,7 @@ static void test_settings_persistence(void)
 
     test_printf("         [INFO] Set all 10 fields: tempUnit=%d water=%d cal=%d speed=%d "
                 "interval=%d random=%d alarm=%d autostart=%d overlap=%d rinse=%d\n",
-           s->tempUnit, s->waterInlet, s->calibratedTemp,
+           s->tempUnit, s->waterInlet, s->tempCalibOffset,
            s->filmRotationSpeedSetpoint, s->rotationIntervalSetpoint,
            s->randomSetpoint, s->isPersistentAlarm, s->isProcessAutostart,
            s->drainFillOverlapSetpoint, s->multiRinseTime);
@@ -126,7 +126,7 @@ static void test_settings_persistence(void)
     /* Clobber ALL 10 fields to opposite values */
     s->tempUnit                  = CELSIUS_TEMP;
     s->waterInlet                = false;
-    s->calibratedTemp            = 0;
+    s->tempCalibOffset           = 0;
     s->filmRotationSpeedSetpoint = 0;
     s->rotationIntervalSetpoint  = 0;
     s->randomSetpoint            = 0;
@@ -144,8 +144,8 @@ static void test_settings_persistence(void)
                    "tempUnit should be restored to Fahrenheit");
     TEST_ASSERT_EQ((int)s->waterInlet, 1,
                    "waterInlet should be restored to true");
-    TEST_ASSERT_EQ((int)s->calibratedTemp, 22,
-                   "calibratedTemp should be restored to 22");
+    TEST_ASSERT_EQ((int)s->tempCalibOffset, 22,
+                   "tempCalibOffset should be restored to 22");
     TEST_ASSERT_EQ((int)s->filmRotationSpeedSetpoint, 77,
                    "rotation speed should be restored to 77");
     TEST_ASSERT_EQ((int)s->rotationIntervalSetpoint, 42,

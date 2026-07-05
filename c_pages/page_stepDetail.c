@@ -98,6 +98,21 @@ static void step_detail_cancel(stepNode *sn) {
     lv_msgbox_close(popup);
 }
 
+/** Enforce the water-bath-only rule for multi-rinse steps: force the source to
+ * WB and lock the source dropdown so it can't be changed. For other step types
+ * the dropdown is left enabled. Safe to call whenever the type or popup state
+ * changes. */
+static void step_detail_apply_source_constraint(sStepDetail *sd) {
+    if (sd == NULL || sd->stepSourceDropDownList == NULL) return;
+    if (sd->data.type == MULTI_RINSE) {
+        sd->data.source = WB;
+        lv_dropdown_set_selected(sd->stepSourceDropDownList, WB);
+        lv_obj_add_state(sd->stepSourceDropDownList, LV_STATE_DISABLED);
+    } else {
+        lv_obj_remove_state(sd->stepSourceDropDownList, LV_STATE_DISABLED);
+    }
+}
+
 /** Handle dropdown and switch value changes */
 static void step_detail_handle_value_changed(stepNode *sn, lv_obj_t *obj) {
     sStepDetail *sd = sn->step.stepDetails;
@@ -115,6 +130,9 @@ static void step_detail_handle_value_changed(stepNode *sn, lv_obj_t *obj) {
             else if (newType == RINSE)      lv_label_set_text(sd->stepTypeHelpIcon, rinse_icon);
             else if (newType == MULTI_RINSE) lv_label_set_text(sd->stepTypeHelpIcon, multiRinse_icon);
             LV_LOG_USER("Selected stepTypeDropDownList: %d", sd->data.type);
+            /* Multi-rinse steps can only draw from the water bath (they use large
+             * amounts of water); force the source to WB and lock the dropdown. */
+            step_detail_apply_source_constraint(sd);
             sd->data.somethingChanged = true;
             lv_obj_send_event(sd->stepSaveButton, LV_EVENT_REFRESH, NULL);
         }
@@ -132,6 +150,11 @@ static void step_detail_handle_value_changed(stepNode *sn, lv_obj_t *obj) {
 
     if (obj == sd->stepSourceDropDownList) {
         uint8_t newSource = lv_dropdown_get_selected(sd->stepSourceDropDownList);
+        /* Multi-rinse is water-bath only: ignore any other selection and snap back. */
+        if (sd->data.type == MULTI_RINSE && newSource != WB) {
+            lv_dropdown_set_selected(sd->stepSourceDropDownList, WB);
+            newSource = WB;
+        }
         if (newSource != sd->data.source) {
             sd->data.source = newSource;
             sd->data.somethingChanged = true;
@@ -573,6 +596,8 @@ void stepDetail(processNode * referenceNode, stepNode * currentNode)
                   lv_obj_add_event_cb(sd->stepSourceDropDownList, event_stepDetail, LV_EVENT_VALUE_CHANGED, sn);
                   lv_obj_set_style_bg_color(lv_dropdown_get_list(sd->stepSourceDropDownList), lv_palette_main(LV_PALETTE_GREEN), LV_PART_SELECTED | LV_STATE_CHECKED);
                   lv_dropdown_set_selected(sd->stepSourceDropDownList, sd->data.source);
+                  /* Lock source to WB if this is a multi-rinse step */
+                  step_detail_apply_source_constraint(sd);
 
                   sd->stepSourceTempLabel = lv_label_create(sd->stepSourceContainer);
                   lv_label_set_text(sd->stepSourceTempLabel, stepDetailCurrentTemp_text);

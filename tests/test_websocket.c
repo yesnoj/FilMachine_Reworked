@@ -190,7 +190,7 @@ static void test_state_json_field_names(void)
     /* Set distinctive values for verification */
     s->tempUnit = CELSIUS_TEMP;
     s->waterInlet = true;
-    s->calibratedTemp = 25;
+    s->tempCalibOffset = 25;
     s->filmRotationSpeedSetpoint = 50;
     s->rotationIntervalSetpoint = 30;
     s->randomSetpoint = 10;
@@ -201,7 +201,7 @@ static void test_state_json_field_names(void)
 
     test_printf("         [INFO] Set test values: tempUnit=%d, water=%s, cal=%d\n",
                 (int)s->tempUnit, s->waterInlet ? "true" : "false",
-                (int)s->calibratedTemp);
+                (int)s->tempCalibOffset);
 
     /* Broadcast state to exercise JSON building */
     ws_broadcast_state();

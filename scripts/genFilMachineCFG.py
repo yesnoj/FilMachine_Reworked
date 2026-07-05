@@ -155,7 +155,6 @@ REALISTIC_PROCESSES = [
 DEFAULT_SETTINGS = {
     "tempUnit": 0,  # Celsius
     "waterInlet": 1,
-    "calibratedTemp": 20,
     "filmRotationSpeedSetpoint": 50,
     "rotationIntervalSetpoint": 10,
     "randomSetpoint": 20,
@@ -192,7 +191,6 @@ def random_settings():
     return {
         "tempUnit": random.randint(0, 1),
         "waterInlet": random.randint(0, 1),
-        "calibratedTemp": random.randint(0, 40),
         "filmRotationSpeedSetpoint": random.randrange(10, 101, 10),
         "rotationIntervalSetpoint": random.randrange(10, 61, 10),
         "randomSetpoint": random.randrange(0, 101, 20),
@@ -299,7 +297,6 @@ def convert_realistic_process(p):
 def write_settings(f, s):
     f.write(struct.pack('<L', s["tempUnit"]))        # tempUnit_t (enum = 4 bytes)
     f.write(struct.pack('<B', s["waterInlet"]))       # bool
-    f.write(struct.pack('<B', s["calibratedTemp"]))   # uint8_t
     f.write(struct.pack('<B', s["filmRotationSpeedSetpoint"]))
     f.write(struct.pack('<B', s["rotationIntervalSetpoint"]))
     f.write(struct.pack('<B', s["randomSetpoint"]))

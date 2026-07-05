@@ -604,7 +604,6 @@ typedef struct processNode processNode;  // Forward declaration
 struct __attribute__ ((packed)) machineSettings {
 	tempUnit_t				tempUnit; //0= C° 1= °F
 	bool					waterInlet;
-	uint8_t					calibratedTemp;
 	uint8_t					filmRotationSpeedSetpoint;
 	uint8_t					rotationIntervalSetpoint;
 	uint8_t					randomSetpoint;
@@ -794,6 +793,7 @@ typedef struct sCheckupData {
     float               currentChemTemp;
     bool                heaterOn;
     uint16_t            tempTimeoutCounter;
+    bool                multiRinseChanging; /* true while a multi-rinse step is doing a mid-step drain→refill water change */
 } sCheckupData;
 
 typedef struct sCheckup{

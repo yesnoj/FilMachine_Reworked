@@ -2,7 +2,6 @@
   "settingsParams": {
     "tempUnit": 1,
     "waterInlet": 1,
-    "calibratedTemp": 22,
     "filmRotationSpeedSetpoint": 100,
     "rotationIntervalSetpoint": 10,
     "randomSetpoint": 0,

@@ -148,7 +148,6 @@ void settingsApplyFactoryDefaults(void)
     /* Same values as initGlobals in accessories.c */
     p->tempUnit = 0;               /* Celsius */
     p->waterInlet = false;
-    p->calibratedTemp = 20;
     p->filmRotationSpeedSetpoint = 50;
     p->rotationIntervalSetpoint = 10;
     p->randomSetpoint = 0;

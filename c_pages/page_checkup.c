@@ -356,6 +356,35 @@ void processTimer(lv_timer_t * timer) {
     minutesStepLeft = remaining_step_mins;
     secondsStepLeft = (uint8_t)remaining_step_secs_only;
 
+    /* ── Multi-rinse cycling ──
+     * On a MULTI_RINSE step, every `multiRinseTime` seconds of agitation we
+     * pause and perform a fresh-water change (drain to waste + refill from the
+     * water bath), then resume agitating. We only trigger a change when at
+     * least one more full cycle fits before the step ends, so any leftover time
+     * is absorbed into a longer final cycle (matching the Adeo dev.a behaviour).
+     * The step still advances normally when its total time elapses below. */
+    if(ckup->currentStep != NULL
+       && ckup->currentStep->step.stepDetails != NULL
+       && ckup->currentStep->step.stepDetails->data.type == MULTI_RINSE
+       && !ckup->data.stopAfter && !ckup->data.stopNow) {
+        uint32_t cycleSecs = (uint32_t)gui.page.settings.settingsParams.multiRinseTime;
+        if(cycleSecs > 0U
+           && elapsed_step_seconds > 0U
+           && (elapsed_step_seconds % cycleSecs) == 0U
+           && adjusted_step_seconds > elapsed_step_seconds
+           && (adjusted_step_seconds - elapsed_step_seconds) >= cycleSecs) {
+            ckup->data.multiRinseChanging = true;
+            ckup->data.isDeveloping       = false;
+            ckup->data.isFilling          = false;
+            ckup->data.isAlreadyPumping   = false;
+            tankPercentage = 0;
+            tankTimeElapsed = 0;
+            lv_timer_pause(ckup->processTimer);
+            lv_timer_resume(ckup->pumpTimer);
+            return;
+        }
+    }
+
     if(ckup->currentStep != NULL) {
         /* Continuously enforce: if we're on the last step, Stop After is always disabled */
         if(ckup->currentStep->next == NULL) {
@@ -406,6 +435,7 @@ void processTimer(lv_timer_t * timer) {
                 stepPercentage = 0;
                 minutesStepElapsed = 0;
                 secondsStepElapsed = 0;
+                ckup->data.multiRinseChanging = false;
                 ckup->currentStep = ckup->currentStep->next;
                 lv_label_set_text(ckup->checkupStepNameValue, checkupEllipsis_text);
                 lv_arc_set_value(ckup->stepArc, stepPercentage);
@@ -754,6 +784,65 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
     }
 }
 
+/* ── Multi-rinse mid-step water change ──
+ * A MULTI_RINSE step is not a single continuous soak: the tank is repeatedly
+ * filled with fresh water (always from the water bath), agitated for one
+ * "cycle" (settingsParams.multiRinseTime seconds), then fully drained to waste,
+ * over and over until the step's total processing time elapses. This handler
+ * runs the drain→refill part of a single cycle boundary; the agitation itself
+ * is handled by processTimer. It reuses the same tankPercentage/tankTimeElapsed
+ * ramp as the normal fill/drain routines. Semantics mirror the Adeo dev.a:
+ * water is discarded after every cycle and the source is always the water bath. */
+void handleMultiRinseChange(processNode *pn) {
+    sCheckup* checkup = pn->process.processDetails->checkup;
+
+    if (!checkup->data.isFilling) {
+        /* Discard the used rinse water to waste */
+        pumpFrom = getValueForChemicalSource(WASTE);
+        pumpDir = PUMP_OUT_RLY;
+        if (tankPercentage < 100) {
+            if (checkup->data.isAlreadyPumping == false) {
+                sendValueToRelay(pumpFrom, pumpDir, true);
+                checkup->data.isAlreadyPumping = true;
+            }
+            lv_arc_set_value(checkup->pumpArc, 100 - tankPercentage);
+            lv_label_set_text(checkup->checkupStepKindValue, checkupDraining_text);
+            tankTimeElapsed++;
+        } else {
+            sendValueToRelay(pumpFrom, pumpDir, false);
+            checkup->data.isAlreadyPumping = false;
+            tankPercentage = 0;
+            tankTimeElapsed = 0;
+            checkup->data.isFilling = true;
+        }
+    } else {
+        /* Refill with fresh water from the water bath */
+        pumpFrom = getValueForChemicalSource(WB);
+        pumpDir = PUMP_IN_RLY;
+        if (tankPercentage < 100) {
+            if (checkup->data.isAlreadyPumping == false) {
+                sendValueToRelay(pumpFrom, pumpDir, true);
+                checkup->data.isAlreadyPumping = true;
+            }
+            lv_arc_set_value(checkup->pumpArc, tankPercentage);
+            lv_label_set_text(checkup->checkupStepKindValue, checkupFilling_text);
+            tankTimeElapsed++;
+        } else {
+            sendValueToRelay(pumpFrom, pumpDir, false);
+            checkup->data.isAlreadyPumping = false;
+            tankPercentage = 0;
+            tankTimeElapsed = 0;
+            checkup->data.isFilling = false;
+            checkup->data.isDeveloping = true;
+            checkup->data.multiRinseChanging = false;
+            lv_label_set_text(checkup->checkupStepKindValue, checkupProcessing_text);
+            /* Back to agitation for the next cycle */
+            lv_timer_pause(checkup->pumpTimer);
+            lv_timer_resume(checkup->processTimer);
+        }
+    }
+}
+
 void handleStopNow(processNode *pn) {
     sCheckup* checkup = pn->process.processDetails->checkup;
     /* currentStep is NULL during last-step draining — use waste in that case */
@@ -940,6 +1029,17 @@ void pumpTimer(lv_timer_t *timer) {
     /* Only advance process elapsed time when NOT in stop/drain phase */
     if (!checkup->data.stopAfter && !checkup->data.stopNow) {
         checkup_tick_process_elapsed();
+    }
+
+    /* Mid-step multi-rinse water change takes priority over the normal
+     * fill/drain dispatch (but never over a user-requested stop). */
+    if (checkup->data.multiRinseChanging
+        && !checkup->data.stopAfter && !checkup->data.stopNow) {
+        handleMultiRinseChange(pn);
+        if(checkup->checkupProcessTimeLeftValue != NULL) {
+            checkup_refresh_process_ui(pn, checkup);
+        }
+        return;
     }
 
     if (!checkup->data.stopAfter) {

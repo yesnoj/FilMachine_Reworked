@@ -122,20 +122,20 @@ void event_Roller(lv_event_t * e)
               lv_style_reset(&gui.element.rollerPopup.style_roller);
               lv_msgbox_close(godFatherCont);
               gui.element.rollerPopup.mBoxRollerParent = NULL;
-              gui.page.settings.settingsParams.calibratedTemp = rollerSelected + TEMP_ROLLER_MIN;
+              uint8_t trueTemp = rollerSelected + TEMP_ROLLER_MIN;   /* the real temperature entered */
 
               /* Calculate calibration offset */
               float rawTemp = sim_getTemperature(TEMPERATURE_SENSOR_BATH);
               /* Remove any existing offset to get the true raw reading */
               float rawWithoutOffset = rawTemp - (gui.page.settings.settingsParams.tempCalibOffset / 10.0f);
-              float newOffset = (float)gui.page.settings.settingsParams.calibratedTemp - rawWithoutOffset;
+              float newOffset = (float)trueTemp - rawWithoutOffset;
               float newOffsetTenths = newOffset * 10.0f;
               /* Clamp to ±30°C — int16 store, no overflow (was int8, wrapped past ±12.7°C) */
               if (newOffsetTenths >  300.0f) newOffsetTenths =  300.0f;
               if (newOffsetTenths < -300.0f) newOffsetTenths = -300.0f;
               gui.page.settings.settingsParams.tempCalibOffset = (int16_t)newOffsetTenths;
               LV_LOG_USER("Calibration: entered=%u, raw=%.1f, offset=%.2f, offsetTenths=%d",
-                         gui.page.settings.settingsParams.calibratedTemp, rawWithoutOffset, newOffset,
+                         trueTemp, rawWithoutOffset, newOffset,
                          gui.page.settings.settingsParams.tempCalibOffset);
 
               qSysAction( SAVE_PROCESS_CONFIG );

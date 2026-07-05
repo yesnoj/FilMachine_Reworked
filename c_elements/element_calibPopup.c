@@ -97,7 +97,6 @@ static void event_calibReset(lv_event_t *e)
 {
     (void)e;
     gui.page.settings.settingsParams.tempCalibOffset = 0;
-    gui.page.settings.settingsParams.calibratedTemp  = 20;   /* default */
     setChemCalibOffset(0);
     qSysAction(SAVE_PROCESS_CONFIG);
     calib_popup_close();
@@ -130,7 +129,6 @@ static void event_calibSet(lv_event_t *e)
     if (bathReading > -100.0f) {
         float rawBath = bathReading - (gui.page.settings.settingsParams.tempCalibOffset / 10.0f);
         gui.page.settings.settingsParams.tempCalibOffset = calib_offset_tenths(trueBath - rawBath);
-        gui.page.settings.settingsParams.calibratedTemp  = (uint8_t)trueBath;
     }
     if (chemReading > -100.0f) {
         float rawChem = chemReading - (getChemCalibOffset() / 10.0f);

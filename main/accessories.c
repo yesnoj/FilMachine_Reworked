@@ -819,7 +819,6 @@ void initGlobals( void ) {
   gui.page.settings.settingsParams.filmRotationSpeedSetpoint = 50;
   sys.analogVal_rotationSpeedPercent = mapPercentageToValue(50, 10, 100);
   gui.page.settings.settingsParams.rotationIntervalSetpoint = 10;
-  gui.page.settings.settingsParams.calibratedTemp = 20;
   gui.page.settings.settingsParams.multiRinseTime = 60;
   gui.page.settings.settingsParams.drainFillOverlapSetpoint = 100;
 
@@ -1173,7 +1172,6 @@ static void jsonApplySettings(struct machineSettings *S, mj_node *sp) {
     if (!sp) return;
     S->tempUnit                  = (tempUnit_t) mj_int(mj_get(sp, "tempUnit"), CELSIUS_TEMP);
     S->waterInlet                = mj_bool(mj_get(sp, "waterInlet"), false);
-    S->calibratedTemp            = (uint8_t) mj_int(mj_get(sp, "calibratedTemp"), 0);
     S->filmRotationSpeedSetpoint = (uint8_t) mj_int(mj_get(sp, "filmRotationSpeedSetpoint"), 50);
     S->rotationIntervalSetpoint  = (uint8_t) mj_int(mj_get(sp, "rotationIntervalSetpoint"), 0);
     S->randomSetpoint            = (uint8_t) mj_int(mj_get(sp, "randomSetpoint"), 0);
@@ -1401,7 +1399,6 @@ void writeConfigFile( const char *path, bool enableLog ) {
             "  \"settingsParams\": {\n"
             "    \"tempUnit\": %d,\n"
             "    \"waterInlet\": %d,\n"
-            "    \"calibratedTemp\": %u,\n"
             "    \"filmRotationSpeedSetpoint\": %u,\n"
             "    \"rotationIntervalSetpoint\": %u,\n"
             "    \"randomSetpoint\": %u,\n"
@@ -1411,7 +1408,7 @@ void writeConfigFile( const char *path, bool enableLog ) {
             "    \"multiRinseTime\": %u,\n"
             "    \"tankSize\": %u,\n"
             "    \"pumpSpeed\": %u,\n",
-            (int)S->tempUnit, S->waterInlet ? 1 : 0, S->calibratedTemp,
+            (int)S->tempUnit, S->waterInlet ? 1 : 0,
             S->filmRotationSpeedSetpoint, S->rotationIntervalSetpoint, S->randomSetpoint,
             S->isPersistentAlarm ? 1 : 0, S->isProcessAutostart ? 1 : 0,
             S->drainFillOverlapSetpoint, S->multiRinseTime, S->tankSize, S->pumpSpeed);
