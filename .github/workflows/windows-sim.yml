@@ -1,0 +1,65 @@
+name: Windows Simulator
+
+# Builds the SDL2 PC simulator as a Windows .exe and uploads it as a
+# downloadable artifact. Run automatically on push, or manually from the
+# Actions tab ("Run workflow").
+
+on:
+  push:
+    branches: [ main, master ]
+    paths-ignore:
+      - 'README.md'
+      - 'COMMANDS.md'
+      - 'docs/**'
+  workflow_dispatch:
+
+jobs:
+  build-windows-sim:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up MSYS2 (MinGW64)
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            git
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-pkgconf
+            mingw-w64-x86_64-SDL2
+
+      - name: Configure (CMake + Ninja)
+        run: cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build simulator
+        run: cmake --build build --target filmachine_sim
+
+      - name: Package (exe + runtime DLLs + SD config)
+        run: |
+          set -e
+          mkdir -p dist/sd
+          cp build/filmachine_sim.exe dist/
+          # Copy every MinGW runtime DLL the exe depends on (SDL2, libwinpthread,
+          # libgcc, ...) so it runs on a clean Windows machine with no MSYS2.
+          for dll in $(ldd build/filmachine_sim.exe | grep -i '/mingw64/bin/' | awk '{print $3}'); do
+            cp -v "$dll" dist/ || true
+          done
+          # Bundle the SD card config so the simulator starts out of the box.
+          cp sd/*.json dist/sd/ 2>/dev/null || true
+          printf 'FilMachine simulator (Windows)\n\nDouble-click filmachine_sim.exe.\nKeep every .dll and the sd\\ folder next to the exe.\n' > dist/README.txt
+          ls -la dist
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: filmachine-sim-windows
+          path: dist/
+          if-no-files-found: error

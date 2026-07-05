@@ -41,7 +41,11 @@ else()
 
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(SDL2 REQUIRED sdl2)
-    link_directories(${SDL2_LIBRARY_DIRS} /opt/homebrew/lib)
+    link_directories(${SDL2_LIBRARY_DIRS})
+    # Homebrew keeps libs outside the default search path on macOS only.
+    if(APPLE)
+        link_directories(/opt/homebrew/lib)
+    endif()
 
     if(NOT EXISTS "${CMAKE_SOURCE_DIR}/lvgl/CMakeLists.txt")
         message(STATUS "Cloning LVGL v9.5.0 ...")
