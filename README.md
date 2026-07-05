@@ -19,10 +19,13 @@ The project includes a **desktop simulator** (SDL2 + LVGL) that reproduces the f
 9. [User Interface Guide](#user-interface-guide)
 10. [Firmware Update (OTA)](#firmware-update-ota)
 11. [Hardware Specifications](#hardware-specifications)
-12. [Configuration & Persistence](#configuration--persistence)
-13. [Typical Workflows](#typical-workflows)
-14. [Developer Quick Reference](#developer-quick-reference)
-15. [Authors](#authors)
+12. [Bill of Materials (Components)](#bill-of-materials-components)
+13. [Diagnostics & Bring-up Page](#diagnostics--bring-up-page)
+14. [Build-time Switches](#build-time-switches)
+15. [Configuration & Persistence](#configuration--persistence)
+16. [Typical Workflows](#typical-workflows)
+17. [Developer Quick Reference](#developer-quick-reference)
+18. [Authors](#authors)
 
 ---
 
@@ -232,7 +235,9 @@ idf.py set-target esp32p4
 idf.py build
 ```
 
-The `main/CMakeLists.txt` automatically sets `-DBOARD_JC4880P433`. No manual `-DCMAKE_C_FLAGS` flag is needed.
+The `main/CMakeLists.txt` automatically sets `-DBOARD_JC4880P433`. No manual `-DCMAKE_C_FLAGS` flag is needed (passing `-D CMAKE_C_FLAGS="-DBOARD_JC4880P433"` is harmless but redundant).
+
+> **See [`COMMANDS.md`](COMMANDS.md)** for the canonical quick reference: simulator + board build, flash/monitor, generating and copying the SD config, version bumping and cleanup.
 
 #### Flash and monitor
 
@@ -588,7 +593,8 @@ The version displayed in Tools → Software version is read at runtime from the 
 | **SD card** | SDMMC 4-bit (~40 MB/s) |
 | **Audio** | ES8311 codec + power amplifier |
 | **2D accelerator** | PPA (rotate, scale, blend, fill) |
-| **Sensors** | Flow meter, water level, hall effect |
+| **Sensors** | Flow meter, water-bath level (min/max), 6× chemical level (3 containers × min/max), Hall effect, 2× DS18B20, chip internal temp |
+| **Wi-Fi / BLE** | ESP32-C6 companion chip over SDIO (ESP-Hosted) |
 | **ESP-IDF version** | 5.5.x+ |
 
 ### Landscape Mode
@@ -631,17 +637,37 @@ All external peripherals connect through the board's 2×13 Expand IO header (JP1
 
 All 12 P4 GPIO pins on JP1 are allocated — GPIO 28 is the only spare.
 
-### Shared Peripherals (all boards)
+### Peripheral Drivers
 
 | Component | Detail |
 |-----------|--------|
-| **Solenoid Driver** | Adafruit I2C 8-Ch Solenoid Driver (#6318) — MCP23017 @ 0x20, Port A: 5 valve channels (C1–C3, water bath, waste on pins 0–4) + heater relay trigger (pin 7), Port B: 4-ch relay board (pins 8–11, all spare) |
+| **Solenoid / IO expander** | Adafruit I2C 8-Ch Solenoid Driver (#6318) — MCP23017 @ 0x20 on the shared I2C bus (GPIO 7/8). Port A drives the valves via on-board MOSFETs; Port B is broken out as raw GPIO and repurposed for level sensors + heater MOSFETs. |
 | **Motor Driver** | DBH-12V dual DC motor driver — channel A: agitation motor, channel B: pump |
-| **Temperature** | 2× DS18B20 OneWire sensors (chemical bath + water bath) on shared bus |
-| **Motor** | DC motor with H-bridge (DBH-12V ch.A), PWM speed control (ENA on ESP32 LEDC, IN1/IN2 on GPIO) |
-| **Pump** | DC pump with H-bridge (DBH-12V ch.B), direction reversal for fill/drain (replaces solenoid pump valves) |
-| **Valves** | 5 solenoid valves (C1/C2/C3, water bath, waste) on MCP23017 Port A pins 0–4 via MOSFET driver. Heater on pin 7 (drives external relay for high-current load) |
-| **Power** | USB Type-C 5.0V |
+| **Temperature** | 2× DS18B20 OneWire sensors (water bath + chemical) on one bus (GPIO 35, 4.7 kΩ pull-up) |
+| **Pump** | DC pump on DBH-12V ch.B — direction reversal for fill/drain (no pump valves) |
+| **Board power** | USB Type-C 5 V (logic) + external 12 V rail for solenoids/motor/pump/heaters (common ground) |
+
+**MCP23017 pin map (I2C `0x20`):**
+
+| Pin | Port | Function |
+|-----|------|----------|
+| 0 | A0 | Valve **C1** |
+| 1 | A1 | Valve **C2** |
+| 2 | A2 | Valve **C3** |
+| 3 | A3 | Valve **WB** (water bath) |
+| 4 | A4 | Valve **WASTE** |
+| 5–6 | A5–A6 | Spare |
+| 7 | A7 | Heater relay (legacy / external relay) |
+| 8 | B0 | Chem **C1** level MIN (XKC-Y21) |
+| 9 | B1 | Chem **C1** level MAX |
+| 10 | B2 | Chem **C2** level MIN |
+| 11 | B3 | Chem **C2** level MAX |
+| 12 | B4 | Chem **C3** level MIN |
+| 13 | B5 | Chem **C3** level MAX |
+| 14 | B6 | Heater MOSFET **1** |
+| 15 | B7 | Heater MOSFET **2** |
+
+> Port A pins sit behind the #6318 MOSFET drivers (valves). Port B pins are raw push-pull GPIO on the board's bottom edge: **B0–B5** are inputs (pull-up, LOW = water present), **B6–B7** are heater outputs (HIGH = on).
 
 ### Chemical Container Layout
 
@@ -664,15 +690,125 @@ All 12 P4 GPIO pins on JP1 are allocated — GPIO 28 is the only spare.
 
 ---
 
+## Bill of Materials (Components)
+
+Everything the firmware currently expects, for costing a build or a custom board. Quantities are for the standard 3-chemistry layout; prices are intentionally omitted (they move — estimate locally).
+
+**Controller & storage**
+
+| # | Component | Qty | Role / notes |
+|---|-----------|-----|--------------|
+| 1 | Guition **JC4880P433** board | 1 | ESP32-P4 + 4.3" ST7701S 480×800 display + GT911 touch + ES8311 audio + SDMMC + ESP32-C6 (Wi-Fi/BLE). Main controller + UI. |
+| 2 | microSD card | 1 | Config/process storage (`FilMachine.json`). Any small card. |
+
+**Actuation & power drivers**
+
+| # | Component | Qty | Role / notes |
+|---|-----------|-----|--------------|
+| 3 | Adafruit **#6318** I2C 8-ch solenoid driver (MCP23017 @0x20) | 1 | Port A → valves (MOSFET); Port B → level sensors + heater MOSFETs. |
+| 4 | Solenoid valve, 12 V | 5 | C1, C2, C3, WB, WASTE. |
+| 5 | **DBH-12V** dual DC motor driver (H-bridge) | 1 | Ch. A = agitation motor, ch. B = pump. |
+| 6 | DC gear motor, 12 V | 1 | Tank agitation / rotation. |
+| 7 | DC pump, 12 V (diaphragm/peristaltic, reversible) | 1 | Fill/drain by direction reversal. |
+| 8 | Heater MOSFET module | 2 | Driven from MCP Port B (B6/B7). |
+| 9 | Heating element / immersion heater, 12 V | 1–2 | Water-bath heating (thermostat control). |
+
+**Sensors**
+
+| # | Component | Qty | Role / notes |
+|---|-----------|-----|--------------|
+| 10 | **DS18B20** waterproof probe (+ 4.7 kΩ pull-up) | 2 | Water bath + chemical temperature (one OneWire bus). |
+| 11 | **XKC-Y21** non-contact level sensor | 8 | WB min+max (2) + 3 chem containers × min/max (6). Need 5 V + signal pulled to 3.3 V. |
+| 12 | **Hall** sensor (KY-003 / A3144) | 1 | Tank in-position / rotation. |
+| 13 | **YF-S201** flow meter | 1 | Water-bath inlet flow. |
+
+**Power & misc**
+
+| # | Component | Qty | Role / notes |
+|---|-----------|-----|--------------|
+| 14 | 12 V PSU | 1 | Sized for valves + motor + pump + heaters (shared 12 V rail, common GND). |
+| 15 | USB-C 5 V | 1 | Board logic power. |
+| 16 | Resistors / level-shift, wiring, connectors | — | 4.7 kΩ (DS18B20), pull-ups for XKC-Y21, common ground. |
+| 17 | Chemical containers + water bath + waste, tubing, enclosure | — | Mechanical build. |
+
+**Future / diagnostics-ready (optional)**
+
+| # | Component | Qty | Role / notes |
+|---|-----------|-----|--------------|
+| 18 | Resistor dividers 12V/5V/3.3V → ADC1 | 3 | Enables live rail voltages in the diagnostics page (`HAS_RAIL_MONITOR`). |
+| 19 | INA219 current sensor (I2C) | 1+ | Current draw per rail/load (not yet wired in firmware). |
+
+---
+
+## Diagnostics & Bring-up Page
+
+A hidden factory/bring-up screen for validating hardware (especially a custom board).
+
+**How to open:**
+- **Board:** on the splash, hold **2 fingers** still for **3 seconds**. Touch *after* the splash appears — a capacitive GT911 calibrates out fingers already on the panel at power-on.
+- **Simulator:** press the small **DBG** button (top-left of the splash) — the mouse can't do multi-touch.
+
+**Live monitor (grouped panels, refresh ~3×/s):** bath/chem temperatures, water-bath level (min/max), 3× chemical level (min/max), Hall magnet, flow (L/min + pulses), MCP23017 / SD / Wi-Fi status, and a **System** panel with ESP32-P4 **internal chip temperature**, free PSRAM, **last reset reason**, and uptime. A **Power rails** panel shows 12V/5V/3.3V (`n/a` until dividers + `HAS_RAIL_MONITOR` are provided).
+
+**Output controls (to test the board):** toggle each valve (C1/C2/C3/WB/Waste), run pump FW/RV/Stop, motor FW/RV/Stop, toggle heaters H1/H2, play an audio test tone. **Close** turns every output off and returns to the splash.
+
+---
+
+## Build-time Switches
+
+Compile-time flags (in `main/include/FilMachine.h` and the board header) that change behaviour without touching logic:
+
+| Flag | Default | Effect |
+|------|---------|--------|
+| `ENABLE_BOOT_ERRORS` | 0 | 1 → show a blocking SD/I2C error screen at boot (tap to reboot). At 0 the errors are still detected + logged. |
+| `VALVE_SELFTEST_ON_BOOT` | 1 | Cycle the valves once at boot (runs in the background so the display isn't delayed). |
+| `HAS_DUAL_HEATER` | 1 | Two heater MOSFETs on MCP B6/B7 (vs a single Port-A relay). |
+| `HAS_CHEM_LEVEL_SENSORS` | 1 | 6 chemical-level sensors on MCP Port B (B0–B5). |
+| `HAS_RAIL_MONITOR` | 0 | 1 → read 12V/5V/3.3V rails via ADC in the diagnostics page (needs dividers + channel/ratio defines). |
+| `MOTOR_MIN_ANALOG_VAL` / `PUMP_MIN_ANALOG_VAL` | 90 / 150 | Duty at the 10% slider position — raise if the motor/pump stalls at low speed. |
+
+---
+
 ## Configuration & Persistence
 
-All data is stored on the SD card in binary format (`FilMachine.cfg`). The file contains the complete machine state: settings (including calibration offset and splash screen configuration — default/random flags, palette, shape style, complexity, seed), all processes with their steps, and machine statistics (completed processes, total processing time, stopped processes, completed cleaning cycles).
+All data is stored on the SD card as a single **JSON** file, `FilMachine.json` (the old binary `.cfg` was replaced — JSON is human-readable, hand-editable and version-tolerant). Parsing/serialisation uses a small dependency-free parser (`main/mini_json.c`) that builds on both the board and the simulator (no cJSON). Writes are crash-safe (`.tmp` + atomic rename).
 
-**Auto-save triggers:** creating/editing/deleting a process, changing any setting, toggling preferred, duplicating processes or steps.
+**Schema:**
 
-**Export** creates a backup copy (`FilMachine_Backup.cfg`) on the same SD card. **Import** restores from the backup and reboots the machine.
+```json
+{
+  "settingsParams": {
+    "tempUnit": 0, "waterInlet": 1, "calibratedTemp": 20,
+    "filmRotationSpeedSetpoint": 50, "rotationIntervalSetpoint": 10, "randomSetpoint": 20,
+    "isPersistentAlarm": 1, "isProcessAutostart": 0, "drainFillOverlapSetpoint": 100,
+    "multiRinseTime": 60, "tankSize": 2, "pumpSpeed": 30,
+    "chemCalibFillSecs": 0, "wbCalibFillSecs": 0, "chemistryVolume": 2,
+    "tempCalibOffset": 0, "chemCalibOffset": 0,
+    "splashRandom": 0, "splashPalette": 3, "splashShapeStyle": 0,
+    "splashComplexity": 40, "splashSeed": 0, "splashDefault": 1,
+    "wifiEnabled": 0, "wifiSSID": "", "wifiPassword": "",
+    "brightness": 100, "volume": 60, "invertPump": 0
+  },
+  "processes": [
+    { "name": "C41 Color Std", "temp": 38, "tempTolerance": 0.3,
+      "isTempControlled": 1, "isPreferred": 1, "filmType": 1,
+      "timeMins": 23, "timeSecs": 15,
+      "steps": [
+        { "stepNameString": "Developer", "timeMins": 3, "timeSecs": 15,
+          "type": 0, "source": 0, "discardAfterProc": 0 }
+      ] }
+  ],
+  "machineStats": { "completed": 0, "totalMins": 0, "totalSecs": 0, "stopped": 0, "clean": 0 }
+}
+```
 
-In the simulator, these files live in the `sd/` subdirectory inside the build folder (e.g., `build800/sd/FilMachine.cfg`).
+Notes on a few fields: `tempCalibOffset`/`chemCalibOffset` are in **tenths of a degree** (int16, clamped ±30 °C); `chemCalibFillSecs`/`wbCalibFillSecs` are the **measured** MIN→MAX fill times in seconds (0 = uncalibrated, capacity used as fallback); step `type` 0=Chemistry/1=Rinse/2=MultiRinse; step `source` 0=C1,1=C2,2=C3,3=WB.
+
+**Auto-save triggers:** creating/editing/deleting a process, changing any setting, toggling preferred, duplicating processes or steps, and recording a fill calibration.
+
+**Export** writes a backup copy (`FilMachine_Backup.json`); **Import** restores from it and reboots. Generate a fresh SD file with `scripts/genFilMachineCFG.py --realistic --output sd/` (see COMMANDS.md).
+
+In the simulator these files live in the `sd/` subdirectory relative to the executable (e.g. `sd/FilMachine.json`).
 
 ---
 
