@@ -35,6 +35,7 @@ jobs:
             mingw-w64-x86_64-ninja
             mingw-w64-x86_64-pkgconf
             mingw-w64-x86_64-SDL2
+            mingw-w64-x86_64-python
 
       - name: Configure (CMake + Ninja)
         run: cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Release
@@ -52,8 +53,11 @@ jobs:
           for dll in $(ldd build/filmachine_sim.exe | grep -i '/mingw64/bin/' | awk '{print $3}'); do
             cp -v "$dll" dist/ || true
           done
-          # Bundle the SD card config so the simulator starts out of the box.
-          cp sd/*.json dist/sd/ 2>/dev/null || true
+          # Generate a fresh SD config (sd/ is gitignored, so it isn't checked
+          # out). This writes FilMachine.json + FilMachine_Backup.json with the
+          # current schema and the realistic sample processes, so the simulator
+          # starts out of the box with processes already present.
+          python scripts/genFilMachineCFG.py --realistic --output dist/sd/
           printf 'FilMachine simulator (Windows)\n\nDouble-click filmachine_sim.exe.\nKeep every .dll and the sd\\ folder next to the exe.\n' > dist/README.txt
           ls -la dist
 
