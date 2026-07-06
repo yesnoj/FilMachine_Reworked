@@ -18,6 +18,9 @@
 #if defined(DISPLAY_DRIVER_ST7701)
 #include "st7701_lcd.h"
 #endif
+#ifndef SIMULATOR_BUILD
+#include "audio.h"
+#endif
 
 extern struct gui_components gui;
 
@@ -496,6 +499,16 @@ static int build_state_json(char *buf, int bufsize) {
         "\"chemCalibFillSecs\":%u,"
         "\"wbCalibFillSecs\":%u,"
         "\"chemistryVolume\":%u,"
+        "\"invertPump\":%s,"
+        "\"brightness\":%u,"
+        "\"volume\":%u,"
+        "\"chemCalibOffset\":%d,"
+        /* Splash screen */
+        "\"splashDefault\":%s,"
+        "\"splashRandom\":%s,"
+        "\"splashPalette\":%u,"
+        "\"splashShapeStyle\":%u,"
+        "\"splashComplexity\":%u,"
         /* Wi-Fi */
         "\"wifiEnabled\":%s,"
         "\"wifiSSID\":\"%s\","
@@ -563,6 +576,15 @@ static int build_state_json(char *buf, int bufsize) {
         (unsigned)s->chemCalibFillSecs,
         (unsigned)s->wbCalibFillSecs,
         (unsigned)s->chemistryVolume,
+        s->invertPump ? "true" : "false",
+        (unsigned)s->brightness,
+        (unsigned)s->volume,
+        (int)s->chemCalibOffset,
+        s->splashDefault ? "true" : "false",
+        s->splashRandom ? "true" : "false",
+        (unsigned)s->splashPalette,
+        (unsigned)s->splashShapeStyle,
+        (unsigned)s->splashComplexity,
         s->wifiEnabled ? "true" : "false",
         esc_ssid,
         wifi_is_connected() ? "true" : "false",
@@ -735,6 +757,46 @@ static void ws_handle_command(const char *msg, int len) {
         else if (KEY_IS("chemCalibFillSecs"))  s->chemCalibFillSecs = (uint16_t)atoi(vs);
         else if (KEY_IS("wbCalibFillSecs"))    s->wbCalibFillSecs = (uint16_t)atoi(vs);
         else if (KEY_IS("chemistryVolume"))    s->chemistryVolume = (uint8_t)atoi(vs);
+        else if (KEY_IS("invertPump"))         s->invertPump = (strstr(vs, "true") != NULL);
+        else if (KEY_IS("brightness")) {
+            int v = atoi(vs);
+            if (v < 10)  v = 10;
+            if (v > 100) v = 100;
+            s->brightness = (uint8_t)v;
+#if defined(DISPLAY_DRIVER_ST7701)
+            st7701_lcd_set_user_brightness(s->brightness);
+#endif
+        }
+        else if (KEY_IS("volume")) {
+            int v = atoi(vs);
+            if (v < 0)   v = 0;
+            if (v > 100) v = 100;
+            s->volume = (uint8_t)v;
+#ifndef SIMULATOR_BUILD
+            audio_set_volume(s->volume);
+#endif
+        }
+        else if (KEY_IS("chemCalibOffset"))    s->chemCalibOffset = (int16_t)atoi(vs);
+        else if (KEY_IS("splashDefault"))      s->splashDefault = (strstr(vs, "true") != NULL);
+        else if (KEY_IS("splashRandom"))       s->splashRandom = (strstr(vs, "true") != NULL);
+        else if (KEY_IS("splashPalette")) {
+            int v = atoi(vs);
+            if (v < 0) v = 0;
+            if (v > 9) v = 9;
+            s->splashPalette = (uint8_t)v;
+        }
+        else if (KEY_IS("splashShapeStyle")) {
+            int v = atoi(vs);
+            if (v < 0) v = 0;
+            if (v > 5) v = 5;
+            s->splashShapeStyle = (uint8_t)v;
+        }
+        else if (KEY_IS("splashComplexity")) {
+            int v = atoi(vs);
+            if (v < 20)  v = 20;
+            if (v > 100) v = 100;
+            s->splashComplexity = (uint8_t)v;
+        }
         else if (KEY_IS("wifiEnabled"))        s->wifiEnabled = (strstr(vs, "true") != NULL);
         else {
             LV_LOG_WARN("[WS] Unknown setting key: %.*s", klen, ks);
@@ -769,6 +831,16 @@ static void ws_handle_command(const char *msg, int len) {
         s->chemCalibFillSecs = 0;
         s->wbCalibFillSecs = 0;
         s->chemistryVolume = 2;
+        s->invertPump = false;
+        s->chemCalibOffset = 0;
+        s->brightness = 100;
+        s->volume = 60;
+#if defined(DISPLAY_DRIVER_ST7701)
+        st7701_lcd_set_user_brightness(s->brightness);
+#endif
+#ifndef SIMULATOR_BUILD
+        audio_set_volume(s->volume);
+#endif
         qSysAction(SAVE_PROCESS_CONFIG);
         ws_broadcast_state();
         ws_queue_lvgl_action(ws_async_refresh_settings, NULL);

@@ -168,15 +168,6 @@ static void pump_stop(void)
     LV_LOG_USER("Pump: STOPPED");
 }
 
-/** Brake the pump (short-brake — both HIGH, duty=0) */
-static void __attribute__((unused)) pump_brake(void)
-{
-    ledc_set_duty(PUMP_LEDC_MODE, PUMP_LEDC_CHANNEL, 0);
-    ledc_update_duty(PUMP_LEDC_MODE, PUMP_LEDC_CHANNEL);
-    gpio_set_level(PUMP_IN1_PIN, 1);
-    gpio_set_level(PUMP_IN2_PIN, 1);
-    LV_LOG_USER("Pump: BRAKE");
-}
 #else
 /* Simulator stubs */
 static void pump_ledc_init(void) { LV_LOG_USER("Pump H-bridge init (stub)"); }
@@ -186,7 +177,6 @@ static void pump_run(bool forward, uint8_t duty) {
     LV_LOG_USER("Pump: %s duty=%d (stub)", forward ? "FORWARD" : "REVERSE", duty);
 }
 static void pump_stop(void) { LV_LOG_USER("Pump: STOPPED (stub)"); }
-static void __attribute__((unused)) pump_brake(void) { LV_LOG_USER("Pump: BRAKE (stub)"); }
 #endif /* BOARD_SIMULATOR */
 
 /* Map an arbitrary pump-speed percentage (10-100%) to H-bridge duty (PUMP_MIN..PUMP_MAX).

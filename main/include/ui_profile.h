@@ -939,7 +939,7 @@ typedef struct {
     int title_y;
     int title_line_y;
     int default_switch_y;
-    int random_switch_y;        /* kept for legacy, unused in new layout */
+    int random_switch_y;        /* Y of the "Random next boot" switch row in the splash popup */
     int switch_row_w;           /* width of switch rows (Default) */
     int options_x;
     int options_y;

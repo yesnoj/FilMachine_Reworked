@@ -317,16 +317,10 @@ typedef enum {
 #define invertPumpAlertMBox_text            "Invert the pump rotation direction.\nUse this to compensate for the\nphysical switch position on the pump."
 #define brightness_text                     "Brightness"
 #define brightnessAlertMBox_text            "Set the LCD backlight brightness.\nAuto-dim: 1min \xe2\x86\x92 50%, 5min \xe2\x86\x92 20%,\n10min \xe2\x86\x92 off. Touch to wake."
-#define chemContainerMl_text                "Chemistry container"
-#define chemContainerMlAlertMBox_text       "Set the chemistry container\nsize in milliliters."
-#define wbContainerMl_text                  "Water bath container"
-#define wbContainerMlAlertMBox_text         "Set the water bath size\nin milliliters."
 #define chemistryVolume_text                "Chemistry volume"
 #define splashScreenAlertMBox_text          "Customize the boot splash screen.\n\nUse Default: shows the standard\nDeep Ocean splash.\n\nRandom next boot: generates a\nnew random splash each boot.\n\nBoth off: choose Palette, Shape\nStyle and Complexity manually.\nPress Random to shuffle."
 #define chemistryVolumeAlertMBox_text       "Low: uses half the chemistry.\nHigh: fills the tank completely."
 #define chemistryVolumeList                 "Low\nHigh"
-#define chemContainerMlList                 "250\n500\n750\n1000\n1250\n1500"
-#define wbContainerMlList                   "1000\n1500\n2000\n2500\n3000\n3500\n4000\n5000"
 
 /* Checkup strings/vars */
 #define checkupNexStepsTitle_text 					"Next steps:"
@@ -1496,14 +1490,6 @@ struct sSettings {
 	lv_obj_t                *brightnessLabel;
 	lv_obj_t                *brightnessSlider;
 	lv_obj_t                *brightnessValueLabel;
-
-	lv_obj_t                *chemContainerMlContainer;
-	lv_obj_t                *chemContainerMlLabel;
-	lv_obj_t                *chemContainerMlTextArea;
-
-	lv_obj_t                *wbContainerMlContainer;
-	lv_obj_t                *wbContainerMlLabel;
-	lv_obj_t                *wbContainerMlTextArea;
 
 	lv_obj_t                *chemVolumeContainer;
 	lv_obj_t                *chemVolumeLabel;

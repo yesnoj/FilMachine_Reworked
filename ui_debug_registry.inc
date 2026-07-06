@@ -63,12 +63,6 @@ UI_DEBUG_ENTRY(gui.page.settings.pumpSpeedContainer, "gui.page.settings.pumpSpee
 UI_DEBUG_ENTRY(gui.page.settings.pumpSpeedLabel, "gui.page.settings.pumpSpeedLabel");
 UI_DEBUG_ENTRY(gui.page.settings.pumpSpeedSlider, "gui.page.settings.pumpSpeedSlider");
 UI_DEBUG_ENTRY(gui.page.settings.pumpSpeedValueLabel, "gui.page.settings.pumpSpeedValueLabel");
-UI_DEBUG_ENTRY(gui.page.settings.chemContainerMlContainer, "gui.page.settings.chemContainerMlContainer");
-UI_DEBUG_ENTRY(gui.page.settings.chemContainerMlLabel, "gui.page.settings.chemContainerMlLabel");
-UI_DEBUG_ENTRY(gui.page.settings.chemContainerMlTextArea, "gui.page.settings.chemContainerMlTextArea");
-UI_DEBUG_ENTRY(gui.page.settings.wbContainerMlContainer, "gui.page.settings.wbContainerMlContainer");
-UI_DEBUG_ENTRY(gui.page.settings.wbContainerMlLabel, "gui.page.settings.wbContainerMlLabel");
-UI_DEBUG_ENTRY(gui.page.settings.wbContainerMlTextArea, "gui.page.settings.wbContainerMlTextArea");
 UI_DEBUG_ENTRY(gui.page.settings.chemVolumeContainer, "gui.page.settings.chemVolumeContainer");
 UI_DEBUG_ENTRY(gui.page.settings.chemVolumeLabel, "gui.page.settings.chemVolumeLabel");
 UI_DEBUG_ENTRY(gui.page.settings.chemVolumeTextArea, "gui.page.settings.chemVolumeTextArea");

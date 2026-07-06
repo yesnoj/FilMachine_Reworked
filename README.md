@@ -114,10 +114,10 @@ FilMachine_Reworked/
 ├── c_fonts/                       # Custom icon fonts (7 sizes: 15/20/30/40/50/60/100px)
 │   │                              #   + 8 custom splash title fonts (48px) + Montserrat 64
 ├── drivers/                       # Custom peripheral drivers (ESP-IDF compatible)
-│   ├── include/                   #   Driver headers (mcp23017.h, ds18b20.h, pca9685.h)
+│   ├── include/                   #   Driver headers (mcp23017.h, ds18b20.h, sensors.h, audio.h)
 │   ├── mcp23017.c                 #   I2C 16-bit I/O expander (Adafruit solenoid driver)
-│   ├── pca9685.c                  #   I2C 12-bit PWM controller (legacy, kept for reference)
 │   ├── ds18b20.c                  #   OneWire temperature sensor (shared bus)
+│   ├── audio.c                    #   ES8311 codec bring-up + tone/volume (board only)
 │   └── sensors.c                  #   Flow meter, water level, hall effect sensors
 │
 ├── components/                    # ESP32-P4 specific hardware drivers
@@ -389,7 +389,12 @@ All commands use JSON format: `{"cmd":"command_name", ...params}`.
 | `add_step` | `processIndex, name, mins, secs, type, source, discard` | Add a step to a process |
 | `edit_step` | `processIndex, stepIndex, name, mins, secs, type, source, discard` | Edit a step |
 | `delete_step` | `processIndex, stepIndex` | Delete a step |
-| `set_setting` | `key, value` | Update a machine setting |
+| `reorder_step` | `processIndex, from, to` | Move a step within a process |
+| `set_setting` | `key, value` | Update a machine setting (see key list below) |
+| `reset_defaults` | — | Restore all settings to factory defaults |
+| `wifi_scan` | — | Scan for Wi-Fi networks; results arrive via a `wifi_scan_results` event |
+
+**`set_setting` keys** — `tempUnit`, `waterInlet`, `tempCalibOffset`, `chemCalibOffset`, `filmRotationSpeed`, `rotationInterval`, `random`, `persistentAlarm`, `autostart`, `drainFillOverlap`, `multiRinseTime`, `lineRinseEnabled`, `lineRinseTime`, `tankSize`, `pumpSpeed`, `chemCalibFillSecs`, `wbCalibFillSecs`, `chemistryVolume`, `invertPump`, `brightness`, `volume`, `splashDefault`, `splashRandom`, `splashPalette`, `splashShapeStyle`, `splashComplexity`, `wifiEnabled`. All of these are also included in the broadcast state JSON.
 
 ### Implementation Details
 
@@ -409,7 +414,7 @@ The **filmachine_app** is a Flutter application that provides full remote contro
 - **Process Control**: Start processes, advance through checkup phases, Stop Now / Stop After with confirmation dialogs
 - **Filtering**: Client-side filtering by name, film type (B&W / Color), and preferred flag
 - **Statistics**: View completed processes, stopped processes, total development time, cleaning cycles
-- **Settings**: Full access to all machine settings (temperature unit, rotation speed, autostart, alarms, Wi-Fi config, etc.)
+- **Settings**: Full access to all machine settings (temperature unit, rotation speed, autostart, alarms, line rinse, pump, display brightness, volume, splash screen, Wi-Fi scan, etc.)
 - **Theme**: Dark/light theme toggle with custom FilMachine color palette
 - **Persistent Connection**: Remembers last successful connection for quick reconnect
 
@@ -501,12 +506,15 @@ All fonts are converted from TTF/OTF to LVGL `.c` bitmap arrays using `lv_font_c
 | Process autostart | Auto-start when temperature reached | On/Off |
 | Drain/fill overlap | How much of fill/drain time counts as processing time (100% recommended) | 0–100% |
 | Multi-rinse cycle time | Duration of each rinse in multi-rinse steps | 60–180s |
+| Line rinse | Flush the shared pump line with water after each chemistry step | On/Off |
+| Line rinse time | Duration of the line-rinse flush | 5–60s |
 | Pump speed | Water pump speed percentage | 10–100% |
 | Invert pump | Invert H-bridge direction to compensate for pump physical switch position | On/Off |
+| Brightness | LCD backlight brightness (auto-dim after inactivity) | 10–100% |
+| Volume | Speaker volume | 0–100% |
 | Tank size | Default developing tank size | S (500ml) / M (700ml) / L (1000ml) |
-| Container size | Chemistry container capacity | 250–2000 ml |
-| Water bath size | Water bath capacity | 1000–5000 ml |
 | Chemistry volume | Amount of chemistry used per step | Low / High |
+| Fill calibration | Chemistry / water-bath fill times, measured via Maintenance fills | read-only (s) |
 | Wi-Fi SSID | Network name for OTA updates | Text (max 32 chars) |
 | Wi-Fi password | Network password for OTA updates | Text (max 64 chars) |
 
