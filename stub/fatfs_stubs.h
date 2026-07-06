@@ -14,8 +14,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#if defined(_WIN32)
+#include <direct.h>   /* _mkdir (single-argument on Windows) */
+#endif
 
 /* ─────────────────────────────────────────────
  * FatFS result codes
@@ -79,7 +83,11 @@ typedef struct {
 static inline void fatfs_ensure_dir(void) {
     struct stat st = {0};
     if (stat(SIM_SD_DIR, &st) == -1) {
+#if defined(_WIN32)
+        _mkdir(SIM_SD_DIR);            /* Windows mkdir takes only the path */
+#else
         mkdir(SIM_SD_DIR, 0755);
+#endif
         printf("[SIM] Created SD card directory: %s/\n", SIM_SD_DIR);
     }
 }
