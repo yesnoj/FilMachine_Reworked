@@ -821,6 +821,8 @@ void initGlobals( void ) {
   gui.page.settings.settingsParams.rotationIntervalSetpoint = 10;
   gui.page.settings.settingsParams.multiRinseTime = 60;
   gui.page.settings.settingsParams.drainFillOverlapSetpoint = 100;
+  gui.page.settings.settingsParams.lineRinseEnabled = false;   /* opt-in */
+  gui.page.settings.settingsParams.lineRinseTime = 10;         /* seconds */
 
   gui.element.rollerPopup.tempCelsiusOptions = createRollerValues(TEMP_ROLLER_MIN,TEMP_ROLLER_MAX,"",false);
   gui.element.rollerPopup.tempFahrenheitOptions = createRollerValues(TEMP_ROLLER_MIN,TEMP_ROLLER_MAX,"",true);
@@ -1179,6 +1181,8 @@ static void jsonApplySettings(struct machineSettings *S, mj_node *sp) {
     S->isProcessAutostart        = mj_bool(mj_get(sp, "isProcessAutostart"), false);
     S->drainFillOverlapSetpoint  = (uint8_t) mj_int(mj_get(sp, "drainFillOverlapSetpoint"), 0);
     S->multiRinseTime            = (uint8_t) mj_int(mj_get(sp, "multiRinseTime"), 0);
+    S->lineRinseEnabled          = mj_bool(mj_get(sp, "lineRinseEnabled"), false);
+    S->lineRinseTime             = (uint8_t) mj_int(mj_get(sp, "lineRinseTime"), 10);
     S->tankSize                  = (uint8_t) mj_int(mj_get(sp, "tankSize"), 2);
     S->pumpSpeed                 = (uint8_t) mj_int(mj_get(sp, "pumpSpeed"), 50);
     S->chemCalibFillSecs         = (uint16_t) mj_int(mj_get(sp, "chemCalibFillSecs"), 0);
@@ -1406,12 +1410,16 @@ void writeConfigFile( const char *path, bool enableLog ) {
             "    \"isProcessAutostart\": %d,\n"
             "    \"drainFillOverlapSetpoint\": %u,\n"
             "    \"multiRinseTime\": %u,\n"
+            "    \"lineRinseEnabled\": %d,\n"
+            "    \"lineRinseTime\": %u,\n"
             "    \"tankSize\": %u,\n"
             "    \"pumpSpeed\": %u,\n",
             (int)S->tempUnit, S->waterInlet ? 1 : 0,
             S->filmRotationSpeedSetpoint, S->rotationIntervalSetpoint, S->randomSetpoint,
             S->isPersistentAlarm ? 1 : 0, S->isProcessAutostart ? 1 : 0,
-            S->drainFillOverlapSetpoint, S->multiRinseTime, S->tankSize, S->pumpSpeed);
+            S->drainFillOverlapSetpoint, S->multiRinseTime,
+            S->lineRinseEnabled ? 1 : 0, S->lineRinseTime,
+            S->tankSize, S->pumpSpeed);
         cfgWrite(fp, buf);
 
         snprintf(buf, sizeof(buf),

@@ -298,6 +298,9 @@ typedef enum {
 #define autostart_text 								"Process autostart"
 #define drainFillTime_text 							"Drain/fill time overlap"
 #define multiRinseTime_text 						"Multi rinse cycle time"
+#define lineRinse_text 								"Rinse line after chemistry"
+#define lineRinseTime_text 							"Line rinse time"
+#define lineRinseAlertMBox_text 					"After each chemistry step, flush the shared pump line with clean water (from the water bath, discarded to waste) before drawing the next liquid. This clears chemistry residue from the common tubing to prevent cross-contamination between chemistries. Uses extra water, so keep an eye on the bath level if the water inlet isn't connected."
 #define tankSize_text                       "Tank size"
 #define tankSizeAlertMBox_text              "Select the default tank size.\nSmall, Medium, or Large."
 #define tankSizeSmall_text                  "S"
@@ -364,6 +367,7 @@ typedef enum {
 #define checkupFilling_text							"Filling"
 #define checkupDraining_text						"Draining"
 #define checkupProcessing_text						"Processing"
+#define checkupRinsingLine_text						"Rinsing line"
 #define checkupDrainingComplete_text				"Complete"
 #define checkupHeaterStatusFmt_text					"Heater: %s"
 #define checkupHeaterOn_text						"ON"
@@ -611,6 +615,8 @@ struct __attribute__ ((packed)) machineSettings {
 	bool					isProcessAutostart;
 	uint8_t					drainFillOverlapSetpoint;
 	uint8_t					multiRinseTime;
+	bool					lineRinseEnabled;   /* flush the shared pump line with water (WB→WASTE) after each chemistry step, to avoid cross-contamination between chemistries */
+	uint8_t					lineRinseTime;      /* line-rinse flush duration in seconds */
 	uint8_t					tankSize;       // 1=Small, 2=Medium, 3=Large
 	uint8_t					pumpSpeed;          // 10-100% pump speed
 	uint16_t				chemCalibFillSecs;  // Measured C1/C2/C3 fill time in s, 0=uncal (was chemContainerMl)
@@ -794,6 +800,8 @@ typedef struct sCheckupData {
     bool                heaterOn;
     uint16_t            tempTimeoutCounter;
     bool                multiRinseChanging; /* true while a multi-rinse step is doing a mid-step drain→refill water change */
+    bool                lineRinsing;        /* true while flushing the shared pump line with water after a chemistry step */
+    uint16_t            lineRinseElapsed;   /* seconds elapsed in the current line-rinse flush */
 } sCheckupData;
 
 typedef struct sCheckup{
@@ -1417,9 +1425,12 @@ struct sSettings {
 	lv_obj_t 	        	*autostartLabel;
 	lv_obj_t 	        	*drainFillTimeLabel;
   lv_obj_t 	        	*multiRinseTimeLabel;
+  lv_obj_t 	        	*lineRinseLabel;
+  lv_obj_t 	        	*lineRinseTimeLabel;
 
 	lv_obj_t 	        	*drainFillTimeValueLabel;
   lv_obj_t 	        	*multiRinseTimeValueLabel;
+  lv_obj_t 	        	*lineRinseTimeValueLabel;
 	lv_obj_t 	        	*filmRotationInverseIntervalValueLabel;
 	lv_obj_t 	        	*filmRotationRandomValueLabel;
 	lv_obj_t 	        	*filmRotationSpeedValueLabel;
@@ -1435,10 +1446,13 @@ struct sSettings {
 	lv_obj_t 	        	*autostartContainer;
 	lv_obj_t 	        	*drainFillTimeContainer;
   lv_obj_t 	        	*multiRinseTimeContainer;
+  lv_obj_t 	        	*lineRinseContainer;
+  lv_obj_t 	        	*lineRinseTimeContainer;
 
 	lv_obj_t 	        	*autostartSwitch;
 	lv_obj_t 	        	*persistentAlarmSwitch;
 	lv_obj_t 	        	*waterInletSwitch;
+	lv_obj_t 	        	*lineRinseSwitch;
 
 	lv_obj_t 	        	*filmRotationSpeedSlider;
 	lv_obj_t 	        	*motorSpeedTuneButton;
@@ -1447,6 +1461,7 @@ struct sSettings {
 	lv_obj_t 	        	*filmRandomSlider;
 	lv_obj_t 	        	*drainFillTimeSlider;
   lv_obj_t 	        	*multiRinseTimeSlider;
+  lv_obj_t 	        	*lineRinseTimeSlider;
 
 	lv_obj_t	        	*tempSensorTuneButton;
 	lv_obj_t 	        	*tempCalibOffsetValueLabel;  /* Display current calibration offset */

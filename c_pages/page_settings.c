@@ -37,7 +37,9 @@ uint8_t analogVal_rotationSpeedPercent;
 #define Y_FILM_RANDOM                (Y_FILM_ROT_INTERVAL + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
 #define Y_DRAIN_FILL                 (Y_FILM_RANDOM + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
 #define Y_MULTI_RINSE                (Y_DRAIN_FILL + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
-#define Y_PUMP_SPEED                 (Y_MULTI_RINSE + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
+#define Y_LINE_RINSE                 (Y_MULTI_RINSE + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
+#define Y_LINE_RINSE_TIME            (Y_LINE_RINSE + SETTINGS_H_ROW + SETTINGS_GAP_Y)
+#define Y_PUMP_SPEED                 (Y_LINE_RINSE_TIME + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
 #define Y_INVERT_PUMP                (Y_PUMP_SPEED + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
 #if defined(DISPLAY_DRIVER_ST7701)
 #define Y_BRIGHTNESS                 (Y_INVERT_PUMP + SETTINGS_H_ROW + SETTINGS_GAP_Y)
@@ -130,6 +132,9 @@ void event_settingPopupMBox(lv_event_t * e){
     if(data == gui.page.settings.multiRinseTimeLabel) {
         messagePopupCreate(messagePopupDetailTitle_text,multiRinseTimeAlertMBox_text,NULL,NULL,NULL);
     }
+    if(data == gui.page.settings.lineRinseLabel || data == gui.page.settings.lineRinseTimeLabel) {
+        messagePopupCreate(messagePopupDetailTitle_text,lineRinseAlertMBox_text,NULL,NULL,NULL);
+    }
     if(data == gui.page.settings.waterInletLabel) {
         messagePopupCreate(messagePopupDetailTitle_text,waterInletAlertMBox_text,NULL,NULL,NULL);
     }
@@ -155,6 +160,8 @@ void settingsApplyFactoryDefaults(void)
     p->isProcessAutostart = false;
     p->drainFillOverlapSetpoint = 100;
     p->multiRinseTime = 60;
+    p->lineRinseEnabled = false;
+    p->lineRinseTime = 10;
     p->tankSize = 2;               /* Medium */
     p->pumpSpeed = 30;
     p->invertPump = false;
@@ -181,7 +188,7 @@ void event_settings_handler(lv_event_t * e)
 
     /*Do nothing if the container was clicked*/
 
-    if(act_cb == cont && cont != gui.page.settings.waterInletSwitch && cont != gui.page.settings.tempSensorTuneButton && cont != gui.page.settings.filmRotationSpeedSlider && cont != gui.page.settings.filmRotationInversionIntervalSlider && cont != gui.page.settings.filmRandomSlider && cont != gui.page.settings.persistentAlarmSwitch && cont != gui.page.settings.invertPumpSwitch && cont != gui.page.settings.autostartSwitch && cont != gui.page.settings.drainFillTimeSlider && cont != gui.page.settings.multiRinseTimeSlider && cont != gui.page.settings.tankSizeTextArea && cont != gui.page.settings.pumpSpeedSlider && cont != gui.page.settings.brightnessSlider && cont != gui.page.settings.chemContainerMlTextArea && cont != gui.page.settings.wbContainerMlTextArea && cont != gui.page.settings.chemVolumeTextArea && cont != gui.page.settings.splashButton && cont != gui.page.settings.wifiButton && cont != gui.page.settings.resetButton)
+    if(act_cb == cont && cont != gui.page.settings.waterInletSwitch && cont != gui.page.settings.tempSensorTuneButton && cont != gui.page.settings.filmRotationSpeedSlider && cont != gui.page.settings.filmRotationInversionIntervalSlider && cont != gui.page.settings.filmRandomSlider && cont != gui.page.settings.persistentAlarmSwitch && cont != gui.page.settings.invertPumpSwitch && cont != gui.page.settings.autostartSwitch && cont != gui.page.settings.drainFillTimeSlider && cont != gui.page.settings.multiRinseTimeSlider && cont != gui.page.settings.lineRinseSwitch && cont != gui.page.settings.lineRinseTimeSlider && cont != gui.page.settings.tankSizeTextArea && cont != gui.page.settings.pumpSpeedSlider && cont != gui.page.settings.brightnessSlider && cont != gui.page.settings.chemContainerMlTextArea && cont != gui.page.settings.wbContainerMlTextArea && cont != gui.page.settings.chemVolumeTextArea && cont != gui.page.settings.splashButton && cont != gui.page.settings.wifiButton && cont != gui.page.settings.resetButton)
       return;
 
     if(act_cb == gui.page.settings.tempUnitCelsiusRadioButton || act_cb == gui.page.settings.tempUnitFahrenheitRadioButton){
@@ -295,6 +302,14 @@ void event_settings_handler(lv_event_t * e)
         }
     }
 
+    if(act_cb == gui.page.settings.lineRinseSwitch){
+      if(code == LV_EVENT_VALUE_CHANGED) {
+          LV_LOG_USER("Line rinse : %s", lv_obj_has_state(act_cb, LV_STATE_CHECKED) ? "On" : "Off");
+          gui.page.settings.settingsParams.lineRinseEnabled = lv_obj_has_state(act_cb, LV_STATE_CHECKED);
+          qSysAction( SAVE_PROCESS_CONFIG );
+        }
+    }
+
 
     if(act_cb == gui.page.settings.drainFillTimeSlider) {
         if(code == LV_EVENT_VALUE_CHANGED) {
@@ -330,6 +345,25 @@ void event_settings_handler(lv_event_t * e)
             lv_label_set_text_fmt((lv_obj_t*)lv_event_get_user_data(e), "%ds", new_value);
             LV_LOG_USER("Multi rinse cycle time (s): %d", new_value);
             gui.page.settings.settingsParams.multiRinseTime = new_value;
+        }
+        if(code == LV_EVENT_RELEASED) {
+            qSysAction(SAVE_PROCESS_CONFIG);
+        }
+    }
+
+    if(act_cb == gui.page.settings.lineRinseTimeSlider) {
+        if(code == LV_EVENT_VALUE_CHANGED) {
+            current_value = gui.page.settings.settingsParams.lineRinseTime;
+            new_value = lv_slider_get_value(act_cb);
+
+            new_value = roundToStep(new_value, 5);
+            if(new_value < 5)  new_value = 5;
+            if(new_value > 60) new_value = 60;
+
+            lv_slider_set_value(act_cb, new_value, LV_ANIM_OFF);
+            lv_label_set_text_fmt((lv_obj_t*)lv_event_get_user_data(e), "%ds", new_value);
+            LV_LOG_USER("Line rinse time (s): %d", new_value);
+            gui.page.settings.settingsParams.lineRinseTime = new_value;
         }
         if(code == LV_EVENT_RELEASED) {
             qSysAction(SAVE_PROCESS_CONFIG);
@@ -718,6 +752,60 @@ gui.page.settings.multiRinseTimeContainer = lv_obj_create(parent);
         lv_obj_add_event_cb(gui.page.settings.multiRinseTimeSlider, event_settings_handler, LV_EVENT_RELEASED, gui.page.settings.multiRinseTimeValueLabel);
         lv_label_set_text_fmt(gui.page.settings.multiRinseTimeValueLabel, "%ds", gui.page.settings.settingsParams.multiRinseTime);
 
+/* ── Line rinse enable (switch row) ── */
+gui.page.settings.lineRinseContainer = lv_obj_create(parent);
+  lv_obj_align(gui.page.settings.lineRinseContainer, LV_ALIGN_TOP_LEFT, SETTINGS_LEFT_X, Y_LINE_RINSE);
+  lv_obj_set_size(gui.page.settings.lineRinseContainer, UI_SETTINGS->row_w, SETTINGS_H_ROW);
+  lv_obj_remove_flag(gui.page.settings.lineRinseContainer, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_style_border_opa(gui.page.settings.lineRinseContainer, LV_OPA_TRANSP, 0);
+
+        gui.page.settings.lineRinseLabel = lv_label_create(gui.page.settings.lineRinseContainer);
+        lv_label_set_text(gui.page.settings.lineRinseLabel, lineRinse_text);
+        lv_obj_set_style_text_font(gui.page.settings.lineRinseLabel, UI_SETTINGS->label_font, 0);
+        lv_obj_align(gui.page.settings.lineRinseLabel, LV_ALIGN_LEFT_MID, UI_SETTINGS->row_label_x, UI_SETTINGS->row_label_y);
+
+        createQuestionMark(gui.page.settings.lineRinseContainer, gui.page.settings.lineRinseLabel, event_settingPopupMBox, UI_SETTINGS->help_icon_x, UI_SETTINGS->help_icon_y);
+
+        gui.page.settings.lineRinseSwitch = lv_switch_create(gui.page.settings.lineRinseContainer);
+        lv_obj_set_size(gui.page.settings.lineRinseSwitch, UI_SETTINGS->toggle_switch_w, UI_SETTINGS->toggle_switch_h);
+        lv_obj_add_event_cb(gui.page.settings.lineRinseSwitch, event_settings_handler, LV_EVENT_VALUE_CHANGED, gui.page.settings.lineRinseSwitch);
+        lv_obj_align(gui.page.settings.lineRinseSwitch, LV_ALIGN_RIGHT_MID, UI_SETTINGS->switch_x, UI_SETTINGS->switch_y);
+        lv_obj_set_style_bg_color(gui.page.settings.lineRinseSwitch,  lv_palette_darken(LV_PALETTE_GREY, 3), LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_color(gui.page.settings.lineRinseSwitch,  lv_color_hex(ORANGE), LV_PART_KNOB | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_color(gui.page.settings.lineRinseSwitch,  lv_color_hex(ORANGE_DARK), LV_PART_INDICATOR | LV_STATE_CHECKED);
+        lv_obj_add_state(gui.page.settings.lineRinseSwitch, gui.page.settings.settingsParams.lineRinseEnabled);
+
+/* ── Line rinse duration (slider row) ── */
+gui.page.settings.lineRinseTimeContainer = lv_obj_create(parent);
+  lv_obj_align(gui.page.settings.lineRinseTimeContainer, LV_ALIGN_TOP_LEFT, SETTINGS_LEFT_X, Y_LINE_RINSE_TIME);
+  lv_obj_set_size(gui.page.settings.lineRinseTimeContainer, UI_SETTINGS->row_w, SETTINGS_H_SLIDER);
+  lv_obj_remove_flag(gui.page.settings.lineRinseTimeContainer, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_style_border_opa(gui.page.settings.lineRinseTimeContainer, LV_OPA_TRANSP, 0);
+
+        gui.page.settings.lineRinseTimeLabel = lv_label_create(gui.page.settings.lineRinseTimeContainer);
+        lv_label_set_text(gui.page.settings.lineRinseTimeLabel, lineRinseTime_text);
+        lv_obj_set_style_text_font(gui.page.settings.lineRinseTimeLabel, UI_SETTINGS->label_font, 0);
+        lv_obj_align(gui.page.settings.lineRinseTimeLabel, LV_ALIGN_TOP_LEFT, -UI_SETTINGS->row_value_x, UI_SETTINGS->row_value_y);
+
+        createQuestionMark(gui.page.settings.lineRinseTimeContainer, gui.page.settings.lineRinseTimeLabel, event_settingPopupMBox, UI_SETTINGS->help_icon_x, UI_SETTINGS->help_icon_y);
+
+        gui.page.settings.lineRinseTimeSlider = lv_slider_create(gui.page.settings.lineRinseTimeContainer);
+        lv_obj_set_width(gui.page.settings.lineRinseTimeSlider, UI_SETTINGS->slider_w);
+        lv_obj_align(gui.page.settings.lineRinseTimeSlider, LV_ALIGN_TOP_LEFT, UI_SETTINGS->slider_x_offset, UI_SETTINGS->slider_y);
+        lv_obj_set_style_anim_duration(gui.page.settings.lineRinseTimeSlider, 2000, 0);
+        lv_obj_set_style_bg_color(gui.page.settings.lineRinseTimeSlider,lv_color_hex(ORANGE) , LV_PART_KNOB);
+        lv_obj_set_style_bg_color(gui.page.settings.lineRinseTimeSlider,lv_color_hex(ORANGE_LIGHT) , LV_PART_INDICATOR);
+        lv_obj_set_style_bg_color(gui.page.settings.lineRinseTimeSlider, lv_palette_lighten(LV_PALETTE_GREY, 3), LV_PART_MAIN);
+        lv_slider_set_range(gui.page.settings.lineRinseTimeSlider, 5, 60);
+        lv_slider_set_value(gui.page.settings.lineRinseTimeSlider, gui.page.settings.settingsParams.lineRinseTime, LV_ANIM_OFF);
+
+        gui.page.settings.lineRinseTimeValueLabel = lv_label_create(gui.page.settings.lineRinseTimeContainer);
+        lv_obj_set_style_text_font(gui.page.settings.lineRinseTimeValueLabel, UI_SETTINGS->value_font, 0);
+        lv_obj_align(gui.page.settings.lineRinseTimeValueLabel, LV_ALIGN_TOP_RIGHT, UI_SETTINGS->row_value_x, UI_SETTINGS->row_value_y);
+        lv_obj_add_event_cb(gui.page.settings.lineRinseTimeSlider, event_settings_handler, LV_EVENT_VALUE_CHANGED, gui.page.settings.lineRinseTimeValueLabel);
+        lv_obj_add_event_cb(gui.page.settings.lineRinseTimeSlider, event_settings_handler, LV_EVENT_RELEASED, gui.page.settings.lineRinseTimeValueLabel);
+        lv_label_set_text_fmt(gui.page.settings.lineRinseTimeValueLabel, "%ds", gui.page.settings.settingsParams.lineRinseTime);
+
 gui.page.settings.tankSizeContainer = lv_obj_create(parent);
   lv_obj_align(gui.page.settings.tankSizeContainer, LV_ALIGN_TOP_LEFT, SETTINGS_LEFT_X, Y_TANK_SIZE);
   lv_obj_set_size(gui.page.settings.tankSizeContainer, UI_SETTINGS->row_w, SETTINGS_H_ROW);
@@ -1094,6 +1182,11 @@ void refreshSettingsUI(void)
     else
         lv_obj_remove_state(gui.page.settings.autostartSwitch, LV_STATE_CHECKED);
 
+    if (p->lineRinseEnabled)
+        lv_obj_add_state(gui.page.settings.lineRinseSwitch, LV_STATE_CHECKED);
+    else
+        lv_obj_remove_state(gui.page.settings.lineRinseSwitch, LV_STATE_CHECKED);
+
     /* ── Sliders + value labels ── */
     /* Pump/Motor speed use a TUNE popup now — just refresh the value label. */
     lv_label_set_text_fmt(gui.page.settings.filmRotationSpeedValueLabel,
@@ -1124,6 +1217,11 @@ void refreshSettingsUI(void)
                         p->multiRinseTime, LV_ANIM_OFF);
     lv_label_set_text_fmt(gui.page.settings.multiRinseTimeValueLabel,
                           "%ds", p->multiRinseTime);
+
+    lv_slider_set_value(gui.page.settings.lineRinseTimeSlider,
+                        p->lineRinseTime, LV_ANIM_OFF);
+    lv_label_set_text_fmt(gui.page.settings.lineRinseTimeValueLabel,
+                          "%ds", p->lineRinseTime);
 
     /* ── Volume (TUNE popup) ── */
     lv_label_set_text_fmt(gui.page.settings.volumeValueLabel, "%d%%", p->volume);

@@ -436,6 +436,8 @@ void processTimer(lv_timer_t * timer) {
                 minutesStepElapsed = 0;
                 secondsStepElapsed = 0;
                 ckup->data.multiRinseChanging = false;
+                ckup->data.lineRinsing = false;
+                ckup->data.lineRinseElapsed = 0;
                 ckup->currentStep = ckup->currentStep->next;
                 lv_label_set_text(ckup->checkupStepNameValue, checkupEllipsis_text);
                 lv_arc_set_value(ckup->stepArc, stepPercentage);
@@ -778,7 +780,21 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
 
                 tankPercentage = 0;
                 tankTimeElapsed = 0;
-                checkup->data.isFilling = true;
+
+                /* If enabled, flush the shared line with water after a CHEMISTRY
+                 * step (before drawing the next liquid) to avoid cross-contamination.
+                 * Otherwise proceed straight to filling the next step. */
+                stepNode *justFinished = checkup->currentStep->prev;
+                if (gui.page.settings.settingsParams.lineRinseEnabled
+                    && justFinished != NULL
+                    && justFinished->step.stepDetails != NULL
+                    && justFinished->step.stepDetails->data.type == CHEMISTRY) {
+                    checkup->data.lineRinsing = true;
+                    checkup->data.lineRinseElapsed = 0;
+                    /* isFilling stays false; handleLineRinse sets it true when done */
+                } else {
+                    checkup->data.isFilling = true;
+                }
             }
         }
     }
@@ -840,6 +856,50 @@ void handleMultiRinseChange(processNode *pn) {
             lv_timer_pause(checkup->pumpTimer);
             lv_timer_resume(checkup->processTimer);
         }
+    }
+}
+
+/* ── Line rinse after a chemistry step ──
+ * When enabled (settingsParams.lineRinseEnabled), after draining a chemistry
+ * step the shared pump line is flushed with clean water from the water bath and
+ * discarded to waste, for `lineRinseTime` seconds, before the next liquid is
+ * drawn. This clears chemistry residue from the common tubing to prevent
+ * cross-contamination between different chemistries.
+ * NOTE: the exact valve/pump combination for a "water bath → line → waste"
+ * flush depends on the real plumbing and may need bench tuning; the timing,
+ * gating and hand-off logic here are hardware-agnostic. */
+void handleLineRinse(processNode *pn) {
+    sCheckup* checkup = pn->process.processDetails->checkup;
+
+    pumpFrom = getValueForChemicalSource(WB);   /* clean water from the bath */
+    pumpDir  = PUMP_OUT_RLY;                     /* push it through the line to waste */
+
+    if (checkup->data.isAlreadyPumping == false) {
+        sendValueToRelay(pumpFrom, pumpDir, true);
+        checkup->data.isAlreadyPumping = true;
+    }
+    lv_label_set_text(checkup->checkupStepKindValue, checkupRinsingLine_text);
+
+    checkup->data.lineRinseElapsed++;
+    uint16_t dur = (uint16_t)gui.page.settings.settingsParams.lineRinseTime;
+    if (dur < 1) dur = 1;
+
+    /* Animate the pump bargraph 0→100% over the flush duration, so the line
+     * rinse is visible like the fill/drain phases. */
+    {
+        uint32_t pct = ((uint32_t)checkup->data.lineRinseElapsed * 100U) / dur;
+        if (pct > 100U) pct = 100U;
+        lv_arc_set_value(checkup->pumpArc, (int32_t)pct);
+    }
+
+    if (checkup->data.lineRinseElapsed >= dur) {
+        sendValueToRelay(pumpFrom, pumpDir, false);
+        checkup->data.isAlreadyPumping = false;
+        checkup->data.lineRinsing = false;
+        checkup->data.lineRinseElapsed = 0;
+        tankPercentage = 0;
+        tankTimeElapsed = 0;
+        checkup->data.isFilling = true;   /* now proceed to fill the next step */
     }
 }
 
@@ -1039,6 +1099,14 @@ void pumpTimer(lv_timer_t *timer) {
         if(checkup->checkupProcessTimeLeftValue != NULL) {
             checkup_refresh_process_ui(pn, checkup);
         }
+        return;
+    }
+
+    /* Line rinse between steps takes priority over the normal fill/drain
+     * dispatch (but never over a user-requested stop). */
+    if (checkup->data.lineRinsing
+        && !checkup->data.stopAfter && !checkup->data.stopNow) {
+        handleLineRinse(pn);
         return;
     }
 

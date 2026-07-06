@@ -783,7 +783,8 @@ All data is stored on the SD card as a single **JSON** file, `FilMachine.json` (
     "tempUnit": 0, "waterInlet": 1,
     "filmRotationSpeedSetpoint": 50, "rotationIntervalSetpoint": 10, "randomSetpoint": 20,
     "isPersistentAlarm": 1, "isProcessAutostart": 0, "drainFillOverlapSetpoint": 100,
-    "multiRinseTime": 60, "tankSize": 2, "pumpSpeed": 30,
+    "multiRinseTime": 60, "lineRinseEnabled": 0, "lineRinseTime": 10,
+    "tankSize": 2, "pumpSpeed": 30,
     "chemCalibFillSecs": 0, "wbCalibFillSecs": 0, "chemistryVolume": 2,
     "tempCalibOffset": 0, "chemCalibOffset": 0,
     "splashRandom": 0, "splashPalette": 3, "splashShapeStyle": 0,
@@ -804,7 +805,7 @@ All data is stored on the SD card as a single **JSON** file, `FilMachine.json` (
 }
 ```
 
-Notes on a few fields: `tempCalibOffset`/`chemCalibOffset` are in **tenths of a degree** (int16, clamped ±30 °C); `chemCalibFillSecs`/`wbCalibFillSecs` are the **measured** MIN→MAX fill times in seconds (0 = uncalibrated, capacity used as fallback); step `type` 0=Chemistry/1=Rinse/2=MultiRinse; step `source` 0=C1,1=C2,2=C3,3=WB.
+Notes on a few fields: `tempCalibOffset`/`chemCalibOffset` are in **tenths of a degree** (int16, clamped ±30 °C); `chemCalibFillSecs`/`wbCalibFillSecs` are the **measured** MIN→MAX fill times in seconds (0 = uncalibrated, capacity used as fallback); step `type` 0=Chemistry/1=Rinse/2=MultiRinse; step `source` 0=C1,1=C2,2=C3,3=WB. `lineRinseEnabled` (0/1) turns on a **line rinse after each chemistry step**: after draining a chemistry step, the shared pump line is flushed with clean water from the water bath, discarded to waste, for `lineRinseTime` seconds (5–60 s) before the next liquid is drawn — clearing chemistry residue from the common tubing to avoid cross-contamination. Opt-in (default off); uses extra water, so watch the bath level when the water inlet isn't connected.
 
 **Auto-save triggers:** creating/editing/deleting a process, changing any setting, toggling preferred, duplicating processes or steps, and recording a fill calibration.
 

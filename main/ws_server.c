@@ -489,6 +489,8 @@ static int build_state_json(char *buf, int bufsize) {
         "\"autostart\":%s,"
         "\"drainFillOverlap\":%u,"
         "\"multiRinseTime\":%u,"
+        "\"lineRinseEnabled\":%s,"
+        "\"lineRinseTime\":%u,"
         "\"tankSize\":%u,"
         "\"pumpSpeed\":%u,"
         "\"chemCalibFillSecs\":%u,"
@@ -554,6 +556,8 @@ static int build_state_json(char *buf, int bufsize) {
         s->isProcessAutostart ? "true" : "false",
         (unsigned)s->drainFillOverlapSetpoint,
         (unsigned)s->multiRinseTime,
+        s->lineRinseEnabled ? "true" : "false",
+        (unsigned)s->lineRinseTime,
         (unsigned)s->tankSize,
         (unsigned)s->pumpSpeed,
         (unsigned)s->chemCalibFillSecs,
@@ -724,6 +728,8 @@ static void ws_handle_command(const char *msg, int len) {
         else if (KEY_IS("autostart"))          s->isProcessAutostart = (strstr(vs, "true") != NULL);
         else if (KEY_IS("drainFillOverlap"))   s->drainFillOverlapSetpoint = (uint8_t)atoi(vs);
         else if (KEY_IS("multiRinseTime"))     s->multiRinseTime = (uint8_t)atoi(vs);
+        else if (KEY_IS("lineRinseEnabled"))   s->lineRinseEnabled = (strstr(vs, "true") != NULL);
+        else if (KEY_IS("lineRinseTime"))      s->lineRinseTime = (uint8_t)atoi(vs);
         else if (KEY_IS("tankSize"))           s->tankSize = (uint8_t)atoi(vs);
         else if (KEY_IS("pumpSpeed"))          s->pumpSpeed = (uint8_t)atoi(vs);
         else if (KEY_IS("chemCalibFillSecs"))  s->chemCalibFillSecs = (uint16_t)atoi(vs);
@@ -756,6 +762,8 @@ static void ws_handle_command(const char *msg, int len) {
         s->isProcessAutostart = false;
         s->drainFillOverlapSetpoint = 100;
         s->multiRinseTime = 60;
+        s->lineRinseEnabled = false;
+        s->lineRinseTime = 10;
         s->tankSize = 2;
         s->pumpSpeed = 30;
         s->chemCalibFillSecs = 0;
