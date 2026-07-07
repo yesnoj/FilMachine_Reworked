@@ -364,6 +364,9 @@ enum lang_str_id {
     STR_otaCompleteRebooting_text,
     STR_otaCompleteRebootReq_text,
     STR_otaReadingSD_text,
+    STR_screenOff_text,
+    STR_screenOffAlertMBox_text,
+    STR_screenOffNever_text,
     STR__COUNT
 };
 

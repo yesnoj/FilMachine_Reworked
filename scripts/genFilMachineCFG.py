@@ -189,6 +189,7 @@ DEFAULT_SETTINGS = {
     "chemCalibOffset": 0,
     # ── UI language ──
     "language": 0,            # 0=English, 1=Italiano
+    "screenOffMins": 10,      # screen off after N minutes (5/10/30, 0=never)
 }
 
 def random_settings():
@@ -336,6 +337,7 @@ def write_settings(f, s):
     f.write(struct.pack('<B', s.get("invertPump", 0)))       # bool (invert pump direction)
     f.write(struct.pack('<b', s.get("chemCalibOffset", 0)))  # int8_t chemical temp offset (tenths of degree)
     f.write(struct.pack('<B', s.get("language", 0)))         # uint8_t UI language (0=EN, 1=IT)
+    f.write(struct.pack('<B', s.get("screenOffMins", 10)))  # uint8_t screen-off minutes (0=never)
 
 def write_process(f, p):
     f.write(p["processNameString"].encode('ASCII').ljust(MAX_PROC_NAME_LEN + 1, b'\x00'))

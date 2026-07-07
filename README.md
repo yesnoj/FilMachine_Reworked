@@ -401,7 +401,7 @@ All commands use JSON format: `{"cmd":"command_name", ...params}`.
 | `reset_defaults` | — | Restore all settings to factory defaults |
 | `wifi_scan` | — | Scan for Wi-Fi networks; results arrive via a `wifi_scan_results` event |
 
-**`set_setting` keys** — `tempUnit`, `waterInlet`, `tempCalibOffset`, `chemCalibOffset`, `filmRotationSpeed`, `rotationInterval`, `random`, `persistentAlarm`, `autostart`, `drainFillOverlap`, `multiRinseTime`, `lineRinseEnabled`, `lineRinseTime`, `tankSize`, `pumpSpeed`, `chemCalibFillSecs`, `wbCalibFillSecs`, `chemistryVolume`, `invertPump`, `brightness`, `volume`, `splashDefault`, `splashRandom`, `splashPalette`, `splashShapeStyle`, `splashComplexity`, `language` (0=EN, 1=IT — applied at next boot), `wifiEnabled`. All of these are also included in the broadcast state JSON.
+**`set_setting` keys** — `tempUnit`, `waterInlet`, `tempCalibOffset`, `chemCalibOffset`, `filmRotationSpeed`, `rotationInterval`, `random`, `persistentAlarm`, `autostart`, `drainFillOverlap`, `multiRinseTime`, `lineRinseEnabled`, `lineRinseTime`, `tankSize`, `pumpSpeed`, `chemCalibFillSecs`, `wbCalibFillSecs`, `chemistryVolume`, `invertPump`, `brightness`, `volume`, `splashDefault`, `splashRandom`, `splashPalette`, `splashShapeStyle`, `splashComplexity`, `language` (0=EN, 1=IT — applied at next boot), `screenOffMins` (5/10/30, 0=never), `wifiEnabled`. All of these are also included in the broadcast state JSON.
 
 ### Implementation Details
 
@@ -522,6 +522,7 @@ All fonts are converted from TTF/OTF to LVGL `.c` bitmap arrays using `lv_font_c
 | Tank size | Default developing tank size | S (500ml) / M (700ml) / L (1000ml) |
 | Chemistry volume | Amount of chemistry used per step | Low / High |
 | Language | Interface language — the machine saves and reboots automatically to apply it | English / Italiano |
+| Screen off timeout | Minutes after the last touch before the screen turns off (dims in two steps first; disabled while a process runs) | 5 / 10 / 30 min / Never |
 | Fill calibration | Chemistry / water-bath fill times, measured via Maintenance fills | read-only (s) |
 | Wi-Fi SSID | Network name for OTA updates | Text (max 32 chars) |
 | Wi-Fi password | Network password for OTA updates | Text (max 64 chars) |
@@ -812,7 +813,7 @@ All data is stored on the SD card as a single **JSON** file, `FilMachine.json` (
     "splashComplexity": 40, "splashSeed": 0, "splashDefault": 1,
     "wifiEnabled": 0, "wifiSSID": "", "wifiPassword": "",
     "brightness": 100, "volume": 60, "invertPump": 0,
-    "language": 0
+    "language": 0, "screenOffMins": 10
   },
   "processes": [
     { "name": "C41 Color Std", "temp": 38, "tempTolerance": 0.3,

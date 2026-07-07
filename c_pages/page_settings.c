@@ -54,7 +54,8 @@ uint8_t analogVal_rotationSpeedPercent;
  * MIN/MAX sensors (Maintenance fills). Chem volume follows tank size directly. */
 #define Y_CHEM_VOLUME                (Y_TANK_SIZE + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #define Y_LANGUAGE                   (Y_CHEM_VOLUME + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_SPLASH_SCREEN              (Y_LANGUAGE + SETTINGS_H_ROW + SETTINGS_GAP_Y)
+#define Y_SCREEN_OFF                 (Y_LANGUAGE + SETTINGS_H_ROW + SETTINGS_GAP_Y)
+#define Y_SPLASH_SCREEN              (Y_SCREEN_OFF + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #define Y_WIFI_ROW                   (Y_SPLASH_SCREEN + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #define Y_RESET_ROW                  (Y_WIFI_ROW + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 
@@ -124,6 +125,9 @@ void event_settingPopupMBox(lv_event_t * e){
     if(data == gui.page.settings.languageLabel) {
         messagePopupCreate(messagePopupDetailTitle_text,languageAlertMBox_text,NULL,NULL,NULL);
     }
+    if(data == gui.page.settings.screenOffLabel) {
+        messagePopupCreate(messagePopupDetailTitle_text,screenOffAlertMBox_text,NULL,NULL,NULL);
+    }
     if(data == gui.page.settings.chemVolumeLabel) {
         messagePopupCreate(messagePopupDetailTitle_text,chemistryVolumeAlertMBox_text,NULL,NULL,NULL);
     }
@@ -141,6 +145,36 @@ void event_settingPopupMBox(lv_event_t * e){
     }
 }
 
+
+
+/* ── Screen-off timeout helpers ──
+ * One user-facing value (minutes to full off, 0 = never); the two dim
+ * stages are derived: 50%% at 1/10 of the time, 20%% at half. */
+void applyScreenOffTimeout(uint8_t mins)
+{
+#if defined(DISPLAY_DRIVER_ST7701)
+    if (mins == 0) {
+        st7701_lcd_set_dim_timeout(0, 0, 0);          /* dimming disabled */
+    } else {
+        uint16_t off  = (uint16_t)mins * 60;
+        uint16_t dim1 = off / 10; if (dim1 < 30) dim1 = 30;
+        uint16_t dim2 = off / 2;
+        st7701_lcd_set_dim_timeout(dim1, dim2, off);
+    }
+#else
+    (void)mins;
+#endif
+}
+
+const char *screenOffLabelFor(uint8_t mins)
+{
+    switch (mins) {
+        case 5:  return "5 min";
+        case 30: return "30 min";
+        case 0:  return screenOffNever_text;
+        default: return "10 min";
+    }
+}
 
 /* Restore every setting to its factory default, refresh the UI and persist.
  * Called from the reset-confirmation popup (OK button). */
@@ -171,6 +205,8 @@ void settingsApplyFactoryDefaults(void)
     p->chemCalibFillSecs = 0;       /* uncalibrated (was chemContainerMl) */
     p->wbCalibFillSecs = 0;         /* uncalibrated (was wbContainerMl) */
     p->language = LANG_EN;          /* applied at next boot */
+    p->screenOffMins = 10;
+    applyScreenOffTimeout(p->screenOffMins);
 
     refreshSettingsUI();            /* update all UI widgets */
     qSysAction(SAVE_PROCESS_CONFIG);/* persist to SD */
@@ -187,7 +223,7 @@ void event_settings_handler(lv_event_t * e)
 
     /*Do nothing if the container was clicked*/
 
-    if(act_cb == cont && cont != gui.page.settings.waterInletSwitch && cont != gui.page.settings.tempSensorTuneButton && cont != gui.page.settings.filmRotationSpeedSlider && cont != gui.page.settings.filmRotationInversionIntervalSlider && cont != gui.page.settings.filmRandomSlider && cont != gui.page.settings.persistentAlarmSwitch && cont != gui.page.settings.invertPumpSwitch && cont != gui.page.settings.autostartSwitch && cont != gui.page.settings.drainFillTimeSlider && cont != gui.page.settings.multiRinseTimeSlider && cont != gui.page.settings.lineRinseSwitch && cont != gui.page.settings.lineRinseTimeSlider && cont != gui.page.settings.tankSizeTextArea && cont != gui.page.settings.pumpSpeedSlider && cont != gui.page.settings.brightnessSlider && cont != gui.page.settings.chemVolumeTextArea && cont != gui.page.settings.languageTextArea && cont != gui.page.settings.splashButton && cont != gui.page.settings.wifiButton && cont != gui.page.settings.resetButton)
+    if(act_cb == cont && cont != gui.page.settings.waterInletSwitch && cont != gui.page.settings.tempSensorTuneButton && cont != gui.page.settings.filmRotationSpeedSlider && cont != gui.page.settings.filmRotationInversionIntervalSlider && cont != gui.page.settings.filmRandomSlider && cont != gui.page.settings.persistentAlarmSwitch && cont != gui.page.settings.invertPumpSwitch && cont != gui.page.settings.autostartSwitch && cont != gui.page.settings.drainFillTimeSlider && cont != gui.page.settings.multiRinseTimeSlider && cont != gui.page.settings.lineRinseSwitch && cont != gui.page.settings.lineRinseTimeSlider && cont != gui.page.settings.tankSizeTextArea && cont != gui.page.settings.pumpSpeedSlider && cont != gui.page.settings.brightnessSlider && cont != gui.page.settings.chemVolumeTextArea && cont != gui.page.settings.languageTextArea && cont != gui.page.settings.screenOffTextArea && cont != gui.page.settings.splashButton && cont != gui.page.settings.wifiButton && cont != gui.page.settings.resetButton)
       return;
 
     if(act_cb == gui.page.settings.tempUnitCelsiusRadioButton || act_cb == gui.page.settings.tempUnitFahrenheitRadioButton){
@@ -430,6 +466,19 @@ void event_settings_handler(lv_event_t * e)
             LV_LOG_USER("Set Language");
             uint32_t idx = gui.page.settings.settingsParams.language == LANG_IT ? 1 : 0;
             rollerPopupCreate(languageList, language_text, act_cb, idx, ORANGE);
+        }
+    }
+
+    /* ── Screen-off timeout roller ── */
+    if(act_cb == gui.page.settings.screenOffTextArea) {
+        if(code == LV_EVENT_FOCUSED) {
+            if(gui.element.rollerPopup.mBoxRollerParent != NULL) return;
+            LV_LOG_USER("Set Screen off timeout");
+            static char opts[48];
+            snprintf(opts, sizeof(opts), "5 min\n10 min\n30 min\n%s", screenOffNever_text);
+            uint8_t m = gui.page.settings.settingsParams.screenOffMins;
+            uint32_t idx = (m == 5) ? 0 : (m == 30) ? 2 : (m == 0) ? 3 : 1;
+            rollerPopupCreate(opts, screenOff_text, act_cb, idx, ORANGE);
         }
     }
 
@@ -1028,6 +1077,33 @@ gui.page.settings.chemVolumeContainer = lv_obj_create(parent);
             lv_textarea_set_text(gui.page.settings.languageTextArea, langs[l]);
         }
 
+  /* ── Screen-off timeout ── */
+  gui.page.settings.screenOffContainer = lv_obj_create(parent);
+  lv_obj_align(gui.page.settings.screenOffContainer, LV_ALIGN_TOP_LEFT, SETTINGS_LEFT_X, Y_SCREEN_OFF);
+  lv_obj_set_size(gui.page.settings.screenOffContainer, UI_SETTINGS->row_w, SETTINGS_H_ROW);
+  lv_obj_remove_flag(gui.page.settings.screenOffContainer, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_style_border_opa(gui.page.settings.screenOffContainer, LV_OPA_TRANSP, 0);
+
+        gui.page.settings.screenOffLabel = lv_label_create(gui.page.settings.screenOffContainer);
+        lv_label_set_text(gui.page.settings.screenOffLabel, screenOff_text);
+        lv_obj_set_style_text_font(gui.page.settings.screenOffLabel, UI_SETTINGS->label_font, 0);
+        lv_obj_align(gui.page.settings.screenOffLabel, LV_ALIGN_LEFT_MID, UI_SETTINGS->row_label_x, UI_SETTINGS->row_label_y);
+
+        createQuestionMark(gui.page.settings.screenOffContainer,gui.page.settings.screenOffLabel,event_settingPopupMBox, UI_SETTINGS->help_icon_x, UI_SETTINGS->help_icon_y);
+
+        gui.page.settings.screenOffTextArea = lv_textarea_create(gui.page.settings.screenOffContainer);
+        lv_obj_set_size(gui.page.settings.screenOffTextArea, UI_SETTINGS->textarea_w, UI_SETTINGS->textarea_h);
+        lv_obj_align(gui.page.settings.screenOffTextArea, LV_ALIGN_RIGHT_MID, UI_SETTINGS->textarea_x, UI_SETTINGS->textarea_y);
+        lv_textarea_set_one_line(gui.page.settings.screenOffTextArea, true);
+        lv_obj_set_scrollbar_mode(gui.page.settings.screenOffTextArea, LV_SCROLLBAR_MODE_OFF);
+        lv_obj_set_style_bg_color(gui.page.settings.screenOffTextArea, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
+        lv_obj_set_style_text_align(gui.page.settings.screenOffTextArea, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_set_style_text_font(gui.page.settings.screenOffTextArea, UI_SETTINGS->label_font, 0);
+        lv_obj_set_style_border_color(gui.page.settings.screenOffTextArea, lv_color_hex(ORANGE), 0);
+        lv_obj_add_event_cb(gui.page.settings.screenOffTextArea, event_settings_handler, LV_EVENT_FOCUSED, NULL);
+        lv_textarea_set_text(gui.page.settings.screenOffTextArea,
+                             screenOffLabelFor(gui.page.settings.settingsParams.screenOffMins));
+
   /* ── Splash Screen ── */
   gui.page.settings.splashContainer = lv_obj_create(parent);
   lv_obj_align(gui.page.settings.splashContainer, LV_ALIGN_TOP_LEFT, SETTINGS_LEFT_X, Y_SPLASH_SCREEN);
@@ -1289,8 +1365,8 @@ void refreshSettingsUI(void)
     lv_label_set_text_fmt(gui.page.settings.brightnessValueLabel,
                           "%d%%", p->brightness);
     st7701_lcd_set_user_brightness(p->brightness);
-    st7701_lcd_set_dim_timeout(60, 300, 600);  /* 1min→50%, 5min→20%, 10min→off */
 #endif
+    applyScreenOffTimeout(p->screenOffMins);
 
     /* Chem/WB capacity rows removed (self-calibrated fill times). */
 
@@ -1300,6 +1376,12 @@ void refreshSettingsUI(void)
         uint8_t v = p->chemistryVolume;
         if(v < 1 || v > 2) v = 2;
         lv_textarea_set_text(gui.page.settings.chemVolumeTextArea, vols[v - 1]);
+    }
+
+    /* ── Screen-off timeout ── */
+    if (gui.page.settings.screenOffTextArea) {
+        lv_textarea_set_text(gui.page.settings.screenOffTextArea,
+                             screenOffLabelFor(p->screenOffMins));
     }
 
     /* ── UI language ── */

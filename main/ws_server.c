@@ -510,6 +510,7 @@ static int build_state_json(char *buf, int bufsize) {
         "\"splashShapeStyle\":%u,"
         "\"splashComplexity\":%u,"
         "\"language\":%u,"
+        "\"screenOffMins\":%u,"
         /* Wi-Fi */
         "\"wifiEnabled\":%s,"
         "\"wifiSSID\":\"%s\","
@@ -587,6 +588,7 @@ static int build_state_json(char *buf, int bufsize) {
         (unsigned)s->splashShapeStyle,
         (unsigned)s->splashComplexity,
         (unsigned)s->language,
+        (unsigned)s->screenOffMins,
         s->wifiEnabled ? "true" : "false",
         esc_ssid,
         wifi_is_connected() ? "true" : "false",
@@ -804,6 +806,11 @@ static void ws_handle_command(const char *msg, int len) {
             s->language = (v == LANG_IT) ? LANG_IT : LANG_EN;
             /* Applied at next boot — the on-device UI is built once at startup. */
         }
+        else if (KEY_IS("screenOffMins")) {
+            int v = atoi(vs);
+            s->screenOffMins = (v == 5 || v == 30 || v == 0) ? (uint8_t)v : 10;
+            applyScreenOffTimeout(s->screenOffMins);
+        }
         else if (KEY_IS("wifiEnabled"))        s->wifiEnabled = (strstr(vs, "true") != NULL);
         else {
             LV_LOG_WARN("[WS] Unknown setting key: %.*s", klen, ks);
@@ -843,6 +850,8 @@ static void ws_handle_command(const char *msg, int len) {
         s->brightness = 100;
         s->volume = 60;
         s->language = LANG_EN;   /* applied at next boot */
+        s->screenOffMins = 10;
+        applyScreenOffTimeout(s->screenOffMins);
 #if defined(DISPLAY_DRIVER_ST7701)
         st7701_lcd_set_user_brightness(s->brightness);
 #endif

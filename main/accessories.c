@@ -816,6 +816,7 @@ void initGlobals( void ) {
   gui.page.settings.settingsParams.lineRinseEnabled = false;   /* opt-in */
   gui.page.settings.settingsParams.lineRinseTime = 10;         /* seconds */
   gui.page.settings.settingsParams.language = LANG_EN;         /* English default */
+  gui.page.settings.settingsParams.screenOffMins = 10;        /* screen off after 10 min */
 
   gui.element.rollerPopup.tempCelsiusOptions = createRollerValues(TEMP_ROLLER_MIN,TEMP_ROLLER_MAX,"",false);
   gui.element.rollerPopup.tempFahrenheitOptions = createRollerValues(TEMP_ROLLER_MIN,TEMP_ROLLER_MAX,"",true);
@@ -1203,6 +1204,7 @@ static void jsonApplySettings(struct machineSettings *S, mj_node *sp) {
     S->chemCalibOffset           = (int16_t) mj_int(mj_get(sp, "chemCalibOffset"), 0);
     S->language                  = (uint8_t) mj_int(mj_get(sp, "language"), LANG_EN);
     lang_set(S->language);   /* apply UI language as soon as settings are known */
+    S->screenOffMins             = (uint8_t) mj_int(mj_get(sp, "screenOffMins"), 10);
 }
 
 /* ── Read ONLY the machineSettings block (no processes, no stats).
@@ -1450,11 +1452,12 @@ void writeConfigFile( const char *path, bool enableLog ) {
             "    \"volume\": %u,\n"
             "    \"invertPump\": %d,\n"
             "    \"chemCalibOffset\": %d,\n"
-            "    \"language\": %u\n"
+            "    \"language\": %u,\n"
+            "    \"screenOffMins\": %u\n"
             "  },\n",
             escSsid, escPwd, S->brightness, S->volume,
             S->invertPump ? 1 : 0, (int)S->chemCalibOffset,
-            (unsigned)S->language);
+            (unsigned)S->language, (unsigned)S->screenOffMins);
         cfgWrite(fp, buf);
 
         /* ── processes[] ── */

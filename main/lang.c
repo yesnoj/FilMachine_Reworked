@@ -360,6 +360,9 @@ static const lang_pair_t strings[STR__COUNT] = {
     [STR_otaCompleteRebooting_text] = { "Update complete! Rebooting...", "Aggiornamento completato! Riavvio..." },
     [STR_otaCompleteRebootReq_text] = { "Update complete! Reboot required.", "Aggiornamento completato! Riavvia." },
     [STR_otaReadingSD_text] = { "Reading SD card...", "Lettura scheda SD..." },
+    [STR_screenOff_text] = { "Screen off timeout", "Spegnimento schermo" },
+    [STR_screenOffAlertMBox_text] = { "How long after the last touch the screen turns off. It dims in two steps first, then switches off completely. Touch the screen to wake it. 'Never' keeps it always on. Dimming is disabled while a process is running.", "Dopo quanto tempo dall'ultimo tocco lo schermo si spegne. Prima si attenua in due passi, poi si spegne del tutto. Tocca lo schermo per riattivarlo. 'Mai' lo tiene sempre acceso. Durante un processo lo schermo non si spegne." },
+    [STR_screenOffNever_text] = { "Never", "Mai" },
 };
 
 static uint8_t s_lang = LANG_EN;

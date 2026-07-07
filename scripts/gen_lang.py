@@ -357,6 +357,9 @@ IT = {
  "languageRebootTitle_text": r"Cambio lingua",
  "languageRebootBody_text": r"La macchina si riavviera'\nper applicare la nuova lingua.",
  "languageList": r"English\nItaliano",
+ "screenOff_text": r"Spegnimento schermo",
+ "screenOffAlertMBox_text": r"Dopo quanto tempo dall'ultimo tocco lo schermo si spegne. Prima si attenua in due passi, poi si spegne del tutto. Tocca lo schermo per riattivarlo. 'Mai' lo tiene sempre acceso. Durante un processo lo schermo non si spegne.",
+ "screenOffNever_text": r"Mai",
 }
 
 # New macros to append to FilMachine.h (EN text). Order matters for the enum.

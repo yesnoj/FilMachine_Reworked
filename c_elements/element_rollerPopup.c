@@ -315,6 +315,24 @@ void event_Roller(lv_event_t * e)
               }
               return;
             }
+            /* ── Settings Screen-off timeout roller ── */
+            if((lv_obj_t *)data == gui.page.settings.screenOffTextArea) {
+              static const uint8_t mins_map[] = { 5, 10, 30, 0 };
+              uint32_t sel = isScrolled ? rollerSelected : lv_roller_get_selected(gui.element.rollerPopup.roller);
+              if(sel > 3) sel = 1;
+              uint8_t mins = mins_map[sel];
+              LV_LOG_USER("SET Screen off timeout: %u min (0=never)", (unsigned)mins);
+              gui.page.settings.settingsParams.screenOffMins = mins;
+              lv_textarea_set_text(gui.page.settings.screenOffTextArea, screenOffLabelFor(mins));
+              applyScreenOffTimeout(mins);
+              isScrolled = false;
+              lv_style_reset(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
+              lv_style_reset(&gui.element.rollerPopup.style_roller);
+              lv_msgbox_close(gui.element.rollerPopup.mBoxRollerParent);
+              gui.element.rollerPopup.mBoxRollerParent = NULL;
+              qSysAction(SAVE_PROCESS_CONFIG);
+              return;
+            }
             /* ── Settings UI Language roller ── */
             if((lv_obj_t *)data == gui.page.settings.languageTextArea) {
               const char *langs[] = languageValues;

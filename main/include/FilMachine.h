@@ -356,6 +356,9 @@ typedef enum {
 #define otaCompleteRebooting_text	tr(STR_otaCompleteRebooting_text)
 #define otaCompleteRebootReq_text	tr(STR_otaCompleteRebootReq_text)
 #define otaReadingSD_text	tr(STR_otaReadingSD_text)
+#define screenOff_text	tr(STR_screenOff_text)
+#define screenOffAlertMBox_text	tr(STR_screenOffAlertMBox_text)
+#define screenOffNever_text	tr(STR_screenOffNever_text)
 /* Checkup strings/vars */
 #define checkupNexStepsTitle_text	tr(STR_checkupNexStepsTitle_text)
 #define checkupProcessReady_text	tr(STR_checkupProcessReady_text)
@@ -661,6 +664,7 @@ struct __attribute__ ((packed)) machineSettings {
 	bool					invertPump;         /* true = invert pump H-bridge direction */
 	int16_t					chemCalibOffset;    /* Chemical-sensor temp offset, tenths °C (in config file). int16 to avoid overflow */
 	uint8_t					language;           /* UI language: 0=English, 1=Italiano (applied at boot) */
+	uint8_t					screenOffMins;      /* screen-off timeout in minutes (5/10/30), 0 = never */
 };
 
 
@@ -1529,6 +1533,11 @@ struct sSettings {
 	lv_obj_t                *languageLabel;
 	lv_obj_t                *languageTextArea;
 
+	/* Screen-off timeout row */
+	lv_obj_t                *screenOffContainer;
+	lv_obj_t                *screenOffLabel;
+	lv_obj_t                *screenOffTextArea;
+
 	/* Splash screen settings row */
 	lv_obj_t                *splashContainer;
 	lv_obj_t                *splashLabel;
@@ -1964,6 +1973,8 @@ void stopMotorTask(void);
 void runMotorTask(void);
 // @file accessories.c
 void rebootBoard(void);
+void applyScreenOffTimeout(uint8_t mins);          /* dim chain from screenOffMins */
+const char *screenOffLabelFor(uint8_t mins);       /* '5 min'/'10 min'/'30 min'/Never */
 #if LV_USE_LOG != 0
 void my_print(lv_log_level_t level, const char *buf);   /* LVGL log → console + SD log */
 #endif
