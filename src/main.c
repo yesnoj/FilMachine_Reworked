@@ -903,6 +903,9 @@ int main(int argc, char *argv[]) {
 
     /* Initialize LVGL */
     lv_init();
+#if LV_USE_LOG != 0
+    lv_log_register_print_cb(my_print);   /* LVGL logs -> console (sim) */
+#endif
 
     /* Create SDL display (LVGL 9 built-in SDL driver) */
     lv_display_t *display = lv_sdl_window_create(LCD_H_RES, LCD_V_RES);

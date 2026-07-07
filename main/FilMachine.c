@@ -18,6 +18,7 @@
 /* FilMachine.h pulls in board.h which defines DISPLAY_DRIVER_xxx
  * and TOUCH_DRIVER_xxx — must come BEFORE the conditional includes. */
 #include "FilMachine.h"
+#include "sd_log.h"
 #include "nvs_flash.h"
 
 /* ═══════════════════════════════════════════════
@@ -500,8 +501,18 @@ lv_display_t *our_display;
 
 init_Pins_and_Buses();
 
+    /* ── SD boot/crash log: start as soon as the card is mounted, so the
+     * header (reset reason + core dump summary of a previous crash) and all
+     * subsequent ESP_LOG / LV_LOG lines land in /log/boot_NNNN.txt. ── */
+    if (initErrors != INIT_ERROR_SD) {
+        sd_log_init();
+    }
+
 ESP_LOGI(TAG, "Initialise LVGL library");
     lv_init();
+#if LV_USE_LOG != 0
+    lv_log_register_print_cb(my_print);   /* LVGL logs → console + SD log */
+#endif
 #if defined(DISPLAY_DRIVER_ST7701)
     /* P4: LVGL in 800×480 landscape, PPA handles rotation to physical 480×800 */
     our_display = lv_display_create( LCD_H_RES, LCD_V_RES );
@@ -618,15 +629,11 @@ create_keyboard();
         uint32_t time_till_next = lv_timer_handler();
 
 #if defined(DISPLAY_DRIVER_ST7701)
-        /* Auto-dimming: check ~once per second from LVGL task (safe context) */
-        {
-            static uint32_t dim_accum_ms = 0;
-            dim_accum_ms += time_till_next;
-            if (dim_accum_ms >= 1000) {
-                dim_accum_ms = 0;
-                st7701_lcd_dimming_tick();
-            }
-        }
+        /* Auto-dimming: run every cycle so the deferred wake-up (touch on a
+         * dimmed/off screen) is applied within one loop (~30-50 ms) instead
+         * of up to 1 s. The tick is cheap: a volatile flag check plus a few
+         * int64 compares — LEDC is only touched on actual state changes. */
+        st7701_lcd_dimming_tick();
 #endif
 
         if (time_till_next < 1) time_till_next = 1;

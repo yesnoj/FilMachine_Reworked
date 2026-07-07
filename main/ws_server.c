@@ -509,6 +509,7 @@ static int build_state_json(char *buf, int bufsize) {
         "\"splashPalette\":%u,"
         "\"splashShapeStyle\":%u,"
         "\"splashComplexity\":%u,"
+        "\"language\":%u,"
         /* Wi-Fi */
         "\"wifiEnabled\":%s,"
         "\"wifiSSID\":\"%s\","
@@ -585,6 +586,7 @@ static int build_state_json(char *buf, int bufsize) {
         (unsigned)s->splashPalette,
         (unsigned)s->splashShapeStyle,
         (unsigned)s->splashComplexity,
+        (unsigned)s->language,
         s->wifiEnabled ? "true" : "false",
         esc_ssid,
         wifi_is_connected() ? "true" : "false",
@@ -797,6 +799,11 @@ static void ws_handle_command(const char *msg, int len) {
             if (v > 100) v = 100;
             s->splashComplexity = (uint8_t)v;
         }
+        else if (KEY_IS("language")) {
+            int v = atoi(vs);
+            s->language = (v == LANG_IT) ? LANG_IT : LANG_EN;
+            /* Applied at next boot — the on-device UI is built once at startup. */
+        }
         else if (KEY_IS("wifiEnabled"))        s->wifiEnabled = (strstr(vs, "true") != NULL);
         else {
             LV_LOG_WARN("[WS] Unknown setting key: %.*s", klen, ks);
@@ -835,6 +842,7 @@ static void ws_handle_command(const char *msg, int len) {
         s->chemCalibOffset = 0;
         s->brightness = 100;
         s->volume = 60;
+        s->language = LANG_EN;   /* applied at next boot */
 #if defined(DISPLAY_DRIVER_ST7701)
         st7701_lcd_set_user_brightness(s->brightness);
 #endif

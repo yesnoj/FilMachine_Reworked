@@ -15,12 +15,28 @@ static uint32_t rollerSelected;
 static bool isScrolled = false;
 static char tempBuffer[24];
 
+/* Reboot deferred by a one-shot timer so the "language changed" popup
+ * has time to render before the restart. No-op in the simulator. */
+static void language_reboot_timer_cb(lv_timer_t *t) {
+    (void)t;
+    rebootBoard();
+}
+
 static void roller_popup_close(void)
 {
   lv_style_reset(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
   lv_style_reset(&gui.element.rollerPopup.style_roller);
   lv_msgbox_close(gui.element.rollerPopup.mBoxRollerParent);
   gui.element.rollerPopup.mBoxRollerParent = NULL;
+}
+
+/* Cancel button: close the roller popup without applying the selection. */
+static void event_RollerCancel(lv_event_t *e)
+{
+  (void)e;
+  LV_LOG_USER("Roller popup canceled");
+  isScrolled = false;
+  roller_popup_close();
 }
 
 static bool roller_apply_context(sRollerOwnerContext *ctx)
@@ -299,6 +315,31 @@ void event_Roller(lv_event_t * e)
               }
               return;
             }
+            /* ── Settings UI Language roller ── */
+            if((lv_obj_t *)data == gui.page.settings.languageTextArea) {
+              const char *langs[] = languageValues;
+              uint32_t sel = isScrolled ? rollerSelected : lv_roller_get_selected(gui.element.rollerPopup.roller);
+              if(sel > 1) sel = 0;
+              isScrolled = false;
+              lv_style_reset(&gui.element.rollerPopup.style_mBoxRollerTitleLine);
+              lv_style_reset(&gui.element.rollerPopup.style_roller);
+              lv_msgbox_close(gui.element.rollerPopup.mBoxRollerParent);
+              gui.element.rollerPopup.mBoxRollerParent = NULL;
+
+              if((uint8_t)sel == gui.page.settings.settingsParams.language) return;  /* unchanged */
+
+              LV_LOG_USER("SET Language: %s (value=%lu)", langs[sel], (unsigned long)sel);
+              gui.page.settings.settingsParams.language = (uint8_t)sel;
+              lv_textarea_set_text(gui.page.settings.languageTextArea, langs[sel]);
+
+              /* Save synchronously (the queued SAVE would race the reboot),
+               * tell the user, then reboot to rebuild the UI in the new language. */
+              writeConfigFile(FILENAME_SAVE, true);
+              messagePopupCreate(languageRebootTitle_text, languageRebootBody_text, NULL, NULL, NULL);
+              lv_timer_t *t = lv_timer_create(language_reboot_timer_cb, 2500, NULL);
+              lv_timer_set_repeat_count(t, 1);
+              return;
+            }
             /* ── Splash Popup: Palette roller ── */
             if((lv_obj_t *)data == gui.element.splashPopup.paletteTextArea) {
               extern const char * const palette_display[];
@@ -424,16 +465,33 @@ void rollerPopupCreate(const char * tempOptions,const char * popupTitle, void *w
   lv_obj_set_style_border_color(gui.element.rollerPopup.roller, lv_color_hex(WHITE), LV_PART_MAIN);
 
 
-   gui.element.rollerPopup.mBoxRollerButton = lv_button_create(gui.element.rollerPopup.mBoxRollerRollerContainer);
-   lv_obj_set_size(gui.element.rollerPopup.mBoxRollerButton, ui->confirm_btn_w, ui->confirm_btn_h);
-   lv_obj_align(gui.element.rollerPopup.mBoxRollerButton, LV_ALIGN_BOTTOM_MID, ui->confirm_btn_x , ui->confirm_btn_y);
+   /* Cancel/Set buttons: pixel-identical to the Volume (speed) tune popup —
+    * same parent level (popup container), size, margins, colors and font. */
+   {
+   const lv_font_t *btnFont = ui_get_profile()->clean_popup.button_font;
+
+   gui.element.rollerPopup.mBoxRollerCancelButton = lv_button_create(gui.element.rollerPopup.mBoxRollerContainer);
+   lv_obj_set_size(gui.element.rollerPopup.mBoxRollerCancelButton, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
+   lv_obj_align(gui.element.rollerPopup.mBoxRollerCancelButton, LV_ALIGN_BOTTOM_LEFT, 15, 10);
+   lv_obj_set_style_bg_color(gui.element.rollerPopup.mBoxRollerCancelButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
+   lv_obj_add_event_cb(gui.element.rollerPopup.mBoxRollerCancelButton, event_RollerCancel, LV_EVENT_CLICKED, NULL);
+
+         gui.element.rollerPopup.mBoxRollerCancelButtonLabel = lv_label_create(gui.element.rollerPopup.mBoxRollerCancelButton);
+         lv_label_set_text(gui.element.rollerPopup.mBoxRollerCancelButtonLabel, buttonCancel_text);
+         lv_obj_set_style_text_font(gui.element.rollerPopup.mBoxRollerCancelButtonLabel, btnFont, 0);
+         lv_obj_align(gui.element.rollerPopup.mBoxRollerCancelButtonLabel, LV_ALIGN_CENTER, 0, 0);
+
+   gui.element.rollerPopup.mBoxRollerButton = lv_button_create(gui.element.rollerPopup.mBoxRollerContainer);
+   lv_obj_set_size(gui.element.rollerPopup.mBoxRollerButton, BUTTON_MBOX_WIDTH, BUTTON_MBOX_HEIGHT);
+   lv_obj_align(gui.element.rollerPopup.mBoxRollerButton, LV_ALIGN_BOTTOM_RIGHT, -15, 10);
+   lv_obj_set_style_bg_color(gui.element.rollerPopup.mBoxRollerButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
    lv_obj_add_event_cb(gui.element.rollerPopup.mBoxRollerButton, event_Roller, LV_EVENT_CLICKED, gui.element.rollerPopup.whoCallMe);
    lv_roller_set_selected(gui.element.rollerPopup.roller, currentVal, LV_ANIM_OFF);
-        
 
-         gui.element.rollerPopup.mBoxRollerButtonLabel = lv_label_create(gui.element.rollerPopup.mBoxRollerButton);         
-         lv_label_set_text(gui.element.rollerPopup.mBoxRollerButtonLabel, tuneRollerButton_text); 
-         lv_obj_set_style_text_font(gui.element.rollerPopup.mBoxRollerButtonLabel, ui->confirm_btn_font, 0);              
+         gui.element.rollerPopup.mBoxRollerButtonLabel = lv_label_create(gui.element.rollerPopup.mBoxRollerButton);
+         lv_label_set_text(gui.element.rollerPopup.mBoxRollerButtonLabel, tuneRollerButton_text);
+         lv_obj_set_style_text_font(gui.element.rollerPopup.mBoxRollerButtonLabel, btnFont, 0);
          lv_obj_align(gui.element.rollerPopup.mBoxRollerButtonLabel, LV_ALIGN_CENTER, 0, 0);
+   }
 }
 

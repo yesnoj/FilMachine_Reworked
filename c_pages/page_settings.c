@@ -53,7 +53,8 @@ uint8_t analogVal_rotationSpeedPercent;
 /* Chem/WB capacity rows removed — fill times are now self-calibrated from the
  * MIN/MAX sensors (Maintenance fills). Chem volume follows tank size directly. */
 #define Y_CHEM_VOLUME                (Y_TANK_SIZE + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_SPLASH_SCREEN              (Y_CHEM_VOLUME + SETTINGS_H_ROW + SETTINGS_GAP_Y)
+#define Y_LANGUAGE                   (Y_CHEM_VOLUME + SETTINGS_H_ROW + SETTINGS_GAP_Y)
+#define Y_SPLASH_SCREEN              (Y_LANGUAGE + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #define Y_WIFI_ROW                   (Y_SPLASH_SCREEN + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 #define Y_RESET_ROW                  (Y_WIFI_ROW + SETTINGS_H_ROW + SETTINGS_GAP_Y)
 
@@ -120,6 +121,9 @@ void event_settingPopupMBox(lv_event_t * e){
     if(data == gui.page.settings.volumeLabel) {
         messagePopupCreate(messagePopupDetailTitle_text,volumeAlertMBox_text,NULL,NULL,NULL);
     }
+    if(data == gui.page.settings.languageLabel) {
+        messagePopupCreate(messagePopupDetailTitle_text,languageAlertMBox_text,NULL,NULL,NULL);
+    }
     if(data == gui.page.settings.chemVolumeLabel) {
         messagePopupCreate(messagePopupDetailTitle_text,chemistryVolumeAlertMBox_text,NULL,NULL,NULL);
     }
@@ -166,6 +170,7 @@ void settingsApplyFactoryDefaults(void)
     p->chemCalibOffset = 0;
     p->chemCalibFillSecs = 0;       /* uncalibrated (was chemContainerMl) */
     p->wbCalibFillSecs = 0;         /* uncalibrated (was wbContainerMl) */
+    p->language = LANG_EN;          /* applied at next boot */
 
     refreshSettingsUI();            /* update all UI widgets */
     qSysAction(SAVE_PROCESS_CONFIG);/* persist to SD */
@@ -182,7 +187,7 @@ void event_settings_handler(lv_event_t * e)
 
     /*Do nothing if the container was clicked*/
 
-    if(act_cb == cont && cont != gui.page.settings.waterInletSwitch && cont != gui.page.settings.tempSensorTuneButton && cont != gui.page.settings.filmRotationSpeedSlider && cont != gui.page.settings.filmRotationInversionIntervalSlider && cont != gui.page.settings.filmRandomSlider && cont != gui.page.settings.persistentAlarmSwitch && cont != gui.page.settings.invertPumpSwitch && cont != gui.page.settings.autostartSwitch && cont != gui.page.settings.drainFillTimeSlider && cont != gui.page.settings.multiRinseTimeSlider && cont != gui.page.settings.lineRinseSwitch && cont != gui.page.settings.lineRinseTimeSlider && cont != gui.page.settings.tankSizeTextArea && cont != gui.page.settings.pumpSpeedSlider && cont != gui.page.settings.brightnessSlider && cont != gui.page.settings.chemVolumeTextArea && cont != gui.page.settings.splashButton && cont != gui.page.settings.wifiButton && cont != gui.page.settings.resetButton)
+    if(act_cb == cont && cont != gui.page.settings.waterInletSwitch && cont != gui.page.settings.tempSensorTuneButton && cont != gui.page.settings.filmRotationSpeedSlider && cont != gui.page.settings.filmRotationInversionIntervalSlider && cont != gui.page.settings.filmRandomSlider && cont != gui.page.settings.persistentAlarmSwitch && cont != gui.page.settings.invertPumpSwitch && cont != gui.page.settings.autostartSwitch && cont != gui.page.settings.drainFillTimeSlider && cont != gui.page.settings.multiRinseTimeSlider && cont != gui.page.settings.lineRinseSwitch && cont != gui.page.settings.lineRinseTimeSlider && cont != gui.page.settings.tankSizeTextArea && cont != gui.page.settings.pumpSpeedSlider && cont != gui.page.settings.brightnessSlider && cont != gui.page.settings.chemVolumeTextArea && cont != gui.page.settings.languageTextArea && cont != gui.page.settings.splashButton && cont != gui.page.settings.wifiButton && cont != gui.page.settings.resetButton)
       return;
 
     if(act_cb == gui.page.settings.tempUnitCelsiusRadioButton || act_cb == gui.page.settings.tempUnitFahrenheitRadioButton){
@@ -415,6 +420,16 @@ void event_settings_handler(lv_event_t * e)
             LV_LOG_USER("Set Chemistry Volume");
             uint32_t idx = gui.page.settings.settingsParams.chemistryVolume >= 2 ? 1 : 0;
             rollerPopupCreate(chemistryVolumeList, chemistryVolume_text, act_cb, idx, ORANGE);
+        }
+    }
+
+    /* ── UI language roller ── */
+    if(act_cb == gui.page.settings.languageTextArea) {
+        if(code == LV_EVENT_FOCUSED) {
+            if(gui.element.rollerPopup.mBoxRollerParent != NULL) return;
+            LV_LOG_USER("Set Language");
+            uint32_t idx = gui.page.settings.settingsParams.language == LANG_IT ? 1 : 0;
+            rollerPopupCreate(languageList, language_text, act_cb, idx, ORANGE);
         }
     }
 
@@ -982,6 +997,37 @@ gui.page.settings.chemVolumeContainer = lv_obj_create(parent);
             lv_textarea_set_text(gui.page.settings.chemVolumeTextArea, vols[v - 1]);
         }
 
+  /* ── UI Language ── */
+  gui.page.settings.languageContainer = lv_obj_create(parent);
+  lv_obj_align(gui.page.settings.languageContainer, LV_ALIGN_TOP_LEFT, SETTINGS_LEFT_X, Y_LANGUAGE);
+  lv_obj_set_size(gui.page.settings.languageContainer, UI_SETTINGS->row_w, SETTINGS_H_ROW);
+  lv_obj_remove_flag(gui.page.settings.languageContainer, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_style_border_opa(gui.page.settings.languageContainer, LV_OPA_TRANSP, 0);
+
+        gui.page.settings.languageLabel = lv_label_create(gui.page.settings.languageContainer);
+        lv_label_set_text(gui.page.settings.languageLabel, language_text);
+        lv_obj_set_style_text_font(gui.page.settings.languageLabel, UI_SETTINGS->label_font, 0);
+        lv_obj_align(gui.page.settings.languageLabel, LV_ALIGN_LEFT_MID, UI_SETTINGS->row_label_x, UI_SETTINGS->row_label_y);
+
+        createQuestionMark(gui.page.settings.languageContainer,gui.page.settings.languageLabel,event_settingPopupMBox, UI_SETTINGS->help_icon_x, UI_SETTINGS->help_icon_y);
+
+        gui.page.settings.languageTextArea = lv_textarea_create(gui.page.settings.languageContainer);
+        lv_obj_set_size(gui.page.settings.languageTextArea, UI_SETTINGS->textarea_w, UI_SETTINGS->textarea_h);
+        lv_obj_align(gui.page.settings.languageTextArea, LV_ALIGN_RIGHT_MID, UI_SETTINGS->textarea_x, UI_SETTINGS->textarea_y);
+        lv_textarea_set_one_line(gui.page.settings.languageTextArea, true);
+        lv_obj_set_scrollbar_mode(gui.page.settings.languageTextArea, LV_SCROLLBAR_MODE_OFF);
+        lv_obj_set_style_bg_color(gui.page.settings.languageTextArea, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
+        lv_obj_set_style_text_align(gui.page.settings.languageTextArea, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_set_style_text_font(gui.page.settings.languageTextArea, UI_SETTINGS->label_font, 0);
+        lv_obj_set_style_border_color(gui.page.settings.languageTextArea, lv_color_hex(ORANGE), 0);
+        lv_obj_add_event_cb(gui.page.settings.languageTextArea, event_settings_handler, LV_EVENT_FOCUSED, NULL);
+        {
+            const char *langs[] = languageValues;
+            uint8_t l = gui.page.settings.settingsParams.language;
+            if(l > LANG_IT) l = LANG_EN;
+            lv_textarea_set_text(gui.page.settings.languageTextArea, langs[l]);
+        }
+
   /* ── Splash Screen ── */
   gui.page.settings.splashContainer = lv_obj_create(parent);
   lv_obj_align(gui.page.settings.splashContainer, LV_ALIGN_TOP_LEFT, SETTINGS_LEFT_X, Y_SPLASH_SCREEN);
@@ -1254,6 +1300,14 @@ void refreshSettingsUI(void)
         uint8_t v = p->chemistryVolume;
         if(v < 1 || v > 2) v = 2;
         lv_textarea_set_text(gui.page.settings.chemVolumeTextArea, vols[v - 1]);
+    }
+
+    /* ── UI language ── */
+    if (gui.page.settings.languageTextArea) {
+        const char *langs[] = languageValues;
+        uint8_t l = p->language;
+        if(l > LANG_IT) l = LANG_EN;
+        lv_textarea_set_text(gui.page.settings.languageTextArea, langs[l]);
     }
 
     LV_LOG_USER("Settings UI refreshed from config");

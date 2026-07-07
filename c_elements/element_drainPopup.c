@@ -83,10 +83,10 @@ static void drain_timer_cb(lv_timer_t *timer) {
     lv_label_set_text_fmt(dp->drainStatusLabel, drainDrainingFmt_text, tankNames[tank]);
     if (rem >= 60)
         lv_label_set_text_fmt(dp->drainTimeLabel,
-                              "Time left: %ldm %02lds", (long)(rem / 60), (long)(rem % 60));
+                              timeLeftMinFmt_text, (long)(rem / 60), (long)(rem % 60));
     else
         lv_label_set_text_fmt(dp->drainTimeLabel,
-                              "Time left: %lds", (long)rem);
+                              timeLeftSecFmt_text, (long)rem);
 
     /* --- Current tank finished? (time estimate, or the float says empty) --- */
     bool sensorEmpty = false;
@@ -215,7 +215,7 @@ static void drain_start(void) {
                                 lv_color_hex(WHITE), LV_PART_MAIN);
     int32_t tot = totalDrainTime();
     lv_label_set_text_fmt(dp->drainTimeLabel,
-                          "Time left: %ldm %02lds", (long)(tot / 60), (long)(tot % 60));
+                          timeLeftMinFmt_text, (long)(tot / 60), (long)(tot % 60));
     lv_label_set_text(dp->drainWasteLabel, "");
     lv_obj_add_flag(dp->drainWasteLabel, LV_OBJ_FLAG_HIDDEN);
 
@@ -306,11 +306,7 @@ void drainPopupCreate(void) {
 
     /* Info text */
     dp->drainInfoLabel = lv_label_create(dp->drainConfirmContainer);
-    lv_label_set_text(dp->drainInfoLabel,
-        "All containers and the water\n"
-        "bath will be drained to waste.\n\n"
-        "Containers:  C1   C2   C3\n"
-        "Water Bath:  WB");
+    lv_label_set_text(dp->drainInfoLabel, drainConfirmBody_text);
     lv_obj_set_style_text_font(dp->drainInfoLabel,
                                ui->info_font, 0);
     lv_obj_set_style_text_align(dp->drainInfoLabel,

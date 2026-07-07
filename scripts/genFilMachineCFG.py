@@ -187,6 +187,8 @@ DEFAULT_SETTINGS = {
     # ── New fields (end of struct) ──
     "invertPump": 0,
     "chemCalibOffset": 0,
+    # ── UI language ──
+    "language": 0,            # 0=English, 1=Italiano
 }
 
 def random_settings():
@@ -333,6 +335,7 @@ def write_settings(f, s):
     # ── New fields (end of struct for binary compat) ──
     f.write(struct.pack('<B', s.get("invertPump", 0)))       # bool (invert pump direction)
     f.write(struct.pack('<b', s.get("chemCalibOffset", 0)))  # int8_t chemical temp offset (tenths of degree)
+    f.write(struct.pack('<B', s.get("language", 0)))         # uint8_t UI language (0=EN, 1=IT)
 
 def write_process(f, p):
     f.write(p["processNameString"].encode('ASCII').ljust(MAX_PROC_NAME_LEN + 1, b'\x00'))

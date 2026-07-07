@@ -372,6 +372,14 @@ static void step_detail_apply_readonly(sStepDetail *sd) {
     for (unsigned i = 0; i < sizeof(fields) / sizeof(fields[0]); i++)
         if (fields[i]) lv_obj_remove_flag(fields[i], LV_OBJ_FLAG_CLICKABLE);
 
+    /* No blinking cursor while read-only — the cursor is the "you can edit
+     * this" cue, so it only belongs to edit mode. */
+    for (unsigned i = 0; i < sizeof(fields) / sizeof(fields[0]); i++) {
+        if (!fields[i]) continue;
+        lv_obj_remove_state(fields[i], LV_STATE_FOCUSED);
+        lv_obj_set_style_opa(fields[i], LV_OPA_TRANSP, LV_PART_CURSOR);
+    }
+
     if (sd->stepTypeDropDownList)   lv_obj_add_state(sd->stepTypeDropDownList, LV_STATE_DISABLED);
     if (sd->stepSourceDropDownList) lv_obj_add_state(sd->stepSourceDropDownList, LV_STATE_DISABLED);
     if (sd->stepDiscardAfterSwitch) lv_obj_add_state(sd->stepDiscardAfterSwitch, LV_STATE_DISABLED);

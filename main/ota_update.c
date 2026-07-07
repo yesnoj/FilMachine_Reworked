@@ -118,7 +118,7 @@ bool ota_wifi_server_start(void) {
     LV_LOG_USER("[OTA] Starting Wi-Fi update server (simulated)");
     sim_wifi_server = true;
     snprintf(sim_ip_addr, sizeof(sim_ip_addr), "192.168.1.42");
-    snprintf(sim_ota_status, sizeof(sim_ota_status), "Server running");
+    snprintf(sim_ota_status, sizeof(sim_ota_status), "%s", otaServerRunning_text);
     LV_LOG_USER("[OTA] Web server at http://%s", sim_ip_addr);
     return true;
 }
@@ -447,7 +447,7 @@ static esp_err_t ota_upload_handler(httpd_req_t *req) {
 
     ota_running = true;
     ota_progress = 0;
-    snprintf(ota_status, sizeof(ota_status), "Receiving firmware...");
+    snprintf(ota_status, sizeof(ota_status), "%s", otaReceiving_text);
 
     char *buf = malloc(OTA_BUF_SIZE);
     if (!buf) {
@@ -482,7 +482,7 @@ static esp_err_t ota_upload_handler(httpd_req_t *req) {
         received += n;
         if (total > 0) {
             ota_progress = (received * 100) / total;
-            snprintf(ota_status, sizeof(ota_status), "Writing firmware...");
+            snprintf(ota_status, sizeof(ota_status), "%s", otaWriting_text);
         }
     }
 
@@ -514,7 +514,7 @@ static esp_err_t ota_upload_handler(httpd_req_t *req) {
     }
 
     ota_progress = 100;
-    snprintf(ota_status, sizeof(ota_status), "Update complete! Rebooting...");
+    snprintf(ota_status, sizeof(ota_status), "%s", otaCompleteRebooting_text);
     ESP_LOGI(TAG, "OTA complete. Received %d bytes. Rebooting in 2s...", received);
 
     httpd_resp_sendstr(req, "OK");
@@ -804,9 +804,9 @@ static bool ota_write_from_stream(
         written += n;
         if (total_size > 0) {
             ota_progress = (written * 100) / total_size;
-            snprintf(ota_status, sizeof(ota_status), "Writing firmware...");
+            snprintf(ota_status, sizeof(ota_status), "%s", otaWriting_text);
         } else {
-            snprintf(ota_status, sizeof(ota_status), "Writing firmware...");
+            snprintf(ota_status, sizeof(ota_status), "%s", otaWriting_text);
         }
 
         /* Yield briefly so the DPI display controller can refresh the
@@ -833,7 +833,7 @@ static bool ota_write_from_stream(
 
     ota_progress = 100;
     ota_running = false;
-    snprintf(ota_status, sizeof(ota_status), "Update complete! Reboot required.");
+    snprintf(ota_status, sizeof(ota_status), "%s", otaCompleteRebootReq_text);
     ESP_LOGI(TAG, "SD OTA complete. Written %d bytes.", written);
     return true;
 }
@@ -891,7 +891,7 @@ static void ota_sd_task(void *arg) {
     }
 
     int total_size = (int)f_size(&ctx->file);
-    snprintf(ota_status, sizeof(ota_status), "Reading SD card...");
+    snprintf(ota_status, sizeof(ota_status), "%s", otaReadingSD_text);
     ESP_LOGI(TAG, "Starting SD OTA, size: %d bytes", total_size);
 
     ota_write_from_stream(sd_read_fn, ctx, total_size);
@@ -1052,7 +1052,7 @@ static void fw_wifi_event_handler(void *arg, esp_event_base_t event_base,
         /* If OTA web server was requested, start it now that we have an IP */
         if (ota_httpd == NULL) {
             ota_start_webserver();
-            snprintf(ota_status, sizeof(ota_status), "Server running");
+            snprintf(ota_status, sizeof(ota_status), "%s", otaServerRunning_text);
         }
     }
 }

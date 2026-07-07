@@ -8,6 +8,8 @@
 #ifndef MAIN_FILMACHINE_H_
 #define MAIN_FILMACHINE_H_
 
+#include "lang.h"
+
 #include "freertos/FreeRTOS.h"
 #include "lvgl.h"
 
@@ -78,10 +80,9 @@ void sim_ui_debug_tag(lv_obj_t *obj, const char *name);
 #define INIT_ERROR_WIRE				2
 #define INIT_ERROR_I2C_MCP			3
 #define INIT_ERROR_I2C_ADS			4
-#define initSDError_text			"INITIALIZATION ERROR!\nSD-CARD FAILURE!\nFIX SD-CARD!\nTHEN CLICK ON ICON TO REBOOT!"
-#define initI2CError_text			"INITIALIZATION ERROR!\nI2C MODULE FAILURE\nFIX IT!\nTHEN CLICK ON ICON TO REBOOT!"
-#define initWIREError_text			"INITIALIZATION ERROR!\nINIT WIRE FAILURE\nFIX IT!\nTHEN CLICK ON ICON TO REBOOT!"
-
+#define initSDError_text	tr(STR_initSDError_text)
+#define initI2CError_text	tr(STR_initI2CError_text)
+#define initWIREError_text	tr(STR_initWIREError_text)
 /* ACCESSORY STRUCTS */
 typedef enum{
     STEP_NODE,
@@ -124,75 +125,69 @@ typedef enum {
 #define POPUP_HEIGHT				(ui_get_profile()->popups.message_h)
 
 /* Splash screen strings */
-#define splashTitle_text						"FILMACHINE"
-#define splashSubtitle_text						"Digital Film Developer"
+#define splashTitle_text	tr(STR_splashTitle_text)
+#define splashSubtitle_text	tr(STR_splashSubtitle_text)
 #define splashVersion_text						softwareVersionValue_text
 
 /* Splash popup strings */
-#define splashPopupTitle_text					"Splash Screen"
-#define splashPopupUseDefault_text				"Use Default"
-#define splashPopupRandom_text					"Random next boot"
+#define splashPopupTitle_text	tr(STR_splashPopupTitle_text)
+#define splashPopupUseDefault_text	tr(STR_splashPopupUseDefault_text)
+#define splashPopupRandom_text	tr(STR_splashPopupRandom_text)
 #define splashPopupRandomBtn_text				LV_SYMBOL_SHUFFLE " Random"
-#define splashPopupPalette_text					"Palette"
-#define splashPopupShapeStyle_text				"Shape Style"
-#define splashPopupComplexity_text				"Complexity"
-
+#define splashPopupPalette_text	tr(STR_splashPopupPalette_text)
+#define splashPopupShapeStyle_text	tr(STR_splashPopupShapeStyle_text)
+#define splashPopupComplexity_text	tr(STR_splashPopupComplexity_text)
 /* Settings row strings */
-#define settingsSplashScreen_text				"Splash Screen"
-
+#define settingsSplashScreen_text	tr(STR_settingsSplashScreen_text)
 /* Wi-Fi / Remote control section strings */
-#define settingsWifi_text                       "Wi-Fi"
-#define settingsReset_text                      "Reset to Defaults"
-#define settingsResetPopupTitle_text             "Settings Reset"
-#define settingsResetPopupBody_text              "All settings restored\nto factory defaults."
-#define settingsResetConfirmTitle_text           "Reset settings?"
-#define settingsResetConfirmBody_text            "Restore ALL settings to\nfactory defaults?"
-#define buttonOk_text                            "OK"
-#define wifiPopupTitle_text                     "Wi-Fi"
-#define wifiScan_text                           "Scan"
-#define wifiConnect_text                        "Connect"
-#define wifiDisconnect_text                     "Disconnect"
-#define wifiConnected_text                      "Connected to:"
-#define wifiDisconnected_text                   "Not connected"
-#define wifiConnecting_text                     "Connecting..."
-#define wifiScanning_text                       "Scanning..."
-#define wifiAutoConnect_text                    "Auto-connect"
-#define wifiEnterPassword_text                  "Enter password"
-#define wifiNoNetworks_text                     "No networks found"
-#define wifiErrorTitle_text                     "Wi-Fi Error"
-#define wifiErrAuthFailed_text                  "Authentication failed\n(wrong password)"
-#define wifiErrHandshakeTimeout_text            "Handshake timeout\n(wrong password or WPA3 mismatch)"
-#define wifiErrMicFailure_text                  "MIC failure\n(wrong password)"
-#define wifiErrGroupKeyTimeout_text             "Handshake timeout\n(group key)"
-#define wifiErrApNotFound_text                  "Network not found\n(AP_NOT_FOUND)"
-#define wifiErrApNotFoundGeneric_text           "Network not found"
-#define wifiErrAuthExpired_text                 "Authentication expired\n(AUTH_EXPIRE)"
-#define wifiErrClass2Frame_text                 "Class 2 frame from\nnon-authenticated station"
-#define wifiErrClass3Frame_text                 "Class 3 frame from\nnon-associated station"
-#define wifiErrConnectionFail_text              "Connection failed\n(CONNECTION_FAIL)"
-#define wifiErrBeaconTimeout_text               "Beacon timeout\n(signal lost)"
-#define wifiErrUnknownFmt_text                  "Connection failed\n(reason code: %d)"
-#define wifiForgetTitle_text                    "Forget Network"
-#define wifiForgetBody_text                     "Remove saved credentials\nfor this network?"
-#define wifiForgetYes_text                      "Forget"
-#define wifiForgetNo_text                       "Cancel"
-
+#define settingsWifi_text	tr(STR_settingsWifi_text)
+#define settingsReset_text	tr(STR_settingsReset_text)
+#define settingsResetPopupTitle_text	tr(STR_settingsResetPopupTitle_text)
+#define settingsResetPopupBody_text	tr(STR_settingsResetPopupBody_text)
+#define settingsResetConfirmTitle_text	tr(STR_settingsResetConfirmTitle_text)
+#define settingsResetConfirmBody_text	tr(STR_settingsResetConfirmBody_text)
+#define buttonOk_text	tr(STR_buttonOk_text)
+#define wifiPopupTitle_text	tr(STR_wifiPopupTitle_text)
+#define wifiScan_text	tr(STR_wifiScan_text)
+#define wifiConnect_text	tr(STR_wifiConnect_text)
+#define wifiDisconnect_text	tr(STR_wifiDisconnect_text)
+#define wifiConnected_text	tr(STR_wifiConnected_text)
+#define wifiDisconnected_text	tr(STR_wifiDisconnected_text)
+#define wifiConnecting_text	tr(STR_wifiConnecting_text)
+#define wifiScanning_text	tr(STR_wifiScanning_text)
+#define wifiAutoConnect_text	tr(STR_wifiAutoConnect_text)
+#define wifiEnterPassword_text	tr(STR_wifiEnterPassword_text)
+#define wifiNoNetworks_text	tr(STR_wifiNoNetworks_text)
+#define wifiErrorTitle_text	tr(STR_wifiErrorTitle_text)
+#define wifiErrAuthFailed_text	tr(STR_wifiErrAuthFailed_text)
+#define wifiErrHandshakeTimeout_text	tr(STR_wifiErrHandshakeTimeout_text)
+#define wifiErrMicFailure_text	tr(STR_wifiErrMicFailure_text)
+#define wifiErrGroupKeyTimeout_text	tr(STR_wifiErrGroupKeyTimeout_text)
+#define wifiErrApNotFound_text	tr(STR_wifiErrApNotFound_text)
+#define wifiErrApNotFoundGeneric_text	tr(STR_wifiErrApNotFoundGeneric_text)
+#define wifiErrAuthExpired_text	tr(STR_wifiErrAuthExpired_text)
+#define wifiErrClass2Frame_text	tr(STR_wifiErrClass2Frame_text)
+#define wifiErrClass3Frame_text	tr(STR_wifiErrClass3Frame_text)
+#define wifiErrConnectionFail_text	tr(STR_wifiErrConnectionFail_text)
+#define wifiErrBeaconTimeout_text	tr(STR_wifiErrBeaconTimeout_text)
+#define wifiErrUnknownFmt_text	tr(STR_wifiErrUnknownFmt_text)
+#define wifiForgetTitle_text	tr(STR_wifiForgetTitle_text)
+#define wifiForgetBody_text	tr(STR_wifiForgetBody_text)
+#define wifiForgetYes_text	tr(STR_wifiForgetYes_text)
+#define wifiForgetNo_text	tr(STR_wifiForgetNo_text)
 /* Checkup placeholder */
-#define checkupEllipsis_text					"..."
-
+#define checkupEllipsis_text	tr(STR_checkupEllipsis_text)
 /* Temperature roller range */
 #define TEMP_ROLLER_MIN  15
 #define TEMP_ROLLER_MAX  40
 
 /* Discard unsaved changes popup */
-#define discardChangesTitle_text                "Unsaved Changes"
-#define discardChangesBody_text                 "Close without saving?\nAll changes will be lost."
-#define discardChangesNo_text                   "Cancel"
-#define discardChangesYes_text                  "Discard"
-
+#define discardChangesTitle_text	tr(STR_discardChangesTitle_text)
+#define discardChangesBody_text	tr(STR_discardChangesBody_text)
+#define discardChangesNo_text	tr(STR_discardChangesNo_text)
+#define discardChangesYes_text	tr(STR_discardChangesYes_text)
 /* Step source format */
-#define stepSourceFmt_text						"From:%s"
-
+#define stepSourceFmt_text	tr(STR_stepSourceFmt_text)
 /* Icon Characters */
 #define plusplus_icon2				"\xC2\xB1"
 #define tabProcess_label			"Process list"
@@ -211,7 +206,7 @@ typedef enum {
 #define closePopup_icon				"\xEF\x80\x8D"
 #define play_icon					"\xEF\x81\x8B"
 #define save_icon					"\xEF\x83\x87"
-#define processModify_text			"Edit"
+#define processModify_text	tr(STR_processModify_text)
 #define trash_icon					"\xEF\x8B\xAD"
 #define chemical_icon				"\xEF\x83\x83"
 #define rinse_icon                  "\xEF\x8B\x8C"
@@ -259,303 +254,334 @@ typedef enum {
 /*********************
 * Process tab strings
 *********************/
-#define buttonFilter_text 				 			"Filters"
-#define Processes_text 					 			"Processes"
-#define keyboard_placeholder_text 		 			"Write film name..."
-#define filterPopupTitle_text 			 			"Process list filter"
-#define filterPopupNamePlaceHolder_text  			"Part of name to filter"
-#define filterPopupName_text 			 			"Name"
-#define filterPopupColor_text 			 			"Color"
-#define filterPopupBnW_text 			 			"B&W"
-#define filterPopupBoth_text 			 			"Both"
-#define filterPopupPreferred_text 		 			"Preferred"
-#define filterPopupApplyButton_text 	 			"Apply"
-#define filterPopupResetButton_text 	 			"Reset"
-
+#define buttonFilter_text	tr(STR_buttonFilter_text)
+#define Processes_text	tr(STR_Processes_text)
+#define keyboard_placeholder_text	tr(STR_keyboard_placeholder_text)
+#define filterPopupTitle_text	tr(STR_filterPopupTitle_text)
+#define filterPopupNamePlaceHolder_text	tr(STR_filterPopupNamePlaceHolder_text)
+#define filterPopupName_text	tr(STR_filterPopupName_text)
+#define filterPopupColor_text	tr(STR_filterPopupColor_text)
+#define filterPopupBnW_text	tr(STR_filterPopupBnW_text)
+#define filterPopupBoth_text	tr(STR_filterPopupBoth_text)
+#define filterPopupPreferred_text	tr(STR_filterPopupPreferred_text)
+#define filterPopupApplyButton_text	tr(STR_filterPopupApplyButton_text)
+#define filterPopupResetButton_text	tr(STR_filterPopupResetButton_text)
 /*********************
 * Config tab strings
 *********************/
-#define Settings_text 								"Machine settings"
-#define tempUnit_text 								"Temperature unit"
-#define tempSensorTuning_text 						"Calibrated temperature"
-#define tuneButton_text 							"TUNE"
-#define tempAlertMBox_text							"Ensure stable machine temperature, measure ambient air, input the value, and press 'Tune'. For resetting, long-press 'Tune'."
-#define soundAlertMBox_text 						"Continue to sound the alert when a process is about to end or when the heating phase reaches the desired temperature."
-#define autostartAlertMBox_text 					"When the desired temperature is reached, automatically initiate the temperature-controlled process."
-#define filmRotationSpeedAlertMBox_text 			"Stated as rpm, with a range of 20 to 90 revolutions per minute."
-#define rotationInverseIntervalAlertMBox_text 		"The duration, which may be adjusted between 5 and 60 seconds,during which the film will spin in one direction before moving to the other."
-#define filmRotationRandomAlertMBox_text 			"Introduce random variation to inversion times for consistent development, e.g.,10% randomization on a 10-second inversion yields times between 8 and 10 seconds."
-#define drainFillTimeAlertMBox_text 				"Adjust the overlap of tank filling and draining times with processing times to affect the total processing time, as these actions cannot be rushed."
-#define multiRinseTimeAlertMBox_text 				"Sets the duration of a single multi-rinse wash cycle (not the entire step). Adjustable from 30 seconds to 3 minutes. Longer cycles are better for larger tanks, shorter for smaller ones. 2 minutes is a good default."
-#define waterInletAlertMBox_text 					"Tells the machine whether it's connected to a pressurized water source. If yes, the water bath will be automatically refilled. If no, you must manually fill the water bath."
-#define rotationSpeed_text 							"Rotation speed"
-#define rotationInversionInterval_text 				"Rotation inv. interval"
-#define rotationRandom_text 						"Random variation"
-#define celsius_text 								"°C"
-#define fahrenheit_text 							"°F"
-#define waterInlet_text 							"Water inlet link"
-#define persistentAlarm_text 						"Persistent alarms"
-#define autostart_text 								"Process autostart"
-#define drainFillTime_text 							"Drain/fill time overlap"
-#define multiRinseTime_text 						"Multi rinse cycle time"
-#define lineRinse_text 								"Rinse line after chemistry"
-#define lineRinseTime_text 							"Line rinse time"
-#define lineRinseAlertMBox_text 					"After each chemistry step, flush the shared pump line with clean water (from the water bath, discarded to waste) before drawing the next liquid. This clears chemistry residue from the common tubing to prevent cross-contamination between chemistries. Uses extra water, so keep an eye on the bath level if the water inlet isn't connected."
-#define tankSize_text                       "Tank size"
-#define tankSizeAlertMBox_text              "Select the default tank size.\nSmall, Medium, or Large."
-#define tankSizeSmall_text                  "S"
-#define tankSizeMedium_text                 "M"
-#define tankSizeLarge_text                  "L"
-#define pumpSpeed_text                      "Pump speed"
-#define pumpSpeedAlertMBox_text             "Set the pump speed percentage.\nHigher values = faster fill/drain."
-#define speedTestSwitch_text                "Test"
-#define speedSetPopupTitle_text             "Speed set"
-#define volume_text                         "Volume"
-#define volumeAlertMBox_text                "Set the speaker volume.\nThe tone plays as you scroll so you can hear it."
-#define volumeSetPopupTitle_text            "Volume set"
-#define invertPump_text                     "Invert pump"
-#define invertPumpAlertMBox_text            "Invert the pump rotation direction.\nUse this to compensate for the\nphysical switch position on the pump."
-#define brightness_text                     "Brightness"
-#define brightnessAlertMBox_text            "Set the LCD backlight brightness.\nAuto-dim: 1min \xe2\x86\x92 50%, 5min \xe2\x86\x92 20%,\n10min \xe2\x86\x92 off. Touch to wake."
-#define chemistryVolume_text                "Chemistry volume"
-#define splashScreenAlertMBox_text          "Customize the boot splash screen.\n\nUse Default: shows the standard\nDeep Ocean splash.\n\nRandom next boot: generates a\nnew random splash each boot.\n\nBoth off: choose Palette, Shape\nStyle and Complexity manually.\nPress Random to shuffle."
-#define chemistryVolumeAlertMBox_text       "Low: uses half the chemistry.\nHigh: fills the tank completely."
-#define chemistryVolumeList                 "Low\nHigh"
+#define Settings_text	tr(STR_Settings_text)
+#define tempUnit_text	tr(STR_tempUnit_text)
+#define tempSensorTuning_text	tr(STR_tempSensorTuning_text)
+#define tuneButton_text	tr(STR_tuneButton_text)
+#define tempAlertMBox_text	tr(STR_tempAlertMBox_text)
+#define soundAlertMBox_text	tr(STR_soundAlertMBox_text)
+#define autostartAlertMBox_text	tr(STR_autostartAlertMBox_text)
+#define filmRotationSpeedAlertMBox_text	tr(STR_filmRotationSpeedAlertMBox_text)
+#define rotationInverseIntervalAlertMBox_text	tr(STR_rotationInverseIntervalAlertMBox_text)
+#define filmRotationRandomAlertMBox_text	tr(STR_filmRotationRandomAlertMBox_text)
+#define drainFillTimeAlertMBox_text	tr(STR_drainFillTimeAlertMBox_text)
+#define multiRinseTimeAlertMBox_text	tr(STR_multiRinseTimeAlertMBox_text)
+#define waterInletAlertMBox_text	tr(STR_waterInletAlertMBox_text)
+#define rotationSpeed_text	tr(STR_rotationSpeed_text)
+#define rotationInversionInterval_text	tr(STR_rotationInversionInterval_text)
+#define rotationRandom_text	tr(STR_rotationRandom_text)
+#define celsius_text	tr(STR_celsius_text)
+#define fahrenheit_text	tr(STR_fahrenheit_text)
+#define waterInlet_text	tr(STR_waterInlet_text)
+#define persistentAlarm_text	tr(STR_persistentAlarm_text)
+#define autostart_text	tr(STR_autostart_text)
+#define drainFillTime_text	tr(STR_drainFillTime_text)
+#define multiRinseTime_text	tr(STR_multiRinseTime_text)
+#define lineRinse_text	tr(STR_lineRinse_text)
+#define lineRinseTime_text	tr(STR_lineRinseTime_text)
+#define lineRinseAlertMBox_text	tr(STR_lineRinseAlertMBox_text)
+#define tankSize_text	tr(STR_tankSize_text)
+#define tankSizeAlertMBox_text	tr(STR_tankSizeAlertMBox_text)
+#define tankSizeSmall_text	tr(STR_tankSizeSmall_text)
+#define tankSizeMedium_text	tr(STR_tankSizeMedium_text)
+#define tankSizeLarge_text	tr(STR_tankSizeLarge_text)
+#define pumpSpeed_text	tr(STR_pumpSpeed_text)
+#define pumpSpeedAlertMBox_text	tr(STR_pumpSpeedAlertMBox_text)
+#define speedTestSwitch_text	tr(STR_speedTestSwitch_text)
+#define speedSetPopupTitle_text	tr(STR_speedSetPopupTitle_text)
+#define volume_text	tr(STR_volume_text)
+#define volumeAlertMBox_text	tr(STR_volumeAlertMBox_text)
+#define volumeSetPopupTitle_text	tr(STR_volumeSetPopupTitle_text)
+#define invertPump_text	tr(STR_invertPump_text)
+#define invertPumpAlertMBox_text	tr(STR_invertPumpAlertMBox_text)
+#define brightness_text	tr(STR_brightness_text)
+#define brightnessAlertMBox_text	tr(STR_brightnessAlertMBox_text)
+#define chemistryVolume_text	tr(STR_chemistryVolume_text)
+#define splashScreenAlertMBox_text	tr(STR_splashScreenAlertMBox_text)
+#define chemistryVolumeAlertMBox_text	tr(STR_chemistryVolumeAlertMBox_text)
+#define chemistryVolumeList	tr(STR_chemistryVolumeList)
 
+/* Language setting (EN/IT) — added by gen_lang.py */
+#define language_text	tr(STR_language_text)
+#define languageAlertMBox_text	tr(STR_languageAlertMBox_text)
+#define languageSetPopupTitle_text	tr(STR_languageSetPopupTitle_text)
+#define languageRebootTitle_text	tr(STR_languageRebootTitle_text)
+#define languageRebootBody_text	tr(STR_languageRebootBody_text)
+#define languageList	tr(STR_languageList)
+
+/* Drain-machine & self-check strings (translated) */
+#define drainConfirmBody_text	tr(STR_drainConfirmBody_text)
+#define timeLeftMinFmt_text	tr(STR_timeLeftMinFmt_text)
+#define timeLeftSecFmt_text	tr(STR_timeLeftSecFmt_text)
+#define selfCheckDescTempSensors_text	tr(STR_selfCheckDescTempSensors_text)
+#define selfCheckDescWaterPump_text	tr(STR_selfCheckDescWaterPump_text)
+#define selfCheckDescHeater_text	tr(STR_selfCheckDescHeater_text)
+#define selfCheckDescValves_text	tr(STR_selfCheckDescValves_text)
+#define selfCheckDescC1_text	tr(STR_selfCheckDescC1_text)
+#define selfCheckDescC2_text	tr(STR_selfCheckDescC2_text)
+#define selfCheckDescC3_text	tr(STR_selfCheckDescC3_text)
+#define selfCheckDescMotor_text	tr(STR_selfCheckDescMotor_text)
+#define selfCheckWaterChemFmt_text	tr(STR_selfCheckWaterChemFmt_text)
+#define selfCheckPumpForward_text	tr(STR_selfCheckPumpForward_text)
+#define selfCheckPumpReverse_text	tr(STR_selfCheckPumpReverse_text)
+#define selfCheckPausing_text	tr(STR_selfCheckPausing_text)
+#define selfCheckPumpOk_text	tr(STR_selfCheckPumpOk_text)
+#define selfCheckWaterBathFmt_text	tr(STR_selfCheckWaterBathFmt_text)
+#define selfCheckAllValvesOk_text	tr(STR_selfCheckAllValvesOk_text)
+#define selfCheckFillingFromWB_text	tr(STR_selfCheckFillingFromWB_text)
+#define selfCheckDrainBackWB_text	tr(STR_selfCheckDrainBackWB_text)
+#define selfCheckDrainToWaste_text	tr(STR_selfCheckDrainToWaste_text)
+#define selfCheckFlowOk_text	tr(STR_selfCheckFlowOk_text)
+#define selfCheckForward_text	tr(STR_selfCheckForward_text)
+#define selfCheckReverse_text	tr(STR_selfCheckReverse_text)
+#define selfCheckMotorOk_text	tr(STR_selfCheckMotorOk_text)
+#define otaServerRunning_text	tr(STR_otaServerRunning_text)
+#define otaReceiving_text	tr(STR_otaReceiving_text)
+#define otaWriting_text	tr(STR_otaWriting_text)
+#define otaCompleteRebooting_text	tr(STR_otaCompleteRebooting_text)
+#define otaCompleteRebootReq_text	tr(STR_otaCompleteRebootReq_text)
+#define otaReadingSD_text	tr(STR_otaReadingSD_text)
 /* Checkup strings/vars */
-#define checkupNexStepsTitle_text 					"Next steps:"
-#define checkupProcessReady_text 					"Process starting..."
-#define checkupTheMachineWillDo_text 				"The machine will:"
-#define checkupFillWater_text 						"Fill the water bath"
-#define checkupTankRotation_text 					"Check tank presence and film rotation"
-#define checkupReachTemp_text 						"Reach the chemistry target temperature"
-#define checkupStop_text 							"Stop"
-#define checkupStart_text 							"Start"
-#define checkupSkip_text 							"Skip"
-#define checkupStopNow_text 						"Stop now!"
-#define checkupStopAfter_text 						"Stop after!"
-#define checkupProcessingTitle_text 				"Processing:"
-#define checkupStepSource_text 						"Step source:"
-#define checkupTempControl_text 					"Temp. control:"
-#define checkupWaterTemp_text 						"Water temp:"
-#define checkupNextStep_text						"Next step:"
-#define checkupSelectBeforeStart_text 				"Select the tank size and chemistry amount and click the 'Start' button"
-#define checkupTankSize_text 						"Selected tank size"
-#define checkupChemistryVolume_text 				"Selected volume"
-#define checkupMinimumChemistry_text 				"Minimum required chemistry : 500ml"
-#define checkupFillWaterMachine_text 				"The machine is not connected to a water source.\n\nFill the water bath manually up to the top water level sensor"
-#define checkupTargetTemp_text 						"Target temperature"
-#define checkupWater_text 							"Water"
-#define checkupChemistry_text 						"Chemistry"
-#define checkupTankPosition_text 					"Tank is in position:"
-#define checkupFilmRotation_text 					"Film is rotating:"
-#define checkupYes_text 							"Yes"
-#define checkupNo_text 								"No"
-#define checkupChecking_text 						"Checking..."
-#define checkupTargetToleranceTemp_text 			"tolerance"
-#define checkupProcessComplete_text 				"Process\nCOMPLETE!"
-#define checkupProcessStopped_text 					"Process\nSTOPPED!"
-#define checkupTankSizePlaceHolder_text				"Size"
-#define checkupChemistryLowVol_text					"Low"
-#define checkupChemistryHighVol_text				"High"
-#define checkupFilling_text							"Filling"
-#define checkupDraining_text						"Draining"
-#define checkupProcessing_text						"Processing"
-#define checkupRinsingLine_text						"Rinsing line"
-#define checkupDrainingComplete_text				"Complete"
-#define checkupHeaterStatusFmt_text					"Heater: %s"
-#define checkupHeaterOn_text						"ON"
-#define checkupHeaterOff_text						"OFF"
-#define checkupTempReached_text						"Temp ok!"
-#define checkupTempTimedOut_text						"Timeout!"
-#define checkupContinue_text						"Continue"
-#define checkupNoTempControl_text					"No temp control"
-
+#define checkupNexStepsTitle_text	tr(STR_checkupNexStepsTitle_text)
+#define checkupProcessReady_text	tr(STR_checkupProcessReady_text)
+#define checkupTheMachineWillDo_text	tr(STR_checkupTheMachineWillDo_text)
+#define checkupFillWater_text	tr(STR_checkupFillWater_text)
+#define checkupTankRotation_text	tr(STR_checkupTankRotation_text)
+#define checkupReachTemp_text	tr(STR_checkupReachTemp_text)
+#define checkupStop_text	tr(STR_checkupStop_text)
+#define checkupStart_text	tr(STR_checkupStart_text)
+#define checkupSkip_text	tr(STR_checkupSkip_text)
+#define checkupStopNow_text	tr(STR_checkupStopNow_text)
+#define checkupStopAfter_text	tr(STR_checkupStopAfter_text)
+#define checkupProcessingTitle_text	tr(STR_checkupProcessingTitle_text)
+#define checkupStepSource_text	tr(STR_checkupStepSource_text)
+#define checkupTempControl_text	tr(STR_checkupTempControl_text)
+#define checkupWaterTemp_text	tr(STR_checkupWaterTemp_text)
+#define checkupNextStep_text	tr(STR_checkupNextStep_text)
+#define checkupSelectBeforeStart_text	tr(STR_checkupSelectBeforeStart_text)
+#define checkupTankSize_text	tr(STR_checkupTankSize_text)
+#define checkupChemistryVolume_text	tr(STR_checkupChemistryVolume_text)
+#define checkupMinimumChemistry_text	tr(STR_checkupMinimumChemistry_text)
+#define checkupFillWaterMachine_text	tr(STR_checkupFillWaterMachine_text)
+#define checkupTargetTemp_text	tr(STR_checkupTargetTemp_text)
+#define checkupWater_text	tr(STR_checkupWater_text)
+#define checkupChemistry_text	tr(STR_checkupChemistry_text)
+#define checkupTankPosition_text	tr(STR_checkupTankPosition_text)
+#define checkupFilmRotation_text	tr(STR_checkupFilmRotation_text)
+#define checkupYes_text	tr(STR_checkupYes_text)
+#define checkupNo_text	tr(STR_checkupNo_text)
+#define checkupChecking_text	tr(STR_checkupChecking_text)
+#define checkupTargetToleranceTemp_text	tr(STR_checkupTargetToleranceTemp_text)
+#define checkupProcessComplete_text	tr(STR_checkupProcessComplete_text)
+#define checkupProcessStopped_text	tr(STR_checkupProcessStopped_text)
+#define checkupTankSizePlaceHolder_text	tr(STR_checkupTankSizePlaceHolder_text)
+#define checkupChemistryLowVol_text	tr(STR_checkupChemistryLowVol_text)
+#define checkupChemistryHighVol_text	tr(STR_checkupChemistryHighVol_text)
+#define checkupFilling_text	tr(STR_checkupFilling_text)
+#define checkupDraining_text	tr(STR_checkupDraining_text)
+#define checkupProcessing_text	tr(STR_checkupProcessing_text)
+#define checkupRinsingLine_text	tr(STR_checkupRinsingLine_text)
+#define checkupDrainingComplete_text	tr(STR_checkupDrainingComplete_text)
+#define checkupHeaterStatusFmt_text	tr(STR_checkupHeaterStatusFmt_text)
+#define checkupHeaterOn_text	tr(STR_checkupHeaterOn_text)
+#define checkupHeaterOff_text	tr(STR_checkupHeaterOff_text)
+#define checkupTempReached_text	tr(STR_checkupTempReached_text)
+#define checkupTempTimedOut_text	tr(STR_checkupTempTimedOut_text)
+#define checkupContinue_text	tr(STR_checkupContinue_text)
+#define checkupNoTempControl_text	tr(STR_checkupNoTempControl_text)
 /* Clean Popup elements */
-#define cleanPopupTitle_text						"Cleaning process setup"
-#define cleanCleanProcess_text						"Cleaning machine"
-#define cleanPopupSubTitle_text						"Select containers to clean"
-#define cleanRoller_text							"Clean cycles"
-#define cleanDrainWater_text						"Drain water when finish"
-#define cleanCancelButton_text						"Cancel"
-#define cleanCanceled_text							"Canceled"
-#define cleanRunButton_text							"Run"
-#define cleanStopButton_text						"Stop"
-#define cleanCloseButton_text						"Close"
-#define cleanCycleFmt_text							"%s cycle:%d"
-#define cleanCurrentClean_text						"Cleaning"
-#define cleanCompleteClean_text						"COMPLETE"
-#define cleanWaste_text								"Waste"
-#define cleanDraining_text							"Draining"
-#define cleanFilling_text							"Filling"
-
+#define cleanPopupTitle_text	tr(STR_cleanPopupTitle_text)
+#define cleanCleanProcess_text	tr(STR_cleanCleanProcess_text)
+#define cleanPopupSubTitle_text	tr(STR_cleanPopupSubTitle_text)
+#define cleanRoller_text	tr(STR_cleanRoller_text)
+#define cleanDrainWater_text	tr(STR_cleanDrainWater_text)
+#define cleanCancelButton_text	tr(STR_cleanCancelButton_text)
+#define cleanCanceled_text	tr(STR_cleanCanceled_text)
+#define cleanRunButton_text	tr(STR_cleanRunButton_text)
+#define cleanStopButton_text	tr(STR_cleanStopButton_text)
+#define cleanCloseButton_text	tr(STR_cleanCloseButton_text)
+#define cleanCycleFmt_text	tr(STR_cleanCycleFmt_text)
+#define cleanCurrentClean_text	tr(STR_cleanCurrentClean_text)
+#define cleanCompleteClean_text	tr(STR_cleanCompleteClean_text)
+#define cleanWaste_text	tr(STR_cleanWaste_text)
+#define cleanDraining_text	tr(STR_cleanDraining_text)
+#define cleanFilling_text	tr(STR_cleanFilling_text)
 /* Drain popup texts */
-#define drainStopped_text                       "Drain stopped"
-#define drainComplete_text                      "Drain complete!"
-#define drainWasteIndicator_text                ">> WASTE <<"
-#define drainDrainingFmt_text                   "Draining: %s"
-#define drainDrainingC1_text                    "Draining: C1"
-
+#define drainStopped_text	tr(STR_drainStopped_text)
+#define drainComplete_text	tr(STR_drainComplete_text)
+#define drainWasteIndicator_text	tr(STR_drainWasteIndicator_text)
+#define drainDrainingFmt_text	tr(STR_drainDrainingFmt_text)
+#define drainDrainingC1_text	tr(STR_drainDrainingC1_text)
 /* Machine fill (Maintenance) texts */
-#define fillBath_text                           "Fill bath"
-#define fillChem_text                           "Fill chem"
-#define fillPopupTitle_text                     "Fill water bath"
-#define fillChemPopupTitle_text                 "Fill chemistry container"
-#define fillChemFilling_text                    "Filling chemistry..."
-#define fillStatusReady_text                    "Press Run to fill"
-#define fillManualPour_text                     "Pour water into the bath"
-#define fillManualFilling_text                  "Filling by hand..."
-#define fillStart_text                          "Run"
-#define fillCancel_text                         "Cancel"
-#define fillStatusRunning_text                  "Filling... stops when full"
-#define fillStatusFull_text                     "Water bath full"
-#define fillStatusStopped_text                  "Fill stopped"
-#define fillStatusTimeout_text                  "Timed out - check sensor"
-#define fillStatusNoFlow_text                   "No water flow - check inlet"
-#define fillStatusNoLevel_text                  "Flow OK but bath not filling"
-#define fillStatusDoneNoMax_text                "Target reached - MAX not confirmed"
+#define fillBath_text	tr(STR_fillBath_text)
+#define fillChem_text	tr(STR_fillChem_text)
+#define fillPopupTitle_text	tr(STR_fillPopupTitle_text)
+#define fillChemPopupTitle_text	tr(STR_fillChemPopupTitle_text)
+#define fillChemFilling_text	tr(STR_fillChemFilling_text)
+#define fillStatusReady_text	tr(STR_fillStatusReady_text)
+#define fillManualPour_text	tr(STR_fillManualPour_text)
+#define fillManualFilling_text	tr(STR_fillManualFilling_text)
+#define fillStart_text	tr(STR_fillStart_text)
+#define fillCancel_text	tr(STR_fillCancel_text)
+#define fillStatusRunning_text	tr(STR_fillStatusRunning_text)
+#define fillStatusFull_text	tr(STR_fillStatusFull_text)
+#define fillStatusStopped_text	tr(STR_fillStatusStopped_text)
+#define fillStatusTimeout_text	tr(STR_fillStatusTimeout_text)
+#define fillStatusNoFlow_text	tr(STR_fillStatusNoFlow_text)
+#define fillStatusNoLevel_text	tr(STR_fillStatusNoLevel_text)
+#define fillStatusDoneNoMax_text	tr(STR_fillStatusDoneNoMax_text)
 #define fillFlow_fmt                            "Flow: %.1f L/min"
 #define fillVolume_fmt                          "%lu ml"
 #define fillInfo_fmt                            "%lu ml    %.1f L/min"
-#define fillStop_text                           "Stop"
-#define fillClose_text                          "Close"
-
+#define fillStop_text	tr(STR_fillStop_text)
+#define fillClose_text	tr(STR_fillClose_text)
 /* Self-check popup texts */
-#define selfCheck_text                          "Self-check"
-#define selfCheckTasks_text                     "Tasks:"
-#define selfCheckTempSensors_text               "Temp. sensors"
-#define selfCheckWaterPump_text                 "Water pump"
-#define selfCheckHeater_text                    "Heater"
-#define selfCheckValves_text                    "Valves"
-#define selfCheckContainer1_text                "Container C1"
-#define selfCheckContainer2_text                "Container C2"
-#define selfCheckContainer3_text                "Container C3"
-#define selfCheckMotor_text                     "Agitation motor"
-#define selfCheckRunning_text                   "Running..."
-#define selfCheckDone_text                      "Done"
-#define selfCheckComplete_text                  "Self-check complete!"
-#define selfCheckFinished_text                  "Self-check finished"
-#define selfCheckSkip_text                      "Skip"
-#define selfCheckNext_text                      "Next"
-#define selfCheckRerun_text                     "Re-run"
-#define selfCheckStopped_text                   "Stopped"
-#define selfCheckSkipped_text                   "Skipped"
-#define selfCheckPumpRunning_text               "Pump running..."
-#define selfCheckTimeFmt_text                   "Time: %lds"
-#define selfCheckTempFmt_text                   "Temp: %d.%d C"
-#define selfCheckValveFmt_text                  "Valve: %s"
-
+#define selfCheck_text	tr(STR_selfCheck_text)
+#define selfCheckTasks_text	tr(STR_selfCheckTasks_text)
+#define selfCheckTempSensors_text	tr(STR_selfCheckTempSensors_text)
+#define selfCheckWaterPump_text	tr(STR_selfCheckWaterPump_text)
+#define selfCheckHeater_text	tr(STR_selfCheckHeater_text)
+#define selfCheckValves_text	tr(STR_selfCheckValves_text)
+#define selfCheckContainer1_text	tr(STR_selfCheckContainer1_text)
+#define selfCheckContainer2_text	tr(STR_selfCheckContainer2_text)
+#define selfCheckContainer3_text	tr(STR_selfCheckContainer3_text)
+#define selfCheckMotor_text	tr(STR_selfCheckMotor_text)
+#define selfCheckRunning_text	tr(STR_selfCheckRunning_text)
+#define selfCheckDone_text	tr(STR_selfCheckDone_text)
+#define selfCheckComplete_text	tr(STR_selfCheckComplete_text)
+#define selfCheckFinished_text	tr(STR_selfCheckFinished_text)
+#define selfCheckSkip_text	tr(STR_selfCheckSkip_text)
+#define selfCheckNext_text	tr(STR_selfCheckNext_text)
+#define selfCheckRerun_text	tr(STR_selfCheckRerun_text)
+#define selfCheckStopped_text	tr(STR_selfCheckStopped_text)
+#define selfCheckSkipped_text	tr(STR_selfCheckSkipped_text)
+#define selfCheckPumpRunning_text	tr(STR_selfCheckPumpRunning_text)
+#define selfCheckTimeFmt_text	tr(STR_selfCheckTimeFmt_text)
+#define selfCheckTempFmt_text	tr(STR_selfCheckTempFmt_text)
+#define selfCheckValveFmt_text	tr(STR_selfCheckValveFmt_text)
 /* Common button texts */
-#define buttonClose_text                        "Close"
-#define buttonStop_text                         "Stop"
-#define buttonStart_text                        "Start"
-#define buttonCancel_text                       "Cancel"
-
+#define buttonClose_text	tr(STR_buttonClose_text)
+#define buttonStop_text	tr(STR_buttonStop_text)
+#define buttonStart_text	tr(STR_buttonStart_text)
+#define buttonCancel_text	tr(STR_buttonCancel_text)
 /* Tank size display values */
 #define tankSizeValues                          {"500ml", "700ml", "1000ml"}
 
-/* Chemistry volume display values */
-#define chemVolumeValues                        {"Low", "High"}
+/* Chemistry volume display values (translated) */
+#define chemVolumeValues                        {checkupChemistryLowVol_text, checkupChemistryHighVol_text}
+
+/* UI language display values (proper nouns — same in both languages) */
+#define languageValues                          {"English", "Italiano"}
 
 /* Popup elements */
-#define stopProcessPopupTitle_text 					"Stop process"
-#define warningPopupTitle_text 						"Warning!"
-#define setMinutesPopupTitle_text 					"Set minutes"
-#define setSecondsPopupTitle_text 					"Set seconds"
-#define tuneTempPopupTitle_text 					"Set temperature"
-#define tuneTolerancePopupTitle_text 				"Set tolerance"
-#define tuneRollerButton_text 						"Set"
-#define calibResetButton_text 						"Reset"
-#define messagePopupDetailTitle_text 				"Detail information"
-#define deleteButton_text 							"Delete"
-#define deletePopupTitle_text 						"Delete element"
-#define duplicatePopupTitle_text 					"Duplicate process"
-#define duplicateProcessPopupBody_text 				"Do you want do duplicate the selected process?"
-#define duplicateStepPopupTitle_text				"Duplicate step"
-#define duplicateStepPopupBody_text					"Do you want to duplicate the selected step?"
-#define deleteAllProcessPopupTitle_text 			"Delete all process"
-#define deletePopupBody_text 						"Are you sure to delete the selected element?"
-#define deleteAllProcessPopupBody_text 				"Are you sure to delete all the process created?"
-#define warningPopupLowWaterTitle_text 		   		"The water level is too low!Temperature control has been suspended\nRefill the water bath immediately to correct resume the temperature control process"
-#define stopNowProcessPopupBody_text			   	"Stopping a process will ruin the film inside the tank and leave the chemistry inside!\nDo you want to stop the process now?"
-#define stopAfterProcessPopupBody_text			   	"Do you want to stop the process after this step is completed?"
-#define maxNumberEntryProcessPopupBody_text			"Max number of PROCESS already reached!"
-#define maxNumberEntryStepsPopupBody_text			"Max number of STEP already reached!"
-
+#define stopProcessPopupTitle_text	tr(STR_stopProcessPopupTitle_text)
+#define warningPopupTitle_text	tr(STR_warningPopupTitle_text)
+#define setMinutesPopupTitle_text	tr(STR_setMinutesPopupTitle_text)
+#define setSecondsPopupTitle_text	tr(STR_setSecondsPopupTitle_text)
+#define tuneTempPopupTitle_text	tr(STR_tuneTempPopupTitle_text)
+#define tuneTolerancePopupTitle_text	tr(STR_tuneTolerancePopupTitle_text)
+#define tuneRollerButton_text	tr(STR_tuneRollerButton_text)
+#define calibResetButton_text	tr(STR_calibResetButton_text)
+#define messagePopupDetailTitle_text	tr(STR_messagePopupDetailTitle_text)
+#define deleteButton_text	tr(STR_deleteButton_text)
+#define deletePopupTitle_text	tr(STR_deletePopupTitle_text)
+#define duplicatePopupTitle_text	tr(STR_duplicatePopupTitle_text)
+#define duplicateProcessPopupBody_text	tr(STR_duplicateProcessPopupBody_text)
+#define duplicateStepPopupTitle_text	tr(STR_duplicateStepPopupTitle_text)
+#define duplicateStepPopupBody_text	tr(STR_duplicateStepPopupBody_text)
+#define deleteAllProcessPopupTitle_text	tr(STR_deleteAllProcessPopupTitle_text)
+#define deletePopupBody_text	tr(STR_deletePopupBody_text)
+#define deleteAllProcessPopupBody_text	tr(STR_deleteAllProcessPopupBody_text)
+#define warningPopupLowWaterTitle_text	tr(STR_warningPopupLowWaterTitle_text)
+#define stopNowProcessPopupBody_text	tr(STR_stopNowProcessPopupBody_text)
+#define stopAfterProcessPopupBody_text	tr(STR_stopAfterProcessPopupBody_text)
+#define maxNumberEntryProcessPopupBody_text	tr(STR_maxNumberEntryProcessPopupBody_text)
+#define maxNumberEntryStepsPopupBody_text	tr(STR_maxNumberEntryStepsPopupBody_text)
 /* Tools tab strings/vars */
-#define Maintenance_text 							"Maintenance"
-#define Utilities_text 								"Utilities"
-#define Statistics_text 							"Statistics"
-#define Software_text 								"Software"
-#define cleanMachine_text 							"Clean machine"
-#define drainMachine_text 							"Drain machine"
-#define importConfigAndProcesses_text 				"Import"
-#define importConfigAndProcessesMBox_text 			"Import configuration and processes from micro SD Card"
-#define importConfigAndProcessesMBox2_text			"This will reboot your FilMachine!Are you sure?!"
-#define exportConfigAndProcesses_text 				"Export"
-#define exportConfigAndProcessesMBox_text 			"Export configuration and processes to micro SD Card"
-#define statCompleteProcesses_text 					"Completed processes"
-#define statTotalProcessTime_text 					"Total process time"
-#define statCompleteCleanProcess_text 				"Completed clean cycles"
-#define statStoppedProcess_text 					"Stopped processes"
-#define softwareVersion_text 						"Software version"
+#define Maintenance_text	tr(STR_Maintenance_text)
+#define Utilities_text	tr(STR_Utilities_text)
+#define Statistics_text	tr(STR_Statistics_text)
+#define Software_text	tr(STR_Software_text)
+#define cleanMachine_text	tr(STR_cleanMachine_text)
+#define drainMachine_text	tr(STR_drainMachine_text)
+#define importConfigAndProcesses_text	tr(STR_importConfigAndProcesses_text)
+#define importConfigAndProcessesMBox_text	tr(STR_importConfigAndProcessesMBox_text)
+#define importConfigAndProcessesMBox2_text	tr(STR_importConfigAndProcessesMBox2_text)
+#define exportConfigAndProcesses_text	tr(STR_exportConfigAndProcesses_text)
+#define exportConfigAndProcessesMBox_text	tr(STR_exportConfigAndProcessesMBox_text)
+#define statCompleteProcesses_text	tr(STR_statCompleteProcesses_text)
+#define statTotalProcessTime_text	tr(STR_statTotalProcessTime_text)
+#define statCompleteCleanProcess_text	tr(STR_statCompleteCleanProcess_text)
+#define statStoppedProcess_text	tr(STR_statStoppedProcess_text)
+#define softwareVersion_text	tr(STR_softwareVersion_text)
 #define softwareVersionValue_text    				"v0.0.0.1"
-#define softwareSerialNum_text 						"Serial number"
+#define softwareSerialNum_text	tr(STR_softwareSerialNum_text)
 #define softwareSerialNumValue_text 				"1234567890"
-#define softwareCredits_text 						"Credits"
+#define softwareCredits_text	tr(STR_softwareCredits_text)
 #define softwareCreditsValue_text 					"Credit to Frank P. \nand \nPete B."
-#define calibrationPopupTitle_text					"Calibration"
-#define calibBath_text								"Bath"
-#define calibChem_text								"Chemical"
-#define calibrationResetPopupTitle_text				"Calibration Reset"
-#define calibrationResetPopupBody_text				"Temperature calibration has been reset to default values."
-
+#define calibrationPopupTitle_text	tr(STR_calibrationPopupTitle_text)
+#define calibBath_text	tr(STR_calibBath_text)
+#define calibChem_text	tr(STR_calibChem_text)
+#define calibrationResetPopupTitle_text	tr(STR_calibrationResetPopupTitle_text)
+#define calibrationResetPopupBody_text	tr(STR_calibrationResetPopupBody_text)
 /* OTA update strings */
-#define otaConnecting_text							"Connecting..."
-#define otaStartingServer_text						"Starting server..."
-#define otaStarting_text							"Starting..."
-#define otaZeroPercent_text							"0%"
-#define otaUpdate_text								"Update"
-#define otaUpdateFromSD_text						"Update from SD"
-#define otaUpdateFromSDMBox_text					"Update firmware from\nSD card file."
-#define otaWifiUpdate_text							"Wi-Fi update"
-#define otaWifiUpdateMBox_text						"Start a local web server.\nUpload firmware via browser."
-#define otaUpdating_text							"Updating..."
-#define otaNoFirmware_text							"No firmware found on SD"
-#define otaConfirmUpdate_text						"Update firmware to %s?\nDo not turn off the machine!"
-#define otaRebootNow_text							"Reboot now to apply update?"
-#define otaWifiSSID_text							"Wi-Fi SSID"
-#define otaWifiSSIDAlert_text						"Enter the Wi-Fi network\nname for OTA updates."
-#define otaWifiPassword_text						"Wi-Fi password"
-#define otaWifiPasswordAlert_text					"Enter the Wi-Fi network\npassword."
-
+#define otaConnecting_text	tr(STR_otaConnecting_text)
+#define otaStartingServer_text	tr(STR_otaStartingServer_text)
+#define otaStarting_text	tr(STR_otaStarting_text)
+#define otaZeroPercent_text	tr(STR_otaZeroPercent_text)
+#define otaUpdate_text	tr(STR_otaUpdate_text)
+#define otaUpdateFromSD_text	tr(STR_otaUpdateFromSD_text)
+#define otaUpdateFromSDMBox_text	tr(STR_otaUpdateFromSDMBox_text)
+#define otaWifiUpdate_text	tr(STR_otaWifiUpdate_text)
+#define otaWifiUpdateMBox_text	tr(STR_otaWifiUpdateMBox_text)
+#define otaUpdating_text	tr(STR_otaUpdating_text)
+#define otaNoFirmware_text	tr(STR_otaNoFirmware_text)
+#define otaConfirmUpdate_text	tr(STR_otaConfirmUpdate_text)
+#define otaRebootNow_text	tr(STR_otaRebootNow_text)
+#define otaWifiSSID_text	tr(STR_otaWifiSSID_text)
+#define otaWifiSSIDAlert_text	tr(STR_otaWifiSSIDAlert_text)
+#define otaWifiPassword_text	tr(STR_otaWifiPassword_text)
+#define otaWifiPasswordAlert_text	tr(STR_otaWifiPasswordAlert_text)
 /* Process detail strings/vars */
-#define processDetailStep_text				 		"Steps"
-#define processDetailInfo_text				 		"Details"
-#define processDetailIsColor_text			 		"For color negative"
-#define processDetailIsBnW_text				 		"For b&w negative"
-#define processDetailIsTempControl_text		 		"Temp. control"
-#define processDetailTemp_text				 		"Temperature:"
-#define processDetailIsPreferred_text		 		"Preferred:"
-#define processDetailTotalTime_text			 		"Total time:"
-#define processDetailTempPlaceHolder_text	 		"Tap"
-#define processDetailTempTolerance_text		 		"Tolerance:"
-#define processDetailPlaceHolder_text		   		"Enter name"
-
+#define processDetailStep_text	tr(STR_processDetailStep_text)
+#define processDetailInfo_text	tr(STR_processDetailInfo_text)
+#define processDetailIsColor_text	tr(STR_processDetailIsColor_text)
+#define processDetailIsBnW_text	tr(STR_processDetailIsBnW_text)
+#define processDetailIsTempControl_text	tr(STR_processDetailIsTempControl_text)
+#define processDetailTemp_text	tr(STR_processDetailTemp_text)
+#define processDetailIsPreferred_text	tr(STR_processDetailIsPreferred_text)
+#define processDetailTotalTime_text	tr(STR_processDetailTotalTime_text)
+#define processDetailTempPlaceHolder_text	tr(STR_processDetailTempPlaceHolder_text)
+#define processDetailTempTolerance_text	tr(STR_processDetailTempTolerance_text)
+#define processDetailPlaceHolder_text	tr(STR_processDetailPlaceHolder_text)
 /* Step detail strings/vars */
-#define stepDetailTitle_text						"New step"
-#define stepDetailName_text							"Name:"
-#define stepDetailDuration_text				   		"Duration:             :"
-#define stepDetailDurationMinPlaceHolder_text 		"min"
-#define stepDetailDurationSecPlaceHolder_text 		"sec"
-#define stepDetailType_text							"Type:"
-#define stepDetailSource_text						"Source:"
-#define stepDetailDiscardAfter_text			   		"Discard after:"
-#define stepDetailPlaceHolder_text			   		"Enter name for new step"
-#define stepDetailSave_text							"Save"
-#define stepDetailCancel_text						"Cancel"
-#define stepDetailCurrentTemp_text			   		"Now:"
-
+#define stepDetailTitle_text	tr(STR_stepDetailTitle_text)
+#define stepDetailName_text	tr(STR_stepDetailName_text)
+#define stepDetailDuration_text	tr(STR_stepDetailDuration_text)
+#define stepDetailDurationMinPlaceHolder_text	tr(STR_stepDetailDurationMinPlaceHolder_text)
+#define stepDetailDurationSecPlaceHolder_text	tr(STR_stepDetailDurationSecPlaceHolder_text)
+#define stepDetailType_text	tr(STR_stepDetailType_text)
+#define stepDetailSource_text	tr(STR_stepDetailSource_text)
+#define stepDetailDiscardAfter_text	tr(STR_stepDetailDiscardAfter_text)
+#define stepDetailPlaceHolder_text	tr(STR_stepDetailPlaceHolder_text)
+#define stepDetailSave_text	tr(STR_stepDetailSave_text)
+#define stepDetailCancel_text	tr(STR_stepDetailCancel_text)
+#define stepDetailCurrentTemp_text	tr(STR_stepDetailCurrentTemp_text)
 /* Button sizes — resolved from ui_profile at runtime */
 #define BUTTON_PROCESS_HEIGHT						(ui_get_profile()->buttons.process_h)
 #define BUTTON_PROCESS_WIDTH						(ui_get_profile()->buttons.process_w)
@@ -570,10 +596,10 @@ typedef enum {
 #define LOGO_HEIGHT									(ui_get_profile()->buttons.logo_h)
 #define LOGO_WIDTH									(ui_get_profile()->buttons.logo_w)
 
-#define checkupTankSizesList						"500ml\n700ml\n1000ml"
+#define checkupTankSizesList	tr(STR_checkupTankSizesList)
 #define checkupStepStatuses 						{ dotStep_icon, arrowStep_icon, checkStep_icon }
-#define stepTypeList								"Chemistry\nRinse\nMultiRinse"
-#define stepSourceList								"C1\nC2\nC3\nWB"
+#define stepTypeList	tr(STR_stepTypeList)
+#define stepSourceList	tr(STR_stepSourceList)
 #define processSourceList							{"C1", "C2", "C3", "WB"}
 #define processTempControlList						{"Off", "Run", "Susp."}
 #define tanksSizesAndTimes 							{ { {250,  8}, {350, 11}, {550, 16} }, { {500,  15}, {700,  19}, {1000, 25} } } // Ml and seconds
@@ -634,6 +660,7 @@ struct __attribute__ ((packed)) machineSettings {
 	/* ── New fields go here (end of struct) to preserve binary config compatibility ── */
 	bool					invertPump;         /* true = invert pump H-bridge direction */
 	int16_t					chemCalibOffset;    /* Chemical-sensor temp offset, tenths °C (in config file). int16 to avoid overflow */
+	uint8_t					language;           /* UI language: 0=English, 1=Italiano (applied at boot) */
 };
 
 
@@ -1024,6 +1051,8 @@ struct sRollerPopup {
 	lv_obj_t 	        *mBoxRollerTitle;
 	lv_obj_t 	        *mBoxRollerButton;
 	lv_obj_t 	        *mBoxRollerButtonLabel;
+	lv_obj_t 	        *mBoxRollerCancelButton;
+	lv_obj_t 	        *mBoxRollerCancelButtonLabel;
 	lv_obj_t 	        *mBoxRollerRollerContainer;
 	lv_obj_t 	        *whoCallMe;
 	lv_point_precise_t	titleLinePoints[2];
@@ -1495,6 +1524,11 @@ struct sSettings {
 	lv_obj_t                *chemVolumeLabel;
 	lv_obj_t                *chemVolumeTextArea;
 
+	/* UI language row */
+	lv_obj_t                *languageContainer;
+	lv_obj_t                *languageLabel;
+	lv_obj_t                *languageTextArea;
+
 	/* Splash screen settings row */
 	lv_obj_t                *splashContainer;
 	lv_obj_t                *splashLabel;
@@ -1930,6 +1964,9 @@ void stopMotorTask(void);
 void runMotorTask(void);
 // @file accessories.c
 void rebootBoard(void);
+#if LV_USE_LOG != 0
+void my_print(lv_log_level_t level, const char *buf);   /* LVGL log → console + SD log */
+#endif
 uint8_t qSysAction( uint16_t msg );
 uint8_t qMotorAction( uint16_t msg );
 lv_obj_t *create_radiobutton(lv_obj_t * mBoxParent, const char * txt, const int32_t x, const int32_t y, const int32_t size, const lv_font_t * font, const lv_color_t borderColor, const lv_color_t bgColor);

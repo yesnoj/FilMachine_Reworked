@@ -32,6 +32,7 @@
 #include "nvs.h"
 #endif
 #include "sensors.h"
+#include "sd_log.h"
 
 #include "FilMachine.h"
 #include "ws_server.h"
@@ -196,6 +197,7 @@ static uint8_t pumpSpeedToDuty(void)
 }
 
 void rebootBoard(void) {
+	sd_log_shutdown();     /* flush + close the SD boot log before restarting */
 	esp_restart();
 };
 
@@ -813,6 +815,7 @@ void initGlobals( void ) {
   gui.page.settings.settingsParams.drainFillOverlapSetpoint = 100;
   gui.page.settings.settingsParams.lineRinseEnabled = false;   /* opt-in */
   gui.page.settings.settingsParams.lineRinseTime = 10;         /* seconds */
+  gui.page.settings.settingsParams.language = LANG_EN;         /* English default */
 
   gui.element.rollerPopup.tempCelsiusOptions = createRollerValues(TEMP_ROLLER_MIN,TEMP_ROLLER_MAX,"",false);
   gui.element.rollerPopup.tempFahrenheitOptions = createRollerValues(TEMP_ROLLER_MIN,TEMP_ROLLER_MAX,"",true);
@@ -866,11 +869,17 @@ void hideKeyboard(lv_obj_t * whoCallMe){
     kb_ctx_clear();
 }
 
+/* SD boot-log hooks — the strong versions live in sd_log.c (firmware only);
+ * these weak no-ops keep the simulator linking. */
+void __attribute__((weak)) sd_log_line(const char *line) { (void)line; }
+void __attribute__((weak)) sd_log_shutdown(void) { }
+
 #if LV_USE_LOG != 0
 void my_print( lv_log_level_t level, const char * buf )
 {
     LV_UNUSED(level);
     printf( "%s\r\n", buf );
+    sd_log_line(buf);          /* tee every LV_LOG line to the SD boot log */
 }
 #endif
 
@@ -1192,6 +1201,8 @@ static void jsonApplySettings(struct machineSettings *S, mj_node *sp) {
     S->volume                    = (uint8_t) mj_int(mj_get(sp, "volume"), 50);
     S->invertPump                = mj_bool(mj_get(sp, "invertPump"), false);
     S->chemCalibOffset           = (int16_t) mj_int(mj_get(sp, "chemCalibOffset"), 0);
+    S->language                  = (uint8_t) mj_int(mj_get(sp, "language"), LANG_EN);
+    lang_set(S->language);   /* apply UI language as soon as settings are known */
 }
 
 /* ── Read ONLY the machineSettings block (no processes, no stats).
@@ -1438,10 +1449,12 @@ void writeConfigFile( const char *path, bool enableLog ) {
             "    \"brightness\": %u,\n"
             "    \"volume\": %u,\n"
             "    \"invertPump\": %d,\n"
-            "    \"chemCalibOffset\": %d\n"
+            "    \"chemCalibOffset\": %d,\n"
+            "    \"language\": %u\n"
             "  },\n",
             escSsid, escPwd, S->brightness, S->volume,
-            S->invertPump ? 1 : 0, (int)S->chemCalibOffset);
+            S->invertPump ? 1 : 0, (int)S->chemCalibOffset,
+            (unsigned)S->language);
         cfgWrite(fp, buf);
 
         /* ── processes[] ── */

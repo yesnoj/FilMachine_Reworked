@@ -28,6 +28,7 @@ idf_component_register(
         ${DRIVER_DEPS}
     PRIV_REQUIRES
         app_update
+        espcoredump
         esp_http_server
         esp_event
         esp_timer

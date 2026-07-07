@@ -58,7 +58,7 @@ void refreshProcessesLabel(void) {
         int32_t count = gui.page.processes.processElementsList.size;
         if (count > 0)
             lv_label_set_text_fmt(gui.page.processes.processesLabel,
-                                  "%"PRIi32" " Processes_text, count);
+                                  "%"PRIi32" %s", count, Processes_text);
         else
             lv_label_set_text(gui.page.processes.processesLabel, Processes_text);
 
