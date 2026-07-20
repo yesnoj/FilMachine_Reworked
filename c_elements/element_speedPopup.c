@@ -277,6 +277,11 @@ static void event_volumeSet(lv_event_t *e)
     LV_LOG_USER("Volume SET: %d%%", percent);
     qSysAction(SAVE_PROCESS_CONFIG);
 
+#ifndef SIMULATOR_BUILD
+    audio_set_volume(percent);   /* keep the saved level active */
+    audio_stop();                /* silence the preview tone on close */
+#endif
+
     lv_style_reset(&sp->style_titleLine);
     lv_style_reset(&sp->style_roller);
     lv_msgbox_close(sp->parent);
@@ -297,6 +302,7 @@ static void event_volumeCancel(lv_event_t *e)
     struct sSpeedPopup *sp = &gui.element.speedPopup;
 #ifndef SIMULATOR_BUILD
     audio_set_volume(gui.page.settings.settingsParams.volume);
+    audio_stop();                /* silence the preview tone on close */
 #endif
     lv_style_reset(&sp->style_titleLine);
     lv_style_reset(&sp->style_roller);

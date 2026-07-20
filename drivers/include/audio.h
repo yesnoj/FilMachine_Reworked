@@ -22,6 +22,10 @@ void audio_set_volume(uint8_t vol_0_100);
 /* Play a blocking sine tone (frequency in Hz, duration in ms). */
 void audio_play_tone(uint32_t freq_hz, uint32_t ms);
 
+/* Flush the I2S output with silence so no residual tone keeps playing after
+ * the last audio_play_tone() call (e.g. when closing the Volume popup). */
+void audio_stop(void);
+
 #ifdef __cplusplus
 }
 #endif

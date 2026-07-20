@@ -34,6 +34,11 @@ esp_err_t audio_init(i2c_master_bus_handle_t bus)
     /* ── 1. I2S TX channel (master) ── */
     i2s_chan_handle_t tx = NULL;
     i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_0, I2S_ROLE_MASTER);
+    /* Emit silence on TX underrun instead of looping the last DMA buffer.
+     * Without this, once we stop writing (e.g. leaving the Volume popup) the
+     * DMA ring keeps replaying the tail of the last tone, so the beep is heard
+     * forever. auto_clear_after_cb zeroes each buffer after it is sent. */
+    chan_cfg.auto_clear_after_cb = true;
     esp_err_t err = i2s_new_channel(&chan_cfg, &tx, NULL);
     if (err != ESP_OK) {
         ESP_LOGE(AUDIO_TAG, "i2s_new_channel: %s", esp_err_to_name(err));
@@ -134,6 +139,20 @@ void audio_set_volume(uint8_t vol_0_100)
     s_volume = vol_0_100;
     if (s_dev) {
         esp_codec_dev_set_out_vol(s_dev, (int)vol_0_100);
+    }
+}
+
+void audio_stop(void)
+{
+    if (s_dev == NULL) return;
+
+    /* Push enough zeroed frames to overwrite the whole DMA ring, so no leftover
+     * tone samples can be replayed after playback ends. Belt-and-suspenders on
+     * top of auto_clear_after_cb (see audio_init). */
+    int16_t silence[128 * 2];
+    memset(silence, 0, sizeof(silence));
+    for (int i = 0; i < 12; i++) {          /* ~96 ms of silence @ 16 kHz */
+        esp_codec_dev_write(s_dev, silence, (int)sizeof(silence));
     }
 }
 
