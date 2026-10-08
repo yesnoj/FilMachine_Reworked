@@ -2,9 +2,11 @@
 
 FilMachine is an automated film processing machine designed for photographic film development. It handles the entire process: chemical baths, water rinses, temperature regulation, and motor-driven film agitation — all controlled through a 4.3" color touchscreen display.
 
-The project includes a **desktop simulator** (SDL2 + LVGL) that reproduces the full touchscreen UI on macOS/Linux, enabling rapid development and testing without physical hardware, plus an **automated test suite** (19 suites). A **Flutter companion app** connects via WebSocket and provides full remote control from any mobile device on the same network.
+The project includes a **desktop simulator** (SDL2 + LVGL) that reproduces the full touchscreen UI on macOS/Linux (a Windows build is produced by CI), enabling rapid development and testing without physical hardware, plus an **automated test suite** (19 suites). A **Flutter companion app** connects via WebSocket and provides full remote control from any mobile device on the same network.
 
 The interface is **bilingual (English / Italiano)** — selectable from Settings, applied with an automatic reboot — and every boot writes a **diagnostic log to the SD card** (`/log/boot_NNNN.txt`), including the crash summary of the previous run when the firmware panicked.
+
+The repository also holds the mechanical side of the project: the 3D-printed **film reel auto-loader** (bench prototype v1, for 135 and 120 film) — see [Film Reel Auto-Loader](#film-reel-auto-loader-3d-printed-prototype).
 
 ---
 
@@ -22,14 +24,15 @@ The interface is **bilingual (English / Italiano)** — selectable from Settings
 10. [Firmware Update (OTA)](#firmware-update-ota)
 11. [Hardware Specifications](#hardware-specifications)
 12. [Bill of Materials (Components)](#bill-of-materials-components)
-13. [Diagnostics & Bring-up Page](#diagnostics--bring-up-page)
-14. [Build-time Switches](#build-time-switches)
-15. [Configuration & Persistence](#configuration--persistence)
-16. [Language / Localization](#language--localization)
-17. [SD Boot & Crash Log](#sd-boot--crash-log)
-18. [Typical Workflows](#typical-workflows)
-19. [Developer Quick Reference](#developer-quick-reference)
-20. [Authors](#authors)
+13. [Film Reel Auto-Loader (3D-Printed Prototype)](#film-reel-auto-loader-3d-printed-prototype)
+14. [Diagnostics & Bring-up Page](#diagnostics--bring-up-page)
+15. [Build-time Switches](#build-time-switches)
+16. [Configuration & Persistence](#configuration--persistence)
+17. [Language / Localization](#language--localization)
+18. [SD Boot & Crash Log](#sd-boot--crash-log)
+19. [Typical Workflows](#typical-workflows)
+20. [Developer Quick Reference](#developer-quick-reference)
+21. [Authors](#authors)
 
 ---
 
@@ -49,7 +52,7 @@ The project has a **dual-target build system** that produces ESP32-P4 firmware o
 
 | Layer | Firmware (ESP32-P4) | Simulator (macOS/Linux) |
 |-------|-------------------|------------------------|
-| **UI Library** | LVGL 9.2.2 | LVGL 9.2.2 (identical) |
+| **UI Library** | LVGL 9.5.0 | LVGL 9.5.0 (identical) |
 | **Display** | ST7701S 480×800 MIPI-DSI → landscape 800×480 via PPA | SDL2 window (800×480) |
 | **Touch Input** | GT911 (physical 480×800 → remapped to 800×480) | SDL2 mouse events |
 | **Storage** | FatFS on MicroSD (SDMMC 4-bit, ~40 MB/s) | POSIX file I/O (sd/ directory) |
@@ -67,7 +70,7 @@ The project has a **dual-target build system** that produces ESP32-P4 firmware o
 
 The simulator replaces all hardware-specific code with a **stub layer** that provides compatible implementations:
 
-- **FatFS stubs** map firmware paths (e.g., `/FilMachine.cfg`) to files inside the `sd/` subdirectory relative to the executable, so read/write operations work transparently.
+- **FatFS stubs** map firmware paths (e.g., `/FilMachine.json`) to files inside an `sd/` subdirectory of the directory the simulator is launched from, so read/write operations work transparently.
 - **FreeRTOS stubs** provide working queue implementations (xQueueCreate, xQueueSend, xQueueReceive) using simple circular buffers. Task creation is a no-op since there are no real threads — instead, the main loop drains the system queue every frame.
 - **Hardware stubs** (GPIO, I2C, SPI, solenoid driver, motor, temperature) are either no-ops or printf-based logging functions. Temperature readings come from a simple thermal model that simulates heating/cooling.
 - **OTA stubs** simulate the firmware update flow with a progress timer (0→100%) and fake IP address, allowing full UI testing without real hardware.
@@ -103,7 +106,8 @@ FilMachine_Reworked/
 │   ├── page_stepDetail.c          #   Step creation & editing with validation
 │   ├── page_settings.c            #   Machine settings (temp, speed, alarms, timers, Wi-Fi)
 │   ├── page_tools.c               #   Maintenance tools, import/export, statistics, OTA
-│   └── page_checkup.c             #   Process execution — the most complex page
+│   ├── page_checkup.c             #   Process execution — the most complex page
+│   └── page_debug.c               #   Hidden diagnostics / bring-up page (live sensors, output tests)
 │
 ├── c_elements/                    # Reusable UI components
 │   ├── element_process.c          #   Process list item (drag, delete, duplicate)
@@ -111,6 +115,9 @@ FilMachine_Reworked/
 │   ├── element_filterPopup.c      #   Filter dialog (name, type, preferred)
 │   ├── element_messagePopup.c     #   Generic confirmation/alert popups
 │   ├── element_rollerPopup.c      #   Numeric selector (roller) widget
+│   ├── element_calibPopup.c       #   Dual temperature calibration popup (bath + chemistry offsets)
+│   ├── element_speedPopup.c       #   Pump / motor speed tuning popup with live test
+│   ├── element_fillPopup.c        #   Maintenance "Fill bath" popup (auto-stop on level, flow or timeout)
 │   ├── element_cleanPopup.c       #   Cleaning process UI with timer
 │   ├── element_drainPopup.c       #   Drain process UI with animated tank bars
 │   ├── element_splashPopup.c      #   Splash screen config popup with live preview
@@ -167,7 +174,7 @@ FilMachine_Reworked/
 │   ├── test_ui_profile.c          #   UI profile validation & sensor stubs
 │   └── test_destroy_and_lifecycle.c # Memory cleanup & object destruction
 │
-├── lvgl/                          # LVGL 9.2.2 library (auto-cloned on first build)
+├── lvgl/                          # LVGL 9.5.0 library (auto-cloned on first build, gitignored)
 ├── lvgl_config/
 │   └── lv_conf.h                  # LVGL configuration (RGB565, 256KB heap, dark theme)
 │
@@ -177,15 +184,39 @@ FilMachine_Reworked/
 │   └── board_simulator.h          #   Simulator stubs (matching pin constants)
 │
 ├── scripts/
-│   └── genFilMachineCFG.py        # Config generator (realistic film recipes)
+│   ├── genFilMachineCFG.py        # SD config generator (FilMachine.json with realistic film recipes)
+│   ├── gen_lang.py                # EN/IT string table generator (holds the Italian dictionary)
+│   └── bump_version.sh            # Increments the BUILD field of version.txt
+│
+├── hardware/
+│   └── FilMachine_Breakout_v1/    # KiCad project + BOM: breakout board for the Expand IO header
+│
+├── 3D_Models/
+│   └── FilMachine_caricatore_v1/  # 3D-printed film reel auto-loader: STEP, STL, previews,
+│                                  #   CadQuery source and its own README (in Italian)
+│
+├── docs/
+│   └── hardware_architecture.svg  # System architecture diagram (shown under Hardware Specifications)
+├── tools/
+│   └── lvgl_splash_generator.jsx  # Splash-screen generator (React component that emits LVGL C code)
+├── data/                          # Sample SD config files (FilMachine.json + legacy .cfg), not used by the build
+├── .github/workflows/
+│   └── windows-sim.yml            # CI: builds the simulator for Windows (MSYS2/MinGW)
 │
 ├── CMakeLists.txt                 # Dual-target build (ESP-IDF P4 + simulator/tests)
+├── version.txt                    # Firmware version, MAJOR.MINOR.PATCH.BUILD (single source of truth)
 ├── partitions.csv                 # Custom OTA partition table (16 MB flash)
 ├── sdkconfig.defaults             # ESP-IDF shared defaults
 ├── sdkconfig.defaults.esp32p4     # ESP-IDF defaults for ESP32-P4 target
-├── setup.sh                       # Project initialization script
-├── flash.sh                       # Flash firmware to ESP32 board
-└── flash_p4.sh                    # Flash helper for ESP32-P4 target
+├── flash_p4.sh                    # All-in-one build + flash + monitor for the ESP32-P4 board (macOS)
+├── ui_debug_registry.inc          # Widget-name registry for the simulator's F2 debug overlay
+├── COMMANDS.md                    # Quick command reference (in Italian)
+├── AUDIT_REPORT.md                # Firmware/app audit of 6 July 2026 (firmware v0.0.0.50)
+├── FilMachine_Custom_PCB_BOM.xlsx # Design worksheet for a custom PCB: BOM, pin maps, power budget (in Italian)
+├── DistintaComponenti.xlsx        # Parts list with specs, quantities, prices and links (in Italian)
+├── MDC_db.csv                     # Film/developer development-time table (9,142 rows; not read by the firmware yet)
+├── setup.sh                       # Legacy: one-off script that built the old Simulator_v2 folder (not needed)
+└── flash.sh                       # Legacy: ESP32-S3 flash through the old FilMachine_Pete repo (not for the P4)
 ```
 
 ---
@@ -204,7 +235,9 @@ brew install cmake sdl2 pkg-config
 sudo apt install cmake libsdl2-dev pkg-config build-essential
 ```
 
-LVGL 9.2.2 is automatically cloned from GitHub on the first build if not present.
+LVGL v9.5.0 is automatically cloned from GitHub on the first build if not present (the firmware pulls the same version through the ESP-IDF component manager, `lvgl/lvgl ~9.5.0`).
+
+**Windows:** there is no local recipe; the GitHub Actions workflow `.github/workflows/windows-sim.yml` builds `filmachine_sim.exe` with MSYS2/MinGW on every push to `main` that changes more than the documentation (or on demand from the Actions tab) and uploads it — with its runtime DLLs and a freshly generated `sd/` config — as the `filmachine-sim-windows` artifact.
 
 ### Build the Simulator
 
@@ -254,10 +287,12 @@ The firmware binary is produced at `build/FilMachine.bin`. To flash it directly 
 idf.py flash
 ```
 
-Or use the helper script:
+Or use the all-in-one helper (written for macOS), which sets the target if needed, patches `sdkconfig` for the P4 board, increments the build number in `version.txt`, builds, looks for the serial port, flashes and opens the monitor:
 ```bash
-./flash.sh
+./flash_p4.sh
 ```
+
+> `flash.sh` and `setup.sh` are leftovers of the earlier ESP32-S3 workflow (they copy sources between the old `FilMachine_Simulator_v2` folder and the `FilMachine_Pete` repository). They are not used for the ESP32-P4 and can be ignored.
 
 **P4 note:** the bootloader offset on ESP32-P4 is `0x2000` (different from ESP32-S3's `0x0`). This is handled automatically by `idf.py` when the target is set correctly.
 
@@ -299,8 +334,8 @@ The simulator opens an 800×480 window that reproduces the exact touchscreen int
 - Step management with swipe gestures
 - Settings with slider/switch/radio controls
 - Filter and search functionality
-- Configuration save/load (reads/writes `sd/FilMachine.cfg`)
-- Export/Import (backup to `sd/FilMachine_Backup.cfg`)
+- Configuration save/load (reads/writes `sd/FilMachine.json`)
+- Export/Import (backup to `sd/FilMachine_Backup.json`)
 - Drain machine with animated tank-level bars and relay management
 - Clean machine with per-container rinse cycles and arc progress
 - Self-check diagnostic wizard with 8-phase hardware test simulation (temp sensors, pump, heater, valves, containers, motor)
@@ -383,7 +418,7 @@ All commands use JSON format: `{"cmd":"command_name", ...params}`.
 
 | Command | Parameters | Description |
 |---------|-----------|-------------|
-| `get_state` | — | Returns full machine state (80+ fields: settings, runtime, temperatures, progress, alarms) |
+| `get_state` | — | Returns full machine state (71 fields: settings, runtime, temperatures, progress, alarms) |
 | `get_processes` | — | Returns complete process list with steps, indexed for remote referencing |
 | `start_process` | `index` | Start a process by list index; initializes checkup and begins execution |
 | `checkup_advance` | — | Advance to next checkup phase (Setup → Fill → Temp → Check → Processing) |
@@ -411,7 +446,9 @@ The server uses simple `strstr()` JSON parsing with no external library (no cJSO
 
 ## Flutter Companion App
 
-The **filmachine_app** is a Flutter application that provides full remote control of FilMachine from any mobile device or desktop on the same network. See the [filmachine_app README](../filmachine_app/README.md) for detailed documentation.
+The companion app is a Flutter application that provides full remote control of FilMachine from any mobile device or desktop on the same network. It lives in its own repository, [FilMachine_App](https://github.com/yesnoj/FilMachine_App) (private); see its README for detailed documentation.
+
+**Keeping the two in step.** The app mirrors the protocol implemented in `main/ws_server.c`. Whenever a field is added to `build_state_json()` or a key to `set_setting`, the app needs the same addition in its `MachineState` model, in `MachineService._readSetting` and in its Settings screen. The app release synced with firmware v0.0.0.54 parses all 71 state fields and sends all 17 commands; the only `set_setting` keys it never sends are the fill calibrations (read-only in the app) and `wifiEnabled`.
 
 ### Key Features
 
@@ -421,13 +458,13 @@ The **filmachine_app** is a Flutter application that provides full remote contro
 - **Process Control**: Start processes, advance through checkup phases, Stop Now / Stop After with confirmation dialogs
 - **Filtering**: Client-side filtering by name, film type (B&W / Color), and preferred flag
 - **Statistics**: View completed processes, stopped processes, total development time, cleaning cycles
-- **Settings**: Full access to all machine settings (temperature unit, rotation speed, autostart, alarms, line rinse, pump, display brightness, volume, splash screen, Wi-Fi scan, etc.)
+- **Settings**: Full access to all machine settings (temperature unit, rotation speed, autostart, alarms, line rinse, pump, display brightness, volume, interface language, screen-off timeout, splash screen, Wi-Fi scan, etc.)
 - **Theme**: Dark/light theme toggle with custom FilMachine color palette
 - **Persistent Connection**: Remembers last successful connection for quick reconnect
 
 ### Architecture
 
-The app uses **Provider** for state management. A central `MachineService` (ChangeNotifier) maintains the WebSocket connection and holds the current `MachineState` — a data class with 80+ fields deserialized from the JSON state broadcast. All screens rebuild reactively when state changes.
+The app uses **Provider** for state management. A central `MachineService` (ChangeNotifier) maintains the WebSocket connection and holds the current `MachineState` — a data class with one field per key of the JSON state broadcast (71). All screens rebuild reactively when state changes.
 
 ---
 
@@ -591,7 +628,16 @@ The bootloader alternates between `ota_0` and `ota_1`: the new firmware is writt
 
 ### Setting the Firmware Version
 
-The version displayed in Tools → Software version is read at runtime from the running binary via `esp_app_get_description()->version`. To set it, create a `version.txt` file in the project root containing the version string (e.g., `v1.0.0`), or set it in the main `CMakeLists.txt` via `project(FilMachine VERSION 1.0.0)`.
+The single source of truth is **`version.txt`** in the project root, in the form `MAJOR.MINOR.PATCH.BUILD` (e.g. `0.0.0.54`). ESP-IDF uses it as the application version, so the value shown on the splash and in Tools → Software version is read at runtime from the running binary via `esp_app_get_description()->version`; the simulator gets the same string from `CMakeLists.txt`, which injects it as `FW_VERSION_STR`.
+
+`./flash_p4.sh` increments the BUILD field before every build. To do it by hand:
+
+```bash
+./scripts/bump_version.sh          # 0.0.0.54 -> 0.0.0.55
+./scripts/bump_version.sh --show   # print the current version without changing it
+```
+
+For a real release, edit `version.txt` directly (e.g. `0.1.0.0`).
 
 ---
 
@@ -661,6 +707,10 @@ All external peripherals connect through the board's 2×13 Expand IO header (JP1
 
 All 12 P4 GPIO pins on JP1 are allocated — GPIO 28 is the only spare.
 
+### Breakout Board (KiCad)
+
+`hardware/FilMachine_Breakout_v1/` holds a KiCad project (schematic, PCB, the Python script that generates them, an HTML preview) and a BOM for a 70×50 mm two-layer breakout board. It plugs onto the Expand IO header (called J9 in its files) and brings the signals out to 5.08 mm screw terminals — motor, OneWire temperature, flow meter, I2C, water level, Hall sensor and power — plus a 1×8 header for the remaining GPIOs, and it carries the 4.7 kΩ pull-ups for I2C and OneWire. As its `BOM.txt` warns, check the header's power-pin mapping against the actual board with a multimeter before the first power-on.
+
 ### Peripheral Drivers
 
 | Component | Detail |
@@ -718,6 +768,8 @@ All 12 P4 GPIO pins on JP1 are allocated — GPIO 28 is the only spare.
 
 Everything the firmware currently expects, for costing a build or a custom board. Quantities are for the standard 3-chemistry layout; prices are intentionally omitted (they move — estimate locally).
 
+Two spreadsheets in the repository root complement this list (both in Italian): `DistintaComponenti.xlsx`, a parts list with specs, quantities, prices and links, and `FilMachine_Custom_PCB_BOM.xlsx`, the design worksheet for a future custom PCB (BOM, JP1 pin map, MCP23017 map, power budget). The MCP23017 map in that worksheet belongs to the custom-board design; the mapping the firmware uses today is the one in [Peripheral Drivers](#peripheral-drivers).
+
 **Controller & storage**
 
 | # | Component | Qty | Role / notes |
@@ -761,6 +813,128 @@ Everything the firmware currently expects, for costing a build or a custom board
 |---|-----------|-----|--------------|
 | 18 | Resistor dividers 12V/5V/3.3V → ADC1 | 3 | Enables live rail voltages in the diagnostics page (`HAS_RAIL_MONITOR`). |
 | 19 | INA219 current sensor (I2C) | 1+ | Current draw per rail/load (not yet wired in firmware). |
+
+---
+
+## Film Reel Auto-Loader (3D-Printed Prototype)
+
+*Bench prototype v1 — files in [`3D_Models/FilMachine_caricatore_v1/`](3D_Models/FilMachine_caricatore_v1/). The original notes, in Italian, are in that folder's [README](3D_Models/FilMachine_caricatore_v1/README.md).*
+
+The loader winds the film onto the reel **from the centre outwards**, like the Rondinax: a motor turns the reel, a leader strip with a clip pulls the film out of the cassette, a guide arm bows it and lays it onto the ribs, and a cutter trims it when the winding is done. Formats: **135 and 120** on the same reel.
+
+<p align="center">
+  <img src="3D_Models/FilMachine_caricatore_v1/png/assieme_135_vista.png" alt="Reel auto-loader, assembly for 135 film" width="520">
+</p>
+
+> **What it is and what it is not.** It is an *open* test bench for validating the mechanics in daylight with scrap film. It is not yet light-tight or liquid-tight: that is the next phase, to be designed around mechanics that work.
+
+> **Firmware status.** Nothing in this firmware drives the loader yet: there is no stepper or servo code, and the JP1 pin map has no pins assigned to it. The sequence in [Planned firmware sequence](#planned-firmware-sequence-starting-values) is the starting point for that work.
+
+### Contents
+
+| Folder | What's inside |
+|---|---|
+| `step/` | 21 parts as STEP, already in print orientation, plus the assemblies `ASSIEME_135.step` and `ASSIEME_120.step` |
+| `stl/` | the same 21 parts as STL |
+| `png/` | previews and section views |
+| `src/` | parametric model (Python + CadQuery): `python3 build_all.py` regenerates everything |
+| `verifiche.txt` | outcome of the geometric checks from the last generation |
+
+Each assembly contains 23 named, coloured bodies: the 19 parts used for that format plus the `REF_` reference shapes (NEMA17 motor, servo, blade, 135 cassette or 120 spool). In Shapr3D every body can be hidden. All part faces are planes, cylinders and cones, so they can be edited directly.
+
+### How It Works
+
+1. **Adjustable reel (parts 01–04).** Same principle as the OpenReel/Paterson reel, adapted to centre-out loading: a central tube with bayonet tracks, two flanges that slide on and lock with a 30° twist in **two positions (35 mm and 120)**, and a central drum with the leader-strip anchor and the clip pocket. The flanges move symmetrically, so the film stays centred in both formats. Outer Ø 93.5 mm and tube bore Ø 26.3 mm, as measured on the OpenReel STEP files. The ribs have no outer lead-in and no ratchet: the film, under tension, rests with its edges on the back of the ribs (0.9 mm per side) and the emulsion touches nothing.
+2. **Guide arm (05 for 135, 06 for 120).** It pivots on two screws. Its converging walls squeeze the edges and bow the film into an arc (6.5 mm deep on 135, 8.7 mm on 120): that way it passes between the rib tips and, as soon as it leaves the tip of the arm, it flattens out again and settles on the right turn. The sole rests on the previous turn, so the arm rises by itself as the reel fills. With the reel empty, a stop screw on the cheek plate holds it.
+3. **Turret (07–14).** Two cheek plates, the bridge with the film slot and the blade slot, and the cradle for the 135 cassette or the one for the 120 roll (same four screws).
+4. **Pendulum cutter (10–12).** A micro servo swings an arm that carries an ordinary **9 mm snap-off cutter blade**: the tip crosses the slot from one side to the other and cuts the film against the ceiling of the bridge, like a sliding trimmer. It cuts the full width, 120 included.
+5. **Drive (15–19).** NEMA17 on one upright, a single drive coupling for both formats (a spigot in the tube bore plus two teeth), a plug-type idler pin on the other upright, and the base.
+6. **Clip (20–21).** A wedge jaw with a tooth, closed by a slider; it stays in the drum pocket.
+
+<p align="center">
+  <img src="3D_Models/FilMachine_caricatore_v1/png/spirale_esplosa.png" alt="Adjustable reel, exploded view" width="360">
+  <img src="3D_Models/FilMachine_caricatore_v1/png/taglierina_pendolo.png" alt="Pendulum cutter at three positions of its sweep" width="360">
+</p>
+
+*Left: the adjustable reel, exploded (flanges, bayonet tube with the drum). Right: the pendulum cutter at three positions of its sweep.*
+
+### Printing
+
+PETG, 0.4 mm nozzle. No supports: every part is already oriented.
+
+| Parts | Notes |
+|---|---|
+| 01, 02 flanges | 0.12–0.16 mm layers; the ribs bridge across the windows (6 mm) |
+| 03 tube | upright; the bayonet V-grooves are at 45°, 0.12–0.16 mm layers |
+| 05, 06 guide arms | upside down (roof on the bed); 0.6 mm walls at the tip: enable thin walls / Arachne |
+| 09 bridge | standing on its short side, with a brim |
+| 20 clip jaw | on its side, 0.12 mm layers; it is the finest part |
+| all the others | 0.2 mm layers, 3 perimeters, 15–20 % infill |
+
+Fit clearance used everywhere: 0.15 mm (`FIT` in `src/common.py`). If your printer prints tight or loose, change that value and regenerate.
+
+### Parts to Source
+
+- **NEMA17** stepper motor (Ø5 × 24 mm shaft) + **TMC2209** driver
+- **MG90S** micro servo (or SG90) with the single-arm horn
+- **9 mm snap-off cutter blade** (0.4 mm), a piece at least 45 mm long
+- M3 screws: 12 × M3×12 (bridge, cradle, servo mount), 9 × M3×10 (turret feet, upright feet, idler-pin retainer), 10 × M3×8 (motor, guide-arm pivot and stop, blade clamp), 1 × M3×6 grub screw + 1 M3 nut
+- 1.75 mm filament: it serves as the leader-strip pin (drum and clip) and as the drum-to-tube dowel (2 pieces of 6 mm)
+- **Leader strip**: a 16 × ~135 mm strip of scrap film or 0.15–0.2 mm PET (115 mm usable)
+
+The holes marked "self-tapping" are Ø2.6: the M3 screw cuts its own thread in the PETG.
+
+### Assembly
+
+1. Tube + drum: slide the drum to the middle of the tube and fix it with the two filament dowels.
+2. Leader strip: one end around a piece of filament pushed into the hole of the drum, the other end in the head of the clip.
+3. Flanges: slide them onto the tube with the teeth in the channels, push to the wanted position (35 or 120), then twist 30° up to the stop. Flange A goes on the motor side.
+4. Turret: screw the bridge, the cradle and the servo mount between the two cheek plates, then fit the guide arm with its two pivot screws (they must leave it free to swing) and the stop screw.
+5. Cutter: glue the servo horn into its seat in the blade arm, then mount the blade with the edge towards the cutting side and the tip **75 mm from the servo axis** (19 mm beyond the head of the arm).
+6. Uprights and base; drive coupling on the motor shaft, held by the grub screw.
+
+### Use
+
+**135** — Cassette in the cradle with the lips up, towards the bridge; leader trimmed square. Arm raised. Bring the clip to the cassette, passing under the arm and through the central passage of the bridge, clip it onto the film (1 cm sticking out is enough), lower the arm. Start: the motor winds, stops at the end of the film, the blade cuts, and the motor takes up the tail.
+
+**120** — Flanges in the 120 position, arm 06, cradle 14. Roll in the cradle; unroll the backing paper until the film appears, then clip onto the film. While the motor winds, guide the paper up and back (as on the Rondinax 60). When the adhesive tape arrives: stop, advance 20 mm, cut.
+
+### Planned Firmware Sequence (Starting Values)
+
+Reel turns: 0.83 of leader strip, then **8.2 turns for a 36-exposure 135** (5.9 for 24 exposures) and **4.6 turns for a 120**. Length wound after θ radians: `L = 23·θ + 0.175·θ²` mm.
+
+1. Servo parked (−26.8° from vertical).
+2. Wind at 15–20 rpm, clockwise as seen from the idler-pin side.
+3. End of film on 135: motor stall (StallGuard) at low current, or a maximum number of turns.
+4. Cut: servo from −26.8° to +26.5° and back.
+5. Take up the tail: another 0.6 turns.
+
+Motor current, stall threshold and servo pulse widths have to be tuned on the bench: they have not been measured.
+
+### Checks Done on the Model
+
+See `verifiche.txt` for the full output.
+
+- All 21 parts are valid, single solids; neither assembly has any pair of interfering bodies.
+- Bayonet: free insertion along the channel, free rotation up to the stop, locked beyond the stop and against pull-out, in both positions.
+- Guide arm: no interference with the reel at three winding radii, 0.2 mm clearance per side.
+- Cutter: sweep free of interference in 7 positions; the tip passes the ceiling of the slot by 1.1 mm at the edges of the 120; when parked, the blade stays 0.9 mm from the 120 film zone and 12.8 mm from the 135 one.
+- Reel capacity: 1.83 m of film.
+
+### To Be Validated on the Bench
+
+These are not guaranteed by CAD alone.
+
+1. **Forming the arc and laying the film on the ribs**: this is the heart of the system. Parameters to retouch if needed: `RIB_H`, `TIP_CLEAR`, `WALL_TIP`, `H_EDGE`.
+2. **Clip grip** under tension. For the first trials a piece of adhesive tape works too.
+3. **Bayonet without a detent**: while winding, friction keeps it against the stop; for agitation with reversals a positive lock will be needed (a key in the channel).
+4. **Cutting force**: estimated, not measured. If the MG90S is not enough, the mount has to be adapted to a larger servo.
+5. **End of film**: stall detection to be tuned on 135; on 120 it is manual in this version, like pulling out the backing paper.
+6. **Fit in the developing tank**: the tube is 71 mm long even in the 35 mm configuration.
+
+### Modifying the Model
+
+All dimensions are in `src/common.py`. After a change, run `cd src && python3 build_all.py` (needs `pip install cadquery`): it re-exports parts and assemblies and re-runs all the checks.
 
 ---
 
@@ -834,7 +1008,7 @@ Notes on a few fields: `tempCalibOffset`/`chemCalibOffset` are in **tenths of a 
 
 **Export** writes a backup copy (`FilMachine_Backup.json`); **Import** restores from it and reboots. Generate a fresh SD file with `scripts/genFilMachineCFG.py --realistic --output sd/` (see COMMANDS.md).
 
-In the simulator these files live in the `sd/` subdirectory relative to the executable (e.g. `sd/FilMachine.json`).
+In the simulator these files live in an `sd/` subdirectory of the directory the simulator is launched from (e.g. `sd/FilMachine.json`); the folder is created on first run if missing.
 
 ---
 
@@ -956,7 +1130,8 @@ python3 scripts/genFilMachineCFG.py --realistic --output build800/sd/
 # → Re-run cmake: cd build800 && cmake ..
 
 # LVGL not found
-# → Run setup.sh or clone manually: git clone https://github.com/lvgl/lvgl.git
+# → CMake clones it on the first configure. To do it by hand, from the project root:
+#   git clone --depth 1 --branch v9.5.0 https://github.com/lvgl/lvgl.git
 
 # Serial monitor garbled output
 # → Check baud rate: idf.py monitor -b 115200
