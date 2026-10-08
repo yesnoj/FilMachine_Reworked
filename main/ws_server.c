@@ -632,7 +632,7 @@ static int build_state_json(char *buf, int bufsize) {
         (unsigned long)st->stopped,
         (unsigned long)st->clean,
         alarm_is_active() ? "true" : "false",
-        softwareVersionValue_text,
+        ota_get_running_version(),   /* same source as Splash and Tools (version.txt), not the fixed macro */
         softwareSerialNumValue_text
     );
     return n;
