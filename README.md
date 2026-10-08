@@ -607,7 +607,7 @@ The `.bin` file is produced by `idf.py build` at `build/FilMachine.bin`. It cont
 
 ### Partition Table
 
-The project uses a custom partition table (`partitions.csv`) optimized for the 16MB flash chip. Each OTA slot is 6MB, giving ~68% free space with the current firmware size (~1.9MB).
+The project uses a custom partition table (`partitions.csv`) optimized for the 16MB flash chip. Each OTA slot is 6MB, giving ~59% free space with the current firmware size (~2.5MB, measured on a clean build of v0.0.0.54 with the repository defaults).
 
 ```
 # Name      Type  SubType   Offset      Size
@@ -1138,6 +1138,14 @@ python3 scripts/genFilMachineCFG.py --realistic --output build800/sd/
 
 # ESP-IDF not found / idf.py command not found
 # → Source the environment: . $HOME/esp/esp-idf-v5.5/export.sh
+
+# CMake: 'The "path" field in the manifest file ".../components/espressif__esp_lcd_touch/idf_component.yml"
+#         does not point to a directory'
+# → dependencies.lock stores the absolute path of that local component on the machine that
+#   generated it. After moving or renaming the project folder (or on another computer), edit the
+#   "path:" under espressif/esp_lcd_touch in dependencies.lock to the new location. Deleting the
+#   lock file makes the component manager regenerate it, but with newer versions of the unpinned
+#   dependencies (mdns, esp_lcd_touch_gt911 and two transitive ones), which are untested here.
 
 # CMake generator mismatch (Unix Makefiles vs Ninja)
 # → idf.py uses Ninja, simulator uses Make. If switching, do a clean rebuild:
