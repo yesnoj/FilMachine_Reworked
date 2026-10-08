@@ -2129,6 +2129,8 @@ static void machine_fill_task(void *arg) {
  * and the inlet check is evaluated for the correct target. */
 void machineFillSetTarget(uint8_t target) { s_fillTarget = target; }
 
+int machineFillTarget(void) { return (int)s_fillTarget; }
+
 void machineFillStart(uint8_t target) {
     if (s_fillState == FILL_RUNNING) return;
     s_fillTarget = target;

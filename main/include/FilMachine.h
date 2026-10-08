@@ -1922,6 +1922,7 @@ void     machineFillStart(uint8_t target);
 void     machineFillSetTarget(uint8_t target);   /* set target before Start (popup helpers) */
 void     machineFillStop(void);
 int      machineFillState(void);
+int      machineFillTarget(void);     /* FILL_TARGET_* of the current/last fill */
 float    machineFillFlowLpm(void);   /* live inlet flow rate, L/min           */
 uint32_t machineFillVolumeMl(void);  /* metered volume dispensed so far, ml    */
 int      machineFillProgress(void);  /* 0..100 = volume / FILL_TARGET_ML       */
@@ -1929,6 +1930,8 @@ int      machineFillLevelPct(void);  /* 0/50/100 from the MIN/MAX floats        
 bool     machineFillBathFull(void);  /* true = MAX float already wet right now  */
 bool     machineFillManual(void);    /* true = no inlet, fill by hand (floats)  */
 void     fillPopupCreate(uint8_t target);   /* @file element_fillPopup.c (FILL_TARGET_*) */
+void     fillPopupRemoteStart(uint8_t target); /* app (WebSocket) started a fill: show popup + run */
+void     fillPopupRemoteStop(void);            /* app stopped the running fill */
 // @file accessories.c
 uint8_t pumpPercentToDuty(uint8_t pct);
 // @file ota_update.c

@@ -924,6 +924,8 @@ typedef struct {
     int selfcheck_title_line_w;
     int ota_wifi_w;
     int ota_wifi_h;
+    int wifi_w;                 /* Wi-Fi network popup (own size: taller than OTA) */
+    int wifi_h;
     int ota_progress_w;
     int ota_progress_h;
     int ota_status_w;

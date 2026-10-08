@@ -29,9 +29,31 @@ void clearProcessDetailBackup(void) { s_processBackup = NULL; /* caller takes ow
  * Check whether the process detail form is ready to save.
  * Returns true if there's at least one change, one step, and a non-empty name.
  */
+/* True when any process-level field differs from the snapshot taken when the
+ * detail was opened (or last saved). This is the authoritative "dirty" test for
+ * temperature, tolerance, film type, preferred and temp-control: it does not
+ * depend on each change handler remembering to raise somethingChanged, and it
+ * catches the first toggle as well as any later one. Steps keep using the
+ * sticky somethingChanged flag (raised by element_step.c). */
+static bool process_detail_fields_differ_from_backup(sProcessDetail *pd) {
+    if (s_processBackup == NULL || s_processBackup->process.processDetails == NULL) return false;
+    const sProcessData *a = &pd->data;
+    const sProcessData *b = &s_processBackup->process.processDetails->data;
+    if (a->temp             != b->temp)             return true;
+    if (a->tempTolerance    != b->tempTolerance)    return true;
+    if (a->isTempControlled != b->isTempControlled) return true;
+    if (a->isPreferred      != b->isPreferred)      return true;
+    if (a->filmType         != b->filmType)         return true;
+    if (pd->processDetailNameTextArea) {
+        const char *name = lv_textarea_get_text(pd->processDetailNameTextArea);
+        if (name && strcmp(name, b->processNameString) != 0) return true;
+    }
+    return false;
+}
+
 static bool process_detail_is_valid(sProcessDetail *pd) {
     if (pd == NULL) return false;
-    if (!pd->data.somethingChanged) return false;
+    if (!pd->data.somethingChanged && !process_detail_fields_differ_from_backup(pd)) return false;
     if (pd->stepElementsList.size == 0) return false;
     const char *name = lv_textarea_get_text(pd->processDetailNameTextArea);
     return (name != NULL && strlen(name) > 0);
@@ -267,10 +289,13 @@ static void process_detail_handle_temp_control(processNode *pn, lv_obj_t *obj) {
 
     bool newVal = lv_obj_has_state(obj, LV_STATE_CHECKED);
     LV_LOG_USER("Temperature controlled : %s", newVal ? "On" : "Off");
-    if (newVal != pd->data.isTempControlled) {
-        pd->data.somethingChanged = true;
-    }
+    bool moved = (newVal != pd->data.isTempControlled);
     pd->data.isTempControlled = newVal;
+    /* Raise the sticky flag when the value moved (new process, no snapshot)
+     * or when it now differs from the saved snapshot (existing process). The
+     * Save button itself is driven by process_detail_is_valid(), which also
+     * compares against the snapshot, so the first toggle always enables it. */
+    if (moved || process_detail_fields_differ_from_backup(pd)) pd->data.somethingChanged = true;
 
     /* Enable/disable temperature and tolerance fields based on temp control state */
     if (pd->data.isTempControlled) {
@@ -383,6 +408,10 @@ void event_processDetail(lv_event_t * e) {
   if(code == LV_EVENT_VALUE_CHANGED) {
     if(widget == pd->processTempControlSwitch)
         process_detail_handle_temp_control(pn, widget);
+  }
+  if(code == LV_EVENT_RELEASED && widget == pd->processTempControlSwitch) {
+    /* Re-sync after the gesture ends: the switch state is final here. */
+    process_detail_handle_temp_control(pn, widget);
   }
 
   if(code == LV_EVENT_FOCUSED) {
@@ -731,11 +760,12 @@ if(existingProcess != NULL) {
                           pd->processTempControlSwitch = lv_switch_create(pd->processTempControlContainer);
                           lv_obj_set_size(pd->processTempControlSwitch, ui->temp_switch_w, ui->temp_switch_h);
                           lv_obj_add_event_cb(pd->processTempControlSwitch, event_processDetail, LV_EVENT_VALUE_CHANGED, pn);
+                          lv_obj_add_event_cb(pd->processTempControlSwitch, event_processDetail, LV_EVENT_RELEASED, pn);
                           lv_obj_align(pd->processTempControlSwitch, LV_ALIGN_RIGHT_MID, ui->temp_ctrl_switch_x, ui->form_label_y);
                           lv_obj_set_style_bg_color(pd->processTempControlSwitch, lv_palette_darken(LV_PALETTE_GREY, 3), LV_STATE_DEFAULT);
                           lv_obj_set_style_bg_color(pd->processTempControlSwitch,  lv_palette_main(LV_PALETTE_GREEN), LV_PART_KNOB | LV_STATE_DEFAULT);
                           lv_obj_set_style_bg_color(pd->processTempControlSwitch, lv_color_hex(GREEN_DARK) , LV_PART_INDICATOR | LV_STATE_CHECKED);
-                          lv_obj_add_state(pd->processTempControlSwitch, pd->data.isTempControlled);
+                          if (pd->data.isTempControlled) lv_obj_add_state(pd->processTempControlSwitch, LV_STATE_CHECKED);
 
                   pd->processTempContainer = lv_obj_create(pd->processInfoContainer);
                   lv_obj_remove_flag(pd->processTempContainer, LV_OBJ_FLAG_SCROLLABLE);

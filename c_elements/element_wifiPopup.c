@@ -517,10 +517,11 @@ void wifiPopupCreate(void) {
     }
 
     /* ── First-time creation ── */
-    /* Use OTA popup size for now */
+    /* Own size: the OTA popup (290 px) is too short — the 180 px list ran
+     * past the content area and under the auto-connect / Connect row. */
     createPopupBackdrop(&p->popupParent, &p->popupContainer,
-                        ui_get_profile()->popups.ota_wifi_w,
-                        ui_get_profile()->popups.ota_wifi_h);
+                        ui_get_profile()->popups.wifi_w,
+                        ui_get_profile()->popups.wifi_h);
 
     const ui_ota_popup_layout_t *ui = &ui_get_profile()->ota_popup;
 

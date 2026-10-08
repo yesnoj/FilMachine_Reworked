@@ -106,11 +106,12 @@ static void fill_live_cb(lv_timer_t *t)
     }
 }
 
-/* Run (ready/done) ↔ Stop (running). */
-static void event_fillAction(lv_event_t *e)
+/* Run (ready/done) ↔ Stop (running). Shared by the on-screen button and the
+ * remote (WebSocket) entry points so the display always mirrors the app. */
+static void fill_action_toggle(void)
 {
-    (void)e;
     struct sFillPopup *fp = &gui.element.fillPopup;
+    if (fp->parent == NULL) return;
 
     if (s_phase == FP_RUNNING) {
         machineFillStop();    /* Stop → the fill ends and the button returns to Run */
@@ -121,6 +122,35 @@ static void event_fillAction(lv_event_t *e)
                           s_manual ? fill_manual_status(FILL_RUNNING) : fill_status_text(FILL_RUNNING));
         fill_set_button(fp->actionButton, fp->actionButtonLabel, fillStop_text, RED_DARK);
     }
+}
+
+static void event_fillAction(lv_event_t *e)
+{
+    (void)e;
+    fill_action_toggle();
+}
+
+/* ── Remote control (app over WebSocket) ──
+ * Open the same popup the user would see from Tools, then Run. If a popup for
+ * the other target is open and idle, swap it; never interrupt a running fill. */
+void fillPopupRemoteStart(uint8_t target)
+{
+    struct sFillPopup *fp = &gui.element.fillPopup;
+    if (fp->parent != NULL && s_phase == FP_RUNNING) {
+        LV_LOG_USER("Remote fill_start ignored: a fill is already running");
+        return;
+    }
+    if (fp->parent != NULL && s_target != target) fill_popup_close();
+    if (fp->parent == NULL) fillPopupCreate(target);
+    if (fp->parent == NULL) return;             /* e.g. another popup owns the screen */
+    if (s_phase != FP_RUNNING) fill_action_toggle();
+}
+
+void fillPopupRemoteStop(void)
+{
+    struct sFillPopup *fp = &gui.element.fillPopup;
+    if (fp->parent == NULL) { machineFillStop(); return; }   /* defensive: no popup, still stop */
+    if (s_phase == FP_RUNNING) fill_action_toggle();
 }
 
 /* Cancel: leave the popup at any time (stops the fill first). */

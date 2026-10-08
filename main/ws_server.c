@@ -294,6 +294,18 @@ static void ws_async_checkup_advance(void *user_data) {
 }
 
 /* ── Async callback: stop_now — mirrors message_popup_handle_stop_now() ─ */
+/* ── Maintenance fill from the app (Tools → Fill bath / Fill chem) ──
+ * Runs on the LVGL thread: opens the same fill popup the display uses so the
+ * machine always shows what the app started, then starts/stops the fill. */
+static void ws_async_fill_start(void *user_data) {
+    uint8_t target = (uint8_t)(intptr_t)user_data;
+    fillPopupRemoteStart(target);
+}
+static void ws_async_fill_stop(void *user_data) {
+    (void)user_data;
+    fillPopupRemoteStop();
+}
+
 static void ws_async_stop_now(void *user_data) {
     (void)user_data;
     processNode *pn = find_active_checkup_process();
@@ -479,6 +491,12 @@ static int build_state_json(char *buf, int bufsize) {
     json_escape(esc_next, sizeof(esc_next), next_step_name);
     json_escape(esc_ssid, sizeof(esc_ssid), s->wifiSSID);
 
+    /* Live sensor readings (offset-compensated, same source as the display).
+     * Outside a process the checkup copy is zero, so always read the cache;
+     * -255 (no sensor) is sent as-is and the app shows "--". */
+    float live_bath_temp = getCachedTemperature(TEMPERATURE_SENSOR_BATH);
+    float live_chem_temp = getCachedTemperature(TEMPERATURE_SENSOR_CHEMICAL);
+
     int n = snprintf(buf, bufsize,
         "{\"type\":\"state\",\"data\":{"
         /* Settings */
@@ -557,6 +575,14 @@ static int build_state_json(char *buf, int bufsize) {
         "\"statsClean\":%lu,"
         /* Alarm */
         "\"alarmActive\":%s,"
+        /* Maintenance fill (Tools → Fill bath / Fill chem) — drives the app's
+         * fill-calibration flow; state codes are FILL_* from FilMachine.h */
+        "\"fillToolState\":%d,"
+        "\"fillToolTarget\":%d,"
+        "\"fillToolLevelPct\":%d,"
+        "\"fillToolVolumeMl\":%lu,"
+        "\"fillToolFlowLpm\":%.2f,"
+        "\"fillToolManual\":%s,"
         /* Device info */
         "\"fwVersion\":\"%s\","
         "\"serialNumber\":\"%s\""
@@ -599,8 +625,8 @@ static int build_state_json(char *buf, int bufsize) {
         ck->stopAfter ? "true" : "false",
         ck->isFilling ? "true" : "false",
         ck->isDeveloping ? "true" : "false",
-        ck->currentWaterTemp,
-        ck->currentChemTemp,
+        live_bath_temp,
+        live_chem_temp,
         ck->heaterOn ? "true" : "false",
         (unsigned)ck->stepFillWaterStatus,
         (unsigned)ck->stepReachTempStatus,
@@ -632,6 +658,12 @@ static int build_state_json(char *buf, int bufsize) {
         (unsigned long)st->stopped,
         (unsigned long)st->clean,
         alarm_is_active() ? "true" : "false",
+        machineFillState(),
+        machineFillTarget(),
+        machineFillLevelPct(),
+        (unsigned long)machineFillVolumeMl(),
+        machineFillFlowLpm(),
+        machineFillManual() ? "true" : "false",
         ota_get_running_version(),   /* same source as Splash and Tools (version.txt), not the fixed macro */
         softwareSerialNumValue_text
     );
@@ -907,6 +939,27 @@ static void ws_handle_command(const char *msg, int len) {
                 LV_LOG_WARN("[WS] start_process: index %d not found", index);
             }
         }
+        return;
+    }
+
+    /* ── fill_start / fill_stop: maintenance fill (self-calibrates fill time) ──
+     * Expected: {"cmd":"fill_start","target":0|1}  (0 = water bath, 1 = chem) */
+    if (strstr(msg, "\"fill_start\"")) {
+        sCheckupData *ck = find_active_checkup();
+        if (ck && ck->isProcessing) {
+            ws_broadcast_event("fill_rejected", "{\"reason\":\"processing\"}");
+            LV_LOG_WARN("[WS] fill_start rejected: process running");
+            return;
+        }
+        int target = ws_json_get_int(msg, "target", FILL_TARGET_WB);
+        if (target != FILL_TARGET_WB && target != FILL_TARGET_CHEM) target = FILL_TARGET_WB;
+        ws_queue_lvgl_action(ws_async_fill_start, (void *)(intptr_t)target);
+        LV_LOG_USER("[WS] fill_start target=%d queued", target);
+        return;
+    }
+    if (strstr(msg, "\"fill_stop\"")) {
+        ws_queue_lvgl_action(ws_async_fill_stop, NULL);
+        LV_LOG_USER("[WS] fill_stop queued");
         return;
     }
 
