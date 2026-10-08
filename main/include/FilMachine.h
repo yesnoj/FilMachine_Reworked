@@ -1930,6 +1930,13 @@ int      machineFillLevelPct(void);  /* 0/50/100 from the MIN/MAX floats        
 bool     machineFillBathFull(void);  /* true = MAX float already wet right now  */
 bool     machineFillManual(void);    /* true = no inlet, fill by hand (floats)  */
 void     fillPopupCreate(uint8_t target);   /* @file element_fillPopup.c (FILL_TARGET_*) */
+/* Remote Tune (app over WebSocket) for the speed/volume popups — element_speedPopup.c */
+#define TUNE_KIND_PUMP    0
+#define TUNE_KIND_MOTOR   1
+#define TUNE_KIND_VOLUME  2
+void     tunePopupRemoteTest(uint8_t kind, uint8_t percent, bool on);  /* open popup, sync roller, run/stop live test */
+void     tunePopupRemoteSet(uint8_t kind, uint8_t percent);            /* stop test, save, close (= SET on display) */
+void     tunePopupRemoteCancel(void);                                   /* stop test, close without saving */
 void     fillPopupRemoteStart(uint8_t target); /* app (WebSocket) started a fill: show popup + run */
 void     fillPopupRemoteStop(void);            /* app stopped the running fill */
 // @file accessories.c

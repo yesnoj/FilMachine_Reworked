@@ -23,6 +23,7 @@
 #endif
 
 extern struct gui_components gui;
+extern struct sys_components sys;
 
 /* ── Forward declarations ────────────────────────────────────────── */
 extern void checkup(processNode *pn);
@@ -304,6 +305,23 @@ static void ws_async_fill_start(void *user_data) {
 static void ws_async_fill_stop(void *user_data) {
     (void)user_data;
     fillPopupRemoteStop();
+}
+
+/* ── Tune (pump / motor / volume) from the app: mirrors the display popup ── */
+typedef struct { uint8_t kind; uint8_t percent; bool on; } ws_tune_arg_t;
+static void ws_async_tune_test(void *user_data) {
+    ws_tune_arg_t *a = (ws_tune_arg_t *)user_data;
+    tunePopupRemoteTest(a->kind, a->percent, a->on);
+    free(a);
+}
+static void ws_async_tune_set(void *user_data) {
+    ws_tune_arg_t *a = (ws_tune_arg_t *)user_data;
+    tunePopupRemoteSet(a->kind, a->percent);
+    free(a);
+}
+static void ws_async_tune_cancel(void *user_data) {
+    (void)user_data;
+    tunePopupRemoteCancel();
 }
 
 static void ws_async_stop_now(void *user_data) {
@@ -779,7 +797,10 @@ static void ws_handle_command(const char *msg, int len) {
         if (KEY_IS("tempUnit"))             s->tempUnit = (tempUnit_t)atoi(vs);
         else if (KEY_IS("waterInlet"))      s->waterInlet = (strstr(vs, "true") != NULL);
         else if (KEY_IS("tempCalibOffset")) s->tempCalibOffset = (int16_t)atoi(vs);
-        else if (KEY_IS("filmRotationSpeed"))  s->filmRotationSpeedSetpoint = (uint8_t)atoi(vs);
+        else if (KEY_IS("filmRotationSpeed")) {
+            s->filmRotationSpeedSetpoint = (uint8_t)atoi(vs);
+            sys.analogVal_rotationSpeedPercent = mapPercentageToValue(s->filmRotationSpeedSetpoint, 10, 100);
+        }
         else if (KEY_IS("rotationInterval"))   s->rotationIntervalSetpoint = (uint8_t)atoi(vs);
         else if (KEY_IS("random"))             s->randomSetpoint = (uint8_t)atoi(vs);
         else if (KEY_IS("persistentAlarm"))    s->isPersistentAlarm = (strstr(vs, "true") != NULL);
@@ -960,6 +981,33 @@ static void ws_handle_command(const char *msg, int len) {
     if (strstr(msg, "\"fill_stop\"")) {
         ws_queue_lvgl_action(ws_async_fill_stop, NULL);
         LV_LOG_USER("[WS] fill_stop queued");
+        return;
+    }
+
+    /* ── tune_test / tune_set / tune_cancel: pump, motor or volume Tune ──
+     * {"cmd":"tune_test","kind":0|1|2,"percent":N,"on":true|false}
+     * {"cmd":"tune_set","kind":K,"percent":N}   {"cmd":"tune_cancel"}
+     * kind: 0 pump, 1 motor (film rotation), 2 audio volume. A live test is
+     * auto-stopped by the firmware if the app does not refresh it (~20 s). */
+    if (strstr(msg, "\"tune_test\"") || strstr(msg, "\"tune_set\"")) {
+        bool isSet = strstr(msg, "\"tune_set\"") != NULL;
+        sCheckupData *ck = find_active_checkup();
+        if (ck && ck->isProcessing) {
+            ws_broadcast_event("tune_rejected", "{\"reason\":\"processing\"}");
+            LV_LOG_WARN("[WS] tune rejected: process running");
+            return;
+        }
+        ws_tune_arg_t *a = (ws_tune_arg_t *)calloc(1, sizeof(*a));
+        if (!a) return;
+        int kind = ws_json_get_int(msg, "kind", 0);
+        a->kind    = (uint8_t)((kind < 0 || kind > 2) ? 0 : kind);
+        a->percent = (uint8_t)ws_json_get_int(msg, "percent", 50);
+        a->on      = ws_json_get_bool(msg, "on", false);
+        ws_queue_lvgl_action(isSet ? ws_async_tune_set : ws_async_tune_test, a);
+        return;
+    }
+    if (strstr(msg, "\"tune_cancel\"")) {
+        ws_queue_lvgl_action(ws_async_tune_cancel, NULL);
         return;
     }
 

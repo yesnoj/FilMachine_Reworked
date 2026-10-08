@@ -65,7 +65,8 @@ def dart_str(s: str) -> str:
 
 
 def key_of(name: str) -> str:
-    return name[:-5] if name.endswith('_text') else name
+    k = name[:-5] if name.endswith('_text') else name
+    return k[0].lower() + k[1:]          # Dart getters are lowerCamelCase
 
 
 def main():

@@ -22,6 +22,19 @@ extern struct sys_components sys;
 #define TUNE_BTN_MX              15   /* button side margin (matches Clean popup) */
 #define TUNE_BTN_MY              10   /* button bottom margin (matches Clean popup) */
 
+/* Which flavour of the shared popup is open (remote control needs to know). */
+#define SP_NONE    0
+#define SP_PUMP    1
+#define SP_MOTOR   2
+#define SP_VOLUME  3
+static int s_kind = SP_NONE;
+
+/* Remote (app) watchdog: a live test started over WebSocket is stopped if the
+ * app stops refreshing it (connection lost, app killed) — never leave the pump
+ * or motor running unattended. */
+static lv_timer_t *s_remoteWatchdog = NULL;
+#define REMOTE_TEST_TIMEOUT_MS  20000
+
 /* Apply the currently selected speed to the real hardware (live test). */
 static void speed_apply_live(void)
 {
@@ -30,6 +43,13 @@ static void speed_apply_live(void)
         pump_set_forward(pumpPercentToDuty(sp->percent));
     else
         motor_set_forward(mapPercentageToValue(sp->percent, 10, 100));
+}
+
+/* No popup open (nothing to mirror): stop both actuators, defensively. */
+static void speed_stop_all_remote(void)
+{
+    pump_set_stop();
+    motor_set_stop();
 }
 
 /* Stop the pump/motor. */
@@ -43,8 +63,15 @@ static void speed_stop(void)
 }
 
 /* Close and destroy the popup (always stops the hardware first). */
+static void remote_watchdog_stop(void)
+{
+    if (s_remoteWatchdog) { lv_timer_delete(s_remoteWatchdog); s_remoteWatchdog = NULL; }
+}
+
 static void speed_popup_close(void)
 {
+    s_kind = SP_NONE;
+    remote_watchdog_stop();
     struct sSpeedPopup *sp = &gui.element.speedPopup;
     speed_stop();
     lv_style_reset(&sp->style_titleLine);
@@ -141,6 +168,7 @@ void speedPopupCreate(bool isPump, uint8_t currentPercent)
 
     sp->isPump  = isPump;
     sp->percent = currentPercent;
+    s_kind = isPump ? SP_PUMP : SP_MOTOR;
     sp->targetValueLabel = isPump ? gui.page.settings.pumpSpeedValueLabel
                                   : gui.page.settings.filmRotationSpeedValueLabel;
 
@@ -286,6 +314,8 @@ static void event_volumeSet(lv_event_t *e)
     lv_style_reset(&sp->style_roller);
     lv_msgbox_close(sp->parent);
     sp->parent = NULL;
+    s_kind = SP_NONE;
+    remote_watchdog_stop();
 
     {
         static char msg[48];
@@ -308,6 +338,8 @@ static void event_volumeCancel(lv_event_t *e)
     lv_style_reset(&sp->style_roller);
     lv_msgbox_close(sp->parent);
     sp->parent = NULL;
+    s_kind = SP_NONE;
+    remote_watchdog_stop();
 }
 
 void volumePopupCreate(uint8_t currentPercent)
@@ -326,6 +358,7 @@ void volumePopupCreate(uint8_t currentPercent)
     currentPercent = (uint8_t)((currentPercent / 5) * 5);   /* snap to step 5 */
 
     sp->percent = currentPercent;
+    s_kind = SP_VOLUME;
     sp->targetValueLabel = gui.page.settings.volumeValueLabel;
 
     /* Build roller options "0%\n5%\n...\n100%". */
@@ -399,4 +432,104 @@ void volumePopupCreate(uint8_t currentPercent)
     lv_label_set_text(volSetLbl, tuneRollerButton_text);   /* "Set" */
     lv_obj_set_style_text_font(volSetLbl, btnFont, 0);
     lv_obj_align(volSetLbl, LV_ALIGN_CENTER, 0, 0);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  Remote control from the app (WebSocket tune_test / tune_set / tune_cancel)
+ *  The display shows the very same popup, with the roller and the Test
+ *  switch following the app, so the machine always shows what is running.
+ *  LVGL thread only (queued by ws_server).
+ * ═══════════════════════════════════════════════════════════════════ */
+
+static void remote_watchdog_cb(lv_timer_t *t)
+{
+    (void)t;
+    LV_LOG_WARN("Remote tune: no refresh for %d ms — stopping", REMOTE_TEST_TIMEOUT_MS);
+    tunePopupRemoteCancel();
+}
+
+static void remote_watchdog_kick(void)
+{
+    if (s_remoteWatchdog == NULL)
+        s_remoteWatchdog = lv_timer_create(remote_watchdog_cb, REMOTE_TEST_TIMEOUT_MS, NULL);
+    else
+        lv_timer_reset(s_remoteWatchdog);
+}
+
+static int kind_of(uint8_t kind) { return (kind == TUNE_KIND_PUMP) ? SP_PUMP
+                                        : (kind == TUNE_KIND_MOTOR) ? SP_MOTOR : SP_VOLUME; }
+
+/* Open (or re-target) the popup for `kind` and return true when it is ready. */
+static bool remote_ensure_popup(uint8_t kind, uint8_t percent)
+{
+    struct sSpeedPopup *sp = &gui.element.speedPopup;
+    int want = kind_of(kind);
+    if (sp->parent != NULL && s_kind != want) tunePopupRemoteCancel();   /* swap flavour */
+    if (sp->parent == NULL) {
+        if (want == SP_VOLUME) volumePopupCreate(percent);
+        else                   speedPopupCreate(want == SP_PUMP, percent);
+    }
+    return sp->parent != NULL;
+}
+
+void tunePopupRemoteTest(uint8_t kind, uint8_t percent, bool on)
+{
+    struct sSpeedPopup *sp = &gui.element.speedPopup;
+    if (!remote_ensure_popup(kind, percent)) return;
+    remote_watchdog_kick();
+
+    if (s_kind == SP_VOLUME) {
+        if (percent > 100) percent = 100;
+        percent = (uint8_t)((percent / 5) * 5);
+        sp->percent = percent;
+        if (sp->roller) lv_roller_set_selected(sp->roller, percent / 5, LV_ANIM_ON);
+        if (on) volume_apply(percent);
+#ifndef SIMULATOR_BUILD
+        else { audio_set_volume(gui.page.settings.settingsParams.volume); audio_stop(); }
+#endif
+        return;
+    }
+
+    if (percent < 10) percent = 10;
+    if (percent > 100) percent = 100;
+    percent = (uint8_t)(((percent - 10) / 5) * 5 + 10);
+    bool wasOn = sp->testSwitch && lv_obj_has_state(sp->testSwitch, LV_STATE_CHECKED);
+    sp->percent = percent;
+    if (sp->roller) lv_roller_set_selected(sp->roller, (percent - 10) / 5, LV_ANIM_ON);
+    if (sp->testSwitch) {
+        if (on) lv_obj_add_state(sp->testSwitch, LV_STATE_CHECKED);
+        else    lv_obj_remove_state(sp->testSwitch, LV_STATE_CHECKED);
+    }
+    if (on) {
+        if (!sp->isPump && !wasOn)
+            motor_start_kicked(true, mapPercentageToValue(sp->percent, 10, 100));  /* breakaway kick */
+        else
+            speed_apply_live();
+    } else {
+        speed_stop();
+    }
+}
+
+void tunePopupRemoteSet(uint8_t kind, uint8_t percent)
+{
+    struct sSpeedPopup *sp = &gui.element.speedPopup;
+    if (!remote_ensure_popup(kind, percent)) return;
+    if (s_kind == SP_VOLUME) {
+        if (percent > 100) percent = 100;
+        sp->percent = (uint8_t)((percent / 5) * 5);
+        event_volumeSet(NULL);
+    } else {
+        if (percent < 10) percent = 10;
+        if (percent > 100) percent = 100;
+        sp->percent = (uint8_t)(((percent - 10) / 5) * 5 + 10);
+        event_speedSet(NULL);
+    }
+}
+
+void tunePopupRemoteCancel(void)
+{
+    struct sSpeedPopup *sp = &gui.element.speedPopup;
+    if (sp->parent == NULL) { speed_stop_all_remote(); return; }
+    if (s_kind == SP_VOLUME) event_volumeCancel(NULL);
+    else                     event_speedCancel(NULL);
 }
