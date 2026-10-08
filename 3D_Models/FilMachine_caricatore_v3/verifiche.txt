@@ -1,0 +1,71 @@
+== PEZZI (orientamento di stampa) ==
+01_flangia_A             valido=True solidi=1 volume=  11.6 cm3  ingombro   93.6 x   93.6 x   8.1 mm
+02_flangia_B             valido=True solidi=1 volume=  11.6 cm3  ingombro   93.6 x   93.6 x   8.1 mm
+03_tubo_baionetta        valido=True solidi=1 volume=  17.3 cm3  ingombro   32.1 x   32.0 x  71.0 mm
+04_tamburo               valido=True solidi=1 volume=  14.3 cm3  ingombro   44.1 x   44.1 x  23.1 mm
+05_braccio_guida_135     valido=True solidi=1 volume=   8.6 cm3  ingombro   75.0 x   70.4 x  13.5 mm
+06_braccio_guida_120     valido=True solidi=1 volume=  13.5 cm3  ingombro   75.0 x   70.4 x  15.8 mm
+07_guancia_SX            valido=True solidi=1 volume=  30.2 cm3  ingombro   60.0 x  100.0 x  17.0 mm
+08_guancia_DX            valido=True solidi=1 volume=  30.2 cm3  ingombro   60.0 x  100.0 x  17.0 mm
+09_ponte_lama            valido=True solidi=1 volume=  11.9 cm3  ingombro   10.5 x   22.0 x  71.0 mm
+10_braccio_lama          valido=True solidi=1 volume=   3.7 cm3  ingombro   64.0 x   21.8 x   5.0 mm
+11_morsetto_lama         valido=True solidi=1 volume=   0.4 cm3  ingombro    9.5 x   18.6 x   2.5 mm
+12_supporto_servo        valido=True solidi=1 volume=   6.5 cm3  ingombro   20.0 x   71.0 x   6.0 mm
+13_culla_135             valido=True solidi=1 volume=  27.9 cm3  ingombro   32.5 x   71.0 x  24.0 mm
+14_culla_120             valido=True solidi=1 volume=  32.2 cm3  ingombro   32.5 x   71.0 x  33.5 mm
+15_montante_motore       valido=True solidi=1 volume=  21.8 cm3  ingombro   52.0 x   76.0 x  19.0 mm
+16_montante_folle        valido=True solidi=1 volume=  26.5 cm3  ingombro   52.0 x   76.0 x  19.0 mm
+17_trascinatore          valido=True solidi=1 volume=  14.4 cm3  ingombro   32.1 x   32.1 x  21.0 mm
+18_perno_folle           valido=True solidi=1 volume=   7.3 cm3  ingombro   26.0 x   26.0 x  50.0 mm
+19_basamento             valido=True solidi=1 volume=  65.2 cm3  ingombro  168.0 x  152.0 x   4.0 mm
+20_clip_ganascia         valido=True solidi=1 volume=   0.9 cm3  ingombro   18.4 x    4.4 x  18.0 mm
+21_clip_cursore          valido=True solidi=1 volume=   0.2 cm3  ingombro   20.4 x    4.6 x   4.0 mm
+22_anello_alette_A       valido=True solidi=1 volume=  13.7 cm3  ingombro   91.9 x   91.9 x  14.9 mm
+22_anello_alette_B       valido=True solidi=1 volume=  13.7 cm3  ingombro   91.9 x   91.9 x  14.9 mm
+23_provino_accoppiamento valido=True solidi=1 volume=  10.7 cm3  ingombro  123.0 x   39.0 x   8.0 mm
+
+== SPIRALE ==
+capacita' pellicola: 1829 mm | passo 2.2 | canale tra costole 1.4 | fascetta (300 gradi sul tamburo) 115.2 mm
+135: distanza tra le flange 35.6 | luce tra le punte delle costole 33.2 | arco pellicola nel braccio: corda 31.6, freccia 6.45, raggio 22.6 mm
+120: distanza tra le flange 62.1 | luce tra le punte delle costole 59.7 | arco pellicola nel braccio: corda 58.1, freccia 8.68, raggio 52.9 mm
+
+== check_reel.py ==
+infilaggio lungo il canale (a -30 gradi), interferenza mm3: [0.0, 0.0, 0.0, 0.0, 0.0]
+stazione 120: rotazione di blocco -30..0 gradi: [0.0, 0.0, 0.0, 0.0, 0.0] | oltre la battuta (+3 gradi): 2.647 | sfilamento assiale a blocco inserito (+/-1 mm): 14.112 14.112
+stazione 135: rotazione di blocco -30..0 gradi: [0.0, 0.0, 0.0, 0.0, 0.0] | oltre la battuta (+3 gradi): 2.647 | sfilamento assiale a blocco inserito (+/-1 mm): 14.112 14.112
+rotazione a meta' canale (fuori stazione, -15 gradi): 14.337 (deve interferire)
+accoppiamento flangia/tubo: gioco radiale foro 0.06 | fianchi dente (assiale) 0.06 | punta dente/fondo gola 0.16 mm
+distanza minima flangia/tubo a blocco inserito: 0.042 mm
+anello alette: infilaggio [0.0, 0.0, 0.0] | rotazione di blocco [0.0, 0.0, 0.0] | oltre battuta 2.647 | sfilamento 14.112 14.112
+alette, stesso anello A sui due lati: interferenze con la spirale nessuna, gioco dalla flangia 0.4 mm
+   rotazione orario (avvolgimento) : lato motore spinge DENTRO, lato perno folle spinge FUORI
+   rotazione antiorario            : lato motore spinge FUORI, lato perno folle spinge DENTRO
+alette, anelli speculari A + B: interferenze con la spirale nessuna, gioco dalla flangia 0.4 mm
+   rotazione orario (avvolgimento) : lato motore spinge DENTRO, lato perno folle spinge DENTRO
+   rotazione antiorario            : lato motore spinge FUORI, lato perno folle spinge FUORI
+
+== layout.py ==
+135 r=21.5 angolo braccio=  -9.6 gradi  interferenza=0.000 mm3  gioco minimo braccio/flange=0.20 mm
+135 r=30.0 angolo braccio=  -1.6 gradi  interferenza=0.000 mm3  gioco minimo braccio/flange=0.20 mm
+135 r=42.0 angolo braccio=  11.0 gradi  interferenza=0.000 mm3  gioco minimo braccio/flange=0.20 mm
+120 r=21.5 angolo braccio=  -9.6 gradi  interferenza=0.000 mm3  gioco minimo braccio/flange=0.20 mm
+120 r=30.0 angolo braccio=  -1.6 gradi  interferenza=0.000 mm3  gioco minimo braccio/flange=0.20 mm
+120 r=42.0 angolo braccio=  11.0 gradi  interferenza=0.000 mm3  gioco minimo braccio/flange=0.20 mm
+
+== check_tower.py ==
+parti fisse (135): interferenze nessuna
+parti fisse (120): interferenze nessuna
+spazzata lama da -26.8 a 26.5 gradi (7 posizioni): interferenza totale 0.0000 mm3
+quota punta lama: ai bordi 120 (y=31.05) 85.67 | ai bordi 135 (y=17.5) 90.33 | al centro 92.40 | cielo fessura pellicola 84.6, cielo fessura lama 96.5
+lama parcheggiata: distanza dalla zona pellicola 120 0.94 mm, dalla 135 12.77 mm; gioco lama/ponte 0.30 mm, lama/guancia DX 0.21 mm
+testa del braccio lama (verticale): z max 73.4, sotto il ponte (z=78.0) di 4.6 mm; gioco minimo braccio lama/guance a fine corsa 0.89 mm
+caricatore 135 nella culla: interferenza 0.0 mm3; gioco 0.45
+rocchetto 120 nella culla: interferenza 0.0 mm3; gioco 0.3
+braccio guida 135 r=21.5: interferenza con torretta 0.0000 mm3, gioco minimo 0.30 mm
+braccio guida 135 r=42.0: interferenza con torretta 0.0000 mm3, gioco minimo 0.30 mm
+braccio guida 120 r=21.5: interferenza con torretta 0.0000 mm3, gioco minimo 0.30 mm
+braccio guida 120 r=42.0: interferenza con torretta 0.0000 mm3, gioco minimo 0.30 mm
+
+== ASSIEMI ==
+ASSIEME_135.step: 25 corpi, 9.1 MB, coppie in interferenza: nessuna
+ASSIEME_120.step: 23 corpi, 8.4 MB, coppie in interferenza: nessuna
