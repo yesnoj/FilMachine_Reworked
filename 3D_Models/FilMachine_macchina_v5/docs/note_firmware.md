@@ -4,9 +4,9 @@ Cosa funziona così com'è con questa macchina, cosa no e qual è la modifica pi
 Ho letto il codice del repository (`main/accessories.c`, `c_pages/page_checkup.c`, i popup in `c_elements/`,
 `boards/board_jc4880p433.h`); **non ho potuto provarlo su una macchina vera**.
 
-## 1. Collegamenti: nessuna modifica
+## 1. Collegamenti
 
-I pin sono quelli già definiti in `boards/board_jc4880p433.h`. Lo schema è in `schema_elettrico.pdf`.
+I pin sono quelli di `boards/board_jc4880p433.h`; l'unico cambiamento è GPIO28, ora dedicato al servo della taglierina. Lo schema è in `schema_elettrico.pdf`.
 
 | Funzione | Pin | Dove va |
 |---|---|---|
@@ -18,9 +18,10 @@ I pin sono quelli già definiti in `boards/board_jc4880p433.h`. Lo schema è in 
 | Sonde DS18B20 (0 = bagno, 1 = chimica) | GPIO35 (JP1 15) | bus OneWire |
 | Livello bagno MIN / MAX | GPIO29 / 30 (JP1 14 / 12) | due XKC-Y21 sulla parete del bagno |
 | Sensore Hall | GPIO31 (JP1 10) | KY-003 sulla ruota magneti (4 magneti) |
-| Libero | GPIO28 (JP1 21, `TEST_PIN`) | servo della taglierina, vedi punto 5 |
+| Servo della taglierina | GPIO28 (JP1 21, ora `CUTTER_SERVO_PIN`) | MG90S, LEDC timer 3 / canale 3 a 50 Hz; alimentazione 5 V dal convertitore, massa comune, 10 kΩ verso massa sul segnale |
 
 Non collegati su questa macchina: i sei ingressi B0…B5 (livelli delle vaschette) e il flussimetro (GPIO52).
+Con il servo su GPIO28 non resta nessun pin libero su JP1; se servisse, GPIO52 si libera solo cambiando il codice del riempimento.
 
 ## 2. Cosa funziona senza toccare il codice
 
@@ -105,28 +106,101 @@ Da decidere a banco: i due tempi, e uno svuotamento finale della tank quando il 
 Per il risciacquo linea, la stessa idea in `handleLineRinse()`: `sendValueToRelay(WB, PUMP_IN)` per qualche secondo,
 poi `sendValueToRelay(WASTE, PUMP_OUT)`.
 
-## 5. Caricamento della pellicola e taglierina: funzione nuova
+## 5. Caricamento della pellicola e taglierina: implementato (da provare sulla macchina)
 
-Il caricatore è dentro la tank e usa il motore della spirale e il sensore Hall che ci sono già; in più c'è il servo
-della taglierina. Nel firmware di oggi questa funzione non esiste: va aggiunta una pagina «Carica pellicola».
+Il caricamento c'è nel firmware e nell'app. Le modifiche sono nei due repository locali, **non ancora committate**.
+Il firmware compila per ESP32-P4 (ESP-IDF 5.5.1) senza avvisi nei file toccati; la logica è provata solo nel
+simulatore e nei test automatici, non sulla scheda.
 
-Sequenza proposta (valori di partenza, da tarare):
+### Come funziona
 
-1. Servo a riposo (lama abbassata): manovella a 0°.
-2. L'utente aggancia la clip alla coda della pellicola e chiude il coperchio.
-3. Motore avanti a velocità bassa; contare gli impulsi Hall (4 per giro). Un 135 da 36 pose entra in circa 9 giri,
-   un 120 in circa 5. Il rullino è finito quando gli impulsi Hall smettono di arrivare: la pellicola è trattenuta
-   (dal rocchetto nel 135, dal nastro che la unisce alla carta nel 120), la spirale si ferma e la cinghia tonda
-   slitta, perché fa da limitatore di coppia.
-4. Fermare il motore; servo da 0° a 180° e ritorno (corsa della lama 12,8 mm, circa 1 s per verso): taglia sia il
-   135 sia il 120. Poi mezzo giro per tirare dentro la coda.
-5. Segnale acustico: la tank è pronta.
+| Fase | Cosa fa | Come finisce |
+|---|---|---|
+| Avvolgimento | motore della spirale avanti alla *velocità di caricamento* (40 % di default); conta gli impulsi Hall (4 per giro) | la spirale si ferma, oppure *Taglia ora*, oppure un errore |
+| Taglio | servo da riposo a fine taglio in 0,9 s, fermo 0,3 s, ritorno in 0,6 s, poi il segnale si spegne | fine del movimento |
+| Coda | mezzo giro (2 impulsi) per tirare dentro la coda | 2 impulsi oppure 4 s |
+| Fatto | motore fermo, un bip sul display | — |
 
-Collegamento del servo: segnale su GPIO28 (`TEST_PIN`, JP1 21), LEDC a 50 Hz, impulso 0,5–2,5 ms; alimentazione a 5 V
-dal convertitore.
+- **Fine del rullino**: la spirale è considerata ferma se non arriva un impulso per 3 volte l'intervallo medio degli
+  ultimi impulsi, mai meno di 2,5 s. Funziona a qualunque velocità.
+- **Taglio automatico**: il motore resta acceso, la cinghia slitta e tiene tesa la pellicola sulla lama.
+  **Taglia ora** (per esempio quando nel 120 compare il nastro): la pellicola si sta ancora muovendo, quindi il motore
+  si ferma per il taglio e riparte per la coda.
+- **Protezioni** (motore fermo, lama a riposo, pellicola **non** tagliata):
 
-**Per provare senza scrivere codice**: motore dalla pagina di diagnostica e servo comandato da un «tester per servo»
-da pochi euro (è nella nuova distinta come facoltativo).
+| Errore | Quando | Valori di partenza |
+|---|---|---|
+| La spirale non gira | nessun impulso dopo l'avvio | 5 s |
+| Ferma troppo presto | stallo prima dei giri minimi: clip sganciata o pellicola incastrata | 135: 4 giri, 120: 2 giri |
+| Troppi giri | la fine della pellicola non è trattenuta | 135: 15 giri, 120: 9 giri |
+| Troppo lungo | tempo massimo dell'avvolgimento | 180 s |
+
+  Giri attesi, per la barra: 9 per il 135 × 36, 5 per il 120. Tutte le soglie sono in testa a `main/film_loader.c`.
+- **Blocchi**: il caricamento non parte durante un processo; durante il caricamento vengono rifiutati l'avvio di un
+  processo (`start_rejected`) e il test del motore da Tune.
+- **Registro**: ogni caricamento scrive nel log (e quindi nel file di avvio sulla SD) formato, impulsi e giri:
+  dopo qualche rullino vero si correggono le soglie.
+
+### File
+
+| File | Cosa contiene |
+|---|---|
+| `main/film_loader.c` | macchina a stati, sequenza del servo, task da 20 ms; nel simulatore un modello di spirale/Hall/servo |
+| `drivers/servo.c`, `drivers/include/servo.h` | PWM a 50 Hz su LEDC timer 3 / canale 3 |
+| `drivers/sensors.c` | contatore di impulsi Hall in interrupt (fronte di discesa, antirimbalzo 30 ms); `sensors_hall_magnet_detected()` resta com'era |
+| `c_elements/element_loadPopup.c` | popup *Carica pellicola*: 135/120, stato, barra dei giri, Chiudi/Annulla · Prova lama/Taglia ora · Avvia/Stop |
+| `c_pages/page_tools.c`, `main/ui_profile_800x480.inc` | nuova riga in Manutenzione; le sezioni sotto scendono di 57 px |
+| `main/ws_server.c` | comandi e campi di stato (sotto) |
+| `main/accessories.c`, `c_pages/page_settings.c` | tre impostazioni nuove salvate nel config; GPIO28 tenuto basso all'avvio |
+| `boards/board_jc4880p433.h` | `TEST_PIN` → `CUTTER_SERVO_PIN` |
+| `main/lang.c`, `lang.h`, `FilMachine.h`, `scripts/gen_lang.py` | 15 testi EN/IT |
+| `tests/test_film_loader.c` | 11 test; il runner accetta `FM_TEST_ONLY=film_loader` (o una lista separata da virgole) |
+
+### Impostazioni (config JSON, `set_setting`, *Ripristina predefiniti*)
+
+| Chiave | Default | Limiti |
+|---|---|---|
+| `loadSpeed` | 40 % | 10–100 |
+| `cutterRestUs` | 500 µs (manovella 0°) | 400–2600 |
+| `cutterCutUs` | 2400 µs (manovella 180°) | 400–2600 |
+
+### Protocollo WebSocket
+
+```
+{"cmd":"load_start","format":0|1}     0 = 135, 1 = 120; apre lo stesso popup sul display
+{"cmd":"load_stop"}                    motore fermo, lama a riposo
+{"cmd":"load_cut"}                     taglia ora (solo durante l'avvolgimento)
+{"cmd":"cutter_test","angle":0..180}   tiene la manovella in posizione per 4 s (taratura)
+{"cmd":"cutter_cycle"}                 prova lama: su e giù, motore fermo
+```
+Stato: `loadToolState` (0 fermo, 1 avvolgimento, 2 taglio, 3 coda, 4 fatto, 5 interrotto, 6–9 errori),
+`loadToolFormat`, `loadToolPulses`, `loadToolExpected`, `loadToolServo`, più `loadSpeed`, `cutterRestUs`,
+`cutterCutUs`. Eventi: `load_rejected` (`processing` o `busy`), `start_rejected` (`loading`).
+
+### App
+
+Strumenti → *Caricatore pellicola* apre la schermata *Caricamento pellicola*: scelta 135/120, istruzioni del formato,
+stato con le stesse frasi del display, barra dei giri, e in *Taratura* la velocità di caricamento e i due fine corsa
+del servo con il pulsante *Prova*. I pulsanti in basso sono gli stessi del display; uscire durante il caricamento
+equivale ad Annulla. Testi del firmware rigenerati con `scripts/gen_app_strings.py`.
+
+### Verifiche fatte
+
+- Firmware: build ESP-IDF 5.5.1 per esp32p4 riuscita; simulatore e runner compilati; 11 test nuovi passati;
+  131 test delle altre suite uguali a prima (le due suite che già fallivano, *Settings* e *Board constants*,
+  falliscono allo stesso modo anche senza le modifiche).
+- Popup provato nel simulatore in inglese e in italiano, compreso l'errore più lungo su tre righe.
+- App: `flutter analyze` con gli stessi 18 avvisi di prima, nessuno nei file nuovi; 259 test passati (11 nuovi).
+
+### Ordine di prova a banco
+
+1. Flash, poi Strumenti → Carica pellicola → *Prova lama* senza servo collegato: nel log compare il movimento.
+2. Servo collegato, senza lama: dall'app tarare `cutterRestUs` (lama sotto la fessura) e `cutterCutUs` (filo oltre il
+   cielo della fessura sui due bordi) con *Prova*.
+3. Conteggio Hall: avviare un caricamento a vuoto e far girare la spirale; i giri devono salire di 1 ogni 4 magneti.
+4. Stallo: frenare la spirale con la mano dopo 5 giri → deve tagliare; dopo 2 giri → *Ferma troppo presto*.
+5. Spezzone di pellicola di scarto agganciato a un rocchetto, poi un rullino vero; leggere nel log i giri e
+   correggere le soglie.
 
 ## 6. Riscaldatori: una cosa da cambiare nell'hardware
 
