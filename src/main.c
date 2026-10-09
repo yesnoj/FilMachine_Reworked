@@ -313,10 +313,11 @@ static void sim_drain_sysActionQ(void)
         case EXPORT_CFG:
             printf("[SIM] sysAction: export (backup) %s → %s\n",
                    FILENAME_SAVE, FILENAME_BACKUP);
-            if (!copyAndRenameFile(FILENAME_SAVE, FILENAME_BACKUP)) {
-                printf("[SIM] Export/backup FAILED\n");
-            } else {
-                printf("[SIM] Export/backup successful\n");
+            {
+                bool ok = copyAndRenameFile(FILENAME_SAVE, FILENAME_BACKUP);
+                printf(ok ? "[SIM] Export/backup successful\n" : "[SIM] Export/backup FAILED\n");
+                g_exportOk = ok;
+                g_exportSeq++;   /* the app waits for this to change */
             }
             break;
 

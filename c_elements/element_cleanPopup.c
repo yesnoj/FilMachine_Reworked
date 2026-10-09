@@ -17,69 +17,79 @@ extern struct gui_components gui;
 
 //ACCESSORY INCLUDES
 
+/* ── Clean cycle ─────────────────────────────────────────────
+ * For every selected container (C1, C2, C3 in this order), `cleanCycles`
+ * times: fill it with water from the bath (pump WB → Cx) for the container
+ * fill time, then pump it back (Cx → WB) for the same time. At the end,
+ * optionally drain the water bath to waste ("Drain water" switch).
+ * Stop: the container being filled/drained is pumped back to the bath for the
+ * time it still holds water, then the run ends (STOPPED).
+ * The sequence decides the end, the clock only drives the arcs and the
+ * remaining time (fill time × 2 × cycles × containers). */
+
 static uint8_t processPercentage = 0;
 static uint8_t cyclePercentage = 0;
-static int16_t stepPercentage = 0;  /* int16 to allow negative check during bidirectional pump cycle */
+static int16_t stepPercentage = 0;
 
 static uint32_t minutesProcessElapsed = 0;
-static uint8_t secondsProcessElapsed = 1;
-static uint8_t hoursProcessElapsed = 0;
+static uint8_t  secondsProcessElapsed = 0;
+static uint8_t  hoursProcessElapsed = 0;
 
 static uint32_t minutesCycleElapsed = 0;
-static uint8_t secondsCycleElapsed = 1;
+static uint8_t  secondsCycleElapsed = 0;
 
 static uint32_t minutesStepElapsed = 0;
-static uint8_t secondsStepElapsed = 1;
-
-static uint32_t minutesProcessLeft = 0;
-static uint8_t secondsProcessLeft = 0;
-
-static uint32_t minutesCycleLeft = 0;
-static uint8_t secondsCycleLeft = 0;
-
-static uint32_t minutesStepLeft = 0;
-static uint8_t secondsStepLeft = 0;
+static uint8_t  secondsStepElapsed = 0;
 
 static uint8_t firstContainerIndex = 0;
 static bool containerSelected = false;
 
 static uint8_t containerIndex = 0;
-
-static uint8_t cycleMins = 0;
-static uint8_t cycleSecs = 0;
-
-static uint8_t stepMins = 0;
-static uint8_t stepSecs = 0;
 static uint8_t currentCycle = 1;
 
-static uint8_t wasteSecs = 0;
+static int8_t previousStepDirection = 0;
 
-static uint8_t previousStepDirection = 0;
+static bool isWasting = false;
 
-static bool isWasting = false; 
+#define CLEAN_CONTAINERS 3   /* C1..C3 (processSourceList also has WB, never cleaned here) */
+
+static uint32_t clean_total_secs(void) {
+    return gui.element.cleanPopup.totalMins * 60 + gui.element.cleanPopup.totalSecs;
+}
+static uint32_t clean_process_elapsed_secs(void) {
+    return (uint32_t)hoursProcessElapsed * 3600 + minutesProcessElapsed * 60 + secondsProcessElapsed;
+}
+
+/* Next selected container at or after `from`, or CLEAN_CONTAINERS when none. */
+static uint8_t clean_next_container(uint8_t from) {
+    for (uint8_t i = from; i < CLEAN_CONTAINERS; i++)
+        if (gui.element.cleanPopup.containerToClean[i]) return i;
+    return CLEAN_CONTAINERS;
+}
+
+/* Run button enabled only with at least one container selected. */
+static void clean_update_selection(void) {
+    struct sCleanPopup *cp = &gui.element.cleanPopup;
+    uint8_t first = clean_next_container(0);
+    containerSelected = first < CLEAN_CONTAINERS;
+    if (containerSelected) firstContainerIndex = first;
+    if (cp->cleanRunButton != NULL) {
+        if (containerSelected) lv_obj_clear_state(cp->cleanRunButton, LV_STATE_DISABLED);
+        else                   lv_obj_add_state(cp->cleanRunButton, LV_STATE_DISABLED);
+    }
+}
 
 static void resetStuffBeforeNextProcess(){
     alarm_stop();
     minutesProcessElapsed = 0;
-    secondsProcessElapsed = 1;
+    secondsProcessElapsed = 0;
     hoursProcessElapsed = 0;
 
     minutesCycleElapsed = 0;
-    secondsCycleElapsed = 1;
+    secondsCycleElapsed = 0;
 
     minutesStepElapsed = 0;
-    secondsStepElapsed = 1;
-
-
-
-    minutesProcessLeft = 0;
-    secondsProcessLeft = 0;
-
-    minutesCycleLeft = 0;
-    secondsCycleLeft = 0;
-
-    minutesStepLeft = 0;
-    secondsStepLeft = 0;
+    secondsStepElapsed = 0;
 
     stepPercentage = 0;
     processPercentage = 0;
@@ -87,30 +97,28 @@ static void resetStuffBeforeNextProcess(){
 
     containerIndex = 0;
     currentCycle = 1;
-    
+
     previousStepDirection = 0;
 
-    wasteSecs = 0;
-
-    isWasting = false; 
+    isWasting = false;
 
     gui.element.cleanPopup.stepDirection = 1;
     gui.element.cleanPopup.stopNowPressed = false;
     gui.element.cleanPopup.isAlreadyPumping = false;
     gui.element.cleanPopup.isCleaning = false;
-    
+    gui.element.cleanPopup.result = 0;
+
     lv_obj_clear_state(gui.element.cleanPopup.cleanStopButton, LV_STATE_DISABLED);
-    lv_label_set_text(gui.element.cleanPopup.cleanNowStepLabelValue,cleanFilling_text);             
 
     lv_obj_clear_flag(gui.element.cleanPopup.cleanRemainingTimeValue, LV_OBJ_FLAG_HIDDEN);
-    
+
     lv_obj_clear_flag(gui.element.cleanPopup.cleanNowCleaningValue, LV_OBJ_FLAG_HIDDEN);
     lv_label_set_text(gui.element.cleanPopup.cleanNowCleaningLabel, cleanCurrentClean_text);
-    
+
     lv_label_set_text(gui.element.cleanPopup.cleanStopButtonLabel, cleanStopButton_text);
-    
+
     lv_obj_clear_flag(gui.element.cleanPopup.cleanNowStepLabelValue, LV_OBJ_FLAG_HIDDEN);
-    lv_label_set_text(gui.element.cleanPopup.cleanNowStepLabelValue,cleanFilling_text);             
+    lv_label_set_text(gui.element.cleanPopup.cleanNowStepLabelValue,cleanFilling_text);
 
     lv_arc_set_value(gui.element.cleanPopup.cleanProcessArc, 0);
     lv_arc_set_value(gui.element.cleanPopup.cleanCycleArc, 0);
@@ -119,438 +127,420 @@ static void resetStuffBeforeNextProcess(){
     cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
 }
 
+/* End of a run: Close button, alarm, result for the app.
+ * `text` (may be NULL) replaces the "now cleaning" value. */
+static void clean_show_end(const char *text, uint8_t result) {
+    struct sCleanPopup *cp = &gui.element.cleanPopup;
+    if (text != NULL) {
+        lv_label_set_text(cp->cleanNowCleaningValue, text);
+        lv_obj_clear_flag(cp->cleanNowCleaningValue, LV_OBJ_FLAG_HIDDEN);
+    }
+    lv_obj_add_flag(cp->cleanNowStepLabelValue, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_set_style_bg_color(cp->cleanStopButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
+    lv_label_set_text(cp->cleanStopButtonLabel, cleanCloseButton_text);
+    lv_obj_clear_state(cp->cleanStopButton, LV_STATE_DISABLED);
+    cp->result = result;
+    cp->isCleaning = false;
+#if defined(DISPLAY_DRIVER_ST7701)
+    st7701_lcd_set_dim_inhibit(false); /* Re-enable auto-dimming */
+#endif
+    alarm_start_persistent();
+}
+
 void cleanWasteTimer(lv_timer_t * timer) {
+    LV_UNUSED(timer);
+    struct sCleanPopup *cp = &gui.element.cleanPopup;
+
     /* Increment seconds for step */
     secondsStepElapsed++;
     if (secondsStepElapsed >= 60) {
         secondsStepElapsed = 0;
         minutesStepElapsed++;
-        if (minutesStepElapsed >= 60) {
-            minutesStepElapsed = 0;
-        }
     }
 
-    /* Calculate remaining minutes and seconds */
     uint16_t wbFillTime = getWbFillTime();
-    stepMins = wbFillTime / 60;
-    stepSecs = wbFillTime % 60;
-
+    if (wbFillTime == 0) wbFillTime = 1;
     uint32_t elapsedStepSecs = minutesStepElapsed * 60 + secondsStepElapsed;
-    uint32_t remainingStepSecs = wbFillTime - elapsedStepSecs;
-    uint8_t remainingStepMins = remainingStepSecs / 60;
-    uint8_t remainingStepSecsOnly = remainingStepSecs % 60;
+    uint32_t remainingStepSecs = elapsedStepSecs < wbFillTime ? wbFillTime - elapsedStepSecs : 0;
 
-    /* Calculate step percentage */
-    stepPercentage = calculatePercentage(minutesStepElapsed, secondsStepElapsed, stepMins, stepSecs);
+    stepPercentage = (int16_t)(elapsedStepSecs >= wbFillTime ? 100 : (elapsedStepSecs * 100) / wbFillTime);
 
     /* Update labels and arcs */
-    lv_label_set_text_fmt(gui.element.cleanPopup.cleanRemainingTimeValue, "%dm%ds", remainingStepMins, remainingStepSecsOnly);
-    lv_label_set_text(gui.element.cleanPopup.cleanNowStepLabelValue, cleanDraining_text);
-    lv_label_set_text(gui.element.cleanPopup.cleanNowCleaningLabel, cleanWaste_text);
-    lv_obj_add_flag(gui.element.cleanPopup.cleanNowCleaningValue, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_state(gui.element.cleanPopup.cleanStopButton, LV_STATE_DISABLED);
-    lv_obj_clear_flag(gui.element.cleanPopup.cleanNowStepLabelValue, LV_OBJ_FLAG_HIDDEN);
-    lv_arc_set_value(gui.element.cleanPopup.cleanPumpArc, stepPercentage);
+    lv_label_set_text_fmt(cp->cleanRemainingTimeValue, "%dm%ds", (int)(remainingStepSecs / 60), (int)(remainingStepSecs % 60));
+    lv_label_set_text(cp->cleanNowStepLabelValue, cleanDraining_text);
+    lv_label_set_text(cp->cleanNowCleaningLabel, cleanWaste_text);
+    lv_obj_add_flag(cp->cleanNowCleaningValue, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_state(cp->cleanStopButton, LV_STATE_DISABLED);
+    lv_obj_clear_flag(cp->cleanNowStepLabelValue, LV_OBJ_FLAG_HIDDEN);
+    lv_arc_set_value(cp->cleanPumpArc, stepPercentage);
 
     /* Run cleanRelayManager only once at the start */
     if (!isWasting) {
         cleanRelayManager(getValueForChemicalSource(WB), getValueForChemicalSource(WASTE), PUMP_IN_RLY, true);
         isWasting = true;
-        LV_LOG_USER("Initial execution of cleanRelayManager done");
     }
 
-    /* Check if time has expired */
     if (elapsedStepSecs >= wbFillTime) {
-        lv_arc_set_value(gui.element.cleanPopup.cleanPumpArc, stepPercentage);
-
-        lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanStopButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
-        lv_label_set_text(gui.element.cleanPopup.cleanStopButtonLabel, cleanCloseButton_text);
-        lv_obj_clear_state(gui.element.cleanPopup.cleanStopButton, LV_STATE_DISABLED);
-        lv_obj_add_flag(gui.element.cleanPopup.cleanNowStepLabelValue, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_clear_flag(gui.element.cleanPopup.cleanNowCleaningValue, LV_OBJ_FLAG_HIDDEN);
-        lv_label_set_text(gui.element.cleanPopup.cleanNowCleaningValue, cleanCompleteClean_text);
-
-        /* Start persistent alarm for clean completion */
-        alarm_start_persistent();
-
         cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
-        LV_LOG_USER("Execution of cleanRelayManager after WB_FILLING_TIME done");
-
-        // Cancella il timer
-        lv_timer_del(gui.element.cleanPopup.wasteTimer);
-        gui.element.cleanPopup.wasteTimer = NULL;
-        LV_LOG_USER("cleanWasteTimer stopped");
+        safeTimerDelete(&cp->wasteTimer);
+        isWasting = false;
+        ESP_LOGI(TAG, "=== CLEANING PROCESS FINISHED (bath drained) ===");
+        clean_show_end(cleanCompleteClean_text, CLEAN_TOOL_DONE);
     }
 }
 
+/* Every selected container done: count it, then drain the bath or finish. */
+static void clean_sequence_done(void) {
+    struct sCleanPopup *cp = &gui.element.cleanPopup;
+    cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
+    safeTimerDelete(&cp->pumpTimer);
 
+    gui.page.tools.machineStats.clean++;
+    qSysAction(SAVE_MACHINE_STATS);
 
+    processPercentage = 100;
+    lv_arc_set_value(cp->cleanProcessArc, 100);
+    lv_arc_set_value(cp->cleanCycleArc, 100);
+    lv_label_set_text_fmt(cp->cleanRemainingTimeValue, "%dm%ds", 0, 0);
+
+    if (cp->cleanDrainWater) {
+        secondsStepElapsed = 0;
+        minutesStepElapsed = 0;
+        isWasting = false;
+        cp->wasteTimer = lv_timer_create(cleanWasteTimer, 1000, NULL);
+    } else {
+        ESP_LOGI(TAG, "=== CLEANING PROCESS FINISHED ===");
+        clean_show_end(cleanCompleteClean_text, CLEAN_TOOL_DONE);
+    }
+}
 
 void cleanPumpTimer(lv_timer_t * timer) {
-
+    LV_UNUSED(timer);
+    struct sCleanPopup *cp = &gui.element.cleanPopup;
     char *tmp_processSourceList[] = processSourceList;
-    previousStepDirection = 0; /* Remember previous step direction */
+    uint16_t fillTime = getContainerFillTime();
+    if (fillTime == 0) fillTime = 1;
 
-    LV_LOG_USER("cleanPumpTimer running");
-    gui.element.cleanPopup.isCleaning = true;
-    /* Variables for calculating remaining process time */
-    uint8_t totalProcessSecs = gui.element.cleanPopup.totalMins * 60 + gui.element.cleanPopup.totalSecs;
-    uint8_t elapsedProcessSecs = minutesProcessElapsed * 60 + secondsProcessElapsed;
-    uint8_t remainingProcessSecs = totalProcessSecs - elapsedProcessSecs;
-    uint8_t remainingProcessMins = remainingProcessSecs / 60;
-    uint8_t remainingProcessSecsOnly = remainingProcessSecs % 60;
-    
-    // Verifica se è stato premuto il bottone STOP
-    if (gui.element.cleanPopup.stopNowPressed) {
-        secondsStepElapsed--; 
-        // Decrementa l'arco più interno (cleanPumpArc) fino a 0
-        if (stepPercentage > 0) {
-            stepPercentage = calculatePercentage(minutesStepElapsed, secondsStepElapsed, stepMins, stepSecs);
-            lv_arc_set_value(gui.element.cleanPopup.cleanPumpArc, 100 - stepPercentage);
-            lv_arc_set_value(gui.element.cleanPopup.cleanPumpArc, stepPercentage);
-            LV_LOG_USER("Decrementing Step Percentage: %d", stepPercentage);
-            
-            /* Update label for step */
-            lv_label_set_text_fmt(gui.element.cleanPopup.cleanNowStepLabelValue, cleanDraining_text);
-        } else {
-            /* When stepPercentage is 0, stop timer and update final state */
-            lv_obj_clear_state(gui.element.cleanPopup.cleanStopButton, LV_STATE_DISABLED);
-            lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanStopButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
-            lv_label_set_text(gui.element.cleanPopup.cleanStopButtonLabel, cleanCloseButton_text);
-
-            /* Stop timer and save state */
-            lv_timer_del(gui.element.cleanPopup.pumpTimer);
-            gui.element.cleanPopup.pumpTimer = NULL;
-            cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
-            gui.page.tools.machineStats.clean++;
-            qSysAction(SAVE_MACHINE_STATS);
-
-            /* Start persistent alarm after stop-now clean draining is complete */
-            alarm_start_persistent();
+    /* ── Stop pressed: pump the current container back, then end ── */
+    if (cp->stopNowPressed) {
+        uint32_t left = minutesStepElapsed * 60 + secondsStepElapsed;   /* seconds of water still in it */
+        if (left > 0) {
+            left--;
+            minutesStepElapsed = left / 60;
+            secondsStepElapsed = left % 60;
+            stepPercentage = (int16_t)((left * 100) / fillTime);
+            if (stepPercentage > 100) stepPercentage = 100;
+            lv_arc_set_value(cp->cleanPumpArc, stepPercentage);
+            lv_label_set_text(cp->cleanNowStepLabelValue, cleanDraining_text);
             return;
         }
-    } else {
-        /* If STOP was not pressed, continue with normal increment */
-        /* Increment seconds for step, cycle, and process */
-        secondsStepElapsed++;
-        secondsCycleElapsed++;
-        secondsProcessElapsed++;
+        cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
+        safeTimerDelete(&cp->pumpTimer);
+        gui.page.tools.machineStats.clean++;
+        qSysAction(SAVE_MACHINE_STATS);
+        ESP_LOGW(TAG, "=== CLEANING STOPPED, container drained back ===");
+        clean_show_end(NULL, CLEAN_TOOL_STOPPED);
+        return;
+    }
 
-        /* Update minutes and seconds */
-        if (secondsStepElapsed >= 60) {
-            secondsStepElapsed = 0;
-            minutesStepElapsed++;
-            if (minutesStepElapsed >= 60) {
-                minutesStepElapsed = 0;
-            }
-        }
+    cp->isCleaning = true;
 
-        if (secondsCycleElapsed >= 60) {
-            secondsCycleElapsed = 0;
-            minutesCycleElapsed++;
-            if (minutesCycleElapsed >= 60) {
-                minutesCycleElapsed = 0;
-            }
-        }
+    /* ── Advance the clocks ── */
+    if (++secondsStepElapsed >= 60)    { secondsStepElapsed = 0;    minutesStepElapsed++; }
+    if (++secondsCycleElapsed >= 60)   { secondsCycleElapsed = 0;   minutesCycleElapsed++; }
+    if (++secondsProcessElapsed >= 60) {
+        secondsProcessElapsed = 0;
+        if (++minutesProcessElapsed >= 60) { minutesProcessElapsed = 0; hoursProcessElapsed++; }
+    }
 
-        if (secondsProcessElapsed >= 60) {
-            secondsProcessElapsed = 0;
-            minutesProcessElapsed++;
-            if (minutesProcessElapsed >= 60) {
-                minutesProcessElapsed = 0;
-                hoursProcessElapsed++;
-                if (hoursProcessElapsed >= 12) {
-                    hoursProcessElapsed = 0;
-                }
-            }
-        }
-
-        /* Calculate percentages */
-        uint16_t containerFillTime = getContainerFillTime();
-        stepMins = containerFillTime / 60;
-        stepSecs = containerFillTime % 60;
-        stepPercentage = calculatePercentage(minutesStepElapsed, secondsStepElapsed, stepMins, stepSecs);
+    uint32_t stepEl = minutesStepElapsed * 60 + secondsStepElapsed;
+    stepPercentage = (int16_t)(stepEl >= fillTime ? 100 : (stepEl * 100) / fillTime);
 
 #if CLEAN_USE_LEVEL_SENSORS
-        /* #13: finish the fill/drain step as soon as the container's float sensor
-         * confirms the target level, instead of waiting out the time estimate.
-         * Filling (dir 1): MAX wet = full. Draining (dir -1): MIN dry = empty.
-         * containerIndex 0/1/2 = C1/C2/C3. Disabled by default (see the flag). */
-        if (gui.element.cleanPopup.stepDirection == 1) {
-            if (chemLevelMaxDetected(containerIndex)) {
-                /* Full confirmed: remember the real fill time for the bargraph. */
-                recordFillCalibration(false, (uint16_t)(minutesStepElapsed * 60 + secondsStepElapsed));
-                stepPercentage = 100;
-            }
-        } else {
-            if (!chemLevelMinDetected(containerIndex)) stepPercentage = 100;
+    /* #13: finish the fill/drain step as soon as the container's float sensor
+     * confirms the target level, instead of waiting out the time estimate.
+     * Filling (dir 1): MAX wet = full. Draining (dir -1): MIN dry = empty.
+     * containerIndex 0/1/2 = C1/C2/C3. Disabled by default (see the flag). */
+    if (cp->stepDirection == 1) {
+        if (chemLevelMaxDetected(containerIndex)) {
+            /* Full confirmed: remember the real fill time for the bargraph. */
+            recordFillCalibration(false, (uint16_t)stepEl);
+            stepPercentage = 100;
         }
+    } else {
+        if (!chemLevelMinDetected(containerIndex)) stepPercentage = 100;
+    }
 #endif
 
-        cycleMins = ((containerFillTime * 2) * gui.element.cleanPopup.cleanCycles) / 60;
-        cycleSecs = ((containerFillTime * 2) * gui.element.cleanPopup.cleanCycles) % 60;
-        cyclePercentage = calculatePercentage(minutesCycleElapsed, secondsCycleElapsed, cycleMins, cycleSecs);
+    uint32_t cycleTotal = (uint32_t)fillTime * 2 * cp->cleanCycles;      /* one container, all its cycles */
+    uint32_t cycleEl = minutesCycleElapsed * 60 + secondsCycleElapsed;
+    cyclePercentage = (uint8_t)(cycleTotal == 0 || cycleEl >= cycleTotal ? 100 : (cycleEl * 100) / cycleTotal);
 
-        processPercentage = calculatePercentage(minutesProcessElapsed, secondsProcessElapsed, gui.element.cleanPopup.totalMins, gui.element.cleanPopup.totalSecs);
+    uint32_t total = clean_total_secs();
+    uint32_t procEl = clean_process_elapsed_secs();
+    processPercentage = (uint8_t)(total == 0 ? 0 : (procEl >= total ? 99 : (procEl * 100) / total));
+    if (processPercentage > 99) processPercentage = 99;        /* 100 only when the sequence ends */
+    uint32_t remaining = procEl < total ? total - procEl : 0;
 
-        /* Update arcs */
-        lv_arc_set_value(gui.element.cleanPopup.cleanPumpArc, (gui.element.cleanPopup.stepDirection == 1) ? stepPercentage : 100 - stepPercentage);
-        lv_arc_set_value(gui.element.cleanPopup.cleanCycleArc, cyclePercentage);
-        lv_arc_set_value(gui.element.cleanPopup.cleanProcessArc, processPercentage);
+    /* Arcs and labels */
+    lv_arc_set_value(cp->cleanPumpArc, (cp->stepDirection == 1) ? stepPercentage : 100 - stepPercentage);
+    lv_arc_set_value(cp->cleanCycleArc, cyclePercentage);
+    lv_arc_set_value(cp->cleanProcessArc, processPercentage);
+    lv_label_set_text_fmt(cp->cleanRemainingTimeValue, "%dm%ds", (int)(remaining / 60), (int)(remaining % 60));
+    lv_label_set_text_fmt(cp->cleanNowCleaningValue, cleanCycleFmt_text, tmp_processSourceList[containerIndex], currentCycle);
 
-        /* Debug log */
-        LV_LOG_USER("Step Percentage: %d", stepPercentage);
-        LV_LOG_USER("Cycle Percentage: %d", cyclePercentage);
-        LV_LOG_USER("Process Percentage: %d", processPercentage);
-
-        lv_label_set_text_fmt(gui.element.cleanPopup.cleanNowCleaningValue, cleanCycleFmt_text, tmp_processSourceList[containerIndex], currentCycle);
-
-        /* Progress check */
-        if (processPercentage < 100) {
-            /* Remaining process time */
-            lv_label_set_text_fmt(gui.element.cleanPopup.cleanRemainingTimeValue, "%dm%ds", remainingProcessMins, remainingProcessSecsOnly);
-
-            if (stepPercentage >= 100) {
-                if (gui.element.cleanPopup.stepDirection == 1) {
-                    /* Move to draining phase */
-                    gui.element.cleanPopup.stepDirection = -1;
-                } else {
-                    /* Complete cycle and move to next */
-                    gui.element.cleanPopup.stepDirection = 1; /* Reset for filling */
-
-                    if (++currentCycle > gui.element.cleanPopup.cleanCycles) {
-                        currentCycle = 1;
-                        if (++containerIndex >= (sizeof(tmp_processSourceList) / sizeof(char*)) ) {
-                            containerIndex = 0;
-                            /* Process completed */
-                            lv_label_set_text(gui.element.cleanPopup.cleanNowCleaningValue, cleanCompleteClean_text);
-                            lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanStopButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
-                            lv_label_set_text(gui.element.cleanPopup.cleanStopButtonLabel, cleanCloseButton_text);
-
-                            /* Start persistent alarm for clean completion */
-                            alarm_start_persistent();
-
-                            /* Stop timer and save state */
-                            lv_timer_del(gui.element.cleanPopup.pumpTimer);
-                            gui.element.cleanPopup.pumpTimer = NULL;
-
-                            gui.page.tools.machineStats.clean++;
-                            qSysAction(SAVE_MACHINE_STATS);
-                            return;
-                        }
-                    }
-                }
-                /* Restart timer for next step */
-                minutesStepElapsed = 0;
-                secondsStepElapsed = 0;
-                
-                if(stepPercentage == 100)
-                    gui.element.cleanPopup.isAlreadyPumping = false;
-            } else {
-                /* Update step */
-                stepPercentage += gui.element.cleanPopup.stepDirection;
-                if (stepPercentage < 0) {
-                    stepPercentage = 0;
-                    gui.element.cleanPopup.stepDirection = 1; /* Move to filling phase */
-                } else if (stepPercentage > 100) {
-                    stepPercentage = 100;
-                    gui.element.cleanPopup.stepDirection = -1; /* Move to draining phase */
-                }
-            }
-
-            /* Update cycle timer */
-            if (cyclePercentage == 100) {
-                cyclePercentage = 0;
+    /* ── Step finished: fill → drain → next cycle → next container ── */
+    if (stepPercentage >= 100) {
+        minutesStepElapsed = 0;
+        secondsStepElapsed = 0;
+        if (cp->stepDirection == 1) {
+            cp->stepDirection = -1;                     /* full: pump it back to the bath */
+        } else {
+            cp->stepDirection = 1;
+            if (++currentCycle > cp->cleanCycles) {
+                currentCycle = 1;
                 minutesCycleElapsed = 0;
                 secondsCycleElapsed = 0;
-            }
-
-            /* Check if step direction changed */
-            if (gui.element.cleanPopup.stepDirection != previousStepDirection) {
-                /* Execute function only when direction changes */
-                LV_LOG_USER("sendValueToRelay containerIndex %d",containerIndex);
-                if(gui.element.cleanPopup.isAlreadyPumping == false){
-                  gui.element.cleanPopup.isAlreadyPumping = true;
-                  if( gui.element.cleanPopup.stepDirection == 1 ) {
-                      cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
-                      cleanRelayManager(getValueForChemicalSource(WB), getValueForChemicalSource(containerIndex), PUMP_IN_RLY, true);
-                  } else {
-                      cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
-                      cleanRelayManager(getValueForChemicalSource(containerIndex), getValueForChemicalSource(WB), PUMP_OUT_RLY, true);
-                  }
+                containerIndex = clean_next_container(containerIndex + 1);
+                if (containerIndex >= CLEAN_CONTAINERS) {
+                    containerIndex = CLEAN_CONTAINERS - 1;
+                    clean_sequence_done();
+                    return;
                 }
-                previousStepDirection = gui.element.cleanPopup.stepDirection; /* Update previous direction */
-            }
-
-            lv_label_set_text(gui.element.cleanPopup.cleanNowStepLabelValue, (gui.element.cleanPopup.stepDirection == 1) ? cleanFilling_text : cleanDraining_text);
-        } else {
-            /* Process completed */
-            lv_label_set_text_fmt(gui.element.cleanPopup.cleanRemainingTimeValue, "%dm%ds", 0, 0);
-            lv_obj_add_flag(gui.element.cleanPopup.cleanNowStepLabelValue, LV_OBJ_FLAG_HIDDEN);
-
-            cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
-            /* Stop timer and save state */
-            lv_timer_del(gui.element.cleanPopup.pumpTimer);
-            gui.element.cleanPopup.pumpTimer = NULL;
-
-            gui.page.tools.machineStats.clean++;
-            qSysAction(SAVE_MACHINE_STATS);
-
-            if(gui.element.cleanPopup.cleanDrainWater){
-              secondsStepElapsed = 0;
-              minutesStepElapsed = 0;
-              gui.element.cleanPopup.wasteTimer = lv_timer_create(cleanWasteTimer, 1000,  NULL);
-            }
-            else{
-                lv_label_set_text(gui.element.cleanPopup.cleanNowCleaningValue, cleanCompleteClean_text);
-                lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanStopButton, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
-                lv_label_set_text(gui.element.cleanPopup.cleanStopButtonLabel, cleanCloseButton_text);
-
-                /* Start persistent alarm for clean completion */
-                alarm_start_persistent();
             }
         }
     }
+
+    /* Valves and pump follow the direction (switched once per step) */
+    if (cp->stepDirection != previousStepDirection) {
+        LV_LOG_USER("Clean C%d: %s", containerIndex + 1, cp->stepDirection == 1 ? "fill" : "drain");
+        cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
+        if (cp->stepDirection == 1)
+            cleanRelayManager(getValueForChemicalSource(WB), getValueForChemicalSource(containerIndex), PUMP_IN_RLY, true);
+        else
+            cleanRelayManager(getValueForChemicalSource(containerIndex), getValueForChemicalSource(WB), PUMP_OUT_RLY, true);
+        previousStepDirection = cp->stepDirection;
+    }
+
+    lv_label_set_text(cp->cleanNowStepLabelValue, (cp->stepDirection == 1) ? cleanFilling_text : cleanDraining_text);
 }
 
+/* Run: start the clean with the choices on the settings page. */
+static bool clean_run(void) {
+    struct sCleanPopup *cp = &gui.element.cleanPopup;
+    char *tmp_processSourceList[] = processSourceList;
 
+    clean_update_selection();
+    if (!containerSelected || cp->pumpTimer != NULL || cp->wasteTimer != NULL) return false;
+
+    ESP_LOGI(TAG, "=== CLEANING PROCESS STARTED ===");
+#if defined(DISPLAY_DRIVER_ST7701)
+    st7701_lcd_set_dim_inhibit(true);   /* Keep screen on during cleaning */
+#endif
+    resetStuffBeforeNextProcess();
+    containerIndex = firstContainerIndex;
+    cp->isCleaning = true;
+
+    lv_obj_add_flag(cp->cleanSettingsContainer, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(cp->cleanRunButton, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(cp->cleanCancelButton, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_remove_flag(cp->cleanProcessContainer, LV_OBJ_FLAG_HIDDEN);
+    lv_label_set_text(cp->cleanTitle, cleanCleanProcess_text);
+    lv_obj_remove_flag(cp->cleanRemainingTimeValue, LV_OBJ_FLAG_HIDDEN);
+
+    lv_obj_set_style_bg_color(cp->cleanStopButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
+    lv_label_set_text(cp->cleanNowCleaningLabel, cleanCurrentClean_text);
+
+    getMinutesAndSeconds(getContainerFillTime(), cp->containerToClean);
+    lv_label_set_text_fmt(cp->cleanRemainingTimeValue, "%"PRIu32"m%"PRIu32"s", cp->totalMins, cp->totalSecs);
+    LV_LOG_USER("Process totalMin: %"PRIu32" totalSecs: %"PRIu32"", cp->totalMins, cp->totalSecs);
+
+    lv_obj_remove_flag(cp->cleanNowCleaningValue, LV_OBJ_FLAG_HIDDEN);
+    lv_label_set_text_fmt(cp->cleanNowCleaningValue, cleanCycleFmt_text, tmp_processSourceList[firstContainerIndex], currentCycle);
+
+    cp->pumpTimer = lv_timer_create(cleanPumpTimer, 1000, NULL);
+    return true;
+}
+
+/* Stop: drain back what is in the current container, then end (STOPPED). */
+static void clean_stop_request(void) {
+    struct sCleanPopup *cp = &gui.element.cleanPopup;
+    if (cp->pumpTimer == NULL || cp->stopNowPressed) return;
+    ESP_LOGW(TAG, "Cleaning STOPPED by user");
+    cp->stopNowPressed = true;
+    alarm_stop();
+
+    uint16_t fillTime = getContainerFillTime();
+    uint32_t el = minutesStepElapsed * 60 + secondsStepElapsed;
+    if (cp->stepDirection == 1) {
+        /* Was filling: pump back for the time it has been filling. */
+        cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
+        cleanRelayManager(getValueForChemicalSource(containerIndex), getValueForChemicalSource(WB), PUMP_OUT_RLY, true);
+        cp->stepDirection = -1;
+        previousStepDirection = -1;
+    } else {
+        /* Was draining: only what is still in it. */
+        uint32_t left = el < fillTime ? fillTime - el : 0;
+        minutesStepElapsed = left / 60;
+        secondsStepElapsed = left % 60;
+    }
+
+    lv_label_set_text(cp->cleanTitle, cleanCanceled_text);
+    lv_obj_add_state(cp->cleanStopButton, LV_STATE_DISABLED);
+    lv_obj_add_flag(cp->cleanRemainingTimeValue, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(cp->cleanNowCleaningValue, LV_OBJ_FLAG_HIDDEN);
+    lv_label_set_text(cp->cleanNowCleaningLabel, cleanCanceled_text);
+}
+
+/* Close after the end: back to the settings page, alarm off. */
+static void clean_back_to_settings(void) {
+    struct sCleanPopup *cp = &gui.element.cleanPopup;
+    alarm_stop();
+#if defined(DISPLAY_DRIVER_ST7701)
+    st7701_lcd_set_dim_inhibit(false);
+#endif
+    cp->result = 0;
+    cp->stopNowPressed = false;
+    cp->isCleaning = false;
+    lv_obj_add_flag(cp->cleanRemainingTimeValue, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(cp->cleanProcessContainer, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_remove_flag(cp->cleanSettingsContainer, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_remove_flag(cp->cleanRunButton, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_remove_flag(cp->cleanCancelButton, LV_OBJ_FLAG_HIDDEN);
+    lv_label_set_text(cp->cleanTitle, cleanPopupTitle_text);
+    lv_obj_clear_state(cp->cleanStopButton, LV_STATE_DISABLED);
+    lv_obj_set_style_bg_color(cp->cleanStopButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
+    lv_label_set_text(cp->cleanStopButtonLabel, cleanStopButton_text);
+}
 
 
 void event_cleanPopup(lv_event_t * e) {
 
-	char *tmp_processSourceList[] = processSourceList;
-
   lv_event_code_t code = lv_event_get_code(e);
   lv_obj_t * obj = (lv_obj_t *)lv_event_get_target(e);
+  struct sCleanPopup *cp = &gui.element.cleanPopup;
+
   if(code == LV_EVENT_SHORT_CLICKED){
-    if(obj == gui.element.cleanPopup.cleanSpinBoxPlusButton){
-      lv_spinbox_increment(gui.element.cleanPopup.cleanSpinBox);
-      gui.element.cleanPopup.cleanCycles = lv_spinbox_get_value(gui.element.cleanPopup.cleanSpinBox);
-      LV_LOG_USER("Cycles programmed :%d",gui.element.cleanPopup.cleanCycles);
+    if(obj == cp->cleanSpinBoxPlusButton){
+      lv_spinbox_increment(cp->cleanSpinBox);
+      cp->cleanCycles = lv_spinbox_get_value(cp->cleanSpinBox);
+      LV_LOG_USER("Cycles programmed :%d",cp->cleanCycles);
     }
-    if(obj == gui.element.cleanPopup.cleanSpinBoxMinusButton){
-      lv_spinbox_decrement(gui.element.cleanPopup.cleanSpinBox);
-      gui.element.cleanPopup.cleanCycles = lv_spinbox_get_value(gui.element.cleanPopup.cleanSpinBox);
-      LV_LOG_USER("Cycles programmed :%d",gui.element.cleanPopup.cleanCycles);
+    if(obj == cp->cleanSpinBoxMinusButton){
+      lv_spinbox_decrement(cp->cleanSpinBox);
+      cp->cleanCycles = lv_spinbox_get_value(cp->cleanSpinBox);
+      LV_LOG_USER("Cycles programmed :%d",cp->cleanCycles);
     }
   }
   if(code == LV_EVENT_RELEASED){
-    if(obj == gui.element.cleanPopup.cleanRunButton){
-      if (containerSelected){
-            ESP_LOGI(TAG, "=== CLEANING PROCESS STARTED ===");
-#if defined(DISPLAY_DRIVER_ST7701)
-            st7701_lcd_set_dim_inhibit(true);   /* Keep screen on during cleaning */
-#endif
-            resetStuffBeforeNextProcess();
-
-            lv_obj_add_flag(gui.element.cleanPopup.cleanSettingsContainer, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(gui.element.cleanPopup.cleanRunButton, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(gui.element.cleanPopup.cleanCancelButton, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_remove_flag(gui.element.cleanPopup.cleanProcessContainer, LV_OBJ_FLAG_HIDDEN);
-            lv_label_set_text(gui.element.cleanPopup.cleanTitle, cleanCleanProcess_text);
-            lv_obj_remove_flag(gui.element.cleanPopup.cleanRemainingTimeValue, LV_OBJ_FLAG_HIDDEN); 
-
-            lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanStopButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
-            lv_label_set_text(gui.element.cleanPopup.cleanNowCleaningLabel, cleanCurrentClean_text);
-
-            getMinutesAndSeconds(getContainerFillTime(), gui.element.cleanPopup.containerToClean);
-            lv_label_set_text_fmt(gui.element.cleanPopup.cleanRemainingTimeValue, "%"PRIu32"m%"PRIu32"s",gui.element.cleanPopup.totalMins, gui.element.cleanPopup.totalSecs); 
-            LV_LOG_USER("Process totalMin: %"PRIu32" totalSecs: %"PRIu32"",gui.element.cleanPopup.totalMins,gui.element.cleanPopup.totalSecs);
-            
-            lv_obj_remove_flag(gui.element.cleanPopup.cleanNowCleaningValue, LV_OBJ_FLAG_HIDDEN);
-            lv_label_set_text_fmt(gui.element.cleanPopup.cleanNowCleaningValue, cleanCycleFmt_text, tmp_processSourceList[firstContainerIndex], currentCycle);
-
-            gui.element.cleanPopup.pumpTimer = lv_timer_create(cleanPumpTimer, 1000,  NULL);
-            LV_LOG_USER("Started pumpTimer");
-
-      }
-
+    if(obj == cp->cleanRunButton){
+      clean_run();
     }
-    if(obj == gui.element.cleanPopup.cleanCancelButton){
+    if(obj == cp->cleanCancelButton){
       alarm_stop();
-      lv_obj_add_flag(gui.element.cleanPopup.cleanPopupParent, LV_OBJ_FLAG_HIDDEN);
+      lv_obj_add_flag(cp->cleanPopupParent, LV_OBJ_FLAG_HIDDEN);
     }
+    if(obj == cp->cleanStopButton) {
+      if (cp->pumpTimer != NULL) clean_stop_request();                 /* Stop */
+      else if (cp->wasteTimer == NULL) clean_back_to_settings();       /* Close after the end */
+    }
+  }
 
-	if(obj == gui.element.cleanPopup.cleanStopButton) {
-		if(gui.element.cleanPopup.stopNowPressed == false) {
-	    	if(processPercentage != 100) {
-	       		ESP_LOGW(TAG, "Cleaning STOPPED by user");
-#if defined(DISPLAY_DRIVER_ST7701)
-		      st7701_lcd_set_dim_inhibit(false); /* Re-enable auto-dimming */
-#endif
-		      //lv_timer_delete(gui.element.cleanPopup.pumpTimer);
-		      gui.element.cleanPopup.stopNowPressed = true;
-		      alarm_stop();
-		      lv_label_set_text(gui.element.cleanPopup.cleanTitle, cleanCanceled_text);
-		      lv_obj_add_state(gui.element.cleanPopup.cleanStopButton, LV_STATE_DISABLED);
-		      lv_obj_add_flag(gui.element.cleanPopup.cleanRemainingTimeValue, LV_OBJ_FLAG_HIDDEN);
-		      lv_obj_add_flag(gui.element.cleanPopup.cleanNowCleaningValue, LV_OBJ_FLAG_HIDDEN);
-		      lv_label_set_text(gui.element.cleanPopup.cleanNowCleaningLabel, cleanCanceled_text);
-		      return;
-			} else {
-				alarm_stop();
-				lv_obj_add_flag(gui.element.cleanPopup.cleanProcessContainer, LV_OBJ_FLAG_HIDDEN);
-				lv_obj_remove_flag(gui.element.cleanPopup.cleanSettingsContainer, LV_OBJ_FLAG_HIDDEN);
-				lv_obj_remove_flag(gui.element.cleanPopup.cleanRunButton, LV_OBJ_FLAG_HIDDEN);
-				lv_obj_remove_flag(gui.element.cleanPopup.cleanCancelButton, LV_OBJ_FLAG_HIDDEN);
-				lv_label_set_text(gui.element.cleanPopup.cleanTitle, cleanPopupTitle_text);
-			}
-		} else {
-			ESP_LOGI(TAG, "=== CLEANING PROCESS FINISHED ===");
-#if defined(DISPLAY_DRIVER_ST7701)
-			st7701_lcd_set_dim_inhibit(false); /* Re-enable auto-dimming */
-#endif
-			alarm_stop();
-			lv_obj_add_flag(gui.element.cleanPopup.cleanRemainingTimeValue, LV_OBJ_FLAG_HIDDEN);
-			lv_obj_add_flag(gui.element.cleanPopup.cleanProcessContainer, LV_OBJ_FLAG_HIDDEN);
-			lv_obj_remove_flag(gui.element.cleanPopup.cleanSettingsContainer, LV_OBJ_FLAG_HIDDEN);
-			lv_obj_remove_flag(gui.element.cleanPopup.cleanRunButton, LV_OBJ_FLAG_HIDDEN);
-			lv_obj_remove_flag(gui.element.cleanPopup.cleanCancelButton, LV_OBJ_FLAG_HIDDEN);
-			lv_label_set_text(gui.element.cleanPopup.cleanTitle, cleanPopupTitle_text);
-			lv_obj_clear_state(gui.element.cleanPopup.cleanStopButton, LV_STATE_DISABLED);
-			lv_obj_set_style_bg_color(gui.element.cleanPopup.cleanStopButton, lv_color_hex(RED_DARK), LV_PART_MAIN);
-			lv_label_set_text(gui.element.cleanPopup.cleanStopButtonLabel, cleanStopButton_text);
-		}
-	}
-}
-  
-if(obj == gui.element.cleanPopup.cleanDrainWaterSwitch){
-	if(code == LV_EVENT_VALUE_CHANGED) {
-		LV_LOG_USER("State cleanDrainWaterSwitch: %s", lv_obj_has_state(obj, LV_STATE_CHECKED) ? "On" : "Off");
-		gui.element.cleanPopup.cleanDrainWater = lv_obj_has_state(obj, LV_STATE_CHECKED);  
-	}
-}
-
-
-if(obj == gui.element.cleanPopup.cleanSelectC1CheckBox || obj == gui.element.cleanPopup.cleanSelectC2CheckBox || obj == gui.element.cleanPopup.cleanSelectC3CheckBox){
+  if(obj == cp->cleanDrainWaterSwitch){
     if(code == LV_EVENT_VALUE_CHANGED) {
-        if(obj == gui.element.cleanPopup.cleanSelectC1CheckBox){
-          LV_LOG_USER("State C1: %d", lv_obj_has_state(obj, LV_STATE_CHECKED));
-          gui.element.cleanPopup.containerToClean[0] = lv_obj_has_state(obj, LV_STATE_CHECKED);
-          }
-        if(obj == gui.element.cleanPopup.cleanSelectC2CheckBox){
-          LV_LOG_USER("State C2: %d", lv_obj_has_state(obj, LV_STATE_CHECKED));
-          gui.element.cleanPopup.containerToClean[1] = lv_obj_has_state(obj, LV_STATE_CHECKED);
-          }
-        if(obj == gui.element.cleanPopup.cleanSelectC3CheckBox){
-          LV_LOG_USER("State C3: %d", lv_obj_has_state(obj, LV_STATE_CHECKED));
-          gui.element.cleanPopup.containerToClean[2] = lv_obj_has_state(obj, LV_STATE_CHECKED);
-          }
-        for (uint8_t i = 0; i < ( sizeof(tmp_processSourceList) / sizeof(char*) ); ++i) {
-          if (gui.element.cleanPopup.containerToClean[i]) {
-              lv_obj_clear_state(gui.element.cleanPopup.cleanRunButton, LV_STATE_DISABLED);
-              containerSelected = true;
-              firstContainerIndex = i;
-              LV_LOG_USER("firstContainerIndex :%d",firstContainerIndex);
-              break;
-          }else {
-            lv_obj_add_state(gui.element.cleanPopup.cleanRunButton, LV_STATE_DISABLED);
-            containerSelected = false;
-          }
-        }
+      LV_LOG_USER("State cleanDrainWaterSwitch: %s", lv_obj_has_state(obj, LV_STATE_CHECKED) ? "On" : "Off");
+      cp->cleanDrainWater = lv_obj_has_state(obj, LV_STATE_CHECKED);
+    }
+  }
 
-      }
-    } 
+  if(obj == cp->cleanSelectC1CheckBox || obj == cp->cleanSelectC2CheckBox || obj == cp->cleanSelectC3CheckBox){
+    if(code == LV_EVENT_VALUE_CHANGED) {
+      if(obj == cp->cleanSelectC1CheckBox) cp->containerToClean[0] = lv_obj_has_state(obj, LV_STATE_CHECKED);
+      if(obj == cp->cleanSelectC2CheckBox) cp->containerToClean[1] = lv_obj_has_state(obj, LV_STATE_CHECKED);
+      if(obj == cp->cleanSelectC3CheckBox) cp->containerToClean[2] = lv_obj_has_state(obj, LV_STATE_CHECKED);
+      clean_update_selection();
+      LV_LOG_USER("Containers C1=%d C2=%d C3=%d", cp->containerToClean[0], cp->containerToClean[1], cp->containerToClean[2]);
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+ *  STATE FOR THE APP  +  REMOTE CONTROL (WebSocket)
+ * ══════════════════════════════════════════════════════════ */
+bool cleanToolBusy(void) {
+    return gui.element.cleanPopup.pumpTimer != NULL || gui.element.cleanPopup.wasteTimer != NULL;
+}
+
+int cleanToolState(void) {
+    struct sCleanPopup *cp = &gui.element.cleanPopup;
+    if (cp->pumpTimer != NULL)  return cp->stopNowPressed ? CLEAN_TOOL_STOPPING : CLEAN_TOOL_RUNNING;
+    if (cp->wasteTimer != NULL) return CLEAN_TOOL_WASTE;
+    return cp->result;
+}
+
+int  cleanToolContainer(void) { return containerIndex < CLEAN_CONTAINERS ? containerIndex : CLEAN_CONTAINERS - 1; }
+int  cleanToolCycle(void)     { return currentCycle; }
+int  cleanToolCycles(void)    { return gui.element.cleanPopup.cleanCycles ? gui.element.cleanPopup.cleanCycles : 1; }
+bool cleanToolFilling(void)   { return gui.element.cleanPopup.stepDirection == 1 && !gui.element.cleanPopup.stopNowPressed; }
+bool cleanToolDrainWb(void)   { return gui.element.cleanPopup.cleanDrainWater; }
+
+int cleanToolPercent(void) {
+    if (gui.element.cleanPopup.result == CLEAN_TOOL_DONE || gui.element.cleanPopup.wasteTimer != NULL) return 100;
+    return processPercentage;
+}
+
+uint32_t cleanToolRemainingSecs(void) {
+    struct sCleanPopup *cp = &gui.element.cleanPopup;
+    if (cp->wasteTimer != NULL) {
+        uint32_t el = minutesStepElapsed * 60 + secondsStepElapsed, wb = getWbFillTime();
+        return el < wb ? wb - el : 0;
+    }
+    if (cp->pumpTimer == NULL) return 0;
+    if (cp->stopNowPressed) return minutesStepElapsed * 60 + secondsStepElapsed;
+    uint32_t total = clean_total_secs(), el = clean_process_elapsed_secs();
+    return el < total ? total - el : 0;
+}
+
+uint8_t cleanToolMask(void) {
+    const bool *c = gui.element.cleanPopup.containerToClean;
+    return (uint8_t)((c[0] ? 1 : 0) | (c[1] ? 2 : 0) | (c[2] ? 4 : 0));
+}
+
+bool cleanPopupRemoteStart(uint8_t mask, uint8_t cycles, bool drainWb) {
+    struct sCleanPopup *cp = &gui.element.cleanPopup;
+    if (cleanToolBusy()) return false;
+    if (cp->cleanPopupParent == NULL) cleanPopup();
+    if (cp->cleanPopupParent == NULL) return false;
+    if (cp->result != 0) clean_back_to_settings();
+
+    /* Same choices on the popup, so the display shows what the app asked */
+    lv_obj_t *boxes[CLEAN_CONTAINERS] = { cp->cleanSelectC1CheckBox, cp->cleanSelectC2CheckBox, cp->cleanSelectC3CheckBox };
+    for (uint8_t i = 0; i < CLEAN_CONTAINERS; i++) {
+        cp->containerToClean[i] = (mask >> i) & 1;
+        if (cp->containerToClean[i]) lv_obj_add_state(boxes[i], LV_STATE_CHECKED);
+        else                         lv_obj_remove_state(boxes[i], LV_STATE_CHECKED);
+    }
+    if (cycles < CLEAN_CYCLES_MIN) cycles = CLEAN_CYCLES_MIN;
+    if (cycles > CLEAN_CYCLES_MAX) cycles = CLEAN_CYCLES_MAX;
+    cp->cleanCycles = cycles;
+    lv_spinbox_set_value(cp->cleanSpinBox, cycles);
+    cp->cleanDrainWater = drainWb;
+    if (drainWb) lv_obj_add_state(cp->cleanDrainWaterSwitch, LV_STATE_CHECKED);
+    else         lv_obj_remove_state(cp->cleanDrainWaterSwitch, LV_STATE_CHECKED);
+
+    lv_obj_remove_flag(cp->cleanPopupParent, LV_OBJ_FLAG_HIDDEN);
+    return clean_run();
+}
+
+void cleanPopupRemoteStop(void) {
+    clean_stop_request();
+}
+
+void cleanPopupRemoteClose(void) {
+    struct sCleanPopup *cp = &gui.element.cleanPopup;
+    if (cp->cleanPopupParent == NULL || cleanToolBusy()) return;
+    clean_back_to_settings();
+    lv_obj_add_flag(cp->cleanPopupParent, LV_OBJ_FLAG_HIDDEN);
 }
 
 

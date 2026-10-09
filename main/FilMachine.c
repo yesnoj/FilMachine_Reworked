@@ -342,9 +342,12 @@ case SAVE_MACHINE_STATS:
 
 case EXPORT_CFG:
 LV_LOG_USER("Backup FilMachine.cfg to FilMachine_Backup.cfg.");
-if( !copyAndRenameFile( FILENAME_SAVE, FILENAME_BACKUP) ) {
-LV_LOG_USER("Backup failed!" );
-} else LV_LOG_USER("Backup successful!" );
+{
+  bool ok = copyAndRenameFile( FILENAME_SAVE, FILENAME_BACKUP);
+  LV_LOG_USER(ok ? "Backup successful!" : "Backup failed!" );
+  g_exportOk = ok;
+  g_exportSeq++;            /* the app waits for this to change */
+}
 break;
 
 case RELOAD_CFG:

@@ -95,6 +95,7 @@ FilMachine_Reworked/
 │   ├── mini_json.c                #   Dependency-free JSON parser for the config file
 │   ├── ota_update.c               #   OTA firmware update (SD card + Wi-Fi web server)
 │   ├── ws_server.c                #   WebSocket server for Flutter companion app
+│   ├── film_loader.c              #   Film loading cycle (wind, stall detect, cut, tail) — Tools → Load film
 │   └── ui_profile.c               #   Centralized UI layout constants (800×480)
 │
 ├── c_pages/                       # UI pages (screens)
@@ -104,7 +105,7 @@ FilMachine_Reworked/
 │   ├── page_processes.c           #   Process list with filtering
 │   ├── page_processDetail.c       #   Process creation & editing
 │   ├── page_stepDetail.c          #   Step creation & editing with validation
-│   ├── page_settings.c            #   Machine settings (temp, speed, alarms, timers, Wi-Fi)
+│   ├── page_settings.c            #   Machine settings, grouped in sections (process, rotation, liquids, display, system)
 │   ├── page_tools.c               #   Maintenance tools, import/export, statistics, OTA
 │   ├── page_checkup.c             #   Process execution — the most complex page
 │   └── page_debug.c               #   Hidden diagnostics / bring-up page (live sensors, output tests)
@@ -118,6 +119,7 @@ FilMachine_Reworked/
 │   ├── element_calibPopup.c       #   Dual temperature calibration popup (bath + chemistry offsets)
 │   ├── element_speedPopup.c       #   Pump / motor speed tuning popup with live test
 │   ├── element_fillPopup.c        #   Maintenance "Fill bath" popup (auto-stop on level, flow or timeout)
+│   ├── element_loadPopup.c        #   Film loading popup (135/120, progress, Cut now, blade test)
 │   ├── element_cleanPopup.c       #   Cleaning process UI with timer
 │   ├── element_drainPopup.c       #   Drain process UI with animated tank bars
 │   ├── element_splashPopup.c      #   Splash screen config popup with live preview
@@ -128,11 +130,12 @@ FilMachine_Reworked/
 ├── c_fonts/                       # Custom icon fonts (7 sizes: 15/20/30/40/50/60/100px)
 │   │                              #   + 8 custom splash title fonts (48px) + Montserrat 64
 ├── drivers/                       # Custom peripheral drivers (ESP-IDF compatible)
-│   ├── include/                   #   Driver headers (mcp23017.h, ds18b20.h, sensors.h, audio.h)
+│   ├── include/                   #   Driver headers (mcp23017.h, ds18b20.h, sensors.h, audio.h, servo.h)
 │   ├── mcp23017.c                 #   I2C 16-bit I/O expander (Adafruit solenoid driver)
 │   ├── ds18b20.c                  #   OneWire temperature sensor (shared bus)
 │   ├── audio.c                    #   ES8311 codec bring-up + tone/volume (board only)
-│   └── sensors.c                  #   Flow meter, water level, hall effect sensors
+│   ├── servo.c                    #   Cutter servo, LEDC 50 Hz PWM on GPIO 28 (board only)
+│   └── sensors.c                  #   Flow meter, water level, hall effect sensors (+ reel pulse counter)
 │
 ├── components/                    # ESP32-P4 specific hardware drivers
 │   ├── st7701_lcd/                #   ST7701S MIPI-DSI LCD driver (480×800)
@@ -172,6 +175,8 @@ FilMachine_Reworked/
 │   ├── test_selfcheck.c           #   Self-check wizard tests
 │   ├── test_live_sync.c           #   Live sync integration tests
 │   ├── test_ui_profile.c          #   UI profile validation & sensor stubs
+│   ├── test_film_loader.c         #   Film loader state machine, safety checks, popup
+│   ├── test_maintenance_remote.c  #   Drain / Clean / Export driven by WebSocket commands
 │   └── test_destroy_and_lifecycle.c # Memory cleanup & object destruction
 │
 ├── lvgl/                          # LVGL 9.5.0 library (auto-cloned on first build, gitignored)
@@ -403,6 +408,8 @@ Results are displayed in the terminal and saved to `test_results/test_results_YY
 | **Self-check** | Self-check diagnostic wizard phases |
 | **LiveSync** | Live sync between WebSocket state and LVGL UI |
 | **Destroy & Lifecycle** | Memory cleanup, object destruction |
+| **Film loader** | Loading cycle 135/120, early stall / no spin / too long errors, Cut now, Stop, blade test, popup from the app |
+| **Maintenance from the app** | Drain and Clean started, stopped and closed by WebSocket commands (popups on the display, state fields), only the selected containers cleaned, one tool at a time, no process while one runs, Export queued with its result in the state |
 
 The persistence tests verify that every field (process name, temperature, tolerance, film type, preferred flag, step names, durations, types, sources, discard flags) survives a full save-and-reload cycle.
 
@@ -418,7 +425,7 @@ All commands use JSON format: `{"cmd":"command_name", ...params}`.
 
 | Command | Parameters | Description |
 |---------|-----------|-------------|
-| `get_state` | — | Returns full machine state (71 fields: settings, runtime, temperatures, progress, alarms) |
+| `get_state` | — | Returns full machine state (settings, runtime, temperatures, progress, alarms, maintenance fill, film loader, drain, clean and export status) |
 | `get_processes` | — | Returns complete process list with steps, indexed for remote referencing |
 | `start_process` | `index` | Start a process by list index; initializes checkup and begins execution |
 | `checkup_advance` | — | Advance to next checkup phase (Setup → Fill → Temp → Check → Processing) |
@@ -435,8 +442,19 @@ All commands use JSON format: `{"cmd":"command_name", ...params}`.
 | `set_setting` | `key, value` | Update a machine setting (see key list below) |
 | `reset_defaults` | — | Restore all settings to factory defaults |
 | `wifi_scan` | — | Scan for Wi-Fi networks; results arrive via a `wifi_scan_results` event |
+| `fill_start` / `fill_stop` | `target` (0 = water bath, 1 = chemistry) | Maintenance fill (self-calibrates the fill time; refused with `fill_rejected` while a process runs) |
+| `tune_test` / `tune_set` / `tune_cancel` | `kind` (0 pump, 1 motor, 2 volume), `percent`, `on` | Live test, store or cancel a Tune value |
+| `drain_start` / `drain_stop` / `drain_close` | — | Drain machine: start (no confirm page, the app asks), Stop, Close after the end (alarm off, popup closed). Refused with `drain_rejected` while a process or another maintenance tool runs |
+| `clean_start` | `mask` (bit0 C1, bit1 C2, bit2 C3), `cycles` (1–5), `drainWb` | Clean machine with these choices (shown on the display popup). Refused with `clean_rejected` (`processing`, `busy`, `no_container`) |
+| `clean_stop` / `clean_close` | — | Clean: Stop (the container is pumped back first) / Close after the end |
+| `export_config` | — | Export configuration and processes to the backup file on the SD card; the result arrives as `exportSeq` / `exportOk` in the state |
+| `load_start` | `format` (0 = 135, 1 = 120) | Start loading the film onto the reel (refused with a `load_rejected` event while a process runs or a load is in progress) |
+| `load_stop` | — | Stop the loading (motor off, blade back to rest) |
+| `load_cut` | — | Cut now, without waiting for the reel to stop |
+| `cutter_test` | `angle` (0–180) | Hold the cutter servo at that angle for a few seconds (setup) |
+| `cutter_cycle` | — | One blade up/down cycle, motor off |
 
-**`set_setting` keys** — `tempUnit`, `waterInlet`, `tempCalibOffset`, `chemCalibOffset`, `filmRotationSpeed`, `rotationInterval`, `random`, `persistentAlarm`, `autostart`, `drainFillOverlap`, `multiRinseTime`, `lineRinseEnabled`, `lineRinseTime`, `tankSize`, `pumpSpeed`, `chemCalibFillSecs`, `wbCalibFillSecs`, `chemistryVolume`, `invertPump`, `brightness`, `volume`, `splashDefault`, `splashRandom`, `splashPalette`, `splashShapeStyle`, `splashComplexity`, `language` (0=EN, 1=IT — applied at next boot), `screenOffMins` (5/10/30, 0=never), `wifiEnabled`. All of these are also included in the broadcast state JSON.
+**`set_setting` keys** — `tempUnit`, `waterInlet`, `tempCalibOffset`, `chemCalibOffset`, `filmRotationSpeed`, `rotationInterval`, `random`, `persistentAlarm`, `autostart`, `drainFillOverlap`, `multiRinseTime`, `lineRinseEnabled`, `lineRinseTime`, `tankSize`, `pumpSpeed`, `chemCalibFillSecs`, `wbCalibFillSecs`, `chemistryVolume`, `invertPump`, `brightness`, `volume`, `splashDefault`, `splashRandom`, `splashPalette`, `splashShapeStyle`, `splashComplexity`, `language` (0=EN, 1=IT — applied at next boot), `screenOffMins` (5/10/30, 0=never), `wifiEnabled`, `loadSpeed` (reel motor % while loading), `cutterRestUs` / `cutterCutUs` (servo pulse in µs at rest and at the top of the cut). All of these are also included in the broadcast state JSON.
 
 ### Implementation Details
 
@@ -458,13 +476,14 @@ The companion app is a Flutter application that provides full remote control of 
 - **Process Control**: Start processes, advance through checkup phases, Stop Now / Stop After with confirmation dialogs
 - **Filtering**: Client-side filtering by name, film type (B&W / Color), and preferred flag
 - **Statistics**: View completed processes, stopped processes, total development time, cleaning cycles
-- **Settings**: Full access to all machine settings (temperature unit, rotation speed, autostart, alarms, line rinse, pump, display brightness, volume, interface language, screen-off timeout, splash screen, Wi-Fi scan, etc.)
+- **Settings**: Full access to the machine settings, with the same sections as the display (Process, Film rotation, Pump and liquids, Display and sound, System) plus the app's own options
+- **Tools**: A Tools tab laid out like the display's: Maintenance (Clean machine, Drain machine, Fill bath, Fill chem, Load film), Utilities (Export) and Software (Credits). Self-check, Import (it reboots the machine) and the firmware updates (the Wi-Fi one shows a PIN on the display on purpose) stay on the display; statistics, version and serial number are on the app's Dashboard
 - **Theme**: Dark/light theme toggle with custom FilMachine color palette
 - **Persistent Connection**: Remembers last successful connection for quick reconnect
 
 ### Architecture
 
-The app uses **Provider** for state management. A central `MachineService` (ChangeNotifier) maintains the WebSocket connection and holds the current `MachineState` — a data class with one field per key of the JSON state broadcast (71). All screens rebuild reactively when state changes.
+The app uses **Provider** for state management. A central `MachineService` (ChangeNotifier) maintains the WebSocket connection and holds the current `MachineState` — a data class with one field per key of the JSON state broadcast. All screens rebuild reactively when state changes.
 
 ---
 
@@ -537,41 +556,45 @@ All fonts are converted from TTF/OTF to LVGL `.c` bitmap arrays using `lv_font_c
 
 ### The Settings Tab
 
-| Setting | Description | Range |
-|---------|-------------|-------|
-| Splash Screen | Opens a popup to configure the boot splash (see above) | Default / Random / Custom |
-| Temperature unit | °C or °F | — |
-| Water inlet | Automatic water fill if connected | On/Off |
-| Temp sensor calibration | Calibrate against a reference thermometer. Short-press Tune to set ambient temp, long-press to reset. | Tune button |
-| Rotation speed | Film agitation motor RPM | 10–100% |
-| Inversion interval | Seconds between motor direction changes | 10–60s |
-| Randomness | Random variation on inversion interval | 0–100% |
-| Persistent alarm | Alarm sounds until acknowledged | On/Off |
-| Process autostart | Auto-start when temperature reached | On/Off |
-| Drain/fill overlap | How much of fill/drain time counts as processing time (100% recommended) | 0–100% |
-| Multi-rinse cycle time | Duration of each rinse in multi-rinse steps | 60–180s |
-| Line rinse | Flush the shared pump line with water after each chemistry step | On/Off |
-| Line rinse time | Duration of the line-rinse flush | 5–60s |
-| Pump speed | Water pump speed percentage | 10–100% |
-| Invert pump | Invert H-bridge direction to compensate for pump physical switch position | On/Off |
-| Brightness | LCD backlight brightness (auto-dim after inactivity) | 10–100% |
-| Volume | Speaker volume | 0–100% |
-| Tank size | Default developing tank size | S (500ml) / M (700ml) / L (1000ml) |
-| Chemistry volume | Amount of chemistry used per step | Low / High |
-| Language | Interface language — the machine saves and reboots automatically to apply it | English / Italiano |
-| Screen off timeout | Minutes after the last touch before the screen turns off (dims in two steps first; disabled while a process runs) | 5 / 10 / 30 min / Never |
-| Fill calibration | Chemistry / water-bath fill times, measured via Maintenance fills | read-only (s) |
-| Wi-Fi SSID | Network name for OTA updates | Text (max 32 chars) |
-| Wi-Fi password | Network password for OTA updates | Text (max 64 chars) |
+The settings are grouped in sections, like the Tools tab; the whole page scrolls with its section titles. The app's Settings screen uses the same groups and the same wording.
+
+| Section | Setting | Description | Range |
+|---------|---------|-------------|-------|
+| Process | Process autostart | Auto-start when temperature reached | On/Off |
+| Process | Persistent alarm | Alarm sounds until acknowledged | On/Off |
+| Process | Temperature unit | °C or °F | — |
+| Process | Temp sensor calibration | Calibrate against a reference thermometer. Short-press Tune to set ambient temp, long-press to reset. | Tune button |
+| Film rotation | Rotation speed | Film agitation motor RPM | 10–100% |
+| Film rotation | Inversion interval | Seconds between motor direction changes | 10–60s |
+| Film rotation | Randomness | Random variation on inversion interval | 0–100% |
+| Pump and liquids | Tank size | Default developing tank size | S (500ml) / M (700ml) / L (1000ml) |
+| Pump and liquids | Chemistry volume | Amount of chemistry used per step | Low / High |
+| Pump and liquids | Pump speed | Water pump speed percentage | 10–100% |
+| Pump and liquids | Invert pump | Invert H-bridge direction to compensate for pump physical switch position | On/Off |
+| Pump and liquids | Water inlet | Automatic water fill if connected | On/Off |
+| Pump and liquids | Drain/fill overlap | How much of fill/drain time counts as processing time (100% recommended) | 0–100% |
+| Pump and liquids | Multi-rinse cycle time | Duration of each rinse in multi-rinse steps | 60–180s |
+| Pump and liquids | Line rinse | Flush the shared pump line with water after each chemistry step | On/Off |
+| Pump and liquids | Line rinse time | Duration of the line-rinse flush | 5–60s |
+| Display and sound | Brightness | LCD backlight brightness (auto-dim after inactivity; board only) | 10–100% |
+| Display and sound | Volume | Speaker volume | 0–100% |
+| Display and sound | Screen off timeout | Minutes after the last touch before the screen turns off (dims in two steps first; disabled while a process runs) | 5 / 10 / 30 min / Never |
+| Display and sound | Language | Interface language — the machine saves and reboots automatically to apply it | English / Italiano |
+| System | Splash Screen | Opens a popup to configure the boot splash (see above) | Default / Random / Custom |
+| System | Wi-Fi | Opens the Wi-Fi popup: scan, connect, status (used for OTA updates and the app) | — |
+| System | Reset to Defaults | Restores every setting to its factory value | — |
+
+The fill times are not settings any more: they are measured by the Maintenance fills in the Tools tab. The film loader's motor speed and cutter servo pulses (`loadSpeed`, `cutterRestUs`, `cutterCutUs`) are stored with the settings but are not shown on this page; they are set from the app's Load film screen (or in `FilMachine.json`).
 
 All settings are saved automatically to the SD card when changed. Slider values are saved only when you release the slider (not during dragging) to reduce SD card wear.
 
 ### The Tools Tab
 
-- **Clean machine** — Automated cleaning cycle: select which containers to clean (C1, C2, C3), set the number of rinse cycles, and optionally drain the water bath when done. Each cycle fills the container with water from the water bath and then drains it back, with real-time progress shown via arc animations and remaining-time countdown.
-- **Drain machine** — Drains all containers (C1, C2, C3, WB) to waste sequentially. A confirmation screen lists the affected containers; once started, four colored tank bars animate from full to empty in real time, showing which container is currently draining, a ">> WASTE <<" indicator, and a countdown timer. The drain can be stopped at any time via the Stop button.
+- **Clean machine** — Automated cleaning cycle: select which containers to clean (C1, C2, C3), set the number of rinse cycles (1–5), and optionally drain the water bath when done. Only the selected containers are cleaned, in order: each cycle fills the container with water from the water bath and then pumps it back, with real-time progress shown via arc animations and remaining-time countdown. Stop pumps the water still in the current container back to the bath before ending. It can also be started, stopped and closed from the app (the popup shows the app's choices).
+- **Drain machine** — Drains all containers (C1, C2, C3, WB) to waste sequentially. A confirmation screen lists the affected containers; once started, four colored tank bars animate from full to empty in real time, showing which container is currently draining, a ">> WASTE <<" indicator, and a countdown timer. The drain can be stopped at any time via the Stop button. It can also be started, stopped and closed from the app.
 - **Self-check** — Guided hardware diagnostic wizard that tests all machine components in 8 phases: temperature sensors (5s), water pump (10s), heater (30s), valves (10s), the three containers C1/C2/C3 (10s each), and agitation motor (10s). The UI is split in two panels: a task list on the left showing icons per phase (check for done, dot for pending/skipped/stopped) and a detail panel on the right with phase description, real-time sensor data, countdown timer, and a progress bar. Three buttons control the flow: Stop (halts current phase), Start/Re-run (begins or repeats a phase), and Next (skips to the next phase). Each phase's state (done, skipped, stopped) is saved and visible when revisiting. When all phases complete successfully the title shows "Self-check complete!" in green; if any were skipped or stopped it shows "Self-check finished" in orange.
-- **Import/Export** — Backup and restore configuration to SD card
+- **Load film** — Loads the film onto the reel with the built-in loader: choose 135 or 120 and press Start. The reel motor winds the film while the Hall sensor counts the turns; when the reel stops at the end of the film, the servo raises the blade and cuts, then half a turn pulls the tail inside and a beep says the tank is ready. *Cut now* cuts at once (e.g. when the 120 tape shows), *Stop* halts everything, and with the machine idle a *Test blade* button runs one blade cycle. The cut is refused if the reel stops too early (clip not hooked) or turns too long, and the motor is checked for rotation right after the start. The same cycle can be started from the app; a process cannot start while a film is loading.
+- **Import/Export** — Backup and restore configuration to SD card (Export can also be run from the app; Import reboots the machine and stays on the display)
 - **Statistics** — Completed processes, total time, cleaning cycles, stopped processes
 - **Software info** — Firmware version (read from the running binary, also shown on the splash screen) and serial number
 - **Update from SD** — Firmware OTA update from a `.bin` file on the SD card. The system reads the firmware version from the binary header, asks for confirmation, then writes it to the secondary OTA partition. After completion, a reboot applies the new firmware. If the update fails, the bootloader automatically rolls back to the previous version.
@@ -688,7 +711,7 @@ All external peripherals connect through the board's 2×13 Expand IO header (JP1
 | 7 | 52 | Flow meter (YF-S201) — (used in code) |
 | 8 | 33 | Motor IN1, H-bridge ch.A direction A — (used in code) |
 | 9 | 51 | Pump ENA, LEDC PWM speed — (used in code) |
-| 10 | 31 | Hall sensor (KY-003) — (used in code) |
+| 10 | 31 | Hall sensor (KY-003), reel turn counter for Load film — (used in code) |
 | 11 | 50 | Pump IN2, H-bridge ch.B direction B — (used in code) |
 | 12 | 30 | Water level max — (used in code) |
 | 13 | 49 | Pump IN1, H-bridge ch.B direction A — (used in code) |
@@ -698,14 +721,14 @@ All external peripherals connect through the board's 2×13 Expand IO header (JP1
 | 18 | — | ESP_3V3 — (power, not used in code) |
 | 19 | 32 | Motor ENA, LEDC PWM speed — (used in code) |
 | 20 | — | C6_U0RXD (ESP32-C6) — (not used in code) |
-| 21 | 28 | Test / spare — (not used in code) |
+| 21 | 28 | Cutter servo (MG90S), 50 Hz PWM — (used in code) |
 | 22 | — | C6_U0TXD (ESP32-C6) — (not used in code) |
 | 23 | 7 | I2C SDA, shared bus: touch + MCP23017 — (used in code) |
 | 24 | — | C6_IO9 (ESP32-C6) — (not used in code) |
 | 25 | 8 | I2C SCL, shared bus: touch + MCP23017 — (used in code) |
 | 26 | — | C6_CHIP_PU (ESP32-C6) — (not used in code) |
 
-All 12 P4 GPIO pins on JP1 are allocated — GPIO 28 is the only spare.
+All 12 P4 GPIO pins on JP1 are allocated — GPIO 28, the last spare, now drives the film loader's cutter servo.
 
 ### Breakout Board (KiCad)
 
@@ -795,7 +818,7 @@ Two spreadsheets in the repository root complement this list (both in Italian): 
 |---|-----------|-----|--------------|
 | 10 | **DS18B20** waterproof probe (+ 4.7 kΩ pull-up) | 2 | Water bath + chemical temperature (one OneWire bus). |
 | 11 | **XKC-Y21** non-contact level sensor | 8 | WB min+max (2) + 3 chem containers × min/max (6). Need 5 V + signal pulled to 3.3 V. |
-| 12 | **Hall** sensor (KY-003 / A3144) | 1 | Tank in-position / rotation. |
+| 12 | **Hall** sensor (KY-003 / A3144) | 1 | Tank in-position / rotation; counts the reel turns while loading film. |
 | 13 | **YF-S201** flow meter | 1 | Water-bath inlet flow. |
 
 **Power & misc**
@@ -828,7 +851,7 @@ The loader winds the film onto the reel **from the centre outwards**, like the R
 
 > **What it is and what it is not.** It is an *open* test bench for validating the mechanics in daylight with scrap film. It is not yet light-tight or liquid-tight: that is the next phase, to be designed around mechanics that work.
 
-> **Firmware status.** Nothing in this firmware drives the loader yet: there is no stepper or servo code, and the JP1 pin map has no pins assigned to it. The sequence in [Planned firmware sequence](#planned-firmware-sequence-starting-values) is the starting point for that work.
+> **Firmware status.** This v1 bench (stepper + pendulum cutter) is not driven by the firmware. The firmware drives the loader built into the machine (v5): Tools → **Load film** (`main/film_loader.c`) winds with the agitation motor, counts the reel turns with the Hall sensor, and cuts with a servo on GPIO 28 — see [The Tools Tab](#the-tools-tab). The sequence in [Planned firmware sequence](#planned-firmware-sequence-starting-values) is kept as the reference for the bench.
 
 ### Contents
 

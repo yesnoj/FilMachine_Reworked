@@ -28,36 +28,55 @@ uint8_t analogVal_rotationSpeedPercent;
 #define SETTINGS_H_ROW               (UI_SETTINGS->row_h)
 #define SETTINGS_H_SLIDER            (UI_SETTINGS->slider_h)
 
-#define Y_TEMP_UNIT                  (-25)
-#define Y_TEMP_TUNING                (Y_TEMP_UNIT + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_AUTOSTART                  (Y_TEMP_TUNING + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_WATER_INLET                (Y_AUTOSTART + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_FILM_ROT_SPEED             (Y_WATER_INLET + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_FILM_ROT_INTERVAL          (Y_FILM_ROT_SPEED + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
-#define Y_FILM_RANDOM                (Y_FILM_ROT_INTERVAL + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
-#define Y_DRAIN_FILL                 (Y_FILM_RANDOM + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
-#define Y_MULTI_RINSE                (Y_DRAIN_FILL + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
-#define Y_LINE_RINSE                 (Y_MULTI_RINSE + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
-#define Y_LINE_RINSE_TIME            (Y_LINE_RINSE + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_PUMP_SPEED                 (Y_LINE_RINSE_TIME + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
-#define Y_INVERT_PUMP                (Y_PUMP_SPEED + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
-#if defined(DISPLAY_DRIVER_ST7701)
-#define Y_BRIGHTNESS                 (Y_INVERT_PUMP + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_VOLUME                     (Y_BRIGHTNESS + SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
-#define Y_PERSISTENT_ALARM           (Y_VOLUME + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#else
-#define Y_VOLUME                     (Y_INVERT_PUMP + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_PERSISTENT_ALARM           (Y_VOLUME + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#endif
-#define Y_TANK_SIZE                  (Y_PERSISTENT_ALARM + SETTINGS_H_ROW + SETTINGS_GAP_Y)
+/* Rows are grouped in sections, like the Tools page: each section is a title
+ * (label + line) followed by its rows. Everything scrolls together.
+ * The order matches the app's Settings screen. */
+#define ROW_STEP                     (SETTINGS_H_ROW + SETTINGS_GAP_Y)
+#define SLIDER_STEP                  (SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
+#define SEC_LINE_DY                  (UI_SETTINGS->section_line_y - UI_SETTINGS->section_label_y)  /* title -> line */
+#define SEC_ROWS_DY                  (SEC_LINE_DY + 16)                                            /* title -> first row */
+#define SETTINGS_SCROLL_TOP          (-12)                                                         /* scroll area starts at the top of the page */
+#define SEC_GAP_Y                    (12)                                                          /* last row -> next title */
+
+/* Process */
+#define Y_SEC_PROCESS                (UI_SETTINGS->section_label_y)
+#define Y_AUTOSTART                  (Y_SEC_PROCESS + SEC_ROWS_DY)
+#define Y_PERSISTENT_ALARM           (Y_AUTOSTART + ROW_STEP)
+#define Y_TEMP_UNIT                  (Y_PERSISTENT_ALARM + ROW_STEP)
+#define Y_TEMP_TUNING                (Y_TEMP_UNIT + ROW_STEP)
+/* Film rotation */
+#define Y_SEC_ROTATION               (Y_TEMP_TUNING + ROW_STEP + SEC_GAP_Y)
+#define Y_FILM_ROT_SPEED             (Y_SEC_ROTATION + SEC_ROWS_DY)
+#define Y_FILM_ROT_INTERVAL          (Y_FILM_ROT_SPEED + SLIDER_STEP)
+#define Y_FILM_RANDOM                (Y_FILM_ROT_INTERVAL + SLIDER_STEP)
+/* Pump and liquids */
+#define Y_SEC_LIQUIDS                (Y_FILM_RANDOM + SLIDER_STEP + SEC_GAP_Y)
 /* Chem/WB capacity rows removed — fill times are now self-calibrated from the
  * MIN/MAX sensors (Maintenance fills). Chem volume follows tank size directly. */
-#define Y_CHEM_VOLUME                (Y_TANK_SIZE + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_LANGUAGE                   (Y_CHEM_VOLUME + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_SCREEN_OFF                 (Y_LANGUAGE + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_SPLASH_SCREEN              (Y_SCREEN_OFF + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_WIFI_ROW                   (Y_SPLASH_SCREEN + SETTINGS_H_ROW + SETTINGS_GAP_Y)
-#define Y_RESET_ROW                  (Y_WIFI_ROW + SETTINGS_H_ROW + SETTINGS_GAP_Y)
+#define Y_TANK_SIZE                  (Y_SEC_LIQUIDS + SEC_ROWS_DY)
+#define Y_CHEM_VOLUME                (Y_TANK_SIZE + ROW_STEP)
+#define Y_PUMP_SPEED                 (Y_CHEM_VOLUME + ROW_STEP)
+#define Y_INVERT_PUMP                (Y_PUMP_SPEED + SLIDER_STEP)
+#define Y_WATER_INLET                (Y_INVERT_PUMP + ROW_STEP)
+#define Y_DRAIN_FILL                 (Y_WATER_INLET + ROW_STEP)
+#define Y_MULTI_RINSE                (Y_DRAIN_FILL + SLIDER_STEP)
+#define Y_LINE_RINSE                 (Y_MULTI_RINSE + SLIDER_STEP)
+#define Y_LINE_RINSE_TIME            (Y_LINE_RINSE + ROW_STEP)
+/* Display and sound */
+#define Y_SEC_DISPLAY                (Y_LINE_RINSE_TIME + SLIDER_STEP + SEC_GAP_Y)
+#if defined(DISPLAY_DRIVER_ST7701)
+#define Y_BRIGHTNESS                 (Y_SEC_DISPLAY + SEC_ROWS_DY)
+#define Y_VOLUME                     (Y_BRIGHTNESS + SLIDER_STEP)
+#else
+#define Y_VOLUME                     (Y_SEC_DISPLAY + SEC_ROWS_DY)
+#endif
+#define Y_SCREEN_OFF                 (Y_VOLUME + ROW_STEP)
+#define Y_LANGUAGE                   (Y_SCREEN_OFF + ROW_STEP)
+/* System */
+#define Y_SEC_SYSTEM                 (Y_LANGUAGE + ROW_STEP + SEC_GAP_Y)
+#define Y_SPLASH_SCREEN              (Y_SEC_SYSTEM + SEC_ROWS_DY)
+#define Y_WIFI_ROW                   (Y_SPLASH_SCREEN + ROW_STEP)
+#define Y_RESET_ROW                  (Y_WIFI_ROW + ROW_STEP)
 
 //ACCESSORY INCLUDES
 
@@ -1178,6 +1197,23 @@ gui.page.settings.chemVolumeContainer = lv_obj_create(parent);
 }
 
 
+/* Section title (label + orange line) inside the scroll area, Tools style. */
+static void settings_section_title(lv_obj_t *parent, int idx, const char *text, int32_t y)
+{
+  lv_obj_t *label = lv_label_create(parent);
+  lv_label_set_text(label, text);
+  lv_obj_set_style_text_font(label, UI_SETTINGS->section_title_font, 0);
+  lv_obj_align(label, LV_ALIGN_TOP_LEFT, UI_SETTINGS->section_label_x, y);
+
+  lv_obj_t *line = lv_line_create(parent);
+  lv_line_set_points(line, gui.page.settings.titleLinePoints, 2);
+  lv_obj_add_style(line, &gui.page.settings.style_sectionTitleLine, 0);
+  lv_obj_align(line, LV_ALIGN_TOP_MID, UI_SETTINGS->section_line_x, y + SEC_LINE_DY);
+
+  gui.page.settings.sectionLabels[idx] = label;
+  gui.page.settings.sectionLines[idx]  = line;
+}
+
 void initSettings(void){
 /*********************
  *    PAGE HEADER
@@ -1198,45 +1234,40 @@ void initSettings(void){
 
 
 
-  gui.page.settings.settingsLabel = lv_label_create(gui.page.settings.settingsSection);
-  lv_label_set_text(gui.page.settings.settingsLabel, Settings_text);
-  lv_obj_set_style_text_font(gui.page.settings.settingsLabel, UI_SETTINGS->section_title_font, 0);
-  lv_obj_align(gui.page.settings.settingsLabel, LV_ALIGN_TOP_LEFT, UI_SETTINGS->section_label_x, UI_SETTINGS->section_label_y);
-
-  /*Create style*/
+  /*Section title line style (orange, like the other Settings accents)*/
   lv_style_init(&gui.page.settings.style_sectionTitleLine);
   lv_style_set_line_width(&gui.page.settings.style_sectionTitleLine, ui_get_profile()->title_line_width);
   lv_style_set_line_color(&gui.page.settings.style_sectionTitleLine, lv_palette_main(LV_PALETTE_ORANGE));
   lv_style_set_line_rounded(&gui.page.settings.style_sectionTitleLine, true);
-
-  /*Create a line and apply the new style*/
-  gui.page.settings.sectionTitleLine = lv_line_create(gui.page.settings.settingsSection);
   gui.page.settings.titleLinePoints[1].x = ui_get_profile()->common.title_line_w;
-  lv_line_set_points(gui.page.settings.sectionTitleLine, gui.page.settings.titleLinePoints, 2);
-  lv_obj_add_style(gui.page.settings.sectionTitleLine, &gui.page.settings.style_sectionTitleLine, 0);
-  lv_obj_align(gui.page.settings.sectionTitleLine, LV_ALIGN_TOP_MID, UI_SETTINGS->section_line_x, UI_SETTINGS->section_line_y);
-
-  lv_obj_update_layout(gui.page.settings.settingsSection);
 
   /*********************
  *    PAGE ELEMENTS
  *********************/
 
+  /* One scroll area for the whole page: section titles scroll with their rows,
+   * as on the Tools page. */
   gui.page.settings.settingsContainer = lv_obj_create(gui.page.settings.settingsSection);
-  lv_obj_set_pos(gui.page.settings.settingsContainer, UI_SETTINGS->scroll_x, UI_SETTINGS->scroll_y);
-  lv_obj_set_size(gui.page.settings.settingsContainer, UI_SETTINGS->scroll_w, UI_SETTINGS->scroll_h);
+  lv_obj_set_pos(gui.page.settings.settingsContainer, UI_SETTINGS->scroll_x, SETTINGS_SCROLL_TOP);
+  lv_obj_set_size(gui.page.settings.settingsContainer, UI_SETTINGS->scroll_w, UI_SETTINGS->scroll_h + UI_SETTINGS->scroll_y - SETTINGS_SCROLL_TOP);
   lv_obj_set_style_border_opa(gui.page.settings.settingsContainer, LV_OPA_TRANSP, 0);
   lv_obj_set_scroll_dir(gui.page.settings.settingsContainer, LV_DIR_VER);
   lv_obj_set_scrollbar_mode(gui.page.settings.settingsContainer, LV_SCROLLBAR_MODE_AUTO);
+
+  lv_obj_t *sc = gui.page.settings.settingsContainer;
+  settings_section_title(sc, 0, settingsSectionProcess_text,  Y_SEC_PROCESS);
+  settings_section_title(sc, 1, settingsSectionRotation_text, Y_SEC_ROTATION);
+  settings_section_title(sc, 2, settingsSectionLiquids_text,  Y_SEC_LIQUIDS);
+  settings_section_title(sc, 3, settingsSectionDisplay_text,  Y_SEC_DISPLAY);
+  settings_section_title(sc, 4, settingsSectionSystem_text,   Y_SEC_SYSTEM);
+  gui.page.settings.settingsLabel    = gui.page.settings.sectionLabels[0];
+  gui.page.settings.sectionTitleLine = gui.page.settings.sectionLines[0];
 
   /* Initialize UI sub-sections */
   initSettings_tempUnit(gui.page.settings.settingsContainer);
   initSettings_switches(gui.page.settings.settingsContainer);
   initSettings_sliders(gui.page.settings.settingsContainer);
 
-  /* Ensure title label and line stay on top of the scroll container (Z-order) */
-  lv_obj_move_foreground(gui.page.settings.settingsLabel);
-  lv_obj_move_foreground(gui.page.settings.sectionTitleLine);
 
 }
 

@@ -68,6 +68,15 @@ int32_t roundToStep(int32_t value, int32_t step) {
 }
 
 /** Safely delete an LVGL timer and null-out the pointer */
+/* Result of the last export (Tools → Export), read by the app through the
+ * state broadcast: exportSeq changes after every attempt. */
+volatile uint16_t g_exportSeq = 0;
+volatile bool     g_exportOk  = false;
+
+bool maintenanceBusy(void) {
+    return machineFillState() == FILL_RUNNING || filmLoaderBusy() || drainToolBusy() || cleanToolBusy();
+}
+
 void safeTimerDelete(lv_timer_t **timer) {
     if (timer != NULL && *timer != NULL) {
         lv_timer_delete(*timer);
@@ -3093,7 +3102,7 @@ uint8_t getValueForChemicalSource(uint8_t source) {
     }
 }
 
-void getMinutesAndSeconds(uint8_t containerFillingTime, const bool containerToClean[3]) {
+void getMinutesAndSeconds(uint16_t containerFillingTime, const bool containerToClean[3]) {
     // Multiply containerFillingTime by 2
     uint32_t totalTime = (containerFillingTime * 2) * gui.element.cleanPopup.cleanCycles;
 

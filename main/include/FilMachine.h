@@ -270,6 +270,11 @@ typedef enum {
 * Config tab strings
 *********************/
 #define Settings_text	tr(STR_Settings_text)
+#define settingsSectionProcess_text	tr(STR_settingsSectionProcess_text)
+#define settingsSectionRotation_text	tr(STR_settingsSectionRotation_text)
+#define settingsSectionLiquids_text	tr(STR_settingsSectionLiquids_text)
+#define settingsSectionDisplay_text	tr(STR_settingsSectionDisplay_text)
+#define settingsSectionSystem_text	tr(STR_settingsSectionSystem_text)
 #define tempUnit_text	tr(STR_tempUnit_text)
 #define tempSensorTuning_text	tr(STR_tempSensorTuning_text)
 #define tuneButton_text	tr(STR_tuneButton_text)
@@ -1205,8 +1210,9 @@ struct sCleanPopup {
 	bool 					isAlreadyPumping;
 	uint32_t				totalMins;
 	uint32_t				totalSecs;
-	uint8_t					stepDirection;
+	int8_t					stepDirection;      /* 1 = filling the container, -1 = draining it back (was uint8_t: -1 became 255) */
 	bool	 				isCleaning;
+	uint8_t					result;             /* CLEAN_TOOL_DONE / CLEAN_TOOL_STOPPED once a run has ended, 0 otherwise */
 };
 
 
@@ -1291,6 +1297,7 @@ struct sDrainPopup {
 	uint8_t				 currentTank;
 	int32_t				 tankElapsed;
 	int32_t				 totalElapsed;
+	uint8_t				 result;            /* DRAIN_TOOL_DONE / DRAIN_TOOL_STOPPED once a run has ended, 0 otherwise */
 };
 
 struct sSelfcheckPopup {
@@ -1474,12 +1481,14 @@ struct sProcesses {
 struct sSettings {
     /* LVGL objects */
 	lv_obj_t			      *settingsSection;
-	lv_obj_t			      *sectionTitleLine;
+	lv_obj_t			      *sectionTitleLine;   /* = sectionLines[0] */
 	lv_style_t			    style_sectionTitleLine;
 	lv_point_precise_t	titleLinePoints[2];
 	int32_t 			    pad;
+	lv_obj_t 	        	*sectionLabels[5];   /* Process, Film rotation, Pump and liquids, Display and sound, System */
+	lv_obj_t 	        	*sectionLines[5];
 
-	lv_obj_t 	        	*settingsLabel;
+	lv_obj_t 	        	*settingsLabel;      /* = sectionLabels[0] */
 	lv_obj_t 	        	*tempUnitLabel;
 	lv_obj_t 	        	*waterInletLabel;
 	lv_obj_t 	        	*tempSensorTuneButtonLabel;
@@ -1834,9 +1843,49 @@ void clearProcessDetailBackup(void);
 // @file element_cleanPopup.c
 void event_cleanPopup(lv_event_t *e);
 void cleanPopup(void);
+/* Clean / Drain state for the app (state broadcast cleanTool* / drainTool*) */
+#define CLEAN_TOOL_IDLE      0
+#define CLEAN_TOOL_RUNNING   1   /* filling / draining the containers        */
+#define CLEAN_TOOL_STOPPING  2   /* Stop pressed: draining the current one back */
+#define CLEAN_TOOL_WASTE     3   /* final water-bath drain to waste           */
+#define CLEAN_TOOL_DONE      4
+#define CLEAN_TOOL_STOPPED   5
+#define CLEAN_CYCLES_MIN     1
+#define CLEAN_CYCLES_MAX     5
+int      cleanToolState(void);          /* CLEAN_TOOL_* */
+int      cleanToolContainer(void);      /* 0..2 = C1..C3 being cleaned */
+int      cleanToolCycle(void);          /* 1..cycles */
+int      cleanToolCycles(void);
+bool     cleanToolFilling(void);        /* true = filling, false = draining */
+int      cleanToolPercent(void);        /* whole clean, 0..100 */
+uint32_t cleanToolRemainingSecs(void);
+uint8_t  cleanToolMask(void);           /* bit0 C1, bit1 C2, bit2 C3 of the current/last run */
+bool     cleanToolDrainWb(void);
+bool     cleanToolBusy(void);
+bool     cleanPopupRemoteStart(uint8_t mask, uint8_t cycles, bool drainWb); /* app: open popup with these choices + Run */
+void     cleanPopupRemoteStop(void);
+void     cleanPopupRemoteClose(void);   /* after DONE/STOPPED: back to idle, alarm off, popup closed */
 // @file element_drainPopup.c
 void event_drainPopup(lv_event_t *e);
 void drainPopupCreate(void);
+#define DRAIN_TOOL_IDLE      0
+#define DRAIN_TOOL_RUNNING   1
+#define DRAIN_TOOL_DONE      2
+#define DRAIN_TOOL_STOPPED   3
+int      drainToolState(void);          /* DRAIN_TOOL_* */
+int      drainToolTank(void);           /* 0..3 = C1, C2, C3, WB being drained */
+int      drainToolLevelPct(void);       /* current tank, 100 -> 0 */
+uint32_t drainToolRemainingSecs(void);
+bool     drainToolBusy(void);
+void     drainPopupRemoteStart(void);   /* app: open popup + Start (no confirm page) */
+void     drainPopupRemoteStop(void);
+void     drainPopupRemoteClose(void);   /* after DONE/STOPPED: back to idle, alarm off, popup closed */
+/* Export (Tools → Export) — result of the last export, for the app */
+extern volatile uint16_t g_exportSeq;   /* +1 after every export attempt */
+extern volatile bool     g_exportOk;    /* result of the last one */
+/* true while a maintenance tool moves liquids or the reel motor (fill, drain,
+ * clean, film load): the WebSocket refuses to start a second one or a process. */
+bool     maintenanceBusy(void);
 // @file element_selfcheckPopup.c
 void event_selfcheckPopup(lv_event_t *e);
 void selfcheckPopupCreate(void);
@@ -2159,7 +2208,7 @@ void process_node_destroy(processNode *node);
 void emptyList(void *list, NodeType_t type);
 char *ftoa(char *a, float f, uint8_t precisione);
 uint8_t getValueForChemicalSource(uint8_t source);
-void getMinutesAndSeconds(uint8_t containerFillingTime, const bool containerToClean[3]);
+void getMinutesAndSeconds(uint16_t containerFillingTime, const bool containerToClean[3]);
 void cleanRelayManager(uint8_t pumpFrom, uint8_t pumpTo,uint8_t pumpDir,bool activePump);
 void setValveState(uint8_t relayPin, bool open);
 void closeAllValves(void);

@@ -321,6 +321,18 @@ static void ws_async_load_cut(void *user_data) {
     loadPopupRemoteCut();
 }
 
+/* ── Drain / Clean / Export from the app: mirror the display's Tools popups ── */
+static void ws_async_drain_start(void *u) { (void)u; drainPopupRemoteStart(); }
+static void ws_async_drain_stop(void *u)  { (void)u; drainPopupRemoteStop(); }
+static void ws_async_drain_close(void *u) { (void)u; drainPopupRemoteClose(); }
+static void ws_async_clean_start(void *u) {
+    uint32_t a = (uint32_t)(uintptr_t)u;          /* mask | cycles << 8 | drainWb << 16 */
+    if (!cleanPopupRemoteStart((uint8_t)(a & 0x07), (uint8_t)((a >> 8) & 0xFF), (a >> 16) & 1))
+        ws_broadcast_event("clean_rejected", "{\"reason\":\"no_container\"}");
+}
+static void ws_async_clean_stop(void *u)  { (void)u; cleanPopupRemoteStop(); }
+static void ws_async_clean_close(void *u) { (void)u; cleanPopupRemoteClose(); }
+
 /* ── Tune (pump / motor / volume) from the app: mirrors the display popup ── */
 typedef struct { uint8_t kind; uint8_t percent; bool on; } ws_tune_arg_t;
 static void ws_async_tune_test(void *user_data) {
@@ -624,6 +636,24 @@ static int build_state_json(char *buf, int bufsize) {
         "\"loadToolPulses\":%u,"
         "\"loadToolExpected\":%u,"
         "\"loadToolServo\":%s,"
+        /* Drain machine (Tools → Drain); state codes DRAIN_TOOL_* from FilMachine.h */
+        "\"drainToolState\":%d,"
+        "\"drainToolTank\":%d,"
+        "\"drainToolLevelPct\":%d,"
+        "\"drainToolRemaining\":%lu,"
+        /* Clean machine (Tools → Clean); state codes CLEAN_TOOL_* from FilMachine.h */
+        "\"cleanToolState\":%d,"
+        "\"cleanToolContainer\":%d,"
+        "\"cleanToolCycle\":%d,"
+        "\"cleanToolCycles\":%d,"
+        "\"cleanToolFilling\":%s,"
+        "\"cleanToolPct\":%d,"
+        "\"cleanToolRemaining\":%lu,"
+        "\"cleanToolMask\":%u,"
+        "\"cleanToolDrainWb\":%s,"
+        /* Export (Tools → Export): exportSeq changes after every attempt */
+        "\"exportSeq\":%u,"
+        "\"exportOk\":%s,"
         /* Device info */
         "\"fwVersion\":\"%s\","
         "\"serialNumber\":\"%s\""
@@ -713,6 +743,21 @@ static int build_state_json(char *buf, int bufsize) {
         (unsigned)filmLoaderPulses(),
         (unsigned)filmLoaderExpectedPulses(),
         filmLoaderServoActive() ? "true" : "false",
+        drainToolState(),
+        drainToolTank(),
+        drainToolLevelPct(),
+        (unsigned long)drainToolRemainingSecs(),
+        cleanToolState(),
+        cleanToolContainer(),
+        cleanToolCycle(),
+        cleanToolCycles(),
+        cleanToolFilling() ? "true" : "false",
+        cleanToolPercent(),
+        (unsigned long)cleanToolRemainingSecs(),
+        (unsigned)cleanToolMask(),
+        cleanToolDrainWb() ? "true" : "false",
+        (unsigned)g_exportSeq,
+        g_exportOk ? "true" : "false",
         ota_get_running_version(),   /* same source as Splash and Tools (version.txt), not the fixed macro */
         softwareSerialNumValue_text
     );
@@ -999,6 +1044,11 @@ static void ws_handle_command(const char *msg, int len) {
             LV_LOG_WARN("[WS] start_process rejected: film loading in progress");
             return;
         }
+        if (maintenanceBusy()) {     /* a fill, drain or clean is moving liquids */
+            ws_broadcast_event("start_rejected", "{\"reason\":\"maintenance\"}");
+            LV_LOG_WARN("[WS] start_process rejected: maintenance in progress");
+            return;
+        }
         const char *idx_str = strstr(msg, "\"index\":");
         if (idx_str) {
             int index = atoi(idx_str + 8);
@@ -1072,6 +1122,59 @@ static void ws_handle_command(const char *msg, int len) {
         }
         if (strstr(msg, "\"cutter_cycle\"")) filmLoaderCutterCycle();
         else filmLoaderCutterTest((uint8_t)ws_json_get_int(msg, "angle", 0));
+        return;
+    }
+
+    /* ── drain_start / drain_stop / drain_close: Tools → Drain machine ──
+     * Drains C1, C2, C3 and the water bath to waste (no confirm page: the app
+     * asks). Progress in the drainTool* fields; close = Close button after the
+     * end (alarm off, popup closed). */
+    if (strstr(msg, "\"drain_start\"") || strstr(msg, "\"clean_start\"")) {
+        bool isDrain = strstr(msg, "\"drain_start\"") != NULL;
+        const char *ev = isDrain ? "drain_rejected" : "clean_rejected";
+        sCheckupData *ck = find_active_checkup();
+        if (ck && ck->isProcessing) {
+            ws_broadcast_event(ev, "{\"reason\":\"processing\"}");
+            LV_LOG_WARN("[WS] %s: process running", ev);
+            return;
+        }
+        if (maintenanceBusy()) {
+            ws_broadcast_event(ev, "{\"reason\":\"busy\"}");
+            LV_LOG_WARN("[WS] %s: another maintenance tool is running", ev);
+            return;
+        }
+        if (isDrain) {
+            ws_queue_lvgl_action(ws_async_drain_start, NULL);
+            LV_LOG_USER("[WS] drain_start queued");
+        } else {
+            /* {"cmd":"clean_start","mask":1..7,"cycles":1..5,"drainWb":true|false}
+             * mask: bit0 C1, bit1 C2, bit2 C3 */
+            int mask   = ws_json_get_int(msg, "mask", 0) & 0x07;
+            int cycles = ws_json_get_int(msg, "cycles", 1);
+            bool wb    = ws_json_get_bool(msg, "drainWb", false);
+            if (mask == 0) {
+                ws_broadcast_event(ev, "{\"reason\":\"no_container\"}");
+                return;
+            }
+            if (cycles < CLEAN_CYCLES_MIN) cycles = CLEAN_CYCLES_MIN;
+            if (cycles > CLEAN_CYCLES_MAX) cycles = CLEAN_CYCLES_MAX;
+            uint32_t packed = (uint32_t)mask | ((uint32_t)cycles << 8) | ((wb ? 1u : 0u) << 16);
+            ws_queue_lvgl_action(ws_async_clean_start, (void *)(uintptr_t)packed);
+            LV_LOG_USER("[WS] clean_start mask=%d cycles=%d drainWb=%d queued", mask, cycles, wb);
+        }
+        return;
+    }
+    if (strstr(msg, "\"drain_stop\""))  { ws_queue_lvgl_action(ws_async_drain_stop, NULL);  return; }
+    if (strstr(msg, "\"drain_close\"")) { ws_queue_lvgl_action(ws_async_drain_close, NULL); return; }
+    if (strstr(msg, "\"clean_stop\""))  { ws_queue_lvgl_action(ws_async_clean_stop, NULL);  return; }
+    if (strstr(msg, "\"clean_close\"")) { ws_queue_lvgl_action(ws_async_clean_close, NULL); return; }
+
+    /* ── export_config: Tools → Export (config + processes → backup file on SD) ──
+     * Runs on the system task like the display's Export; the result arrives
+     * as exportSeq/exportOk in the state broadcast. */
+    if (strstr(msg, "\"export_config\"")) {
+        qSysAction(EXPORT_CFG);
+        LV_LOG_USER("[WS] export_config queued");
         return;
     }
 
@@ -1332,6 +1435,8 @@ void ws_broadcast_event(const char *event_name, const char *json_data) {
 }
 
 #else /* POSIX simulator (macOS / Linux) */
+
+static char s_lastEvent[48];   /* name of the last ws_broadcast_event (test hook) */
 
 /* Simulator: lv_async_call is safe (single-threaded SDL event loop) */
 static void ws_queue_lvgl_action(void (*fn)(void *), void *arg) {
@@ -1810,10 +1915,20 @@ void ws_broadcast_event(const char *event_name, const char *json_data) {
             event_name);
     }
     sim_send_all(buf, n);
+    snprintf(s_lastEvent, sizeof(s_lastEvent), "%s", event_name ? event_name : "");
 }
 
 
 #endif /* _WIN32 vs POSIX simulator */
+
+/* ── Test hooks (simulator only): feed a command as if it came from the app,
+ *    read the state JSON, and the name of the last broadcast event. ── */
+void ws_debug_handle_command(const char *msg) {
+    s_lastEvent[0] = '\0';
+    ws_handle_command(msg, (int)strlen(msg));
+}
+int ws_debug_build_state(char *buf, int bufsize) { return build_state_json(buf, bufsize); }
+const char *ws_debug_last_event(void) { return s_lastEvent; }
 
 /* ═══════════════════════════════════════════════════════════════════
  *  FIRMWARE BUILD — real ESP-IDF httpd WebSocket server

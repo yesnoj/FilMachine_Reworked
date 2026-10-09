@@ -4,14 +4,14 @@
  * Tests the write/read cycle of the configuration file (FatFS stub → sd/FilMachine.cfg).
  * Verifies that processes, steps, and settings survive a save/load round-trip.
  *
- * IMPORTANT: These tests use emptyList() instead of deleteProcessElement() to
- * clear the process list.  deleteProcessElement() calls lv_obj_delete() on the
- * processElement LVGL object, which is NULL for nodes created by readConfigFile
- * or test_generate_data (they have no UI).  lv_obj_delete(NULL) dereferences a
- * NULL pointer (LVGL 9 has no NULL guard), causing a segfault.
- *
- * emptyList() frees nodes via process_node_destroy() which only touches data,
- * styles, and timers — never LVGL widget objects.
+ * The process list is cleared with emptyList(), which frees the nodes but
+ * never touches LVGL widgets. When this suite runs after the others, the
+ * Processes page already shows a card for every node, and each card uses the
+ * style stored inside its node (process.processStyle). So the cards must be
+ * deleted BEFORE the nodes are freed, exactly as the firmware does in "Delete
+ * all" (lv_obj_clean of the list, then emptyList) — otherwise the next redraw
+ * reads freed memory (heap-use-after-free, seen with AddressSanitizer as a
+ * random crash in a later suite). See safe_clear_and_reload().
  */
 
 #include "test_runner.h"
@@ -28,12 +28,20 @@
  * readConfigFile() resets list pointers (start=NULL, end=NULL, size=0) BEFORE
  * reading, which leaks any existing nodes.  We call emptyList() first to
  * properly free the old nodes and avoid heap leaks.
+ *
+ * Same order as the firmware ("Delete all", WebSocket delete): first delete
+ * the process cards (they use the style inside their node), then free the
+ * nodes, then rebuild the cards for the reloaded list so the Processes page
+ * stays consistent for the suites that run after this one.
  * ═══════════════════════════════════════════════ */
 static void safe_clear_and_reload(const char *path)
 {
     processList *list = &gui.page.processes.processElementsList;
+    lv_obj_t *cards = gui.page.processes.processesListContainer;
+    if (cards != NULL) lv_obj_clean(cards);
     emptyList(list, PROCESS_NODE);
     readConfigFile(path, false);
+    if (cards != NULL) loadSDCardProcesses();
 }
 
 

@@ -50,6 +50,7 @@ static void drain_timer_cb(lv_timer_t *timer) {
         cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
         safeTimerDelete(&dp->drainTimer);
         dp->isDraining = false;
+        dp->result = DRAIN_TOOL_STOPPED;
 
         ESP_LOGW(TAG, "Drain STOPPED by user");
 #if defined(DISPLAY_DRIVER_ST7701)
@@ -112,6 +113,7 @@ static void drain_timer_cb(lv_timer_t *timer) {
             /* ── All tanks done ── */
             safeTimerDelete(&dp->drainTimer);
             dp->isDraining = false;
+            dp->result = DRAIN_TOOL_DONE;
 
             lv_label_set_text(dp->drainStatusLabel, drainComplete_text);
             lv_obj_set_style_text_color(dp->drainStatusLabel,
@@ -169,6 +171,7 @@ static void drain_reset(void) {
     dp->totalElapsed  = 0;
     dp->isDraining    = false;
     dp->stopNowPressed = false;
+    dp->result        = 0;
 
     lv_label_set_text(dp->drainStatusLabel, "");
     lv_obj_set_style_text_color(dp->drainStatusLabel,
@@ -202,6 +205,7 @@ static void drain_start(void) {
     dp->totalElapsed   = 0;
     dp->isDraining     = true;
     dp->stopNowPressed = false;
+    dp->result         = 0;
 
     /* Switch view */
     lv_obj_add_flag(dp->drainConfirmContainer, LV_OBJ_FLAG_HIDDEN);
@@ -236,6 +240,64 @@ static void drain_start(void) {
 
     /* Create 1-second timer */
     dp->drainTimer = lv_timer_create(drain_timer_cb, 1000, NULL);
+}
+
+/* ══════════════════════════════════════════════════════════
+ *  STATE FOR THE APP  +  REMOTE CONTROL (WebSocket)
+ *  The app drives the same popup the user sees: Start opens it and
+ *  runs (the app has its own confirmation), Stop and Close press the
+ *  popup's buttons.
+ * ══════════════════════════════════════════════════════════ */
+int drainToolState(void) {
+    struct sDrainPopup *dp = &gui.element.drainPopup;
+    if (dp->isDraining) return DRAIN_TOOL_RUNNING;
+    return dp->result;   /* DONE / STOPPED until closed, else IDLE */
+}
+
+bool drainToolBusy(void) { return gui.element.drainPopup.isDraining; }
+
+int drainToolTank(void) {
+    uint8_t t = gui.element.drainPopup.currentTank;
+    return t < NUM_TANKS ? t : NUM_TANKS - 1;
+}
+
+int drainToolLevelPct(void) {
+    struct sDrainPopup *dp = &gui.element.drainPopup;
+    if (dp->result == DRAIN_TOOL_DONE) return 0;
+    if (!dp->isDraining) return 100;
+    int32_t tt = getTankTime(drainToolTank());
+    if (tt <= 0) return 0;
+    int32_t pct = ((tt - dp->tankElapsed) * 100) / tt;
+    return pct < 0 ? 0 : (pct > 100 ? 100 : (int)pct);
+}
+
+uint32_t drainToolRemainingSecs(void) {
+    struct sDrainPopup *dp = &gui.element.drainPopup;
+    if (!dp->isDraining) return 0;
+    int32_t rem = totalDrainTime() - dp->totalElapsed;
+    return rem > 0 ? (uint32_t)rem : 0;
+}
+
+void drainPopupRemoteStart(void) {
+    struct sDrainPopup *dp = &gui.element.drainPopup;
+    if (dp->isDraining) return;
+    if (dp->drainPopupParent == NULL) drainPopupCreate();
+    if (dp->drainPopupParent == NULL) return;
+    drain_reset();                                         /* clean slate, as when opened from Tools */
+    lv_obj_remove_flag(dp->drainPopupParent, LV_OBJ_FLAG_HIDDEN);
+    drain_start();
+}
+
+void drainPopupRemoteStop(void) {
+    struct sDrainPopup *dp = &gui.element.drainPopup;
+    if (dp->isDraining) dp->stopNowPressed = true;         /* = Stop button */
+}
+
+void drainPopupRemoteClose(void) {
+    struct sDrainPopup *dp = &gui.element.drainPopup;
+    if (dp->drainPopupParent == NULL || dp->isDraining) return;
+    drain_reset();                                         /* = Close button: alarm off */
+    lv_obj_add_flag(dp->drainPopupParent, LV_OBJ_FLAG_HIDDEN);
 }
 
 /* ══════════════════════════════════════════════════════════

@@ -25,9 +25,11 @@
  *  { "cmd": "edit_process",   "index": <n>, "data": { ... } }
  *  { "cmd": "delete_process", "index": <n> }
  *  { "cmd": "duplicate_process", "index": <n> }
- *  { "cmd": "run_cleaning",   "tanks": [0,1,2], "cycles": <n>, "drain": <bool> }
- *  { "cmd": "run_drain" }
- *  { "cmd": "run_selfcheck" }
+ *  { "cmd": "clean_start", "mask": <1..7 bit0 C1 bit1 C2 bit2 C3>, "cycles": <1..5>, "drainWb": <bool> }
+ *  { "cmd": "clean_stop" }   { "cmd": "clean_close" }
+ *  { "cmd": "drain_start" }  { "cmd": "drain_stop" }   { "cmd": "drain_close" }
+ *  { "cmd": "export_config" }
+ *  (fill_*, load_*, cutter_*, tune_* and the process commands: see ws_server.c)
  *  { "cmd": "wifi_scan" }
  */
 
@@ -83,6 +85,13 @@ void ws_broadcast_process_list(void);
  * Example: ws_broadcast_event("alarm", "{\"active\":true}");
  */
 void ws_broadcast_event(const char *event_name, const char *json_data);
+
+#if defined(SIMULATOR_BUILD) && !defined(_WIN32)
+/* Test hooks (simulator only) */
+void        ws_debug_handle_command(const char *msg);   /* as if sent by the app */
+int         ws_debug_build_state(char *buf, int bufsize);
+const char *ws_debug_last_event(void);                  /* "" if none since the last command */
+#endif
 
 /* ── Default port ── */
 #define WS_SERVER_PORT 81

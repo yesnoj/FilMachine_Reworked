@@ -302,6 +302,7 @@ int main(int argc, char *argv[])
     RUN_SUITE(test_suite_websocket);
     RUN_SUITE(test_suite_live_sync);
     RUN_SUITE(test_suite_film_loader);
+    RUN_SUITE(test_suite_maintenance_remote);
 #undef RUN_SUITE
 
     /* ── Summary ── */
