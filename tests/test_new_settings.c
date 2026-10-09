@@ -26,7 +26,7 @@ static void go_to_settings(void)
  * ═══════════════════════════════════════════════ */
 static void test_settings_pump_speed_exists(void)
 {
-    TEST_BEGIN("Settings — pump speed slider exists");
+    TEST_BEGIN("Settings — pump speed TUNE row exists");
 
     go_to_settings();
 
@@ -34,16 +34,15 @@ static void test_settings_pump_speed_exists(void)
                          "pump speed container should exist");
     TEST_ASSERT_NOT_NULL(gui.page.settings.pumpSpeedLabel,
                          "pump speed label should exist");
-    TEST_ASSERT_NOT_NULL(gui.page.settings.pumpSpeedSlider,
-                         "pump speed slider should exist");
+    TEST_ASSERT_NOT_NULL(gui.page.settings.pumpSpeedTuneButton,
+                         "pump speed TUNE button should exist (the slider was replaced by the speed popup)");
     TEST_ASSERT_NOT_NULL(gui.page.settings.pumpSpeedValueLabel,
                          "pump speed value label should exist");
 
     const char *label = lv_label_get_text(gui.page.settings.pumpSpeedLabel);
     TEST_ASSERT_STR_EQ(label, pumpSpeed_text, "label should say 'Pump speed'");
 
-    int32_t val = lv_slider_get_value(gui.page.settings.pumpSpeedSlider);
-    test_printf("         [INFO] Pump speed slider value: %d\n", (int)val);
+    test_printf("         [INFO] Pump speed shown: %s\n", lv_label_get_text(gui.page.settings.pumpSpeedValueLabel));
 
     TEST_END();
 }

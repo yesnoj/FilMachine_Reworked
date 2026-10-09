@@ -179,7 +179,8 @@ static void test_board_constants(void)
     TEST_ASSERT_EQ(LVGL_BUF_SIZE, expected_buf, "LVGL_BUF_SIZE formula check");
 
     /* Relay count */
-    TEST_ASSERT_EQ(RELAY_NUMBER, 8, "RELAY_NUMBER should be 8");
+    /* Valves on MCP23017 port A: C1, C2, C3, WB, WASTE (was 8 relays) */
+    TEST_ASSERT_EQ(RELAY_NUMBER, 5, "RELAY_NUMBER should be 5");
 
     test_printf("         [INFO] Board: %dx%d, buf=%d, relays=%d\n",
                 LCD_H_RES, LCD_V_RES, LVGL_BUF_SIZE, RELAY_NUMBER);

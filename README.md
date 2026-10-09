@@ -181,7 +181,7 @@ FilMachine_Reworked/
 │
 ├── lvgl/                          # LVGL 9.5.0 library (auto-cloned on first build, gitignored)
 ├── lvgl_config/
-│   └── lv_conf.h                  # LVGL configuration (RGB565, 256KB heap, dark theme)
+│   └── lv_conf.h                  # LVGL configuration (RGB565, C-library malloc as on the board, dark theme)
 │
 ├── boards/                        # Board-specific hardware definitions
 │   ├── board.h                    #   Board selector (includes correct board header)
@@ -413,6 +413,12 @@ Results are displayed in the terminal and saved to `test_results/test_results_YY
 
 The persistence tests verify that every field (process name, temperature, tolerance, film type, preferred flag, step names, durations, types, sources, discard flags) survives a full save-and-reload cycle.
 
+**Repeatable runs.** Every run starts from the same data: the runner generates three test processes with the default settings and rewrites `sd/FilMachine.json` in the run directory, so a run never depends on what the previous one saved (steps used to pile up on the first process until the 30-step limit made the step tests fail). `FM_TEST_ONLY=<suite>,<suite>` runs only some suites (names after `test_suite_`, e.g. `FM_TEST_ONLY=navigation,tools`).
+
+**Timers run on real time.** The SDL display makes LVGL read the real clock, so `test_pump()` processes events but does not advance LVGL timers; tests that wait for a 1 s timer sleep (see `pump_real()` in `test_maintenance_remote.c`).
+
+**Memory.** The simulator and the tests use the C-library `malloc` for LVGL, like the board. With LVGL's own 256 KB pool the heap fragmented after a few suites, an allocation failed and LVGL's malloc assert spun forever, which looked like random hangs in the step tests. To check memory errors, build the runner with `-fsanitize=address`: AddressSanitizer then sees LVGL's allocations too.
+
 ---
 
 ## WebSocket Server & Remote Control
@@ -453,6 +459,8 @@ All commands use JSON format: `{"cmd":"command_name", ...params}`.
 | `load_cut` | — | Cut now, without waiting for the reel to stop |
 | `cutter_test` | `angle` (0–180) | Hold the cutter servo at that angle for a few seconds (setup) |
 | `cutter_cycle` | — | One blade up/down cycle, motor off |
+
+The `cleanTool*` state fields include `cleanToolProcessArc`, `cleanToolCycleArc` and `cleanToolPumpArc`: the values of the three arcs exactly as drawn on the display's Clean popup, so the app draws the same picture.
 
 **`set_setting` keys** — `tempUnit`, `waterInlet`, `tempCalibOffset`, `chemCalibOffset`, `filmRotationSpeed`, `rotationInterval`, `random`, `persistentAlarm`, `autostart`, `drainFillOverlap`, `multiRinseTime`, `lineRinseEnabled`, `lineRinseTime`, `tankSize`, `pumpSpeed`, `chemCalibFillSecs`, `wbCalibFillSecs`, `chemistryVolume`, `invertPump`, `brightness`, `volume`, `splashDefault`, `splashRandom`, `splashPalette`, `splashShapeStyle`, `splashComplexity`, `language` (0=EN, 1=IT — applied at next boot), `screenOffMins` (5/10/30, 0=never), `wifiEnabled`, `loadSpeed` (reel motor % while loading), `cutterRestUs` / `cutterCutUs` (servo pulse in µs at rest and at the top of the cut). All of these are also included in the broadcast state JSON.
 

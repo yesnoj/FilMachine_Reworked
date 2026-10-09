@@ -192,6 +192,23 @@ static bool suite_selected(const char *list, const char *fn)
     return false;
 }
 
+/* LVGL heap after each suite, when LVGL uses its own pool (LV_STDLIB_BUILTIN
+ * in lvgl_config/lv_conf.h): when the pool runs out, LVGL's malloc assert
+ * spins forever and a test looks hung. With LV_STDLIB_CLIB (as on the board)
+ * there is nothing to print. */
+static void test_print_lvgl_mem(const char *suite)
+{
+#if LV_USE_STDLIB_MALLOC == LV_STDLIB_BUILTIN
+    lv_mem_monitor_t m;
+    lv_mem_monitor(&m);
+    test_printf("         [MEM] after %s: used %u%% (%lu of %lu bytes), biggest free block %lu, frag %u%%\n",
+                suite, (unsigned)m.used_pct, (unsigned long)(m.total_size - m.free_size),
+                (unsigned long)m.total_size, (unsigned long)m.free_biggest_size, (unsigned)m.frag_pct);
+#else
+    (void)suite;
+#endif
+}
+
 int main(int argc, char *argv[])
 {
     /* Build log filename with timestamp in dedicated test_results/ directory.
@@ -258,17 +275,14 @@ int main(int argc, char *argv[])
     lv_obj_t *splash = splash_screen_create();
     lv_scr_load(splash);
 
-    /* Load saved configuration */
-    readConfigFile(FILENAME_SAVE, false);
-
-    /* If no processes loaded (missing sd/FilMachine.cfg), generate test data */
-    if (gui.page.processes.processElementsList.size == 0) {
-        test_printf("[TEST] No config file found — generating test data\n");
-        test_generate_data();
-    } else {
-        test_printf("[TEST] Loaded %d processes from config\n",
-                    (int)gui.page.processes.processElementsList.size);
-    }
+    /* Always start from the same data: the 3 generated test processes and
+     * the default settings. Loading sd/FilMachine.json made every run depend
+     * on the previous ones: the step tests add steps to the first process and
+     * the file is saved, so after a few runs it reached MAX_STEP_ELEMENTS (30)
+     * and "add a step" failed at random. The file is rewritten too, because
+     * the splash Play button (navigation suite) reloads it. */
+    test_generate_data();
+    writeConfigFile(FILENAME_SAVE, false);
 
     test_printf("[TEST] Setup complete — running test suites\n\n");
 
@@ -281,7 +295,7 @@ int main(int argc, char *argv[])
      * after "test_suite_" (e.g. FM_TEST_ONLY=navigation,tools,film_loader).
      * Unset = run everything. */
     const char *only = getenv("FM_TEST_ONLY");
-#define RUN_SUITE(fn) do { if (suite_selected(only, #fn)) fn(); } while (0)
+#define RUN_SUITE(fn) do { if (suite_selected(only, #fn)) { fn(); test_print_lvgl_mem(#fn); } } while (0)
     RUN_SUITE(test_suite_navigation);
     RUN_SUITE(test_suite_processes);
     RUN_SUITE(test_suite_process_crud);

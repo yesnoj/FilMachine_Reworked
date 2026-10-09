@@ -51,6 +51,17 @@ static int8_t previousStepDirection = 0;
 
 static bool isWasting = false;
 
+/* The three arcs as shown on the display (process, cycle, pump step), kept
+ * here so the app draws exactly the same thing (cleanTool*Arc). */
+static uint8_t s_arcProcess, s_arcCycle, s_arcPump;
+static void clean_set_arc(lv_obj_t *arc, uint8_t *mirror, int value)
+{
+    if (value < 0) value = 0;
+    if (value > 100) value = 100;
+    *mirror = (uint8_t)value;
+    lv_arc_set_value(arc, value);
+}
+
 #define CLEAN_CONTAINERS 3   /* C1..C3 (processSourceList also has WB, never cleaned here) */
 
 static uint32_t clean_total_secs(void) {
@@ -120,9 +131,9 @@ static void resetStuffBeforeNextProcess(){
     lv_obj_clear_flag(gui.element.cleanPopup.cleanNowStepLabelValue, LV_OBJ_FLAG_HIDDEN);
     lv_label_set_text(gui.element.cleanPopup.cleanNowStepLabelValue,cleanFilling_text);
 
-    lv_arc_set_value(gui.element.cleanPopup.cleanProcessArc, 0);
-    lv_arc_set_value(gui.element.cleanPopup.cleanCycleArc, 0);
-    lv_arc_set_value(gui.element.cleanPopup.cleanPumpArc, 0);
+    clean_set_arc(gui.element.cleanPopup.cleanProcessArc, &s_arcProcess, 0);
+    clean_set_arc(gui.element.cleanPopup.cleanCycleArc, &s_arcCycle, 0);
+    clean_set_arc(gui.element.cleanPopup.cleanPumpArc, &s_arcPump, 0);
 
     cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
 }
@@ -172,7 +183,7 @@ void cleanWasteTimer(lv_timer_t * timer) {
     lv_obj_add_flag(cp->cleanNowCleaningValue, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_state(cp->cleanStopButton, LV_STATE_DISABLED);
     lv_obj_clear_flag(cp->cleanNowStepLabelValue, LV_OBJ_FLAG_HIDDEN);
-    lv_arc_set_value(cp->cleanPumpArc, stepPercentage);
+    clean_set_arc(cp->cleanPumpArc, &s_arcPump, stepPercentage);
 
     /* Run cleanRelayManager only once at the start */
     if (!isWasting) {
@@ -199,8 +210,8 @@ static void clean_sequence_done(void) {
     qSysAction(SAVE_MACHINE_STATS);
 
     processPercentage = 100;
-    lv_arc_set_value(cp->cleanProcessArc, 100);
-    lv_arc_set_value(cp->cleanCycleArc, 100);
+    clean_set_arc(cp->cleanProcessArc, &s_arcProcess, 100);
+    clean_set_arc(cp->cleanCycleArc, &s_arcCycle, 100);
     lv_label_set_text_fmt(cp->cleanRemainingTimeValue, "%dm%ds", 0, 0);
 
     if (cp->cleanDrainWater) {
@@ -230,7 +241,7 @@ void cleanPumpTimer(lv_timer_t * timer) {
             secondsStepElapsed = left % 60;
             stepPercentage = (int16_t)((left * 100) / fillTime);
             if (stepPercentage > 100) stepPercentage = 100;
-            lv_arc_set_value(cp->cleanPumpArc, stepPercentage);
+            clean_set_arc(cp->cleanPumpArc, &s_arcPump, stepPercentage);
             lv_label_set_text(cp->cleanNowStepLabelValue, cleanDraining_text);
             return;
         }
@@ -283,9 +294,9 @@ void cleanPumpTimer(lv_timer_t * timer) {
     uint32_t remaining = procEl < total ? total - procEl : 0;
 
     /* Arcs and labels */
-    lv_arc_set_value(cp->cleanPumpArc, (cp->stepDirection == 1) ? stepPercentage : 100 - stepPercentage);
-    lv_arc_set_value(cp->cleanCycleArc, cyclePercentage);
-    lv_arc_set_value(cp->cleanProcessArc, processPercentage);
+    clean_set_arc(cp->cleanPumpArc, &s_arcPump, (cp->stepDirection == 1) ? stepPercentage : 100 - stepPercentage);
+    clean_set_arc(cp->cleanCycleArc, &s_arcCycle, cyclePercentage);
+    clean_set_arc(cp->cleanProcessArc, &s_arcProcess, processPercentage);
     lv_label_set_text_fmt(cp->cleanRemainingTimeValue, "%dm%ds", (int)(remaining / 60), (int)(remaining % 60));
     lv_label_set_text_fmt(cp->cleanNowCleaningValue, cleanCycleFmt_text, tmp_processSourceList[containerIndex], currentCycle);
 
@@ -301,12 +312,12 @@ void cleanPumpTimer(lv_timer_t * timer) {
                 currentCycle = 1;
                 minutesCycleElapsed = 0;
                 secondsCycleElapsed = 0;
-                containerIndex = clean_next_container(containerIndex + 1);
-                if (containerIndex >= CLEAN_CONTAINERS) {
-                    containerIndex = CLEAN_CONTAINERS - 1;
+                uint8_t next = clean_next_container(containerIndex + 1);
+                if (next >= CLEAN_CONTAINERS) {          /* keep the last one cleaned for the app */
                     clean_sequence_done();
                     return;
                 }
+                containerIndex = next;
             }
         }
     }
@@ -481,7 +492,15 @@ int cleanToolState(void) {
 int  cleanToolContainer(void) { return containerIndex < CLEAN_CONTAINERS ? containerIndex : CLEAN_CONTAINERS - 1; }
 int  cleanToolCycle(void)     { return currentCycle; }
 int  cleanToolCycles(void)    { return gui.element.cleanPopup.cleanCycles ? gui.element.cleanPopup.cleanCycles : 1; }
-bool cleanToolFilling(void)   { return gui.element.cleanPopup.stepDirection == 1 && !gui.element.cleanPopup.stopNowPressed; }
+/* Filling only while a container is being filled: not while it is pumped
+ * back after Stop, not while the bath goes to waste, not after the end. */
+bool cleanToolFilling(void)   {
+    const struct sCleanPopup *cp = &gui.element.cleanPopup;
+    return cp->pumpTimer != NULL && cp->stepDirection == 1 && !cp->stopNowPressed;
+}
+int  cleanToolProcessArc(void) { return s_arcProcess; }
+int  cleanToolCycleArc(void)   { return s_arcCycle; }
+int  cleanToolPumpArc(void)    { return s_arcPump; }
 bool cleanToolDrainWb(void)   { return gui.element.cleanPopup.cleanDrainWater; }
 
 int cleanToolPercent(void) {

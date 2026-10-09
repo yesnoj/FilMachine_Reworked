@@ -16,10 +16,16 @@
 /*====================
    MEMORY SETTINGS
  *====================*/
-#define LV_USE_BUILTIN_MALLOC 1
-#define LV_USE_BUILTIN_STRING 1
-#define LV_USE_BUILTIN_SPRINTF 1
-#define LV_MEM_SIZE (256 * 1024)   /* 256KB — PC has plenty of RAM */
+/* Same as the board (sdkconfig: CONFIG_LV_USE_CLIB_MALLOC/STRING/SPRINTF):
+ * LVGL allocates with the C library malloc. The old LVGL-8 names
+ * (LV_USE_BUILTIN_MALLOC...) were ignored by LVGL 9, so the simulator and
+ * the tests ran on LVGL's own 256 KB pool: after a few suites it was
+ * fragmented (biggest free block ~17 KB), an allocation failed and LVGL's
+ * malloc assert spun forever — the "hung" step tests. With malloc the
+ * simulator behaves like the board and AddressSanitizer sees LVGL memory. */
+#define LV_USE_STDLIB_MALLOC  LV_STDLIB_CLIB
+#define LV_USE_STDLIB_STRING  LV_STDLIB_CLIB
+#define LV_USE_STDLIB_SPRINTF LV_STDLIB_CLIB
 
 /*====================
    HAL SETTINGS

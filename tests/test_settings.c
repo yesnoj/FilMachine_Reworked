@@ -37,9 +37,13 @@ static void test_settings_elements_exist(void)
     TEST_ASSERT_NOT_NULL(gui.page.settings.tempUnitFahrenheitRadioButton,
                          "Fahrenheit radio button should exist");
 
+    /* Rotation speed: a TUNE button (speed popup with live test), no slider */
+    TEST_ASSERT_NOT_NULL(gui.page.settings.motorSpeedTuneButton,
+                         "rotation speed TUNE button should exist");
+    TEST_ASSERT_NOT_NULL(gui.page.settings.filmRotationSpeedValueLabel,
+                         "rotation speed value label should exist");
+
     /* Sliders */
-    TEST_ASSERT_NOT_NULL(gui.page.settings.filmRotationSpeedSlider,
-                         "rotation speed slider should exist");
     TEST_ASSERT_NOT_NULL(gui.page.settings.filmRotationInversionIntervalSlider,
                          "inversion interval slider should exist");
     TEST_ASSERT_NOT_NULL(gui.page.settings.filmRandomSlider,
@@ -114,32 +118,30 @@ static void test_change_temp_unit(void)
 /* ── Test 4: Modify slider value ── */
 static void test_modify_slider(void)
 {
-    TEST_BEGIN("Settings — slider value change updates param");
+    /* Rotation speed is set with the TUNE popup (no slider any more): open it
+     * from the button, then SET a value as the app does (tunePopupRemoteSet =
+     * SET on the display). The test used to drive the old slider, which is
+     * NULL now: lv_slider_set_value(NULL) never returned. */
+    TEST_BEGIN("Settings — rotation speed set with the TUNE popup");
 
     struct machineSettings *s = &gui.page.settings.settingsParams;
     uint8_t old_speed = s->filmRotationSpeedSetpoint;
     test_printf("         [INFO] Old rotation speed: %d\n", old_speed);
 
-    /* Set slider to a known value (must be multiple of 10 for rounding) */
-    lv_slider_set_value(gui.page.settings.filmRotationSpeedSlider, 50, LV_ANIM_OFF);
-    test_pump(50);
-
-    /* Trigger the VALUE_CHANGED event — the handler reads the slider value
-     * and updates settingsParams.filmRotationSpeedSetpoint.
-     * User_data for this event is the value label (set during registration). */
-    lv_obj_send_event(gui.page.settings.filmRotationSpeedSlider,
-                      LV_EVENT_VALUE_CHANGED, NULL);
+    test_click_obj(gui.page.settings.motorSpeedTuneButton);
     test_pump(100);
+    TEST_ASSERT_NOT_NULL(gui.element.speedPopup.parent, "TUNE opens the speed popup");
 
+    tunePopupRemoteSet(TUNE_KIND_MOTOR, 50);
+    test_pump(100);
     test_printf("         [INFO] New rotation speed: %d\n", s->filmRotationSpeedSetpoint);
-    TEST_ASSERT_EQ((int)s->filmRotationSpeedSetpoint, 50,
-                   "rotation speed should be 50 after slider change");
+    TEST_ASSERT_EQ((int)s->filmRotationSpeedSetpoint, 50, "rotation speed should be 50 after SET");
+    TEST_ASSERT_NULL(gui.element.speedPopup.parent, "SET closes the popup");
 
     /* Restore original value */
-    lv_slider_set_value(gui.page.settings.filmRotationSpeedSlider, old_speed, LV_ANIM_OFF);
-    lv_obj_send_event(gui.page.settings.filmRotationSpeedSlider,
-                      LV_EVENT_VALUE_CHANGED, NULL);
+    tunePopupRemoteSet(TUNE_KIND_MOTOR, old_speed);
     test_pump(100);
+    TEST_ASSERT_EQ((int)s->filmRotationSpeedSetpoint, (int)old_speed, "restored");
 
     TEST_END();
 }

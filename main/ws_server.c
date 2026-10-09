@@ -651,6 +651,9 @@ static int build_state_json(char *buf, int bufsize) {
         "\"cleanToolRemaining\":%lu,"
         "\"cleanToolMask\":%u,"
         "\"cleanToolDrainWb\":%s,"
+        "\"cleanToolProcessArc\":%d,"
+        "\"cleanToolCycleArc\":%d,"
+        "\"cleanToolPumpArc\":%d,"
         /* Export (Tools → Export): exportSeq changes after every attempt */
         "\"exportSeq\":%u,"
         "\"exportOk\":%s,"
@@ -756,6 +759,9 @@ static int build_state_json(char *buf, int bufsize) {
         (unsigned long)cleanToolRemainingSecs(),
         (unsigned)cleanToolMask(),
         cleanToolDrainWb() ? "true" : "false",
+        cleanToolProcessArc(),
+        cleanToolCycleArc(),
+        cleanToolPumpArc(),
         (unsigned)g_exportSeq,
         g_exportOk ? "true" : "false",
         ota_get_running_version(),   /* same source as Splash and Tools (version.txt), not the fixed macro */

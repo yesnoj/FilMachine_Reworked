@@ -146,12 +146,20 @@ static void test_busy_rejections(void)
 /* ── Clean ─────────────────────────────────────────────── */
 
 static int s_seen[3];
-static bool s_sawWaste;
+static bool s_sawWaste, s_fillingInWaste, s_arcMismatch;
 static bool clean_ended_tracking(void)
 {
     int st = cleanToolState();
     if (st == CLEAN_TOOL_RUNNING) s_seen[cleanToolContainer()]++;
-    if (st == CLEAN_TOOL_WASTE) s_sawWaste = true;
+    if (st == CLEAN_TOOL_WASTE) {
+        s_sawWaste = true;
+        if (cleanToolFilling()) s_fillingInWaste = true;
+    }
+    /* The app draws the arcs from these values: they must be the display's. */
+    struct sCleanPopup *cp = &gui.element.cleanPopup;
+    if (cleanToolProcessArc() != lv_arc_get_value(cp->cleanProcessArc) ||
+        cleanToolCycleArc()   != lv_arc_get_value(cp->cleanCycleArc) ||
+        cleanToolPumpArc()    != lv_arc_get_value(cp->cleanPumpArc)) s_arcMismatch = true;
     return clean_ended();
 }
 
@@ -160,7 +168,7 @@ static void test_clean_only_selected(void)
     TEST_BEGIN("Remote clean — only C2, 1 cycle: never touches C1/C3");
     fast_fill_times();
     memset(s_seen, 0, sizeof(s_seen));
-    s_sawWaste = false;
+    s_sawWaste = s_fillingInWaste = s_arcMismatch = false;
     uint32_t cleans = gui.page.tools.machineStats.clean;
 
     cmd("{\"cmd\":\"clean_start\",\"mask\":2,\"cycles\":1,\"drainWb\":false}");
@@ -177,6 +185,9 @@ static void test_clean_only_selected(void)
     TEST_ASSERT(s_seen[1] > 0, "C2 cleaned");
     TEST_ASSERT(!s_sawWaste, "no bath drain");
     TEST_ASSERT_EQ(cleanToolState(), CLEAN_TOOL_DONE, "DONE");
+    TEST_ASSERT_EQ(cleanToolContainer(), 1, "still reports C2 at the end (was C3)");
+    TEST_ASSERT(!cleanToolFilling(), "not filling after the end");
+    TEST_ASSERT(!s_arcMismatch, "arcs for the app = arcs on the display");
     TEST_ASSERT_EQ(cleanToolPercent(), 100, "100 % when done");
     TEST_ASSERT_EQ(gui.page.tools.machineStats.clean, cleans + 1, "clean cycles statistic +1");
 
@@ -192,7 +203,7 @@ static void test_clean_c1_c3_two_cycles_drain_bath(void)
     TEST_BEGIN("Remote clean — C1 + C3, 2 cycles, then bath to waste");
     fast_fill_times();
     memset(s_seen, 0, sizeof(s_seen));
-    s_sawWaste = false;
+    s_sawWaste = s_fillingInWaste = s_arcMismatch = false;
 
     cmd("{\"cmd\":\"clean_start\",\"mask\":5,\"cycles\":2,\"drainWb\":true}");
     TEST_ASSERT_EQ(cleanToolCycles(), 2, "2 cycles");
@@ -204,6 +215,8 @@ static void test_clean_c1_c3_two_cycles_drain_bath(void)
     TEST_ASSERT(s_seen[0] > 0 && s_seen[2] > 0, "C1 and C3 cleaned");
     TEST_ASSERT_EQ(s_seen[1], 0, "C2 skipped");
     TEST_ASSERT(s_sawWaste, "bath drained to waste at the end");
+    TEST_ASSERT(!s_fillingInWaste, "bath to waste reported as draining, as on the display");
+    TEST_ASSERT(!s_arcMismatch, "arcs for the app = arcs on the display");
     TEST_ASSERT_EQ(cleanToolState(), CLEAN_TOOL_DONE, "DONE");
     cmd("{\"cmd\":\"clean_close\"}");
     restore_fill_times();
@@ -263,7 +276,8 @@ static void test_state_fields(void)
     const char *keys[] = { "drainToolState", "drainToolTank", "drainToolLevelPct", "drainToolRemaining",
                            "cleanToolState", "cleanToolContainer", "cleanToolCycle", "cleanToolCycles",
                            "cleanToolFilling", "cleanToolPct", "cleanToolRemaining", "cleanToolMask",
-                           "cleanToolDrainWb", "exportSeq", "exportOk" };
+                           "cleanToolDrainWb", "cleanToolProcessArc", "cleanToolCycleArc", "cleanToolPumpArc",
+                           "exportSeq", "exportOk" };
     char k[64];
     for (size_t i = 0; i < sizeof(keys) / sizeof(keys[0]); i++) {
         snprintf(k, sizeof(k), "\"%s\":", keys[i]);

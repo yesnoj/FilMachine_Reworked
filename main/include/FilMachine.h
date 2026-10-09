@@ -1857,6 +1857,9 @@ int      cleanToolContainer(void);      /* 0..2 = C1..C3 being cleaned */
 int      cleanToolCycle(void);          /* 1..cycles */
 int      cleanToolCycles(void);
 bool     cleanToolFilling(void);        /* true = filling, false = draining */
+int      cleanToolProcessArc(void);     /* the three arcs exactly as drawn on the display, 0..100: */
+int      cleanToolCycleArc(void);       /*   whole clean (blue), this container's cycles (green), */
+int      cleanToolPumpArc(void);        /*   pump step (orange: fills up, then empties)           */
 int      cleanToolPercent(void);        /* whole clean, 0..100 */
 uint32_t cleanToolRemainingSecs(void);
 uint8_t  cleanToolMask(void);           /* bit0 C1, bit1 C2, bit2 C3 of the current/last run */
