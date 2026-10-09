@@ -817,6 +817,7 @@ void initGlobals( void ) {
   gui.page.settings.settingsParams.lineRinseTime = 10;         /* seconds */
   gui.page.settings.settingsParams.language = LANG_EN;         /* English default */
   gui.page.settings.settingsParams.screenOffMins = 10;        /* screen off after 10 min */
+  filmLoaderApplyDefaults(&gui.page.settings.settingsParams); /* loader speed + cutter servo */
 
   gui.element.rollerPopup.tempCelsiusOptions = createRollerValues(TEMP_ROLLER_MIN,TEMP_ROLLER_MAX,"",false);
   gui.element.rollerPopup.tempFahrenheitOptions = createRollerValues(TEMP_ROLLER_MIN,TEMP_ROLLER_MAX,"",true);
@@ -1205,6 +1206,9 @@ static void jsonApplySettings(struct machineSettings *S, mj_node *sp) {
     S->language                  = (uint8_t) mj_int(mj_get(sp, "language"), LANG_EN);
     lang_set(S->language);   /* apply UI language as soon as settings are known */
     S->screenOffMins             = (uint8_t) mj_int(mj_get(sp, "screenOffMins"), 10);
+    S->loadSpeed                 = (uint8_t) mj_int(mj_get(sp, "loadSpeed"), LOAD_SPEED_DEFAULT);
+    S->cutterRestUs              = (uint16_t) mj_int(mj_get(sp, "cutterRestUs"), LOAD_CUTTER_REST_US_DEFAULT);
+    S->cutterCutUs               = (uint16_t) mj_int(mj_get(sp, "cutterCutUs"), LOAD_CUTTER_CUT_US_DEFAULT);
 }
 
 /* ── Read ONLY the machineSettings block (no processes, no stats).
@@ -1453,11 +1457,15 @@ void writeConfigFile( const char *path, bool enableLog ) {
             "    \"invertPump\": %d,\n"
             "    \"chemCalibOffset\": %d,\n"
             "    \"language\": %u,\n"
-            "    \"screenOffMins\": %u\n"
+            "    \"screenOffMins\": %u,\n"
+            "    \"loadSpeed\": %u,\n"
+            "    \"cutterRestUs\": %u,\n"
+            "    \"cutterCutUs\": %u\n"
             "  },\n",
             escSsid, escPwd, S->brightness, S->volume,
             S->invertPump ? 1 : 0, (int)S->chemCalibOffset,
-            (unsigned)S->language, (unsigned)S->screenOffMins);
+            (unsigned)S->language, (unsigned)S->screenOffMins,
+            (unsigned)S->loadSpeed, (unsigned)S->cutterRestUs, (unsigned)S->cutterCutUs);
         cfgWrite(fp, buf);
 
         /* ── processes[] ── */
@@ -1928,11 +1936,12 @@ static void sensor_log_task(void *arg) {
 
 void sensorsSelfTestInit(void) {
     sensors_hw_init();
+    filmLoaderInit();      /* cutter servo quiet + loader task (uses the Hall counter) */
     xTaskCreate(sensor_log_task, "sensorlog", 3072, NULL, 3, NULL);
     LV_LOG_USER("Sensor live-log started (Hall/water/flow every 500ms)");
 }
 #else
-void sensorsSelfTestInit(void) { sensors_hw_init(); }
+void sensorsSelfTestInit(void) { sensors_hw_init(); filmLoaderInit(); }
 #endif
 
 #else
@@ -2278,6 +2287,14 @@ void hbridge_safe_init(void){
     gpio_set_level(PUMP_IN1_PIN, 0);
     gpio_set_level(PUMP_IN2_PIN, 0);
     gpio_set_level(PUMP_ENA_PIN, 0);
+#if defined(HAS_CUTTER_SERVO) && HAS_CUTTER_SERVO
+    /* Cutter servo signal LOW = no pulses = servo idle until the LEDC takes it over. */
+    gpio_config_t sv = { .pin_bit_mask = 1ULL << CUTTER_SERVO_PIN, .mode = GPIO_MODE_OUTPUT,
+                         .pull_up_en = GPIO_PULLUP_DISABLE, .pull_down_en = GPIO_PULLDOWN_ENABLE,
+                         .intr_type = GPIO_INTR_DISABLE };
+    gpio_config(&sv);
+    gpio_set_level(CUTTER_SERVO_PIN, 0);
+#endif
     LV_LOG_USER("H-bridge pins forced LOW (safe boot state)");
 #endif
 }

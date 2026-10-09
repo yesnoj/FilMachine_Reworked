@@ -85,6 +85,7 @@ else()
 
     set(FILMACHINE_SOURCES
         main/accessories.c
+        main/film_loader.c
         main/lang.c
         main/mini_json.c
         main/ota_update.c
@@ -93,6 +94,7 @@ else()
         drivers/mcp23017.c
         drivers/ds18b20.c
         drivers/sensors.c
+        drivers/servo.c
         c_pages/page_menu.c
         c_pages/page_processes.c
         c_pages/page_processDetail.c
@@ -109,6 +111,7 @@ else()
         c_elements/element_speedPopup.c
         c_elements/element_calibPopup.c
         c_elements/element_fillPopup.c
+        c_elements/element_loadPopup.c
         c_elements/element_cleanPopup.c
         c_elements/element_drainPopup.c
         c_elements/element_selfcheckPopup.c

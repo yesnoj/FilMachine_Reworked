@@ -148,5 +148,6 @@
 #define HALL_SENSOR_PIN             0
 
 #define TEST_PIN                    0
+#define HAS_CUTTER_SERVO            0       /* simulator: servo is simulated in film_loader.c */
 
 #endif /* BOARD_SIMULATOR_H */

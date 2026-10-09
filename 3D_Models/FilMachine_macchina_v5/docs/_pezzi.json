@@ -1,0 +1,684 @@
+[
+ {
+  "nome": "A01_flangia_A",
+  "q": 1,
+  "volume_cm3": 11.6,
+  "ingombro": [
+   93.5,
+   93.5,
+   8.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "A02_flangia_B",
+  "q": 1,
+  "volume_cm3": 11.5,
+  "ingombro": [
+   93.5,
+   93.5,
+   8.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "A03_tubo_baionetta",
+  "q": 1,
+  "volume_cm3": 22.5,
+  "ingombro": [
+   32.0,
+   32.0,
+   97.5
+  ],
+  "note": ""
+ },
+ {
+  "nome": "A04_tamburo",
+  "q": 1,
+  "volume_cm3": 14.3,
+  "ingombro": [
+   44.0,
+   44.0,
+   23.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "A05_anello_alette",
+  "q": 2,
+  "volume_cm3": 13.6,
+  "ingombro": [
+   91.8,
+   91.8,
+   14.8
+  ],
+  "note": ""
+ },
+ {
+  "nome": "A06_anello_alette_variante_B",
+  "q": 0,
+  "volume_cm3": 13.6,
+  "ingombro": [
+   91.8,
+   91.8,
+   14.8
+  ],
+  "note": "facoltativo: alette concordi"
+ },
+ {
+  "nome": "A07_clip_ganascia",
+  "q": 1,
+  "volume_cm3": 0.9,
+  "ingombro": [
+   18.4,
+   4.4,
+   18.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "A08_clip_cursore",
+  "q": 1,
+  "volume_cm3": 0.2,
+  "ingombro": [
+   20.4,
+   4.6,
+   4.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "A09_provino_accoppiamento",
+  "q": 1,
+  "volume_cm3": 10.6,
+  "ingombro": [
+   123.0,
+   39.0,
+   8.0
+  ],
+  "note": "da stampare per primo: sceglie il gioco della baionetta"
+ },
+ {
+  "nome": "B01_corpo_tank",
+  "q": 1,
+  "volume_cm3": 570.7,
+  "ingombro": [
+   182.8,
+   144.3,
+   109.0
+  ],
+  "note": "in piedi, senza supporti"
+ },
+ {
+  "nome": "B02_coperchio_tank",
+  "q": 1,
+  "volume_cm3": 81.2,
+  "ingombro": [
+   175.6,
+   121.8,
+   11.0
+  ],
+  "note": "capovolto"
+ },
+ {
+  "nome": "B03_coperchietto_vano_servo",
+  "q": 1,
+  "volume_cm3": 2.7,
+  "ingombro": [
+   22.3,
+   63.5,
+   2.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "B04_blocco_ponte_DX",
+  "q": 1,
+  "volume_cm3": 12.2,
+  "ingombro": [
+   42.0,
+   36.1,
+   52.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "B05_blocco_ponte_SX",
+  "q": 1,
+  "volume_cm3": 12.2,
+  "ingombro": [
+   42.0,
+   36.1,
+   52.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "B06_tetto_ponte",
+  "q": 1,
+  "volume_cm3": 17.2,
+  "ingombro": [
+   17.0,
+   104.0,
+   11.0
+  ],
+  "note": "capovolto"
+ },
+ {
+  "nome": "B07_portalama",
+  "q": 1,
+  "volume_cm3": 4.7,
+  "ingombro": [
+   25.0,
+   80.0,
+   14.7
+  ],
+  "note": ""
+ },
+ {
+  "nome": "B08_morsetto_lama_DX",
+  "q": 1,
+  "volume_cm3": 0.9,
+  "ingombro": [
+   17.7,
+   35.2,
+   2.9
+  ],
+  "note": ""
+ },
+ {
+  "nome": "B09_morsetto_lama_SX",
+  "q": 1,
+  "volume_cm3": 0.9,
+  "ingombro": [
+   17.7,
+   35.2,
+   2.9
+  ],
+  "note": ""
+ },
+ {
+  "nome": "B10_biella",
+  "q": 1,
+  "volume_cm3": 0.5,
+  "ingombro": [
+   7.0,
+   35.0,
+   3.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "B11_manovella",
+  "q": 1,
+  "volume_cm3": 0.1,
+  "ingombro": [
+   7.2,
+   12.6,
+   3.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "B12_culla_universale",
+  "q": 1,
+  "volume_cm3": 39.4,
+  "ingombro": [
+   32.0,
+   72.0,
+   35.5
+  ],
+  "note": "un solo pezzo per caricatore 135 e rullo 120"
+ },
+ {
+  "nome": "B13_barra_guida",
+  "q": 1,
+  "volume_cm3": 6.1,
+  "ingombro": [
+   8.5,
+   104.0,
+   8.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "B14_slitta_DX",
+  "q": 1,
+  "volume_cm3": 2.5,
+  "ingombro": [
+   73.0,
+   13.7,
+   18.5
+  ],
+  "note": "capovolta"
+ },
+ {
+  "nome": "B15_slitta_SX",
+  "q": 1,
+  "volume_cm3": 2.5,
+  "ingombro": [
+   73.0,
+   13.7,
+   18.5
+  ],
+  "note": "capovolta"
+ },
+ {
+  "nome": "B16_trascinatore",
+  "q": 1,
+  "volume_cm3": 5.6,
+  "ingombro": [
+   31.6,
+   31.4,
+   13.9
+  ],
+  "note": ""
+ },
+ {
+  "nome": "B17_cartuccia_cuscinetti",
+  "q": 1,
+  "volume_cm3": 8.3,
+  "ingombro": [
+   42.0,
+   42.0,
+   24.5
+  ],
+  "note": "supporti solo sotto la flangia"
+ },
+ {
+  "nome": "B18_distanziale_paraolio",
+  "q": 1,
+  "volume_cm3": 0.4,
+  "ingombro": [
+   15.8,
+   15.8,
+   3.7
+  ],
+  "note": ""
+ },
+ {
+  "nome": "B19_distanziale_cuscinetti",
+  "q": 1,
+  "volume_cm3": 0.6,
+  "ingombro": [
+   15.8,
+   15.8,
+   5.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "B20_rasamento_puleggia",
+  "q": 1,
+  "volume_cm3": 0.0,
+  "ingombro": [
+   10.8,
+   10.8,
+   1.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "B21_puleggia_spirale",
+  "q": 1,
+  "volume_cm3": 8.4,
+  "ingombro": [
+   34.0,
+   34.0,
+   19.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "B22_puleggia_motore",
+  "q": 1,
+  "volume_cm3": 6.5,
+  "ingombro": [
+   31.6,
+   31.6,
+   19.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "B23_piastra_motore",
+  "q": 1,
+  "volume_cm3": 8.4,
+  "ingombro": [
+   53.5,
+   47.0,
+   4.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "B24_perno_folle",
+  "q": 1,
+  "volume_cm3": 5.1,
+  "ingombro": [
+   30.0,
+   30.0,
+   22.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "B25_staffa_hall",
+  "q": 1,
+  "volume_cm3": 3.7,
+  "ingombro": [
+   18.5,
+   35.0,
+   19.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "C01_sella_testina",
+  "q": 3,
+  "volume_cm3": 7.9,
+  "ingombro": [
+   40.0,
+   23.5,
+   48.5
+  ],
+  "note": "in piedi sui due blocchetti"
+ },
+ {
+  "nome": "C02_culla_sifone",
+  "q": 3,
+  "volume_cm3": 26.6,
+  "ingombro": [
+   67.6,
+   41.8,
+   22.0
+  ],
+  "note": "col davanti sul piatto: la gola ha il cielo a capanna"
+ },
+ {
+  "nome": "C03_staffa_ganci",
+  "q": 3,
+  "volume_cm3": 7.7,
+  "ingombro": [
+   40.0,
+   68.0,
+   10.0
+  ],
+  "note": "PETG: i due bracci sono molle"
+ },
+ {
+  "nome": "C04_fermo_posteriore",
+  "q": 3,
+  "volume_cm3": 3.6,
+  "ingombro": [
+   40.0,
+   21.0,
+   10.6
+  ],
+  "note": ""
+ },
+ {
+  "nome": "C05_testata_telaio_SX",
+  "q": 1,
+  "volume_cm3": 69.2,
+  "ingombro": [
+   39.5,
+   200.6,
+   38.0
+  ],
+  "note": "capovolta"
+ },
+ {
+  "nome": "C05_testata_telaio_DX",
+  "q": 1,
+  "volume_cm3": 69.2,
+  "ingombro": [
+   39.5,
+   200.6,
+   38.0
+  ],
+  "note": "capovolta"
+ },
+ {
+  "nome": "C06_portasonde",
+  "q": 1,
+  "volume_cm3": 7.1,
+  "ingombro": [
+   19.0,
+   49.0,
+   30.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "C07_collettore",
+  "q": 1,
+  "volume_cm3": 80.2,
+  "ingombro": [
+   190.0,
+   34.5,
+   22.0
+  ],
+  "note": "4 perimetri, riempimento 100 %"
+ },
+ {
+  "nome": "C08_pettine_valvole",
+  "q": 1,
+  "volume_cm3": 60.1,
+  "ingombro": [
+   178.0,
+   100.0,
+   9.1
+  ],
+  "note": ""
+ },
+ {
+  "nome": "C09_staffa_scarichi",
+  "q": 1,
+  "volume_cm3": 27.9,
+  "ingombro": [
+   14.0,
+   45.5,
+   150.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "C10_carter_riscaldatori",
+  "q": 1,
+  "volume_cm3": 19.8,
+  "ingombro": [
+   52.0,
+   90.0,
+   29.5
+  ],
+  "note": ""
+ },
+ {
+  "nome": "D01_piano_cavalletto",
+  "q": 1,
+  "volume_cm3": 189.5,
+  "ingombro": [
+   204.0,
+   189.0,
+   23.5
+  ],
+  "note": "capovolto"
+ },
+ {
+  "nome": "D02_fianco_cavalletto_SX",
+  "q": 1,
+  "volume_cm3": 98.4,
+  "ingombro": [
+   113.0,
+   185.0,
+   18.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "D03_fianco_cavalletto_DX",
+  "q": 1,
+  "volume_cm3": 103.8,
+  "ingombro": [
+   113.0,
+   185.0,
+   18.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "D04_frontale_cavalletto",
+  "q": 1,
+  "volume_cm3": 34.9,
+  "ingombro": [
+   202.0,
+   53.0,
+   4.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "D05_carter_trasmissione",
+  "q": 1,
+  "volume_cm3": 68.0,
+  "ingombro": [
+   42.3,
+   148.0,
+   89.5
+  ],
+  "note": "capovolto"
+ },
+ {
+  "nome": "D06_fianco_elettronica_SX",
+  "q": 1,
+  "volume_cm3": 96.4,
+  "ingombro": [
+   226.0,
+   124.0,
+   15.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "D07_fianco_elettronica_DX",
+  "q": 1,
+  "volume_cm3": 99.4,
+  "ingombro": [
+   226.0,
+   124.0,
+   15.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "D08_frontale_elettronica",
+  "q": 1,
+  "volume_cm3": 87.6,
+  "ingombro": [
+   190.0,
+   163.0,
+   3.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "D09_plancia_display",
+  "q": 1,
+  "volume_cm3": 33.4,
+  "ingombro": [
+   189.4,
+   84.9,
+   6.2
+  ],
+  "note": "faccia esterna sul piatto"
+ },
+ {
+  "nome": "D10_tetto_elettronica",
+  "q": 1,
+  "volume_cm3": 29.1,
+  "ingombro": [
+   190.0,
+   58.0,
+   3.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "D11_paratia_posteriore",
+  "q": 1,
+  "volume_cm3": 126.4,
+  "ingombro": [
+   190.0,
+   226.0,
+   3.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "D12_ripiano_griglia",
+  "q": 3,
+  "volume_cm3": 28.4,
+  "ingombro": [
+   180.0,
+   58.0,
+   3.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "D13_colonnina_bassa",
+  "q": 4,
+  "volume_cm3": 0.5,
+  "ingombro": [
+   9.0,
+   9.0,
+   10.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "D14_colonnina_alta",
+  "q": 8,
+  "volume_cm3": 2.8,
+  "ingombro": [
+   9.0,
+   9.0,
+   52.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "D15_morsetto_scheda",
+  "q": 10,
+  "volume_cm3": 1.3,
+  "ingombro": [
+   15.5,
+   8.7,
+   12.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "D16_zoccolo_alimentatore",
+  "q": 1,
+  "volume_cm3": 28.9,
+  "ingombro": [
+   132.0,
+   63.2,
+   34.0
+  ],
+  "note": ""
+ },
+ {
+  "nome": "D17_linguetta_display",
+  "q": 4,
+  "volume_cm3": 0.4,
+  "ingombro": [
+   17.0,
+   8.0,
+   3.0
+  ],
+  "note": "tengono la scheda display: si possono ruotare"
+ }
+]

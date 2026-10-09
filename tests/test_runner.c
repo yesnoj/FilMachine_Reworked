@@ -176,6 +176,22 @@ void test_generate_data(void)
 /* ═══════════════════════════════════════════════
  * Main — Test Entry Point
  * ═══════════════════════════════════════════════ */
+/* true if `fn` ("test_suite_<name>") is in the comma-separated list (NULL = all). */
+static bool suite_selected(const char *list, const char *fn)
+{
+    if (list == NULL || *list == '\0') return true;
+    const char *name = fn + strlen("test_suite_");
+    size_t n = strlen(name);
+    for (const char *p = list; *p; ) {
+        const char *e = strchr(p, ',');
+        size_t len = e ? (size_t)(e - p) : strlen(p);
+        if (len == n && strncmp(p, name, n) == 0) return true;
+        if (!e) break;
+        p = e + 1;
+    }
+    return false;
+}
+
 int main(int argc, char *argv[])
 {
     /* Build log filename with timestamp in dedicated test_results/ directory.
@@ -261,25 +277,32 @@ int main(int argc, char *argv[])
 
     /* ── Run all test suites ── */
 
-    test_suite_navigation();
-    test_suite_processes();
-    test_suite_process_crud();
-    test_suite_steps();
-    test_suite_step_crud();
-    test_suite_execution();
-    test_suite_persistence();
-    test_suite_settings();
-    test_suite_filter();
-    test_suite_tools();
-    test_suite_new_settings();
-    test_suite_selfcheck();
-    test_suite_ota();
-    test_suite_ui_profile();
-    test_suite_edge_cases();
-    test_suite_utilities();
-    test_suite_destroy_and_lifecycle();
-    test_suite_websocket();
-    test_suite_live_sync();
+    /* FM_TEST_ONLY=<list>: run only the listed suites, comma separated, by the name
+     * after "test_suite_" (e.g. FM_TEST_ONLY=navigation,tools,film_loader).
+     * Unset = run everything. */
+    const char *only = getenv("FM_TEST_ONLY");
+#define RUN_SUITE(fn) do { if (suite_selected(only, #fn)) fn(); } while (0)
+    RUN_SUITE(test_suite_navigation);
+    RUN_SUITE(test_suite_processes);
+    RUN_SUITE(test_suite_process_crud);
+    RUN_SUITE(test_suite_steps);
+    RUN_SUITE(test_suite_step_crud);
+    RUN_SUITE(test_suite_execution);
+    RUN_SUITE(test_suite_persistence);
+    RUN_SUITE(test_suite_settings);
+    RUN_SUITE(test_suite_filter);
+    RUN_SUITE(test_suite_tools);
+    RUN_SUITE(test_suite_new_settings);
+    RUN_SUITE(test_suite_selfcheck);
+    RUN_SUITE(test_suite_ota);
+    RUN_SUITE(test_suite_ui_profile);
+    RUN_SUITE(test_suite_edge_cases);
+    RUN_SUITE(test_suite_utilities);
+    RUN_SUITE(test_suite_destroy_and_lifecycle);
+    RUN_SUITE(test_suite_websocket);
+    RUN_SUITE(test_suite_live_sync);
+    RUN_SUITE(test_suite_film_loader);
+#undef RUN_SUITE
 
     /* ── Summary ── */
     int result = test_summary();

@@ -33,6 +33,10 @@ bool sensors_water_level_max_detected(void);  /* true = water at max level */
 /* ── Hall effect (KY-003 / A3144) ── */
 void sensors_hall_init(void);
 bool sensors_hall_magnet_detected(void);      /* true = motor shaft magnet near */
+/* Pulse counter (falling edge = a magnet arrives, debounced in the ISR). The
+ * reel pulley carries 4 magnets → 4 pulses per reel turn. Used by the film
+ * loader to count turns and to detect when the reel stops. */
+uint32_t sensors_hall_pulse_count(void);      /* monotonic since init */
 
 #ifdef __cplusplus
 }

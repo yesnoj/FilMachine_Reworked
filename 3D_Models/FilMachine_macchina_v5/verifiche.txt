@@ -1,0 +1,319 @@
+== PEZZI DA STAMPARE (orientamento di stampa; ingombro in mm) ==
+A01_flangia_A                    x1  solido ok  STL chiuso ( 12512 triangoli)    11.6 cm3    93.5 x   93.5 x   8.0
+A02_flangia_B                    x1  solido ok  STL chiuso ( 12528 triangoli)    11.5 cm3    93.5 x   93.5 x   8.0
+A03_tubo_baionetta               x1  solido ok  STL chiuso (  3200 triangoli)    22.5 cm3    32.0 x   32.0 x  97.5
+A04_tamburo                      x1  solido ok  STL chiuso (  1828 triangoli)    14.3 cm3    44.0 x   44.0 x  23.0
+A05_anello_alette                x2  solido ok  STL chiuso (  2406 triangoli)    13.6 cm3    91.8 x   91.8 x  14.8
+A06_anello_alette_variante_B     x0  solido ok  STL chiuso (  2406 triangoli)    13.6 cm3    91.8 x   91.8 x  14.8
+A07_clip_ganascia                x1  solido ok  STL chiuso (   372 triangoli)     0.9 cm3    18.4 x    4.4 x  18.0
+A08_clip_cursore                 x1  solido ok  STL chiuso (    32 triangoli)     0.2 cm3    20.4 x    4.6 x   4.0
+A09_provino_accoppiamento        x1  solido ok  STL chiuso (  3556 triangoli)    10.6 cm3   123.0 x   39.0 x   8.0
+B01_corpo_tank                   x1  solido ok  STL chiuso ( 11578 triangoli)   570.7 cm3   182.8 x  144.3 x 109.0
+B02_coperchio_tank               x1  solido ok  STL chiuso (    92 triangoli)    81.2 cm3   175.6 x  121.8 x  11.0
+B03_coperchietto_vano_servo      x1  solido ok  STL chiuso (   708 triangoli)     2.7 cm3    22.3 x   63.5 x   2.0
+B04_blocco_ponte_DX              x1  solido ok  STL chiuso (  1712 triangoli)    12.2 cm3    42.0 x   36.1 x  52.0
+B05_blocco_ponte_SX              x1  solido ok  STL chiuso (  1712 triangoli)    12.2 cm3    42.0 x   36.1 x  52.0
+B06_tetto_ponte                  x1  solido ok  STL chiuso (  2616 triangoli)    17.2 cm3    17.0 x  104.0 x  11.0
+B07_portalama                    x1  solido ok  STL chiuso (  2168 triangoli)     4.7 cm3    25.0 x   80.0 x  14.7
+B08_morsetto_lama_DX             x1  solido ok  STL chiuso (  1376 triangoli)     0.9 cm3    17.7 x   35.2 x   2.9
+B09_morsetto_lama_SX             x1  solido ok  STL chiuso (  1376 triangoli)     0.9 cm3    17.7 x   35.2 x   2.9
+B10_biella                       x1  solido ok  STL chiuso (   708 triangoli)     0.5 cm3     7.0 x   35.0 x   3.0
+B11_manovella                    x1  solido ok  STL chiuso (  1124 triangoli)     0.1 cm3     7.2 x   12.6 x   3.0
+B12_culla_universale             x1  solido ok  STL chiuso (  3628 triangoli)    39.4 cm3    32.0 x   72.0 x  35.5
+B13_barra_guida                  x1  solido ok  STL chiuso (   844 triangoli)     6.1 cm3     8.5 x  104.0 x   8.0
+B14_slitta_DX                    x1  solido ok  STL chiuso (   138 triangoli)     2.5 cm3    73.0 x   13.7 x  18.5
+B15_slitta_SX                    x1  solido ok  STL chiuso (   138 triangoli)     2.5 cm3    73.0 x   13.7 x  18.5
+B16_trascinatore                 x1  solido ok  STL chiuso (  2206 triangoli)     5.6 cm3    31.6 x   31.4 x  13.9
+B17_cartuccia_cuscinetti         x1  solido ok  STL chiuso (  3372 triangoli)     8.3 cm3    42.0 x   42.0 x  24.5
+B18_distanziale_paraolio         x1  solido ok  STL chiuso (   672 triangoli)     0.4 cm3    15.8 x   15.8 x   3.7
+B19_distanziale_cuscinetti       x1  solido ok  STL chiuso (   672 triangoli)     0.6 cm3    15.8 x   15.8 x   5.0
+B20_rasamento_puleggia           x1  solido ok  STL chiuso (   672 triangoli)     0.0 cm3    10.8 x   10.8 x   1.0
+B21_puleggia_spirale             x1  solido ok  STL chiuso (  4210 triangoli)     8.4 cm3    34.0 x   34.0 x  19.0
+B22_puleggia_motore              x1  solido ok  STL chiuso (  2398 triangoli)     6.5 cm3    31.6 x   31.6 x  19.0
+B23_piastra_motore               x1  solido ok  STL chiuso (  3480 triangoli)     8.4 cm3    53.5 x   47.0 x   4.0
+B24_perno_folle                  x1  solido ok  STL chiuso (  1472 triangoli)     5.1 cm3    30.0 x   30.0 x  22.0
+B25_staffa_hall                  x1  solido ok  STL chiuso (   772 triangoli)     3.7 cm3    18.5 x   35.0 x  19.0
+C01_sella_testina                x3  solido ok  STL chiuso (   812 triangoli)     7.9 cm3    40.0 x   23.5 x  48.5
+C02_culla_sifone                 x3  solido ok  STL chiuso (  1554 triangoli)    26.6 cm3    67.6 x   41.8 x  22.0
+C03_staffa_ganci                 x3  solido ok  STL chiuso (  2132 triangoli)     7.7 cm3    40.0 x   68.0 x  10.0
+C04_fermo_posteriore             x3  solido ok  STL chiuso (   708 triangoli)     3.6 cm3    40.0 x   21.0 x  10.6
+C05_testata_telaio_SX            x1  solido ok  STL chiuso (   780 triangoli)    69.2 cm3    39.5 x  200.6 x  38.0
+C05_testata_telaio_DX            x1  solido ok  STL chiuso (   780 triangoli)    69.2 cm3    39.5 x  200.6 x  38.0
+C06_portasonde                   x1  solido ok  STL chiuso (  1372 triangoli)     7.1 cm3    19.0 x   49.0 x  30.0
+C07_collettore                   x1  solido ok  STL chiuso (  9554 triangoli)    80.2 cm3   190.0 x   34.5 x  22.0
+C08_pettine_valvole              x1  solido ok  STL chiuso (  2268 triangoli)    60.1 cm3   178.0 x  100.0 x   9.1
+C09_staffa_scarichi              x1  solido ok  STL chiuso (  1404 triangoli)    27.9 cm3    14.0 x   45.5 x 150.0
+C10_carter_riscaldatori          x1  solido ok  STL chiuso (   744 triangoli)    19.8 cm3    52.0 x   90.0 x  29.5
+D01_piano_cavalletto             x1  solido ok  STL chiuso (  7788 triangoli)   189.5 cm3   204.0 x  189.0 x  23.5
+D02_fianco_cavalletto_SX         x1  solido ok  STL chiuso (  3800 triangoli)    98.4 cm3   113.0 x  185.0 x  18.0
+D03_fianco_cavalletto_DX         x1  solido ok  STL chiuso (  2804 triangoli)   103.8 cm3   113.0 x  185.0 x  18.0
+D04_frontale_cavalletto          x1  solido ok  STL chiuso (  1552 triangoli)    34.9 cm3   202.0 x   53.0 x   4.0
+D05_carter_trasmissione          x1  solido ok  STL chiuso (  1504 triangoli)    68.0 cm3    42.3 x  148.0 x  89.5
+D06_fianco_elettronica_SX        x1  solido ok  STL chiuso (  6892 triangoli)    96.4 cm3   226.0 x  124.0 x  15.0
+D07_fianco_elettronica_DX        x1  solido ok  STL chiuso (  4832 triangoli)    99.4 cm3   226.0 x  124.0 x  15.0
+D08_frontale_elettronica         x1  solido ok  STL chiuso (  2292 triangoli)    87.6 cm3   190.0 x  163.0 x   3.0
+D09_plancia_display              x1  solido ok  STL chiuso (  4112 triangoli)    33.4 cm3   189.4 x   84.9 x   6.2
+D10_tetto_elettronica            x1  solido ok  STL chiuso (  1552 triangoli)    29.1 cm3   190.0 x   58.0 x   3.0
+D11_paratia_posteriore           x1  solido ok  STL chiuso (  2732 triangoli)   126.4 cm3   190.0 x  226.0 x   3.0
+D12_ripiano_griglia              x3  solido ok  STL chiuso ( 36732 triangoli)    28.4 cm3   180.0 x   58.0 x   3.0
+D13_colonnina_bassa              x4  solido ok  STL chiuso (   672 triangoli)     0.5 cm3     9.0 x    9.0 x  10.0
+D14_colonnina_alta               x8  solido ok  STL chiuso (   672 triangoli)     2.8 cm3     9.0 x    9.0 x  52.0
+D15_morsetto_scheda              x10 solido ok  STL chiuso (   376 triangoli)     1.3 cm3    15.5 x    8.7 x  12.0
+D16_zoccolo_alimentatore         x1  solido ok  STL chiuso (  1472 triangoli)    28.9 cm3   132.0 x   63.2 x  34.0
+D17_linguetta_display            x4  solido ok  STL chiuso (   352 triangoli)     0.4 cm3    17.0 x    8.0 x   3.0
+totale: 62 pezzi diversi, 94 da stampare, 2490 cm3 di materiale pieno
+
+== overhang.py ==
+== sbalzi oltre 45 gradi (mm2): totale | di cui orizzontali (ponti o tetti) | quote ==
+   B01_corpo_tank                       1414 |     1074 | z 6.8..85.2
+   B17_cartuccia_cuscinetti             1113 |     1113 | z 14.0..23.7
+   C05_testata_telaio_DX                 451 |      436 | z 19.3..31.8
+   C05_testata_telaio_SX                 451 |      436 | z 19.3..31.8
+   C07_collettore                        374 |      374 | z 16.6..16.6
+   C01_sella_testina                     219 |      115 | z 6.8..13.6
+   D01_piano_cavalletto                  148 |       25 | z 14.0..20.7
+   B22_puleggia_motore                   114 |        1 | z 5.7..15.2
+   B21_puleggia_spirale                  110 |        0 | z 5.7..17.2
+   B14_slitta_DX                         107 |       85 | z 2.4..16.1
+   B15_slitta_SX                         107 |       85 | z 2.4..16.1
+   D02_fianco_cavalletto_SX               92 |        9 | z 9.0..13.1
+   A03_tubo_baionetta                     92 |       87 | z 4.0..97.0
+   C09_staffa_scarichi                    90 |        9 | z 100.5..144.2
+   D06_fianco_elettronica_SX              87 |        9 | z 10.0..11.1
+   D07_fianco_elettronica_DX              87 |        9 | z 10.0..11.1
+   D15_morsetto_scheda                    83 |       63 | z 7.2..7.7
+   B06_tetto_ponte                        78 |       78 | z 3.2..3.2
+   D03_fianco_cavalletto_DX               77 |        8 | z 12.0..13.1
+   B04_blocco_ponte_DX                    71 |       11 | z 10.2..33.5
+   B05_blocco_ponte_SX                    71 |       11 | z 10.2..33.5
+   C08_pettine_valvole                    68 |        7 | z 7.4..7.9
+   B24_perno_folle                        67 |        4 | z 7.0..21.2
+   D05_carter_trasmissione                55 |       55 | z 86.5..86.5
+   B13_barra_guida                        44 |        0 | z 0.3..1.1
+   C04_fermo_posteriore                   36 |        4 | z 5.9..6.4
+   C06_portasonde                         20 |        2 | z 23.7..24.2
+   B25_staffa_hall                        20 |       10 | z 3.0..11.2
+   C10_carter_riscaldatori                19 |        2 | z 8.7..9.3
+   A04_tamburo                            18 |        2 | z 12.2..20.2
+   B08_morsetto_lama_DX                   18 |       18 | z 1.2..1.2
+   B09_morsetto_lama_SX                   18 |       18 | z 1.2..1.2
+   A02_flangia_B                           9 |        9 | z 0.4..0.4
+   B07_portalama                           9 |        1 | z 12.3..12.8
+   A01_flangia_A                           7 |        7 | z 0.4..0.4
+   C02_culla_sifone                        7 |        7 | z 13.1..15.2
+   B16_trascinatore                        5 |        1 | z 3.9..12.6
+   pezzi senza sbalzi: 25 su 62
+
+== check_reel.py ==
+denti: 3 a (0.0, 120.0, 240.0) gradi, chiave 32 gradi (canale 36), gli altri 24 (canale 28)
+flangia A: infilaggio lungo il canale (a -30 gradi), interferenza mm3: [0.0, 0.0, 0.0, 0.0, 0.0]
+   stazione 120: rotazione di blocco -30..0: [0.0, 0.0, 0.0, 0.0, 0.0] | oltre la battuta (+3 gradi): 3.9703 | sfilamento assiale a blocco inserito (+/-1 mm): 22.3432 22.3432
+   stazione 135: rotazione di blocco -30..0: [0.0, 0.0, 0.0, 0.0, 0.0] | oltre la battuta (+3 gradi): 3.9703 | sfilamento assiale a blocco inserito (+/-1 mm): 22.6443 22.3432
+   rotazione a meta' canale (fuori stazione): 21.5057 (deve interferire)
+   anti-errore: imbocco con la flangia sfasata di 120 e 240 gradi: [1.9646, 1.9646] (deve interferire)
+   verso sbagliato: dal canale ruotando al contrario (-60 gradi) in stazione 135: 41.0803 (deve interferire)
+flangia B: infilaggio lungo il canale (a +30 gradi), interferenza mm3: [0.0, 0.0, 0.0, 0.0, 0.0]
+   stazione 120: rotazione di blocco +30..0: [0.0, 0.0, 0.0, 0.0, 0.0] | oltre la battuta (-3 gradi): 3.9703 | sfilamento assiale a blocco inserito (+/-1 mm): 22.3432 22.3432
+   stazione 135: rotazione di blocco +30..0: [0.0, 0.0, 0.0, 0.0, 0.0] | oltre la battuta (-3 gradi): 3.9703 | sfilamento assiale a blocco inserito (+/-1 mm): 22.6443 22.3432
+   rotazione a meta' canale (fuori stazione): 21.5057 (deve interferire)
+   anti-errore: imbocco con la flangia sfasata di 120 e 240 gradi: [1.9646, 1.9646] (deve interferire)
+   verso sbagliato: dal canale ruotando al contrario (+60 gradi) in stazione 135: 41.0803 (deve interferire)
+versi di blocco: A ruota di +30 gradi, B di -30 gradi (visti dallo stesso lato) -> opposti
+spirali A e B in fase: volume costola A 1694.8 mm3, differenza con B specchiata 0.000 mm3
+scatto: il dentino sporge 0.40 mm nel tubo (linguetta flessa di 0.34 mm fuori dalla gola); volume di riferimento 0.207 mm3
+   flange lato A: lungo l'infilaggio il dentino trova sempre tubo pieno (mancante mm3): [0.0, 0.0, 0.0, 0.0, 0.0, 0.0] | a meta' rotazione preme [0.207, 0.207] | a blocco inserito interferenza [0.0, 0.0] (0 = nella gola)
+   flange lato B: lungo l'infilaggio il dentino trova sempre tubo pieno (mancante mm3): [0.0, 0.0, 0.0, 0.0, 0.0, 0.0] | a meta' rotazione preme [0.207, 0.207] | a blocco inserito interferenza [0.0, 0.0] (0 = nella gola)
+   ring   lato A: lungo l'infilaggio il dentino trova sempre tubo pieno (mancante mm3): [0.0, 0.0257, 0.0, 0.0, 0.0, 0.0] | a meta' rotazione preme [0.207, 0.207] | a blocco inserito interferenza [0.0, 0.0] (0 = nella gola)
+   ring   lato B: lungo l'infilaggio il dentino trova sempre tubo pieno (mancante mm3): [0.0, 0.0257, 0.0, 0.0, 0.0, 0.0] | a meta' rotazione preme [0.207, 0.207] | a blocco inserito interferenza [0.0, 0.0] (0 = nella gola)
+anello alette lato A, stazione per il 135 (|z|=31.55): infilaggio [0.0, 0.0, 0.0] | rotazione [0.0, 0.0, 0.0] | oltre battuta 2.6469 | sfilamento 21.1673 21.1673
+anello alette lato A, stazione per il 120 (|z|=44.80): infilaggio [0.0, 0.0, 0.0] | rotazione [0.0, 0.0, 0.0] | oltre battuta 2.6469 | sfilamento 21.1673 21.1673
+anello alette lato B, stazione per il 135 (|z|=31.55): infilaggio [0.0, 0.0, 0.0] | rotazione [0.0, 0.0, 0.0] | oltre battuta 2.6469 | sfilamento 21.1673 21.1673
+anello alette lato B, stazione per il 120 (|z|=44.80): infilaggio [0.0, 0.0, 0.0] | rotazione [0.0, 0.0, 0.0] | oltre battuta 2.6469 | sfilamento 21.1673 21.1673
+spirale 135 montata: interferenze nessuna; gioco flangia/tubo 0.042 mm
+   135 alette, stesso anello A sui due lati: interferenze con la spirale nessuna, gioco dalla flangia 0.4 mm
+      rotazione orario (avvolgimento) : lato A spinge DENTRO, lato B spinge FUORI
+      rotazione antiorario            : lato A spinge FUORI, lato B spinge DENTRO
+   135 alette, anelli speculari A + B: interferenze con la spirale nessuna, gioco dalla flangia 0.4 mm
+      rotazione orario (avvolgimento) : lato A spinge DENTRO, lato B spinge DENTRO
+      rotazione antiorario            : lato A spinge FUORI, lato B spinge FUORI
+spirale 120 montata: interferenze nessuna; gioco flangia/tubo 0.042 mm
+   120 alette, stesso anello A sui due lati: interferenze con la spirale nessuna, gioco dalla flangia 0.4 mm
+   120 alette, anelli speculari A + B: interferenze con la spirale nessuna, gioco dalla flangia 0.4 mm
+
+== check_tank.py ==
+== taglierina a Λ ==
+manovella   0 gradi: alzata  0.00 mm, interferenze con parti fisse 0.0000 mm3, biella+manovella/servo 0.0000 mm3
+manovella  45 gradi: alzata  1.52 mm, interferenze con parti fisse 0.0000 mm3, biella+manovella/servo 0.0000 mm3
+manovella  90 gradi: alzata  5.68 mm, interferenze con parti fisse 0.0000 mm3, biella+manovella/servo 0.0000 mm3
+manovella 135 gradi: alzata 10.57 mm, interferenze con parti fisse 0.0000 mm3, biella+manovella/servo 0.0000 mm3
+manovella 180 gradi: alzata 12.80 mm, interferenze con parti fisse 0.0000 mm3, biella+manovella/servo 0.0000 mm3
+a riposo la punta sta a z=79.0: 2.0 mm sotto il piano della fessura (z=81.0); a fine corsa punta a 91.8
+   135: ai bordi della pellicola il filo arriva a z=88.08, 3.48 mm sopra il cielo della fessura (z=84.6)
+   120: ai bordi della pellicola il filo arriva a z=85.26, 0.66 mm sopra il cielo della fessura (z=84.6)
+   forza disponibile sul portalama a meta' corsa con un MG90S (1.8 kg*cm): circa 28 N
+== guida a due slitte ==
+135 raggio 22.0 (inclinazione  -8.5 gradi): interferenze spirale 0.0000, parti fisse+coperchio 0.0000, portalama alzato 0.0000 mm3; gioco slitte/flange 0.20, slitte/coperchio 16.60 mm
+135 raggio 30.0 (inclinazione  -0.1 gradi): interferenze spirale 0.0000, parti fisse+coperchio 0.0000, portalama alzato 0.0000 mm3; gioco slitte/flange 0.20, slitte/coperchio 17.49 mm
+135 raggio 42.0 (inclinazione +13.8 gradi): interferenze spirale 0.0000, parti fisse+coperchio 0.0000, portalama alzato 0.0000 mm3; gioco slitte/flange 0.20, slitte/coperchio 2.15 mm
+120 raggio 22.0 (inclinazione  -8.5 gradi): interferenze spirale 0.0000, parti fisse+coperchio 0.0000, portalama alzato 0.0000 mm3; gioco slitte/flange 0.20, slitte/coperchio 14.76 mm
+120 raggio 30.0 (inclinazione  -0.1 gradi): interferenze spirale 0.0000, parti fisse+coperchio 0.0000, portalama alzato 0.0000 mm3; gioco slitte/flange 0.20, slitte/coperchio 15.36 mm
+120 raggio 42.0 (inclinazione +13.8 gradi): interferenze spirale 0.0000, parti fisse+coperchio 0.0000, portalama alzato 0.0000 mm3; gioco slitte/flange 0.20, slitte/coperchio 2.15 mm
+punto di tangenza della suola sulla spirale: s = 56.0 mm (vuota), 45.7 mm (piena); la slitta e' lunga 66 mm
+135: guida ribaltata all'indietro: libera fino a 90 gradi (poi appoggia sul ponte)
+120: guida ribaltata all'indietro: libera fino a 90 gradi (poi appoggia sul ponte)
+== montaggio della spirale ==
+135: in sede interferenze 0.0000 mm3; arretrata di 5.5 mm contro la molla: spirale/corpo+trascinatore+perno 0.0000, perno/corpo 0.0000; sollevata di 30 mm: 0.0000 mm3
+120: in sede interferenze 0.0000 mm3; arretrata di 5.5 mm contro la molla: spirale/corpo+trascinatore+perno 0.0000, perno/corpo 0.0000; sollevata di 30 mm: 0.0000 mm3
+   gioco minimo spirale/vasca: 2.11 mm (120), 2.11 mm (135)
+== liquido nella vasca ==
+135: livello all'asse (z=50) = 397 ml; alla soglia del troppopieno (z=62) = 503 ml; per bagnare il giro piu' interno (z=28) = 199 ml  (pellicola, da togliere: fino a 8 ml)
+   livello raggiunto da 250 / 350 / 500 / 550 ml: [34, 46, 62, None] mm dal fondo; asse albero a 50, sommita' del divisorio a 66
+120: livello all'asse (z=50) = 397 ml; alla soglia del troppopieno (z=62) = 503 ml; per bagnare il giro piu' interno (z=28) = 199 ml  (pellicola, da togliere: fino a 6 ml)
+   livello raggiunto da 250 / 350 / 500 / 550 ml: [34, 46, 62, None] mm dal fondo; asse albero a 50, sommita' del divisorio a 66
+volume della canaletta e del pescante (resta bagnato): 3.7 ml
+
+== check_bath.py ==
+== inserimento della vaschetta: rotazione attorno al bordo posteriore (davanti in alto) ==
+C1 inclinata 0.0 gradi (bordo anteriore + 0.0 mm): interferenze    0.00 mm3  | con i ganci a scatto    0.0 mm3
+C1 inclinata 1.0 gradi (bordo anteriore + 3.1 mm): interferenze    0.00 mm3  | con i ganci a scatto  134.7 mm3
+C1 inclinata 2.0 gradi (bordo anteriore + 6.1 mm): interferenze    0.00 mm3  | con i ganci a scatto   20.1 mm3
+C1 inclinata 3.0 gradi (bordo anteriore + 9.2 mm): interferenze    0.00 mm3  | con i ganci a scatto    0.0 mm3
+C1 inclinata 4.0 gradi (bordo anteriore +12.3 mm): interferenze    0.00 mm3  | con i ganci a scatto    0.0 mm3
+C1 inclinata 5.0 gradi (bordo anteriore +15.3 mm): interferenze    0.00 mm3  | con i ganci a scatto    0.0 mm3
+C1 inclinata 6.0 gradi (bordo anteriore +18.4 mm): interferenze    0.00 mm3  | con i ganci a scatto    0.0 mm3
+C1 inclinata 8.0 gradi (bordo anteriore +24.5 mm): interferenze    0.04 mm3 ('REF_vaschetta_GN1-9_C1 / C04_fermo_posteriore_C1', 0.04) | con i ganci a scatto    0.0 mm3
+   C1 estratta: 4.5 gradi, avanti 1.5 mm, su 0 mm -> interferenze 0.00 mm3 
+   C1 estratta: 4.5 gradi, avanti 3.5 mm, su 0 mm -> interferenze 0.00 mm3 
+   C1 estratta: 3.0 gradi, avanti 3.5 mm, su 12 mm -> interferenze 0.00 mm3 
+   C1 estratta: 0.0 gradi, avanti 3.5 mm, su 30 mm -> interferenze 0.00 mm3 
+   C1 estratta: 0.0 gradi, avanti 3.5 mm, su 100 mm -> interferenze 0.00 mm3 
+   C1 estratta: 0.0 gradi, avanti 3.5 mm, su 200 mm -> interferenze 0.00 mm3 
+C2 inclinata 0.0 gradi (bordo anteriore + 0.0 mm): interferenze    0.00 mm3  | con i ganci a scatto    0.0 mm3
+C2 inclinata 1.0 gradi (bordo anteriore + 3.1 mm): interferenze    0.00 mm3  | con i ganci a scatto  134.7 mm3
+C2 inclinata 2.0 gradi (bordo anteriore + 6.1 mm): interferenze    0.00 mm3  | con i ganci a scatto   20.1 mm3
+C2 inclinata 3.0 gradi (bordo anteriore + 9.2 mm): interferenze    0.00 mm3  | con i ganci a scatto    0.0 mm3
+C2 inclinata 4.0 gradi (bordo anteriore +12.3 mm): interferenze    0.00 mm3  | con i ganci a scatto    0.0 mm3
+C2 inclinata 5.0 gradi (bordo anteriore +15.3 mm): interferenze    0.00 mm3  | con i ganci a scatto    0.0 mm3
+C2 inclinata 6.0 gradi (bordo anteriore +18.4 mm): interferenze    0.00 mm3  | con i ganci a scatto    0.0 mm3
+C2 inclinata 8.0 gradi (bordo anteriore +24.5 mm): interferenze    0.04 mm3 ('REF_vaschetta_GN1-9_C2 / C04_fermo_posteriore_C2', 0.04) | con i ganci a scatto    0.0 mm3
+   C2 estratta: 4.5 gradi, avanti 1.5 mm, su 0 mm -> interferenze 0.00 mm3 
+   C2 estratta: 4.5 gradi, avanti 3.5 mm, su 0 mm -> interferenze 0.00 mm3 
+   C2 estratta: 3.0 gradi, avanti 3.5 mm, su 12 mm -> interferenze 0.00 mm3 
+   C2 estratta: 0.0 gradi, avanti 3.5 mm, su 30 mm -> interferenze 0.00 mm3 
+   C2 estratta: 0.0 gradi, avanti 3.5 mm, su 100 mm -> interferenze 0.00 mm3 
+   C2 estratta: 0.0 gradi, avanti 3.5 mm, su 200 mm -> interferenze 0.00 mm3 
+C3 inclinata 0.0 gradi (bordo anteriore + 0.0 mm): interferenze    0.00 mm3  | con i ganci a scatto    0.0 mm3
+C3 inclinata 1.0 gradi (bordo anteriore + 3.1 mm): interferenze    0.00 mm3  | con i ganci a scatto  134.7 mm3
+C3 inclinata 2.0 gradi (bordo anteriore + 6.1 mm): interferenze    0.00 mm3  | con i ganci a scatto   20.1 mm3
+C3 inclinata 3.0 gradi (bordo anteriore + 9.2 mm): interferenze    0.00 mm3  | con i ganci a scatto    0.0 mm3
+C3 inclinata 4.0 gradi (bordo anteriore +12.3 mm): interferenze    0.00 mm3  | con i ganci a scatto    0.0 mm3
+C3 inclinata 5.0 gradi (bordo anteriore +15.3 mm): interferenze    0.00 mm3  | con i ganci a scatto    0.0 mm3
+C3 inclinata 6.0 gradi (bordo anteriore +18.4 mm): interferenze    0.00 mm3  | con i ganci a scatto    0.0 mm3
+C3 inclinata 8.0 gradi (bordo anteriore +24.5 mm): interferenze    0.04 mm3 ('REF_vaschetta_GN1-9_C3 / C04_fermo_posteriore_C3', 0.04) | con i ganci a scatto    0.0 mm3
+   C3 estratta: 4.5 gradi, avanti 1.5 mm, su 0 mm -> interferenze 0.00 mm3 
+   C3 estratta: 4.5 gradi, avanti 3.5 mm, su 0 mm -> interferenze 0.00 mm3 
+   C3 estratta: 3.0 gradi, avanti 3.5 mm, su 12 mm -> interferenze 0.00 mm3 
+   C3 estratta: 0.0 gradi, avanti 3.5 mm, su 30 mm -> interferenze 0.00 mm3 
+   C3 estratta: 0.0 gradi, avanti 3.5 mm, su 100 mm -> interferenze 0.00 mm3 
+   C3 estratta: 0.0 gradi, avanti 3.5 mm, su 200 mm -> interferenze 0.00 mm3 
+== volumi e livelli ==
+vaschetta GN 1/9 h150: capacita' al bordo 1.60 l; 1 litro arriva a 98 mm dal fondo (quota Z = 120, 52 mm sotto il bordo)
+bagno: livello di lavoro Z = 113 (vaschette immerse per 90 mm) -> 7.4 l d'acqua; senza vaschette la stessa acqua arriva a Z = 82
+   ogni litro prelevato per i risciacqui abbassa il livello di 16.6 mm
+   riserva per i risciacqui tra livello di lavoro e sensore MIN (Z = 62): 3.2 l = 9 riempimenti da 350 ml (13 da 250 ml)
+   sensore MAX a Z = 120: 7.8 l; bordo del contenitore a Z = 170
+   sommita' dei riscaldatori Z = 31; bocca del pescante WB Z = 42: la pompa non puo' scoprire i riscaldatori (restano 3.0 l); sensore MIN 31 mm sopra i riscaldatori
+   riscaldamento da 20 a 38 gradi di 10.4 kg (acqua + 3 l di chimica) con 200 W, senza perdite: 65 minuti
+   riscaldamento da 33 a 38 gradi di 10.4 kg (acqua + 3 l di chimica) con 200 W, senza perdite: 18 minuti
+== galleggiamento ==
+vaschetta vuota in polipropilene: peso 1.2 N, spinta 9.7 N -> 8.5 N verso l'alto, divisi tra labbro posteriore e due ganci a scatto
+vaschetta vuota in policarbonato: peso 1.6 N, spinta 9.7 N -> 8.1 N verso l'alto, divisi tra labbro posteriore e due ganci a scatto
+ganci a scatto: braccio 36 x 7 x 2.5 mm, rigidezza 1.14 N/mm; per sganciare servono 4.2 mm = 4.8 N per braccio, deformazione 1.2 % (limite prudente per il PETG: 2 %)
+   con la vaschetta vuota ogni dente porta circa 2.1 N: il braccio si apre di 0.26 mm su 4.2 di presa
+
+== check_screws.py ==
+fori per viti nei pezzi stampati dell'assieme: 612 (88 filettati, 524 passanti)
+pareti attorno ai fori filettati (anello di 1.2 mm): fori controllati 82, pareti sottili 0
+   previsto: A04 x1, il foro della spina taglia apposta la fessura della fascetta
+   previsto: A07 x1, perno della clip (non e' una vite)
+   previsto: B11 x1, sede del braccio della squadretta del servo
+fori M3 con il compagno sullo stesso asse in un altro pezzo stampato: 150
+fori che finiscono in un componente acquistato: albero 2, longherone 14, molla 1, motoriduttore 47, sensore 1, servo 1
+fori senza compagno previsti dal disegno:
+   A04 x1: spina di filamento che ferma la fascetta
+   A07 x1: perno della clip
+   B10 x1: perno di manovella: vite M2,5 nella squadretta del servo
+   C05 x4: viti di pressione M4 sotto la fascia del contenitore
+   D01 x4: viti dei piedini della tank (asole nel corpo)
+   D12 x300: griglia dei ripiani
+   D15 x20: morsetti universali, in un punto qualsiasi della griglia
+fori senza compagno NON previsti: nessuno
+viti autofilettanti da 3 mm tra pezzi stampati (lunghezza dalla tabella SCREW):
+   B03 -> B01  x2  3 x 8   sotto la testa  2.0  presa  6.0  foro cieco da 8.0 (restano 2.0)
+   B04 -> B01  x2  3 x 10  sotto la testa  4.0  presa  6.0  foro cieco da 9.0 (restano 3.0)
+   B05 -> B01  x2  3 x 10  sotto la testa  4.0  presa  6.0  foro cieco da 9.0 (restano 3.0)
+   B06 -> B04  x2  3 x 16  sotto la testa  7.8  presa  8.2  foro cieco da 12.0 (restano 3.8)
+   B06 -> B05  x2  3 x 16  sotto la testa  7.8  presa  8.2  foro cieco da 12.0 (restano 3.8)
+   B12 -> B01  x4  3 x 10  sotto la testa  5.0  presa  5.0  foro cieco da 9.0 (restano 4.0)
+   B17 -> B01  x2  3 x 8   sotto la testa  4.0  presa  4.0  foro cieco da 6.0 (restano 2.0)
+   B23 -> B01  x3  3 x 10  sotto la testa  4.0  presa  6.0  foro cieco da 9.0 (restano 3.0)
+   B25 -> B01  x1  3 x 10  sotto la testa  6.5  presa  3.5  foro cieco da 6.0 (restano 2.5)
+   C03 -> C02  x6  3 x 10  sotto la testa  2.2  presa  7.8  foro cieco da 9.0 (restano 1.2)
+   D01 -> D02  x3  3 x 10  sotto la testa  5.0  presa  5.0  foro passante da 4.0, la punta esce di 1.0
+   D01 -> D03  x3  3 x 10  sotto la testa  5.0  presa  5.0  foro passante da 4.0, la punta esce di 1.0
+   D04 -> D02  x2  3 x 10  sotto la testa  4.0  presa  6.0  foro passante da 4.0, la punta esce di 2.0
+   D04 -> D03  x2  3 x 10  sotto la testa  4.0  presa  6.0  foro passante da 4.0, la punta esce di 2.0
+   D05 -> D01  x2  3 x 10  sotto la testa  3.0  presa  7.0  foro passante da 9.0
+   D08 -> D06  x3  3 x 8   sotto la testa  3.0  presa  5.0  foro passante da 3.0, la punta esce di 2.0
+   D08 -> D07  x3  3 x 8   sotto la testa  3.0  presa  5.0  foro passante da 3.0, la punta esce di 2.0
+   D09 -> D06  x2  3 x 8   sotto la testa  3.0  presa  5.0  foro passante da 3.0, la punta esce di 2.0
+   D09 -> D07  x2  3 x 8   sotto la testa  3.0  presa  5.0  foro passante da 3.0, la punta esce di 2.0
+   D10 -> D06  x2  3 x 8   sotto la testa  3.0  presa  5.0  foro passante da 3.0, la punta esce di 2.0
+   D10 -> D07  x2  3 x 8   sotto la testa  3.0  presa  5.0  foro passante da 3.0, la punta esce di 2.0
+   D11 -> D06  x3  3 x 8   sotto la testa  3.0  presa  5.0  foro passante da 3.0, la punta esce di 2.0
+   D11 -> D07  x3  3 x 8   sotto la testa  3.0  presa  5.0  foro passante da 3.0, la punta esce di 2.0
+   D17 -> D09  x4  3 x 8   sotto la testa  3.0  presa  5.0  foro cieco da 5.4 (restano 0.4)
+   piedini della tank -> D01  x4  3 x 16  sotto la testa  5.0 (asola nel piedino)  presa 11.0  foro passante da 12.0
+   totale per lunghezza: 3 x 8: 28, 3 x 10: 30, 3 x 16: 8
+lunghezze da correggere: nessuna
+
+== cutlist.py ==
+== come sono posati i tubi ==
+   valvole da sinistra: C1, WB, C2, C3, scarico (cosi' i quattro tubi verso il bagno non si incrociano)
+   valvole -> bagno: un pezzo solo ciascuno, a ponte sopra il bordo del contenitore; salgono in verticale fino a Z = 165, poi curve di raggio 45 mm (sommita' a Z = 215)
+   scarico: gomito sopra la valvola, girato di 18 gradi verso il retro; il tubo entra nella rientranza del contenitore e la segue fino al passaparete
+   collettore -> pompa: gomito a codolo, col codolo nella sede con O-ring del collettore; pompa -> tank: gomito a codolo nel raccordo destro, gomito, salita
+   troppopieno: silicone diritto, in discesa di 3.6 gradi dall'innesto sotto il piano del cavalletto alla staffa degli scarichi
+== tagli (mm); nei raccordi a innesto il tubo entra per 15 mm, gia' compresi; i tubi a ponte vanno tagliati un po' abbondanti e rifilati ==
+   tubo 3/8" valvola C1 -> sifone C1, a ponte (curve di raggio 45)               240
+   tubo 3/8" valvola C2 -> sifone C2, a ponte (curve di raggio 45)               256
+   tubo 3/8" valvola C3 -> sifone C3, a ponte (curve di raggio 45)               310
+   tubo 3/8" valvola WB -> pescante nel bagno, a ponte (curve di raggio 45)      388
+   tubo 3/8" valvola scarico -> gomito (nascosto nei due innesti)                 30
+   tubo 3/8" gomito dello scarico -> passaparete SCARICO                         239
+   tubo 3/8" gomito a codolo del collettore -> pompa                              40
+   tubo 3/8" tra i due gomiti sotto il cavalletto                                 49
+   tubo 3/8" salita verso la tank                                                151
+   spezzone 3/8" collettore -> valvola (x5)                                       33
+   testina: pescante, taglio a 45 gradi in fondo (x3)                            146
+   testina: ponticello tra i due gomiti (x3)                                      32
+   testina: codolo, punta conica Ø7,5 lunga 8 (x3)                                28
+   silicone 8x12: sifone (x3)                                                    104
+   silicone 8x12 nero: pescante tank -> tubo 3/8" (curva libera di raggio 30)    127
+   silicone 8x12 nero: troppopieno, dall'innesto al bordo della base             143
+   longherone di alluminio 15x15 (x2)                                            356
+   totale tubo 3/8": 2.5 m;  silicone 8x12: 0.58 m + i tubi esterni verso le taniche
+== raccordi ==
+   gomiti a innesto 3/8": 6 nelle tre testine + 1 sopra la valvola dello scarico + 1 ai piedi della salita verso la tank = 8
+   gomiti a codolo 3/8": 2. Sul collettore il codolo e' lungo 37 mm dall'angolo (deve superare l'O-ring: almeno 33); sulla pompa va accorciato a 27 mm dall'angolo
+   raccordi diritti filetto maschio 3/8" BSP - tubo 3/8": 2 (pompa);  passaparete 3/8": 1 (SCARICO)
+== posizioni lungo i longheroni (mm dall'estremita' sinistra del longherone al centro del pezzo) ==
+   staffe con ganci C03 e fermi posteriori C04: [70, 178, 286] | portasonde C06: 101
+== fori nel contenitore del bagno (parete corta destra, dall'interno) ==
+   2 fori Ø16,5 per i riscaldatori: a 20 mm dal fondo interno, a 38 e 64 mm dalla parete lunga anteriore
+   sensori di livello sulla parete lunga anteriore, all'esterno: centro a 326 mm dallo spigolo sinistro, a 62 mm (MIN) e 120 mm (MAX) dal piano d'appoggio
+
+== ASSIEME UNICO ==
+164 corpi (93 stampati, 71 sagome di componenti acquistati); non validi: nessuno; coppie in interferenza: nessuna
+ingombro: X -2..420, Y 0..505, Z -12..245 mm
+ASSIEME_FilMachine.step: 21.5 MB

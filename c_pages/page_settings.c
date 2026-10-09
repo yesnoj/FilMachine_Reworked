@@ -206,6 +206,7 @@ void settingsApplyFactoryDefaults(void)
     p->wbCalibFillSecs = 0;         /* uncalibrated (was wbContainerMl) */
     p->language = LANG_EN;          /* applied at next boot */
     p->screenOffMins = 10;
+    filmLoaderApplyDefaults(p);
     applyScreenOffTimeout(p->screenOffMins);
 
     refreshSettingsUI();            /* update all UI widgets */

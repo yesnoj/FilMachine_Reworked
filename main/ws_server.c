@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include "FilMachine.h"
 #include "ws_server.h"
+#include "servo.h"      /* SERVO_US_MIN_ABS / SERVO_US_MAX_ABS for the cutter settings */
 #if defined(DISPLAY_DRIVER_ST7701)
 #include "st7701_lcd.h"
 #endif
@@ -305,6 +306,19 @@ static void ws_async_fill_start(void *user_data) {
 static void ws_async_fill_stop(void *user_data) {
     (void)user_data;
     fillPopupRemoteStop();
+}
+
+/* ── Film loader from the app: mirrors the display's Load film popup ── */
+static void ws_async_load_start(void *user_data) {
+    loadPopupRemoteStart((uint8_t)(intptr_t)user_data);
+}
+static void ws_async_load_stop(void *user_data) {
+    (void)user_data;
+    loadPopupRemoteStop();
+}
+static void ws_async_load_cut(void *user_data) {
+    (void)user_data;
+    loadPopupRemoteCut();
 }
 
 /* ── Tune (pump / motor / volume) from the app: mirrors the display popup ── */
@@ -601,6 +615,15 @@ static int build_state_json(char *buf, int bufsize) {
         "\"fillToolVolumeMl\":%lu,"
         "\"fillToolFlowLpm\":%.2f,"
         "\"fillToolManual\":%s,"
+        /* Film loader (Tools → Load film); state codes are LOAD_* from FilMachine.h */
+        "\"loadSpeed\":%u,"
+        "\"cutterRestUs\":%u,"
+        "\"cutterCutUs\":%u,"
+        "\"loadToolState\":%d,"
+        "\"loadToolFormat\":%d,"
+        "\"loadToolPulses\":%u,"
+        "\"loadToolExpected\":%u,"
+        "\"loadToolServo\":%s,"
         /* Device info */
         "\"fwVersion\":\"%s\","
         "\"serialNumber\":\"%s\""
@@ -682,6 +705,14 @@ static int build_state_json(char *buf, int bufsize) {
         (unsigned long)machineFillVolumeMl(),
         machineFillFlowLpm(),
         machineFillManual() ? "true" : "false",
+        (unsigned)s->loadSpeed,
+        (unsigned)s->cutterRestUs,
+        (unsigned)s->cutterCutUs,
+        filmLoaderState(),
+        filmLoaderFormat(),
+        (unsigned)filmLoaderPulses(),
+        (unsigned)filmLoaderExpectedPulses(),
+        filmLoaderServoActive() ? "true" : "false",
         ota_get_running_version(),   /* same source as Splash and Tools (version.txt), not the fixed macro */
         softwareSerialNumValue_text
     );
@@ -865,6 +896,19 @@ static void ws_handle_command(const char *msg, int len) {
             applyScreenOffTimeout(s->screenOffMins);
         }
         else if (KEY_IS("wifiEnabled"))        s->wifiEnabled = (strstr(vs, "true") != NULL);
+        else if (KEY_IS("loadSpeed")) {
+            int v = atoi(vs);
+            if (v < 10)  v = 10;
+            if (v > 100) v = 100;
+            s->loadSpeed = (uint8_t)v;
+        }
+        else if (KEY_IS("cutterRestUs") || KEY_IS("cutterCutUs")) {
+            int v = atoi(vs);
+            if (v < SERVO_US_MIN_ABS) v = SERVO_US_MIN_ABS;
+            if (v > SERVO_US_MAX_ABS) v = SERVO_US_MAX_ABS;
+            if (KEY_IS("cutterRestUs")) s->cutterRestUs = (uint16_t)v;
+            else                        s->cutterCutUs  = (uint16_t)v;
+        }
         else {
             LV_LOG_WARN("[WS] Unknown setting key: %.*s", klen, ks);
             return;
@@ -904,6 +948,7 @@ static void ws_handle_command(const char *msg, int len) {
         s->volume = 60;
         s->language = LANG_EN;   /* applied at next boot */
         s->screenOffMins = 10;
+        filmLoaderApplyDefaults(s);
         applyScreenOffTimeout(s->screenOffMins);
 #if defined(DISPLAY_DRIVER_ST7701)
         st7701_lcd_set_user_brightness(s->brightness);
@@ -949,6 +994,11 @@ static void ws_handle_command(const char *msg, int len) {
     /* ── start_process ── */
     if (strstr(msg, "\"start_process\"")) {
         /* Expected: {"cmd":"start_process","index":0} */
+        if (filmLoaderBusy()) {      /* the reel motor is busy loading film */
+            ws_broadcast_event("start_rejected", "{\"reason\":\"loading\"}");
+            LV_LOG_WARN("[WS] start_process rejected: film loading in progress");
+            return;
+        }
         const char *idx_str = strstr(msg, "\"index\":");
         if (idx_str) {
             int index = atoi(idx_str + 8);
@@ -984,6 +1034,47 @@ static void ws_handle_command(const char *msg, int len) {
         return;
     }
 
+    /* ── load_start / load_stop / load_cut / cutter_test / cutter_cycle: film loader ──
+     * {"cmd":"load_start","format":0|1}   0 = 135, 1 = 120
+     * {"cmd":"load_stop"}  {"cmd":"load_cut"}
+     * {"cmd":"cutter_test","angle":0..180}  hold the crank there for a few seconds
+     * {"cmd":"cutter_cycle"}                blade up and down, motor off
+     * Progress arrives in the loadTool* fields of the state broadcast. */
+    if (strstr(msg, "\"load_start\"")) {
+        sCheckupData *ck = find_active_checkup();
+        if (ck && ck->isProcessing) {
+            ws_broadcast_event("load_rejected", "{\"reason\":\"processing\"}");
+            LV_LOG_WARN("[WS] load_start rejected: process running");
+            return;
+        }
+        if (filmLoaderBusy()) {
+            ws_broadcast_event("load_rejected", "{\"reason\":\"busy\"}");
+            return;
+        }
+        int fmt = ws_json_get_int(msg, "format", LOAD_FMT_135);
+        if (fmt != LOAD_FMT_120) fmt = LOAD_FMT_135;
+        ws_queue_lvgl_action(ws_async_load_start, (void *)(intptr_t)fmt);
+        LV_LOG_USER("[WS] load_start format=%d queued", fmt);
+        return;
+    }
+    if (strstr(msg, "\"load_stop\"")) {
+        ws_queue_lvgl_action(ws_async_load_stop, NULL);
+        return;
+    }
+    if (strstr(msg, "\"load_cut\"")) {
+        ws_queue_lvgl_action(ws_async_load_cut, NULL);
+        return;
+    }
+    if (strstr(msg, "\"cutter_test\"") || strstr(msg, "\"cutter_cycle\"")) {
+        if (filmLoaderBusy()) {
+            ws_broadcast_event("load_rejected", "{\"reason\":\"busy\"}");
+            return;
+        }
+        if (strstr(msg, "\"cutter_cycle\"")) filmLoaderCutterCycle();
+        else filmLoaderCutterTest((uint8_t)ws_json_get_int(msg, "angle", 0));
+        return;
+    }
+
     /* ── tune_test / tune_set / tune_cancel: pump, motor or volume Tune ──
      * {"cmd":"tune_test","kind":0|1|2,"percent":N,"on":true|false}
      * {"cmd":"tune_set","kind":K,"percent":N}   {"cmd":"tune_cancel"}
@@ -992,7 +1083,7 @@ static void ws_handle_command(const char *msg, int len) {
     if (strstr(msg, "\"tune_test\"") || strstr(msg, "\"tune_set\"")) {
         bool isSet = strstr(msg, "\"tune_set\"") != NULL;
         sCheckupData *ck = find_active_checkup();
-        if (ck && ck->isProcessing) {
+        if ((ck && ck->isProcessing) || filmLoaderBusy()) {
             ws_broadcast_event("tune_rejected", "{\"reason\":\"processing\"}");
             LV_LOG_WARN("[WS] tune rejected: process running");
             return;

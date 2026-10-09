@@ -86,6 +86,10 @@ void event_toolsElement(lv_event_t * e) {
               LV_LOG_USER("PRESSED gui.page.tools.toolsFillButton");
               fillPopupCreate(FILL_TARGET_WB);
           }
+      if(obj == gui.page.tools.toolsLoadFilmButton){
+              LV_LOG_USER("PRESSED gui.page.tools.toolsLoadFilmButton");
+              loadPopupCreate();
+      }
       if(obj == gui.page.tools.toolsFillChemButton){
               LV_LOG_USER("PRESSED gui.page.tools.toolsFillChemButton");
               fillPopupCreate(FILL_TARGET_CHEM);
@@ -257,6 +261,30 @@ static void initTools_maintenance(lv_obj_t *parent) {
   lv_label_set_text(gui.page.tools.toolsFillChemButtonLabel, play_icon);
   lv_obj_set_style_text_font(gui.page.tools.toolsFillChemButtonLabel, ui->button_icon_font, 0);
   lv_obj_align(gui.page.tools.toolsFillChemButtonLabel, LV_ALIGN_CENTER, 0, 0);
+
+  /* Load film: wind the film onto the reel, cut at the end of the roll (film_loader.c) */
+  gui.page.tools.toolsLoadFilmContainer = lv_obj_create(parent);
+  lv_obj_align(gui.page.tools.toolsLoadFilmContainer, LV_ALIGN_TOP_LEFT, ui->item_row_x, ui->maintenance_loadfilm_y);
+  lv_obj_set_size(gui.page.tools.toolsLoadFilmContainer, ui->item_row_w, ui->action_row_h);
+  lv_obj_remove_flag(gui.page.tools.toolsLoadFilmContainer, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_scroll_dir(gui.page.tools.toolsLoadFilmContainer, LV_DIR_VER);
+  lv_obj_set_style_border_opa(gui.page.tools.toolsLoadFilmContainer, LV_OPA_TRANSP, 0);
+
+  gui.page.tools.toolsLoadFilmLabel = lv_label_create(gui.page.tools.toolsLoadFilmContainer);
+  lv_label_set_text(gui.page.tools.toolsLoadFilmLabel, loadFilm_text);
+  lv_obj_set_style_text_font(gui.page.tools.toolsLoadFilmLabel, ui->item_font, 0);
+  lv_obj_align(gui.page.tools.toolsLoadFilmLabel, LV_ALIGN_LEFT_MID, ui->item_label_x, ui->item_label_y);
+
+  gui.page.tools.toolsLoadFilmButton = lv_button_create(gui.page.tools.toolsLoadFilmContainer);
+  lv_obj_set_size(gui.page.tools.toolsLoadFilmButton, ui->action_btn_w, BUTTON_PROCESS_HEIGHT);
+  lv_obj_align(gui.page.tools.toolsLoadFilmButton, LV_ALIGN_RIGHT_MID, ui->item_btn_x, ui->item_label_y);
+  lv_obj_add_event_cb(gui.page.tools.toolsLoadFilmButton, event_toolsElement, LV_EVENT_CLICKED, gui.page.tools.toolsLoadFilmButton);
+  lv_obj_set_style_bg_color(gui.page.tools.toolsLoadFilmButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
+
+  gui.page.tools.toolsLoadFilmButtonLabel = lv_label_create(gui.page.tools.toolsLoadFilmButton);
+  lv_label_set_text(gui.page.tools.toolsLoadFilmButtonLabel, play_icon);
+  lv_obj_set_style_text_font(gui.page.tools.toolsLoadFilmButtonLabel, ui->button_icon_font, 0);
+  lv_obj_align(gui.page.tools.toolsLoadFilmButtonLabel, LV_ALIGN_CENTER, 0, 0);
 }
 
 static void initTools_utilities(lv_obj_t *parent) {

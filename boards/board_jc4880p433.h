@@ -232,14 +232,22 @@
 #define WIFI_C6_RESET_PIN           54      /* P4 GPIO to reset ESP32-C6 */
 
 /* ═══════════════════════════════════════════════
+ * Film loader — cutter servo (MG90S) on the last spare JP1 pin.
+ * 50 Hz PWM from LEDC timer 3 / channel 3 (timer 0 = motor, 1 = backlight,
+ * 2 = pump). Servo powered at 5 V from the LM2596 converter, common GND;
+ * a 10 k pull-down on the signal keeps it quiet while the P4 boots.
+ * ═══════════════════════════════════════════════ */
+#define HAS_CUTTER_SERVO            1
+#define CUTTER_SERVO_PIN            28      /* JP1 pin 21 (was TEST_PIN) */
+
+/* ═══════════════════════════════════════════════
  * Spare pins on Expand IO header (JP1):
- *   GPIO 28 (pin 21) — currently assigned as TEST_PIN
- *   All other JP1 GPIO pins are allocated.
+ *   none left — GPIO 28 (pin 21) now drives the cutter servo.
+ *   GPIO 52 (pin 7, flow meter) is free in practice on machines without a
+ *   pressurized water inlet, but the Maintenance fill still reads it.
  *
  * Not on JP1 header but free on ESP32-P4:
  *   GPIO 20, 21, 22, 25, 26, 27, 36, 37, 38, 45, 46, 47, 53
  * ═══════════════════════════════════════════════ */
-
-#define TEST_PIN                    28      /* JP1 pin 21 — spare on header */
 
 #endif /* BOARD_JC4880P433_H */

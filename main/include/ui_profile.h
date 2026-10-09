@@ -405,6 +405,7 @@ typedef struct {
     int maintenance_selfcheck_y;
     int maintenance_fill_y;
     int maintenance_fillchem_y;
+    int maintenance_loadfilm_y;
     int utilities_import_y;
     int utilities_export_y;
     int statistics_completed_y;

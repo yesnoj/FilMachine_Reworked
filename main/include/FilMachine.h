@@ -453,6 +453,22 @@ typedef enum {
 #define fillInfo_fmt                            "%lu ml    %.1f L/min"
 #define fillStop_text	tr(STR_fillStop_text)
 #define fillClose_text	tr(STR_fillClose_text)
+/* Film loader (Tools → Load film) texts */
+#define loadFilm_text	tr(STR_loadFilm_text)
+#define loadPopupTitle_text	tr(STR_loadPopupTitle_text)
+#define loadStatusReady_text	tr(STR_loadStatusReady_text)
+#define loadStatusWinding_text	tr(STR_loadStatusWinding_text)
+#define loadStatusCutting_text	tr(STR_loadStatusCutting_text)
+#define loadStatusTail_text	tr(STR_loadStatusTail_text)
+#define loadStatusDone_text	tr(STR_loadStatusDone_text)
+#define loadStatusStopped_text	tr(STR_loadStatusStopped_text)
+#define loadErrNoSpin_text	tr(STR_loadErrNoSpin_text)
+#define loadErrEarly_text	tr(STR_loadErrEarly_text)
+#define loadErrLong_text	tr(STR_loadErrLong_text)
+#define loadErrTimeout_text	tr(STR_loadErrTimeout_text)
+#define loadTurns_text	tr(STR_loadTurns_text)
+#define loadCutNow_text	tr(STR_loadCutNow_text)
+#define loadTestBlade_text	tr(STR_loadTestBlade_text)
 /* Self-check popup texts */
 #define selfCheck_text	tr(STR_selfCheck_text)
 #define selfCheckTasks_text	tr(STR_selfCheckTasks_text)
@@ -665,6 +681,10 @@ struct __attribute__ ((packed)) machineSettings {
 	int16_t					chemCalibOffset;    /* Chemical-sensor temp offset, tenths °C (in config file). int16 to avoid overflow */
 	uint8_t					language;           /* UI language: 0=English, 1=Italiano (applied at boot) */
 	uint8_t					screenOffMins;      /* screen-off timeout in minutes (5/10/30), 0 = never */
+	/* ── Film loader (Tools → Load film) ── */
+	uint8_t					loadSpeed;          /* reel motor speed while loading, 10-100 % (default 40) */
+	uint16_t				cutterRestUs;       /* cutter servo pulse at rest (blade down), µs */
+	uint16_t				cutterCutUs;        /* cutter servo pulse at the end of the cut (blade up), µs */
 };
 
 
@@ -1111,6 +1131,25 @@ struct sFillPopup {
 	lv_obj_t            *flowLabel;          /* live inlet flow rate */
 	lv_obj_t            *actionButton;       /* Stop while filling, Close when done */
 	lv_obj_t            *actionButtonLabel;
+	lv_style_t          style_barIndic;
+	lv_style_t          style_titleLine;
+	lv_point_precise_t  titleLinePoints[2];
+	lv_timer_t          *liveTimer;
+};
+
+struct sLoadPopup {
+	lv_obj_t            *parent;
+	lv_obj_t            *container;
+	lv_obj_t            *title;
+	lv_obj_t            *fmtButton[2];       /* 135 / 120 */
+	lv_obj_t            *statusLabel;
+	lv_obj_t            *bar;                /* turns so far / expected */
+	lv_obj_t            *turnsLabel;
+	lv_obj_t            *midButton;          /* "Cut now" while loading, "Test blade" when idle */
+	lv_obj_t            *midButtonLabel;
+	lv_obj_t            *actionButton;       /* Start ↔ Stop */
+	lv_obj_t            *actionButtonLabel;
+	lv_obj_t            *cancelButtonLabel;  /* Cancel while loading, Close otherwise */
 	lv_style_t          style_barIndic;
 	lv_style_t          style_titleLine;
 	lv_point_precise_t  titleLinePoints[2];
@@ -1573,6 +1612,10 @@ struct sTools {
 	lv_obj_t 	        	*toolsSelfcheckContainer;
 	lv_obj_t 	        	*toolsFillContainer;
 	lv_obj_t 	        	*toolsFillChemContainer;
+	lv_obj_t 	        	*toolsLoadFilmContainer;
+	lv_obj_t 	        	*toolsLoadFilmLabel;
+	lv_obj_t 	        	*toolsLoadFilmButton;
+	lv_obj_t 	        	*toolsLoadFilmButtonLabel;
 	lv_obj_t 	        	*toolsImportContainer;
 	lv_obj_t 	        	*toolsExportContainer;
 
@@ -1694,6 +1737,7 @@ struct sElements {
 	struct sSpeedPopup			speedPopup;
 	struct sCalibPopup			calibPopup;
 	struct sFillPopup			fillPopup;
+	struct sLoadPopup			loadPopup;
   struct sKeyboardPopup   keyboardPopup;
   struct sSplashPopup     splashPopup;
   struct sWifiPopup       wifiPopup;
@@ -1939,6 +1983,54 @@ void     tunePopupRemoteSet(uint8_t kind, uint8_t percent);            /* stop t
 void     tunePopupRemoteCancel(void);                                   /* stop test, close without saving */
 void     fillPopupRemoteStart(uint8_t target); /* app (WebSocket) started a fill: show popup + run */
 void     fillPopupRemoteStop(void);            /* app stopped the running fill */
+
+/* ── Film loader (Tools → Load film) — main/film_loader.c ──
+ * Winds the film onto the reel with the reel motor, counts the Hall pulses
+ * (4 per reel turn), detects the end of the roll (reel stops, belt slips),
+ * cuts with the servo blade and pulls the tail in. See film_loader.c. */
+#define LOAD_FMT_135            0
+#define LOAD_FMT_120            1
+#define LOAD_PULSES_PER_TURN    4
+#define LOAD_IDLE               0
+#define LOAD_WINDING            1
+#define LOAD_CUTTING            2
+#define LOAD_TAIL               3
+#define LOAD_DONE               4
+#define LOAD_STOPPED            5   /* stopped by the user                          */
+#define LOAD_ERR_NOSPIN         6   /* no Hall pulse after the start                */
+#define LOAD_ERR_EARLY          7   /* reel stopped before the minimum turns: no cut */
+#define LOAD_ERR_LONG           8   /* more than the maximum turns: no cut          */
+#define LOAD_ERR_TIMEOUT        9
+#define LOAD_SPEED_DEFAULT              40     /* % */
+#define LOAD_CUTTER_REST_US_DEFAULT     500    /* MG90S: ~0 deg */
+#define LOAD_CUTTER_CUT_US_DEFAULT      2400   /* MG90S: ~180 deg */
+void     filmLoaderInit(void);
+bool     filmLoaderStart(uint8_t format);   /* false if a load is already running */
+void     filmLoaderStop(void);
+void     filmLoaderCutNow(void);            /* cut immediately (only while loading) */
+void     filmLoaderCutterCycle(void);       /* test: blade up and down, motor off (idle only) */
+void     filmLoaderCutterTest(uint8_t angle); /* test: hold the crank at 0..180 deg for a few s (idle only) */
+int      filmLoaderState(void);             /* LOAD_* */
+int      filmLoaderFormat(void);            /* LOAD_FMT_* of the current/last load */
+uint16_t filmLoaderPulses(void);            /* Hall pulses counted in this load */
+uint16_t filmLoaderExpectedPulses(void);    /* typical pulses for the format (progress bar) */
+bool     filmLoaderBusy(void);              /* winding, cutting or pulling the tail */
+bool     filmLoaderServoActive(void);
+bool     filmLoaderNeedsTick(void);
+void     filmLoaderTickAt(uint32_t now_ms); /* state machine step (runner task / tests) */
+void     filmLoaderApplyDefaults(struct machineSettings *s);
+#if !defined(BOARD_JC4880P433)
+void     filmLoaderSimSetup(bool autoTick, uint16_t filmPulses, uint16_t pulseMs);
+void     filmLoaderSimManualTicks(void);
+void     filmLoaderSimReset(void);
+uint16_t filmLoaderSimServoUs(void);
+bool     filmLoaderSimMotorOn(void);
+#endif
+// @file element_loadPopup.c
+void     loadPopupCreate(void);
+void     loadPopupRemoteStart(uint8_t format); /* app started a load: show popup + start */
+void     loadPopupRemoteStop(void);
+void     loadPopupRemoteCut(void);
 // @file accessories.c
 uint8_t pumpPercentToDuty(uint8_t pct);
 // @file ota_update.c

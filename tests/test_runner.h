@@ -269,6 +269,7 @@ void test_suite_websocket(void);
 
 /** test_live_sync.c — Live sync, real-time updates, tolerance roller, deferred free */
 void test_suite_live_sync(void);
+void test_suite_film_loader(void);
 
 
 /* ═══════════════════════════════════════════════

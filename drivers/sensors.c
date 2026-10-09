@@ -165,6 +165,20 @@ bool sensors_water_level_max_detected(void) { return false; }
  * ═══════════════════════════════════════════════ */
 #if HAS_HALL_SENSOR
 
+#define HALL_DEBOUNCE_US   30000   /* 30 ms: at 20 rpm x 4 magnets pulses are >= 750 ms apart */
+
+static volatile uint32_t hall_pulses = 0;
+static volatile int64_t  hall_last_us = 0;
+
+static void IRAM_ATTR hall_isr(void *arg)
+{
+    (void)arg;
+    int64_t now = esp_timer_get_time();
+    if (now - hall_last_us < HALL_DEBOUNCE_US) return;   /* contact bounce / noise */
+    hall_last_us = now;
+    hall_pulses++;
+}
+
 void sensors_hall_init(void)
 {
     gpio_config_t io_conf = {
@@ -172,10 +186,22 @@ void sensors_hall_init(void)
         .mode         = GPIO_MODE_INPUT,
         .pull_up_en   = GPIO_PULLUP_ENABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .intr_type    = GPIO_INTR_DISABLE,
+        .intr_type    = GPIO_INTR_NEGEDGE,              /* A3144 pulls LOW when a magnet arrives */
     };
     ESP_ERROR_CHECK(gpio_config(&io_conf));
-    ESP_LOGI(TAG, "Hall sensor initialised on GPIO %d", HALL_SENSOR_PIN);
+    /* The ISR service may already be installed (touch driver / flow meter). */
+    esp_err_t isr_ret = gpio_install_isr_service(0);
+    if (isr_ret != ESP_OK && isr_ret != ESP_ERR_INVALID_STATE) {
+        ESP_ERROR_CHECK(isr_ret);
+    }
+    ESP_ERROR_CHECK(gpio_isr_handler_add(HALL_SENSOR_PIN, hall_isr, NULL));
+    hall_pulses = 0;
+    ESP_LOGI(TAG, "Hall sensor initialised on GPIO %d (pulse counter)", HALL_SENSOR_PIN);
+}
+
+uint32_t sensors_hall_pulse_count(void)
+{
+    return hall_pulses;
 }
 
 bool sensors_hall_magnet_detected(void)
@@ -187,6 +213,7 @@ bool sensors_hall_magnet_detected(void)
 #else /* !HAS_HALL_SENSOR */
 void sensors_hall_init(void) {}
 bool sensors_hall_magnet_detected(void) { return true; }  /* assume spinning */
+uint32_t sensors_hall_pulse_count(void) { return 0; }
 #endif
 
 #else /* BOARD_SIMULATOR */
@@ -206,4 +233,5 @@ bool sensors_water_level_max_detected(void) { return false; }
 
 void sensors_hall_init(void) {}
 bool sensors_hall_magnet_detected(void) { return true; }
+uint32_t sensors_hall_pulse_count(void) { return 0; }   /* the film loader simulates its own pulses */
 #endif /* BOARD_SIMULATOR */
