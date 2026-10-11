@@ -1,0 +1,6374 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "a0aa4cc1-c89c-5c94-b349-8dbaaf854bef")
+	(paper "A3")
+	(title_block
+		(title "FilMachine Mainboard — Alimentazione")
+		(date "2026-10-10")
+		(rev "1.0")
+		(company "FilMachine")
+		(comment 1 "Mainboard per JC4880P433 (ESP32-P4) — generata da design.py")
+	)
+	(lib_symbols
+		(symbol "Connector_Generic:Conn_01x02"
+			(pin_names (offset 1.016) (hide yes))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "J" (at 0 2.54 0) (effects (font (size 1.27 1.27))))
+			(property "Value" "Conn_01x02" (at 0 -5.08 0) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "connector" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "Connector*:*_1x??_*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "Conn_01x02_1_1" (rectangle (start -1.27 1.27) (end 1.27 -3.81) (stroke (width 0.254) (type default)) (fill (type background))) (rectangle (start -1.27 0.127) (end 0 -0.127) (stroke (width 0.1524) (type default)) (fill (type none))) (rectangle (start -1.27 -2.413) (end 0 -2.667) (stroke (width 0.1524) (type default)) (fill (type none))) (pin passive line (at -5.08 0 0) (length 3.81) (name "Pin_1" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at -5.08 -2.54 0) (length 3.81) (name "Pin_2" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Device:Fuse"
+			(pin_numbers (hide yes))
+			(pin_names (offset 0))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "F" (at 2.032 0 90) (effects (font (size 1.27 1.27))))
+			(property "Value" "Fuse" (at -1.905 0 90) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at -1.778 0 90) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Fuse" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "fuse" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "*Fuse*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "Fuse_0_1" (rectangle (start -0.762 -2.54) (end 0.762 2.54) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0 2.54) (xy 0 -2.54)) (stroke (width 0) (type default)) (fill (type none))))
+			(symbol "Fuse_1_1" (pin passive line (at 0 3.81 270) (length 1.27) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 0 -3.81 90) (length 1.27) (name "~" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Device:D_Zener"
+			(pin_numbers (hide yes))
+			(pin_names (offset 1.016) (hide yes))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "D" (at 0 2.54 0) (effects (font (size 1.27 1.27))))
+			(property "Value" "D_Zener" (at 0 -2.54 0) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Zener diode" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "diode" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "TO-???* *_Diode_* *SingleDiode* D_*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "D_Zener_0_1" (polyline (pts (xy -1.27 -1.27) (xy -1.27 1.27) (xy -0.762 1.27)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 1.27 0) (xy -1.27 0)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 1.27 -1.27) (xy 1.27 1.27) (xy -1.27 0) (xy 1.27 -1.27)) (stroke (width 0.254) (type default)) (fill (type none))))
+			(symbol "D_Zener_1_1" (pin passive line (at -3.81 0 0) (length 2.54) (name "K" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 3.81 0 180) (length 2.54) (name "A" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Device:C_Polarized"
+			(pin_numbers (hide yes))
+			(pin_names (offset 0.254))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "C" (at 0.635 2.54 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Value" "C_Polarized" (at 0.635 -2.54 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Footprint" "" (at 0.9652 -3.81 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Polarized capacitor" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "cap capacitor" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "CP_*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "C_Polarized_0_1" (rectangle (start -2.286 0.508) (end 2.286 1.016) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy -1.778 2.286) (xy -0.762 2.286)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy -1.27 2.794) (xy -1.27 1.778)) (stroke (width 0) (type default)) (fill (type none))) (rectangle (start 2.286 -0.508) (end -2.286 -1.016) (stroke (width 0) (type default)) (fill (type outline))))
+			(symbol "C_Polarized_1_1" (pin passive line (at 0 3.81 270) (length 2.794) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 0 -3.81 90) (length 2.794) (name "~" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Regulator_Switching:LMR33630ADDA"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U" (at 0 11.43 0) (effects (font (size 1.27 1.27))))
+			(property "Value" "LMR33630ADDA" (at 0 8.89 0) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "Package_SO:Texas_HSOP-8-1EP_3.9x4.9mm_P1.27mm_ThermalVias" (at 0 -20.32 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "http://www.ti.com/lit/ds/symlink/lmr33630.pdf" (at 0 -2.54 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Simple Switcher Synchronous Buck Regulator, Vin=3.8-36V, Iout=3A, F=400kHz, Adjustable output voltage, HSOP-8" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "simple-switcher synchronous buck step-down voltage-regulator" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "Texas*HSOP*1EP*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "LMR33630ADDA_0_1" (rectangle (start -7.62 7.62) (end 7.62 -7.62) (stroke (width 0.254) (type default)) (fill (type background))))
+			(symbol "LMR33630ADDA_1_1" (pin power_in line (at -10.16 5.08 0) (length 2.54) (name "VIN" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))) (pin input line (at -10.16 0 0) (length 2.54) (name "EN" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27))))) (pin power_out line (at -10.16 -5.08 0) (length 2.54) (name "VCC" (effects (font (size 1.27 1.27)))) (number "6" (effects (font (size 1.27 1.27))))) (pin power_in line (at 0 -10.16 90) (length 2.54) (name "GND" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 0 -10.16 90) (length 2.54) (hide yes) (name "GND" (effects (font (size 1.27 1.27)))) (number "9" (effects (font (size 1.27 1.27))))) (pin input line (at 10.16 5.08 180) (length 2.54) (name "BOOT" (effects (font (size 1.27 1.27)))) (number "7" (effects (font (size 1.27 1.27))))) (pin output line (at 10.16 2.54 180) (length 2.54) (name "SW" (effects (font (size 1.27 1.27)))) (number "8" (effects (font (size 1.27 1.27))))) (pin input line (at 10.16 -2.54 180) (length 2.54) (name "FB" (effects (font (size 1.27 1.27)))) (number "5" (effects (font (size 1.27 1.27))))) (pin open_collector line (at 10.16 -5.08 180) (length 2.54) (name "PG" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Device:C"
+			(pin_numbers (hide yes))
+			(pin_names (offset 0.254))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "C" (at 0.635 2.54 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Value" "C" (at 0.635 -2.54 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Footprint" "" (at 0.9652 -3.81 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Unpolarized capacitor" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "cap capacitor" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "C_*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "C_0_1" (polyline (pts (xy -2.032 0.762) (xy 2.032 0.762)) (stroke (width 0.508) (type default)) (fill (type none))) (polyline (pts (xy -2.032 -0.762) (xy 2.032 -0.762)) (stroke (width 0.508) (type default)) (fill (type none))))
+			(symbol "C_1_1" (pin passive line (at 0 3.81 270) (length 2.794) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 0 -3.81 90) (length 2.794) (name "~" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Device:L"
+			(pin_numbers (hide yes))
+			(pin_names (offset 1.016) (hide yes))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "L" (at -1.27 0 90) (effects (font (size 1.27 1.27))))
+			(property "Value" "L" (at 1.905 0 90) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Inductor" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "inductor choke coil reactor magnetic" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "Choke_* *Coil* Inductor_* L_*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "L_0_1" (arc (start 0 2.54) (mid 0.6323 1.905) (end 0 1.27) (stroke (width 0) (type default)) (fill (type none))) (arc (start 0 1.27) (mid 0.6323 0.635) (end 0 0) (stroke (width 0) (type default)) (fill (type none))) (arc (start 0 0) (mid 0.6323 -0.635) (end 0 -1.27) (stroke (width 0) (type default)) (fill (type none))) (arc (start 0 -1.27) (mid 0.6323 -1.905) (end 0 -2.54) (stroke (width 0) (type default)) (fill (type none))))
+			(symbol "L_1_1" (pin passive line (at 0 3.81 270) (length 1.27) (name "1" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 0 -3.81 90) (length 1.27) (name "2" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Device:R"
+			(pin_numbers (hide yes))
+			(pin_names (offset 0))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "R" (at 2.032 0 90) (effects (font (size 1.27 1.27))))
+			(property "Value" "R" (at 0 0 90) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at -1.778 0 90) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Resistor" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "R res resistor" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "R_*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "R_0_1" (rectangle (start -1.016 -2.54) (end 1.016 2.54) (stroke (width 0.254) (type default)) (fill (type none))))
+			(symbol "R_1_1" (pin passive line (at 0 3.81 270) (length 1.27) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 0 -3.81 90) (length 1.27) (name "~" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Regulator_Linear:AP2112K-3.3"
+			(pin_names (offset 0.254))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U" (at -5.08 5.715 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Value" "AP2112K-3.3" (at 0 5.715 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5" (at 0 8.255 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "https://www.diodes.com/assets/Datasheets/AP2112.pdf" (at 0 2.54 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "600mA low dropout linear regulator, with enable pin, 3.8V-6V input voltage range, 3.3V fixed positive output, SOT-23-5" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "linear regulator ldo fixed positive" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "SOT?23?5*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "AP2112K-3.3_0_1" (rectangle (start -5.08 4.445) (end 5.08 -5.08) (stroke (width 0.254) (type default)) (fill (type background))))
+			(symbol "AP2112K-3.3_1_1" (pin power_in line (at -7.62 2.54 0) (length 2.54) (name "VIN" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin input line (at -7.62 0 0) (length 2.54) (name "EN" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27))))) (pin power_in line (at 0 -7.62 90) (length 2.54) (name "GND" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))) (pin no_connect line (at 5.08 0 180) (length 2.54) (hide yes) (name "NC" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27))))) (pin power_out line (at 7.62 2.54 180) (length 2.54) (name "VOUT" (effects (font (size 1.27 1.27)))) (number "5" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Device:Polyfuse"
+			(pin_numbers (hide yes))
+			(pin_names (offset 0))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "F" (at -2.54 0 90) (effects (font (size 1.27 1.27))))
+			(property "Value" "Polyfuse" (at 2.54 0 90) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at 1.27 -5.08 0) (effects (font (size 1.27 1.27)) (justify left) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Resettable fuse, polymeric positive temperature coefficient" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "resettable fuse PTC PPTC polyfuse polyswitch" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "*polyfuse* *PTC*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "Polyfuse_0_1" (polyline (pts (xy -1.524 2.54) (xy -1.524 1.524) (xy 1.524 -1.524) (xy 1.524 -2.54)) (stroke (width 0) (type default)) (fill (type none))) (rectangle (start -0.762 2.54) (end 0.762 -2.54) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0 2.54) (xy 0 -2.54)) (stroke (width 0) (type default)) (fill (type none))))
+			(symbol "Polyfuse_1_1" (pin passive line (at 0 3.81 270) (length 1.27) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 0 -3.81 90) (length 1.27) (name "~" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Connector:USB_C_Receptacle_PowerOnly_6P"
+			(pin_names (offset 1.016))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "J" (at 0 16.51 0) (effects (font (size 1.27 1.27)) (justify bottom)))
+			(property "Value" "USB_C_Receptacle_PowerOnly_6P" (at 0 13.97 0) (effects (font (size 1.27 1.27)) (justify bottom)))
+			(property "Footprint" "" (at 3.81 2.54 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "https://www.usb.org/sites/default/files/documents/usb_type-c.zip" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "USB Power-Only 6P Type-C Receptacle connector" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "usb universal serial bus type-C power-only charging-only 6P 6C" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "USB*C*Receptacle*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "USB_C_Receptacle_PowerOnly_6P_0_0" (rectangle (start -0.254 -12.7) (end 0.254 -11.684) (stroke (width 0) (type default)) (fill (type none))) (rectangle (start 10.16 7.874) (end 9.144 7.366) (stroke (width 0) (type default)) (fill (type none))) (rectangle (start 10.16 -4.826) (end 9.144 -5.334) (stroke (width 0) (type default)) (fill (type none))) (rectangle (start 10.16 -7.366) (end 9.144 -7.874) (stroke (width 0) (type default)) (fill (type none))))
+			(symbol "USB_C_Receptacle_PowerOnly_6P_0_1" (rectangle (start -10.16 12.7) (end 10.16 -12.7) (stroke (width 0.254) (type default)) (fill (type background))) (polyline (pts (xy -8.89 -1.27) (xy -8.89 6.35)) (stroke (width 0.508) (type default)) (fill (type none))) (rectangle (start -7.62 -1.27) (end -6.35 6.35) (stroke (width 0.254) (type default)) (fill (type outline))) (arc (start -7.62 6.35) (mid -6.985 6.9823) (end -6.35 6.35) (stroke (width 0.254) (type default)) (fill (type none))) (arc (start -7.62 6.35) (mid -6.985 6.9823) (end -6.35 6.35) (stroke (width 0.254) (type default)) (fill (type outline))) (arc (start -8.89 6.35) (mid -6.985 8.2467) (end -5.08 6.35) (stroke (width 0.508) (type default)) (fill (type none))) (arc (start -5.08 -1.27) (mid -6.985 -3.1667) (end -8.89 -1.27) (stroke (width 0.508) (type default)) (fill (type none))) (arc (start -6.35 -1.27) (mid -6.985 -1.9023) (end -7.62 -1.27) (stroke (width 0.254) (type default)) (fill (type none))) (arc (start -6.35 -1.27) (mid -6.985 -1.9023) (end -7.62 -1.27) (stroke (width 0.254) (type default)) (fill (type outline))) (polyline (pts (xy -5.08 6.35) (xy -5.08 -1.27)) (stroke (width 0.508) (type default)) (fill (type none))) (circle (center -2.54 3.683) (radius 0.635) (stroke (width 0.254) (type default)) (fill (type outline))) (polyline (pts (xy -1.27 6.858) (xy 0 9.398) (xy 1.27 6.858) (xy -1.27 6.858)) (stroke (width 0.254) (type default)) (fill (type outline))) (polyline (pts (xy 0 0.508) (xy 2.54 3.048) (xy 2.54 4.318)) (stroke (width 0.508) (type default)) (fill (type none))) (polyline (pts (xy 0 -0.762) (xy -2.54 1.778) (xy -2.54 3.048)) (stroke (width 0.508) (type default)) (fill (type none))) (polyline (pts (xy 0 -3.302) (xy 0 6.858)) (stroke (width 0.508) (type default)) (fill (type none))) (circle (center 0 -3.302) (radius 1.27) (stroke (width 0) (type default)) (fill (type outline))) (rectangle (start 1.905 4.318) (end 3.175 5.588) (stroke (width 0.254) (type default)) (fill (type outline))))
+			(symbol "USB_C_Receptacle_PowerOnly_6P_1_1" (pin passive line (at -7.62 -17.78 90) (length 5.08) (name "SHIELD" (effects (font (size 1.27 1.27)))) (number "S1" (effects (font (size 1.27 1.27))))) (pin passive line (at 0 -17.78 90) (length 5.08) (name "GND" (effects (font (size 1.27 1.27)))) (number "A12" (effects (font (size 1.27 1.27))))) (pin passive line (at 0 -17.78 90) (length 5.08) (hide yes) (name "GND" (effects (font (size 1.27 1.27)))) (number "B12" (effects (font (size 1.27 1.27))))) (pin passive line (at 15.24 7.62 180) (length 5.08) (name "VBUS" (effects (font (size 1.27 1.27)))) (number "A9" (effects (font (size 1.27 1.27))))) (pin passive line (at 15.24 7.62 180) (length 5.08) (hide yes) (name "VBUS" (effects (font (size 1.27 1.27)))) (number "B9" (effects (font (size 1.27 1.27))))) (pin bidirectional line (at 15.24 -5.08 180) (length 5.08) (name "CC1" (effects (font (size 1.27 1.27)))) (number "A5" (effects (font (size 1.27 1.27))))) (pin bidirectional line (at 15.24 -7.62 180) (length 5.08) (name "CC2" (effects (font (size 1.27 1.27)))) (number "B5" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Diode:1N4148WS"
+			(pin_numbers (hide yes))
+			(pin_names (hide yes))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "D" (at 0 2.54 0) (effects (font (size 1.27 1.27))))
+			(property "Value" "1N4148WS" (at 0 -2.54 0) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "Diode_SMD:D_SOD-323" (at 0 -4.445 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "https://www.vishay.com/docs/85751/1n4148ws.pdf" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "75V 0.15A Fast switching Diode, SOD-323" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Sim.Device" "D" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Sim.Pins" "1=K 2=A" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "diode" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "D*SOD?323*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "1N4148WS_0_1" (polyline (pts (xy -1.27 1.27) (xy -1.27 -1.27)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0) (xy 1.27 1.27)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 1.27 0) (xy -1.27 0)) (stroke (width 0) (type default)) (fill (type none))))
+			(symbol "1N4148WS_1_1" (pin passive line (at -3.81 0 0) (length 2.54) (name "K" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 3.81 0 180) (length 2.54) (name "A" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Comparator:TLV7041DBV"
+			(pin_names (offset 0.127))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U" (at 0 5.08 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Value" "TLV7041DBV" (at 0 -5.08 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5" (at 0 -10.16 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "https://www.ti.com/lit/ds/symlink/tlv7041.pdf" (at 0 -7.62 0) (effects (font (size 1.27 1.27)) (justify left) (hide yes)))
+			(property "Description" "Single, 1.6V-6.5V, 315nA Quiescent, Open-Drain Output, Comparator, North-west pinout, SOT-23-5" (at 0 -10.16 0) (effects (font (size 1.27 1.27)) (justify left) (hide yes)))
+			(property "ki_keywords" "cmp collector" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "SOT?23*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "TLV7041DBV_0_1" (polyline (pts (xy -5.08 5.08) (xy 5.08 0) (xy -5.08 -5.08) (xy -5.08 5.08)) (stroke (width 0.254) (type default)) (fill (type background))) (polyline (pts (xy 3.302 -0.508) (xy 2.794 -0.508) (xy 3.302 0) (xy 2.794 0.508) (xy 2.286 0) (xy 2.794 -0.508) (xy 2.286 -0.508)) (stroke (width 0.127) (type default)) (fill (type none))) (pin power_in line (at -2.54 7.62 270) (length 3.81) (name "V+" (effects (font (size 1.27 1.27)))) (number "5" (effects (font (size 1.27 1.27))))) (pin power_in line (at -2.54 -7.62 90) (length 3.81) (name "V-" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(symbol "TLV7041DBV_1_1" (pin input line (at -7.62 2.54 0) (length 2.54) (name "+" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27))))) (pin input line (at -7.62 -2.54 0) (length 2.54) (name "-" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27))))) (pin open_collector line (at 7.62 0 180) (length 2.54) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Transistor_FET:AO3401A"
+			(pin_names (hide yes))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "Q" (at 5.08 1.905 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Value" "AO3401A" (at 5.08 0 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 5.08 -1.905 0) (effects (font (size 1.27 1.27) (italic yes)) (justify left) (hide yes)))
+			(property "Datasheet" "http://www.aosmd.com/pdfs/datasheet/AO3401A.pdf" (at 5.08 -3.81 0) (effects (font (size 1.27 1.27)) (justify left) (hide yes)))
+			(property "Description" "-4.0A Id, -30V Vds, P-Channel MOSFET, SOT-23" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "P-Channel MOSFET" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "SOT?23*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "AO3401A_0_1" (polyline (pts (xy 0.254 1.905) (xy 0.254 -1.905)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0.254 0) (xy -2.54 0)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 0.762 2.286) (xy 0.762 1.27)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0.762 1.778) (xy 3.302 1.778) (xy 3.302 -1.778) (xy 0.762 -1.778)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 0.762 0.508) (xy 0.762 -0.508)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0.762 -1.27) (xy 0.762 -2.286)) (stroke (width 0.254) (type default)) (fill (type none))) (circle (center 1.651 0) (radius 2.794) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 2.286 0) (xy 1.27 0.381) (xy 1.27 -0.381) (xy 2.286 0)) (stroke (width 0) (type default)) (fill (type outline))) (polyline (pts (xy 2.54 2.54) (xy 2.54 1.778)) (stroke (width 0) (type default)) (fill (type none))) (circle (center 2.54 1.778) (radius 0.254) (stroke (width 0) (type default)) (fill (type outline))) (circle (center 2.54 -1.778) (radius 0.254) (stroke (width 0) (type default)) (fill (type outline))) (polyline (pts (xy 2.54 -2.54) (xy 2.54 0) (xy 0.762 0)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 2.794 -0.508) (xy 2.921 -0.381) (xy 3.683 -0.381) (xy 3.81 -0.254)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 3.302 -0.381) (xy 2.921 0.254) (xy 3.683 0.254) (xy 3.302 -0.381)) (stroke (width 0) (type default)) (fill (type none))))
+			(symbol "AO3401A_1_1" (pin input line (at -5.08 0 0) (length 2.54) (name "G" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 2.54 5.08 270) (length 2.54) (name "D" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27))))) (pin passive line (at 2.54 -5.08 90) (length 2.54) (name "S" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Device:LED"
+			(pin_numbers (hide yes))
+			(pin_names (offset 1.016) (hide yes))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "D" (at 0 2.54 0) (effects (font (size 1.27 1.27))))
+			(property "Value" "LED" (at 0 -2.54 0) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Light emitting diode" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Sim.Pins" "1=K 2=A" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "LED diode" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "LED* LED_SMD:* LED_THT:*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "LED_0_1" (polyline (pts (xy -3.048 -0.762) (xy -4.572 -2.286) (xy -3.81 -2.286) (xy -4.572 -2.286) (xy -4.572 -1.524)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy -1.778 -0.762) (xy -3.302 -2.286) (xy -2.54 -2.286) (xy -3.302 -2.286) (xy -3.302 -1.524)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy -1.27 0) (xy 1.27 0)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy -1.27 -1.27) (xy -1.27 1.27)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 1.27 -1.27) (xy 1.27 1.27) (xy -1.27 0) (xy 1.27 -1.27)) (stroke (width 0.254) (type default)) (fill (type none))))
+			(symbol "LED_1_1" (pin passive line (at -3.81 0 0) (length 2.54) (name "K" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 3.81 0 180) (length 2.54) (name "A" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Mechanical:MountingHole"
+			(pin_names (offset 1.016))
+			(exclude_from_sim no)
+			(in_bom no)
+			(on_board yes)
+			(property "Reference" "H" (at 0 5.08 0) (effects (font (size 1.27 1.27))))
+			(property "Value" "MountingHole" (at 0 3.175 0) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Mounting Hole without connection" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "mounting hole" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "MountingHole*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "MountingHole_0_1" (circle (center 0 0) (radius 1.27) (stroke (width 1.27) (type default)) (fill (type none))))
+			(embedded_fonts no)
+		)
+		(symbol "power:PWR_FLAG"
+			(power)
+			(pin_numbers (hide yes))
+			(pin_names (offset 0) (hide yes))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "#FLG" (at 0 1.905 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Value" "PWR_FLAG" (at 0 3.81 0) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Special symbol for telling ERC where power comes from" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "flag power" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "PWR_FLAG_0_0" (pin power_out line (at 0 0 90) (length 0) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))))
+			(symbol "PWR_FLAG_0_1" (polyline (pts (xy 0 0) (xy 0 1.27) (xy -1.016 1.905) (xy 0 2.54) (xy 1.016 1.905) (xy 0 1.27)) (stroke (width 0) (type default)) (fill (type none))))
+			(embedded_fonts no)
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x02")
+		(at 40.64 27.94 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "929ee0ba-92c3-55ab-957b-ea2092fe74ce")
+		(property "Reference" "J1"
+			(at 40.64 25.17 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "12V HEAT IN"
+			(at 40.64 33.25 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-2-5.08_1x02_P5.08mm_Horizontal"
+			(at 40.64 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 40.64 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Ingresso 12 V riscaldatori (da LRS-350, coppia +V/-V n.1), 24 A (pin 2 = +)"
+			(at 40.64 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "1711026"
+			(at 40.64 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Phoenix Contact"
+			(at 40.64 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "d0461935-0ae5-5a9a-b23a-652a00c6d853")
+		)
+		(pin "2"
+			(uuid "f01bcf76-2edc-5e45-9250-8239032b05eb")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "J1") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 35.56 27.94)
+			(xy 33.02 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d5a4ed7a-e9e5-56a0-8eb0-c7ca2b280370")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 33.02 27.94 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "910e4deb-1cd0-5e64-b32d-d20bb421a5b0")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 33.02 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 35.56 30.48)
+			(xy 33.02 30.48)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "de26e7cf-5aa2-57bf-9860-eade1c8b805e")
+	)
+	(global_label "+12V_IN_H"
+		(shape passive)
+		(at 33.02 30.48 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "3c7c4bd6-02da-5c79-8402-b94c524d15fe")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 33.02 30.48 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x02")
+		(at 67.31 27.94 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "fa84c5bd-b9b6-5eac-a084-7264cc41d077")
+		(property "Reference" "J2"
+			(at 67.31 25.17 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "12V MAIN IN"
+			(at 67.31 33.25 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-2-5.08_1x02_P5.08mm_Horizontal"
+			(at 67.31 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 67.31 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Ingresso 12 V pompa/logica (da LRS-350, coppia +V/-V n.2), 24 A (pin 2 = +)"
+			(at 67.31 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "1711026"
+			(at 67.31 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Phoenix Contact"
+			(at 67.31 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "cf8da283-4ff5-5e09-bfc1-cde4b163be47")
+		)
+		(pin "2"
+			(uuid "da49ec62-ef97-56fc-a198-2389af80efe9")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "J2") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 62.23 27.94)
+			(xy 59.69 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c812c899-399c-5f0a-8598-85cb4826a62d")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 59.69 27.94 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "459e5783-c5ee-5c68-b157-0a0d374c529f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 59.69 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 62.23 30.48)
+			(xy 59.69 30.48)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a45a2d82-f7ab-5788-acc3-8dccacdd9170")
+	)
+	(global_label "+12V_IN_M"
+		(shape passive)
+		(at 59.69 30.48 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "9630a8c3-4875-565b-a9ef-da7f3224f834")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 59.69 30.48 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:Fuse")
+		(at 76.2 44.45 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d0351e79-f7ed-59d7-9a29-c628063da697")
+		(property "Reference" "F1"
+			(at 76.2 39.14 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "15A MINI"
+			(at 76.2 49.76 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Fuse:Fuseholder_Blade_Mini_Keystone_3568"
+			(at 76.2 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 76.2 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Portafusibile mini-blade + fusibile 15 A inserito (voce a parte) — riscaldatore 1"
+			(at 76.2 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "3568"
+			(at 76.2 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Keystone"
+			(at 76.2 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "9daaaadf-b28f-571e-ac03-2d88764e78ef")
+		)
+		(pin "2"
+			(uuid "193dc2b1-4a4c-5e53-8420-4fcbb047a314")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "F1") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 76.2 40.64)
+			(xy 76.2 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "980a3ce4-7f12-5a33-ab0f-bd16d87820fe")
+	)
+	(global_label "+12V_IN_H"
+		(shape passive)
+		(at 76.2 38.1 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "09e80bdd-516f-544d-a266-1563343442c3")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 76.2 38.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 76.2 48.26)
+			(xy 76.2 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "812ae5eb-7971-5995-bfa5-7a780ad90ec5")
+	)
+	(global_label "+12V_H1"
+		(shape passive)
+		(at 76.2 50.8 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "a22d8432-59dc-5239-8b31-1dfca3b95150")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 76.2 50.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:Fuse")
+		(at 83.82 44.45 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "965c09b8-cceb-56e4-b50f-0970803b25c4")
+		(property "Reference" "F2"
+			(at 83.82 39.14 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "15A MINI"
+			(at 83.82 49.76 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Fuse:Fuseholder_Blade_Mini_Keystone_3568"
+			(at 83.82 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 83.82 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Portafusibile mini-blade + fusibile 15 A inserito — riscaldatore 2"
+			(at 83.82 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "3568"
+			(at 83.82 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Keystone"
+			(at 83.82 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "4c30dfc1-78c1-5b23-93d9-9f0f0896eacf")
+		)
+		(pin "2"
+			(uuid "adfec3e5-5878-5d8f-baa9-342b8a59680d")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "F2") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 83.82 40.64)
+			(xy 83.82 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1d49db46-acbc-54c2-8d18-dcb056da3eaa")
+	)
+	(global_label "+12V_IN_H"
+		(shape passive)
+		(at 83.82 38.1 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "d9a82391-5a16-5b36-9b2f-c13782237981")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 83.82 38.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 83.82 48.26)
+			(xy 83.82 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8228b961-6680-5205-88d6-bbfc45243ce3")
+	)
+	(global_label "+12V_H2"
+		(shape passive)
+		(at 83.82 50.8 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "9011ff4a-ee63-5e45-b7b7-93704941643d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 83.82 50.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:Fuse")
+		(at 90.17 44.45 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "b08dc6ab-6e13-516e-a221-c964a540d375")
+		(property "Reference" "F3"
+			(at 90.17 39.14 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "15A MINI"
+			(at 90.17 49.76 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Fuse:Fuseholder_Blade_Mini_Keystone_3568"
+			(at 90.17 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 90.17 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Portafusibile mini-blade + fusibile 15 A inserito — pompa"
+			(at 90.17 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "3568"
+			(at 90.17 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Keystone"
+			(at 90.17 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "efa1c509-c2f5-5a28-bc08-232c0cde98eb")
+		)
+		(pin "2"
+			(uuid "b1ab04ec-50f5-59b6-ae43-3b58cbeda5f9")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "F3") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 90.17 40.64)
+			(xy 90.17 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8b06a75f-fca8-5b8d-a5b6-1cb2033a8edb")
+	)
+	(global_label "+12V_IN_M"
+		(shape passive)
+		(at 90.17 38.1 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "b9642b97-1fb3-5326-92e6-00b38c606e24")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 90.17 38.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 90.17 48.26)
+			(xy 90.17 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cb4e4de1-1bd3-54d8-b0b2-03886c6c94dd")
+	)
+	(global_label "+12V_PUMP"
+		(shape passive)
+		(at 90.17 50.8 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "d1f07be2-2f4a-5bc4-aa6e-defc687599a0")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 90.17 50.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:Fuse")
+		(at 97.79 44.45 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "5fb5bc42-b218-5178-84f2-f261769f4a4e")
+		(property "Reference" "F4"
+			(at 97.79 39.14 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "7.5A MINI"
+			(at 97.79 49.76 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Fuse:Fuseholder_Blade_Mini_Keystone_3568"
+			(at 97.79 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 97.79 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Portafusibile mini-blade + fusibile 7,5 A inserito — valvole, motore, logica"
+			(at 97.79 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "3568"
+			(at 97.79 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Keystone"
+			(at 97.79 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "af26281e-0bb1-5366-b604-4f1c69e98bf3")
+		)
+		(pin "2"
+			(uuid "07fa3d62-9eb5-5eec-b4c6-0063062c9c5e")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "F4") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 97.79 40.64)
+			(xy 97.79 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c3f0427a-ded8-5b75-8c65-5a10350aa92a")
+	)
+	(global_label "+12V_IN_M"
+		(shape passive)
+		(at 97.79 38.1 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "2002e5a1-6f98-50a9-977a-048ef71ec0f5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 97.79 38.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 97.79 48.26)
+			(xy 97.79 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e15a04a1-b162-50a6-b3bd-19ebf978e8ce")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 97.79 50.8 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "532a9354-7876-50cb-b6a7-483733d05ba6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 97.79 50.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:D_Zener")
+		(at 118.11 27.94 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "75ecf39c-228c-5681-a2fb-3d3497ab4bcd")
+		(property "Reference" "D1"
+			(at 118.11 25.17 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "SMCJ16A"
+			(at 118.11 30.71 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SMC"
+			(at 118.11 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 118.11 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "TVS 16 V: transitori + crowbar inversione polarità (brucia F4)"
+			(at 118.11 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "SMCJ16A"
+			(at 118.11 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Littelfuse"
+			(at 118.11 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "bab4331f-ac9a-5da3-8fae-016ff8dc9a9e")
+		)
+		(pin "2"
+			(uuid "12036b11-13bf-5900-a3b0-a84c40677c53")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "D1") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 114.3 27.94)
+			(xy 111.76 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7f7f17c5-e7d9-5ad9-a73d-90b0907256cd")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 111.76 27.94 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "cb5456fe-9b27-5f45-9b1a-0b351015e8f2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 111.76 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 121.92 27.94)
+			(xy 124.46 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "74c057e3-c816-5af4-afa1-b59e8d46b712")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 124.46 27.94 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "872461e9-a52f-5a69-9dd3-8e8c372e3084")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 124.46 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:D_Zener")
+		(at 154.94 27.94 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "9317e305-55eb-57d6-8b59-1f1c1964ede0")
+		(property "Reference" "D2"
+			(at 154.94 25.17 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "SMCJ16A"
+			(at 154.94 30.71 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SMC"
+			(at 154.94 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 154.94 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "TVS 16 V sul rail pompa (energia di ritorno del motore)"
+			(at 154.94 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "SMCJ16A"
+			(at 154.94 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Littelfuse"
+			(at 154.94 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "51b39db6-ed14-5cf6-bbe3-ca3fde76ccc7")
+		)
+		(pin "2"
+			(uuid "69b0cd90-d4f8-5eb2-83cf-816fd7e63f1e")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "D2") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 151.13 27.94)
+			(xy 148.59 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4d5ef2ad-03f8-5ab1-80c2-fb33bf4ec845")
+	)
+	(global_label "+12V_PUMP"
+		(shape passive)
+		(at 148.59 27.94 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "b27b8cb9-1d60-50e0-b39b-63cc5133d7f4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 148.59 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 158.75 27.94)
+			(xy 161.29 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "88765699-260e-5528-9ce5-d244cf8c9dca")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 161.29 27.94 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "0f175ede-faa0-5a74-b772-78ec74f76de2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 161.29 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C_Polarized")
+		(at 175.26 40.64 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "3fdcd1d6-a975-53d2-9997-f738b7ccfc0f")
+		(property "Reference" "C1"
+			(at 175.26 35.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100uF 25V"
+			(at 175.26 45.95 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_THT:CP_Radial_D8.0mm_P3.50mm"
+			(at 175.26 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 175.26 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Bulk rail +12V logica/valvole"
+			(at 175.26 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "EEU-FR1E101"
+			(at 175.26 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Panasonic"
+			(at 175.26 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "c15ceb56-d884-5920-ab57-24199fa99241")
+		)
+		(pin "2"
+			(uuid "3df41ac5-6102-5c12-b9f1-dbd1e694755c")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "C1") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 175.26 36.83)
+			(xy 175.26 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c164b425-f58a-51c1-976d-a9d6c5daf4f5")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 175.26 34.29 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "d853258c-a05b-5047-aff0-3ef39345d61c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 175.26 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 175.26 44.45)
+			(xy 175.26 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b962d643-f802-5645-9b41-48564d844aef")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 175.26 46.99 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "ee2a34c6-9f84-5405-9ed0-455c67c78b49")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 175.26 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Regulator_Switching:LMR33630ADDA")
+		(at 207.01 34.29 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "b8afde1b-feef-5c50-a79f-6bab3cdd4d92")
+		(property "Reference" "U1"
+			(at 207.01 25.17 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "LMR33630ADDA"
+			(at 207.01 45.95 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_SO:TI_SO-PowerPAD-8_ThermalVias"
+			(at 207.01 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 207.01 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Buck sincrono 3,8–36 V -> 5 V 3 A"
+			(at 207.01 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "LMR33630ADDAR"
+			(at 207.01 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 207.01 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "2"
+			(uuid "da835144-8c2d-5cf6-b7cf-7e58256381b9")
+		)
+		(pin "3"
+			(uuid "bd49a6af-2255-5445-8228-39a3a0aa08b4")
+		)
+		(pin "6"
+			(uuid "8471320a-4f0f-55b4-8c36-9fda5ca41ed3")
+		)
+		(pin "1"
+			(uuid "b7f17c14-617f-53d3-8aa9-3d0d5cd996f0")
+		)
+		(pin "9"
+			(uuid "3b60d201-1c23-5840-982f-033abeaf7038")
+		)
+		(pin "7"
+			(uuid "b3b7a596-4797-508f-9753-f49b67dbe4b2")
+		)
+		(pin "8"
+			(uuid "0bab4238-b559-5a85-9b05-685351782954")
+		)
+		(pin "5"
+			(uuid "730687c1-a378-5080-8dd5-278f20a02308")
+		)
+		(pin "4"
+			(uuid "5da8119a-83fc-503b-8073-7c51d69c2616")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "U1") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 196.85 29.21)
+			(xy 194.31 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3bd6d72a-77b4-5041-b477-2eb938dcbfd6")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 194.31 29.21 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "b74a7aa4-5ed9-57db-bbf2-be6607572c6b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 194.31 29.21 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 196.85 34.29)
+			(xy 194.31 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d9884bd5-b027-5503-8690-9e9e8a9946d5")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 194.31 34.29 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "c8cd9c41-5958-5977-b50a-9f0e1dca2b2e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 194.31 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 196.85 39.37)
+			(xy 194.31 39.37)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f4b5e79d-8837-5937-9ab6-14ffcb84a7a8")
+	)
+	(global_label "BUCK_VCC"
+		(shape passive)
+		(at 194.31 39.37 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "b99e4dd4-f3b7-554a-8d3b-6b0aaf5eeed6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 194.31 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 207.01 44.45)
+			(xy 207.01 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "88d01b01-6152-5bd6-8a1b-31f251700c7e")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 207.01 46.99 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "b2e71b6d-6f7a-5ef2-a92c-2e617708e870")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 207.01 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 207.01 44.45)
+			(xy 207.01 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cc6fa8ef-de1d-57ce-8dca-f00b9a538ea9")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 207.01 46.99 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "48066a36-b67c-5a9e-af25-642b63f63084")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 207.01 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 217.17 29.21)
+			(xy 219.71 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "56975c88-81b6-551c-a7c3-f918324748ee")
+	)
+	(global_label "BUCK_BOOT"
+		(shape passive)
+		(at 219.71 29.21 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "70ef0cf0-fba8-5fac-8b2a-c52649c42938")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 219.71 29.21 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 217.17 31.75)
+			(xy 219.71 31.75)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a5f08cda-76dd-5ff7-805b-f9d0641d8ae5")
+	)
+	(global_label "BUCK_SW"
+		(shape passive)
+		(at 219.71 31.75 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "ac8de29b-4d4c-5926-beb7-52ad7c827bd4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 219.71 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 217.17 36.83)
+			(xy 219.71 36.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "11a8ef96-2d7e-589a-89ae-f780d34a36d2")
+	)
+	(global_label "BUCK_FB"
+		(shape passive)
+		(at 219.71 36.83 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "f710558d-0ae2-54be-9289-361fa33d0ddc")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 219.71 36.83 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(no_connect
+		(at 217.17 39.37)
+		(uuid "e8f8544f-c6ab-55ee-97c2-606ef902b1fb")
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 238.76 40.64 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "8d83d12b-852f-523e-b05e-bb35b3fb39e4")
+		(property "Reference" "C2"
+			(at 238.76 35.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "10uF 50V"
+			(at 238.76 45.95 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric"
+			(at 238.76 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 238.76 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Cin buck"
+			(at 238.76 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "GRM32ER71H106KA12L"
+			(at 238.76 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 238.76 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "576510ae-0ca0-5964-968e-0332ef5756ea")
+		)
+		(pin "2"
+			(uuid "5f24a2e9-953f-5b87-909c-463edcffd3fb")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "C2") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 238.76 36.83)
+			(xy 238.76 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a30b1de3-22f8-53bc-b1e6-5cd724c92cd6")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 238.76 34.29 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "ea4db37e-5393-5ffd-95b4-e1944c73f514")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 238.76 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 238.76 44.45)
+			(xy 238.76 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0e26ded0-448a-52ef-8634-4a7932420d22")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 238.76 46.99 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "212b5d3b-dff3-51c4-939d-0de416b6baef")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 238.76 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 248.92 40.64 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "f27b0c70-007d-5a83-9e29-8084b78940cb")
+		(property "Reference" "C3"
+			(at 248.92 35.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "10uF 50V"
+			(at 248.92 45.95 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric"
+			(at 248.92 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 248.92 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Cin buck"
+			(at 248.92 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "GRM32ER71H106KA12L"
+			(at 248.92 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 248.92 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "e6f1e446-6c36-5cbf-9634-15b2d4b48713")
+		)
+		(pin "2"
+			(uuid "f816dcce-7890-5e17-9f9f-ac6f6c8ba4f3")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "C3") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 248.92 36.83)
+			(xy 248.92 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a87199fc-66cb-55b3-ba66-b1d5016b5ba0")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 248.92 34.29 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "eab9e0b7-a6df-55dd-b86c-1c1293bd0a98")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 248.92 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 248.92 44.45)
+			(xy 248.92 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b086f643-d964-5722-845c-9256bf9a5820")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 248.92 46.99 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "f7861131-b43c-526e-a49f-7a61bd130400")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 248.92 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 259.08 40.64 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "654b913f-0d54-5146-9c8c-837fb54e3c76")
+		(property "Reference" "C4"
+			(at 259.08 35.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "220nF 50V"
+			(at 259.08 45.95 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 259.08 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 259.08 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Cin HF buck"
+			(at 259.08 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "CL10B224KB8NNNC"
+			(at 259.08 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 259.08 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "d9e10215-bf5c-57db-9a21-0d5a9581cba4")
+		)
+		(pin "2"
+			(uuid "28370666-a44f-5c56-bb58-ac2dea9751bf")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "C4") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 259.08 36.83)
+			(xy 259.08 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1566aabb-324d-549d-9cd2-0ac666c15a1c")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 259.08 34.29 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "b296d2ca-8375-5e63-a24e-02b0cdbc2c1a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 259.08 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 259.08 44.45)
+			(xy 259.08 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "eaf6986d-f8b8-5f5c-b6e9-460b8cbaa1ad")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 259.08 46.99 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "dca0b07d-76cc-5def-844f-97111590b75d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 259.08 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 269.24 44.45 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "f203350f-eb74-56b3-8ab7-f8c4221234dc")
+		(property "Reference" "C5"
+			(at 269.24 39.14 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100nF"
+			(at 269.24 49.76 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 269.24 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 269.24 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Bootstrap"
+			(at 269.24 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "MLCC 100nF"
+			(at 269.24 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 269.24 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "ea61821b-02a0-5f55-a7ff-ae6dfffdf225")
+		)
+		(pin "2"
+			(uuid "e1b3a44f-7476-5cb7-9737-bf2a3d483191")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "C5") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 269.24 40.64)
+			(xy 269.24 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "935f2a32-ec18-5ef8-a166-b3edb36a1b38")
+	)
+	(global_label "BUCK_BOOT"
+		(shape passive)
+		(at 269.24 38.1 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "ee692d83-5c89-5cac-a6e2-67872ca10c08")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 269.24 38.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 269.24 48.26)
+			(xy 269.24 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6ff82e70-1a0a-5e96-9b98-c4e84a9f5ea0")
+	)
+	(global_label "BUCK_SW"
+		(shape passive)
+		(at 269.24 50.8 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "f22cdf8c-85f4-50bd-939e-8df7c0297ee2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 269.24 50.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 279.4 44.45 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "bfc9dc2d-4049-5133-8a30-06e50100df37")
+		(property "Reference" "C6"
+			(at 279.4 39.14 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "1uF 16V"
+			(at 279.4 49.76 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 279.4 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 279.4 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "VCC interno buck"
+			(at 279.4 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "MLCC 1uF 16V"
+			(at 279.4 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 279.4 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "1e08ee6d-2244-55b8-b5ef-98e9435ca349")
+		)
+		(pin "2"
+			(uuid "f57c8838-0fe5-5770-ba35-9c8929fa936b")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "C6") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 279.4 40.64)
+			(xy 279.4 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f452bf37-751d-5f04-a3b2-f2cba9dd2c2d")
+	)
+	(global_label "BUCK_VCC"
+		(shape passive)
+		(at 279.4 38.1 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "4336a531-4a3d-5c7f-96c7-05fa285ecf36")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 279.4 38.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 279.4 48.26)
+			(xy 279.4 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dfdb9931-2de8-5ae2-8c82-4caef87785f7")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 279.4 50.8 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "833ff934-e3c9-5d58-8c30-4bf6fbb11174")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 279.4 50.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:L")
+		(at 287.02 43.18 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "66459035-4e9d-53f7-8db1-00d2612f2d5a")
+		(property "Reference" "L1"
+			(at 287.02 37.87 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "6.8uH"
+			(at 287.02 48.49 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Inductor_SMD:L_Bourns_SRP7028A_7.3x6.6mm"
+			(at 287.02 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 287.02 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Induttore buck 6,8 uH (Isat > 5 A)"
+			(at 287.02 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "SRP7028A-6R8M"
+			(at 287.02 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Bourns"
+			(at 287.02 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "4714d40d-fde3-5aa0-8f71-a5a866fa775b")
+		)
+		(pin "2"
+			(uuid "f0cdbeb8-2210-5314-8ccb-7d95a492e382")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "L1") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 287.02 39.37)
+			(xy 287.02 36.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7f091095-d001-5056-89b7-7eb5161b146a")
+	)
+	(global_label "BUCK_SW"
+		(shape passive)
+		(at 287.02 36.83 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "fb3392f2-9555-5376-8878-94d57d0dad09")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 287.02 36.83 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 287.02 46.99)
+			(xy 287.02 49.53)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "66f94f34-3ad0-5f15-aa16-61fdbeb00c09")
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 287.02 49.53 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "4dcc8b02-cdfd-573d-9301-05b412242486")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 287.02 49.53 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 294.64 39.37 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "de137c61-a429-522c-88fe-a857fb1ab403")
+		(property "Reference" "R1"
+			(at 294.64 34.06 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 294.64 44.68 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 294.64 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 294.64 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Partitore FB (Vout = 1 V x (1+100k/24.3k) = 5.12 V: margine per USB-C e display)"
+			(at 294.64 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 294.64 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 294.64 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "bc6737bc-8e07-5fd2-9bc2-d42108cac4b9")
+		)
+		(pin "2"
+			(uuid "2da3a920-00da-5f37-9692-6add57a90dbb")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "R1") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 294.64 35.56)
+			(xy 294.64 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6ce4d0c2-292e-57db-ba75-ad0e1429f13d")
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 294.64 33.02 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "446ff365-53a5-519e-81c3-56adaf16d0a7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 294.64 33.02 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 294.64 43.18)
+			(xy 294.64 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3fbf01dc-84f6-584d-968e-8d8756dadaee")
+	)
+	(global_label "BUCK_FB"
+		(shape passive)
+		(at 294.64 45.72 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "9d95c3d6-4985-54c9-95de-4fe1b84d5b63")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 294.64 45.72 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 302.26 43.18 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "45466386-d7c4-5e0e-becc-2519ccd07b4e")
+		(property "Reference" "R2"
+			(at 302.26 37.87 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "24.3k"
+			(at 302.26 48.49 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 302.26 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 302.26 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Partitore FB"
+			(at 302.26 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 24.3k 1%"
+			(at 302.26 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 302.26 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "f781ff56-1d86-558c-81de-635c5cf4e1de")
+		)
+		(pin "2"
+			(uuid "c3de2897-95fa-5188-a2ff-4d50bdc4b626")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "R2") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 302.26 39.37)
+			(xy 302.26 36.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f0a869cd-220b-519f-abfb-c4bc62762ad2")
+	)
+	(global_label "BUCK_FB"
+		(shape passive)
+		(at 302.26 36.83 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "a05f6b28-7bb1-55dc-b75d-271eca963360")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 302.26 36.83 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 302.26 46.99)
+			(xy 302.26 49.53)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c63a8f00-4829-508b-9a7b-2de9cdaacaed")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 302.26 49.53 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "9937078a-d48f-58fb-9def-54a99995e975")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 302.26 49.53 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 311.15 39.37 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a66f3e0c-9cbf-58f0-ad1f-91e76dec70b1")
+		(property "Reference" "C7"
+			(at 311.15 34.06 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "22uF 16V"
+			(at 311.15 44.68 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+			(at 311.15 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 311.15 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Cout buck"
+			(at 311.15 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "CL31A226KOHNNNE"
+			(at 311.15 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 311.15 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "b89819d0-3afa-5bcc-83e8-b90bf687f7d3")
+		)
+		(pin "2"
+			(uuid "c3949190-475b-51c5-beb4-827b0bee306c")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "C7") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 311.15 35.56)
+			(xy 311.15 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7a119b16-fa6d-569b-b15b-102961c17d85")
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 311.15 33.02 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "e11b5cbf-2018-5529-ae1a-4c3ca6fc1e82")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 311.15 33.02 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 311.15 43.18)
+			(xy 311.15 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6de94c2e-8da9-5e5a-86b9-d11876f334d6")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 311.15 45.72 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "99b3e574-f0a9-5cd2-8955-bfcdedfe73ac")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 311.15 45.72 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 321.31 39.37 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "667cee7b-8188-5d1f-a517-03ecd83b476c")
+		(property "Reference" "C8"
+			(at 321.31 34.06 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "22uF 16V"
+			(at 321.31 44.68 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+			(at 321.31 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 321.31 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Cout buck"
+			(at 321.31 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "CL31A226KOHNNNE"
+			(at 321.31 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 321.31 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "2e86ac05-fb12-5958-8de8-8dd0155cf99f")
+		)
+		(pin "2"
+			(uuid "aa3b12c7-cb86-5d7f-bc99-3f48e48e2ea0")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "C8") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 321.31 35.56)
+			(xy 321.31 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "52438265-7bc4-551b-94ba-a24656af33b7")
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 321.31 33.02 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "c7aa0b0f-dcf9-549f-b320-b25b0b5eb0a2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 321.31 33.02 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 321.31 43.18)
+			(xy 321.31 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d96a5ecc-cb6d-578c-bdb2-0d27a0599fb6")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 321.31 45.72 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "c281d674-c655-5f32-b274-11e4508c46ca")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 321.31 45.72 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 331.47 39.37 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a1f385cf-3959-5a5f-86cf-74b9547c7fef")
+		(property "Reference" "C9"
+			(at 331.47 34.06 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "22uF 16V"
+			(at 331.47 44.68 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+			(at 331.47 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 331.47 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Cout buck"
+			(at 331.47 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "CL31A226KOHNNNE"
+			(at 331.47 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 331.47 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "a9962eed-3a99-5324-b890-1ace5734178d")
+		)
+		(pin "2"
+			(uuid "8871b79c-24d3-5ddf-8945-db115f2892cc")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "C9") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 331.47 35.56)
+			(xy 331.47 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "44b23258-af1c-53ba-bc3d-bb700e3e497a")
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 331.47 33.02 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "4f283858-b002-51b8-8f5e-eb270b32ea9a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 331.47 33.02 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 331.47 43.18)
+			(xy 331.47 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "23cd1cb8-9424-5e56-8734-6c16c247a4da")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 331.47 45.72 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "a45a3eb0-ba94-54ea-8bdf-d9d2f39c5667")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 331.47 45.72 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 341.63 39.37 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "bbe6317f-81e1-5572-856f-21fddd5b9f45")
+		(property "Reference" "C10"
+			(at 341.63 34.06 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "22uF 16V"
+			(at 341.63 44.68 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+			(at 341.63 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 341.63 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Cout buck"
+			(at 341.63 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "CL31A226KOHNNNE"
+			(at 341.63 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 341.63 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "f6cfa335-b62a-51ba-8a85-3ff44a7f69ed")
+		)
+		(pin "2"
+			(uuid "9113ff49-a534-51a7-941e-1c16d4593428")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "C10") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 341.63 35.56)
+			(xy 341.63 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6bc04577-2907-546f-8f26-6b5f3743a3b0")
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 341.63 33.02 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "035aaa29-7952-5021-8222-91635712bbeb")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 341.63 33.02 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 341.63 43.18)
+			(xy 341.63 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "84f46e09-d1da-51a6-b765-d8c661a4f1a7")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 341.63 45.72 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "936f10c3-1dc3-548c-b5f0-418051dc7981")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 341.63 45.72 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Regulator_Linear:AP2112K-3.3")
+		(at 365.76 31.75 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "bdebd2b5-b02f-5a80-b81f-d86d5ce53ef8")
+		(property "Reference" "U2"
+			(at 365.76 25.805 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "AP2112K-3.3"
+			(at 365.76 40.87 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5"
+			(at 365.76 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 365.76 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "LDO 3,3 V 600 mA"
+			(at 365.76 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "AP2112K-3.3TRG1"
+			(at 365.76 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Diodes Inc."
+			(at 365.76 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "e0c9b165-3187-5aa8-9f94-cef0a776bbf2")
+		)
+		(pin "3"
+			(uuid "c1a9f46b-2eec-5156-8090-a69a3c14e30c")
+		)
+		(pin "2"
+			(uuid "906e309e-46a9-5b65-a2bd-1c8e69c20f5c")
+		)
+		(pin "4"
+			(uuid "f3df2fd6-873f-56e2-a535-8bf9ab05945f")
+		)
+		(pin "5"
+			(uuid "87dcb26e-fbf8-5877-a029-ca1e2cefde19")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "U2") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 358.14 29.21)
+			(xy 355.6 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2ae0f7d2-a1e9-5b68-a69d-b44d5d539ce8")
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 355.6 29.21 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "d1dd0ad0-690c-5595-9060-d21d7226b712")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 355.6 29.21 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 358.14 31.75)
+			(xy 355.6 31.75)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "885f06fe-d23d-5ab2-92d2-2655c7104992")
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 355.6 31.75 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "2bd691d6-8cf8-50ed-8dfb-e4c74da92ca5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 355.6 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 365.76 39.37)
+			(xy 365.76 41.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7a7daa53-3fd1-5ac2-8b3d-d2a6bf8533a2")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 365.76 41.91 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "86b55923-19d0-5271-b01e-942cb7f3094e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 365.76 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(no_connect
+		(at 370.84 31.75)
+		(uuid "874022c0-38cf-556b-be73-f76147831f45")
+	)
+	(wire
+		(pts
+			(xy 373.38 29.21)
+			(xy 375.92 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4380a870-9c37-5c26-b3d8-95b3f42d36ed")
+	)
+	(global_label "+3V3"
+		(shape passive)
+		(at 375.92 29.21 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "571500a1-ed3e-5f5a-8f5c-0f6732ce786d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 375.92 29.21 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 389.89 39.37 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "79913235-d0a9-56e0-bd20-7a9a6592a1bd")
+		(property "Reference" "C11"
+			(at 389.89 34.06 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "1uF 16V"
+			(at 389.89 44.68 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 389.89 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 389.89 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" ""
+			(at 389.89 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "MLCC 1uF 16V"
+			(at 389.89 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 389.89 39.37 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "6287db73-78ff-5920-b88f-3a00f513bc02")
+		)
+		(pin "2"
+			(uuid "35ae37ba-68d7-506b-b64e-f23fb7b38427")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "C11") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 389.89 35.56)
+			(xy 389.89 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6fb0f6ee-c225-5c6f-8ea3-c8b837ac1820")
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 389.89 33.02 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "633e3283-3a7b-5384-bbb0-fafc16e964f3")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 389.89 33.02 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 389.89 43.18)
+			(xy 389.89 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ace8936f-0d62-5578-b64e-df7a01c537bf")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 389.89 45.72 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "e2028688-3f68-5ee8-aab3-0526831bd8b7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 389.89 45.72 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 24.13 87.63 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "14bc9f63-e97f-5e61-b5c1-7728ec6d98f2")
+		(property "Reference" "C12"
+			(at 24.13 82.32 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "2.2uF 16V"
+			(at 24.13 92.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 24.13 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 24.13 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" ""
+			(at 24.13 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "MLCC 2.2uF 16V"
+			(at 24.13 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 24.13 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "9941df08-e81e-553c-9188-84d721e390e0")
+		)
+		(pin "2"
+			(uuid "43d84a9c-3b63-5a7f-b770-4b195e2525bf")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "C12") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 24.13 83.82)
+			(xy 24.13 81.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "864face0-4b47-50a8-a172-ab3c4c9fddbf")
+	)
+	(global_label "+3V3"
+		(shape passive)
+		(at 24.13 81.28 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "a92e07f2-902e-5241-897a-dd771cd837b1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 24.13 81.28 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 24.13 91.44)
+			(xy 24.13 93.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d20fb745-dfc8-545b-921e-51b8601f518b")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 24.13 93.98 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "32f9a97c-447d-5787-b27c-42854008502e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 24.13 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:Polyfuse")
+		(at 33.02 87.63 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "034a214f-7119-54a7-a005-e07b39250c5c")
+		(property "Reference" "F5"
+			(at 33.02 82.32 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "1.5A"
+			(at 33.02 92.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Fuse:Fuse_1812_4532Metric"
+			(at 33.02 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 33.02 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "PTC 1,5 A uscita USB-C 5 V di servizio"
+			(at 33.02 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "1812L150/12DR"
+			(at 33.02 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Littelfuse"
+			(at 33.02 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "a81b6b37-7b87-586a-9b90-8d21b16b0a2f")
+		)
+		(pin "2"
+			(uuid "9e5aef83-e90f-5889-ae3c-2ca5d5dd3e0d")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "F5") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 33.02 83.82)
+			(xy 33.02 81.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "62214fd4-1475-5c00-8d5b-647330443a90")
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 33.02 81.28 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "336410e8-1856-58ea-9ea3-b371d73972b9")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 33.02 81.28 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 33.02 91.44)
+			(xy 33.02 93.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fcc71315-701d-53f0-99bc-3de0deaec281")
+	)
+	(global_label "+5V_USB"
+		(shape passive)
+		(at 33.02 93.98 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "df701a91-b792-54a9-a09b-5605ea97d558")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 33.02 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:Polyfuse")
+		(at 43.18 87.63 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "93a948c3-0ec5-5140-be2d-40a90b5489e6")
+		(property "Reference" "F6"
+			(at 43.18 82.32 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "0.5A"
+			(at 43.18 92.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Fuse:Fuse_1206_3216Metric"
+			(at 43.18 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 43.18 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "PTC 0,5 A alimentazione sensori"
+			(at 43.18 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "1206L050YR"
+			(at 43.18 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Littelfuse"
+			(at 43.18 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "4a2cf99d-fca8-5eb8-83b8-80c432d552aa")
+		)
+		(pin "2"
+			(uuid "6b60f82c-ff54-5f94-a0ad-addd2b97cbba")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "F6") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 43.18 83.82)
+			(xy 43.18 81.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "eb071932-2873-5bd2-94e2-3149bca3a1ec")
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 43.18 81.28 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "f5f5fa66-7b3c-5ade-9335-f6e3067c01d3")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 43.18 81.28 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 43.18 91.44)
+			(xy 43.18 93.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ef0c3ee7-89f3-5086-bf54-af4db904f1dd")
+	)
+	(global_label "+5V_SENS"
+		(shape passive)
+		(at 43.18 93.98 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "1d6a6e9c-e047-5eed-b64a-555b46771416")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 43.18 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Connector:USB_C_Receptacle_PowerOnly_6P")
+		(at 59.69 87.63 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "6a0d06e3-6b93-5f66-b322-bc00b5a72c9e")
+		(property "Reference" "J3"
+			(at 59.69 73.43 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "USB-C 5V OUT"
+			(at 59.69 106.91 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Connector_USB:USB_C_Receptacle_GCT_USB4125-xx-x_6P_TopMnt_Horizontal"
+			(at 59.69 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 59.69 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "USB-C solo alimentazione (6 poli), uscita 5 V (Default USB power)"
+			(at 59.69 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "USB4125-GF-A"
+			(at 59.69 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "GCT"
+			(at 59.69 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "S1"
+			(uuid "44859c06-b823-5f46-96e1-756ab54f10e7")
+		)
+		(pin "A12"
+			(uuid "f263ac02-8fb1-5491-8a0e-8cb1c0b9185b")
+		)
+		(pin "B12"
+			(uuid "5760f9c1-1db6-5192-8f88-f810d969d802")
+		)
+		(pin "A9"
+			(uuid "309dfa4e-3987-5365-b3ec-395461f6ecb1")
+		)
+		(pin "B9"
+			(uuid "74357305-61f0-5e04-9663-1a2b57089969")
+		)
+		(pin "A5"
+			(uuid "a24d26c6-c4a9-5f80-9248-b755eb95c523")
+		)
+		(pin "B5"
+			(uuid "8828fe54-548f-53c9-bf24-70a854fc2161")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "J3") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 52.07 105.41)
+			(xy 52.07 107.95)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ab1e81fc-1402-5ec5-bfc7-409de89a8e0e")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 52.07 107.95 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "59513e28-ccca-5073-8363-4cc9fd6ed823")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 52.07 107.95 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 59.69 105.41)
+			(xy 59.69 107.95)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d200a6ef-6872-5618-b0b0-0a09bf548529")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 59.69 107.95 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "d738c98c-407a-510e-a69b-8a18600b5d7b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 59.69 107.95 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 59.69 105.41)
+			(xy 59.69 107.95)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e9d52333-eed0-5cf3-b58c-bedf34f496aa")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 59.69 107.95 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "1d7877e8-e969-5bd4-8421-e7df11db7a8c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 59.69 107.95 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 74.93 80.01)
+			(xy 77.47 80.01)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "da9cd13e-4576-5bc2-b323-2e49d92cdf3b")
+	)
+	(global_label "VBUS_C"
+		(shape passive)
+		(at 77.47 80.01 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "eb76364f-d95d-5817-b2ba-95cc44fff6ac")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 77.47 80.01 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 74.93 80.01)
+			(xy 77.47 80.01)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f3553cec-2366-5bbf-b642-6cd6451ee3fd")
+	)
+	(global_label "VBUS_C"
+		(shape passive)
+		(at 77.47 80.01 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "d927e146-6662-5155-af2f-e4aea736cfb4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 77.47 80.01 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 74.93 92.71)
+			(xy 77.47 92.71)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a3d6ce50-537c-5181-abba-43c5f8eb8295")
+	)
+	(global_label "USBC_CC1"
+		(shape passive)
+		(at 77.47 92.71 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "2f6eeac9-9557-5af0-b32c-e8fb55bc7344")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 77.47 92.71 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 74.93 95.25)
+			(xy 77.47 95.25)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b8b5332f-e319-5dda-a254-90e1e4b1d074")
+	)
+	(global_label "USBC_CC2"
+		(shape passive)
+		(at 77.47 95.25 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "c095256d-20a9-5850-91b0-8672fb2b2a9c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 77.47 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 95.25 90.17 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "48cd9df3-1fb2-5074-a0c7-67740c2cd675")
+		(property "Reference" "R89"
+			(at 95.25 84.86 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "56k"
+			(at 95.25 95.48 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 95.25 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 95.25 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Rp CC1: Default USB power"
+			(at 95.25 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 56k 1%"
+			(at 95.25 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 95.25 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "2956b5dc-8330-57b8-9017-dd5d3015f5f8")
+		)
+		(pin "2"
+			(uuid "b2c1af1f-e41b-5107-a827-791f76122063")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "R89") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 95.25 86.36)
+			(xy 95.25 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "48d70878-a922-5635-9b62-a50628238bb8")
+	)
+	(global_label "USBC_S"
+		(shape passive)
+		(at 95.25 83.82 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "56ca5175-6d64-544a-b02e-b4521faf54b7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 95.25 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 95.25 93.98)
+			(xy 95.25 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ab912e33-c994-5892-98ac-ac91e5d69f50")
+	)
+	(global_label "USBC_CC1"
+		(shape passive)
+		(at 95.25 96.52 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "fd964bcc-df98-5765-afda-908108156934")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 95.25 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 104.14 90.17 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "233c3045-fb80-5082-98ff-ed12202d4efd")
+		(property "Reference" "R90"
+			(at 104.14 84.86 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "56k"
+			(at 104.14 95.48 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 104.14 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 104.14 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Rp CC2: Default USB power"
+			(at 104.14 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 56k 1%"
+			(at 104.14 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 104.14 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "c995e828-01e6-58f8-804a-6f1e2849efd7")
+		)
+		(pin "2"
+			(uuid "fb86fa79-d55e-5854-bcaf-d09f4d33431d")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "R90") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 104.14 86.36)
+			(xy 104.14 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9639fb6e-2d13-578f-963f-03415165752d")
+	)
+	(global_label "USBC_S"
+		(shape passive)
+		(at 104.14 83.82 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "74a45d06-5e7c-5169-bf07-1b6869643604")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 104.14 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 104.14 93.98)
+			(xy 104.14 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9f7e1b16-d5e4-5ebd-a3a8-b06a7eaeb56e")
+	)
+	(global_label "USBC_CC2"
+		(shape passive)
+		(at 104.14 96.52 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "ccd0ca01-158c-5efd-83d1-07f56e8576d9")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 104.14 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Diode:1N4148WS")
+		(at 128.27 76.2 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "dffb81a3-b1b1-544f-94f6-f2ae7a77eb61")
+		(property "Reference" "D45"
+			(at 128.27 73.43 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "1N4148WS"
+			(at 128.27 78.97 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SOD-323"
+			(at 128.27 76.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 128.27 76.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "OR della CC piu' bassa"
+			(at 128.27 76.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "1N4148WS-7-F"
+			(at 128.27 76.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Diodes Inc"
+			(at 128.27 76.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "2d550ba5-e1c5-5a18-a50b-eda1aa149176")
+		)
+		(pin "2"
+			(uuid "c9d1d333-ec0b-5cef-b72f-7f23415e680a")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "D45") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 124.46 76.2)
+			(xy 121.92 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8468f4c0-19f0-5c12-8540-4bf6fe1285ed")
+	)
+	(global_label "USBC_CC1"
+		(shape passive)
+		(at 121.92 76.2 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "26950114-c6a7-5c27-911e-e0f97f077430")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 121.92 76.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 132.08 76.2)
+			(xy 134.62 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ab9af809-35c3-5f8a-b0cb-9930a4624f18")
+	)
+	(global_label "USBC_CCMIN"
+		(shape passive)
+		(at 134.62 76.2 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "b24b5eec-9515-5656-a133-8f54aaadacf8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 134.62 76.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Diode:1N4148WS")
+		(at 170.18 76.2 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "088c4449-d8f5-5adc-a538-aae199e4d096")
+		(property "Reference" "D46"
+			(at 170.18 73.43 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "1N4148WS"
+			(at 170.18 78.97 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SOD-323"
+			(at 170.18 76.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 170.18 76.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "OR della CC piu' bassa"
+			(at 170.18 76.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "1N4148WS-7-F"
+			(at 170.18 76.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Diodes Inc"
+			(at 170.18 76.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "360e8b29-9c53-5f4c-8fbf-22dcbdc9cfce")
+		)
+		(pin "2"
+			(uuid "809efb9e-7e4b-5acf-ab8b-5e99253df4f0")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "D46") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 166.37 76.2)
+			(xy 163.83 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "56e4b1c0-623e-54d7-b52b-26b47712a6ab")
+	)
+	(global_label "USBC_CC2"
+		(shape passive)
+		(at 163.83 76.2 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "e2894213-6bc3-564d-94e9-a66ec81384f7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 163.83 76.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 173.99 76.2)
+			(xy 176.53 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7e561644-3234-59d6-845d-993cf7fcba4b")
+	)
+	(global_label "USBC_CCMIN"
+		(shape passive)
+		(at 176.53 76.2 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "ea4e6893-21da-53e6-8029-ddfbe41fc168")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 176.53 76.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 195.58 90.17 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "ca93017d-96e9-5221-9c2d-69272ad09175")
+		(property "Reference" "R91"
+			(at 195.58 84.86 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "220k"
+			(at 195.58 95.48 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 195.58 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 195.58 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Polarizzazione dell'OR delle CC"
+			(at 195.58 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 220k 1%"
+			(at 195.58 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 195.58 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "255a5f09-ae9b-5dfe-b970-7f6c50a7018f")
+		)
+		(pin "2"
+			(uuid "f5faa11b-ce5c-57d0-a5e7-d110a4a0183f")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "R91") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 195.58 86.36)
+			(xy 195.58 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "96d9d67a-9012-501d-ac30-20e8240cdffd")
+	)
+	(global_label "USBC_S"
+		(shape passive)
+		(at 195.58 83.82 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "2798d39d-4e2a-5b9f-aac5-9df21aa996d7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 195.58 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 195.58 93.98)
+			(xy 195.58 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c878a116-f5df-525e-b657-afe9c189dd52")
+	)
+	(global_label "USBC_CCMIN"
+		(shape passive)
+		(at 195.58 96.52 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "390872b2-f47c-537f-8f36-7d3b39ff70ab")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 195.58 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 203.2 90.17 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "b6b167c7-b507-524c-8c2a-3fe4c6d6e3e2")
+		(property "Reference" "R93"
+			(at 203.2 84.86 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "130k"
+			(at 203.2 95.48 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 203.2 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 203.2 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Soglia raziometrica 0,43 x USBC_S"
+			(at 203.2 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 130k 1%"
+			(at 203.2 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 203.2 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "dbb6b74c-3b27-5f46-b264-ba77b5da20c8")
+		)
+		(pin "2"
+			(uuid "df7adae4-2cbb-54c5-b48e-7af8d1a72e14")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "R93") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 203.2 86.36)
+			(xy 203.2 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "471c9749-3912-57c6-a110-ad5863ab95fb")
+	)
+	(global_label "USBC_S"
+		(shape passive)
+		(at 203.2 83.82 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "20b7a54b-6344-567f-9d39-0875b22ba13e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 203.2 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 203.2 93.98)
+			(xy 203.2 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7253a5d1-03d1-52b9-810d-4c353e02672a")
+	)
+	(global_label "USBC_REF"
+		(shape passive)
+		(at 203.2 96.52 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "e460495b-b86c-5d45-8865-014baa59e2d8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 203.2 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 212.09 91.44 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "4b50eab7-84e2-53d4-826c-efbd45416d94")
+		(property "Reference" "R94"
+			(at 212.09 86.13 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 212.09 96.75 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 212.09 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 212.09 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Soglia raziometrica"
+			(at 212.09 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 212.09 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 212.09 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "7792975c-4ee1-56c8-b7fd-56f92ee3c67c")
+		)
+		(pin "2"
+			(uuid "bafa11ba-00da-51a1-8503-49f1fb0752ae")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "R94") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 212.09 87.63)
+			(xy 212.09 85.09)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6cfe0187-d459-5910-baec-c25572d8668b")
+	)
+	(global_label "USBC_REF"
+		(shape passive)
+		(at 212.09 85.09 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "1195570a-ee59-5c85-b8fd-7491f02c92ac")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 212.09 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 212.09 95.25)
+			(xy 212.09 97.79)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a5715e00-0ab1-57b3-b921-478ac64ef33c")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 212.09 97.79 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "ae1552c8-f06b-58c0-b4de-30e1490d99b7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 212.09 97.79 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Comparator:TLV7041DBV")
+		(at 241.3 93.98 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "549a819a-124f-53f3-b603-f8f115aea32c")
+		(property "Reference" "U11"
+			(at 241.3 84.86 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "TLV7041"
+			(at 241.3 103.1 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5"
+			(at 241.3 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 241.3 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Comparatore open-drain: Rd rilevato -> accende il VBUS"
+			(at 241.3 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "TLV7041DBVR"
+			(at 241.3 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 241.3 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "5"
+			(uuid "80f8096a-731f-5027-9972-f97cdd1d0f33")
+		)
+		(pin "2"
+			(uuid "2d561422-1c68-58da-a42b-ba7a0a1aed85")
+		)
+		(pin "3"
+			(uuid "6ad216a7-f516-511b-be8d-6e2da7ee7f23")
+		)
+		(pin "4"
+			(uuid "9ac5fcd1-cca5-543f-be3f-b11fb6e68254")
+		)
+		(pin "1"
+			(uuid "693409f1-3dd7-51de-a28d-628c95cc13a2")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "U11") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 238.76 86.36)
+			(xy 238.76 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ac5280a3-236f-558e-99eb-aa43d6a7150c")
+	)
+	(global_label "USBC_S"
+		(shape passive)
+		(at 238.76 83.82 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "fe7c5a46-e77e-5790-9999-78ca4b9767d1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 238.76 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 238.76 101.6)
+			(xy 238.76 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "feb1c61e-2792-57a5-bba8-ac14dc1e40b4")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 238.76 104.14 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "a477355c-31cc-522a-84e5-5a9af9667fca")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 238.76 104.14 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 233.68 91.44)
+			(xy 231.14 91.44)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5ddafde9-c97f-5479-98ee-0611d7ef36d2")
+	)
+	(global_label "USBC_CCMIN"
+		(shape passive)
+		(at 231.14 91.44 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "855fce44-24fe-5be4-8a03-689de0fbd8e7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 231.14 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 233.68 96.52)
+			(xy 231.14 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8e669c99-4197-5ee6-b520-00fb4432ac22")
+	)
+	(global_label "USBC_REF"
+		(shape passive)
+		(at 231.14 96.52 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "9e74f3b1-021f-51e5-983d-05a800d1e818")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 231.14 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 248.92 93.98)
+			(xy 251.46 93.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1a0ae686-e720-5973-9b64-a9956ca2e028")
+	)
+	(global_label "USBC_DRV"
+		(shape passive)
+		(at 251.46 93.98 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "3503712d-9301-5ea4-99cc-474e013e7a3e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 251.46 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 270.51 90.17 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "bc512a34-3e43-5490-ac86-016fc1da6122")
+		(property "Reference" "C65"
+			(at 270.51 84.86 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100nF"
+			(at 270.51 95.48 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 270.51 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 270.51 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Disaccoppiamento U11"
+			(at 270.51 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "MLCC 100nF"
+			(at 270.51 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 270.51 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "b1e4900a-7579-599a-9ff0-79545ce2d3d2")
+		)
+		(pin "2"
+			(uuid "4de3d9d7-07f4-56e8-8ae7-e069d5bc7f02")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "C65") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 270.51 86.36)
+			(xy 270.51 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "08de4ea1-7abf-5802-8c45-fabf2bdc02d7")
+	)
+	(global_label "USBC_S"
+		(shape passive)
+		(at 270.51 83.82 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "c7423ace-e10c-51de-a34a-f7d9a953dd86")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 270.51 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 270.51 93.98)
+			(xy 270.51 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c82708d5-c98b-5cf5-8715-47786cbbabd9")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 270.51 96.52 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "ad4c1b73-bebe-5199-84db-1fb611648ca1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 270.51 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 279.4 91.44 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "ba31c1c4-b392-5156-857b-ce58a4e3a855")
+		(property "Reference" "R96"
+			(at 279.4 86.13 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "10k"
+			(at 279.4 96.75 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 279.4 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 279.4 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Soft-start del VBUS (con C64)"
+			(at 279.4 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 10k 1%"
+			(at 279.4 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 279.4 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "b2980c7d-fcf1-56e8-be82-847f393aec0b")
+		)
+		(pin "2"
+			(uuid "3e96468b-d6ae-55f2-934d-543ae904ccec")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "R96") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 279.4 87.63)
+			(xy 279.4 85.09)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d0e08027-0328-5442-9152-95f5efbfec72")
+	)
+	(global_label "USBC_DRV"
+		(shape passive)
+		(at 279.4 85.09 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "26017462-4cf4-51e4-8b8b-a68fc8068f1f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 279.4 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 279.4 95.25)
+			(xy 279.4 97.79)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9fbca333-5196-559e-a54d-72b069bdef52")
+	)
+	(global_label "USBC_GATE"
+		(shape passive)
+		(at 279.4 97.79 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "e33d8089-c236-588d-81ae-2d3699d778cb")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 279.4 97.79 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 287.02 90.17 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "4b23d0e4-4a41-5da2-a9c5-c6a5d1e76369")
+		(property "Reference" "R95"
+			(at 287.02 84.86 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 287.02 95.48 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 287.02 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 287.02 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Gate a USBC_S = VBUS spento"
+			(at 287.02 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 287.02 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 287.02 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "784f9767-0d68-559c-b749-bd7fd6293ccd")
+		)
+		(pin "2"
+			(uuid "8683760d-20e5-5127-83bf-69786c552add")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "R95") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 287.02 86.36)
+			(xy 287.02 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "547f8d52-1221-5bea-b291-dcc11efef8fb")
+	)
+	(global_label "USBC_S"
+		(shape passive)
+		(at 287.02 83.82 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "3176ee72-3d3f-56e6-a636-2fa61380f5bf")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 287.02 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 287.02 93.98)
+			(xy 287.02 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1fd6e606-29a7-5407-aa97-3b1d695fe7d4")
+	)
+	(global_label "USBC_GATE"
+		(shape passive)
+		(at 287.02 96.52 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "3b4e0d28-520b-56dc-a2ed-d68e9731339e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 287.02 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 295.91 92.71 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "3455acd3-85d9-5938-bc8a-f0ce1ecbe15f")
+		(property "Reference" "C64"
+			(at 295.91 87.4 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100nF"
+			(at 295.91 98.02 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 295.91 92.71 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 295.91 92.71 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Soft-start: ~1 ms in accensione, ~10 ms in spegnimento"
+			(at 295.91 92.71 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "MLCC 100nF"
+			(at 295.91 92.71 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 295.91 92.71 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "4971f6a0-df11-5d98-ae55-40e89ffe6ddf")
+		)
+		(pin "2"
+			(uuid "d95346c1-8776-52b3-8dbd-bfe5ed969e70")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "C64") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 295.91 88.9)
+			(xy 295.91 86.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9152337f-df5d-5566-b1be-c46118f2a0d3")
+	)
+	(global_label "USBC_GATE"
+		(shape passive)
+		(at 295.91 86.36 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "35432b8c-6059-5edc-af04-c5d9ea0df887")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 295.91 86.36 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 295.91 96.52)
+			(xy 295.91 99.06)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "39c3a4cb-3b01-5d21-90dd-0d0cd801bfc3")
+	)
+	(global_label "USBC_S"
+		(shape passive)
+		(at 295.91 99.06 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "a727474a-565b-5e24-8124-9030eeb41d00")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 295.91 99.06 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Transistor_FET:AO3401A")
+		(at 323.85 92.71 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "e24bcaef-c628-5de2-b912-4af26c30fe8a")
+		(property "Reference" "Q11"
+			(at 323.85 86.13 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "AO3401A"
+			(at 323.85 99.29 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+			(at 323.85 92.71 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 323.85 92.71 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Interruttore VBUS lato 5 V (P-MOS, antiserie con Q12)"
+			(at 323.85 92.71 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "AO3401A"
+			(at 323.85 92.71 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Alpha & Omega"
+			(at 323.85 92.71 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "0c320302-956f-5342-84f5-f6cdfe485ce9")
+		)
+		(pin "3"
+			(uuid "4692b518-71f3-5de3-ac73-6674954a363b")
+		)
+		(pin "2"
+			(uuid "1df35730-013f-5be9-8dc1-0c019fee975e")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "Q11") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 318.77 92.71)
+			(xy 316.23 92.71)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d0cf9c1e-a5e1-551b-a14f-296370c2cb5a")
+	)
+	(global_label "USBC_GATE"
+		(shape passive)
+		(at 316.23 92.71 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "b70c6d8d-42ae-5bfa-beee-60a11646db74")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 316.23 92.71 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 326.39 87.63)
+			(xy 326.39 85.09)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "45e94461-6f6a-5cba-8ff3-f0fef2408c77")
+	)
+	(global_label "+5V_USB"
+		(shape passive)
+		(at 326.39 85.09 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "c37aaf0d-1432-591e-9a70-b6ee051f3a59")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 326.39 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 326.39 97.79)
+			(xy 326.39 100.33)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bf93f274-fb8e-5365-8655-d0191b3f3bdc")
+	)
+	(global_label "USBC_S"
+		(shape passive)
+		(at 326.39 100.33 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "88c20be4-69b0-58cd-84f4-bc33c634953f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 326.39 100.33 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Transistor_FET:AO3401A")
+		(at 351.79 91.44 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "cd482f48-7ec3-509a-b566-e95b591c35e9")
+		(property "Reference" "Q12"
+			(at 351.79 84.86 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "AO3401A"
+			(at 351.79 98.02 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+			(at 351.79 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 351.79 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Interruttore VBUS lato connettore (blocca il ritorno da fuori)"
+			(at 351.79 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "AO3401A"
+			(at 351.79 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Alpha & Omega"
+			(at 351.79 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "121ccbcf-1c89-5de8-ab35-5ffb85d6ffa8")
+		)
+		(pin "3"
+			(uuid "e7aa9242-3723-563e-a9c5-5c0619ab2d95")
+		)
+		(pin "2"
+			(uuid "8f7eb7ad-c218-58b8-8b74-fa034b3c0502")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "Q12") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 346.71 91.44)
+			(xy 344.17 91.44)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8cd3c3c1-b722-5b38-bb37-70084e3c008b")
+	)
+	(global_label "USBC_GATE"
+		(shape passive)
+		(at 344.17 91.44 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "ea1b6fed-436e-553c-bb16-f03fe14fde21")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 344.17 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 354.33 86.36)
+			(xy 354.33 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cc6986ee-ab6e-5123-8906-585965c6e712")
+	)
+	(global_label "VBUS_C"
+		(shape passive)
+		(at 354.33 83.82 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "b6fcf69a-d52e-5709-9f7e-8c9f28657062")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 354.33 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 354.33 96.52)
+			(xy 354.33 99.06)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6873eea1-1084-5c94-a6cd-cccb217ec8f0")
+	)
+	(global_label "USBC_S"
+		(shape passive)
+		(at 354.33 99.06 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "49e96ed5-e31c-5176-9cb2-634a033d67d3")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 354.33 99.06 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 363.22 90.17 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "172712aa-3932-5490-91b3-8f0c3563eb15")
+		(property "Reference" "R92"
+			(at 363.22 84.86 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "10k"
+			(at 363.22 95.48 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 363.22 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 363.22 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Scarica il VBUS quando si stacca il dispositivo"
+			(at 363.22 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 10k 1%"
+			(at 363.22 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 363.22 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "64a0dfd6-0ae6-5007-bac6-6c51c7081a2c")
+		)
+		(pin "2"
+			(uuid "e58dd396-52f6-51d9-9149-8cfdda16a683")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "R92") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 363.22 86.36)
+			(xy 363.22 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5574b216-d9c8-5651-bc83-7909518db5dc")
+	)
+	(global_label "VBUS_C"
+		(shape passive)
+		(at 363.22 83.82 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "52558e44-d2d5-5028-bdb6-173e02f0109d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 363.22 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 363.22 93.98)
+			(xy 363.22 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3917fe6b-a7bf-5cd5-9468-e22fb0d24810")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 363.22 96.52 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "2282fea9-f4df-546a-a59d-c4ae8ad0bf3c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 363.22 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 372.11 90.17 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "0263fa26-f23e-585f-ab7a-c70ec53e5841")
+		(property "Reference" "C63"
+			(at 372.11 84.86 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "4.7uF 16V"
+			(at 372.11 95.48 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+			(at 372.11 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 372.11 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Disaccoppiamento VBUS USB-C"
+			(at 372.11 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "MLCC 4.7uF 16V"
+			(at 372.11 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 372.11 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "84792a55-4863-59e9-84e9-5befe7d76c3e")
+		)
+		(pin "2"
+			(uuid "0d3f7a05-b9a9-54aa-98e2-02250210068a")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "C63") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 372.11 86.36)
+			(xy 372.11 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "76f3948c-8b6f-54e7-91f2-abb0dca40d3c")
+	)
+	(global_label "VBUS_C"
+		(shape passive)
+		(at 372.11 83.82 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "648dde5d-295d-50c8-a8ea-900feb76418d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 372.11 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 372.11 93.98)
+			(xy 372.11 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "55e6f9c1-7e93-5d48-8a59-8eaed30fb7e1")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 372.11 96.52 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "27cf4dfb-ea41-564a-b7f8-91dc303bf516")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 372.11 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 381 87.63 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "8ad17ab0-8fdd-5e56-9c39-71dccb6c3c6f")
+		(property "Reference" "R3"
+			(at 381 82.32 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "4.7k"
+			(at 381 92.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 381 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 381 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "LED 12V"
+			(at 381 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 4.7k 1%"
+			(at 381 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 381 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "e91a59dd-339c-539e-8401-4d57f021e9d4")
+		)
+		(pin "2"
+			(uuid "05076805-1e3f-5983-94de-9d98b4f03d33")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "R3") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 381 83.82)
+			(xy 381 81.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f47f163d-3f8d-58c6-9a5b-422e27035325")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 381 81.28 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "ebae53ed-986c-53e7-9c61-1c37cef10625")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 381 81.28 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 381 91.44)
+			(xy 381 93.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8430436c-a3cc-58e4-b0c0-d9d4a80dab03")
+	)
+	(global_label "LED12_A"
+		(shape passive)
+		(at 381 93.98 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "03cdd7d0-3ce1-5d45-8de5-f47268dcac3e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 381 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 34.29 127 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "ef1cd078-ed3a-58ee-af0e-c1294ef2f147")
+		(property "Reference" "D3"
+			(at 34.29 124.23 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "Green"
+			(at 34.29 130.786 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 34.29 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 34.29 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "12 V logica presente"
+			(at 34.29 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "KT-0603G"
+			(at 34.29 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Hubei KENTO"
+			(at 34.29 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "222ef7bd-f432-5420-8c0f-8736be4d126a")
+		)
+		(pin "2"
+			(uuid "32f76933-bd77-5c2b-8e2b-5c91f395c3e2")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "D3") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 30.48 127)
+			(xy 27.94 127)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ba53347c-1f4f-5b59-8427-aa889a1aa90f")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 27.94 127 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "bce3cad5-3920-59a4-9dd0-8783e56c38a2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 27.94 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 38.1 127)
+			(xy 40.64 127)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ca75a400-8285-5cf8-817a-ce61131a0324")
+	)
+	(global_label "LED12_A"
+		(shape passive)
+		(at 40.64 127 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "c1683983-4774-599e-9326-ba8a8de94662")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 40.64 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 57.15 138.43 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d102be51-1d2a-55fa-a00b-d0e763a20b14")
+		(property "Reference" "R4"
+			(at 57.15 133.12 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "1k"
+			(at 57.15 143.74 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 57.15 138.43 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 57.15 138.43 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "LED 5V"
+			(at 57.15 138.43 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 1k 1%"
+			(at 57.15 138.43 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 57.15 138.43 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "08355f28-da62-524b-b596-80814280bb1f")
+		)
+		(pin "2"
+			(uuid "4289ad19-e524-58e5-a8d3-791dfc102ee2")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "R4") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 57.15 134.62)
+			(xy 57.15 132.08)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1df8d91d-a089-5dc8-b6ca-03b308fe4001")
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 57.15 132.08 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "7058144a-4d9e-5eca-b24c-dae3037f2a9b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 57.15 132.08 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 57.15 142.24)
+			(xy 57.15 144.78)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9f998f56-b0d2-5f76-a18d-9f682d0bed52")
+	)
+	(global_label "LED5_A"
+		(shape passive)
+		(at 57.15 144.78 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "bc15c93d-7f95-50fa-9080-138afaeab242")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 57.15 144.78 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 76.2 127 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "4c6d977c-6c5d-5568-9b14-162fa41b69f8")
+		(property "Reference" "D4"
+			(at 76.2 124.23 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "Green"
+			(at 76.2 130.786 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 76.2 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 76.2 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "5 V presente"
+			(at 76.2 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "KT-0603G"
+			(at 76.2 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Hubei KENTO"
+			(at 76.2 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "4113400c-635b-544d-bcb2-91fcc8abda5a")
+		)
+		(pin "2"
+			(uuid "1731e98d-744e-5227-bb02-74141daf905a")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "D4") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 72.39 127)
+			(xy 69.85 127)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8098d45e-c9f4-528d-a61d-fac78d509e2c")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 69.85 127 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "a026dd78-db44-5f13-9cbb-4837f9a8a6d1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 69.85 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 80.01 127)
+			(xy 82.55 127)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "13387473-89a5-5860-819e-9e817ec05830")
+	)
+	(global_label "LED5_A"
+		(shape passive)
+		(at 82.55 127 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "93819d31-7a0b-5dae-ab40-3c46662c93f0")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 82.55 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 99.06 138.43 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "27c545b6-b5d1-5eec-bcac-05f1f78d6ff9")
+		(property "Reference" "R5"
+			(at 99.06 133.12 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "1k"
+			(at 99.06 143.74 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 99.06 138.43 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 99.06 138.43 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "LED 3V3"
+			(at 99.06 138.43 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 1k 1%"
+			(at 99.06 138.43 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 99.06 138.43 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "8ce3f8a9-bf14-534c-855c-98f28c47a4a2")
+		)
+		(pin "2"
+			(uuid "f96e7c66-6c85-5aa2-a69f-f0d48717d5e8")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "R5") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 99.06 134.62)
+			(xy 99.06 132.08)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "415b6a61-9b9e-5865-a502-0707df477ff9")
+	)
+	(global_label "+3V3"
+		(shape passive)
+		(at 99.06 132.08 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "20889cf7-575d-5c9f-99b0-fa3f87021b51")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 99.06 132.08 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 99.06 142.24)
+			(xy 99.06 144.78)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "721ea397-ca5a-5a8b-b700-48e26e2b18e9")
+	)
+	(global_label "LED33_A"
+		(shape passive)
+		(at 99.06 144.78 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "aca4cc34-0469-5330-9831-8f7b2da8b917")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 99.06 144.78 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 118.11 127 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "bb718726-d280-519c-a273-0976baabc1bd")
+		(property "Reference" "D5"
+			(at 118.11 124.23 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "Green"
+			(at 118.11 130.786 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 118.11 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 118.11 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "3,3 V presente"
+			(at 118.11 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "KT-0603G"
+			(at 118.11 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Hubei KENTO"
+			(at 118.11 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "ec401e8a-faff-5852-84f7-0a036deed048")
+		)
+		(pin "2"
+			(uuid "994ccf89-07ac-5575-89e3-9c9c7975bd97")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "D5") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 114.3 127)
+			(xy 111.76 127)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "541f2eae-dba5-5701-92f6-7e198ada47a8")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 111.76 127 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "b29de699-c985-515a-b687-d4a9f30feaa5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 111.76 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 121.92 127)
+			(xy 124.46 127)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d8659bd9-b8ba-59f7-9023-afb05eba3252")
+	)
+	(global_label "LED33_A"
+		(shape passive)
+		(at 124.46 127 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "95152f32-1c85-528d-9a18-d00327cd4152")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 124.46 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 139.7 125.73 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "ac5ba115-6357-56e9-bc9a-0322951101f1")
+		(property "Reference" "H1"
+			(at 139.7 124.23 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "M3"
+			(at 139.7 127.23 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3"
+			(at 139.7 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 139.7 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Foro di fissaggio M3"
+			(at 139.7 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" ""
+			(at 139.7 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" ""
+			(at 139.7 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "H1") (unit 1)))
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 146.05 125.73 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "03f2b12c-7952-579b-92ae-62df03f9c84b")
+		(property "Reference" "H2"
+			(at 146.05 124.23 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "M3"
+			(at 146.05 127.23 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3"
+			(at 146.05 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 146.05 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Foro di fissaggio M3"
+			(at 146.05 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" ""
+			(at 146.05 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" ""
+			(at 146.05 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "H2") (unit 1)))
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 152.4 125.73 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "834b6cd4-2817-58b5-85ef-4d33ce69f60c")
+		(property "Reference" "H3"
+			(at 152.4 124.23 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "M3"
+			(at 152.4 127.23 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3"
+			(at 152.4 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 152.4 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Foro di fissaggio M3"
+			(at 152.4 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" ""
+			(at 152.4 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" ""
+			(at 152.4 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "H3") (unit 1)))
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 157.48 125.73 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a37d8cc6-c70a-5469-889a-d160054d6453")
+		(property "Reference" "H4"
+			(at 157.48 124.23 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "M3"
+			(at 157.48 127.23 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3"
+			(at 157.48 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 157.48 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Foro di fissaggio M3"
+			(at 157.48 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" ""
+			(at 157.48 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" ""
+			(at 157.48 125.73 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "H4") (unit 1)))
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 173.99 127 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "be7e017e-646b-531f-8276-7130e62dd252")
+		(property "Reference" "#FLG001"
+			(at 173.99 123.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Value" "PWR_FLAG"
+			(at 173.99 123.2 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 173.99 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 173.99 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" ""
+			(at 173.99 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "99259fda-e4d1-5110-a04e-4b121343f0df")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "#FLG001") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 173.99 127)
+			(xy 173.99 129.54)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a621d5be-0b69-5d73-a4e3-151df436de93")
+	)
+	(global_label "+12V_IN_H"
+		(shape passive)
+		(at 173.99 129.54 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "7daccc4f-5808-564f-83d3-bcd19ec0d850")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 173.99 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 199.39 127 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b8fc6c15-a5ac-5424-b67c-f7ed7000f576")
+		(property "Reference" "#FLG002"
+			(at 199.39 123.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Value" "PWR_FLAG"
+			(at 199.39 123.2 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 199.39 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 199.39 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" ""
+			(at 199.39 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "ef7526a7-b8d5-556b-b455-f296f84cbd67")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "#FLG002") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 199.39 127)
+			(xy 199.39 129.54)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "74d21324-327f-5a49-b031-23cd3230780d")
+	)
+	(global_label "+12V_IN_M"
+		(shape passive)
+		(at 199.39 129.54 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "6affa7b9-2772-590b-aca8-d0e5afc07958")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 199.39 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 226.06 127 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "dad66a70-2ead-53b7-b592-7ccaa43c18e2")
+		(property "Reference" "#FLG003"
+			(at 226.06 123.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Value" "PWR_FLAG"
+			(at 226.06 123.2 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 226.06 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 226.06 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" ""
+			(at 226.06 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "8da7a350-1049-56be-b5a3-e5eed6e2e98a")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "#FLG003") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 226.06 127)
+			(xy 226.06 129.54)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1badda98-0953-5341-a680-1f463c9808b0")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 226.06 129.54 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "ef056a33-4741-5814-9fca-a355a0e3bed4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 226.06 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 251.46 127 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "52ec1245-0d0e-5fe9-afd8-8fc4d5784ec1")
+		(property "Reference" "#FLG004"
+			(at 251.46 123.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Value" "PWR_FLAG"
+			(at 251.46 123.2 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 251.46 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 251.46 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" ""
+			(at 251.46 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "3f1e0c43-b5bc-5d5a-bcdc-b2612aa029e6")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "#FLG004") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 251.46 127)
+			(xy 251.46 129.54)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6adb3661-5bc0-575b-867e-b5e0807c3937")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 251.46 129.54 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "c481fc5c-378c-5e2f-ab2b-f5aa30256cd0")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 251.46 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 278.13 127 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "6be885a9-150f-5b48-b35e-9c48df4bdc82")
+		(property "Reference" "#FLG005"
+			(at 278.13 123.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Value" "PWR_FLAG"
+			(at 278.13 123.2 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 278.13 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 278.13 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" ""
+			(at 278.13 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "650e4d77-95bd-5f99-860a-f658668db815")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "#FLG005") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 278.13 127)
+			(xy 278.13 129.54)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4ad4914e-1f63-5a08-8b5d-707f1f392024")
+	)
+	(global_label "+12V_PUMP"
+		(shape passive)
+		(at 278.13 129.54 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "aea19773-8ed5-5f3e-88be-07e4db06d48c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 278.13 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 303.53 127 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "dd3c37c8-5ef2-501a-bef9-c7afff21115d")
+		(property "Reference" "#FLG006"
+			(at 303.53 123.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Value" "PWR_FLAG"
+			(at 303.53 123.2 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 303.53 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 303.53 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" ""
+			(at 303.53 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "147e067e-74d8-52e8-ab11-1f2fa2305bd5")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "#FLG006") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 303.53 127)
+			(xy 303.53 129.54)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b4af8962-1fa1-5e2b-b91d-207d52820fce")
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 303.53 129.54 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "d7099d62-0dd1-51a9-ac11-5ef0ed479696")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 303.53 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 330.2 127 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "eaac5b3a-47d9-543a-8119-a60b0eb5c155")
+		(property "Reference" "#FLG007"
+			(at 330.2 123.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Value" "PWR_FLAG"
+			(at 330.2 123.2 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 330.2 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 330.2 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" ""
+			(at 330.2 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "268427ad-8563-500c-b7bf-af00aaeccd76")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "#FLG007") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 330.2 127)
+			(xy 330.2 129.54)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "233b08a1-52b6-58b9-8655-822feef91203")
+	)
+	(global_label "+5V_USB"
+		(shape passive)
+		(at 330.2 129.54 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "7901d2ef-ebdd-5ac3-930e-3ccd069d037f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 330.2 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 355.6 127 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "729109da-9ca1-50b3-bcb3-aed20d90e75b")
+		(property "Reference" "#FLG008"
+			(at 355.6 123.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Value" "PWR_FLAG"
+			(at 355.6 123.2 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 355.6 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 355.6 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" ""
+			(at 355.6 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "b6c18f2b-bc4e-5cd6-8eb0-5dfd437faf5e")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/a0aa4cc1-c89c-5c94-b349-8dbaaf854bef" (reference "#FLG008") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 355.6 127)
+			(xy 355.6 129.54)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cb434672-e778-5068-9b62-6184b18852b6")
+	)
+	(global_label "USBC_S"
+		(shape passive)
+		(at 355.6 129.54 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "ea1a45e6-5ae0-5a0c-b548-803a4bfcb6cf")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 355.6 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(embedded_fonts no)
+)

@@ -117,6 +117,11 @@
 #define C3_RLY                      2
 #define WB_RLY                      3
 #define WASTE_RLY                   4
+/* Port A pin 5 — mains water-inlet valve (machine v6). Same pin on the Adafruit
+ * #6318 (MOSFET channel 6) and on the FilMachine Mainboard (J16 pins 3-4).
+ * Deliberately outside RELAY_NUMBER: process code never touches it, only the
+ * Maintenance "fill machine" task opens it, and closeAllValves() closes it. */
+#define INLET_RLY                   5
 #define HEATER_RLY                  7       /* Port A pin 7 — drives external relay for heater */
 
 /* Port B — external relay board (10A per channel, for high-power loads)
@@ -151,21 +156,22 @@
 #define HEATER1_PIN                 14      /* B6 — heater MOSFET 1 */
 #define HEATER2_PIN                 15      /* B7 — heater MOSFET 2 */
 
-/* ── Power-rail monitoring (future custom board) ──
- * The 12V/5V/3.3V rails must be scaled below the ADC full-scale (~2.5V @ 12dB)
- * with resistor dividers, each feeding an ADC1 channel. When the custom board
- * provides them, set HAS_RAIL_MONITOR to 1 and fill in the channels + divider
- * ratios (ratio = (R_top + R_bottom) / R_bottom). The diagnostics "Power rails"
- * panel then shows live voltages; until then it shows "n/a". */
-#define HAS_RAIL_MONITOR            0
-#if HAS_RAIL_MONITOR
-#define RAIL_12V_ADC_CH             ADC_CHANNEL_0
-#define RAIL_12V_DIVIDER            6.0f     /* e.g. 100k/20k → 6.0 */
-#define RAIL_5V_ADC_CH              ADC_CHANNEL_1
-#define RAIL_5V_DIVIDER             3.0f     /* e.g. 20k/10k → 3.0 */
-#define RAIL_3V3_ADC_CH             ADC_CHANNEL_2
-#define RAIL_3V3_DIVIDER            2.0f     /* e.g. 10k/10k → 2.0 */
-#endif
+/* ── Power-rail / pump-current monitoring — MCP3424 on the FilMachine Mainboard ──
+ * No JP1 GPIO is left for the P4's own ADC, so the Mainboard carries an MCP3424
+ * (18-bit I2C ADC) on the shared I2C bus at 0x68. It is probed at boot: with the
+ * separate modules (Adafruit #6318 + DBH-12V) nothing answers at 0x68 and the
+ * diagnostics "Power rails" panel simply shows "n/a" — no other effect.
+ *   CH1: +12V through 100k/15k  -> V12 = Vin * 115/15
+ *   CH2: +5V  through 20k/10k   -> V5  = Vin * 3
+ *   CH3/CH4: BTN8982 IS of pump half-bridge A/B into 1.5k (via 10k + 100nF):
+ *            I ≈ (Vin/1.5k - 0.17 mA) * 19500  (to be calibrated on the bench) */
+#define HAS_RAIL_MONITOR            1
+#define RAIL_MON_I2C_ADDR           0x68
+#define RAIL_12V_DIVIDER            (115.0f / 15.0f)
+#define RAIL_5V_DIVIDER             3.0f
+#define RAIL_PUMP_IS_OHM            1500.0f
+#define RAIL_PUMP_IS_OFFSET_A       0.00017f
+#define RAIL_PUMP_KILIS             19500.0f
 
 /* Pump direction is now handled by DBH-12V H-bridge channel B.
  * These constants are kept as logical direction markers so that

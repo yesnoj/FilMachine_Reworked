@@ -1,0 +1,7751 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "7dd4feca-e5a8-53b9-aa46-76c693766476")
+	(paper "A3")
+	(title_block
+		(title "FilMachine Mainboard — Valvole e riscaldatori")
+		(date "2026-10-10")
+		(rev "1.0")
+		(company "FilMachine")
+		(comment 1 "Mainboard per JC4880P433 (ESP32-P4) — generata da design.py")
+	)
+	(lib_symbols
+		(symbol "Device:R"
+			(pin_numbers (hide yes))
+			(pin_names (offset 0))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "R" (at 2.032 0 90) (effects (font (size 1.27 1.27))))
+			(property "Value" "R" (at 0 0 90) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at -1.778 0 90) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Resistor" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "R res resistor" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "R_*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "R_0_1" (rectangle (start -1.016 -2.54) (end 1.016 2.54) (stroke (width 0.254) (type default)) (fill (type none))))
+			(symbol "R_1_1" (pin passive line (at 0 3.81 270) (length 1.27) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 0 -3.81 90) (length 1.27) (name "~" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Transistor_FET:AO3400A"
+			(property "ki_fp_filters" "SOT?23*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(pin_names (offset 0) (hide yes))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "Q" (at 5.08 1.905 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Value" "AO3400A" (at 5.08 0 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 5.08 -1.905 0) (effects (font (size 1.27 1.27) (italic yes)) (justify left) (hide yes)))
+			(property "Datasheet" "http://www.aosmd.com/pdfs/datasheet/AO3400A.pdf" (at 5.08 -3.81 0) (effects (font (size 1.27 1.27)) (justify left) (hide yes)))
+			(property "Description" "30V Vds, 5.7A Id, N-Channel MOSFET, SOT-23" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "N-Channel MOSFET" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "AO3400A_0_1" (polyline (pts (xy 0.254 1.905) (xy 0.254 -1.905)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0.254 0) (xy -2.54 0)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 0.762 2.286) (xy 0.762 1.27)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0.762 0.508) (xy 0.762 -0.508)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0.762 -1.27) (xy 0.762 -2.286)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0.762 -1.778) (xy 3.302 -1.778) (xy 3.302 1.778) (xy 0.762 1.778)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 1.016 0) (xy 2.032 0.381) (xy 2.032 -0.381) (xy 1.016 0)) (stroke (width 0) (type default)) (fill (type outline))) (circle (center 1.651 0) (radius 2.794) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 2.54 2.54) (xy 2.54 1.778)) (stroke (width 0) (type default)) (fill (type none))) (circle (center 2.54 1.778) (radius 0.254) (stroke (width 0) (type default)) (fill (type outline))) (circle (center 2.54 -1.778) (radius 0.254) (stroke (width 0) (type default)) (fill (type outline))) (polyline (pts (xy 2.54 -2.54) (xy 2.54 0) (xy 0.762 0)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 2.921 0.381) (xy 3.683 0.381)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 3.302 0.381) (xy 2.921 -0.254) (xy 3.683 -0.254) (xy 3.302 0.381)) (stroke (width 0) (type default)) (fill (type none))))
+			(symbol "AO3400A_1_1" (pin input line (at -5.08 0 0) (length 2.54) (name "G" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 2.54 5.08 270) (length 2.54) (name "D" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27))))) (pin passive line (at 2.54 -5.08 90) (length 2.54) (name "S" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Device:D_Schottky"
+			(pin_numbers (hide yes))
+			(pin_names (offset 1.016) (hide yes))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "D" (at 0 2.54 0) (effects (font (size 1.27 1.27))))
+			(property "Value" "D_Schottky" (at 0 -2.54 0) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Schottky diode" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "diode Schottky" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "TO-???* *_Diode_* *SingleDiode* D_*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "D_Schottky_0_1" (polyline (pts (xy -1.905 0.635) (xy -1.905 1.27) (xy -1.27 1.27) (xy -1.27 -1.27) (xy -0.635 -1.27) (xy -0.635 -0.635)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0) (xy 1.27 1.27)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 1.27 0) (xy -1.27 0)) (stroke (width 0) (type default)) (fill (type none))))
+			(symbol "D_Schottky_1_1" (pin passive line (at -3.81 0 0) (length 2.54) (name "K" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 3.81 0 180) (length 2.54) (name "A" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Device:LED"
+			(pin_numbers (hide yes))
+			(pin_names (offset 1.016) (hide yes))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "D" (at 0 2.54 0) (effects (font (size 1.27 1.27))))
+			(property "Value" "LED" (at 0 -2.54 0) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Light emitting diode" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Sim.Pins" "1=K 2=A" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "LED diode" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "LED* LED_SMD:* LED_THT:*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "LED_0_1" (polyline (pts (xy -3.048 -0.762) (xy -4.572 -2.286) (xy -3.81 -2.286) (xy -4.572 -2.286) (xy -4.572 -1.524)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy -1.778 -0.762) (xy -3.302 -2.286) (xy -2.54 -2.286) (xy -3.302 -2.286) (xy -3.302 -1.524)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy -1.27 0) (xy 1.27 0)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy -1.27 -1.27) (xy -1.27 1.27)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 1.27 -1.27) (xy 1.27 1.27) (xy -1.27 0) (xy 1.27 -1.27)) (stroke (width 0.254) (type default)) (fill (type none))))
+			(symbol "LED_1_1" (pin passive line (at -3.81 0 0) (length 2.54) (name "K" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 3.81 0 180) (length 2.54) (name "A" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Connector_Generic:Conn_01x04"
+			(pin_names (offset 1.016) (hide yes))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "J" (at 0 5.08 0) (effects (font (size 1.27 1.27))))
+			(property "Value" "Conn_01x04" (at 0 -7.62 0) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "connector" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "Connector*:*_1x??_*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "Conn_01x04_1_1" (rectangle (start -1.27 3.81) (end 1.27 -6.35) (stroke (width 0.254) (type default)) (fill (type background))) (rectangle (start -1.27 2.667) (end 0 2.413) (stroke (width 0.1524) (type default)) (fill (type none))) (rectangle (start -1.27 0.127) (end 0 -0.127) (stroke (width 0.1524) (type default)) (fill (type none))) (rectangle (start -1.27 -2.413) (end 0 -2.667) (stroke (width 0.1524) (type default)) (fill (type none))) (rectangle (start -1.27 -4.953) (end 0 -5.207) (stroke (width 0.1524) (type default)) (fill (type none))) (pin passive line (at -5.08 2.54 0) (length 3.81) (name "Pin_1" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at -5.08 0 0) (length 3.81) (name "Pin_2" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))) (pin passive line (at -5.08 -2.54 0) (length 3.81) (name "Pin_3" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27))))) (pin passive line (at -5.08 -5.08 0) (length 3.81) (name "Pin_4" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Driver_FET:UCC27524D"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U" (at -7.62 8.89 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Value" "UCC27524D" (at 1.27 8.89 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" (at 0 -8.89 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "https://www.ti.com/lit/ds/symlink/ucc27524.pdf" (at 0 -2.54 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Dual 5A MOSFET driver, 4.5V..18V supply, non-inverting, SOIC-8" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "high-speed low-side negative-input-voltage-capability" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "*SOIC*3.9x4.9mm*P1.27mm*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "UCC27524D_0_1" (rectangle (start -7.62 7.62) (end 7.62 -7.62) (stroke (width 0.254) (type default)) (fill (type background))))
+			(symbol "UCC27524D_1_1" (pin input line (at -10.16 5.08 0) (length 2.54) (name "ENA" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin input line (at -10.16 2.54 0) (length 2.54) (name "INA" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))) (pin input line (at -10.16 -2.54 0) (length 2.54) (name "INB" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27))))) (pin input line (at -10.16 -5.08 0) (length 2.54) (name "ENB" (effects (font (size 1.27 1.27)))) (number "8" (effects (font (size 1.27 1.27))))) (pin power_in line (at 0 10.16 270) (length 2.54) (name "V_{DD}" (effects (font (size 1.27 1.27)))) (number "6" (effects (font (size 1.27 1.27))))) (pin power_in line (at 0 -10.16 90) (length 2.54) (name "GND" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27))))) (pin output line (at 10.16 2.54 180) (length 2.54) (name "OUTA" (effects (font (size 1.27 1.27)))) (number "7" (effects (font (size 1.27 1.27))))) (pin output line (at 10.16 -2.54 180) (length 2.54) (name "OUTB" (effects (font (size 1.27 1.27)))) (number "5" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Device:C"
+			(pin_numbers (hide yes))
+			(pin_names (offset 0.254))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "C" (at 0.635 2.54 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Value" "C" (at 0.635 -2.54 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Footprint" "" (at 0.9652 -3.81 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Unpolarized capacitor" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "cap capacitor" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "C_*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "C_0_1" (polyline (pts (xy -2.032 0.762) (xy 2.032 0.762)) (stroke (width 0.508) (type default)) (fill (type none))) (polyline (pts (xy -2.032 -0.762) (xy 2.032 -0.762)) (stroke (width 0.508) (type default)) (fill (type none))))
+			(symbol "C_1_1" (pin passive line (at 0 3.81 270) (length 2.794) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 0 -3.81 90) (length 2.794) (name "~" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Transistor_FET:IPD50R380CE"
+			(pin_names (hide yes))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "Q" (at 5.08 1.905 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Value" "IPD50R380CE" (at 5.08 0 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Footprint" "Package_TO_SOT_SMD:TO-252-2" (at 5.08 -1.905 0) (effects (font (size 1.27 1.27) (italic yes)) (justify left) (hide yes)))
+			(property "Datasheet" "https://www.infineon.com/dgdl/Infineon-IPD50R380CE-DS-v02_01-en.pdf?fileId=db3a30433ecb86d4013ed0a2ef580f38" (at 5.08 -3.81 0) (effects (font (size 1.27 1.27)) (justify left) (hide yes)))
+			(property "Description" "14.1A Id, 500V Vds, CoolMOS N-Channel Power MOSFET, 380mOhm Ron, 24.8nC Qg (typ), TO-252-2" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "CoolMOS Power MOSFET N-MOS" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "TO?252*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "IPD50R380CE_0_1" (polyline (pts (xy 0.254 1.905) (xy 0.254 -1.905)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0.254 0) (xy -2.54 0)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 0.762 2.286) (xy 0.762 1.27)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0.762 0.508) (xy 0.762 -0.508)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0.762 -1.27) (xy 0.762 -2.286)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0.762 -1.778) (xy 3.302 -1.778) (xy 3.302 1.778) (xy 0.762 1.778)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 1.016 0) (xy 2.032 0.381) (xy 2.032 -0.381) (xy 1.016 0)) (stroke (width 0) (type default)) (fill (type outline))) (circle (center 1.651 0) (radius 2.794) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 2.54 2.54) (xy 2.54 1.778)) (stroke (width 0) (type default)) (fill (type none))) (circle (center 2.54 1.778) (radius 0.254) (stroke (width 0) (type default)) (fill (type outline))) (circle (center 2.54 -1.778) (radius 0.254) (stroke (width 0) (type default)) (fill (type outline))) (polyline (pts (xy 2.54 -2.54) (xy 2.54 0) (xy 0.762 0)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 2.794 0.508) (xy 2.921 0.381) (xy 3.683 0.381) (xy 3.81 0.254)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 3.302 0.381) (xy 2.921 -0.254) (xy 3.683 -0.254) (xy 3.302 0.381)) (stroke (width 0) (type default)) (fill (type none))))
+			(symbol "IPD50R380CE_1_1" (pin input line (at -5.08 0 0) (length 2.54) (name "G" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 2.54 5.08 270) (length 2.54) (name "D" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))) (pin passive line (at 2.54 -5.08 90) (length 2.54) (name "S" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Connector_Generic:Conn_01x02"
+			(pin_names (offset 1.016) (hide yes))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "J" (at 0 2.54 0) (effects (font (size 1.27 1.27))))
+			(property "Value" "Conn_01x02" (at 0 -5.08 0) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "connector" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "Connector*:*_1x??_*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "Conn_01x02_1_1" (rectangle (start -1.27 1.27) (end 1.27 -3.81) (stroke (width 0.254) (type default)) (fill (type background))) (rectangle (start -1.27 0.127) (end 0 -0.127) (stroke (width 0.1524) (type default)) (fill (type none))) (rectangle (start -1.27 -2.413) (end 0 -2.667) (stroke (width 0.1524) (type default)) (fill (type none))) (pin passive line (at -5.08 0 0) (length 3.81) (name "Pin_1" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at -5.08 -2.54 0) (length 3.81) (name "Pin_2" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 22.86 41.91 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "60ded84d-7d18-5c17-bc66-fe2b041c68ee")
+		(property "Reference" "R31"
+			(at 22.86 36.6 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100R"
+			(at 22.86 47.22 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 22.86 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 22.86 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Gate valvola C1"
+			(at 22.86 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100R 1%"
+			(at 22.86 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 22.86 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "36a34f70-ab41-5564-90a1-a4e9b6d3599e")
+		)
+		(pin "2"
+			(uuid "6a025a6d-bda4-58a6-9718-6d5a62c7b5fe")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R31") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 22.86 38.1)
+			(xy 22.86 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b9bf839c-52a7-5203-86c6-f734a544d7bb")
+	)
+	(global_label "VLV_C1"
+		(shape passive)
+		(at 22.86 35.56 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "5ae1ce59-03af-5ab9-a62f-03b5fb4320de")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 22.86 35.56 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 22.86 45.72)
+			(xy 22.86 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "53157623-5d26-57ab-af33-9312e4268a35")
+	)
+	(global_label "VLV1_G"
+		(shape passive)
+		(at 22.86 48.26 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "83bcdf69-01b7-5f7e-aca4-2cc7167fa566")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 22.86 48.26 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 30.48 41.91 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "31c23dae-ef1d-5fa2-997c-9235f5898505")
+		(property "Reference" "R41"
+			(at 30.48 36.6 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 30.48 47.22 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 30.48 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 30.48 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down gate valvola C1 (spenta al boot)"
+			(at 30.48 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 30.48 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 30.48 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "b16447ca-51b1-5089-a693-4b79abc54e07")
+		)
+		(pin "2"
+			(uuid "4df9e214-2d2f-578b-af94-8672f5800e03")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R41") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 30.48 38.1)
+			(xy 30.48 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "19728315-bb89-58b3-a5a4-85314d7c1c49")
+	)
+	(global_label "VLV1_G"
+		(shape passive)
+		(at 30.48 35.56 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "eb8a6102-36e8-5c68-85f2-a2ecedf2d0c2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 30.48 35.56 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 30.48 45.72)
+			(xy 30.48 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a8f629d5-4772-567a-ac27-1e67a00eefa9")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 30.48 48.26 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "d68eb96f-1591-5007-9df9-54420d447acd")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 30.48 48.26 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Transistor_FET:AO3400A")
+		(at 54.61 43.18 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a0d7f51f-be8c-5a6a-bbce-ad4ba3a6d296")
+		(property "Reference" "Q1"
+			(at 54.61 36.6 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "AO3400A"
+			(at 54.61 49.76 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+			(at 54.61 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 54.61 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Low-side valvola C1 (30 V, 5,7 A)"
+			(at 54.61 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "AO3400A"
+			(at 54.61 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Alpha & Omega"
+			(at 54.61 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "1a7428a9-e4ea-53e9-a7ff-0be69c566e0e")
+		)
+		(pin "3"
+			(uuid "6165a488-131b-598a-9b60-377ad518857e")
+		)
+		(pin "2"
+			(uuid "14f25f35-475d-5d67-8ce9-cc7c6ffda0db")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "Q1") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 49.53 43.18)
+			(xy 46.99 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "58352751-78ef-537d-a5d1-8b4231e9ce2f")
+	)
+	(global_label "VLV1_G"
+		(shape passive)
+		(at 46.99 43.18 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "702546a0-16f0-5e3b-9795-1ab7b3fc7486")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 46.99 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 57.15 38.1)
+			(xy 57.15 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3cccd629-9031-59f8-bc9e-5639f80fa061")
+	)
+	(global_label "VLV1_N"
+		(shape passive)
+		(at 57.15 35.56 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "36c0a20c-80ad-5658-a6fb-9a8e43292f4f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 57.15 35.56 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 57.15 48.26)
+			(xy 57.15 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "24244101-9b49-5232-ae6a-c7043b7636e5")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 57.15 50.8 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "2546781e-e79a-52f7-bd70-cc152a3d6606")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 57.15 50.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:D_Schottky")
+		(at 77.47 27.94 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "acd08bf6-c991-51cb-80a4-539c1e452b76")
+		(property "Reference" "D21"
+			(at 77.47 25.17 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "B5819W"
+			(at 77.47 30.71 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SOD-123"
+			(at 77.47 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 77.47 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Ricircolo bobina valvola C1"
+			(at 77.47 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "B5819W"
+			(at 77.47 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Diodes/CJ"
+			(at 77.47 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "81f16987-d8f9-5250-b6df-ff5746b27679")
+		)
+		(pin "2"
+			(uuid "72890d07-a67a-54a1-aa19-8ee79fdfd297")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D21") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 73.66 27.94)
+			(xy 71.12 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9c2358e6-f1e5-56fa-9ccf-644bfbf7a481")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 71.12 27.94 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "aa04fb32-2313-5770-8b68-ae563fb4b105")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 71.12 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 81.28 27.94)
+			(xy 83.82 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "34916e58-c2b0-5bbc-9549-0502f7e5e757")
+	)
+	(global_label "VLV1_N"
+		(shape passive)
+		(at 83.82 27.94 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "4df2b1f3-253d-5ee7-8ee2-f940e72e094f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 83.82 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 99.06 40.64 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "0b645241-83a1-5579-9093-62b4815fa97d")
+		(property "Reference" "R51"
+			(at 99.06 35.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "4.7k"
+			(at 99.06 45.95 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 99.06 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 99.06 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "LED valvola C1"
+			(at 99.06 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 4.7k 1%"
+			(at 99.06 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 99.06 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "bd551be1-9da7-56fb-a8b6-8c2e7961e0ad")
+		)
+		(pin "2"
+			(uuid "4caff5ef-9591-5a6c-8395-f677890753da")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R51") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 99.06 36.83)
+			(xy 99.06 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f4aea8fe-8b54-51f8-a0ec-68504a510d9b")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 99.06 34.29 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "5cf6aa2a-0c47-5898-b2a0-e28c87c0d510")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 99.06 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 99.06 44.45)
+			(xy 99.06 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "027b4597-c4ce-5c40-998e-cb27fbe3eeb6")
+	)
+	(global_label "VLV1_LED"
+		(shape passive)
+		(at 99.06 46.99 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "3e312c7b-2900-504c-8a45-150526a12b50")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 99.06 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 121.92 27.94 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "10285aed-7f18-54a4-ac07-723c18d9c368")
+		(property "Reference" "D31"
+			(at 121.92 25.17 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "Yellow"
+			(at 121.92 31.726 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 121.92 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 121.92 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Valvola C1 aperta"
+			(at 121.92 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "KT-0603Y"
+			(at 121.92 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Hubei KENTO"
+			(at 121.92 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "d94d5180-f5c8-544f-8c3d-75efbb297484")
+		)
+		(pin "2"
+			(uuid "ef43a7b6-6a83-5562-90de-2190ad9e7f58")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D31") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 118.11 27.94)
+			(xy 115.57 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "72eb84af-eca9-54ff-952b-b10e1f391216")
+	)
+	(global_label "VLV1_N"
+		(shape passive)
+		(at 115.57 27.94 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "689758aa-539f-53ba-8a80-883fabb13080")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 115.57 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 125.73 27.94)
+			(xy 128.27 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a1de9fcf-f1fd-5794-9532-08b12f383f03")
+	)
+	(global_label "VLV1_LED"
+		(shape passive)
+		(at 128.27 27.94 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "ce34e7cc-d6be-5e00-96f9-670a95ddc865")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 128.27 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 144.78 41.91 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "2fe01cd2-64ff-510f-a269-692670c20d8f")
+		(property "Reference" "R32"
+			(at 144.78 36.6 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100R"
+			(at 144.78 47.22 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 144.78 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 144.78 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Gate valvola C2"
+			(at 144.78 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100R 1%"
+			(at 144.78 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 144.78 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "4eeba811-5952-5f0c-b18d-2307093d3e06")
+		)
+		(pin "2"
+			(uuid "d1fbee7d-b9a4-59a7-ac12-cde66ac4b1b6")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R32") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 144.78 38.1)
+			(xy 144.78 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "abfbbd40-4a02-5cdb-8317-a568951bbace")
+	)
+	(global_label "VLV_C2"
+		(shape passive)
+		(at 144.78 35.56 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "6cc51347-0a60-5774-811d-c92e24ece3cc")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 144.78 35.56 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 144.78 45.72)
+			(xy 144.78 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5e5705bf-d6d2-5076-80a3-d03295f5e702")
+	)
+	(global_label "VLV2_G"
+		(shape passive)
+		(at 144.78 48.26 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "94c81d88-6191-5f6c-9b7b-ab49bf7a4f71")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 144.78 48.26 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 153.67 41.91 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c12f75fe-c929-52bc-a460-a9ffed4772f0")
+		(property "Reference" "R42"
+			(at 153.67 36.6 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 153.67 47.22 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 153.67 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 153.67 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down gate valvola C2 (spenta al boot)"
+			(at 153.67 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 153.67 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 153.67 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "bfd81748-4e51-58f9-84a0-48b9fb53e94d")
+		)
+		(pin "2"
+			(uuid "5ead91d9-ca1c-5512-a2d4-db7cfe7a0e36")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R42") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 153.67 38.1)
+			(xy 153.67 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fff33347-f212-50a5-83e9-cb5936f8cf19")
+	)
+	(global_label "VLV2_G"
+		(shape passive)
+		(at 153.67 35.56 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "2d290bfb-b859-5f07-b236-d545a98c65a5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 153.67 35.56 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 153.67 45.72)
+			(xy 153.67 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ce46073c-5b2d-58ab-bb32-992723c837bf")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 153.67 48.26 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "1a8d697c-38ef-5bc5-9100-2bd63c8b053b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 153.67 48.26 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Transistor_FET:AO3400A")
+		(at 176.53 43.18 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "9b402c7e-aa35-5b02-9e8f-c63d13f92646")
+		(property "Reference" "Q2"
+			(at 176.53 36.6 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "AO3400A"
+			(at 176.53 49.76 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+			(at 176.53 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 176.53 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Low-side valvola C2 (30 V, 5,7 A)"
+			(at 176.53 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "AO3400A"
+			(at 176.53 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Alpha & Omega"
+			(at 176.53 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "d14c75fe-3ea9-5d6f-8868-f542bcb1b493")
+		)
+		(pin "3"
+			(uuid "0e96dbe7-7efd-5154-ac8a-0ca13a37a5d5")
+		)
+		(pin "2"
+			(uuid "a4e1f619-aafd-5f30-8bf2-63c3706b45e9")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "Q2") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 171.45 43.18)
+			(xy 168.91 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "efbff2b6-5b1b-558e-834a-2c41dd1e3023")
+	)
+	(global_label "VLV2_G"
+		(shape passive)
+		(at 168.91 43.18 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "a1fb0619-6443-51bf-9420-a7c2f4ff1748")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 168.91 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 179.07 38.1)
+			(xy 179.07 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a091259e-4e8d-5ce0-be5a-77848d4f8786")
+	)
+	(global_label "VLV2_N"
+		(shape passive)
+		(at 179.07 35.56 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "74fcbd6e-739a-526e-9b75-5462475a1459")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 179.07 35.56 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 179.07 48.26)
+			(xy 179.07 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "34113677-80a8-5837-b7e0-dc38adc55f5a")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 179.07 50.8 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "5077ac91-1e84-57d3-8801-532281ced11c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 179.07 50.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:D_Schottky")
+		(at 199.39 27.94 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "f051eaea-618d-5635-a6e6-05cc055b2a73")
+		(property "Reference" "D22"
+			(at 199.39 25.17 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "B5819W"
+			(at 199.39 30.71 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SOD-123"
+			(at 199.39 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 199.39 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Ricircolo bobina valvola C2"
+			(at 199.39 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "B5819W"
+			(at 199.39 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Diodes/CJ"
+			(at 199.39 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "1a4150d5-a317-5dfe-9a9b-453f672e86d6")
+		)
+		(pin "2"
+			(uuid "c1ff61de-2ef3-55f8-98b8-ca22bb768a2d")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D22") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 195.58 27.94)
+			(xy 193.04 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0752ddd5-0f61-577b-a708-575347fdb2a8")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 193.04 27.94 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "277695d7-95d9-594f-9328-f41a0b67492d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 193.04 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 203.2 27.94)
+			(xy 205.74 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cbd4c118-88f4-52e7-9c5d-a7cd15b268b8")
+	)
+	(global_label "VLV2_N"
+		(shape passive)
+		(at 205.74 27.94 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "10ce1083-fefa-5ffe-8320-4d3c2d2a05f8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 205.74 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 222.25 40.64 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "b25379dc-ed42-5e6b-8a15-6d1e4ac8ea70")
+		(property "Reference" "R52"
+			(at 222.25 35.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "4.7k"
+			(at 222.25 45.95 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 222.25 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 222.25 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "LED valvola C2"
+			(at 222.25 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 4.7k 1%"
+			(at 222.25 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 222.25 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "c91ce35c-8a6d-53d7-a268-54de57270231")
+		)
+		(pin "2"
+			(uuid "45bd5aa3-3e2b-5341-92b6-daebc04b4b2e")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R52") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 222.25 36.83)
+			(xy 222.25 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a61b4f89-13c5-545d-9986-fa7bacc531b6")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 222.25 34.29 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "816914e3-5ab9-5931-88af-7de966142de1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 222.25 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 222.25 44.45)
+			(xy 222.25 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bde23ad2-07a0-50e7-bd57-c88f6284675c")
+	)
+	(global_label "VLV2_LED"
+		(shape passive)
+		(at 222.25 46.99 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "ea0d5c9d-3c82-5fcc-b61f-98dc80f9eda5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 222.25 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 243.84 27.94 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "aa2c0430-1385-52e5-8c5b-5c8325e3ea66")
+		(property "Reference" "D32"
+			(at 243.84 25.17 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "Yellow"
+			(at 243.84 31.726 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 243.84 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 243.84 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Valvola C2 aperta"
+			(at 243.84 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "KT-0603Y"
+			(at 243.84 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Hubei KENTO"
+			(at 243.84 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "8b6bc32a-3810-5af9-8c0b-92a29318cbdb")
+		)
+		(pin "2"
+			(uuid "0b29b501-5845-5382-a2ea-00e04807b020")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D32") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 240.03 27.94)
+			(xy 237.49 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1af2f22f-f58d-5b4d-abf0-f2a186b0045f")
+	)
+	(global_label "VLV2_N"
+		(shape passive)
+		(at 237.49 27.94 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "233397cd-5341-5ed9-8ece-f7c260c3672b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 237.49 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 247.65 27.94)
+			(xy 250.19 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "781a39f5-163e-5ef4-90e4-06f8f55a5034")
+	)
+	(global_label "VLV2_LED"
+		(shape passive)
+		(at 250.19 27.94 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "f3292ad1-36fd-5f95-8f8b-a91c619f6744")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 250.19 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 267.97 41.91 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "6674c7a3-dc96-5624-9e0e-979d23fb4e47")
+		(property "Reference" "R33"
+			(at 267.97 36.6 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100R"
+			(at 267.97 47.22 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 267.97 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 267.97 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Gate valvola C3"
+			(at 267.97 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100R 1%"
+			(at 267.97 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 267.97 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "fb75ea0b-b0fc-5539-bed8-be3668109299")
+		)
+		(pin "2"
+			(uuid "f5dbaa71-5e86-59aa-bd66-0eb3b91415ad")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R33") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 267.97 38.1)
+			(xy 267.97 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "91b0c41c-95c3-5c07-afd0-0409ab75000d")
+	)
+	(global_label "VLV_C3"
+		(shape passive)
+		(at 267.97 35.56 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "f713b108-6f73-5562-96c1-fca6a116fdaf")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 267.97 35.56 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 267.97 45.72)
+			(xy 267.97 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "33e35234-be99-580b-b678-f515eebd7b91")
+	)
+	(global_label "VLV3_G"
+		(shape passive)
+		(at 267.97 48.26 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "fc613a2d-1d15-5501-8493-9362765d052a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 267.97 48.26 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 275.59 41.91 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "9dad0409-93af-5b9f-9869-3df8a846eb22")
+		(property "Reference" "R43"
+			(at 275.59 36.6 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 275.59 47.22 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 275.59 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 275.59 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down gate valvola C3 (spenta al boot)"
+			(at 275.59 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 275.59 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 275.59 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "389c71c3-a33f-53bc-9d2c-5ae8a73c04a0")
+		)
+		(pin "2"
+			(uuid "3d3ea62b-8a66-5c9d-92e0-a2e78ec8f6f8")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R43") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 275.59 38.1)
+			(xy 275.59 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4221aa1e-2d76-5430-b497-8622227f0732")
+	)
+	(global_label "VLV3_G"
+		(shape passive)
+		(at 275.59 35.56 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "61550b71-56cc-51c5-b485-f146b3d84e7d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 275.59 35.56 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 275.59 45.72)
+			(xy 275.59 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a22f8de8-8754-538c-a9f8-565df73641ec")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 275.59 48.26 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "a9320016-a8ca-57b5-8738-56b547c7a8b7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 275.59 48.26 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Transistor_FET:AO3400A")
+		(at 299.72 43.18 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "5896ea34-6dca-5a36-b093-53af3c915e2b")
+		(property "Reference" "Q3"
+			(at 299.72 36.6 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "AO3400A"
+			(at 299.72 49.76 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+			(at 299.72 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 299.72 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Low-side valvola C3 (30 V, 5,7 A)"
+			(at 299.72 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "AO3400A"
+			(at 299.72 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Alpha & Omega"
+			(at 299.72 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "5fe45d88-0144-5a01-81b6-7dbe24624965")
+		)
+		(pin "3"
+			(uuid "d1c4d4b2-2417-500c-a858-6d23540d51ed")
+		)
+		(pin "2"
+			(uuid "3e1df6a7-91e3-56a4-9b5a-ce939e13d4da")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "Q3") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 294.64 43.18)
+			(xy 292.1 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c88bb69a-1a4f-5e40-b188-7369447d3ad4")
+	)
+	(global_label "VLV3_G"
+		(shape passive)
+		(at 292.1 43.18 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "3e8e2b0c-4279-5739-bc34-93047f6de973")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 292.1 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 302.26 38.1)
+			(xy 302.26 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "15f6607e-44bb-55db-884c-cc8882cefdc1")
+	)
+	(global_label "VLV3_N"
+		(shape passive)
+		(at 302.26 35.56 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "2b3173b2-cd8f-5f61-be45-6a6b9a1946b2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 302.26 35.56 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 302.26 48.26)
+			(xy 302.26 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2907ca5d-d2d8-57da-9d47-0b8df20259c7")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 302.26 50.8 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "0d268019-1b2f-573c-ac8d-11ddb06689e0")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 302.26 50.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:D_Schottky")
+		(at 322.58 27.94 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "3ab1373d-54f7-5656-9483-d99a770cd15d")
+		(property "Reference" "D23"
+			(at 322.58 25.17 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "B5819W"
+			(at 322.58 30.71 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SOD-123"
+			(at 322.58 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 322.58 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Ricircolo bobina valvola C3"
+			(at 322.58 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "B5819W"
+			(at 322.58 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Diodes/CJ"
+			(at 322.58 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "1ffc811e-bbd0-5886-ac21-13e41afc3d20")
+		)
+		(pin "2"
+			(uuid "7a6cc51a-fec6-5fc8-82ec-9e58e430e27a")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D23") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 318.77 27.94)
+			(xy 316.23 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fa2144f7-cc45-587d-a92b-d4b027fd375f")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 316.23 27.94 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "fedc3e82-3acb-5873-b027-0e4c70568ea2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 316.23 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 326.39 27.94)
+			(xy 328.93 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6560f3f1-4fd4-5f4b-a21a-407dff050de9")
+	)
+	(global_label "VLV3_N"
+		(shape passive)
+		(at 328.93 27.94 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "3352a746-cb3e-5545-87e4-04c70ffa1477")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 328.93 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 344.17 40.64 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "86456476-87b2-584d-a390-1512874f3e8a")
+		(property "Reference" "R53"
+			(at 344.17 35.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "4.7k"
+			(at 344.17 45.95 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 344.17 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 344.17 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "LED valvola C3"
+			(at 344.17 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 4.7k 1%"
+			(at 344.17 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 344.17 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "6248cb2e-36c9-50b5-8ac4-ae3ddd0c7f5e")
+		)
+		(pin "2"
+			(uuid "0d9e82aa-4d87-504e-9d60-346885b48505")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R53") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 344.17 36.83)
+			(xy 344.17 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4224aedd-6e8d-5d46-939b-051e45fbfd65")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 344.17 34.29 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "0035d9a0-c2ec-5e24-8b90-9285840db400")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 344.17 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 344.17 44.45)
+			(xy 344.17 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "330b9436-e3cc-5f98-863b-9d524624d6c3")
+	)
+	(global_label "VLV3_LED"
+		(shape passive)
+		(at 344.17 46.99 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "cc74e5e9-8295-554d-ba10-1d98e962c422")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 344.17 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 365.76 27.94 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "bb444c2a-08f3-56f6-902c-cadac39f2e50")
+		(property "Reference" "D33"
+			(at 365.76 25.17 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "Yellow"
+			(at 365.76 31.726 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 365.76 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 365.76 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Valvola C3 aperta"
+			(at 365.76 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "KT-0603Y"
+			(at 365.76 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Hubei KENTO"
+			(at 365.76 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "a9f2c7c2-2483-53a1-9e2d-629729166a0c")
+		)
+		(pin "2"
+			(uuid "5912a81a-6d49-5571-aeab-f81ffbf1abf9")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D33") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 361.95 27.94)
+			(xy 359.41 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9262381e-6d60-5e73-8521-fc84dc19d724")
+	)
+	(global_label "VLV3_N"
+		(shape passive)
+		(at 359.41 27.94 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "da067b59-b091-5c40-987a-94d666594a56")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 359.41 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 369.57 27.94)
+			(xy 372.11 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d55851ba-374c-58e8-bf3c-bc272348860c")
+	)
+	(global_label "VLV3_LED"
+		(shape passive)
+		(at 372.11 27.94 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "f30f4af8-365b-59b1-bb55-9279398097e1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 372.11 27.94 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 389.89 41.91 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a48abb57-9b91-5357-905e-7bce30172c43")
+		(property "Reference" "R34"
+			(at 389.89 36.6 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100R"
+			(at 389.89 47.22 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 389.89 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 389.89 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Gate valvola WB"
+			(at 389.89 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100R 1%"
+			(at 389.89 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 389.89 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "ad954053-da77-5d7d-9ce1-d8e6f4dcd68d")
+		)
+		(pin "2"
+			(uuid "bdab211b-d763-5c07-a6ea-aafabddece5d")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R34") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 389.89 38.1)
+			(xy 389.89 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "525c7f7a-bbf6-5853-a681-f904343735a2")
+	)
+	(global_label "VLV_WB"
+		(shape passive)
+		(at 389.89 35.56 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "bba58bf6-b3a7-53ef-ba0e-0344b405ca35")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 389.89 35.56 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 389.89 45.72)
+			(xy 389.89 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b5855d35-716e-5cff-a26b-c9ba490c57f0")
+	)
+	(global_label "VLV4_G"
+		(shape passive)
+		(at 389.89 48.26 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "cb4cfbe3-6685-595b-aaa1-7d68253811f7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 389.89 48.26 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 22.86 83.82 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "9dc3904e-e010-5ed0-bab4-15d4229a27e0")
+		(property "Reference" "R44"
+			(at 22.86 78.51 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 22.86 89.13 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 22.86 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 22.86 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down gate valvola WB (spenta al boot)"
+			(at 22.86 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 22.86 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 22.86 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "4823cc5b-3366-5216-9d7c-b1ddfdc7dbd8")
+		)
+		(pin "2"
+			(uuid "1bb8de32-d949-5bca-8869-4849e61667f3")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R44") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 22.86 80.01)
+			(xy 22.86 77.47)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "75749f24-2e2a-53ee-85d0-a6b4b6ccf533")
+	)
+	(global_label "VLV4_G"
+		(shape passive)
+		(at 22.86 77.47 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "59285133-9bee-5824-955b-75ca22bdedf6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 22.86 77.47 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 22.86 87.63)
+			(xy 22.86 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bb97a5a9-aed0-57d9-803b-a2abc52efa0b")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 22.86 90.17 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "b89c7e4f-2787-5d93-8c43-b87cb44e261d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 22.86 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Transistor_FET:AO3400A")
+		(at 46.99 85.09 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "6458eb01-ae9d-5cde-a2dd-6edcae0749f5")
+		(property "Reference" "Q4"
+			(at 46.99 78.51 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "AO3400A"
+			(at 46.99 91.67 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+			(at 46.99 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 46.99 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Low-side valvola WB (30 V, 5,7 A)"
+			(at 46.99 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "AO3400A"
+			(at 46.99 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Alpha & Omega"
+			(at 46.99 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "2c5e4cb3-f66f-56a1-b39b-d2253749eca8")
+		)
+		(pin "3"
+			(uuid "b17afb74-8686-5dae-96c4-f1e07466d290")
+		)
+		(pin "2"
+			(uuid "127b9001-bd81-550b-ac02-469a67e6a3bf")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "Q4") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 41.91 85.09)
+			(xy 39.37 85.09)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ff7b7292-c002-5a28-ad01-40b78703909e")
+	)
+	(global_label "VLV4_G"
+		(shape passive)
+		(at 39.37 85.09 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "1a66d7c3-20aa-55f8-a896-edea381457b4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 39.37 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 49.53 80.01)
+			(xy 49.53 77.47)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2ed0a88b-dac0-5a78-852c-e7c5dd355542")
+	)
+	(global_label "VLV4_N"
+		(shape passive)
+		(at 49.53 77.47 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "06e2038b-041c-5bd8-b916-92679ec7bd59")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 49.53 77.47 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 49.53 90.17)
+			(xy 49.53 92.71)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7fd24a1a-5cdc-5fb8-91f4-0f60605a004c")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 49.53 92.71 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "44008714-d76d-5018-8db9-3d841eaed01a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 49.53 92.71 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:D_Schottky")
+		(at 68.58 69.85 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a126f12e-37fe-5dc3-8287-5379268e442e")
+		(property "Reference" "D24"
+			(at 68.58 67.08 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "B5819W"
+			(at 68.58 72.62 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SOD-123"
+			(at 68.58 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 68.58 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Ricircolo bobina valvola WB"
+			(at 68.58 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "B5819W"
+			(at 68.58 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Diodes/CJ"
+			(at 68.58 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "33ab7c42-505a-54dd-9605-8a2ae6c36a0c")
+		)
+		(pin "2"
+			(uuid "8d9c4d3d-2bee-5883-8c76-bd3e39b1ba7b")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D24") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 64.77 69.85)
+			(xy 62.23 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c04dd1a8-659c-5067-8ebc-5687c3539c5f")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 62.23 69.85 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "a1a1cfad-62d5-5d83-93e3-7892f5f63221")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 62.23 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 72.39 69.85)
+			(xy 74.93 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "602f7ee1-d0f3-59fa-9157-4e626dabb933")
+	)
+	(global_label "VLV4_N"
+		(shape passive)
+		(at 74.93 69.85 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "f5207634-8397-50e1-91ce-4f744e9a5678")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 74.93 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 91.44 82.55 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "2dbead1b-fae6-5c1b-a9d4-1fddb0d2fe8f")
+		(property "Reference" "R54"
+			(at 91.44 77.24 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "4.7k"
+			(at 91.44 87.86 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 91.44 82.55 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 91.44 82.55 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "LED valvola WB"
+			(at 91.44 82.55 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 4.7k 1%"
+			(at 91.44 82.55 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 91.44 82.55 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "7c1c383d-986f-5352-ac39-2ca3c2942d7b")
+		)
+		(pin "2"
+			(uuid "a1e1be37-7d9c-5e8c-aea3-ca397b0cdc0f")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R54") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 91.44 78.74)
+			(xy 91.44 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c8e47ff4-9a71-5612-9747-dda8cdae8d58")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 91.44 76.2 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "dbd1ec67-ada1-511a-a663-e7de4c956962")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 91.44 76.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 91.44 86.36)
+			(xy 91.44 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7668dc53-1f5e-5785-b2a8-3d4811467e39")
+	)
+	(global_label "VLV4_LED"
+		(shape passive)
+		(at 91.44 88.9 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "aae39348-8884-5f10-9fbe-3ca41c24b103")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 91.44 88.9 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 113.03 69.85 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "3bbc1c57-6b83-5218-9f0c-cbd47a80fc92")
+		(property "Reference" "D34"
+			(at 113.03 67.08 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "Yellow"
+			(at 113.03 73.636 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 113.03 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 113.03 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Valvola WB aperta"
+			(at 113.03 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "KT-0603Y"
+			(at 113.03 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Hubei KENTO"
+			(at 113.03 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "d200137d-3110-59fe-a0e6-4b132455e74e")
+		)
+		(pin "2"
+			(uuid "13c340a9-215c-562a-a85a-7c14b85caed7")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D34") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 109.22 69.85)
+			(xy 106.68 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9d6d006e-5360-5945-a7ce-19e260ce251e")
+	)
+	(global_label "VLV4_N"
+		(shape passive)
+		(at 106.68 69.85 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "9b39a79c-6efe-5cb8-af33-c528fe08caa6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 106.68 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 116.84 69.85)
+			(xy 119.38 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "22927456-fb6d-5f44-a31d-3653096fe894")
+	)
+	(global_label "VLV4_LED"
+		(shape passive)
+		(at 119.38 69.85 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "5c7cea0a-ceac-5876-ab79-8a3e8b594ec7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 119.38 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 137.16 87.63 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "52f862be-f915-519d-83be-b3868aee2164")
+		(property "Reference" "R35"
+			(at 137.16 82.32 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100R"
+			(at 137.16 92.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 137.16 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 137.16 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Gate valvola WASTE"
+			(at 137.16 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100R 1%"
+			(at 137.16 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 137.16 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "41079b79-465b-5957-8fab-82f45974b686")
+		)
+		(pin "2"
+			(uuid "85b1ddfd-0482-5edf-9898-43efc9721491")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R35") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 137.16 83.82)
+			(xy 137.16 81.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "375bb079-54e7-5f1d-b554-839e6cd55378")
+	)
+	(global_label "VLV_WASTE"
+		(shape passive)
+		(at 137.16 81.28 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "972c5664-6a29-5697-88e7-f13b277715fb")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 137.16 81.28 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 137.16 91.44)
+			(xy 137.16 93.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f56c975d-4fb5-53ef-a98b-10d2112c4938")
+	)
+	(global_label "VLV5_G"
+		(shape passive)
+		(at 137.16 93.98 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "ade92874-8d00-528e-9f33-6623064e2b84")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 137.16 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 144.78 83.82 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "658add5e-71da-58fa-934e-44f7d9252ca4")
+		(property "Reference" "R45"
+			(at 144.78 78.51 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 144.78 89.13 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 144.78 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 144.78 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down gate valvola WASTE (spenta al boot)"
+			(at 144.78 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 144.78 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 144.78 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "a18c4270-c882-5c68-9478-58563cb4119f")
+		)
+		(pin "2"
+			(uuid "d8b336a6-eaa8-57d1-9982-d6d915d8427e")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R45") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 144.78 80.01)
+			(xy 144.78 77.47)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "19a751ef-0fe6-5d36-ac75-114a62b13dc0")
+	)
+	(global_label "VLV5_G"
+		(shape passive)
+		(at 144.78 77.47 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "79b677f1-2341-5029-ad33-01386f7ee381")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 144.78 77.47 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 144.78 87.63)
+			(xy 144.78 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f47fccc0-0d5d-5fcd-9a2d-077f68b7ac28")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 144.78 90.17 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "2db82ea3-e2fa-50b1-a7fc-f67de088b3a6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 144.78 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Transistor_FET:AO3400A")
+		(at 168.91 85.09 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "6c28f4f9-b602-5c44-8984-0bfecff52c5d")
+		(property "Reference" "Q5"
+			(at 168.91 78.51 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "AO3400A"
+			(at 168.91 91.67 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+			(at 168.91 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 168.91 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Low-side valvola WASTE (30 V, 5,7 A)"
+			(at 168.91 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "AO3400A"
+			(at 168.91 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Alpha & Omega"
+			(at 168.91 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "91aef8d6-e4c8-5fcc-8487-8cd4902194b4")
+		)
+		(pin "3"
+			(uuid "06449460-e706-57c2-b919-d9451b873abc")
+		)
+		(pin "2"
+			(uuid "f2b17d9c-7e8a-57b3-a69d-e4364713ff0b")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "Q5") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 163.83 85.09)
+			(xy 161.29 85.09)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "72bb36e5-7b10-56b0-a902-f366e179ad5d")
+	)
+	(global_label "VLV5_G"
+		(shape passive)
+		(at 161.29 85.09 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "b47dfdca-2ac9-518b-a30e-bf01fbd931e3")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 161.29 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 171.45 80.01)
+			(xy 171.45 77.47)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ea8013e8-d4fc-51d1-8fbd-46ee68828941")
+	)
+	(global_label "VLV5_N"
+		(shape passive)
+		(at 171.45 77.47 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "ffba3947-7aa6-5d63-8e9e-12b8a492a13b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 171.45 77.47 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 171.45 90.17)
+			(xy 171.45 92.71)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0242e8f7-6736-54f5-a75f-f38af29062ad")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 171.45 92.71 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "1d76e27f-03bf-5587-af2b-491e030689d3")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 171.45 92.71 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:D_Schottky")
+		(at 191.77 69.85 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "1ce48a08-27fb-5d80-84a3-71a2cbf6318c")
+		(property "Reference" "D25"
+			(at 191.77 67.08 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "B5819W"
+			(at 191.77 72.62 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SOD-123"
+			(at 191.77 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 191.77 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Ricircolo bobina valvola WASTE"
+			(at 191.77 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "B5819W"
+			(at 191.77 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Diodes/CJ"
+			(at 191.77 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "120dc02f-2e28-5f4f-8e89-59d7bfa85d69")
+		)
+		(pin "2"
+			(uuid "d886e6b7-93e6-572c-a8a9-73914c723ee4")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D25") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 187.96 69.85)
+			(xy 185.42 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0d6e77f0-0887-5881-962d-14834e022b2a")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 185.42 69.85 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "c216e6b3-1c4c-59bf-bdcd-61dccbc9dd01")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 185.42 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 195.58 69.85)
+			(xy 198.12 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2d09b3b9-d91b-5e28-b42d-2a68b0375d87")
+	)
+	(global_label "VLV5_N"
+		(shape passive)
+		(at 198.12 69.85 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "428ae159-45f2-5b1e-a23e-3efa571fc3c1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 198.12 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 213.36 82.55 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "53e455fe-1a73-59ff-9ecc-1b9cca417ef6")
+		(property "Reference" "R55"
+			(at 213.36 77.24 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "4.7k"
+			(at 213.36 87.86 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 213.36 82.55 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 213.36 82.55 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "LED valvola WASTE"
+			(at 213.36 82.55 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 4.7k 1%"
+			(at 213.36 82.55 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 213.36 82.55 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "247491c5-1f20-5f90-ae85-22b25150976d")
+		)
+		(pin "2"
+			(uuid "d89e634b-2e88-553c-9e77-adc333998a94")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R55") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 213.36 78.74)
+			(xy 213.36 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6699c86d-9b5a-5f4d-958d-eaf6efe62c3e")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 213.36 76.2 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "d830617f-9d9e-5ef4-bfa5-9a7d93e4d50c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 213.36 76.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 213.36 86.36)
+			(xy 213.36 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f823440f-55cb-56e3-9087-f9499e21a225")
+	)
+	(global_label "VLV5_LED"
+		(shape passive)
+		(at 213.36 88.9 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "0f6e4bff-5cc1-5229-a2ce-6ad0eff0e68a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 213.36 88.9 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 236.22 69.85 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "15d7cded-953b-52ec-a0d2-822f63e2295e")
+		(property "Reference" "D35"
+			(at 236.22 67.08 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "Yellow"
+			(at 236.22 73.636 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 236.22 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 236.22 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Valvola WASTE aperta"
+			(at 236.22 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "KT-0603Y"
+			(at 236.22 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Hubei KENTO"
+			(at 236.22 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "5286ab2d-3197-5532-afaa-7577c6f702a1")
+		)
+		(pin "2"
+			(uuid "9cb4ab26-fc60-5823-9b33-3b5e270282f4")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D35") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 232.41 69.85)
+			(xy 229.87 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9b0013ff-cb0d-59b5-a7fc-d9b9b8474038")
+	)
+	(global_label "VLV5_N"
+		(shape passive)
+		(at 229.87 69.85 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "0e33bf7d-f16e-506e-b322-186d0cd6ff46")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 229.87 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 240.03 69.85)
+			(xy 242.57 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0880d9b7-0b33-50fc-acf2-d65a5ff08157")
+	)
+	(global_label "VLV5_LED"
+		(shape passive)
+		(at 242.57 69.85 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "29935a73-8b7f-5f58-9664-70f57589b396")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 242.57 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 260.35 87.63 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "800b9a45-4053-5801-85e0-c58e78eb8564")
+		(property "Reference" "R36"
+			(at 260.35 82.32 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100R"
+			(at 260.35 92.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 260.35 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 260.35 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Gate valvola INLET"
+			(at 260.35 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100R 1%"
+			(at 260.35 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 260.35 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "47d8434a-0d31-5635-9f59-2ef7624eff84")
+		)
+		(pin "2"
+			(uuid "09250b48-99d5-5aa2-8bde-90a7d3a24614")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R36") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 260.35 83.82)
+			(xy 260.35 81.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "00fee882-9a37-5205-95dc-454644578057")
+	)
+	(global_label "VLV_INLET"
+		(shape passive)
+		(at 260.35 81.28 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "0b5ab4eb-4627-5f12-9c02-7085461854e0")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 260.35 81.28 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 260.35 91.44)
+			(xy 260.35 93.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1d18421f-146b-5bfb-8d06-4702711abb0d")
+	)
+	(global_label "VLV6_G"
+		(shape passive)
+		(at 260.35 93.98 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "76fde679-51ee-56c4-8538-f825f6c1ee98")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 260.35 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 267.97 83.82 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "76725312-ac50-56af-9e27-39726b69fb08")
+		(property "Reference" "R46"
+			(at 267.97 78.51 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 267.97 89.13 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 267.97 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 267.97 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down gate valvola INLET (spenta al boot)"
+			(at 267.97 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 267.97 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 267.97 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "0af1aefd-d7f6-5fbd-8358-f7ced9d84ded")
+		)
+		(pin "2"
+			(uuid "09aaa004-6bb3-5c42-8bc0-27dbdfe1fc4b")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R46") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 267.97 80.01)
+			(xy 267.97 77.47)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7058d411-f1dd-5881-93fb-ee0809b6c653")
+	)
+	(global_label "VLV6_G"
+		(shape passive)
+		(at 267.97 77.47 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "2c65b1a1-5019-500a-8a48-4462267f4a6f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 267.97 77.47 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 267.97 87.63)
+			(xy 267.97 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e6b4ef14-1e15-52ea-91c7-933d88c9c169")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 267.97 90.17 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "b0a28603-70bc-5359-9765-8d08359641ba")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 267.97 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Transistor_FET:AO3400A")
+		(at 290.83 85.09 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "2dfc9cff-5d6f-5266-9ba0-6fb04a8c783a")
+		(property "Reference" "Q6"
+			(at 290.83 78.51 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "AO3400A"
+			(at 290.83 91.67 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+			(at 290.83 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 290.83 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Low-side valvola INLET (30 V, 5,7 A)"
+			(at 290.83 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "AO3400A"
+			(at 290.83 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Alpha & Omega"
+			(at 290.83 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "e1b1510e-cb11-5c82-83b2-b67256c4e6f7")
+		)
+		(pin "3"
+			(uuid "ea106b4a-439e-599b-84bf-fd721cf0a891")
+		)
+		(pin "2"
+			(uuid "f2a0c6d2-969a-55f2-937c-50615ffc9e8e")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "Q6") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 285.75 85.09)
+			(xy 283.21 85.09)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0c65e309-7f64-51d6-8a13-4a20b1660a2b")
+	)
+	(global_label "VLV6_G"
+		(shape passive)
+		(at 283.21 85.09 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "10fcee5f-5204-5384-befa-cb8b1ab3d37c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 283.21 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 293.37 80.01)
+			(xy 293.37 77.47)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9004dcf7-2033-50b4-9389-13bf8ccd43b8")
+	)
+	(global_label "VLV6_N"
+		(shape passive)
+		(at 293.37 77.47 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "86dfe9fb-2aa9-5ae4-ace8-23b09a1d4e54")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 293.37 77.47 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 293.37 90.17)
+			(xy 293.37 92.71)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "86a1f8f5-37ea-541f-814e-32d866d618b7")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 293.37 92.71 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "5eac8873-2bfb-589f-be5c-eb7e3cf56658")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 293.37 92.71 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:D_Schottky")
+		(at 313.69 69.85 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d389de70-4116-583b-9fbf-38103932af66")
+		(property "Reference" "D26"
+			(at 313.69 67.08 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "B5819W"
+			(at 313.69 72.62 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SOD-123"
+			(at 313.69 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 313.69 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Ricircolo bobina valvola INLET"
+			(at 313.69 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "B5819W"
+			(at 313.69 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Diodes/CJ"
+			(at 313.69 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "9de435b8-6e7f-57b1-8b3c-99ac7c68da21")
+		)
+		(pin "2"
+			(uuid "0f6af789-de6d-52ca-8e34-ae5415d880d0")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D26") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 309.88 69.85)
+			(xy 307.34 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ae10bd85-ed20-5cdf-b648-30d051a22a95")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 307.34 69.85 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "1e49a939-2afd-57fb-820f-43ba5df6120a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 307.34 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 317.5 69.85)
+			(xy 320.04 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c3e3f53b-d389-5673-8a4a-597fb3252257")
+	)
+	(global_label "VLV6_N"
+		(shape passive)
+		(at 320.04 69.85 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "71b2b9dc-71ec-5a61-8cfd-34805a9207b7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 320.04 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 336.55 82.55 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "6364ef71-f21e-5af9-86ac-b33a46c14642")
+		(property "Reference" "R56"
+			(at 336.55 77.24 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "4.7k"
+			(at 336.55 87.86 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 336.55 82.55 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 336.55 82.55 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "LED valvola INLET"
+			(at 336.55 82.55 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 4.7k 1%"
+			(at 336.55 82.55 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 336.55 82.55 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "d1f8c825-039f-56f3-8893-b9c8e52ba422")
+		)
+		(pin "2"
+			(uuid "c295f148-6fc7-5aa5-a50c-30d855798d39")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R56") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 336.55 78.74)
+			(xy 336.55 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "832515a0-bc1e-53fc-bb98-cd6cdc6af7cd")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 336.55 76.2 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "9092b46a-d76f-53da-a942-48880728fe82")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 336.55 76.2 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 336.55 86.36)
+			(xy 336.55 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8e48e864-df7b-5f4a-b4b6-eced65d8037f")
+	)
+	(global_label "VLV6_LED"
+		(shape passive)
+		(at 336.55 88.9 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "581505b3-5f5b-5ace-a0b6-812afb0801f1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 336.55 88.9 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 358.14 69.85 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "b1e21601-8dd5-5f06-b1df-7989107c3fef")
+		(property "Reference" "D36"
+			(at 358.14 67.08 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "Yellow"
+			(at 358.14 73.636 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 358.14 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 358.14 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Valvola INLET aperta"
+			(at 358.14 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "KT-0603Y"
+			(at 358.14 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Hubei KENTO"
+			(at 358.14 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "d417f93c-8c24-5b6a-9f5f-dabb33c7d87f")
+		)
+		(pin "2"
+			(uuid "39a1f776-56f7-53af-af71-cd2030130503")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D36") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 354.33 69.85)
+			(xy 351.79 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "aefaa55a-4fbc-590a-a4e0-50ff2850c847")
+	)
+	(global_label "VLV6_N"
+		(shape passive)
+		(at 351.79 69.85 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "81096603-a75d-5bf5-9e03-aa04ab22f590")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 351.79 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 361.95 69.85)
+			(xy 364.49 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b11a9fc2-796c-5c7f-aa24-e98b9112838d")
+	)
+	(global_label "VLV6_LED"
+		(shape passive)
+		(at 364.49 69.85 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "ce84a359-dff5-5501-a0f3-3b1a3a587bbc")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 364.49 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 382.27 85.09 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "76af118e-7b91-55c7-8816-ea7ca066beeb")
+		(property "Reference" "R37"
+			(at 382.27 79.78 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100R"
+			(at 382.27 90.4 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 382.27 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 382.27 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Gate valvola SP1"
+			(at 382.27 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100R 1%"
+			(at 382.27 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 382.27 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "e5c49bbe-7c77-561c-9c7c-d47f7e0c6b90")
+		)
+		(pin "2"
+			(uuid "c5c66c1a-5bec-52de-8aab-8d666b45faaf")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R37") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 382.27 81.28)
+			(xy 382.27 78.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "056091f3-d450-55a3-941d-3fc7f9060367")
+	)
+	(global_label "VLV_SP1"
+		(shape passive)
+		(at 382.27 78.74 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "553214e7-6ca1-5110-8f0a-fa88f6882921")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 382.27 78.74 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 382.27 88.9)
+			(xy 382.27 91.44)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c4e6cc88-a5ec-5f63-916a-410ea99a8452")
+	)
+	(global_label "VLV7_G"
+		(shape passive)
+		(at 382.27 91.44 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "81ae8056-dc32-5c0d-8298-6a79d99a8858")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 382.27 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 389.89 83.82 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "1e3682ea-e170-53dd-ab9c-568af145807d")
+		(property "Reference" "R47"
+			(at 389.89 78.51 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 389.89 89.13 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 389.89 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 389.89 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down gate valvola SP1 (spenta al boot)"
+			(at 389.89 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 389.89 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 389.89 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "834bfdc6-a39a-5d55-b775-2d4d7839c549")
+		)
+		(pin "2"
+			(uuid "0789d286-0263-54d5-9dc0-8757736a422f")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R47") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 389.89 80.01)
+			(xy 389.89 77.47)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b3601421-fe6c-56c0-a476-5e206df451a4")
+	)
+	(global_label "VLV7_G"
+		(shape passive)
+		(at 389.89 77.47 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "20fd8b89-ddb7-5f26-978e-3f05265c4fa9")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 389.89 77.47 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 389.89 87.63)
+			(xy 389.89 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f32dc858-0cf6-5441-837d-f7aa58fd2722")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 389.89 90.17 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "16060119-281e-5ced-9a7d-12cdad2458af")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 389.89 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Transistor_FET:AO3400A")
+		(at 38.1 130.81 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "bc238601-a3ed-5a14-825e-7bcad4020705")
+		(property "Reference" "Q7"
+			(at 38.1 124.23 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "AO3400A"
+			(at 38.1 137.39 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+			(at 38.1 130.81 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 38.1 130.81 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Low-side valvola SP1 (30 V, 5,7 A)"
+			(at 38.1 130.81 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "AO3400A"
+			(at 38.1 130.81 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Alpha & Omega"
+			(at 38.1 130.81 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "108f0a22-4c9c-5008-b935-f7cb979c1420")
+		)
+		(pin "3"
+			(uuid "07415b22-e2b6-528a-bb6b-c1f37d6d5132")
+		)
+		(pin "2"
+			(uuid "baec742c-4063-5a98-93bd-3ed0af2da480")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "Q7") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 33.02 130.81)
+			(xy 30.48 130.81)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "43c1a196-00d3-5ce5-8738-0592ddd4f4a4")
+	)
+	(global_label "VLV7_G"
+		(shape passive)
+		(at 30.48 130.81 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "78cd7e23-a273-550e-801d-2a372b123d64")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 30.48 130.81 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 40.64 125.73)
+			(xy 40.64 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "103401fd-bf76-5f10-8f49-cae9dad5c7fc")
+	)
+	(global_label "VLV7_N"
+		(shape passive)
+		(at 40.64 123.19 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "c39cfa65-065c-562f-b6d5-33aba12cb547")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 40.64 123.19 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 40.64 135.89)
+			(xy 40.64 138.43)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "99686460-0d8b-59b6-85e3-4f2efec69059")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 40.64 138.43 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "f2fc0bbc-ebe4-569a-8843-90b06d20cf07")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 40.64 138.43 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:D_Schottky")
+		(at 60.96 115.57 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "54bb0729-0eea-5d0d-8ad7-c4bea9536cf0")
+		(property "Reference" "D27"
+			(at 60.96 112.8 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "B5819W"
+			(at 60.96 118.34 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SOD-123"
+			(at 60.96 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 60.96 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Ricircolo bobina valvola SP1"
+			(at 60.96 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "B5819W"
+			(at 60.96 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Diodes/CJ"
+			(at 60.96 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "c99a81a7-eae4-51b7-bfe6-07a80d2b3b8e")
+		)
+		(pin "2"
+			(uuid "d8062461-2b35-5a7e-9b53-b4f1b0d1bb4d")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D27") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 57.15 115.57)
+			(xy 54.61 115.57)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a0bb5fc4-0609-5860-9229-d697d8b27243")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 54.61 115.57 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "de9b82ed-625b-5b3a-9ae4-de60d7460fef")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 54.61 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 64.77 115.57)
+			(xy 67.31 115.57)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f83cf412-979d-5f95-8ab3-88162ab2c4cb")
+	)
+	(global_label "VLV7_N"
+		(shape passive)
+		(at 67.31 115.57 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "a954a07d-f95f-5538-aa84-8dea9cb90590")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 67.31 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 83.82 127 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "5e5b7948-d46e-5192-811d-2524e75aef4e")
+		(property "Reference" "R57"
+			(at 83.82 121.69 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "4.7k"
+			(at 83.82 132.31 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 83.82 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 83.82 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "LED valvola SP1"
+			(at 83.82 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 4.7k 1%"
+			(at 83.82 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 83.82 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "6a7de659-64d0-5eb7-85b3-55896ad3913b")
+		)
+		(pin "2"
+			(uuid "5f003264-2021-5695-ab10-278f9093ad5e")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R57") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 83.82 123.19)
+			(xy 83.82 120.65)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c81d372f-451f-5fa6-96b9-d10e2e0fea6f")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 83.82 120.65 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "d9587ff5-aa0a-5408-857c-d293fcc66201")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 83.82 120.65 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 83.82 130.81)
+			(xy 83.82 133.35)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dac477c7-59bf-5f25-9c80-6856d71e84a6")
+	)
+	(global_label "VLV7_LED"
+		(shape passive)
+		(at 83.82 133.35 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "08a2efe9-ecf7-5803-b384-d97d489f129c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 83.82 133.35 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 105.41 115.57 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "da69d845-835c-5229-a1b2-4d713ee6a1ed")
+		(property "Reference" "D37"
+			(at 105.41 112.8 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "Yellow"
+			(at 105.41 119.356 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 105.41 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 105.41 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Valvola SP1 aperta"
+			(at 105.41 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "KT-0603Y"
+			(at 105.41 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Hubei KENTO"
+			(at 105.41 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "1483ac96-b6ea-5899-b91f-754d71a5ef7a")
+		)
+		(pin "2"
+			(uuid "faa40d14-890c-5980-8253-c11c184e80b4")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D37") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 101.6 115.57)
+			(xy 99.06 115.57)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7ed760c9-2d27-548b-bd87-04c9d4ff8cab")
+	)
+	(global_label "VLV7_N"
+		(shape passive)
+		(at 99.06 115.57 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "3a8be12e-7c2a-5303-93fe-04493365762f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 99.06 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 109.22 115.57)
+			(xy 111.76 115.57)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "43906efc-5d01-5805-afbc-b7637a7ebbe7")
+	)
+	(global_label "VLV7_LED"
+		(shape passive)
+		(at 111.76 115.57 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "264a7c27-8f9b-559d-81c5-8cccd84df3df")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 111.76 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 129.54 129.54 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c4ab9b03-7b15-5867-8b7c-cbc5524d3f35")
+		(property "Reference" "R38"
+			(at 129.54 124.23 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100R"
+			(at 129.54 134.85 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 129.54 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 129.54 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Gate valvola SP2"
+			(at 129.54 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100R 1%"
+			(at 129.54 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 129.54 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "997609a7-f25c-5316-a671-896c44ab8c57")
+		)
+		(pin "2"
+			(uuid "801ab0ae-73e1-5a7e-b4f3-878ff9fb68c2")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R38") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 129.54 125.73)
+			(xy 129.54 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "66b50fb5-7d62-5fdc-9a49-09e12450752f")
+	)
+	(global_label "VLV_SP2"
+		(shape passive)
+		(at 129.54 123.19 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "366c497e-4327-5f68-9220-11efd73d5357")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 129.54 123.19 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 129.54 133.35)
+			(xy 129.54 135.89)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "74d5efd2-5fea-55f8-a48d-8712c962f8da")
+	)
+	(global_label "VLV8_G"
+		(shape passive)
+		(at 129.54 135.89 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "e044f8fb-2307-5151-881f-9e5ae26fc639")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 129.54 135.89 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 137.16 129.54 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "94221ef7-306d-591a-a578-cb3c693048eb")
+		(property "Reference" "R48"
+			(at 137.16 124.23 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 137.16 134.85 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 137.16 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 137.16 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down gate valvola SP2 (spenta al boot)"
+			(at 137.16 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 137.16 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 137.16 129.54 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "c22f0c2c-5eba-55f5-85f2-52575baf801b")
+		)
+		(pin "2"
+			(uuid "582c5223-354e-5ef9-b20f-61d6eadb0547")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R48") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 137.16 125.73)
+			(xy 137.16 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6d8d4ac6-7795-54bc-a38d-b8d2484cdeb5")
+	)
+	(global_label "VLV8_G"
+		(shape passive)
+		(at 137.16 123.19 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "1bb109b9-e738-59b1-8c45-fb57b0aa44cf")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 137.16 123.19 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 137.16 133.35)
+			(xy 137.16 135.89)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ffbaf8ea-dced-53f0-b5f7-180fef823ad2")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 137.16 135.89 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "83b511ba-4540-5859-b5e5-913e95b8082c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 137.16 135.89 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Transistor_FET:AO3400A")
+		(at 161.29 130.81 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "987fc198-31dc-5fda-9f8b-24e84e33c05e")
+		(property "Reference" "Q8"
+			(at 161.29 124.23 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "AO3400A"
+			(at 161.29 137.39 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+			(at 161.29 130.81 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 161.29 130.81 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Low-side valvola SP2 (30 V, 5,7 A)"
+			(at 161.29 130.81 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "AO3400A"
+			(at 161.29 130.81 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Alpha & Omega"
+			(at 161.29 130.81 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "f80b8cb4-d244-54de-b76f-d4fc0dba2182")
+		)
+		(pin "3"
+			(uuid "c8ccdd43-285c-542e-9d5c-67da30738058")
+		)
+		(pin "2"
+			(uuid "6f75d919-d3aa-5335-8699-80635abe0d12")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "Q8") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 156.21 130.81)
+			(xy 153.67 130.81)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "80756693-8747-584d-8d40-f7c857457345")
+	)
+	(global_label "VLV8_G"
+		(shape passive)
+		(at 153.67 130.81 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "8199a7f8-2200-5d53-9671-95bd274e9dda")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 153.67 130.81 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 163.83 125.73)
+			(xy 163.83 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2d9bcd0d-7275-5697-a038-dd09f523dc17")
+	)
+	(global_label "VLV8_N"
+		(shape passive)
+		(at 163.83 123.19 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "bdf397d0-666a-590f-be3e-072c80ace845")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 163.83 123.19 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 163.83 135.89)
+			(xy 163.83 138.43)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0e3f579e-f77d-593a-9471-e8db14ffe2ac")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 163.83 138.43 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "eb89a92d-ad76-5d8e-b5c5-0daef4bbdd9d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 163.83 138.43 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:D_Schottky")
+		(at 184.15 115.57 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c2f33d8f-1d9a-5dff-a7ab-0257da833adb")
+		(property "Reference" "D28"
+			(at 184.15 112.8 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "B5819W"
+			(at 184.15 118.34 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SOD-123"
+			(at 184.15 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 184.15 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Ricircolo bobina valvola SP2"
+			(at 184.15 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "B5819W"
+			(at 184.15 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Diodes/CJ"
+			(at 184.15 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "b5dd0d45-79da-508d-8149-f5238abbccfa")
+		)
+		(pin "2"
+			(uuid "8fa0178e-1bb4-5a03-8347-e7fc53261c5b")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D28") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 180.34 115.57)
+			(xy 177.8 115.57)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bf2b3824-af77-5a6a-9a61-d887f6e54f7b")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 177.8 115.57 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "2127b876-0a3d-5f9f-9d00-f964d842d840")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 177.8 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 187.96 115.57)
+			(xy 190.5 115.57)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "502140c7-041d-551b-9738-f997b34d3c80")
+	)
+	(global_label "VLV8_N"
+		(shape passive)
+		(at 190.5 115.57 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "b3580bb3-97cb-566a-bdb6-6fc02e5a252c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 190.5 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 205.74 127 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "f49defb1-346b-5719-a8a5-ca682382ff6f")
+		(property "Reference" "R58"
+			(at 205.74 121.69 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "4.7k"
+			(at 205.74 132.31 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 205.74 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 205.74 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "LED valvola SP2"
+			(at 205.74 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 4.7k 1%"
+			(at 205.74 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 205.74 127 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "c2d44789-1c4f-5904-b118-d771fca1278c")
+		)
+		(pin "2"
+			(uuid "131ddcfe-bf4f-5a50-be66-004b07b4a20f")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R58") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 205.74 123.19)
+			(xy 205.74 120.65)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8dad31b6-9d7a-5a88-982b-e9061e1ed984")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 205.74 120.65 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "148dafa1-9805-5fe9-ac82-1396ae33f513")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 205.74 120.65 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 205.74 130.81)
+			(xy 205.74 133.35)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9ea69e34-168b-556e-9055-3ded2da27f3d")
+	)
+	(global_label "VLV8_LED"
+		(shape passive)
+		(at 205.74 133.35 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "f841c206-a531-507d-ae9e-f5d54a6ffa37")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 205.74 133.35 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 227.33 115.57 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "f8fed657-9866-53d3-95bc-530b8752401e")
+		(property "Reference" "D38"
+			(at 227.33 112.8 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "Yellow"
+			(at 227.33 119.356 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 227.33 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 227.33 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Valvola SP2 aperta"
+			(at 227.33 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "KT-0603Y"
+			(at 227.33 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Hubei KENTO"
+			(at 227.33 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "0bee4ef9-7147-545d-92b1-963e47a94ccf")
+		)
+		(pin "2"
+			(uuid "d44ffeb5-84fa-582f-b231-5b08b6685561")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D38") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 223.52 115.57)
+			(xy 220.98 115.57)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "66e6f3ed-034e-5b38-9e6e-35b43956bbcc")
+	)
+	(global_label "VLV8_N"
+		(shape passive)
+		(at 220.98 115.57 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "ce0d106f-54ca-5339-b90b-d4be03dc8369")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 220.98 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 231.14 115.57)
+			(xy 233.68 115.57)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "39525ef2-0cfe-5d02-ba2d-8f483aacb7d2")
+	)
+	(global_label "VLV8_LED"
+		(shape passive)
+		(at 233.68 115.57 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "6de1d989-3c7b-5a9a-9bea-3229381df8c1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 233.68 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x04")
+		(at 266.7 118.11 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "6367eb22-80f0-5d85-a454-5cc42ba65e97")
+		(property "Reference" "J14"
+			(at 266.7 112.8 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "VALVES C1 C2"
+			(at 266.7 125.96 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_PT-1,5-4-3.5-H_1x04_P3.50mm_Horizontal"
+			(at 266.7 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 266.7 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Valvole C1, C2 (+, -, +, -)"
+			(at 266.7 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "1984888"
+			(at 266.7 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Phoenix Contact"
+			(at 266.7 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "49eeefa1-7e78-5f38-b937-7feb3db1cd57")
+		)
+		(pin "2"
+			(uuid "3a378b61-832b-551d-82fc-ece54860498a")
+		)
+		(pin "3"
+			(uuid "0c902ce3-a148-5f69-97fa-e2858359b8a0")
+		)
+		(pin "4"
+			(uuid "b7377895-0401-5652-a9aa-3c5bba4a4254")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "J14") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 261.62 115.57)
+			(xy 259.08 115.57)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f82fd685-5d4e-5263-a309-8f36ab1db1f4")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 259.08 115.57 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "1c9b426f-82eb-5819-8935-b621b46d0841")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 259.08 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 261.62 118.11)
+			(xy 259.08 118.11)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5343f459-7033-599f-b4ee-938288dbf401")
+	)
+	(global_label "VLV1_N"
+		(shape passive)
+		(at 259.08 118.11 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "34ddbce4-8d03-5447-a09c-95703c14bd0a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 259.08 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 261.62 120.65)
+			(xy 259.08 120.65)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "410d6c72-d8c7-5bee-b457-d085695cfaa7")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 259.08 120.65 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "ddda7954-f570-50e8-853e-5154b2168bb5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 259.08 120.65 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 261.62 123.19)
+			(xy 259.08 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "80035672-6f69-56f2-b923-b8c56ee05676")
+	)
+	(global_label "VLV2_N"
+		(shape passive)
+		(at 259.08 123.19 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "17be28cc-89bb-52d6-a049-3a7626fb885d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 259.08 123.19 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x04")
+		(at 290.83 118.11 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "56eba8be-f762-5544-8918-48815953f6af")
+		(property "Reference" "J15"
+			(at 290.83 112.8 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "VALVES C3 WB"
+			(at 290.83 125.96 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_PT-1,5-4-3.5-H_1x04_P3.50mm_Horizontal"
+			(at 290.83 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 290.83 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Valvole C3, WB"
+			(at 290.83 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "1984888"
+			(at 290.83 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Phoenix Contact"
+			(at 290.83 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "cc1bde89-a8dd-5ac7-a152-a6886ceaf599")
+		)
+		(pin "2"
+			(uuid "7ee652a1-8dc0-59a0-9a55-6c1e50592e17")
+		)
+		(pin "3"
+			(uuid "36a63b9d-35a4-5b58-8737-0d3d8b9feb18")
+		)
+		(pin "4"
+			(uuid "73dbf529-7ce9-54c6-a353-7f9ed6c8d130")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "J15") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 285.75 115.57)
+			(xy 283.21 115.57)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "365f5c95-3869-59f0-b8c8-a1cea2fd8175")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 283.21 115.57 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "5da067d6-0cff-5a30-acbf-2274ff84b318")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 283.21 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 285.75 118.11)
+			(xy 283.21 118.11)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "90b44493-6053-50d7-9b7f-adef5c27886c")
+	)
+	(global_label "VLV3_N"
+		(shape passive)
+		(at 283.21 118.11 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "6c620fce-dd32-50db-b43e-7d1ed69d12f0")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 283.21 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 285.75 120.65)
+			(xy 283.21 120.65)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1bf91424-c514-5d86-b2d0-790f8a129b2e")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 283.21 120.65 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "d7c942d1-73fb-502f-b77f-0054f641c6bf")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 283.21 120.65 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 285.75 123.19)
+			(xy 283.21 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9ef6895d-b267-5910-956b-316a2a3ebfd9")
+	)
+	(global_label "VLV4_N"
+		(shape passive)
+		(at 283.21 123.19 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "a717a822-40b7-51bf-be8b-ae0ec5968a7e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 283.21 123.19 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x04")
+		(at 313.69 118.11 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "21c7af2d-3242-5c0b-9739-a88ca692f15f")
+		(property "Reference" "J16"
+			(at 313.69 112.8 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "VALVES WASTE INLET"
+			(at 313.69 125.96 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_PT-1,5-4-3.5-H_1x04_P3.50mm_Horizontal"
+			(at 313.69 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 313.69 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Valvole scarico, ingresso acqua"
+			(at 313.69 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "1984888"
+			(at 313.69 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Phoenix Contact"
+			(at 313.69 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "7f2a8e14-becf-5bdb-a159-998dbedcacab")
+		)
+		(pin "2"
+			(uuid "81e1ab62-1b33-525a-bd2a-db8990c1731d")
+		)
+		(pin "3"
+			(uuid "f6a7951f-8258-53b9-8a8d-de875b98e081")
+		)
+		(pin "4"
+			(uuid "5c3097ba-c858-5483-b271-1844ea14b334")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "J16") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 308.61 115.57)
+			(xy 306.07 115.57)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "41fbd086-883d-5356-a2ed-7b92e57592b5")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 306.07 115.57 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "d3328c9e-7540-5a72-8da7-15c709d62cb7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 306.07 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 308.61 118.11)
+			(xy 306.07 118.11)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "628cf204-9beb-5e65-925f-6505cf5670fd")
+	)
+	(global_label "VLV5_N"
+		(shape passive)
+		(at 306.07 118.11 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "fd74d5b0-7a51-5ab1-b54e-bcddddd3c56a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 306.07 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 308.61 120.65)
+			(xy 306.07 120.65)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a05ca0fd-b79f-59b6-a622-c8f0f8ae3ce2")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 306.07 120.65 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "6039b7a8-2c3a-5f51-af13-ffb6748d141f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 306.07 120.65 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 308.61 123.19)
+			(xy 306.07 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3e2f8547-89f3-5ad0-87b1-ad8640bbe187")
+	)
+	(global_label "VLV6_N"
+		(shape passive)
+		(at 306.07 123.19 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "152375cf-07fb-5b71-9950-7cff45029e91")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 306.07 123.19 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x04")
+		(at 337.82 118.11 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "947c075c-fa84-5c73-bf63-9d7ec0316e33")
+		(property "Reference" "J17"
+			(at 337.82 112.8 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "VALVES SPARE"
+			(at 337.82 125.96 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_PT-1,5-4-3.5-H_1x04_P3.50mm_Horizontal"
+			(at 337.82 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 337.82 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Uscite di riserva A6, A7"
+			(at 337.82 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "1984888"
+			(at 337.82 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Phoenix Contact"
+			(at 337.82 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "6216c50d-50e8-5dab-9225-43f087734fa6")
+		)
+		(pin "2"
+			(uuid "b4204634-d042-5019-b3b7-cde193fdcb42")
+		)
+		(pin "3"
+			(uuid "dacffab8-df20-5526-a5f6-94496112d39b")
+		)
+		(pin "4"
+			(uuid "6a2133bc-11ae-574a-acc8-a3d6d6dfc9cb")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "J17") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 332.74 115.57)
+			(xy 330.2 115.57)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "586b8ff8-7cbc-594e-a266-f9bca54c5b7f")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 330.2 115.57 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "d35d35c2-7dc7-5716-a2c3-d310c5f3b2c1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 330.2 115.57 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 332.74 118.11)
+			(xy 330.2 118.11)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2ce64444-9abe-547e-b70f-dc5bdc676dba")
+	)
+	(global_label "VLV7_N"
+		(shape passive)
+		(at 330.2 118.11 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "fd6f091c-0824-5f01-bdca-cac49fe77d61")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 330.2 118.11 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 332.74 120.65)
+			(xy 330.2 120.65)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f69a2c54-48f9-53bb-a724-feaabd9d4497")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 330.2 120.65 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "bbefc033-a126-5d36-9f2a-62cd81bd1256")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 330.2 120.65 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 332.74 123.19)
+			(xy 330.2 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c0c2b183-0ea6-5760-a4b1-c26094687fe1")
+	)
+	(global_label "VLV8_N"
+		(shape passive)
+		(at 330.2 123.19 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "e431ea6d-9e2a-538d-9596-6c66ba51e47d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 330.2 123.19 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Driver_FET:UCC27524D")
+		(at 369.57 133.35 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d2643779-1ed0-5651-9f21-95564242810b")
+		(property "Reference" "U5"
+			(at 369.57 121.69 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "UCC27524D"
+			(at 369.57 145.01 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+			(at 369.57 133.35 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 369.57 133.35 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Gate driver doppio low-side (ingressi 3,3 V, uscite 12 V); EN interni a pull-up"
+			(at 369.57 133.35 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "UCC27524DR"
+			(at 369.57 133.35 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 369.57 133.35 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "efe9b440-8f2d-5d2c-8a72-59a7342afbbd")
+		)
+		(pin "2"
+			(uuid "3aec2a1c-5e07-58bc-a561-215c43d5852c")
+		)
+		(pin "4"
+			(uuid "c0e216e8-26c0-59d4-b76b-70c0f0464f11")
+		)
+		(pin "8"
+			(uuid "48900f98-a787-59b7-925b-b6b2ec83ea50")
+		)
+		(pin "6"
+			(uuid "b3f74929-fa96-5d82-a4c6-95131c8083d6")
+		)
+		(pin "3"
+			(uuid "651edb47-e9fc-5c62-9edf-a357bb780543")
+		)
+		(pin "7"
+			(uuid "f29ce078-f904-51ef-a518-9e9fe7561d02")
+		)
+		(pin "5"
+			(uuid "41c3692b-ca29-5075-93a1-e60f3bebbecb")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "U5") (unit 1)))
+		)
+	)
+	(no_connect
+		(at 359.41 128.27)
+		(uuid "430cf4cc-cadc-5a6a-9f97-0b220d9e35de")
+	)
+	(wire
+		(pts
+			(xy 359.41 130.81)
+			(xy 356.87 130.81)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "47fb5210-f23e-57cd-b7f2-c5656d704d51")
+	)
+	(global_label "HEAT1_CMD"
+		(shape passive)
+		(at 356.87 130.81 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "34ec84be-9aff-5a9d-98af-1e51234cb881")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 356.87 130.81 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 359.41 135.89)
+			(xy 356.87 135.89)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1c3ff6a4-510d-5561-af96-c32806b2d443")
+	)
+	(global_label "HEAT2_CMD"
+		(shape passive)
+		(at 356.87 135.89 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "f16435ff-02bf-5865-948a-6f1c3339e20f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 356.87 135.89 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(no_connect
+		(at 359.41 138.43)
+		(uuid "c00ee640-a1c9-550e-bd10-780b09ba3273")
+	)
+	(wire
+		(pts
+			(xy 369.57 123.19)
+			(xy 369.57 120.65)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7c6ad5ce-27e7-52c9-8963-15e6324b2cbc")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 369.57 120.65 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "c0b4b36f-5272-5763-8c80-035d5f4238d5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 369.57 120.65 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 369.57 143.51)
+			(xy 369.57 146.05)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1204d5e4-d5e7-5326-a940-0f608b12a459")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 369.57 146.05 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "483948b6-ce61-52b7-b976-57897c360a87")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 369.57 146.05 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 379.73 130.81)
+			(xy 382.27 130.81)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fa2dfc13-6c58-566e-b7bc-9f187a91bedc")
+	)
+	(global_label "HEAT1_DRV"
+		(shape passive)
+		(at 382.27 130.81 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "fc12499d-cb7e-55fa-a946-1354a7b4b605")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 382.27 130.81 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 379.73 135.89)
+			(xy 382.27 135.89)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "68d56cca-5c42-5d18-8d31-ae60a81934b1")
+	)
+	(global_label "HEAT2_DRV"
+		(shape passive)
+		(at 382.27 135.89 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "cd43888b-03c7-519e-a8c9-94a2e9f9bb11")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 382.27 135.89 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 24.13 177.8 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "92c3abb8-3a55-5c12-9730-18bea5253e3e")
+		(property "Reference" "C40"
+			(at 24.13 172.49 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "1uF 25V"
+			(at 24.13 183.11 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+			(at 24.13 177.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 24.13 177.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Disaccoppiamento gate driver"
+			(at 24.13 177.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "MLCC 1uF 25V"
+			(at 24.13 177.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 24.13 177.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "778bf011-588d-548b-b044-fbe65a83d9b7")
+		)
+		(pin "2"
+			(uuid "324deb5b-e8ca-5b3d-af3b-ad4e64213ac5")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "C40") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 24.13 173.99)
+			(xy 24.13 171.45)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e5f271df-df57-5078-9636-bc587c866167")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 24.13 171.45 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "d4bb519a-cc0f-5aa5-a6a6-5a4380c585fa")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 24.13 171.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 24.13 181.61)
+			(xy 24.13 184.15)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ebe6eaf0-666a-5763-b030-99e183eb49bd")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 24.13 184.15 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "869b388f-20ed-5f16-8887-a3e8c3cf891e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 24.13 184.15 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 34.29 177.8 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "f9654c42-28d9-5fd7-b360-7e9d6fbc4880")
+		(property "Reference" "C41"
+			(at 34.29 172.49 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100nF"
+			(at 34.29 183.11 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 34.29 177.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 34.29 177.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Disaccoppiamento gate driver"
+			(at 34.29 177.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "MLCC 100nF"
+			(at 34.29 177.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 34.29 177.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "172471a5-5524-510b-96bb-1bc35bf81b8d")
+		)
+		(pin "2"
+			(uuid "5f6462ff-8d6e-5806-a048-5101b6a70c6d")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "C41") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 34.29 173.99)
+			(xy 34.29 171.45)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "02dee496-fb82-58e1-a9d6-38ff851937d5")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 34.29 171.45 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "b9516ae9-9eff-59ec-a2bd-353a2aaabd8a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 34.29 171.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 34.29 181.61)
+			(xy 34.29 184.15)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "54eae044-5d7b-5c32-8d5a-b0344925d39b")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 34.29 184.15 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "fc01709b-0a8d-5e47-86e6-796eaa05194d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 34.29 184.15 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 43.18 181.61 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "5778515d-ea91-5384-b8b6-fecc394d398f")
+		(property "Reference" "R61"
+			(at 43.18 176.3 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 43.18 186.92 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 43.18 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 43.18 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down comando riscaldatore 1"
+			(at 43.18 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 43.18 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 43.18 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "3f4c758e-c1ce-5631-98a0-0a0c0963f605")
+		)
+		(pin "2"
+			(uuid "5c9345c0-24a5-552f-a88f-2d47551de991")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R61") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 43.18 177.8)
+			(xy 43.18 175.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3248fa5d-e94c-5fbb-80ab-3b878a2c1658")
+	)
+	(global_label "HEAT1_CMD"
+		(shape passive)
+		(at 43.18 175.26 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "0c791453-bb9f-5cbe-9ccf-4dd7abcdca33")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 43.18 175.26 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 43.18 185.42)
+			(xy 43.18 187.96)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9cf21cd3-a7f0-577e-bb57-e89d63fd324f")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 43.18 187.96 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "82ef6d10-d348-537c-9506-c25ed04ba47d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 43.18 187.96 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 50.8 181.61 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d310cb4d-6429-55cf-93f9-886fe505e533")
+		(property "Reference" "R62"
+			(at 50.8 176.3 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 50.8 186.92 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 50.8 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 50.8 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down comando riscaldatore 2"
+			(at 50.8 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 50.8 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 50.8 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "141846a1-8833-5a39-893e-be78d7592a65")
+		)
+		(pin "2"
+			(uuid "d4b8d793-ffb1-5cc3-ab7b-2dacd8ca4a1e")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R62") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 50.8 177.8)
+			(xy 50.8 175.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b2eae9b4-6558-5aec-a114-a83a22c879db")
+	)
+	(global_label "HEAT2_CMD"
+		(shape passive)
+		(at 50.8 175.26 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "1e7c36e0-c303-5cdd-a7c7-45250b0d4225")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 50.8 175.26 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 50.8 185.42)
+			(xy 50.8 187.96)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "34006781-9451-598c-a611-47207cbdef52")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 50.8 187.96 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "a1184f42-2b94-5d74-bf69-64b9db132815")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 50.8 187.96 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 59.69 181.61 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "71b77e90-33df-5c16-83af-c6692577e12c")
+		(property "Reference" "R63"
+			(at 59.69 176.3 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "10R"
+			(at 59.69 186.92 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 59.69 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 59.69 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Gate riscaldatore 1"
+			(at 59.69 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 10R 1%"
+			(at 59.69 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 59.69 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "873f0fa0-2118-5cdf-a26e-8a037adb574e")
+		)
+		(pin "2"
+			(uuid "19824c84-6c2a-57e8-a22f-9b741f652bd2")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R63") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 59.69 177.8)
+			(xy 59.69 175.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b96dafac-3cb7-5dd5-8fb6-d010e19928b6")
+	)
+	(global_label "HEAT1_DRV"
+		(shape passive)
+		(at 59.69 175.26 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "928e7228-fa59-5e16-9f13-a1d68fdd5ee0")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 59.69 175.26 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 59.69 185.42)
+			(xy 59.69 187.96)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "80171b50-4892-5d07-91f6-00cbe5d5076d")
+	)
+	(global_label "HEAT1_G"
+		(shape passive)
+		(at 59.69 187.96 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "cad5a766-1f8f-5698-9249-9fbca72ee1aa")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 59.69 187.96 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 67.31 180.34 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "2a7a50c8-1392-5f6f-b53d-7b394259f265")
+		(property "Reference" "R64"
+			(at 67.31 175.03 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "10k"
+			(at 67.31 185.65 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 67.31 180.34 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 67.31 180.34 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down gate riscaldatore 1"
+			(at 67.31 180.34 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 10k 1%"
+			(at 67.31 180.34 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 67.31 180.34 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "94cc7c1b-1173-5e0f-88d9-48ef22bbded5")
+		)
+		(pin "2"
+			(uuid "23b85983-8571-5066-93cc-b41807c22d85")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R64") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 67.31 176.53)
+			(xy 67.31 173.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "530030e6-fc31-5af1-8299-c0b77af985dc")
+	)
+	(global_label "HEAT1_G"
+		(shape passive)
+		(at 67.31 173.99 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "47a29260-f2fa-5eb7-9a17-cb67066df96d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 67.31 173.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 67.31 184.15)
+			(xy 67.31 186.69)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "aa3ffadf-585e-5b79-883e-f6383bfa308c")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 67.31 186.69 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "b289f1c6-d5fd-58a1-b167-fed120216efe")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 67.31 186.69 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Transistor_FET:IPD50R380CE")
+		(at 91.44 181.61 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "0f36ac27-fdd6-568e-b37f-86757d09d554")
+		(property "Reference" "Q9"
+			(at 91.44 175.03 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "AOD4184A"
+			(at 91.44 188.19 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:TO-252-2"
+			(at 91.44 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 91.44 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Low-side riscaldatore 1 (40 V, 50 A, 7 mOhm @10 V)"
+			(at 91.44 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "AOD4184A"
+			(at 91.44 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Alpha & Omega"
+			(at 91.44 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "ce0c39ac-7043-520b-8e9d-7e84a0cb0350")
+		)
+		(pin "2"
+			(uuid "23f79a97-77d9-5544-b8e2-65adeaaab94c")
+		)
+		(pin "3"
+			(uuid "f069f13b-f7cb-5e28-ad4d-045f37e930cd")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "Q9") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 86.36 181.61)
+			(xy 83.82 181.61)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "851db7f5-60a9-5ce1-a4b9-7fc81a610b0c")
+	)
+	(global_label "HEAT1_G"
+		(shape passive)
+		(at 83.82 181.61 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "2cae38e6-c650-515d-b923-65d233fd1d5c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 83.82 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 93.98 176.53)
+			(xy 93.98 173.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1736a52d-5bd2-54cb-96e1-c18ea375e18d")
+	)
+	(global_label "HEAT1_N"
+		(shape passive)
+		(at 93.98 173.99 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "c95e6362-c147-555a-bee7-4f45589d4f3b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 93.98 173.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 93.98 186.69)
+			(xy 93.98 189.23)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "47079e21-f8b5-587c-aec4-b2e23f5ae64c")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 93.98 189.23 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "27b3ee57-5263-5abd-9c60-52a7ef00be43")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 93.98 189.23 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:D_Schottky")
+		(at 116.84 165.1 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "19fa00bb-7c2d-5146-bbd2-dda3033c07d1")
+		(property "Reference" "D41"
+			(at 116.84 162.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "SS34"
+			(at 116.84 167.87 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SMA"
+			(at 116.84 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 116.84 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Ricircolo induttanza cavi riscaldatore 1"
+			(at 116.84 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "SS34"
+			(at 116.84 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "MDD/onsemi"
+			(at 116.84 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "bbfefb0f-af07-5c56-b280-3ea966ccab81")
+		)
+		(pin "2"
+			(uuid "e873d73f-d351-55f2-a206-145ba752824f")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D41") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 113.03 165.1)
+			(xy 110.49 165.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "10e099bc-c733-5f5b-a377-889d83422a97")
+	)
+	(global_label "+12V_H1"
+		(shape passive)
+		(at 110.49 165.1 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "0e766394-d9da-5e0a-8721-6e57bbb3b0c2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 110.49 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 120.65 165.1)
+			(xy 123.19 165.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "406e4ae0-97cb-51c7-a3c8-e0c0f6fabcb7")
+	)
+	(global_label "HEAT1_N"
+		(shape passive)
+		(at 123.19 165.1 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "269e667a-eb28-579a-b54b-a8acac13b5d1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 123.19 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 140.97 181.61 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "86ba448b-7092-5ae0-bc6e-89a1aebea962")
+		(property "Reference" "R67"
+			(at 140.97 176.3 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "4.7k"
+			(at 140.97 186.92 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 140.97 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 140.97 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "LED riscaldatore 1 (dal gate driver, 12 V = acceso)"
+			(at 140.97 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 4.7k 1%"
+			(at 140.97 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 140.97 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "8832ad41-d7c7-588e-814c-c8d8c285e920")
+		)
+		(pin "2"
+			(uuid "8dc030a2-c520-58d4-9980-de73c2900f4a")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R67") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 140.97 177.8)
+			(xy 140.97 175.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f4ef71d5-fab2-5995-994a-a567a7d11f96")
+	)
+	(global_label "HEAT1_DRV"
+		(shape passive)
+		(at 140.97 175.26 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "58d634bc-bc93-577a-8457-1247913a633b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 140.97 175.26 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 140.97 185.42)
+			(xy 140.97 187.96)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d0e783c2-68d2-5b83-8ed6-5d81c215fe95")
+	)
+	(global_label "HEAT1_LED"
+		(shape passive)
+		(at 140.97 187.96 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "a9f0e7c6-2eec-5474-b7fc-501295e3ccef")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 140.97 187.96 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 160.02 165.1 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c126f38f-2705-5e3c-9bc9-a54f6003ccd6")
+		(property "Reference" "D43"
+			(at 160.02 162.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "Red"
+			(at 160.02 168.886 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 160.02 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 160.02 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Riscaldatore 1 comandato acceso"
+			(at 160.02 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "KT-0603R"
+			(at 160.02 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Hubei KENTO"
+			(at 160.02 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "18f1d62e-a88b-569f-9163-d500d0b9d04d")
+		)
+		(pin "2"
+			(uuid "2b35f27d-9895-552c-b7a8-c4bbde0ad0b5")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D43") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 156.21 165.1)
+			(xy 153.67 165.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "670770c4-aed0-51e8-871a-4be798ee8d01")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 153.67 165.1 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "ba2b9726-8696-5296-b5ed-4902f2046bb1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 153.67 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 163.83 165.1)
+			(xy 166.37 165.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "765e62c6-2512-56b5-b329-c5c222117d1c")
+	)
+	(global_label "HEAT1_LED"
+		(shape passive)
+		(at 166.37 165.1 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "2fe35b9d-0f2e-52b5-b5e4-3faaa32d9e41")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 166.37 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x02")
+		(at 200.66 165.1 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "ea88357f-6391-52da-98d6-5f7ed6a05a6d")
+		(property "Reference" "J18"
+			(at 200.66 162.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "HEATER 1"
+			(at 200.66 170.41 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-2-5.08_1x02_P5.08mm_Horizontal"
+			(at 200.66 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 200.66 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Riscaldatore 1 100 W 12 V (pin 2 = +, pin 1 = -)"
+			(at 200.66 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "1711026"
+			(at 200.66 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Phoenix Contact"
+			(at 200.66 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "696b3d74-6bc7-5c79-a021-270bb5389e3a")
+		)
+		(pin "2"
+			(uuid "5f1a3fdd-e7a3-5a3d-9e28-f1fc4f254737")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "J18") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 195.58 165.1)
+			(xy 193.04 165.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "946d838d-8adc-51c0-b89f-8ce7432722a0")
+	)
+	(global_label "HEAT1_N"
+		(shape passive)
+		(at 193.04 165.1 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "a8529d37-6867-55c0-9bfc-0f324251a7e9")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 193.04 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 195.58 167.64)
+			(xy 193.04 167.64)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4c7709a9-1849-5f45-94f5-3ebe58c54702")
+	)
+	(global_label "+12V_H1"
+		(shape passive)
+		(at 193.04 167.64 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "6c793936-b82a-517d-b533-ce9ecbe608b3")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 193.04 167.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 209.55 181.61 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "800f4164-7e73-5266-b932-931c8b2826de")
+		(property "Reference" "R65"
+			(at 209.55 176.3 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "10R"
+			(at 209.55 186.92 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 209.55 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 209.55 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Gate riscaldatore 2"
+			(at 209.55 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 10R 1%"
+			(at 209.55 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 209.55 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "601c336d-0344-5786-8d62-c5de673613d8")
+		)
+		(pin "2"
+			(uuid "5826f9df-c0db-5a07-ac16-52a805d2ab51")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R65") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 209.55 177.8)
+			(xy 209.55 175.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1e7a36d7-5d48-5af5-8555-a568d4da8554")
+	)
+	(global_label "HEAT2_DRV"
+		(shape passive)
+		(at 209.55 175.26 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "bfda8e9d-b596-52b8-bc70-435bd606aae1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 209.55 175.26 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 209.55 185.42)
+			(xy 209.55 187.96)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "913b45c2-d697-5b39-8b9c-e1180d1aa4cc")
+	)
+	(global_label "HEAT2_G"
+		(shape passive)
+		(at 209.55 187.96 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "2e217703-3d01-500d-b272-d79e25fd041b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 209.55 187.96 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 217.17 180.34 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "7cf786ff-bdd5-522c-b2a4-a9c53ca35c97")
+		(property "Reference" "R66"
+			(at 217.17 175.03 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "10k"
+			(at 217.17 185.65 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 217.17 180.34 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 217.17 180.34 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down gate riscaldatore 2"
+			(at 217.17 180.34 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 10k 1%"
+			(at 217.17 180.34 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 217.17 180.34 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "a2fa929c-2268-527c-9d01-740bee05811b")
+		)
+		(pin "2"
+			(uuid "c71ff1b3-d90d-53ca-b79c-ce9b426495ef")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R66") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 217.17 176.53)
+			(xy 217.17 173.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ef9a8c8c-33ff-5f47-85cb-996f1a51128a")
+	)
+	(global_label "HEAT2_G"
+		(shape passive)
+		(at 217.17 173.99 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "4f7f815a-8bac-55a8-b381-a8bc454685f6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 217.17 173.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 217.17 184.15)
+			(xy 217.17 186.69)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "61d938fe-33f5-59cc-afb2-292e67a96842")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 217.17 186.69 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "fdbb22d0-54fa-54f0-8217-c6fd04c8c554")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 217.17 186.69 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Transistor_FET:IPD50R380CE")
+		(at 241.3 181.61 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "4a0aa6e8-29d2-52bb-85a1-b9461633bdfa")
+		(property "Reference" "Q10"
+			(at 241.3 175.03 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "AOD4184A"
+			(at 241.3 188.19 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:TO-252-2"
+			(at 241.3 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 241.3 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Low-side riscaldatore 2 (40 V, 50 A, 7 mOhm @10 V)"
+			(at 241.3 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "AOD4184A"
+			(at 241.3 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Alpha & Omega"
+			(at 241.3 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "27fa943f-087c-5024-acee-02411fee760f")
+		)
+		(pin "2"
+			(uuid "9c6b7052-f93b-5c0c-a3a3-dc708a573cc3")
+		)
+		(pin "3"
+			(uuid "d2d1f121-51fe-5c40-a9ab-096cc42f55b8")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "Q10") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 236.22 181.61)
+			(xy 233.68 181.61)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c0a916c9-8959-55f4-89d7-0619d52a43ed")
+	)
+	(global_label "HEAT2_G"
+		(shape passive)
+		(at 233.68 181.61 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "224755e7-c8e8-5367-9618-f7f1adf7e957")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 233.68 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 243.84 176.53)
+			(xy 243.84 173.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "68c48195-a138-50ca-b571-17f9be8f1380")
+	)
+	(global_label "HEAT2_N"
+		(shape passive)
+		(at 243.84 173.99 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "a2932697-5367-5915-90c4-bd7865974eba")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 243.84 173.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 243.84 186.69)
+			(xy 243.84 189.23)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "64d0811c-e089-5b2e-8be5-82976868519c")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 243.84 189.23 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "7de340ff-20ab-5893-b236-893de14d2c17")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 243.84 189.23 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:D_Schottky")
+		(at 266.7 165.1 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "dbddfe1e-205e-56a2-9ace-74414d4265ff")
+		(property "Reference" "D42"
+			(at 266.7 162.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "SS34"
+			(at 266.7 167.87 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SMA"
+			(at 266.7 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 266.7 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Ricircolo induttanza cavi riscaldatore 2"
+			(at 266.7 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "SS34"
+			(at 266.7 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "MDD/onsemi"
+			(at 266.7 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "e231186f-2602-5a65-8e3a-2db255ffda5c")
+		)
+		(pin "2"
+			(uuid "57d385ec-33d4-549a-af8d-53a0b173a469")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D42") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 262.89 165.1)
+			(xy 260.35 165.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e44514b3-0f05-5367-afc3-cc1eb52fa703")
+	)
+	(global_label "+12V_H2"
+		(shape passive)
+		(at 260.35 165.1 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "a44d9a10-28be-5890-b33d-a0fc1a8fb05f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 260.35 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 270.51 165.1)
+			(xy 273.05 165.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2a8c7afd-4f5f-55ea-aa14-7f2d4ad0b68f")
+	)
+	(global_label "HEAT2_N"
+		(shape passive)
+		(at 273.05 165.1 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "cf87f350-324c-55c0-b092-6a60014d20ab")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 273.05 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 290.83 181.61 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "93cb7213-a0a4-57e4-abdc-ee9def4a0905")
+		(property "Reference" "R68"
+			(at 290.83 176.3 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "4.7k"
+			(at 290.83 186.92 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 290.83 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 290.83 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "LED riscaldatore 2 (dal gate driver, 12 V = acceso)"
+			(at 290.83 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 4.7k 1%"
+			(at 290.83 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 290.83 181.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "5655aff9-6e93-563c-9829-a6d9247ebda5")
+		)
+		(pin "2"
+			(uuid "a38b60f7-f0b3-570e-9004-9969a55ac026")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "R68") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 290.83 177.8)
+			(xy 290.83 175.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "495360d0-3382-542a-ab9e-d36befb31317")
+	)
+	(global_label "HEAT2_DRV"
+		(shape passive)
+		(at 290.83 175.26 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "0c7dac71-1ecf-50de-a202-dba1081e34ac")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 290.83 175.26 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 290.83 185.42)
+			(xy 290.83 187.96)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c2986562-78b8-5945-81d2-63ae74f3f3d6")
+	)
+	(global_label "HEAT2_LED"
+		(shape passive)
+		(at 290.83 187.96 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "caa45a35-9532-51bd-a293-0cccfb56fe69")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 290.83 187.96 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 309.88 165.1 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "898c59d1-d614-5e8f-965d-9b00564d292e")
+		(property "Reference" "D44"
+			(at 309.88 162.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "Red"
+			(at 309.88 168.886 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 309.88 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 309.88 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Riscaldatore 2 comandato acceso"
+			(at 309.88 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "KT-0603R"
+			(at 309.88 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Hubei KENTO"
+			(at 309.88 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "fd99572a-d147-5894-9478-97ed37f8ece0")
+		)
+		(pin "2"
+			(uuid "44672320-0da1-5755-a835-4821b013088c")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "D44") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 306.07 165.1)
+			(xy 303.53 165.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7c59a7cf-1098-5756-beed-a7614aef9364")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 303.53 165.1 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "00cd4ac1-790e-5112-bfbc-10651346ff1a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 303.53 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 313.69 165.1)
+			(xy 316.23 165.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "16ceeb21-1eeb-57c7-9703-3a807ab55eac")
+	)
+	(global_label "HEAT2_LED"
+		(shape passive)
+		(at 316.23 165.1 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "5f548516-a4db-58b9-937a-c43b0004b34b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 316.23 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x02")
+		(at 350.52 165.1 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "98e21920-606c-5011-bd13-542fe7ddf34b")
+		(property "Reference" "J19"
+			(at 350.52 162.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "HEATER 2"
+			(at 350.52 170.41 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-2-5.08_1x02_P5.08mm_Horizontal"
+			(at 350.52 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 350.52 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Riscaldatore 2 100 W 12 V (pin 2 = +, pin 1 = -)"
+			(at 350.52 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "1711026"
+			(at 350.52 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Phoenix Contact"
+			(at 350.52 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "fbed0c98-7fe9-5a17-b945-3f0c4e9cc308")
+		)
+		(pin "2"
+			(uuid "555829c3-5fc7-5fcf-b34b-b76bcc65018e")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/7dd4feca-e5a8-53b9-aa46-76c693766476" (reference "J19") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 345.44 165.1)
+			(xy 342.9 165.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6df75d3b-00ef-56a0-851a-050b10420f18")
+	)
+	(global_label "HEAT2_N"
+		(shape passive)
+		(at 342.9 165.1 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "f35cab1a-18ba-5fb0-adff-9b3fdedcf1c2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 342.9 165.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 345.44 167.64)
+			(xy 342.9 167.64)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "87b4ea5a-6b2d-5d1d-ad04-c1e3cc5a581d")
+	)
+	(global_label "+12V_H2"
+		(shape passive)
+		(at 342.9 167.64 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "5d626eeb-c432-5986-b193-302b05c016ba")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 342.9 167.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(embedded_fonts no)
+)

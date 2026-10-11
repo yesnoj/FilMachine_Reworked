@@ -45,28 +45,12 @@ static const char *reset_reason_str(void) {
 }
 #endif
 
-#if HAS_RAIL_MONITOR
-#include "esp_adc/adc_oneshot.h"
-static adc_oneshot_unit_handle_t s_adc = NULL;
-
-static void rails_adc_init(void) {
-    if (s_adc) return;
-    adc_oneshot_unit_init_cfg_t uc = { .unit_id = ADC_UNIT_1 };
-    if (adc_oneshot_new_unit(&uc, &s_adc) != ESP_OK) { s_adc = NULL; return; }
-    adc_oneshot_chan_cfg_t cc = { .atten = ADC_ATTEN_DB_12, .bitwidth = ADC_BITWIDTH_DEFAULT };
-    adc_oneshot_config_channel(s_adc, RAIL_12V_ADC_CH, &cc);
-    adc_oneshot_config_channel(s_adc, RAIL_5V_ADC_CH,  &cc);
-    adc_oneshot_config_channel(s_adc, RAIL_3V3_ADC_CH, &cc);
-}
-
-/* Approximate rail voltage. 12dB atten ≈ 0..~2.5V full-scale on 12 bit.
- * Refine with adc_cali once the real board + dividers exist. Returns <0 on error. */
-static float rail_read(int ch, float divider) {
-    if (!s_adc) return -1.0f;
-    int raw = 0;
-    if (adc_oneshot_read(s_adc, ch, &raw) != ESP_OK) return -1.0f;
-    return ((float)raw * (2.5f / 4095.0f)) * divider;
-}
+/* Power rails: read through the MCP3424 on the FilMachine Mainboard (see
+ * railMonitor* in accessories.c). Shows "n/a" with the separate modules. */
+#if HAS_RAIL_MONITOR && defined(BOARD_JC4880P433)
+#define DBG_RAILS 1
+#else
+#define DBG_RAILS 0
 #endif
 
 /* ── Layout: header + 3x3 grid of panels on 800x480 ── */
@@ -275,14 +259,17 @@ static void dbg_refresh(lv_timer_t *t) {
     snprintf(b, sizeof b, "up %lus", (unsigned long)(lv_tick_get() / 1000));
     lv_label_set_text(D.lbl_up, b);
 
-#if HAS_RAIL_MONITOR
-    float rv;
-    rv = rail_read(RAIL_12V_ADC_CH, RAIL_12V_DIVIDER);
-    if (rv >= 0) { snprintf(b, sizeof b, "%.2f V", (double)rv); lv_label_set_text(D.lbl_v12, b); }
-    rv = rail_read(RAIL_5V_ADC_CH, RAIL_5V_DIVIDER);
-    if (rv >= 0) { snprintf(b, sizeof b, "%.2f V", (double)rv); lv_label_set_text(D.lbl_v5, b); }
-    rv = rail_read(RAIL_3V3_ADC_CH, RAIL_3V3_DIVIDER);
-    if (rv >= 0) { snprintf(b, sizeof b, "%.2f V", (double)rv); lv_label_set_text(D.lbl_v33, b); }
+#if DBG_RAILS
+    if (railMonitorPresent()) {
+        float rv;
+        railMonitorPoll();
+        rv = railMonitor12V();
+        if (rv >= 0) { snprintf(b, sizeof b, "%.2f V", (double)rv); lv_label_set_text(D.lbl_v12, b); }
+        rv = railMonitor5V();
+        if (rv >= 0) { snprintf(b, sizeof b, "%.2f V", (double)rv); lv_label_set_text(D.lbl_v5, b); }
+        rv = railMonitorPumpA();
+        if (rv >= 0) { snprintf(b, sizeof b, "~%.1f A", (double)rv); lv_label_set_text(D.lbl_v33, b); }
+    }
 #endif
 }
 
@@ -393,14 +380,13 @@ void debugScreenCreate(void) {
     D.lbl_v12 = make_label(p, 70,  34, &lv_font_montserrat_14, 0xFFFFFF, "n/a");
     make_label(p, 270, 34, &lv_font_montserrat_14, 0xDDDDDD, "5V");
     D.lbl_v5  = make_label(p, 330, 34, &lv_font_montserrat_14, 0xFFFFFF, "n/a");
-    make_label(p, 520, 34, &lv_font_montserrat_14, 0xDDDDDD, "3.3V");
+    make_label(p, 520, 34, &lv_font_montserrat_14, 0xDDDDDD, "Pump");
     D.lbl_v33 = make_label(p, 590, 34, &lv_font_montserrat_14, 0xFFFFFF, "n/a");
-#if HAS_RAIL_MONITOR
-    rails_adc_init();
-#else
-    make_label(p, 0, 70, &lv_font_montserrat_12, 0x888888,
-               "Add resistor dividers on the custom board, then set HAS_RAIL_MONITOR + channels/ratios.");
+#if DBG_RAILS
+    if (!railMonitorPresent())
 #endif
+        make_label(p, 0, 70, &lv_font_montserrat_12, 0x888888,
+                   "Rail monitor (MCP3424, FilMachine Mainboard) not found: separate modules.");
 
     lv_screen_load(D.scr);
     dbg_refresh(NULL);

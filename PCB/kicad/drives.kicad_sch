@@ -1,0 +1,4542 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "d349440b-0928-522a-a8f3-b3b172eb680a")
+	(paper "A3")
+	(title_block
+		(title "FilMachine Mainboard — Pompa, motore, servo")
+		(date "2026-10-10")
+		(rev "1.0")
+		(company "FilMachine")
+		(comment 1 "Mainboard per JC4880P433 (ESP32-P4) — generata da design.py")
+	)
+	(lib_symbols
+		(symbol "Device:R"
+			(pin_numbers (hide yes))
+			(pin_names (offset 0))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "R" (at 2.032 0 90) (effects (font (size 1.27 1.27))))
+			(property "Value" "R" (at 0 0 90) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at -1.778 0 90) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Resistor" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "R res resistor" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "R_*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "R_0_1" (rectangle (start -1.016 -2.54) (end 1.016 2.54) (stroke (width 0.254) (type default)) (fill (type none))))
+			(symbol "R_1_1" (pin passive line (at 0 3.81 270) (length 1.27) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 0 -3.81 90) (length 1.27) (name "~" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "74xGxx:74LVC2G08"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U" (at -10.16 7.62 0) (effects (font (size 1.27 1.27))))
+			(property "Value" "74LVC2G08" (at -10.16 -7.62 0) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Dual AND Gate, Low-Voltage CMOS" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "Dual Gate AND LVC CMOS" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "SSOP* VSSOP*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "74LVC2G08_1_1" (arc (start 0 5.08) (mid 5.0579 0) (end 0 -5.08) (stroke (width 0.254) (type default)) (fill (type background))) (polyline (pts (xy 0 -5.08) (xy -7.62 -5.08) (xy -7.62 5.08) (xy 0 5.08)) (stroke (width 0.254) (type default)) (fill (type background))) (pin input line (at -15.24 2.54 0) (length 7.62) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin input line (at -15.24 -2.54 0) (length 7.62) (name "~" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))) (pin output line (at 12.7 0 180) (length 7.62) (name "~" (effects (font (size 1.27 1.27)))) (number "7" (effects (font (size 1.27 1.27))))))
+			(symbol "74LVC2G08_2_1" (arc (start 0 5.08) (mid 5.0579 0) (end 0 -5.08) (stroke (width 0.254) (type default)) (fill (type background))) (polyline (pts (xy 0 -5.08) (xy -7.62 -5.08) (xy -7.62 5.08) (xy 0 5.08)) (stroke (width 0.254) (type default)) (fill (type background))) (pin input line (at -15.24 2.54 0) (length 7.62) (name "~" (effects (font (size 1.27 1.27)))) (number "5" (effects (font (size 1.27 1.27))))) (pin input line (at -15.24 -2.54 0) (length 7.62) (name "~" (effects (font (size 1.27 1.27)))) (number "6" (effects (font (size 1.27 1.27))))) (pin output line (at 12.7 0 180) (length 7.62) (name "~" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27))))))
+			(symbol "74LVC2G08_3_0" (rectangle (start -5.08 -5.08) (end 5.08 5.08) (stroke (width 0.254) (type default)) (fill (type background))))
+			(symbol "74LVC2G08_3_1" (pin power_in line (at 0 10.16 270) (length 5.08) (name "VCC" (effects (font (size 1.27 1.27)))) (number "8" (effects (font (size 1.27 1.27))))) (pin power_in line (at 0 -10.16 90) (length 5.08) (name "GND" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Device:C"
+			(pin_numbers (hide yes))
+			(pin_names (offset 0.254))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "C" (at 0.635 2.54 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Value" "C" (at 0.635 -2.54 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Footprint" "" (at 0.9652 -3.81 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Unpolarized capacitor" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "cap capacitor" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "C_*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "C_0_1" (polyline (pts (xy -2.032 0.762) (xy 2.032 0.762)) (stroke (width 0.508) (type default)) (fill (type none))) (polyline (pts (xy -2.032 -0.762) (xy 2.032 -0.762)) (stroke (width 0.508) (type default)) (fill (type none))))
+			(symbol "C_1_1" (pin passive line (at 0 3.81 270) (length 2.794) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 0 -3.81 90) (length 2.794) (name "~" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Power_Management:BTN8982TA"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "Q" (at 6.35 5.715 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Value" "BTN8982TA" (at 6.35 3.81 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Footprint" "Package_TO_SOT_SMD:TO-263-7_TabPin8" (at -5.08 11.43 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "https://www.infineon.com/dgdl/Infineon-BTN8982TA-DS-v01_00-EN.pdf?fileId=db3a30433fa9412f013fbe32289b7c17" (at -1.27 0.254 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "High Current PN Half Bridge, TO-263-7" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "half bridge for motor drive applications" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "TO*263*TabPin8*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "BTN8982TA_0_1" (rectangle (start -5.08 7.62) (end 5.08 -7.62) (stroke (width 0.254) (type default)) (fill (type background))) (polyline (pts (xy -5.08 6.35) (xy -0.762 6.35) (xy -0.762 -6.35) (xy -5.08 -6.35)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 0.254 2.159) (xy -0.762 2.159)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 0.254 -5.969) (xy -0.762 -5.969)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 2.54 2.286) (xy 2.54 -2.286)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 2.54 0) (xy 5.08 0)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 2.54 -5.842) (xy 2.54 -7.62) (xy 2.54 -6.858)) (stroke (width 0) (type default)) (fill (type none))))
+			(symbol "BTN8982TA_1_0" (text "Ctrl" (at -2.54 0 900) (effects (font (size 1.27 1.27)))))
+			(symbol "BTN8982TA_1_1" (polyline (pts (xy 0.254 5.969) (xy 0.254 2.159) (xy 0.254 2.159)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 0.254 -2.159) (xy 0.254 -5.969) (xy 0.254 -5.969)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 0.762 6.35) (xy 0.762 5.334)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0.762 5.842) (xy 2.54 5.842)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 0.762 4.572) (xy 0.762 3.556)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0.762 4.064) (xy 2.54 4.064)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 0.762 2.794) (xy 0.762 1.778)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0.762 2.286) (xy 2.54 2.286)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 0.762 -1.778) (xy 0.762 -2.794)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0.762 -2.286) (xy 2.54 -2.286)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 0.762 -3.556) (xy 0.762 -4.572)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0.762 -4.064) (xy 2.54 -4.064)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 0.762 -5.334) (xy 0.762 -6.35)) (stroke (width 0.254) (type default)) (fill (type none))) (polyline (pts (xy 0.762 -5.842) (xy 2.54 -5.842)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 1.016 -4.064) (xy 2.032 -3.683) (xy 2.032 -4.445) (xy 1.016 -4.064)) (stroke (width 0) (type default)) (fill (type outline))) (polyline (pts (xy 2.159 4.064) (xy 1.143 3.683) (xy 1.143 4.445) (xy 2.159 4.064)) (stroke (width 0) (type default)) (fill (type outline))) (polyline (pts (xy 2.54 7.62) (xy 2.54 5.842)) (stroke (width 0) (type default)) (fill (type none))) (circle (center 2.54 5.842) (radius 0.2794) (stroke (width 0) (type default)) (fill (type outline))) (polyline (pts (xy 2.54 4.064) (xy 2.54 5.842)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 2.54 2.286) (xy 3.302 2.286) (xy 3.302 5.842) (xy 2.54 5.842)) (stroke (width 0) (type default)) (fill (type none))) (circle (center 2.54 2.286) (radius 0.2794) (stroke (width 0) (type default)) (fill (type outline))) (circle (center 2.54 0) (radius 0.2794) (stroke (width 0) (type default)) (fill (type outline))) (circle (center 2.54 -2.286) (radius 0.2794) (stroke (width 0) (type default)) (fill (type outline))) (polyline (pts (xy 2.54 -5.842) (xy 2.54 -4.064)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 2.54 -5.842) (xy 3.302 -5.842) (xy 3.302 -2.286) (xy 2.54 -2.286)) (stroke (width 0) (type default)) (fill (type none))) (circle (center 2.54 -5.842) (radius 0.2794) (stroke (width 0) (type default)) (fill (type outline))) (polyline (pts (xy 2.794 4.572) (xy 2.921 4.445) (xy 3.683 4.445) (xy 3.81 4.318)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 2.794 -3.556) (xy 2.921 -3.683) (xy 3.683 -3.683) (xy 3.81 -3.81)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 3.302 4.445) (xy 2.921 3.81) (xy 3.683 3.81) (xy 3.302 4.445)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy 3.302 -3.683) (xy 2.921 -4.318) (xy 3.683 -4.318) (xy 3.302 -3.683)) (stroke (width 0) (type default)) (fill (type none))) (pin input line (at -7.62 5.08 0) (length 2.54) (name "INH" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27))))) (pin input line (at -7.62 2.54 0) (length 2.54) (name "IN" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))) (pin output line (at -7.62 -2.54 0) (length 2.54) (name "IS" (effects (font (size 1.27 1.27)))) (number "6" (effects (font (size 1.27 1.27))))) (pin input line (at -7.62 -5.08 0) (length 2.54) (name "SR" (effects (font (size 1.27 1.27)))) (number "5" (effects (font (size 1.27 1.27))))) (pin power_in line (at 2.54 10.16 270) (length 2.54) (name "~" (effects (font (size 1.27 1.27)))) (number "7" (effects (font (size 1.27 1.27))))) (pin power_in line (at 2.54 -10.16 90) (length 2.54) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 7.62 0 180) (length 2.54) (hide yes) (name "~" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27))))) (pin passive line (at 7.62 0 180) (length 2.54) (name "~" (effects (font (size 1.27 1.27)))) (number "8" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Device:C_Polarized"
+			(pin_numbers (hide yes))
+			(pin_names (offset 0.254))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "C" (at 0.635 2.54 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Value" "C_Polarized" (at 0.635 -2.54 0) (effects (font (size 1.27 1.27)) (justify left)))
+			(property "Footprint" "" (at 0.9652 -3.81 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Polarized capacitor" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "cap capacitor" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "CP_*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "C_Polarized_0_1" (rectangle (start -2.286 0.508) (end 2.286 1.016) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy -1.778 2.286) (xy -0.762 2.286)) (stroke (width 0) (type default)) (fill (type none))) (polyline (pts (xy -1.27 2.794) (xy -1.27 1.778)) (stroke (width 0) (type default)) (fill (type none))) (rectangle (start 2.286 -0.508) (end -2.286 -1.016) (stroke (width 0) (type default)) (fill (type outline))))
+			(symbol "C_Polarized_1_1" (pin passive line (at 0 3.81 270) (length 2.794) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 0 -3.81 90) (length 2.794) (name "~" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Connector_Generic:Conn_01x02"
+			(pin_names (offset 1.016) (hide yes))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "J" (at 0 2.54 0) (effects (font (size 1.27 1.27))))
+			(property "Value" "Conn_01x02" (at 0 -5.08 0) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "connector" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "Connector*:*_1x??_*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "Conn_01x02_1_1" (rectangle (start -1.27 1.27) (end 1.27 -3.81) (stroke (width 0.254) (type default)) (fill (type background))) (rectangle (start -1.27 0.127) (end 0 -0.127) (stroke (width 0.1524) (type default)) (fill (type none))) (rectangle (start -1.27 -2.413) (end 0 -2.667) (stroke (width 0.1524) (type default)) (fill (type none))) (pin passive line (at -5.08 0 0) (length 3.81) (name "Pin_1" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at -5.08 -2.54 0) (length 3.81) (name "Pin_2" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Driver_Motor:DRV8871DDA"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U" (at -6.35 8.89 0) (effects (font (size 1.27 1.27))))
+			(property "Value" "DRV8871DDA" (at 8.128 8.89 0) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "Package_SO:Texas_HTSOP-8-1EP_3.9x4.9mm_P1.27mm_EP2.95x4.9mm_Mask2.4x3.1mm_ThermalVias" (at 6.35 -1.27 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "http://www.ti.com/lit/ds/symlink/drv8871.pdf" (at 6.35 -1.27 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Brushed DC Motor Driver, PWM Control, 45V, 3.6A, Current limiting, HTSOP-8" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "H-bridge driver motor current limit" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "Texas*HTSOP*1EP*3.9x4.9mm*P1.27mm*EP2.95x4.9mm*Mask2.4x3.1mm*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "DRV8871DDA_0_1" (rectangle (start -7.62 7.62) (end 7.62 -7.62) (stroke (width 0.254) (type default)) (fill (type background))))
+			(symbol "DRV8871DDA_1_1" (pin input line (at -10.16 5.08 0) (length 2.54) (name "IN1" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27))))) (pin input line (at -10.16 2.54 0) (length 2.54) (name "IN2" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))) (pin power_in line (at 0 10.16 270) (length 2.54) (name "VM" (effects (font (size 1.27 1.27)))) (number "5" (effects (font (size 1.27 1.27))))) (pin power_in line (at 0 -10.16 90) (length 2.54) (name "GND" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at 0 -10.16 90) (length 2.54) (hide yes) (name "GND" (effects (font (size 1.27 1.27)))) (number "7" (effects (font (size 1.27 1.27))))) (pin passive line (at 0 -10.16 90) (length 2.54) (hide yes) (name "GND" (effects (font (size 1.27 1.27)))) (number "9" (effects (font (size 1.27 1.27))))) (pin output line (at 10.16 5.08 180) (length 2.54) (name "OUT1" (effects (font (size 1.27 1.27)))) (number "6" (effects (font (size 1.27 1.27))))) (pin output line (at 10.16 2.54 180) (length 2.54) (name "OUT2" (effects (font (size 1.27 1.27)))) (number "8" (effects (font (size 1.27 1.27))))) (pin passive line (at 10.16 -5.08 180) (length 2.54) (name "ILIM" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+		(symbol "Connector_Generic:Conn_01x03"
+			(pin_names (offset 1.016) (hide yes))
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "J" (at 0 5.08 0) (effects (font (size 1.27 1.27))))
+			(property "Value" "Conn_01x03" (at 0 -5.08 0) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "Description" "Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_keywords" "connector" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(property "ki_fp_filters" "Connector*:*_1x??_*" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+			(symbol "Conn_01x03_1_1" (rectangle (start -1.27 3.81) (end 1.27 -3.81) (stroke (width 0.254) (type default)) (fill (type background))) (rectangle (start -1.27 2.667) (end 0 2.413) (stroke (width 0.1524) (type default)) (fill (type none))) (rectangle (start -1.27 0.127) (end 0 -0.127) (stroke (width 0.1524) (type default)) (fill (type none))) (rectangle (start -1.27 -2.413) (end 0 -2.667) (stroke (width 0.1524) (type default)) (fill (type none))) (pin passive line (at -5.08 2.54 0) (length 3.81) (name "Pin_1" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27))))) (pin passive line (at -5.08 0 0) (length 3.81) (name "Pin_2" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))) (pin passive line (at -5.08 -2.54 0) (length 3.81) (name "Pin_3" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27))))))
+			(embedded_fonts no)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 22.86 44.45 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "45a51a59-347d-5bd9-81a8-36b04a74fcdf")
+		(property "Reference" "R70"
+			(at 22.86 39.14 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 22.86 49.76 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 22.86 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 22.86 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down PUMP_IN1"
+			(at 22.86 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 22.86 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 22.86 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "953aa027-7599-50be-9318-fe4b234c77f7")
+		)
+		(pin "2"
+			(uuid "ef3f1f84-4d41-503e-a1be-49f7880fbce0")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R70") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 22.86 40.64)
+			(xy 22.86 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3926ebee-fa92-55d4-bcd3-addf5c91dbee")
+	)
+	(global_label "PUMP_IN1"
+		(shape passive)
+		(at 22.86 38.1 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "4ebb0a23-fc43-513f-83c0-3d177bc15dee")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 22.86 38.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 22.86 48.26)
+			(xy 22.86 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "20efbfba-8eed-5e62-aaaf-6242a57bb31b")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 22.86 50.8 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "792a8cb4-b804-5b38-8730-21dd1e166329")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 22.86 50.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 30.48 44.45 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "dffd8ecb-31c7-5c30-9a23-cde28df4d755")
+		(property "Reference" "R71"
+			(at 30.48 39.14 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 30.48 49.76 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 30.48 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 30.48 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down PUMP_IN2"
+			(at 30.48 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 30.48 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 30.48 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "a78ad9a5-2ffc-5511-a70f-fedc3225017d")
+		)
+		(pin "2"
+			(uuid "f0792633-079c-516f-b788-495775c0ee66")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R71") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 30.48 40.64)
+			(xy 30.48 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6c797f67-dc86-571f-bd1b-389d8164a4b0")
+	)
+	(global_label "PUMP_IN2"
+		(shape passive)
+		(at 30.48 38.1 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "0304b0fd-2717-5438-b8c0-666201841420")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 30.48 38.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 30.48 48.26)
+			(xy 30.48 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "31615f8d-44cd-50f0-864a-c6e6d500f4d2")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 30.48 50.8 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "42eae880-81d0-5c83-bcd4-43bfcee9448b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 30.48 50.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 39.37 44.45 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "29f80bed-5f1d-5c65-bd7a-aa621fdcaa70")
+		(property "Reference" "R72"
+			(at 39.37 39.14 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 39.37 49.76 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 39.37 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 39.37 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down PUMP_ENA"
+			(at 39.37 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 39.37 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 39.37 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "8af05b0e-4b59-5d4e-9e5d-3215420cfd1d")
+		)
+		(pin "2"
+			(uuid "05dfcd6e-d728-53e1-a787-bab0ae9a4a05")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R72") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 39.37 40.64)
+			(xy 39.37 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9bcabd1c-0e09-54be-abf2-5545e6d73d53")
+	)
+	(global_label "PUMP_ENA"
+		(shape passive)
+		(at 39.37 38.1 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "5e98e03a-4b23-5f95-bd46-be002e4171e2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 39.37 38.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 39.37 48.26)
+			(xy 39.37 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "db320da4-d71a-5335-a88e-e3db6042b3b6")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 39.37 50.8 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "76d63a20-7026-56f8-966c-edc494888f00")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 39.37 50.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 46.99 43.18 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "96db0080-7186-52af-b41e-c38436fdeb04")
+		(property "Reference" "R73"
+			(at 46.99 37.87 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 46.99 48.49 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 46.99 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 46.99 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down MOT_IN1"
+			(at 46.99 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 46.99 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 46.99 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "a42d14f2-2061-50bd-ae01-716b435eebdc")
+		)
+		(pin "2"
+			(uuid "bdabb398-c029-5892-b6d6-2290ec5cda51")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R73") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 46.99 39.37)
+			(xy 46.99 36.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1fe3ada8-bfbd-596b-b993-502f7831b063")
+	)
+	(global_label "MOT_IN1"
+		(shape passive)
+		(at 46.99 36.83 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "c43baa5c-97b3-5347-a4ad-6f2d4dc47d2a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 46.99 36.83 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 46.99 46.99)
+			(xy 46.99 49.53)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bc2e772b-7cab-5fb0-ad5b-dab4d7c7ceee")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 46.99 49.53 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "a958689e-fc77-5dc0-84ab-6fd5f67873b2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 46.99 49.53 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 54.61 43.18 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "bc7101ce-8584-50d4-afdc-794adeae92d3")
+		(property "Reference" "R74"
+			(at 54.61 37.87 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 54.61 48.49 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 54.61 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 54.61 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down MOT_IN2"
+			(at 54.61 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 54.61 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 54.61 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "b9c1eb35-033b-5464-a6a7-d10163038abc")
+		)
+		(pin "2"
+			(uuid "004623fb-fa53-5fcf-b04e-593192682d9c")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R74") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 54.61 39.37)
+			(xy 54.61 36.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bd5e44f3-6e27-5f49-b5b2-532e1ad87987")
+	)
+	(global_label "MOT_IN2"
+		(shape passive)
+		(at 54.61 36.83 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "e8618a53-41f9-5f9b-9e52-d752caea99c6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 54.61 36.83 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 54.61 46.99)
+			(xy 54.61 49.53)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a71f2958-8b71-50af-88ce-cfcd41bcf36d")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 54.61 49.53 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "5a35c72b-1700-5b91-8ac9-d78646e31658")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 54.61 49.53 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 63.5 43.18 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a9eb9708-179a-5c64-8268-c515c5d2f726")
+		(property "Reference" "R75"
+			(at 63.5 37.87 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 63.5 48.49 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 63.5 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 63.5 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down MOT_ENA"
+			(at 63.5 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 63.5 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 63.5 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "c06e0074-dd3b-5f70-ab5d-44130f437822")
+		)
+		(pin "2"
+			(uuid "de78214b-779f-5314-912f-d173c220b0fa")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R75") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 63.5 39.37)
+			(xy 63.5 36.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a66412fa-cedc-5f24-8e8d-66ef62d6a121")
+	)
+	(global_label "MOT_ENA"
+		(shape passive)
+		(at 63.5 36.83 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "9abc9bd8-f49a-5764-94ae-ca4d5e27af7a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 63.5 36.83 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 63.5 46.99)
+			(xy 63.5 49.53)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "090f6a14-0d8e-5e6a-932c-a276baf24f5e")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 63.5 49.53 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "4bc126ca-65b6-5f48-90b7-179e41dd2728")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 63.5 49.53 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 71.12 44.45 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "e1651c5e-5194-5ce4-9c5e-b4cbeaabd9aa")
+		(property "Reference" "R76"
+			(at 71.12 39.14 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100k"
+			(at 71.12 49.76 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 71.12 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 71.12 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pull-down SERVO_PWM"
+			(at 71.12 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 100k 1%"
+			(at 71.12 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 71.12 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "fc8769f5-bdbb-5683-a2c3-ba233f27ebf0")
+		)
+		(pin "2"
+			(uuid "ae87d1bd-8e9c-5145-a5e6-9f82fa9c32db")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R76") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 71.12 40.64)
+			(xy 71.12 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f10f6315-7614-5527-8697-72624e630b59")
+	)
+	(global_label "SERVO_PWM"
+		(shape passive)
+		(at 71.12 38.1 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "2a129b98-ddb2-5726-b06f-1d08c5c6cc09")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 71.12 38.1 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 71.12 48.26)
+			(xy 71.12 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "72626d92-8f9e-58ee-a82a-55f319f15255")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 71.12 50.8 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "7abcbc4b-c08f-510f-bf74-4fdf33ffa65d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 71.12 50.8 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "74xGxx:74LVC2G08")
+		(at 106.68 31.75 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "b4b694f4-0a74-591c-ae0c-70a5169105c9")
+		(property "Reference" "U6"
+			(at 106.68 25.17 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "74LVC2G08"
+			(at 106.68 38.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_SO:SSOP-8_2.95x2.8mm_P0.65mm"
+			(at 106.68 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 106.68 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "AND: IN1·ENA, IN2·ENA pompa"
+			(at 106.68 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "SN74LVC2G08DCTR"
+			(at 106.68 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 106.68 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "202a5c42-c3c6-5487-bef3-4157de44b2db")
+		)
+		(pin "2"
+			(uuid "a2685776-0f16-5c0a-8d04-b460f89e4cb2")
+		)
+		(pin "7"
+			(uuid "a32521cf-2a2a-5a10-a20f-bfba92b7c595")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U6") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 91.44 29.21)
+			(xy 88.9 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8e3b3665-3e79-53bf-af55-1e7bd7a41eda")
+	)
+	(global_label "PUMP_IN1"
+		(shape passive)
+		(at 88.9 29.21 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "e18f416f-72cd-5dbf-abe7-7eadeaf0a492")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 88.9 29.21 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 91.44 34.29)
+			(xy 88.9 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9eadde71-79c1-5994-aa36-aeed9e6041d7")
+	)
+	(global_label "PUMP_ENA"
+		(shape passive)
+		(at 88.9 34.29 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "e5a6c326-6218-53f0-83ec-e2cfc19b561c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 88.9 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 119.38 31.75)
+			(xy 121.92 31.75)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "20c12e93-88e0-52b3-9e46-5d8c9d0036db")
+	)
+	(global_label "PUMP_A_CTL"
+		(shape passive)
+		(at 121.92 31.75 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "9598e67b-9a55-5730-8b6e-34b1cedfb782")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 121.92 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "74xGxx:74LVC2G08")
+		(at 168.91 31.75 0)
+		(unit 2)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "0afd2286-ebdc-5811-9f9e-415d030f5237")
+		(property "Reference" "U6"
+			(at 168.91 25.17 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "74LVC2G08"
+			(at 168.91 38.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_SO:SSOP-8_2.95x2.8mm_P0.65mm"
+			(at 168.91 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 168.91 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "AND: IN1·ENA, IN2·ENA pompa"
+			(at 168.91 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "SN74LVC2G08DCTR"
+			(at 168.91 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 168.91 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "5"
+			(uuid "38affb95-ecaf-5965-84d7-574b7266d95f")
+		)
+		(pin "6"
+			(uuid "db8143e6-00e6-5dd0-9011-1b5a205d850f")
+		)
+		(pin "3"
+			(uuid "082a04dc-a3ac-5089-aa34-c4c4645d7f8c")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U6") (unit 2)))
+		)
+	)
+	(wire
+		(pts
+			(xy 153.67 29.21)
+			(xy 151.13 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b69960af-3f44-5ffa-a1f8-65d3703f4d92")
+	)
+	(global_label "PUMP_IN2"
+		(shape passive)
+		(at 151.13 29.21 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "6233dca4-dbd2-5114-af37-fe3d6f15fd9d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 151.13 29.21 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 153.67 34.29)
+			(xy 151.13 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4c73b8a5-5708-5e49-ae35-8e2cd42e9b8a")
+	)
+	(global_label "PUMP_ENA"
+		(shape passive)
+		(at 151.13 34.29 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "d8eb3557-1991-5449-9cdf-beb05848f456")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 151.13 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 181.61 31.75)
+			(xy 184.15 31.75)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "95c15f22-190b-515c-a2eb-136b310964f9")
+	)
+	(global_label "PUMP_B_CTL"
+		(shape passive)
+		(at 184.15 31.75 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "eb864f81-ca73-5ce3-a8ed-4c0128a81aa8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 184.15 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "74xGxx:74LVC2G08")
+		(at 207.01 46.99 0)
+		(unit 3)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "cde289fd-2080-5e07-be39-54088fb25bc2")
+		(property "Reference" "U6"
+			(at 207.01 35.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "74LVC2G08"
+			(at 207.01 58.65 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_SO:SSOP-8_2.95x2.8mm_P0.65mm"
+			(at 207.01 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 207.01 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "AND: IN1·ENA, IN2·ENA pompa"
+			(at 207.01 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "SN74LVC2G08DCTR"
+			(at 207.01 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 207.01 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "8"
+			(uuid "eada4344-e3b9-52e7-ad9d-f942760596cd")
+		)
+		(pin "4"
+			(uuid "7f4e33f1-f6ec-5bd0-9bde-eee4c04e2c55")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U6") (unit 3)))
+		)
+	)
+	(wire
+		(pts
+			(xy 207.01 36.83)
+			(xy 207.01 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "64ddabda-598f-5c0d-a183-67c16952fb76")
+	)
+	(global_label "+3V3"
+		(shape passive)
+		(at 207.01 34.29 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "8895bca8-a616-5926-9509-8d5754f92f25")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 207.01 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 207.01 57.15)
+			(xy 207.01 59.69)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c026561a-c00d-59b9-bfbb-957f8cdc768a")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 207.01 59.69 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "c581c52d-9422-5565-a279-4c5efbd23a28")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 207.01 59.69 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 220.98 40.64 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "656d3560-9076-56c6-8660-a6e058633c3c")
+		(property "Reference" "C50"
+			(at 220.98 35.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100nF"
+			(at 220.98 45.95 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 220.98 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 220.98 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" ""
+			(at 220.98 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "MLCC 100nF"
+			(at 220.98 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 220.98 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "d840b53e-a0b7-5434-b5d1-4d6016a30b54")
+		)
+		(pin "2"
+			(uuid "e20f5490-2b44-5434-a75a-5454ae9267e6")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C50") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 220.98 36.83)
+			(xy 220.98 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "321c45ab-efd1-51ff-ac35-664dc54aedef")
+	)
+	(global_label "+3V3"
+		(shape passive)
+		(at 220.98 34.29 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "4d790129-3762-536e-b90b-95bc6bfeaa02")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 220.98 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 220.98 44.45)
+			(xy 220.98 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9a254068-5590-59bd-98e2-a8f636fa34a8")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 220.98 46.99 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "d54d1732-09e7-5c42-9b50-5c3e534cdfc5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 220.98 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "74xGxx:74LVC2G08")
+		(at 256.54 31.75 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "5f4db796-95a5-5a1b-8452-188ccc6dbb38")
+		(property "Reference" "U7"
+			(at 256.54 25.17 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "74LVC2G08"
+			(at 256.54 38.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_SO:SSOP-8_2.95x2.8mm_P0.65mm"
+			(at 256.54 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 256.54 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "AND: IN1·ENA, IN2·ENA motore"
+			(at 256.54 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "SN74LVC2G08DCTR"
+			(at 256.54 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 256.54 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "baa9f455-c635-5fa3-843c-0f12ceb5ad68")
+		)
+		(pin "2"
+			(uuid "1c381a68-80b8-583d-b4cd-a88214d9e971")
+		)
+		(pin "7"
+			(uuid "27799775-a73b-552f-b899-d9a7c085c99d")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U7") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 241.3 29.21)
+			(xy 238.76 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9fda9a85-9baa-55dc-9373-4c8696174d88")
+	)
+	(global_label "MOT_IN1"
+		(shape passive)
+		(at 238.76 29.21 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "3436b456-4b37-59a3-b440-25a09ce17d52")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 238.76 29.21 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 241.3 34.29)
+			(xy 238.76 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a2e6d520-772f-5431-bbf7-465af687bc38")
+	)
+	(global_label "MOT_ENA"
+		(shape passive)
+		(at 238.76 34.29 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "fc68274e-0e5f-5d9e-918a-e57f0516e5aa")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 238.76 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 269.24 31.75)
+			(xy 271.78 31.75)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c93d1862-aecc-54dc-b7a4-4a1a6e102d5e")
+	)
+	(global_label "MOT_A_CTL"
+		(shape passive)
+		(at 271.78 31.75 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "040e8428-e678-5a7c-aef9-a2ee0a43cbbe")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 271.78 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "74xGxx:74LVC2G08")
+		(at 316.23 31.75 0)
+		(unit 2)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "537f0693-ffea-5d6c-b792-dbc735432fe6")
+		(property "Reference" "U7"
+			(at 316.23 25.17 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "74LVC2G08"
+			(at 316.23 38.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_SO:SSOP-8_2.95x2.8mm_P0.65mm"
+			(at 316.23 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 316.23 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "AND: IN1·ENA, IN2·ENA motore"
+			(at 316.23 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "SN74LVC2G08DCTR"
+			(at 316.23 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 316.23 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "5"
+			(uuid "5e4053da-2f90-5fe9-b1f0-5b65d29276f5")
+		)
+		(pin "6"
+			(uuid "69f688da-51d7-52c4-b746-8945b219fa13")
+		)
+		(pin "3"
+			(uuid "f389bca8-71ce-5b0f-aae2-b5306e1ec6e4")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U7") (unit 2)))
+		)
+	)
+	(wire
+		(pts
+			(xy 300.99 29.21)
+			(xy 298.45 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4a13b83f-633d-50a9-807c-c14a8ac6c67f")
+	)
+	(global_label "MOT_IN2"
+		(shape passive)
+		(at 298.45 29.21 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "aef984da-42b9-5c33-914e-0b57b8ee22c8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 298.45 29.21 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 300.99 34.29)
+			(xy 298.45 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5c4327c7-e96e-5e79-be4d-e7fc4027f2b3")
+	)
+	(global_label "MOT_ENA"
+		(shape passive)
+		(at 298.45 34.29 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "34485dc6-f8d9-5e8d-a825-a91d16245515")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 298.45 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 328.93 31.75)
+			(xy 331.47 31.75)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a883fa47-e35d-549a-bbcb-c3001f001b3d")
+	)
+	(global_label "MOT_B_CTL"
+		(shape passive)
+		(at 331.47 31.75 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "f5472820-5de9-518d-bdc0-7638cfa7c12a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 331.47 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "74xGxx:74LVC2G08")
+		(at 354.33 46.99 0)
+		(unit 3)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "4fd744d7-1bac-593f-a1e1-f077eb234d2e")
+		(property "Reference" "U7"
+			(at 354.33 35.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "74LVC2G08"
+			(at 354.33 58.65 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_SO:SSOP-8_2.95x2.8mm_P0.65mm"
+			(at 354.33 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 354.33 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "AND: IN1·ENA, IN2·ENA motore"
+			(at 354.33 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "SN74LVC2G08DCTR"
+			(at 354.33 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 354.33 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "8"
+			(uuid "d15a4fd9-b8e8-55e2-8bda-09fec4af465e")
+		)
+		(pin "4"
+			(uuid "c7992f2b-72a0-5de2-b4b0-7200416f6c67")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U7") (unit 3)))
+		)
+	)
+	(wire
+		(pts
+			(xy 354.33 36.83)
+			(xy 354.33 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "080f7497-fa7d-5bab-8a72-0d61f6fae25e")
+	)
+	(global_label "+3V3"
+		(shape passive)
+		(at 354.33 34.29 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "2b3ace78-c66c-5b08-b6a7-4a9ece13c2e6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 354.33 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 354.33 57.15)
+			(xy 354.33 59.69)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8efd7485-4ccc-5fd2-b8fa-ba6d91c83eff")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 354.33 59.69 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "94dd9aeb-3735-5354-93af-fa3537b4a4c5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 354.33 59.69 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 367.03 40.64 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "3c6ef280-4ff5-568e-b124-ece4c9602e95")
+		(property "Reference" "C51"
+			(at 367.03 35.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100nF"
+			(at 367.03 45.95 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 367.03 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 367.03 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" ""
+			(at 367.03 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "MLCC 100nF"
+			(at 367.03 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 367.03 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "c5de310a-4cdc-5abc-8b07-a4dac79bc8d2")
+		)
+		(pin "2"
+			(uuid "6cab9b14-f9e3-5f1f-8105-21771e0683b9")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C51") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 367.03 36.83)
+			(xy 367.03 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3ba5aa64-843c-5919-8e9d-733c7915338e")
+	)
+	(global_label "+3V3"
+		(shape passive)
+		(at 367.03 34.29 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "13548135-d277-5e85-a169-05ac20145ed3")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 367.03 34.29 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 367.03 44.45)
+			(xy 367.03 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8c758054-a34f-5dba-abe1-464fb03017b6")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 367.03 46.99 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "bf5de4f9-1368-5293-93fc-2ac0868fcfe7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 367.03 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Power_Management:BTN8982TA")
+		(at 43.18 101.6 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "e96726f2-e477-58b5-a2de-baca0392d71f")
+		(property "Reference" "U8"
+			(at 43.18 89.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "BTN8982TA"
+			(at 43.18 113.26 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:TO-263-7_TabPin8"
+			(at 43.18 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 43.18 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Mezzo ponte pompa lato A (30 A, 10 mOhm); SR a GND = slew rate massimo"
+			(at 43.18 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "BTN8982TAAUMA1"
+			(at 43.18 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Infineon"
+			(at 43.18 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "3"
+			(uuid "d2d64419-d4ab-5fd7-911d-840baecac7ce")
+		)
+		(pin "2"
+			(uuid "5128e5fa-548d-56f3-a545-63a20caf02d9")
+		)
+		(pin "6"
+			(uuid "f1149f74-5726-59b4-a5b7-295083ae90ae")
+		)
+		(pin "5"
+			(uuid "2e2fdc5b-290f-57ce-90ba-8090a8feaa78")
+		)
+		(pin "7"
+			(uuid "e627b38a-7d61-591f-9492-45cd48aa647a")
+		)
+		(pin "1"
+			(uuid "c517402d-4fed-5d74-a6a2-c0c95799c691")
+		)
+		(pin "4"
+			(uuid "7b0020ec-0b94-5964-943c-a2ab9d3e5e2a")
+		)
+		(pin "8"
+			(uuid "6986a9a9-50aa-5ed5-a21a-8f20ce6d5ff6")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U8") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 35.56 96.52)
+			(xy 33.02 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "79df1fe1-3870-5c65-bf81-4a192188f906")
+	)
+	(global_label "PUMP_INH"
+		(shape passive)
+		(at 33.02 96.52 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "6aaac315-dbfe-5b6c-a955-2b03b8bf22a6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 33.02 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 35.56 99.06)
+			(xy 33.02 99.06)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "06a613d1-4fdd-5088-baa0-082a40166e77")
+	)
+	(global_label "PUMP_A_IN"
+		(shape passive)
+		(at 33.02 99.06 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "41dda796-3ef3-58bf-948b-88d1d54a416d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 33.02 99.06 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 35.56 104.14)
+			(xy 33.02 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d3143e1b-deef-5718-af82-2c94c7aa6ce3")
+	)
+	(global_label "PUMP_IS_A"
+		(shape passive)
+		(at 33.02 104.14 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "61b5f3f9-3033-5329-bf75-9d8f89e9c747")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 33.02 104.14 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 35.56 106.68)
+			(xy 33.02 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "23d95c50-6d62-5c28-acd4-c0539fb8d851")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 33.02 106.68 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "3102f623-4c9e-5284-8de5-580eecbf8c17")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 33.02 106.68 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 45.72 91.44)
+			(xy 45.72 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e091d502-ae16-5b3f-8e5c-ccfe2a46459e")
+	)
+	(global_label "+12V_PUMP"
+		(shape passive)
+		(at 45.72 88.9 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "f3a5e026-26b5-5527-8341-537a86af3e37")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 45.72 88.9 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 45.72 111.76)
+			(xy 45.72 114.3)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "af4b914c-f821-556f-9775-3b612a5f7cce")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 45.72 114.3 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "c1961be5-1279-553e-9699-84339b8ea18c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 45.72 114.3 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 50.8 101.6)
+			(xy 53.34 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0d49b0ff-b06f-597d-a9fc-482514c196dc")
+	)
+	(global_label "PUMP_OUT_A"
+		(shape passive)
+		(at 53.34 101.6 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "278a13e7-91ad-53d5-a2b0-fbbd07d17b6e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 53.34 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 50.8 101.6)
+			(xy 53.34 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0e0bfdcd-9032-550c-8a7a-0860448ff203")
+	)
+	(global_label "PUMP_OUT_A"
+		(shape passive)
+		(at 53.34 101.6 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "8303172c-58a7-59eb-a79c-77b068df3f7c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 53.34 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 73.66 96.52 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "86bd23ad-ff05-5517-88b4-38002b93ed66")
+		(property "Reference" "R80"
+			(at 73.66 91.21 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "10k"
+			(at 73.66 101.83 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 73.66 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 73.66 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Serie ingresso IN (datasheet: > 7 kOhm)"
+			(at 73.66 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 10k 1%"
+			(at 73.66 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 73.66 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "15484738-c081-5e99-963c-4440268f9639")
+		)
+		(pin "2"
+			(uuid "1783f89b-e85e-5286-90c5-a322d3549acb")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R80") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 73.66 92.71)
+			(xy 73.66 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "24d0dc68-f625-56ee-bafe-514329f817ce")
+	)
+	(global_label "PUMP_A_CTL"
+		(shape passive)
+		(at 73.66 90.17 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "b2125af4-5cbe-5b2a-90b5-dd1feac85faf")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 73.66 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 73.66 100.33)
+			(xy 73.66 102.87)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7b7185ff-8960-58a4-af78-fadb51c4be0f")
+	)
+	(global_label "PUMP_A_IN"
+		(shape passive)
+		(at 73.66 102.87 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "f5084ae3-e052-5f7b-a198-d6d3690797ab")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 73.66 102.87 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 82.55 95.25 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "3c2b16e0-89c9-5b74-aba8-9ecf9ea8ea52")
+		(property "Reference" "C52"
+			(at 82.55 89.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100nF 50V"
+			(at 82.55 100.56 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+			(at 82.55 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 82.55 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "VS locale"
+			(at 82.55 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "MLCC 100nF 50V"
+			(at 82.55 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 82.55 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "e5f7d920-2070-58c6-8e1d-d62d4efcf93c")
+		)
+		(pin "2"
+			(uuid "2a98c99a-30bc-55b1-b560-b1e16f1aad4d")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C52") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 82.55 91.44)
+			(xy 82.55 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b0c1af91-5211-55fc-bbf1-30033c9dfec6")
+	)
+	(global_label "+12V_PUMP"
+		(shape passive)
+		(at 82.55 88.9 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "9c33804e-3db6-51fb-8241-db6937c8e8b9")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 82.55 88.9 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 82.55 99.06)
+			(xy 82.55 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c0614883-e2d6-56b0-87df-7608e8178c24")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 82.55 101.6 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "b061f891-9e5d-54c7-b883-4f2540f7921c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 82.55 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Power_Management:BTN8982TA")
+		(at 111.76 101.6 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "ce198e09-6906-55b1-aa2b-02fe6d85a3cc")
+		(property "Reference" "U9"
+			(at 111.76 89.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "BTN8982TA"
+			(at 111.76 113.26 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:TO-263-7_TabPin8"
+			(at 111.76 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 111.76 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Mezzo ponte pompa lato B (30 A, 10 mOhm); SR a GND = slew rate massimo"
+			(at 111.76 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "BTN8982TAAUMA1"
+			(at 111.76 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Infineon"
+			(at 111.76 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "3"
+			(uuid "69f80526-3461-5f43-acd4-13fc421589e6")
+		)
+		(pin "2"
+			(uuid "ae0cc6a8-6d1b-5b39-9ab8-a0e11df2afce")
+		)
+		(pin "6"
+			(uuid "8f4549de-d077-57f7-83dc-933888fd624c")
+		)
+		(pin "5"
+			(uuid "dab11bda-5669-516c-a8b5-81f738a8f990")
+		)
+		(pin "7"
+			(uuid "f291e5fb-6961-5a2f-b8e7-20ae26890fbb")
+		)
+		(pin "1"
+			(uuid "e0314a63-5cb1-51d2-a284-2961fe4a7fba")
+		)
+		(pin "4"
+			(uuid "673d99e8-40bc-5788-936d-21c5b813f61e")
+		)
+		(pin "8"
+			(uuid "b54942a0-82ae-522d-b057-5ec50633ebb5")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U9") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 104.14 96.52)
+			(xy 101.6 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "146a8d42-f9af-56a4-b289-5ff799382660")
+	)
+	(global_label "PUMP_INH"
+		(shape passive)
+		(at 101.6 96.52 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "f12a6ecd-a34d-5581-9f43-da60a33c22d8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 101.6 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 104.14 99.06)
+			(xy 101.6 99.06)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "221da98e-1409-54e2-b933-8a667c0f9d56")
+	)
+	(global_label "PUMP_B_IN"
+		(shape passive)
+		(at 101.6 99.06 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "2b7a612b-3df8-5ddd-bc22-13012aac4c46")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 101.6 99.06 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 104.14 104.14)
+			(xy 101.6 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b13278e4-f909-5f0e-88ba-99bc64409e25")
+	)
+	(global_label "PUMP_IS_B"
+		(shape passive)
+		(at 101.6 104.14 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "0a099950-a71f-5dd7-b871-92f70ed8ccf5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 101.6 104.14 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 104.14 106.68)
+			(xy 101.6 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d68f9c0e-0c60-585b-a7cb-47db5559fdda")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 101.6 106.68 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "9e0a34dc-5dcb-59cb-b5ce-4e2c26fff29b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 101.6 106.68 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 114.3 91.44)
+			(xy 114.3 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e7dea8f8-c057-52ff-8627-1129f257975a")
+	)
+	(global_label "+12V_PUMP"
+		(shape passive)
+		(at 114.3 88.9 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "b7473ebc-85d1-5cef-8d90-51a69090c6af")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 114.3 88.9 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 114.3 111.76)
+			(xy 114.3 114.3)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bbf25219-25ce-5829-94c1-bd571ee3a3f9")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 114.3 114.3 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "2a1a669d-6c44-59e5-9483-f847cd196dfa")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 114.3 114.3 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 119.38 101.6)
+			(xy 121.92 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "59bd91e0-242f-5c05-b1d3-78329300a66e")
+	)
+	(global_label "PUMP_OUT_B"
+		(shape passive)
+		(at 121.92 101.6 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "aa347458-9282-5603-9308-df14aa0e8611")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 121.92 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 119.38 101.6)
+			(xy 121.92 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "80ad8224-2184-5a16-9957-9349abea58b2")
+	)
+	(global_label "PUMP_OUT_B"
+		(shape passive)
+		(at 121.92 101.6 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "1e5f07ed-e7f8-51d8-9d15-c4b1057fae44")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 121.92 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 142.24 96.52 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a7c011a5-fd2a-5e59-8099-98363078e92b")
+		(property "Reference" "R82"
+			(at 142.24 91.21 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "10k"
+			(at 142.24 101.83 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 142.24 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 142.24 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Serie ingresso IN (datasheet: > 7 kOhm)"
+			(at 142.24 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 10k 1%"
+			(at 142.24 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 142.24 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "6cf448a6-2214-5fa5-9fff-d3360e99a31b")
+		)
+		(pin "2"
+			(uuid "99eef5c5-2675-596d-9079-087025b3bc06")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R82") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 142.24 92.71)
+			(xy 142.24 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "437e260a-c3d6-581b-9ac2-31ba5e98bfe0")
+	)
+	(global_label "PUMP_B_CTL"
+		(shape passive)
+		(at 142.24 90.17 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "a7b8abd2-e54c-589c-8f91-9307bbadd8ea")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 142.24 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 142.24 100.33)
+			(xy 142.24 102.87)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ce738b15-a462-5d81-bb96-b6a49fade9fa")
+	)
+	(global_label "PUMP_B_IN"
+		(shape passive)
+		(at 142.24 102.87 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "185a06f8-591d-5b34-8f8b-18fcc3ad6368")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 142.24 102.87 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 151.13 95.25 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "b553403a-a3a9-58c5-a39a-40b0d26c5c8c")
+		(property "Reference" "C53"
+			(at 151.13 89.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100nF 50V"
+			(at 151.13 100.56 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+			(at 151.13 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 151.13 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "VS locale"
+			(at 151.13 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "MLCC 100nF 50V"
+			(at 151.13 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 151.13 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "28b92eef-e08c-51e3-8600-a6f2cc13e0b7")
+		)
+		(pin "2"
+			(uuid "5384470e-9f14-5fb0-96ac-592afb655013")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C53") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 151.13 91.44)
+			(xy 151.13 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c046f08d-0890-54d9-a2cd-0dc8a190f670")
+	)
+	(global_label "+12V_PUMP"
+		(shape passive)
+		(at 151.13 88.9 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "ac5eab83-2fc6-593e-9d7c-3eaa579ea83f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 151.13 88.9 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 151.13 99.06)
+			(xy 151.13 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "89d86526-3ef6-5f1d-820b-a6a87fd69b54")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 151.13 101.6 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "1aebc95f-74ae-5575-bd9c-a3e9dab563d3")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 151.13 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 160.02 90.17 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a001d089-6142-5698-a28a-71fbc410e048")
+		(property "Reference" "R84"
+			(at 160.02 84.86 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "10k"
+			(at 160.02 95.48 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 160.02 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 160.02 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "INH alto = ponte attivo"
+			(at 160.02 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 10k 1%"
+			(at 160.02 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 160.02 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "c722969a-18f5-59c5-ac48-7537b5eb55db")
+		)
+		(pin "2"
+			(uuid "785fea04-3b4b-54fe-8f12-12a14c6f9d7c")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R84") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 160.02 86.36)
+			(xy 160.02 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f1a2d4f4-0d01-57ee-9323-5b09c7773e36")
+	)
+	(global_label "+3V3"
+		(shape passive)
+		(at 160.02 83.82 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "be17db96-f28e-5b4e-9647-6fadb49c5e8d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 160.02 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 160.02 93.98)
+			(xy 160.02 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b963476a-7361-5d50-a1df-8df6006dcf3b")
+	)
+	(global_label "PUMP_INH"
+		(shape passive)
+		(at 160.02 96.52 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "d30643b1-cbd6-5bc8-adac-860557c52c18")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 160.02 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 167.64 95.25 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "11b87581-cbd0-5b2a-ac0e-bcd76243d9e0")
+		(property "Reference" "R85"
+			(at 167.64 89.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "1.5k"
+			(at 167.64 100.56 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 167.64 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 167.64 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Sense IS lato A: 10 A -> ~0,8 V (peggior caso < 2,048 V)"
+			(at 167.64 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 1.5k 1%"
+			(at 167.64 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 167.64 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "8be85102-cc51-5860-a311-57bce689bfda")
+		)
+		(pin "2"
+			(uuid "3c6fe650-54a9-5732-80b3-5bb1347b3dbc")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R85") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 167.64 91.44)
+			(xy 167.64 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "11de656c-f115-5b5d-b728-4ed0a1106015")
+	)
+	(global_label "PUMP_IS_A"
+		(shape passive)
+		(at 167.64 88.9 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "1f2bc6a7-212f-5d36-ae79-76fd34b7ccc3")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 167.64 88.9 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 167.64 99.06)
+			(xy 167.64 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "33d04dcf-2d52-56a3-bb4b-48cea4635381")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 167.64 101.6 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "2c6aab3d-d368-5060-a2ed-4b2db872559b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 167.64 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 176.53 95.25 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "03615cea-e7aa-57c1-912f-05d2c493f27e")
+		(property "Reference" "C54"
+			(at 176.53 89.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "1nF"
+			(at 176.53 100.56 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 176.53 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 176.53 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" ""
+			(at 176.53 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "MLCC 1nF"
+			(at 176.53 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 176.53 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "d3b48483-1a7b-5d34-8878-1ba16ba324d1")
+		)
+		(pin "2"
+			(uuid "b7b0b725-b656-527f-96df-a8714c02150d")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C54") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 176.53 91.44)
+			(xy 176.53 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d62edddf-d7ba-50b7-8c0c-1c3648a88823")
+	)
+	(global_label "PUMP_IS_A"
+		(shape passive)
+		(at 176.53 88.9 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "49b5bba9-1481-53ff-8186-94f6a7840b17")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 176.53 88.9 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 176.53 99.06)
+			(xy 176.53 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3a86a251-77b1-5c28-868a-2fc0e39146bf")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 176.53 101.6 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "b3669217-d6a9-52fc-a0ca-90473d78ecb4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 176.53 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 186.69 95.25 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "b8614b76-c3aa-58f6-8c0e-fab53426d09d")
+		(property "Reference" "R88"
+			(at 186.69 89.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "1.5k"
+			(at 186.69 100.56 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 186.69 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 186.69 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Sense IS lato B: 10 A -> ~0,8 V (peggior caso < 2,048 V)"
+			(at 186.69 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 1.5k 1%"
+			(at 186.69 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 186.69 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "2feb865d-20db-5a59-8e73-dce8e6f7ab63")
+		)
+		(pin "2"
+			(uuid "c0414713-dd47-5343-8d6c-0b3427f940c1")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R88") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 186.69 91.44)
+			(xy 186.69 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a85bc502-febd-5219-b178-09fa32db9f69")
+	)
+	(global_label "PUMP_IS_B"
+		(shape passive)
+		(at 186.69 88.9 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "9f11eb25-fa24-59f2-b2b3-28c7cd4ebcce")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 186.69 88.9 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 186.69 99.06)
+			(xy 186.69 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9f78639f-45bb-5c02-b9fb-8adb8da5473d")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 186.69 101.6 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "de769a85-b1ef-5f3c-af80-8cebbc2630d8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 186.69 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 195.58 95.25 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c1e4008f-b344-5b60-b61a-883af2daadac")
+		(property "Reference" "C61"
+			(at 195.58 89.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "1nF"
+			(at 195.58 100.56 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 195.58 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 195.58 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" ""
+			(at 195.58 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "MLCC 1nF"
+			(at 195.58 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 195.58 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "54544a7e-414b-51cd-bdb2-ffa8c5e23858")
+		)
+		(pin "2"
+			(uuid "497573c0-a083-5e46-aeb9-779e0cae5915")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C61") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 195.58 91.44)
+			(xy 195.58 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9194562e-13f0-5ba2-b198-c90f3ea27ca1")
+	)
+	(global_label "PUMP_IS_B"
+		(shape passive)
+		(at 195.58 88.9 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "b2d99047-0b96-58c6-9b30-3e073b10a6d1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 195.58 88.9 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 195.58 99.06)
+			(xy 195.58 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4a130be4-f6ba-5215-8909-1bdf3ed41491")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 195.58 101.6 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "93939f1d-1e87-5651-a382-c37117a5644e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 195.58 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C_Polarized")
+		(at 205.74 95.25 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "b674ff41-8d34-5bc6-ae1c-d718042243d2")
+		(property "Reference" "C55"
+			(at 205.74 89.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "470uF 25V"
+			(at 205.74 100.56 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm"
+			(at 205.74 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 205.74 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Bulk ponte pompa (basso ESR)"
+			(at 205.74 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "EEU-FR1E471"
+			(at 205.74 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Panasonic"
+			(at 205.74 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "e2524212-5750-526e-b491-a7e504cf3778")
+		)
+		(pin "2"
+			(uuid "c572a537-45c2-5d1e-9607-7f84d8fbc431")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C55") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 205.74 91.44)
+			(xy 205.74 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bc56436b-59d6-52bd-abab-3252e30067ba")
+	)
+	(global_label "+12V_PUMP"
+		(shape passive)
+		(at 205.74 88.9 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "686f155d-806a-53cf-9cf0-05c0cf805e42")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 205.74 88.9 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 205.74 99.06)
+			(xy 205.74 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b2627ed3-3db9-57b1-8ed4-a9e978c86020")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 205.74 101.6 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "67b6f8e7-53db-55f4-ad66-75cc49d21c2a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 205.74 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C_Polarized")
+		(at 215.9 95.25 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "2fb2faca-4d60-53c8-9662-2db78bce3c24")
+		(property "Reference" "C56"
+			(at 215.9 89.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "470uF 25V"
+			(at 215.9 100.56 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm"
+			(at 215.9 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 215.9 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Bulk ponte pompa (basso ESR)"
+			(at 215.9 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "EEU-FR1E471"
+			(at 215.9 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Panasonic"
+			(at 215.9 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "49e580a7-e484-5463-a5cd-1364b68257b3")
+		)
+		(pin "2"
+			(uuid "75d81275-7aab-59c3-9825-abdc407b75a2")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C56") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 215.9 91.44)
+			(xy 215.9 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "62de7a1a-6963-5a0d-af13-34545cefd667")
+	)
+	(global_label "+12V_PUMP"
+		(shape passive)
+		(at 215.9 88.9 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "5cac71f3-78b1-5e04-8326-de62deaac851")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 215.9 88.9 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 215.9 99.06)
+			(xy 215.9 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "73d43be8-6c95-55da-a9e1-cedfc64d097c")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 215.9 101.6 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "8b0e926d-64da-592d-aa52-1b3810a4a1d6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 215.9 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 226.06 95.25 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "24fe4ebd-6507-5d8d-97ba-eb9825e41bdc")
+		(property "Reference" "C57"
+			(at 226.06 89.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "10uF 50V"
+			(at 226.06 100.56 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric"
+			(at 226.06 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 226.06 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Ceramico ponte pompa"
+			(at 226.06 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "GRM32ER71H106KA12L"
+			(at 226.06 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 226.06 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "75e6dcc0-c1ca-5789-ba86-f2ca8faac236")
+		)
+		(pin "2"
+			(uuid "edcccf71-7ada-5837-a1ef-42f544bdadb8")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C57") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 226.06 91.44)
+			(xy 226.06 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ad4eaf01-68ba-5c21-a2aa-850ec2db2d76")
+	)
+	(global_label "+12V_PUMP"
+		(shape passive)
+		(at 226.06 88.9 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "5970aa87-a7e4-5664-adf0-f68461a5d004")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 226.06 88.9 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 226.06 99.06)
+			(xy 226.06 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0d2f2530-7f49-5d7e-8035-b5e2ee2195f3")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 226.06 101.6 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "16a18763-6718-5e58-9e42-51b8d9f15e2a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 226.06 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x02")
+		(at 254 78.74 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c3456665-3803-51d2-b991-5b2ee5a43ff5")
+		(property "Reference" "J20"
+			(at 254 75.97 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "PUMP"
+			(at 254 84.05 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-2-5.08_1x02_P5.08mm_Horizontal"
+			(at 254 78.74 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 254 78.74 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Pompa Marco UP3-R"
+			(at 254 78.74 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "1711026"
+			(at 254 78.74 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Phoenix Contact"
+			(at 254 78.74 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "80fea0a1-7c78-5e00-ade0-0d57502c561a")
+		)
+		(pin "2"
+			(uuid "4c22152d-4161-5525-a10b-e0514d0bc398")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "J20") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 248.92 78.74)
+			(xy 246.38 78.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "99c8ff39-68a8-52bf-8db5-fcba0e3bfd82")
+	)
+	(global_label "PUMP_OUT_A"
+		(shape passive)
+		(at 246.38 78.74 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "211fd269-1f94-59b3-b553-b7f5653af499")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 246.38 78.74 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 248.92 81.28)
+			(xy 246.38 81.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "12e3f15b-c778-526c-b0f8-1a97ec82637e")
+	)
+	(global_label "PUMP_OUT_B"
+		(shape passive)
+		(at 246.38 81.28 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "15b5c5dd-0870-5cfb-98ca-d62ac7ab8e77")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 246.38 81.28 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Driver_Motor:DRV8871DDA")
+		(at 285.75 96.52 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "bede544d-4d7d-52e3-a114-b1b8b2d5dbbc")
+		(property "Reference" "U10"
+			(at 285.75 84.86 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "DRV8871DDA"
+			(at 285.75 108.18 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_SO:TI_SO-PowerPAD-8_ThermalVias"
+			(at 285.75 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 285.75 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Ponte H motore spirale 3,6 A picco"
+			(at 285.75 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "DRV8871DDAR"
+			(at 285.75 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 285.75 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "3"
+			(uuid "69a1db3e-db18-519e-889f-34aa09eb2961")
+		)
+		(pin "2"
+			(uuid "111fd9df-f448-53e6-8f96-edce8480602b")
+		)
+		(pin "5"
+			(uuid "d8acda57-dc10-5084-8daa-be563574b31e")
+		)
+		(pin "1"
+			(uuid "a032984d-791d-5ac1-96d0-423b13b6a3c3")
+		)
+		(pin "7"
+			(uuid "9322cebe-d62f-5774-b127-b9ee4f5eddfc")
+		)
+		(pin "9"
+			(uuid "c1f49bb3-f29e-5eae-93fa-30adea7f6867")
+		)
+		(pin "6"
+			(uuid "34b76ab3-5144-5bd7-bac8-0b527e5f6975")
+		)
+		(pin "8"
+			(uuid "b8d8363f-1ad7-5193-b360-8e59fb328c3c")
+		)
+		(pin "4"
+			(uuid "3606c97d-f3c0-5cfe-906a-fdebdc297837")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U10") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 275.59 91.44)
+			(xy 273.05 91.44)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8c8b9f0e-e26e-5c84-9d1b-7f43c87f5fb2")
+	)
+	(global_label "MOT_A_CTL"
+		(shape passive)
+		(at 273.05 91.44 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "e1c565c0-1a48-5541-b2b5-35429c1295a7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 273.05 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 275.59 93.98)
+			(xy 273.05 93.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "def36a81-f8e7-592e-b309-c6d9cd8e19e4")
+	)
+	(global_label "MOT_B_CTL"
+		(shape passive)
+		(at 273.05 93.98 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "b9e90154-fba9-5b08-9431-29f0d5ebadec")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 273.05 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 285.75 86.36)
+			(xy 285.75 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "00b9b77e-8d6e-5497-a705-d65e8b12b4a9")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 285.75 83.82 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "6160d2c3-4b1f-55a8-b428-6e9cc62cdb19")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 285.75 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 285.75 106.68)
+			(xy 285.75 109.22)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "731c833b-fb0e-5c7c-9113-d92ca6f80a89")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 285.75 109.22 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "a2ef8a6f-e358-58ef-bfaf-ddfc9f92f3d9")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 285.75 109.22 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 285.75 106.68)
+			(xy 285.75 109.22)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c686e622-9b49-5d92-8c98-ff86f2a5f117")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 285.75 109.22 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "878576f6-9cce-56b2-a730-ac07dde2bc15")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 285.75 109.22 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 285.75 106.68)
+			(xy 285.75 109.22)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "76e4c41b-5644-5764-afd1-c0be5757f45f")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 285.75 109.22 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "ed52da85-a47e-5e93-a9dc-cfe33f426fef")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 285.75 109.22 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 295.91 91.44)
+			(xy 298.45 91.44)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "177f5d5c-ec19-58c6-a4e9-b7c77bf87332")
+	)
+	(global_label "MOT_OUT_A"
+		(shape passive)
+		(at 298.45 91.44 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "53c35bf7-2160-507a-aecf-51cc018e044c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 298.45 91.44 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 295.91 93.98)
+			(xy 298.45 93.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f8d4446c-adfb-5749-89b7-871c2c68689f")
+	)
+	(global_label "MOT_OUT_B"
+		(shape passive)
+		(at 298.45 93.98 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "a0cfa943-f244-50cc-94ee-cb8c905ee7c5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 298.45 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 295.91 101.6)
+			(xy 298.45 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b498609d-90e1-54c7-8814-bfb1621f19f7")
+	)
+	(global_label "MOT_ILIM"
+		(shape passive)
+		(at 298.45 101.6 0)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "c97ba765-47e1-5e95-b1d0-952f6aebfae8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 298.45 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 317.5 93.98 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "63838ad9-cce6-5efa-98f6-caf51b4ac5ef")
+		(property "Reference" "R86"
+			(at 317.5 88.67 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "30k"
+			(at 317.5 99.29 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 317.5 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 317.5 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "ILIM: 64 kV / 30k = 2,1 A"
+			(at 317.5 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 30k 1%"
+			(at 317.5 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 317.5 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "2267659f-d5d4-5366-8fdf-b5e98f47c38d")
+		)
+		(pin "2"
+			(uuid "9e637143-9f47-5d2e-b754-75982ab49786")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R86") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 317.5 90.17)
+			(xy 317.5 87.63)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c1ed74cf-11aa-5c4f-a520-8c3de45192bb")
+	)
+	(global_label "MOT_ILIM"
+		(shape passive)
+		(at 317.5 87.63 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "9334224a-5c09-597d-a67b-c6f214a3bc27")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 317.5 87.63 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 317.5 97.79)
+			(xy 317.5 100.33)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6d4f80dc-d415-5c3e-822b-cfe6bb4f12c4")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 317.5 100.33 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "0705227b-b15b-51b2-8762-f1dc2a855c54")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 317.5 100.33 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 326.39 90.17 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a8e58c83-b184-58c1-bfcd-cebdde056d58")
+		(property "Reference" "C58"
+			(at 326.39 84.86 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100nF 50V"
+			(at 326.39 95.48 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+			(at 326.39 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 326.39 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" ""
+			(at 326.39 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "MLCC 100nF 50V"
+			(at 326.39 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 326.39 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "00d4a149-e368-55a4-ad64-1f2462485ec1")
+		)
+		(pin "2"
+			(uuid "6a262472-1bcd-5816-a849-d69d888c0a88")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C58") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 326.39 86.36)
+			(xy 326.39 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b09d0fc0-f81c-5095-a23a-424a0606322c")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 326.39 83.82 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "304605e8-2da8-5173-ba45-8bd621b1ddc8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 326.39 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 326.39 93.98)
+			(xy 326.39 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "80aeb7be-9eca-58ed-a6f6-ac3f946afd72")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 326.39 96.52 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "2b7e612c-3031-50a9-9fff-ea45cfc85a1e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 326.39 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 336.55 90.17 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "da1e9091-ae0e-5169-8c7b-be85c38aa6c8")
+		(property "Reference" "C59"
+			(at 336.55 84.86 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "22uF 25V"
+			(at 336.55 95.48 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric"
+			(at 336.55 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 336.55 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Bulk VM motore"
+			(at 336.55 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "GRM32ER71E226KE15L"
+			(at 336.55 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 336.55 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "4193f6a0-ef47-555c-9b95-15ab92b11438")
+		)
+		(pin "2"
+			(uuid "769d4482-d28d-5f38-9da0-622aac6a80a8")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C59") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 336.55 86.36)
+			(xy 336.55 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d4915c03-0bc9-51c2-920f-72aeab923220")
+	)
+	(global_label "+12V"
+		(shape passive)
+		(at 336.55 83.82 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "72c1bc3c-fb42-50ae-b211-c4c05f526d71")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 336.55 83.82 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 336.55 93.98)
+			(xy 336.55 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3d2d12df-7d41-5869-9c9e-18cbcd43eb69")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 336.55 96.52 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "28ed7d0a-d0f8-52b2-b3b1-071e4cac4787")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 336.55 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x02")
+		(at 363.22 78.74 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "8398e12d-b8f0-5af8-9aae-fe0dd981b704")
+		(property "Reference" "J21"
+			(at 363.22 75.97 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "MOTOR"
+			(at 363.22 84.05 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_PT-1,5-2-3.5-H_1x02_P3.50mm_Horizontal"
+			(at 363.22 78.74 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 363.22 78.74 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Motore spirale JGB37-520"
+			(at 363.22 78.74 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "1984617"
+			(at 363.22 78.74 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Phoenix Contact"
+			(at 363.22 78.74 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "880f102f-8f8d-5d27-8b64-65f3fae032a2")
+		)
+		(pin "2"
+			(uuid "1174e037-1836-5e78-929b-9659de10220b")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "J21") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 358.14 78.74)
+			(xy 355.6 78.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f4eac4c5-5637-5bc1-bfad-7974afc9b484")
+	)
+	(global_label "MOT_OUT_A"
+		(shape passive)
+		(at 355.6 78.74 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "94e02642-3f84-5d20-bbeb-95a98943d0e1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 355.6 78.74 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 358.14 81.28)
+			(xy 355.6 81.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6b6572e7-160d-54b4-883d-d820ece2af53")
+	)
+	(global_label "MOT_OUT_B"
+		(shape passive)
+		(at 355.6 81.28 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "c9f1d73f-a657-556e-817e-6c843bc759ad")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 355.6 81.28 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 372.11 95.25 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "77808f0b-3eac-5a8d-a30d-60fc80534a07")
+		(property "Reference" "R87"
+			(at 372.11 89.94 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "220R"
+			(at 372.11 100.56 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 372.11 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 372.11 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Serie segnale servo"
+			(at 372.11 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "0603 220R 1%"
+			(at 372.11 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Yageo/UniOhm (generic)"
+			(at 372.11 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "0186cc2b-97c9-530b-ab00-7379707828cd")
+		)
+		(pin "2"
+			(uuid "a489768d-f51b-5aef-be2f-f64a53a5a9f2")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R87") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 372.11 91.44)
+			(xy 372.11 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "01eae3e5-aab2-50f8-901b-78f6891a5580")
+	)
+	(global_label "SERVO_PWM"
+		(shape passive)
+		(at 372.11 88.9 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "fdaec5d5-6811-54f2-af38-5033c5adeba3")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 372.11 88.9 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 372.11 99.06)
+			(xy 372.11 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "469d08cf-07b4-5514-8b62-2ca1a077060a")
+	)
+	(global_label "SERVO_SIG"
+		(shape passive)
+		(at 372.11 101.6 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "7fdb51df-a3ac-5286-b0af-b88f719ad37d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 372.11 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x03")
+		(at 40.64 135.89 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "5fa7dd3a-27eb-5976-a23b-57e6e52ab075")
+		(property "Reference" "J22"
+			(at 40.64 130.58 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "SERVO"
+			(at 40.64 141.2 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical"
+			(at 40.64 135.89 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 40.64 135.89 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Servo MG90S (S, +5V, GND)"
+			(at 40.64 135.89 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "PZ254V-11-03P"
+			(at 40.64 135.89 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "XFCN"
+			(at 40.64 135.89 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "554568af-1530-5c8d-87fd-24dbc5ccba28")
+		)
+		(pin "2"
+			(uuid "c7957174-ae72-512a-9366-de94310a6e06")
+		)
+		(pin "3"
+			(uuid "f8838328-65fe-518c-b9a7-e4833803f1d0")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "J22") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 35.56 133.35)
+			(xy 33.02 133.35)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "adf6f715-0ac4-5228-b5bb-0e6df359e43d")
+	)
+	(global_label "SERVO_SIG"
+		(shape passive)
+		(at 33.02 133.35 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "df637b3d-1d2b-59bd-b5e3-ba69809e6beb")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 33.02 133.35 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 35.56 135.89)
+			(xy 33.02 135.89)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7a34db15-926f-5e45-aaf6-0e45d4e36471")
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 33.02 135.89 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "7c053ccd-018e-573b-91c0-9e98009b942c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 33.02 135.89 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 35.56 138.43)
+			(xy 33.02 138.43)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "87c6c9b5-a94d-5e3a-914d-e9ac5dc1ab91")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 33.02 138.43 180)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "14608b30-953a-5832-8aa1-ccc5464c7d4b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 33.02 138.43 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 50.8 143.51 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "9083e450-11eb-50a5-85dd-cc066cb78717")
+		(property "Reference" "C60"
+			(at 50.8 138.2 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100uF 10V"
+			(at 50.8 148.82 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric"
+			(at 50.8 143.51 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 50.8 143.51 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Description" "Riserva per i picchi del servo"
+			(at 50.8 143.51 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "MPN" "GRM32ER61A107ME20L"
+			(at 50.8 143.51 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Manufacturer" "Samsung/Murata (generic)"
+			(at 50.8 143.51 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1"
+			(uuid "bb8dc05c-246e-58ba-9dd4-0f2058f363f2")
+		)
+		(pin "2"
+			(uuid "45cd4787-00da-56ca-a43c-c5b2ce14fe1e")
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C60") (unit 1)))
+		)
+	)
+	(wire
+		(pts
+			(xy 50.8 139.7)
+			(xy 50.8 137.16)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0d77eb43-2ffb-5757-ad17-943694e61b4c")
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 50.8 137.16 90)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left)
+		)
+		(uuid "3c4f07c6-4678-5823-bb71-9ede07a5a34c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 50.8 137.16 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(wire
+		(pts
+			(xy 50.8 147.32)
+			(xy 50.8 149.86)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "65596e5f-9961-5aa4-a739-f3ab88c78c9a")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 50.8 149.86 270)
+		(fields_autoplaced yes)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right)
+		)
+		(uuid "546bf21c-5f06-5868-9f33-b55b1c65543e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 50.8 149.86 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+	)
+	(embedded_fonts no)
+)

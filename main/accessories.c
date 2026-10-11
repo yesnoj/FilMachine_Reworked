@@ -37,6 +37,10 @@
 #include "FilMachine.h"
 #include "ws_server.h"
 #include "mcp23017.h"
+#include "mcp3424.h"
+#if HAS_RAIL_MONITOR && defined(BOARD_JC4880P433)
+static void railMonitorInit(void);
+#endif
 #include "ds18b20.h"
 #include "mini_json.h"
 /* pca9685.h removed — pump now driven by DBH-12V H-bridge */
@@ -1081,6 +1085,9 @@ void init_Pins_and_Buses( void ) {
         initializeRelayPins();
         initializeMotorPins();
         initializeChemLevelPins();
+#if HAS_RAIL_MONITOR && defined(BOARD_JC4880P433)
+        railMonitorInit();      /* FilMachine Mainboard only; absent = no-op */
+#endif
         /* NOTE: the valve self-test used to run here and blocked boot for
          * ~3.75s before the display came up. It is now deferred: app_main posts
          * SELFTEST_VALVES to sysMan right after the splash loads, so the display
@@ -1820,6 +1827,13 @@ void initializeRelayPins(){
         mcp23017_digitalWrite(&mcp, i, 0);
         LV_LOG_USER("Relay pin %d init: %d", i, mcp23017_digitalRead(&mcp, i));
     }
+#if defined(INLET_RLY)
+    /* Mains water-inlet valve (A5): output, closed. Outside RELAY_NUMBER, so it
+     * is set up here explicitly — otherwise it stays an MCP input and the
+     * Maintenance fill could never open it. */
+    mcp23017_pinMode(&mcp, INLET_RLY, MCP23017_OUTPUT);
+    mcp23017_digitalWrite(&mcp, INLET_RLY, 0);
+#endif
 #if defined(PORTB_RELAY_COUNT) && !defined(HAS_CHEM_LEVEL_SENSORS)
     /* Port B: external relay board channels (pins 8-11, active HIGH) */
     for (uint8_t i = 0; i < PORTB_RELAY_COUNT; i++) {
@@ -1889,10 +1903,57 @@ bool debugMcpPresent(void) {
     return initErrors != INIT_ERROR_I2C_MCP;
 }
 
+#if HAS_RAIL_MONITOR && defined(BOARD_JC4880P433)
+/* ── Rail / pump-current monitor (MCP3424 on the FilMachine Mainboard) ──
+ * Probed once at boot. Absent (separate modules) -> railMonitorPresent() false
+ * and nothing else ever touches address 0x68. Present -> the diagnostics page
+ * calls railMonitorPoll() from its refresh timer: each call collects the
+ * conversion started by the previous call and starts the next channel, so no
+ * call ever waits for the ADC. Nothing runs outside the diagnostics page. */
+static mcp3424_t s_railAdc;
+static bool      s_railPresent = false;
+static bool      s_railStarted = false;
+static float     s_railVin[4]  = { -1.0f, -1.0f, -1.0f, -1.0f };
+
+static void railMonitorInit(void) {
+    s_railPresent = (mcp3424_init(&s_railAdc, g_i2c_bus_handle, RAIL_MON_I2C_ADDR) == ESP_OK);
+}
+
+bool railMonitorPresent(void) { return s_railPresent; }
+
+void railMonitorPoll(void) {
+    if (!s_railPresent) return;
+    uint8_t next = 0;
+    if (s_railStarted) {
+        float v; bool ready = false;
+        if (mcp3424_read(&s_railAdc, &v, &ready) == ESP_OK && !ready) return;  /* try again next tick */
+        if (ready) s_railVin[s_railAdc.channel] = v;
+        next = (uint8_t)((s_railAdc.channel + 1) & 3);
+    }
+    s_railStarted = (mcp3424_start(&s_railAdc, next) == ESP_OK);
+}
+
+/* Latest values; negative = not available yet. */
+float railMonitor12V(void) { return s_railVin[0] < 0 ? -1.0f : s_railVin[0] * RAIL_12V_DIVIDER; }
+float railMonitor5V(void)  { return s_railVin[1] < 0 ? -1.0f : s_railVin[1] * RAIL_5V_DIVIDER; }
+/* Pump supply current: only the high side that is conducting reports current,
+ * so take the larger of the two half-bridges. Averaged over the PWM period by
+ * the 10k/100nF filter. Approximate until calibrated on the bench. */
+float railMonitorPumpA(void) {
+    if (s_railVin[2] < 0 || s_railVin[3] < 0) return -1.0f;
+    float vis = s_railVin[2] > s_railVin[3] ? s_railVin[2] : s_railVin[3];
+    float a = (vis / RAIL_PUMP_IS_OHM - RAIL_PUMP_IS_OFFSET_A) * RAIL_PUMP_KILIS;
+    return a < 0.0f ? 0.0f : a;
+}
+#endif
+
 void closeAllValves(void) {
     for (uint8_t i = 0; i < RELAY_NUMBER; i++) {
         mcp23017_digitalWrite(&mcp, i, 0);
     }
+#if defined(INLET_RLY)
+    mcp23017_digitalWrite(&mcp, INLET_RLY, 0);
+#endif
 }
 
 /* Boot self-test: turn on then off each Port-A channel of the #6318 in sequence
@@ -1958,7 +2019,7 @@ void sensorsSelfTestInit(void) {}
 #endif
 
 /* ── Machine (water-bath) fill ──
- * Maintenance action: open the WB valve and meter the incoming water with the
+ * Maintenance action: open the mains inlet valve (INLET_RLY) and meter the incoming water with the
  * flow sensor, stopping once FILL_TARGET_ML has been dispensed. The MAX level
  * switch is a safety backstop (stop early if it trips), plus a safety timeout
  * and a manual Stop. The water inlet is already pressurized, so NO pump is
@@ -1968,10 +2029,15 @@ void sensorsSelfTestInit(void) {}
  * This is standalone and does NOT touch the process state machine, so it must
  * not go through sendValueToRelay (that dereferences the active process node,
  * which is NULL outside a running process). */
-#define MACHINE_FILL_TIMEOUT_MS   600000    /* 10 min safety cap (5 L bath)      */
+#define MACHINE_FILL_TIMEOUT_MS   1200000   /* 20 min safety cap (12.8 L bath, v6) */
 #define FILL_FLOW_GRACE_MS        4000      /* window to see flow start          */
 #define FILL_FLOW_MIN_PULSES      3         /* pulses that confirm real flow     */
-#define FILL_MIN_CONFIRM_MS       20000     /* low float must wet within this after flow starts */
+#define FILL_MAX_VOLUME_ML        16000     /* hard cap: the v6 bath holds 12.8 L up to MAX; more than
+                                               * this means the MAX float failed -> stop (FILL_TIMEOUT) */
+#define FILL_FLOW_STALL_MS        10000     /* flow stopped this long with the valve open -> FILL_NOFLOW */
+#define FILL_MIN_CONFIRM_ML       12000     /* low float must wet within this volume: on an empty
+                                               * v6 bath the MIN float wets after ~9.3 L, which a
+                                               * 3-5 L/min tap needs 2-3 minutes for */
 
 static volatile int      s_fillState    = FILL_IDLE;
 static volatile bool     s_fillStopReq  = false;
@@ -2029,6 +2095,14 @@ bool machineFillManual(void) {
 }
 
 #if defined(BOARD_JC4880P433)
+/* Valve that lets mains water into the bath. v6: a dedicated inlet valve on A5
+ * (the WB valve connects the bath pick-up to the pump, not to the mains). */
+#if defined(INLET_RLY)
+#define FILL_VALVE  INLET_RLY
+#else
+#define FILL_VALVE  WB_RLY
+#endif
+
 static void machine_fill_task(void *arg) {
     (void)arg;
     s_fillStopReq  = false;
@@ -2081,14 +2155,15 @@ static void machine_fill_task(void *arg) {
         return;
     }
 
-    ESP_LOGI(TAG, "Machine fill: opening WB valve, target %d ml", FILL_TARGET_ML);
+    ESP_LOGI(TAG, "Machine fill: opening inlet valve (A%d), target %d ml", FILL_VALVE, FILL_TARGET_ML);
 
-    mcp23017_digitalWrite(&mcp, WB_RLY, 1);          /* open water-bath valve   */
+    mcp23017_digitalWrite(&mcp, FILL_VALVE, 1);      /* open the mains inlet    */
 
     const uint32_t ppl        = sensors_flow_pulses_per_litre();   /* ~450     */
     const uint32_t startTotal = sensors_flow_get_total_pulses();
     uint32_t       prevTotal  = startTotal;
     bool           flowConfirmed = false;
+    int            lastFlowMs  = 0;    /* last tick that saw at least one pulse */
     bool           minConfirmed  = false;
     int            elapsed     = 0;
     int            minWetMs    = -1;   /* time the MIN float first wet (MIN→MAX calibration) */
@@ -2104,6 +2179,7 @@ static void machine_fill_task(void *arg) {
         /* Instantaneous flow rate over the 200 ms tick (L/min). */
         uint32_t stepPulses = total - prevTotal;
         prevTotal = total;
+        if (stepPulses > 0) lastFlowMs = elapsed;
         s_fillFlowLpm = ((float)stepPulses / ppl) * (60.0f / 0.2f);
 
         bool maxWet = FILL_IGNORE_MAX ? false : sensors_water_level_max_detected();
@@ -2125,18 +2201,23 @@ static void machine_fill_task(void *arg) {
          * the valve; if not, the inlet has no water — abort. */
         if (!flowConfirmed && dPulses >= FILL_FLOW_MIN_PULSES) flowConfirmed = true;
         if (!flowConfirmed && elapsed >= FILL_FLOW_GRACE_MS)   { s_fillState = FILL_NOFLOW; break; }
+        /* Tap closed / mains pressure lost mid-fill: don't leave the valve open. */
+        if (flowConfirmed && elapsed - lastFlowMs >= FILL_FLOW_STALL_MS) { s_fillState = FILL_NOFLOW; break; }
+        /* Belt and braces against a failed MAX float: never let more than the
+         * bath could possibly hold go in (the rest would leave by the overflow). */
+        if (s_fillVolumeMl >= FILL_MAX_VOLUME_ML)              { s_fillState = FILL_TIMEOUT; break; }
 
         /* Level cross-check: flow is going in, so the low float must wet within a
          * short window — otherwise water flows but the bath isn't filling. */
         if (!minConfirmed && sensors_water_level_detected())          minConfirmed = true;
-        if (!minConfirmed && elapsed >= FILL_MIN_CONFIRM_MS)          { s_fillState = FILL_NOLEVEL; break; }
+        if (!minConfirmed && s_fillVolumeMl >= FILL_MIN_CONFIRM_ML)  { s_fillState = FILL_NOLEVEL; break; }
 
         vTaskDelay(pdMS_TO_TICKS(200));
         elapsed += 200;
     }
 
     s_fillFlowLpm = 0.0f;
-    mcp23017_digitalWrite(&mcp, WB_RLY, 0);          /* close valve             */
+    mcp23017_digitalWrite(&mcp, FILL_VALVE, 0);      /* close the mains inlet   */
     ESP_LOGI(TAG, "Machine fill ended (state=%d, %lu ml)", s_fillState, (unsigned long)s_fillVolumeMl);
     vTaskDelete(NULL);
 }

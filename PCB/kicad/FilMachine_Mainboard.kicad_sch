@@ -1,0 +1,142 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "a927e185-7e3f-5b80-b685-b3395dc9b500")
+	(paper "A4")
+	(title_block
+		(title "FilMachine Mainboard v1")
+		(date "2026-10-10")
+		(rev "1.0")
+		(company "FilMachine")
+		(comment 1 "Mainboard per JC4880P433 (ESP32-P4) — generata da design.py")
+	)
+	(lib_symbols)
+	(sheet
+		(at 25 40)
+		(size 90 35)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "a0aa4cc1-c89c-5c94-b349-8dbaaf854bef")
+		(property "Sheetname" "Alimentazione"
+			(at 25 39.3 0)
+			(effects (font (size 1.27 1.27)) (justify left bottom))
+		)
+		(property "Sheetfile" "power.kicad_sch"
+			(at 25 75.6 0)
+			(effects (font (size 1.27 1.27)) (justify left top))
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500" (page "2")))
+		)
+	)
+	(sheet
+		(at 145 40)
+		(size 90 35)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "2522be7e-f67a-5b73-841a-43d0f5023856")
+		(property "Sheetname" "Display, I/O e sensori"
+			(at 145 39.3 0)
+			(effects (font (size 1.27 1.27)) (justify left bottom))
+		)
+		(property "Sheetfile" "io.kicad_sch"
+			(at 145 75.6 0)
+			(effects (font (size 1.27 1.27)) (justify left top))
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500" (page "3")))
+		)
+	)
+	(sheet
+		(at 25 100)
+		(size 90 35)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "7dd4feca-e5a8-53b9-aa46-76c693766476")
+		(property "Sheetname" "Valvole e riscaldatori"
+			(at 25 99.3 0)
+			(effects (font (size 1.27 1.27)) (justify left bottom))
+		)
+		(property "Sheetfile" "outputs.kicad_sch"
+			(at 25 135.6 0)
+			(effects (font (size 1.27 1.27)) (justify left top))
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500" (page "4")))
+		)
+	)
+	(sheet
+		(at 145 100)
+		(size 90 35)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "d349440b-0928-522a-a8f3-b3b172eb680a")
+		(property "Sheetname" "Pompa, motore, servo"
+			(at 145 99.3 0)
+			(effects (font (size 1.27 1.27)) (justify left bottom))
+		)
+		(property "Sheetfile" "drives.kicad_sch"
+			(at 145 135.6 0)
+			(effects (font (size 1.27 1.27)) (justify left top))
+		)
+		(instances
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500" (page "5")))
+		)
+	)
+	(text "Collegamenti per etichette globali: ogni pin ha il nome della sua net.\nSorgente: design.py (rigenerare schema e PCB da li').\nDisplay JC4880P433 collegato con flat 2x13 su J4 (pin 1 = pin 1).\nIl display si alimenta dal flat JP1 (pin 2/4) tramite F7 + D8; J3 = uscita 5 V di servizio."
+		(exclude_from_sim no)
+		(at 25 160 0)
+		(effects
+			(font (size 2 2))
+			(justify left top)
+		)
+		(uuid "fd491e9d-2117-5735-a51e-be3c816e4dd8")
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)
