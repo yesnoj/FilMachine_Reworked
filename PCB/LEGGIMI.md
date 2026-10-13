@@ -1,79 +1,120 @@
-# FilMachine Mainboard v1.0 — ordine PCBWay
+# FilMachine Mainboard v1.1 — ordine JLCPCB (PCB + assemblaggio)
 
-Scheda madre per la FilMachine v6. Il display JC4880P433 (ESP32-P4) resta separato e si collega con il
-flat 2×13 su **J4**, che porta anche la sua **alimentazione** (5 V su JP1 pin 2/4, tramite PTC F7 e diodo D8).
-La scheda arriva **completa e pronta**: tutti i componenti montati e i fusibili già inseriti.
+Scheda madre per la FilMachine v6. Il display JC4880P433 (ESP32-P4) resta separato e si collega con il flat 2×13
+su **J5**, che porta anche la sua **alimentazione** (5 V su JP1 pin 2/4, tramite PTC F7 e diodo D8) e da cui la scheda
+prende i **3,3 V** per la sua logica (MCP23017, ADS1115, porte AND, pull-up): così l'I2C del display non resta mai
+bloccato da un chip spento, nemmeno con la scheda senza 12 V e il display alimentato da USB.
+La scheda arriva **completa e pronta**: tutti i componenti montati (SMD e THT), fusibili SMD già saldati.
+
+**Tutti i componenti sono presi dal catalogo JLCPCB/LCSC** (codice C… in ogni riga della distinta, verificato in
+magazzino il 13/10/2026): 30 codici *Basic* e 24 *Extended*; costo componenti ≈ 20 $ a scheda più i costi fissi degli
+Extended. I connettori sono i più economici del catalogo: morsetti a vite WJ500V (5,08 mm) e DB301V (3,5 mm), JST-XH,
+header 2,54.
 
 ## File del pacchetto
 
 | File | A cosa serve |
 |---|---|
-| `FilMachine_Mainboard_Gerber.zip` | Gerber RS-274X + forature Excellon (PTH e NPTH separate), da caricare nel preventivo PCB |
-| `FilMachine_Mainboard_BOM.xlsx` | Distinta nel formato PCBWay (designator, quantità, produttore, codice, package, SMD/THT, note) |
-| `FilMachine_Mainboard_CPL.csv` | File di piazzamento (centroidi), solo lato TOP |
+| `FilMachine_Mainboard_Gerber.zip` | Gerber (estensioni Protel) + forature Excellon, da caricare in *Order now* |
+| `FilMachine_Mainboard_BOM.csv` | Distinta nel formato JLCPCB: `Comment, Designator, Footprint, LCSC Part #` (una riga per codice; i DNP non ci sono) |
+| `FilMachine_Mainboard_CPL.csv` | Piazzamento nel formato JLCPCB: `Designator, Mid X, Mid Y, Layer, Rotation` (solo lato Top; rotazioni già convertite alla convenzione JLCPCB) |
+| `FilMachine_Mainboard_BOM_leggibile.xlsx` | La stessa distinta, leggibile (quantità, produttore, codice costruttore, descrizione) |
 | `FilMachine_Mainboard_Schema.pdf` | Schema elettrico completo (4 fogli) |
 | `FilMachine_Mainboard_Assembly_Top.pdf` | Disegno di montaggio lato componenti |
 | `FilMachine_Mainboard.step` | Modello 3D della scheda montata, per il cabinet |
-| `FilMachine_Mainboard_3D.png`, `_top.png`, `_bottom.png` | Render della scheda montata |
-| `../kicad/` | Progetto KiCad 9 (schema su 4 fogli, PCB, file di progetto) |
-| `../sorgenti/` | Script Python che generano schema e PCB da `design.py` (`make.sh` rifà tutto) |
+| `FilMachine_Mainboard_top.png`, `_bottom.png`, `_3D.png` | Render della scheda |
+| `../kicad/` | Progetto KiCad 9 (schema su 4 fogli, PCB, libreria `FM.pretty` con i footprint dei connettori LCSC) |
+| `../sorgenti/` | Script Python che generano schema e PCB da `design.py` (`make.sh` rifà tutto, `export.py` produce questi file) |
 
-## Parametri da impostare nel preventivo PCB
+## Ordine PCB (jlcpcb.com → Order now → carica il Gerber zip)
 
 | Voce | Valore |
 |---|---|
-| Strati | **4** |
-| Dimensioni | **110 × 90 mm** |
-| Spessore | 1,6 mm, FR-4 TG150 o superiore |
-| Rame esterno / interno | **2 oz / 1 oz** (correnti fino a 16 A sui riscaldatori) |
-| Pista / spazio minimi | 0,2 / 0,2 mm (8/8 mil) |
-| Foro minimo | 0,3 mm (via 0,6/0,3) |
-| Finitura | HASL senza piombo o ENIG |
-| Solder mask | verde (o a piacere), serigrafia bianca |
-| Stackup | L1 segnali + potenza (70 µm) · L2 GND (35 µm) · L3 +12 V (35 µm) · L4 segnali + potenza (70 µm) — già dichiarato nel file job dei Gerber |
-| Via | tenting standard; nessuna via nei pad (non serve via-in-pad) |
+| Layers | **4** |
+| Dimensions | 110 × 90 mm (le legge dal Gerber) |
+| PCB Thickness | 1,6 mm |
+| **Outer Copper Weight** | **2 oz** (correnti fino a 10 A sui riscaldatori) |
+| Inner Copper Weight | **1 oz** (consigliato: il piano di massa interno fa da ritorno per riscaldatori e pompa insieme al rame esterno; con 0,5 oz la scheda funziona comunque, perché i ritorni principali hanno rame dedicato sugli strati esterni) |
+| Impedance Control | No |
+| Surface Finish | LeadFree HASL (va bene anche ENIG) |
+| Via Covering | Tented |
+| Min via hole size / diameter | 0,3 mm / (0,6 mm) — è il default |
+| Mark on PCB | **Specify a location**: sul lato bottom c'è il testo `JLCJLCJLCJLC`, che JLCPCB sostituisce con il numero d'ordine |
+| Stackup | il file `FilMachine_Mainboard-job.gbrjob` nello zip dichiara L1 segnali+potenza · L2 GND · L3 +12 V · L4 segnali+potenza |
 
-## Assemblaggio (PCBWay Assembly, turnkey)
+## Assemblaggio (PCB Assembly → Standard; solo lato **Top**)
 
-- **Solo lato TOP.** Tutti i componenti sono su un lato.
-- Componenti SMD e THT (morsetti, portafusibili, elettrolitici, USB-C, box header, JST-XH): il file BOM indica il tipo.
-- **Non montare (DNP):** J5 (header ESP32-C6), R6, R7 (pull-up I2C: ci sono già sul display). La BOM li riporta con quantità 0.
-- **Fusibili:** sono le ultime due voci della BOM (Littelfuse 0297015.WXNV × 3, 0297007.WXNV × 1). PCBWay li fornisce
-  e li **inserisce** nei portafusibili F1–F4 dopo la saldatura (tipo *Hand insert*, nessuna saldatura).
-  Nel campo note dell'ordine scrivere anche: *"Please insert the 4 mini blade fuses into holders F1–F4 (F1–F3 15 A, F4 7.5 A)."*
-- Passivi generici (R 1 %, C X7R/X5R): sono ammessi equivalenti con tensione ≥ di quella indicata.
+1. Carica `FilMachine_Mainboard_BOM.csv` e `FilMachine_Mainboard_CPL.csv`.
+2. Nella pagina dei componenti tutte le righe devono risultare abbinate per codice LCSC (nessuna riga «no part
+   selected»). Se un codice risultasse momentaneamente esaurito, in fondo c'è la tabella delle alternative.
+3. **Anteprima di piazzamento**: JLCPCB mostra ogni componente sulle piazzole. Controlla (e correggi col tasto *rotate*,
+   se serve) l'orientamento di questi, confrontandolo con il disegno `Assembly_Top.pdf` / la serigrafia:
+   - integrati U1–U10 (pin 1 = puntino/smusso sul lato del segno in serigrafia);
+   - diodi: D1, D2 (TVS, banda = catodo verso il +12 V), D6, D7, D8, D10–D19, D21–D28, D41, D42 (banda sul lato della
+     riga in serigrafia); LED D3, D4, D5, D31–D38, D43, D44;
+   - transistor Q1–Q8 (SOT-23), Q9/Q10 (TO-252: linguetta in alto), U8/U9 (TO-263: linguetta verso sinistra, pin verso destra);
+   - elettrolitici C1, C55, C56: piazzola **quadrata = +**;
+   - morsetti a vite J1–J3, J15–J26, J28, J29: l'apertura per i fili guarda **verso il bordo** della scheda;
+   - box header J5: la tacca della chiave verso il bordo alto (il flat esce verso il bordo).
+   JLCPCB comunque verifica le polarità col suo controllo DFM prima di produrre; se chiede conferma, rispondere
+   facendo riferimento alla serigrafia.
+4. **Non montati (DNP)**: J6 (header ESP32-C6), R6, R7 (pull-up I2C: ci sono già sul display). Non compaiono né nella
+   BOM né nel CPL, quindi JLCPCB non li chiede.
 
-## Cosa collegare ai morsetti
+## Cosa collegare
 
-| Morsetto | Cosa | Note |
+| Connettore | Cosa | Note |
 |---|---|---|
-| J1 `12V HEAT IN` | LRS-350-12, coppia +V/−V n. 1 | **− sopra, + sotto**; solo riscaldatori, fino a 16,6 A |
-| J2 `12V MAIN IN` | LRS-350-12, coppia +V/−V n. 2 | **− sopra, + sotto** (stesso ordine di J1); pompa, valvole, motore, logica |
-| J18 / J19 `HEATER 1/2` | riscaldatori 100 W | non polarizzati |
-| J20 `PUMP` | Marco UP3-R | il verso si inverte da firmware (*Inverti pompa*) |
-| J21 `MOTOR` | motore spirale JGB37-520 | |
-| J14…J17 | 8 elettrovalvole 12 V (2 poli ciascuna) | C1, C2, C3, WB, scarico, ingresso, riserva A6, A7 — non polarizzate |
-| J6 `BATH LEVEL` | XKC-Y21 MIN, MAX del bagno | JST-XH 4 poli: 5 V, MIN, MAX, GND |
-| J7…J9 `CHEM 1/2/3` | XKC-Y21 MIN, MAX di ogni chimica | JST-XH 4 poli |
-| J10 `FLOW` · J11 `HALL` | YF-S201 · KY-003 | JST-XH 3 poli: 5 V, segnale, GND |
-| J12 / J13 `TEMP 1/2` | DS18B20 bagno / chimica | JST-XH 3 poli: 3,3 V, DQ, GND |
-| J22 `SERVO` | MG90S della taglierina | header 2,54: segnale, +5 V, GND |
-| J4 `DISPLAY JP1` | flat 2×13 verso JP1 del JC4880P433 | pin 1 = pin 1; porta segnali **e** alimentazione del display |
-| J3 `USB-C 5V OUT` | **uscita** 5 V per un eventuale accessorio (cavo USB-C) | solo alimentazione, corrente USB standard (500–900 mA); il 5 V si accende solo quando dall'altra parte c'è un dispositivo da alimentare; non serve al display |
+| J1 `12V IN HEATER 1` | LRS-350-12, coppia +V/−V n. 1 | **− sopra, + sotto** (serigrafia accanto al morsetto); solo riscaldatore 1 (fusibile F1 15 A) |
+| J2 `12V IN HEATER 2` | LRS-350-12, coppia +V/−V n. 2 | **− sopra, + sotto**; solo riscaldatore 2 (F2 15 A) |
+| J3 `12V IN MAIN` | LRS-350-12, coppia +V/−V n. 3 | **− sopra, + sotto**; pompa (F3 15 A), valvole/motore/logica/uscite (F4 8 A) |
+| J23 / J24 `HEATER 1/2` | riscaldatori 100 W | + a sinistra, − a destra (indifferente per una resistenza) |
+| J25 `PUMP` | Marco UP3-R | A sopra, B sotto; il verso si inverte da firmware (*Inverti pompa*) |
+| J26 `MOTOR` | motore spirale JGB37-520 | |
+| J15 … J20 | elettrovalvole 12 V: C1, C2, C3, WB, WASTE, INLET | un morsetto a 2 poli per valvola, + a sinistra (nome in serigrafia) |
+| J21 / J22 `SPARE 1/2` (`SPARE OUT 1/2` nello schema) | uscite 12 V commutate di riserva (MCP23017 A6 / A7) | come le valvole: carico fino a 2 A, con diodo di ricircolo e LED; spente finché il firmware non le usa |
+| J30 `GPIO SPARE` | header 2,54: A6, A7, 3V3, 5V, GND | gli stessi A6/A7 dell'MCP23017 come GPIO **a 3,3 V** (tramite 1 kΩ in serie e diodo di clamp a 3,3 V: un segnale a 5 V non fa danni, ma non collegare uscite a 12 V), più 3,3 V (dal display, pochi mA), 5 V di servizio (PTC F5, condiviso con J29) e GND. Attenzione: A6/A7 sono gli stessi pin delle uscite SPARE 1/2, quindi un livello alto su J30 (come uscita o come ingresso) accende anche la corrispondente SPARE |
+| J28 `12V OUT` · J29 `5V OUT` | uscite di servizio per accessori (ventola, striscia LED, modulo relè…) | + a sinistra; PTC autoripristinanti: 12 V max 2 A (F8), 5 V max 1 A (F5) |
+| J7 `BATH LEVEL` | XKC-Y21 MIN, MAX del bagno | JST-XH 4 poli: 5 V, MIN, MAX, GND |
+| J8 … J10 `CHEM 1/2/3` | XKC-Y21 MIN, MAX di ogni chimica | JST-XH 4 poli |
+| J11 `FLOW` · J12 `HALL` | YF-S201 · KY-003 | JST-XH 3 poli: 5 V, segnale, GND |
+| J13 / J14 `TEMP 1/2` | DS18B20 bagno / chimica | JST-XH 3 poli: 3,3 V, DQ, GND |
+| J27 `SERVO` | MG90S della taglierina | header 2,54: segnale, +5 V, GND |
+| J5 `DISPLAY JP1` | flat 2×13 verso JP1 del JC4880P433 | pin 1 = pin 1 (piazzola quadrata); porta segnali, alimentazione del display (pin 2/4) e i 3,3 V verso la scheda (pin 1/3, `VCC3.3`); il pin 18 (`ESP_3V3`) è lasciato scollegato sulla scheda |
+
+Le tre coppie +V/−V dell'LRS-350-12 vanno ciascuna sul proprio morsetto: così i 10 A di ogni riscaldatore e quelli
+della pompa non passano mai dallo stesso morsetto (ogni morsetto resta sotto 8–10 A, metà della portata del WJ500V).
 
 ## Verifiche fatte
 
-- ERC dello schema: 0 violazioni; netlist dello schema identica pin per pin a `design.py` (223 componenti, 125 net); PCB identico pin per pin.
-- DRC della scheda (regole 0,2/0,2 mm): 0 errori, 0 collegamenti mancanti; restano solo avvisi di serigrafia
-  (testi che si toccano), che non riguardano la produzione.
-- Revisione indipendente: mappa di JP1 e dell'MCP23017 confrontata con il firmware, pinout di ogni integrato
-  e transistor confrontati con i datasheet, stati all'accensione, valori di buck, ADC e limiti di corrente.
-  Seconda revisione indipendente sulle modifiche di questa versione (display alimentato da JP1, USB-C di uscita,
-  fusibili inseriti, firmware): tutti i casi della USB-C ricontrollati, esito «pronta da ordinare».
+- Schema: ERC 0 violazioni; netlist dello schema identica pin per pin a `design.py`; PCB identico pin per pin.
+- PCB: DRC con le regole JLCPCB 4 strati (0,2/0,2 mm, foro 0,3): 0 errori, 0 collegamenti mancanti; restano solo
+  avvisi di serigrafia (testi che si toccano), che non riguardano la produzione.
+- Distinta: ogni riga ha un codice LCSC esistente, in magazzino e abbinabile (controllo fatto sul catalogo live di
+  JLCPCB); BOM e CPL con gli stessi designator (nessun DNP in nessuno dei due).
+- Revisione dei datasheet LCSC per i footprint dei connettori e dei fusibili (misure prese dai disegni dei costruttori).
+- Revisione indipendente del progetto (pinout, stati all'accensione, correnti, alimentazione del display).
+- Firmware: uno solo per moduli separati e Mainboard (vedi `NOTE_firmware.md`).
+- **Non è stata provata dal vero.** Ordinare il lotto minimo (5 pezzi, 2 assemblati bastano) e alla prima accensione
+  seguire l'ordine: solo J3 senza carichi (LED verdi 12 V e 5 V) → flat del display (LED 3,3 V) → valvole → motore →
+  pompa → J1/J2 e riscaldatori. Sulla scheda non c'è niente da saldare, ponticellare o impostare.
+- **Prima di infilare il flat**, col display acceso da USB, misurare sul suo JP1 (pin 1 = quello segnato): pin 1 e 3
+  = 3,3 V, pin 2 e 4 = 5 V, pin 5, 6 e 16 = 0 V (GND). È la mappa usata dalla scheda (quella del README del firmware);
+  un tester toglie ogni dubbio su un eventuale cambio di revisione del display.
+- Senza display collegato il LED verde «3V3» può accendersi debolmente (perdita attraverso i partitori dell'ADC):
+  non è un guasto.
 - Da misurare alla prima accensione, col display collegato e il suo cavo USB-C staccato: la tensione sul VBUS della
   USB-C del display (dice se l'IP5306 lascia passare il 5 V all'indietro; è innocuo, ma è bene saperlo).
-- Firmware: uno solo per moduli separati e Mainboard (vedi `NOTE_firmware.md`).
-- **Non è stata provata dal vero.** Nessuno può garantire una scheda nuova senza averla accesa: ordinare il lotto
-  minimo (5 pezzi) e alla prima accensione seguire l'ordine: solo J2 senza carichi (LED verdi 12 V / 5 V / 3,3 V)
-  → flat del display → valvole → motore → pompa → J1 e riscaldatori. Sulla scheda non c'è niente da saldare o
-  ponticellare.
+
+## Alternative se un codice risultasse esaurito
+
+Tutte verificate sul catalogo live JLCPCB (13/10/2026). Stesso passo e stesse forature; per i morsetti l'ingombro del
+corpo può differire di qualche decimo di millimetro, senza conseguenze sul piazzamento.
+
+| Designator | Codice usato | Alternativa |
+|---|---|---|
+| J5 box header 2×13 angolato | C7430326 (CONNFLY DS1013-26RSiB-B-0) | C21167 (BOOMELE 2×13 right angle) |
+| J1–J3, J23–J25 WJ500V-5.08-2P | C8465 (Kangnex, 18 A) | C474906 (Cixi Kefa KF127-5.08-2P, 15 A) |
+| J15–J22, J26, J28, J29 DB301V-3.5-2P | C695629 (DORABO, 7 A) | C474892 (Cixi Kefa KF350-3.5-2P, 10 A) |
+| Q9/Q10 AOD4184A | C99124 (Alpha & Omega) | C5370959 (TECH PUBLIC AOD4184A, stesso package TO-252) |
+| F1–F3 / F4 fusibili 2410 | C136393 / C136390 (JDT JFC2410) | qualsiasi fusibile SMD 2410 da 15 A / 8 A con lo stesso footprint |

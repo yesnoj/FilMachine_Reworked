@@ -35,6 +35,10 @@ for fmt in ("135", "120"):
         car = sum(vol(g, m) for g in G for m in (loader.carrier(STROKE), loader.clamp(1, STROKE), loader.clamp(-1, STROKE)))
         print(f"{fmt} raggio {r:4.1f} (inclinazione {phi:+5.1f} gradi): interferenze spirale {sp:.4f}, parti fisse+coperchio {fx:.4f}, portalama alzato {car:.4f} mm3; "
               f"gioco slitte/flange {min(dist(g, R[i]) for g in G[1:] for i in (0, 2)):.2f}, slitte/coperchio {min(dist(g, lid) for g in G):.2f} mm")
+for fmt in ("135",):
+    G, phi = loader.place_guide(fmt, 42.0)
+    print(f"a spirale piena lo spigolo del cappuccio passa a {min(dist(g, fixed['tetto']) for g in G[1:3]):.2f} mm dal tetto del ponte; "
+          f"a spirale vuota la bocca del cappuccio sta a {min(dist(g, f) for g in loader.place_guide(fmt, EMPTY_R)[0][1:3] for f in (fixed['bloccoDX'], fixed['bloccoSX'])):.2f} mm dalle soglie")
 print(f"punto di tangenza della suola sulla spirale: s = {math.sqrt(math.hypot(XB, HC - ZB) ** 2 - (EMPTY_R - loader.N_SOLE) ** 2):.1f} mm (vuota), "
       f"{math.sqrt(math.hypot(XB, HC - ZB) ** 2 - (42 - loader.N_SOLE) ** 2):.1f} mm (piena); la slitta e' lunga {S_TIP:.0f} mm")
 for fmt in ("135", "120"):

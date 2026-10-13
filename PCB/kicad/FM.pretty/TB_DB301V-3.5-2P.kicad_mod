@@ -1,0 +1,202 @@
+(footprint "TB_DB301V-3.5-2P"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(descr "DORABO DB301V-3.5-2P screw terminal, 2 pins, pitch 3.5 mm, 7 A, LCSC C695629; wire entry +y")
+	(property "Reference" "REF**"
+		(at 0 -1 0)
+		(layer "F.SilkS")
+		(uuid "afc3012c-b5a6-486d-b3c5-ec0e8f319424")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "TB_DB301V-3.5-2P"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(uuid "00a66f31-9bfc-4107-ac71-a709aac13c35")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "9e6a1308-6fc3-4439-9e64-7e8231c19611")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "40c691df-f057-48fb-8b5d-e79326289e15")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr through_hole)
+	(fp_line
+		(start -3.61 -3.56)
+		(end 3.61 -3.56)
+		(stroke
+			(width 0.12)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "57f7457c-4b92-4fda-94fd-3c9f65c20aac")
+	)
+	(fp_line
+		(start -3.61 3.56)
+		(end -3.61 -3.56)
+		(stroke
+			(width 0.12)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "970f481c-d065-4eef-9a66-dce964fddedf")
+	)
+	(fp_line
+		(start -3.5 3.45)
+		(end 3.5 3.45)
+		(stroke
+			(width 0.3)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "f61f9dc0-d62f-42aa-89a8-bc9089f1af37")
+	)
+	(fp_line
+		(start 3.61 -3.56)
+		(end 3.61 3.56)
+		(stroke
+			(width 0.12)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "f0985c96-808c-4ddd-a2d8-45a8c284bfdc")
+	)
+	(fp_line
+		(start 3.61 3.56)
+		(end -3.61 3.56)
+		(stroke
+			(width 0.12)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "069ac6ed-3180-4dc3-9496-59222a567a49")
+	)
+	(fp_line
+		(start -3.75 -3.7)
+		(end 3.75 -3.7)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "70a2db08-11d1-4880-9710-fec6b444f305")
+	)
+	(fp_line
+		(start -3.75 3.7)
+		(end -3.75 -3.7)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "741f858b-c214-48cd-87c4-fd2940d8aa7c")
+	)
+	(fp_line
+		(start 3.75 -3.7)
+		(end 3.75 3.7)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "83d4710b-b442-4abf-999b-e7fc7487aa75")
+	)
+	(fp_line
+		(start 3.75 3.7)
+		(end -3.75 3.7)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "e6686d1f-ea1c-490c-a2de-56c6c48416d0")
+	)
+	(fp_line
+		(start -3.5 -3.45)
+		(end 3.5 -3.45)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "8a92470a-30a5-43ed-a25b-075b650b169d")
+	)
+	(fp_line
+		(start -3.5 3.45)
+		(end -3.5 -3.45)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "8979a4f0-0970-4693-b2b3-814c6555d065")
+	)
+	(fp_line
+		(start 3.5 -3.45)
+		(end 3.5 3.45)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "70828119-8b9e-4d74-a966-16f74e92d09c")
+	)
+	(fp_line
+		(start 3.5 3.45)
+		(end -3.5 3.45)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "4872b5c8-6f50-4820-b3e9-d8c7642d37fc")
+	)
+	(pad "1" thru_hole rect
+		(at -1.75 -0.05)
+		(size 2.1 2.1)
+		(drill 1.1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(thermal_bridge_angle 45)
+		(uuid "a719f131-67fc-49a0-8603-ba40ace97851")
+	)
+	(pad "2" thru_hole circle
+		(at 1.75 -0.05)
+		(size 2.1 2.1)
+		(drill 1.1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "99a9ee62-9e79-48a5-8593-0dad180d48e2")
+	)
+	(embedded_fonts no)
+)

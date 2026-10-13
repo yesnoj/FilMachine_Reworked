@@ -2221,7 +2221,7 @@ void    debugScreenCreate(void);            /* build + show the diagnostics scre
 void    debugMcpWrite(uint8_t pin, bool on);/* direct MCP output write (heaters etc.) */
 bool    debugMcpPresent(void);              /* MCP23017 detected on the I2C bus */
 #if HAS_RAIL_MONITOR && defined(BOARD_JC4880P433)
-bool    railMonitorPresent(void);           /* MCP3424 (Mainboard) answered at boot */
+bool    railMonitorPresent(void);           /* ADS1115 (Mainboard) answered at boot */
 void    railMonitorPoll(void);              /* non-blocking: collect one channel, start the next */
 float   railMonitor12V(void);               /* volts, <0 = n/a */
 float   railMonitor5V(void);

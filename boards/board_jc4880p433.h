@@ -109,8 +109,16 @@
  * Drop-in replacement for discrete relay board — same chip,
  * same address, same register layout.
  * ═══════════════════════════════════════════════ */
-/* Port A — solenoid valves + heater relay via Adafruit #6318 MOSFET channels (3.6A max)
- * Pins 0-4: solenoid valves, Pins 5-6: free, Pin 7: heater relay trigger */
+/* Port A — solenoid valves via Adafruit #6318 MOSFET channels (3.6A max)
+ * Pins 0-4: solenoid valves, Pin 5: mains inlet valve (v6), Pins 6-7: FREE.
+ * On the FilMachine Mainboard A6/A7 drive the "SPARE OUT 1/2" low-side 12 V
+ * outputs (J21/J22, gate pull-down 1 M) and are also brought out on the
+ * "GPIO SPARE" header J30 (A6, A7, 3V3, 5V, GND) through 1 k + Schottky clamp
+ * to 3.3 V. As outputs: J30 follows the pin and the matching SPARE OUT switches.
+ * As inputs: a high level on the pin (external signal, or the MCP internal
+ * pull-up) also turns the matching SPARE OUT on, so read them with the pull-up
+ * OFF and a push-pull 3.3 V source, or accept that SPARE OUT follows the input.
+ * The firmware itself never touches A6/A7 (they stay inputs after reset). */
 #define RELAY_NUMBER                5       /* Valve channels on MCP23017 port A (pins 0-4) */
 #define C1_RLY                      0
 #define C2_RLY                      1
@@ -118,11 +126,11 @@
 #define WB_RLY                      3
 #define WASTE_RLY                   4
 /* Port A pin 5 — mains water-inlet valve (machine v6). Same pin on the Adafruit
- * #6318 (MOSFET channel 6) and on the FilMachine Mainboard (J16 pins 3-4).
+ * #6318 (MOSFET channel 6) and on the FilMachine Mainboard (terminal J20 "VALVE INLET").
  * Deliberately outside RELAY_NUMBER: process code never touches it, only the
  * Maintenance "fill machine" task opens it, and closeAllValves() closes it. */
 #define INLET_RLY                   5
-#define HEATER_RLY                  7       /* Port A pin 7 — drives external relay for heater */
+#define HEATER_RLY                  7       /* Port A pin 7 — legacy single-heater relay; unused with HAS_DUAL_HEATER (A7 is free) */
 
 /* Port B — external relay board (10A per channel, for high-power loads)
  * 4-channel relay board connected to MCP23017 port B pins 8-11.
@@ -156,22 +164,23 @@
 #define HEATER1_PIN                 14      /* B6 — heater MOSFET 1 */
 #define HEATER2_PIN                 15      /* B7 — heater MOSFET 2 */
 
-/* ── Power-rail / pump-current monitoring — MCP3424 on the FilMachine Mainboard ──
- * No JP1 GPIO is left for the P4's own ADC, so the Mainboard carries an MCP3424
- * (18-bit I2C ADC) on the shared I2C bus at 0x68. It is probed at boot: with the
- * separate modules (Adafruit #6318 + DBH-12V) nothing answers at 0x68 and the
- * diagnostics "Power rails" panel simply shows "n/a" — no other effect.
- *   CH1: +12V through 100k/15k  -> V12 = Vin * 115/15
- *   CH2: +5V  through 20k/10k   -> V5  = Vin * 3
- *   CH3/CH4: BTN8982 IS of pump half-bridge A/B into 1.5k (via 10k + 100nF):
- *            I ≈ (Vin/1.5k - 0.17 mA) * 19500  (to be calibrated on the bench) */
+/* ── Power-rail / pump-current monitoring — ADS1115 on the FilMachine Mainboard ──
+ * No JP1 GPIO is left for the P4's own ADC, so the Mainboard carries an ADS1115
+ * (16-bit I2C ADC, U4, ADDR = GND) on the shared I2C bus at 0x48. It is probed at
+ * boot: with the separate modules (Adafruit #6318 + DBH-12V) nothing answers at
+ * 0x48 and the diagnostics "Power rails" panel simply shows "n/a" — no other effect.
+ *   AIN0: +12V through 100k/15k  -> V12 = Vin * 115/15
+ *   AIN1: +5V  through 20k/10k   -> V5  = Vin * 3
+ *   AIN2/AIN3: BTN8962TA IS of pump half-bridge A/B into 1.5k (then 10k + 100nF):
+ *            I = (Vin/1.5k - I_IS(offset)) * kILIS, kILIS = 10000, offset ~0.2 mA
+ *            (BTN8962TA datasheet typ.; calibrate on the bench if needed) */
 #define HAS_RAIL_MONITOR            1
-#define RAIL_MON_I2C_ADDR           0x68
+#define RAIL_MON_I2C_ADDR           0x48
 #define RAIL_12V_DIVIDER            (115.0f / 15.0f)
 #define RAIL_5V_DIVIDER             3.0f
 #define RAIL_PUMP_IS_OHM            1500.0f
-#define RAIL_PUMP_IS_OFFSET_A       0.00017f
-#define RAIL_PUMP_KILIS             19500.0f
+#define RAIL_PUMP_IS_OFFSET_A       0.0002f
+#define RAIL_PUMP_KILIS             10000.0f
 
 /* Pump direction is now handled by DBH-12V H-bridge channel B.
  * These constants are kept as logical direction markers so that

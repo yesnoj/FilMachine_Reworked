@@ -20,8 +20,8 @@ B10_biella                       x1  solido ok  STL chiuso (   708 triangoli)   
 B11_manovella                    x1  solido ok  STL chiuso (  1124 triangoli)     0.1 cm3     7.2 x   12.6 x   3.0
 B12_culla_universale             x1  solido ok  STL chiuso (  3628 triangoli)    39.4 cm3    32.0 x   72.0 x  35.5
 B13_barra_guida                  x1  solido ok  STL chiuso (  2028 triangoli)     6.4 cm3     8.0 x  104.0 x   8.0
-B14_slitta_DX                    x1  solido ok  STL chiuso (   706 triangoli)     5.0 cm3    30.0 x   29.5 x  73.0
-B15_slitta_SX                    x1  solido ok  STL chiuso (   706 triangoli)     5.0 cm3    30.0 x   29.5 x  73.0
+B14_slitta_DX                    x1  solido ok  STL chiuso (   648 triangoli)     5.3 cm3    29.1 x   29.8 x  73.0
+B15_slitta_SX                    x1  solido ok  STL chiuso (   648 triangoli)     5.3 cm3    29.1 x   29.8 x  73.0
 B16_trascinatore                 x1  solido ok  STL chiuso (  2206 triangoli)     5.6 cm3    31.6 x   31.4 x  13.9
 B17_cartuccia_cuscinetti         x1  solido ok  STL chiuso (  3372 triangoli)     8.3 cm3    42.0 x   42.0 x  24.5
 B18_distanziale_paraolio         x1  solido ok  STL chiuso (   672 triangoli)     0.4 cm3    15.8 x   15.8 x   3.7
@@ -70,7 +70,7 @@ D15_morsetto_scheda              x10 solido ok  STL chiuso (   376 triangoli)   
 D16_zoccolo_alimentatore         x1  solido ok  STL chiuso (   768 triangoli)    30.7 cm3   145.0 x   35.0 x  24.0
 D17_staffa_alimentatore          x1  solido ok  STL chiuso (   752 triangoli)    24.8 cm3   145.0 x   36.7 x  23.0
 D19_supporto_altoparlante        x1  solido ok  STL chiuso (  1008 triangoli)     5.7 cm3    48.0 x   48.0 x   8.0
-totale: 71 pezzi diversi, 123 da stampare, 2712 cm3 di materiale pieno
+totale: 71 pezzi diversi, 123 da stampare, 2713 cm3 di materiale pieno
 
 == overhang.py ==
 == sbalzi oltre 45 gradi (mm2): totale | di cui orizzontali (ponti o tetti) | quote ==
@@ -78,10 +78,10 @@ totale: 71 pezzi diversi, 123 da stampare, 2712 cm3 di materiale pieno
    B17_cartuccia_cuscinetti             1113 |     1113 | z 14.0..23.7
    C05_testata_telaio_DX                 778 |      763 | z 15.6..194.4
    C05_testata_telaio_SX                 778 |      763 | z 15.6..194.4
+   B14_slitta_DX                         659 |      646 | z 0.5..11.2
+   B15_slitta_SX                         659 |      646 | z 0.5..11.2
    D09_cruscotto_display                 550 |        0 | z 0.3..44.5
    C12_ghiera_codolo                     433 |      123 | z 0.3..27.9
-   B14_slitta_DX                         410 |      384 | z 0.5..11.7
-   B15_slitta_SX                         410 |      384 | z 0.5..11.7
    C11_corpo_innesto                     377 |       48 | z 1.2..13.3
    C07_collettore                        374 |      374 | z 16.6..16.6
    D17_staffa_alimentatore               275 |      258 | z 3.0..13.7
@@ -179,12 +179,13 @@ a riposo la punta sta a z=79.0: 2.0 mm sotto il piano della fessura (z=81.0); a 
    120: ai bordi della pellicola il filo arriva a z=85.26, 0.66 mm sopra il cielo della fessura (z=84.6)
    forza disponibile sul portalama a meta' corsa con un MG90S (1.8 kg*cm): circa 28 N
 == guida a due slitte ==
-135 raggio 19.5 (inclinazione -11.0 gradi): interferenze spirale 0.0000, parti fisse+coperchio 0.0000, portalama alzato 0.0000 mm3; gioco slitte/flange 0.00, slitte/coperchio 8.92 mm
+135 raggio 19.5 (inclinazione -11.0 gradi): interferenze spirale 0.0000, parti fisse+coperchio 0.0000, portalama alzato 0.0000 mm3; gioco slitte/flange 0.00, slitte/coperchio 7.88 mm
 135 raggio 30.0 (inclinazione  -0.1 gradi): interferenze spirale 0.0000, parti fisse+coperchio 0.0000, portalama alzato 0.0000 mm3; gioco slitte/flange 0.20, slitte/coperchio 6.02 mm
 135 raggio 42.0 (inclinazione +13.8 gradi): interferenze spirale 0.0000, parti fisse+coperchio 0.0000, portalama alzato 0.0000 mm3; gioco slitte/flange 0.20, slitte/coperchio 2.15 mm
-120 raggio 19.5 (inclinazione -11.0 gradi): interferenze spirale 0.0000, parti fisse+coperchio 0.0000, portalama alzato 0.0000 mm3; gioco slitte/flange 0.00, slitte/coperchio 8.92 mm
+120 raggio 19.5 (inclinazione -11.0 gradi): interferenze spirale 0.0000, parti fisse+coperchio 0.0000, portalama alzato 0.0000 mm3; gioco slitte/flange 0.00, slitte/coperchio 7.88 mm
 120 raggio 30.0 (inclinazione  -0.1 gradi): interferenze spirale 0.0000, parti fisse+coperchio 0.0000, portalama alzato 0.0000 mm3; gioco slitte/flange 0.20, slitte/coperchio 6.02 mm
 120 raggio 42.0 (inclinazione +13.8 gradi): interferenze spirale 0.0000, parti fisse+coperchio 0.0000, portalama alzato 0.0000 mm3; gioco slitte/flange 0.20, slitte/coperchio 2.15 mm
+a spirale piena lo spigolo del cappuccio passa a 0.87 mm dal tetto del ponte; a spirale vuota la bocca del cappuccio sta a 4.58 mm dalle soglie
 punto di tangenza della suola sulla spirale: s = 56.7 mm (vuota), 45.7 mm (piena); la slitta e' lunga 66 mm
 135: guida ribaltata all'indietro: libera fino a 90 gradi (poi appoggia sul ponte)
 120: guida ribaltata all'indietro: libera fino a 90 gradi (poi appoggia sul ponte)
@@ -355,4 +356,4 @@ Dibond: 0.64 m2 in tutto; plexiglass: 0.13 m2
 == ASSIEME UNICO ==
 217 corpi (119 stampati, 98 sagome di componenti acquistati); non validi: nessuno; coppie in interferenza: nessuna
 ingombro: X -5..470, Y -5..510, Z -12..306 mm
-ASSIEME_FilMachine.step: 47.2 MB
+ASSIEME_FilMachine.step: 47.3 MB

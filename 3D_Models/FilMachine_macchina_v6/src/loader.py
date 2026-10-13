@@ -189,53 +189,83 @@ def roll120():
     return r.union(ycyl(CAS_X, rz, 12.6, 31.0, 32.25)).union(ycyl(CAS_X, rz, 12.6, -32.25, -31.0))
 
 # ---------------------------------------------------------------- guida a due slitte su barra quadra (tipo Lab-Box)
-N_SOLE = N_F - H_EDGE                      # quota della suola nel riferimento della slitta
-N_TOP = 12.0                               # faccia superiore della slitta (piano di stampa)
-HUB_Y0 = 18.0                             # mozzo, all'esterno della pellicola (coordinate della slitta a 135)
+N_SOLE = N_F - H_EDGE                      # fondo della suola nel riferimento della slitta
+N_TOP = 12.0                               # cima della parete alla punta
+T_SOLE = 1.4                               # spessore della suola: lamina sottile; solo la rotaia lungo la gola si alza
+RAIL_W = 0.4                               # rotaia oltre il fianco inferiore della gola
+Y_RAIL = 12.2                              # bordo interno della suola tra le flange (la rotaia sta a 12,5): il centro resta libero
+T_FIN = 1.2                                # spessore della parete sopra il labbro
 FMT_SHIFT = {"135": 0.0, "120": (reel_width("120") - reel_width("135")) / 2}     # spostamento laterale di ogni slitta
 BAR_HALF = COL_Y1                          # la barra arriva alle selle nelle colonne del ponte
-# Slitte tipo Lab-Box (v6.2). Sezione di ogni stazione (slitta destra, y verso l'esterno, n verso l'alto, pellicola a n = N_F):
-# s, y esterno, y del vertice della gola (bordo pellicola), y labbro superiore, y labbro inferiore, angolo inferiore,
-# angolo superiore, n suola, n sommita' della parete, svasatura dell'aletta, y del bordo interno del piano.
-# Come nella Lab-Box l'invito e' all'inizio, dal lato della barra: un cappuccio a C con il labbro che copre il bordo
-# della pellicola fin dall'imbocco (s = -7), con la bocca larga e alta; lungo la spalla (s = -7 .. 13) la gola si
-# stringe e si abbassa fino al canale sottile, che dentro le flange (s >= 13) sta dentro le punte delle costole e
-# incurva la pellicola. Le punte sono smussate verso l'interno: insieme le due slitte fanno una V.
-W_OUT, N_TOPW = 21.5, 22.0
-_YT = reel_width("135") / 2 - RIB_H - TIP_CLEAR             # punta delle costole meno il gioco (15.1 con costole da 2.5)
-_G0 = (_YT, _YT - 0.6, _YT - 1.8, _YT - 2.2, 45.0, 70.0)            # labbro 1.2 mm sopra il bordo, a 70 gradi
-_ST = [(-7.0, 23.0, 20.2, 16.4, 16.4, -20.0, 35.0, N_SOLE, 15.0, 1.0, 1.0),     # bocca del cappuccio: labbro 3,8 mm sopra il bordo, alto 2,7 mm
-       (-2.0, 22.2, 19.0, 16.0, 16.0, -10.0, 32.0, N_SOLE, 18.0, 1.5, 1.0),
-       ( 6.0, 20.8, 17.4, 15.0, 15.2,  10.0, 35.0, N_SOLE, N_TOPW, 1.5, 1.0),
-       ( 9.0, 19.5, 16.0, 13.8, 14.7,  25.0, 40.0, N_SOLE, N_TOPW, 1.5, 2.0),           # fine della spalla
-       (13.0, _G0[0], _G0[1], _G0[1] - 1.6, _G0[3], 37.7, 60.0, N_SOLE, 23.5, 0.0, 8.0),
-       (17.0,) + _G0 + (N_SOLE, 22.5, 0.0, 11.0)] + \
-      [(s,) + _G0 + (N_SOLE, nt, 0.0, _G0[3] - 0.4) for s, nt in ((30.0, 19.5), (45.0, 16.0), (58.0, 12.5), (S_TIP - 3.0, N_TOP))] + \
-      [(S_TIP,) + _G0 + (N_SOLE + 1.4, N_TOP, 0.0, _G0[3] - 0.4)]
+S_MOUTH, S_BULGE, S_SH = -7.0, -5.0, 13.0  # imbocco; punto piu' largo del cappuccio; fine della spalla (da qui sta tra le flange)
+_YT = reel_width("135") / 2 - RIB_H - TIP_CLEAR             # 15.1: faccia esterna tra le flange (punte delle costole meno il gioco)
+_YV = _YT - WALL_TIP                                        # 14.5: vertice della gola tra le flange
+YV_MOUTH = 20.2                                             # vertice della gola all'imbocco: pellicola 135 piatta con 2,7 mm per lato
+Y_SEAM = 1.0                                                # bordo interno della suola: a 135 le due slitte sono a 2 mm
+# Slitta tipo Lab-Box (v6.3). Sezione (slitta destra, y verso l'esterno, n verso l'alto, pellicola a n = N_F), dall'esterno:
+# suola piana sottile, parete sottile, labbro a C che sporge sopra il bordo della pellicola. Il labbro e il fondo della
+# gola formano una V aperta all'imbocco (invito), che lungo la spalla si chiude nella gola stretta del canale (vertice a
+# 14,5, fianchi a 70 e 45 gradi) che tiene il bordo della pellicola incurvata; sotto la gola la suola si alza in una
+# rotaia. Il bordo interno della suola parte dalla giunzione con l'altra slitta e, dopo la spalla, rientra con uno
+# smusso dritto fino alla rotaia: le due slitte insieme fanno la coda di pesce della Lab-Box.
+# stazioni: s, cima della parete (n_t), bordo interno della suola (y_f)
+# (all'imbocco la parete e' bassa: a spirale piena la slitta si alza di 14 gradi e lo spigolo del cappuccio passa a 1 mm dal tetto del ponte)
+_STATIONS = [(-7.0, 14.0, Y_SEAM), (-5.0, 16.5, Y_SEAM), (-2.0, 19.5, Y_SEAM), (2.0, 22.0, Y_SEAM), (6.0, 23.2, Y_SEAM),
+             (10.0, 23.5, 1.86), (13.0, 23.5, 4.45), (17.0, 22.5, 7.9), (22.0, 21.3, Y_RAIL), (30.0, 19.5, Y_RAIL),
+             (45.0, 16.0, Y_RAIL), (58.0, 12.5, Y_RAIL), (62.5, 12.1, Y_RAIL), (S_TIP, N_TOP, Y_RAIL)]
 TIP_V = 3.0                                # smusso a V della punta: lungo s, sul lato interno
-HUB_Y1 = 30.5                              # mozzo piu' largo: la vite zigrinata sta fuori dall'aletta
-HUB_YC = (HUB_Y0 + HUB_Y1) / 2
-HUB_ZT = N_F                               # faccia superiore del mozzo, al piano della pellicola: ci appoggia la vite zigrinata M3 x 6
+HUB_Y1 = 30.8                              # il mozzo arriva fin qui (a 120 resta 1 mm dalla sella del ponte): l'orecchia della vite sta fuori dal cappuccio
+HUB_YC = 26.3                              # asse della vite zigrinata (testa Ø7 libera dalla parete del cappuccio)
+HUB_ZB = 5.6                               # fondo del mozzo sotto l'asse della barra
+HUB_ZT = 12.0                              # faccia superiore dell'orecchia: ci appoggia la testa della vite zigrinata M3 x 10
 DIMPLE_Y = (HUB_YC, HUB_YC + FMT_SHIFT["120"])    # fossette nella barra: posizione 135 e 120
 
-def _slide_section(st):
-    s, yo, yv, yiu, yil, al, au, nb, nt, fl, yf = st
-    mu = N_F + (yv - yiu) * math.tan(math.radians(au))
-    ml = N_F + (yv - yil) * math.tan(math.radians(al))
-    return [(s, yo, nb), (s, yo + fl, nt), (s, yiu + fl, nt), (s, yiu, mu), (s, yv, N_F), (s, yil, ml), (s, yf, ml), (s, yf, nb)]
+def _blend(s):
+    """1 all'imbocco, 0 dalla fine della spalla in poi, raccordo a coseno in mezzo."""
+    if s <= S_BULGE: return 1.0
+    if s >= S_SH: return 0.0
+    return (1.0 + math.cos(math.pi * (s - S_BULGE) / (S_SH - S_BULGE))) / 2
+
+def _interp(s, col):
+    pts = [(st[0], st[col]) for st in _STATIONS]
+    for (s0, v0), (s1, v1) in zip(pts[:-1], pts[1:]):
+        if s0 <= s <= s1: return v0 + (v1 - v0) * (s - s0) / (s1 - s0)
+    return pts[-1][1]
+
+def slide_section(s):
+    """Sezione della slitta destra alla stazione s: lista di (y, n), stessa topologia a ogni stazione (12 vertici)."""
+    f = _blend(s)
+    y_v = _YV + (YV_MOUTH - _YV) * f - (0.6 * (S_BULGE - s) / (S_BULGE - S_MOUTH) if s < S_BULGE else 0.0)   # il cappuccio si arrotonda
+    t_o = WALL_TIP + 0.6 * f                                     # parete oltre il vertice: 1,2 all'imbocco, 0,6 tra le flange
+    d_lip = 1.2 + 2.6 * f                                        # sporgenza del labbro sopra il bordo
+    w_lf = 1.6 + 2.2 * f                                         # larghezza del fianco inferiore della gola
+    al = 45.0 - 55.0 * f                                         # fianco inferiore: -10 (imbocco) .. 45 (canale): la rotaia non si annulla mai
+    au = (70.0 if s < 58.0 else 65.0) - 35.0 * f                 # fianco superiore: 35 .. 70 (un po' piu' aperto alla punta)
+    t_lip = (1.0 if s < 58.0 else 0.7) + 0.4 * f
+    n_t, y_f = _interp(s, 1), _interp(s, 2)
+    y_o, y_i, y_li, y_il = y_v + t_o, y_v + t_o - T_FIN, y_v - d_lip, y_v - w_lf
+    mu = N_F + d_lip * math.tan(math.radians(au)); ml = N_F + w_lf * math.tan(math.radians(al))
+    n_lt, n_fl, y_r = mu + t_lip, N_SOLE + T_SOLE, y_il - RAIL_W
+    return [(y_o, N_SOLE), (y_o, n_t), (y_i, n_t), (y_i, n_lt), (y_li, n_lt), (y_li, mu), (y_v, N_F), (y_il, ml),
+            (y_r, ml), (y_r, n_fl), (y_f, n_fl), (y_f, N_SOLE)]
 
 def slide_local():
     """Slitta destra (+Y) nel suo riferimento: x = s lungo la suola, y = laterale (posizione 135), z = n.
-    v6.2, come lo scivolo della Lab-Box: all'imbocco un cappuccio a C che copre il bordo della pellicola (invito largo e
-    alto), poi la spalla che stringe la gola fino al canale sottile che entra tra le flange; punta smussata verso l'interno.
-    Si blocca sulla barra con una vite zigrinata M3 x 6 che entra in una delle due fossette (135 stretta, 120 larga)."""
-    body = cq.Workplane("XY").add(loft_planar([_slide_section(st) for st in _ST]))
-    hub = box(-HUB / 2, HUB / 2, _G0[3], HUB_Y1, -HUB / 2, HUB_ZT)                    # mozzo allungato fino alla faccia interna: si stampa su quella faccia
-    g = body.union(hub)
-    g = g.cut(box(-BAR / 2 - 0.15, BAR / 2 + 0.15, min(_G0[3], HUB_Y0) - 0.01, HUB_Y1 + 0.01, -BAR / 2 - 0.15, BAR / 2 + 0.15))   # foro quadro, per tutto il mozzo
+    v6.3, rifatta sullo stile della Lab-Box: cappuccio con il bordo a C all'imbocco (dal lato della barra), spalla che
+    stringe la gola, linguetta sottile con il labbro che entra tra le flange, punta smussata verso l'interno (a V).
+    Mozzo a blocco sotto la suola, dalla giunzione fino all'orecchia esterna in cui sta la vite zigrinata M3 x 10 che
+    entra in una delle due fossette della barra (135 stretta, 120 larga)."""
+    wires = [cq.Wire.makePolygon([cq.Vector(s, y, n) for y, n in slide_section(s)], close=True) for s, _, _ in _STATIONS]
+    body = cq.Workplane("XY").add(cq.Solid.makeLoft(wires, ruled=True))
+    hub = box(-HUB / 2, HUB / 2, Y_SEAM, HUB_Y1, -HUB_ZB, N_SOLE + 0.01)                   # blocco sotto la suola
+    ss = [-HUB / 2 + HUB * k / 8 for k in range(9)]
+    ear = (cq.Workplane("XY").polyline([(s, slide_section(s)[0][0] - 0.3) for s in ss] + [(HUB / 2, HUB_Y1), (-HUB / 2, HUB_Y1)])
+           .close().extrude(HUB_ZT - N_SOLE).translate((0, 0, N_SOLE)))                      # orecchia esterna, contro la parete
+    g = body.union(hub).union(ear)
+    g = g.cut(box(-BAR / 2 - 0.15, BAR / 2 + 0.15, Y_SEAM - 0.01, HUB_Y1 + 0.01, -BAR / 2 - 0.15, BAR / 2 + 0.15))   # foro quadro
     g = g.cut(zcyl(0, HUB_YC, 1.3, BAR / 2 + 0.1, HUB_ZT + 0.01))                                       # vite di blocco M3
-    g = g.cut(zcyl(0, HUB_YC, 5.0, HUB_ZT, N_TOPW + 6.0))                                               # spazio per la testa della vite
-    yf, yo = _ST[-1][10], _ST[-1][1]                                                                    # punta smussata verso l'interno (V)
+    g = g.cut(zcyl(0, HUB_YC, 4.5, HUB_ZT, HUB_ZT + 20.0))                                              # spazio per la testa
+    yf, yo = slide_section(S_TIP)[10][0], slide_section(S_TIP)[0][0]                                    # punta smussata verso l'interno (V)
     v = (cq.Workplane("XY").polyline([(S_TIP - TIP_V, yf - 0.1), (S_TIP + 0.1, yf - 0.1), (S_TIP + 0.1, yo - 0.4)]).close()
          .extrude(40.0).translate((0, 0, -10.0)))
     return g.cut(v)
@@ -252,7 +282,7 @@ def bar_local():
     return b
 
 def thumb_screw_local(y):
-    """Vite zigrinata M3 x 6 (testa Ø7 x 3) che blocca la slitta: sagoma, nel riferimento della slitta."""
+    """Vite zigrinata M3 x 10 (testa Ø7 x 3) che blocca la slitta: sagoma, nel riferimento della slitta."""
     return zcyl(0, y, 1.5, BAR / 2 - 1.4, HUB_ZT).union(zcyl(0, y, 3.5, HUB_ZT, HUB_ZT + 3.0))
 
 def slide_angle(r):

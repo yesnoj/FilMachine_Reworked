@@ -72,6 +72,10 @@ if __name__ == "__main__":
     G, _ = loader.place_guide("135", 30.0)
     sc = dict(zip(("B13_barra_guida", "B14_slitta_DX", "B15_slitta_SX", "REF_viti_zigrinate"), G))
     viz.render(sc, "scivolo_tipo_labbox", azim=-140, elev=35, color_of=c, zoom=1.0, tol=0.1, size=(1300, 950))
+    viz.render(sc, "scivolo_dall_alto", azim=-90, elev=89, color_of=c, zoom=1.0, tol=0.1, size=(1300, 950))
+    G2, _ = loader.place_guide("120", 30.0)
+    viz.render({"B13_barra_guida": G2[0], "B14_slitta_DX_120": G2[1], "B15_slitta_SX_120": G2[2], "REF_viti_zigrinate_120": G2[3]},
+               "scivolo_posizione_120", azim=-90, elev=89, color_of=c, zoom=1.0, tol=0.1, size=(1300, 950))
     sc.update({f"A0{i}_spirale": p for i, p in enumerate(layout.place_reel("135"))})
     viz.render(sc, "scivolo_sulla_spirale", azim=-150, elev=40, color_of=c, zoom=1.0, tol=0.1, size=(1300, 950))
     # imbuto di svuotamento con la vaschetta appoggiata (riferimento della vaschetta) e confronto dell'avvio della spirale

@@ -11,7 +11,7 @@ volumi, viti); niente è stato stampato né misurato. I punti da provare a banco
 
 ![vista](png/macchina_fronte_sinistra.png)
 
-## Aggiornamento 6.2: spirali e scivolo come la Lab-Box
+## Aggiornamenti 6.2 e 6.3: spirali e scivolo come la Lab-Box
 
 - **Una coppia di flange per formato**, come nella Lab-Box. Le flange **135** (A01, A02) sono quelle di prima: 8 giri a
   passo 2,2 mm, 180 cm di pellicola. Le nuove flange **120** (A10, A11) hanno 5,5 giri a passo **3,1 mm**: il 120 è
@@ -34,9 +34,17 @@ volumi, viti); niente è stato stampato né misurato. I punti da provare a banco
   gola hanno un **fianco ripido a 70°** (prima 45°). Bloccando si sente lo scatto; per svitare il dentino deve risalire
   lo scalino, quindi il reel non si svita da solo e va girato con decisione. Vale per le flange e per gli anelli alette.
   La gola del click c'è **solo nelle tre stazioni** di ogni lato, dove arriva il dentino: tra i collarini il tubo è liscio.
-- **Scivolo**: l'**invito a C è all'imbocco**, dal lato della barra, come nella Lab-Box. Il labbro copre il bordo della
-  pellicola fin dall'ingresso, con una bocca alta circa 4 mm; lungo la spalla la gola si stringe fino al canale che entra
-  tra le flange. Le **punte sono smussate** verso l'interno: insieme le due slitte fanno una V.
+- **Scivolo rifatto sullo stile della Lab-Box (6.3)**. Ogni slitta è una lamina sottile (suola 1,4 mm, parete 1,2) con
+  il **labbro a C** che sporge sopra il bordo della pellicola, come nel pezzo originale: all'imbocco, dal lato della barra,
+  il **cappuccio** con il bordo arrotondato e la bocca aperta (il labbro e il fondo della gola fanno una V di 4 mm in
+  cui il bordo della pellicola entra anche se non è perfettamente allineato); lungo la **spalla** la gola si stringe fino
+  al canale che entra tra le flange, dove la gola stretta tiene i bordi della pellicola incurvata; sotto la gola la suola
+  si alza in una rotaia. Il bordo interno della suola rientra con uno smusso dritto: le due slitte insieme fanno la
+  **coda di pesce** della Lab-Box, con le punte smussate a V. Il **mozzo è un blocco sotto la suola**, dalla giunzione
+  con l'altra slitta (a 135 i due mozzi si toccano quasi, come nella Lab-Box) fino all'**orecchia esterna** con la vite
+  zigrinata, che ora sta fuori dal cappuccio e non lo intacca più (**M3 × 10**, era M3 × 6). Le superfici sono rigate
+  pulite, non più sfaccettate. Quote funzionali invariate: vertice della gola a 14,5 mm tra le flange, canale 0,2 mm
+  dentro le punte delle costole, altezze sotto il coperchio.
 
 ## Cosa c'è nel pacchetto
 
@@ -95,10 +103,10 @@ Tutto è **a filo**: piano anteriore, bocca della tank, vaschette e coperchio tr
 - **Tank a filo del piano**: cavalletto rialzato, portagomma della tank orizzontale, apertura nel piano con due tacche
   per le dita e l'uscita della carta del 120.
 - **Scivolo come la Lab-Box**: ognuna delle due slitte è un mezzo scivolo. All'imbocco, dal lato della barra, c'è
-  l'**invito a C**: piano largo su cui scorre la pellicola (a 135 i due piani quasi si toccano al centro) e il labbro che
-  copre il bordo della pellicola; lungo la spalla la gola si stringe e dentro le flange resta il canale sottile. Punte
-  smussate a V. Si bloccano nelle due posizioni (135 stretta, 120 larga) con una **vite zigrinata M3 × 6** che entra in
-  una fossetta della barra.
+  il **cappuccio con il bordo a C**: suola sottile su cui scorre la pellicola (a 135 le due suole quasi si toccano al
+  centro) e il labbro che copre il bordo della pellicola; lungo la spalla la gola si stringe e dentro le flange resta la
+  linguetta sottile con la gola. Coda di pesce con le punte smussate a V. Si bloccano nelle due posizioni (135 stretta,
+  120 larga) con una **vite zigrinata M3 × 10** nell'orecchia del mozzo, che entra in una fossetta della barra.
 - **Spirale**: costole alte **2,5 mm** (erano 1,2: la pellicola poteva uscire dalla guida); **centro come la Lab-Box**:
   dal giro più interno la costola arriva dritta al mozzo con una sola curva di mezzo giro, e al centro resta uno spazio
   libero. **Una coppia di flange per formato**: 135 con 8 giri a 2,2 mm (180 cm di pellicola; un 36 pose è circa
@@ -130,6 +138,12 @@ nella stazione stretta, le 120 in quella larga. Per toglierle si gira con decisi
 
 ![scivolo](png/scivolo_tipo_labbox.png)
 
+Dall'alto, come nelle foto della Lab-Box: a 135 le due slitte unite al centro, a 120 distanziate sulla barra.
+
+![scivolo dall'alto](png/scivolo_dall_alto.png)
+
+![scivolo a 120](png/scivolo_posizione_120.png)
+
 ![sezioni](png/scivolo_sezioni.png)
 
 Corpo in un pezzo solo, stampato in piedi. Dentro: la vasca della spirale e, separato da un divisorio, il ripiano
@@ -143,11 +157,13 @@ La bocca della tank sta nell'apertura del piano anteriore, a filo.
   livello è a 34 mm dal fondo, con 350 ml a 46 mm; l'asse è a 50 mm. Oltre circa 500 ml il liquido esce dal troppopieno.
   Il portagomma ora è orizzontale e il tubo in silicone nero sale con una curva larga fuori dal cavalletto.
 - **Scivolo**: due slitte su una barra quadra, come nella Lab-Box. Fuori dalle flange ogni slitta è un mezzo scivolo:
-  all'imbocco l'invito a C, con il piano largo e il labbro che copre il bordo della pellicola; lungo la spalla la gola si
-  stringe. Dentro le flange resta solo il canale, che sta 0,2 mm dentro le punte delle costole e incurva la pellicola (gobba in alto) quanto basta per farla passare sopra le
-  costole dei giri esterni: con le costole da 2,5 mm il 135 si incurva con un raggio di circa 17 mm (8 mm di freccia),
-  il 120 di circa 40 mm. A spirale piena restano 2,15 mm sotto il coperchio. Per cambiare formato: allentare le due
-  viti zigrinate, spostare le slitte nell'altra fossetta, stringere a mano.
+  all'imbocco il cappuccio con il bordo a C, con la suola sottile e il labbro che copre il bordo della pellicola; lungo
+  la spalla la gola si stringe. Dentro le flange resta solo la linguetta con la gola, che sta 0,2 mm dentro le punte
+  delle costole e incurva la pellicola (gobba in alto) quanto basta per farla passare sopra le costole dei giri esterni:
+  con le costole da 2,5 mm il 135 si incurva con un raggio di circa 17 mm (8 mm di freccia), il 120 di circa 40 mm.
+  A spirale piena restano 2,15 mm sotto il coperchio e lo spigolo del cappuccio passa a 0,9 mm dal tetto del ponte (per
+  questo la parete del cappuccio è bassa all'imbocco). Per cambiare formato: allentare le due viti zigrinate, spostare
+  le slitte nell'altra fossetta, stringere a mano.
 - **Fascetta**: quella della Lab-Box, comprata già fatta. Passa nel tubo A03 da parte a parte, tra i due collarini: si
   infila dalla finestra larga e dalla finestra stretta, dal lato opposto, passa solo la fascetta; il perno sul suo capo
   resta dentro, contro la finestra stretta. All'altro capo la clip, che a fine caricamento resta avvolta sul tubo sotto
@@ -296,7 +312,7 @@ di sola acqua per sciacquare tubi, pompa e tank.
 - Ugello 0,4, strato 0,2, 3–4 perimetri, riempimento 25 %. **A 4 perimetri e 100 %**: collettore C07, innesti C11 e C12,
   prese C14 (devono pesare), imbuto C20; otturatore C13 e camere C15 al 100 %.
 - Tutti i pezzi sono già orientati e stanno su un piatto da 256 × 256. Vogliono i supporti **solo** B17 (sotto la
-  flangia) e le slitte B14/B15 (stampate in piedi sulla coda, supporti solo dal piatto sotto il piano e l'aletta). Le testate C05 si stampano in piedi
+  flangia) e le slitte B14/B15 (stampate in piedi sulla coda, supporti solo dal piatto sotto il mozzo e il cappuccio). Le testate C05 si stampano in piedi
   (202 mm): brim consigliato. Negli altri pezzi ci sono solo ponti corti (elenco in `verifiche.txt`).
 - Elenco, quantità, ingombri e note pezzo per pezzo: foglio *Pezzi stampati* della distinta. In tutto circa 1,7 kg di
   filamento.
@@ -381,7 +397,7 @@ Dettagli e numeri in `verifiche.txt`.
    2,5 mm il 135 deve incurvarsi con un raggio di circa 17 mm per passare sopra le costole dei giri esterni (con 1,2
    mm bastavano 23 mm): provarlo a mano con uno spezzone di pellicola di scarto, flange e slitte stampate, prima del
    resto. Se la pellicola non entra bene, 2,0 mm sono un compromesso (è un solo numero, `RIB_H` in `common.py`).
-   Provare anche l'invito: la coda deve infilarsi sotto i labbri senza piegarsi. Le flange 120 vanno provate allo
+   Provare anche il cappuccio: la coda deve infilarsi sotto i labbri senza piegarsi. Le flange 120 vanno provate allo
    stesso modo con uno spezzone di 120; il passo è un solo numero (`SPIRALS` in `src/reel.py`).
 5. **Fascetta nel tubo**: provarla sul tubo stampato prima di montare le flange: il piolino deve passare dalla finestra
    larga (3,6 mm per un piolino da 3,25: se la stampa la stringe troppo, si allarga con una limetta o si alza

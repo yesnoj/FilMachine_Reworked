@@ -45,7 +45,7 @@ static const char *reset_reason_str(void) {
 }
 #endif
 
-/* Power rails: read through the MCP3424 on the FilMachine Mainboard (see
+/* Power rails: read through the ADS1115 on the FilMachine Mainboard (see
  * railMonitor* in accessories.c). Shows "n/a" with the separate modules. */
 #if HAS_RAIL_MONITOR && defined(BOARD_JC4880P433)
 #define DBG_RAILS 1
@@ -386,7 +386,7 @@ void debugScreenCreate(void) {
     if (!railMonitorPresent())
 #endif
         make_label(p, 0, 70, &lv_font_montserrat_12, 0x888888,
-                   "Rail monitor (MCP3424, FilMachine Mainboard) not found: separate modules.");
+                   "Rail monitor (ADS1115, FilMachine Mainboard) not found: separate modules.");
 
     lv_screen_load(D.scr);
     dbg_refresh(NULL);

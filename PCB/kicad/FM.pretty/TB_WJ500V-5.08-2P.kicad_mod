@@ -1,0 +1,223 @@
+(footprint "TB_WJ500V-5.08-2P"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(descr "Ningbo Kangnex WJ500V-5.08-2P screw terminal, 2 pins, pitch 5.08 mm, 18 A, LCSC C8465; wire entry +y")
+	(property "Reference" "REF**"
+		(at 0 -1 0)
+		(layer "F.SilkS")
+		(uuid "50397bbe-1861-4f18-8d11-a3106d641eed")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "TB_WJ500V-5.08-2P"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(uuid "ba78f9ce-a4f3-4661-9fe3-76b3144c4252")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "01b39e00-1921-4ea2-a129-de7694d2c307")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "6eb7a8fd-169d-4d65-8fc2-9cced990a385")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr through_hole)
+	(fp_line
+		(start -5.19 -5.11)
+		(end 5.19 -5.11)
+		(stroke
+			(width 0.12)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "065411aa-cf46-44c3-be3a-d40f7070f2d5")
+	)
+	(fp_line
+		(start -5.19 5.11)
+		(end -5.19 -5.11)
+		(stroke
+			(width 0.12)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "6642d209-0fb4-4693-803c-250934b7a23a")
+	)
+	(fp_line
+		(start -5.08 -5)
+		(end 5.08 -5)
+		(stroke
+			(width 0.12)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "707674d8-b833-4f14-9ded-f15b28c0ca1a")
+	)
+	(fp_line
+		(start -5.08 5)
+		(end 5.08 5)
+		(stroke
+			(width 0.3)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "825486ae-f4a5-4c72-8b04-6aefb7ccf0ca")
+	)
+	(fp_line
+		(start 5.19 -5.11)
+		(end 5.19 5.11)
+		(stroke
+			(width 0.12)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "f0e8113c-cd2e-4efd-9cd2-783259c6cec1")
+	)
+	(fp_line
+		(start 5.19 5.11)
+		(end -5.19 5.11)
+		(stroke
+			(width 0.12)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "e0233eb9-0246-4fe1-9c64-be76d6df1f45")
+	)
+	(fp_line
+		(start -5.34 -5.25)
+		(end 5.36 -5.25)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "cd71b56a-be35-4a4d-a482-2cf5b2cd9149")
+	)
+	(fp_line
+		(start -5.34 5.25)
+		(end -5.34 -5.25)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "c9b398f4-e31d-44ea-86c1-b83af10b9bea")
+	)
+	(fp_line
+		(start 5.36 -5.25)
+		(end 5.36 5.25)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "1f05f939-1b17-41d1-9b5e-91f033bb816a")
+	)
+	(fp_line
+		(start 5.36 5.25)
+		(end -5.34 5.25)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "a6bc4d56-6a32-493b-9557-f082413f94e7")
+	)
+	(fp_line
+		(start -5.08 -5)
+		(end 5.08 -5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "6a978868-52e6-4f9a-a479-a7b5fae23578")
+	)
+	(fp_line
+		(start -5.08 5)
+		(end -5.08 -5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "c4bb15a1-3896-4d12-8de6-a93374e7aa60")
+	)
+	(fp_line
+		(start 5.08 -5)
+		(end 5.08 5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "95b2eba9-1e3c-4404-9e6d-3d999e84bba0")
+	)
+	(fp_line
+		(start 5.08 5)
+		(end -5.08 5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "f704fe6d-9408-4d74-8e39-4c78c71b3929")
+	)
+	(fp_text user "1"
+		(at -4.54 -2.7 0)
+		(layer "F.Fab")
+		(uuid "2e56b88a-18b4-4f0e-8df9-e8ec0dccf68e")
+		(effects
+			(font
+				(size 0.7 0.7)
+				(thickness 0.12)
+			)
+		)
+	)
+	(pad "1" thru_hole rect
+		(at -2.54 0.5)
+		(size 2.7 2.7)
+		(drill 1.5)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(thermal_bridge_angle 45)
+		(uuid "083f3b9f-2848-437b-83de-53912454abb4")
+	)
+	(pad "2" thru_hole circle
+		(at 2.54 0.5)
+		(size 2.7 2.7)
+		(drill 1.5)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "2ed542b7-3c3c-4bf0-ae31-746d2e72e2a9")
+	)
+	(embedded_fonts no)
+)

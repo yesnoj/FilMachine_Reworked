@@ -229,7 +229,8 @@ def place_sheet(sheet, parts, flags):
                prop("Datasheet", "~", sx, sy, hide=True),
                prop("Description", p["desc"], sx, sy, hide=True),
                prop("MPN", p["mpn"], sx, sy, hide=True),
-               prop("Manufacturer", p["mfr"], sx, sy, hide=True)]
+               prop("Manufacturer", p["mfr"], sx, sy, hide=True),
+               prop("LCSC", p.get("lcsc", ""), sx, sy, hide=True)]
         for q in c["upins"]:
             sym.append([Sym("pin"), q["num"], [Sym("uuid"), U()]])
         sym.append([Sym("instances"), [Sym("project"), PROJECT, [Sym("path"), path, [Sym("reference"), p["ref"]], [Sym("unit"), u]]]])
@@ -271,11 +272,11 @@ def add_stub_label(items, px, py, d, net):
 def header(u, paper, title, page):
     return [Sym("kicad_sch"), [Sym("version"), 20250114], [Sym("generator"), "eeschema"], [Sym("generator_version"), "9.0"],
             [Sym("uuid"), u], [Sym("paper"), paper],
-            [Sym("title_block"), [Sym("title"), title], [Sym("date"), "2026-10-10"], [Sym("rev"), "1.0"],
+            [Sym("title_block"), [Sym("title"), title], [Sym("date"), "2026-10-13"], [Sym("rev"), "1.1"],
              [Sym("company"), "FilMachine"], [Sym("comment"), 1, "Mainboard per JC4880P433 (ESP32-P4) — generata da design.py"]]]
 
 # power flags: nets that only have power_in/passive pins
-FLAG_NETS = ["+12V_IN_H", "+12V_IN_M", "GND", "+12V", "+12V_PUMP", "+5V", "+5V_USB", "USBC_S"]
+FLAG_NETS = ["+12V_IN_H1", "+12V_IN_H2", "+12V_IN_M", "GND", "+12V", "+12V_PUMP", "+5V", "+12V_AUX", "+5V_AUX", "+3V3"]
 flags_by_sheet = {"power": [(n, i + 1) for i, n in enumerate(FLAG_NETS)]}
 
 os.makedirs(OUT, exist_ok=True)
@@ -308,8 +309,10 @@ for i, (sheet, title, fn, page) in enumerate(sheet_files):
                  [Sym("instances"), [Sym("project"), PROJECT, [Sym("path"), f"/{root_uuid}", [Sym("page"), str(page)]]]]])
 notes = ("Collegamenti per etichette globali: ogni pin ha il nome della sua net.\n"
          "Sorgente: design.py (rigenerare schema e PCB da li').\n"
-         "Display JC4880P433 collegato con flat 2x13 su J4 (pin 1 = pin 1).\n"
-         "Il display si alimenta dal flat JP1 (pin 2/4) tramite F7 + D8; J3 = uscita 5 V di servizio.")
+         "Display JC4880P433 collegato con flat 2x13 su J5 (pin 1 = pin 1).\n"
+         "Il display si alimenta dal flat JP1 (pin 2/4) tramite F7 + D8; la logica della scheda (3,3 V) viene dal display.\n"
+         "J28/J29 = uscite 12 V / 5 V di servizio (PTC). J30 = GPIO liberi A6/A7 dell'MCP23017 (= SPARE OUT 1/2).\n"
+         "Tre ingressi 12 V (riscaldatore 1, riscaldatore 2, principale). Parti LCSC/JLCPCB.")
 root.append([Sym("text"), notes, [Sym("exclude_from_sim"), Sym("no")], [Sym("at"), 25, 160, 0],
              [Sym("effects"), [Sym("font"), [Sym("size"), 2, 2]], [Sym("justify"), Sym("left"), Sym("top")]], [Sym("uuid"), U()]])
 root.append([Sym("sheet_instances"), [Sym("path"), "/", [Sym("page"), "1"]]])

@@ -6,8 +6,8 @@
 	(paper "A4")
 	(title_block
 		(title "FilMachine Mainboard v1")
-		(date "2026-10-10")
-		(rev "1.0")
+		(date "2026-10-13")
+		(rev "1.1")
 		(company "FilMachine")
 		(comment 1 "Mainboard per JC4880P433 (ESP32-P4) — generata da design.py")
 	)
@@ -124,14 +124,14 @@
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500" (page "5")))
 		)
 	)
-	(text "Collegamenti per etichette globali: ogni pin ha il nome della sua net.\nSorgente: design.py (rigenerare schema e PCB da li').\nDisplay JC4880P433 collegato con flat 2x13 su J4 (pin 1 = pin 1).\nIl display si alimenta dal flat JP1 (pin 2/4) tramite F7 + D8; J3 = uscita 5 V di servizio."
+	(text "Collegamenti per etichette globali: ogni pin ha il nome della sua net.\nSorgente: design.py (rigenerare schema e PCB da li').\nDisplay JC4880P433 collegato con flat 2x13 su J5 (pin 1 = pin 1).\nIl display si alimenta dal flat JP1 (pin 2/4) tramite F7 + D8; la logica della scheda (3,3 V) viene dal display.\nJ28/J29 = uscite 12 V / 5 V di servizio (PTC). J30 = GPIO liberi A6/A7 dell'MCP23017 (= SPARE OUT 1/2).\nTre ingressi 12 V (riscaldatore 1, riscaldatore 2, principale). Parti LCSC/JLCPCB."
 		(exclude_from_sim no)
 		(at 25 160 0)
 		(effects
 			(font (size 2 2))
 			(justify left top)
 		)
-		(uuid "fd491e9d-2117-5735-a51e-be3c816e4dd8")
+		(uuid "24fe4ebd-6507-5d8d-97ba-eb9825e41bdc")
 	)
 	(sheet_instances
 		(path "/"

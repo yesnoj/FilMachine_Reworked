@@ -24,5 +24,8 @@ for i in 1 2; do
   python3 gndfix.py $B 2>&1 | grep -v "assert\|no fanout"
 done
 python3 fill_drc.py $B 2>&1 | grep -v "silk\|starved_thermal |"
+python3 stubclean.py $B 2>&1 | grep "removed"
+python3 fullconn.py $B 2>&1 | grep "full connection"
+python3 nudge.py $B 2>&1 | grep "nudge"
 python3 silk.py $B 2>&1 | grep "silk ok"
 python3 fill_drc.py $B 2>&1 | grep -v "silk\|starved_thermal |"

@@ -6,8 +6,8 @@
 	(paper "A3")
 	(title_block
 		(title "FilMachine Mainboard — Pompa, motore, servo")
-		(date "2026-10-10")
-		(rev "1.0")
+		(date "2026-10-13")
+		(rev "1.1")
 		(company "FilMachine")
 		(comment 1 "Mainboard per JC4880P433 (ESP32-P4) — generata da design.py")
 	)
@@ -151,7 +151,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "45a51a59-347d-5bd9-81a8-36b04a74fcdf")
+		(uuid "530030e6-fc31-5af1-8299-c0b77af985dc")
 		(property "Reference" "R70"
 			(at 22.86 39.14 0)
 			(effects (font (size 1.27 1.27)))
@@ -176,15 +176,19 @@
 			(at 22.86 44.45 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Yageo/UniOhm (generic)"
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 22.86 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C25803"
 			(at 22.86 44.45 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "953aa027-7599-50be-9318-fe4b234c77f7")
+			(uuid "47a29260-f2fa-5eb7-9a17-cb67066df96d")
 		)
 		(pin "2"
-			(uuid "ef3f1f84-4d41-503e-a1be-49f7880fbce0")
+			(uuid "aa3ffadf-585e-5b79-883e-f6383bfa308c")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R70") (unit 1)))
@@ -199,7 +203,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "3926ebee-fa92-55d4-bcd3-addf5c91dbee")
+		(uuid "b289f1c6-d5fd-58a1-b167-fed120216efe")
 	)
 	(global_label "PUMP_IN1"
 		(shape passive)
@@ -209,7 +213,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "4ebb0a23-fc43-513f-83c0-3d177bc15dee")
+		(uuid "0f36ac27-fdd6-568e-b37f-86757d09d554")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 22.86 38.1 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -224,7 +228,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "20efbfba-8eed-5e62-aaaf-6242a57bb31b")
+		(uuid "ce0c39ac-7043-520b-8e9d-7e84a0cb0350")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -234,7 +238,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "792a8cb4-b804-5b38-8730-21dd1e166329")
+		(uuid "23f79a97-77d9-5544-b8e2-65adeaaab94c")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 22.86 50.8 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -249,7 +253,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "dffd8ecb-31c7-5c30-9a23-cde28df4d755")
+		(uuid "f069f13b-f7cb-5e28-ad4d-045f37e930cd")
 		(property "Reference" "R71"
 			(at 30.48 39.14 0)
 			(effects (font (size 1.27 1.27)))
@@ -274,15 +278,19 @@
 			(at 30.48 44.45 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Yageo/UniOhm (generic)"
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 30.48 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C25803"
 			(at 30.48 44.45 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "a78ad9a5-2ffc-5511-a70f-fedc3225017d")
+			(uuid "851db7f5-60a9-5ce1-a4b9-7fc81a610b0c")
 		)
 		(pin "2"
-			(uuid "f0792633-079c-516f-b788-495775c0ee66")
+			(uuid "2cae38e6-c650-515d-b923-65d233fd1d5c")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R71") (unit 1)))
@@ -297,7 +305,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "6c797f67-dc86-571f-bd1b-389d8164a4b0")
+		(uuid "1736a52d-5bd2-54cb-96e1-c18ea375e18d")
 	)
 	(global_label "PUMP_IN2"
 		(shape passive)
@@ -307,7 +315,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "0304b0fd-2717-5438-b8c0-666201841420")
+		(uuid "c95e6362-c147-555a-bee7-4f45589d4f3b")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 30.48 38.1 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -322,7 +330,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "31615f8d-44cd-50f0-864a-c6e6d500f4d2")
+		(uuid "47079e21-f8b5-587c-aec4-b2e23f5ae64c")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -332,7 +340,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "42eae880-81d0-5c83-bcd4-43bfcee9448b")
+		(uuid "27b3ee57-5263-5abd-9c60-52a7ef00be43")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 30.48 50.8 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -347,7 +355,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "29f80bed-5f1d-5c65-bd7a-aa621fdcaa70")
+		(uuid "19fa00bb-7c2d-5146-bbd2-dda3033c07d1")
 		(property "Reference" "R72"
 			(at 39.37 39.14 0)
 			(effects (font (size 1.27 1.27)))
@@ -372,15 +380,19 @@
 			(at 39.37 44.45 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Yageo/UniOhm (generic)"
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 39.37 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C25803"
 			(at 39.37 44.45 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "8af05b0e-4b59-5d4e-9e5d-3215420cfd1d")
+			(uuid "bbfefb0f-af07-5c56-b280-3ea966ccab81")
 		)
 		(pin "2"
-			(uuid "05dfcd6e-d728-53e1-a787-bab0ae9a4a05")
+			(uuid "e873d73f-d351-55f2-a206-145ba752824f")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R72") (unit 1)))
@@ -395,7 +407,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "9bcabd1c-0e09-54be-abf2-5545e6d73d53")
+		(uuid "10e099bc-c733-5f5b-a377-889d83422a97")
 	)
 	(global_label "PUMP_ENA"
 		(shape passive)
@@ -405,7 +417,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "5e98e03a-4b23-5f95-bd46-be002e4171e2")
+		(uuid "0e766394-d9da-5e0a-8721-6e57bbb3b0c2")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 39.37 38.1 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -420,7 +432,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "db320da4-d71a-5335-a88e-e3db6042b3b6")
+		(uuid "406e4ae0-97cb-51c7-a3c8-e0c0f6fabcb7")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -430,7 +442,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "76d63a20-7026-56f8-966c-edc494888f00")
+		(uuid "269e667a-eb28-579a-b54b-a8acac13b5d1")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 39.37 50.8 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -445,7 +457,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "96db0080-7186-52af-b41e-c38436fdeb04")
+		(uuid "86ba448b-7092-5ae0-bc6e-89a1aebea962")
 		(property "Reference" "R73"
 			(at 46.99 37.87 0)
 			(effects (font (size 1.27 1.27)))
@@ -470,15 +482,19 @@
 			(at 46.99 43.18 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Yageo/UniOhm (generic)"
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 46.99 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C25803"
 			(at 46.99 43.18 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "a42d14f2-2061-50bd-ae01-716b435eebdc")
+			(uuid "8832ad41-d7c7-588e-814c-c8d8c285e920")
 		)
 		(pin "2"
-			(uuid "bdabb398-c029-5892-b6d6-2290ec5cda51")
+			(uuid "8dc030a2-c520-58d4-9980-de73c2900f4a")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R73") (unit 1)))
@@ -493,7 +509,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "1fe3ada8-bfbd-596b-b993-502f7831b063")
+		(uuid "f4ef71d5-fab2-5995-994a-a567a7d11f96")
 	)
 	(global_label "MOT_IN1"
 		(shape passive)
@@ -503,7 +519,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "c43baa5c-97b3-5347-a4ad-6f2d4dc47d2a")
+		(uuid "58d634bc-bc93-577a-8457-1247913a633b")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 46.99 36.83 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -518,7 +534,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "bc2e772b-7cab-5fb0-ad5b-dab4d7c7ceee")
+		(uuid "d0e783c2-68d2-5b83-8ed6-5d81c215fe95")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -528,7 +544,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "a958689e-fc77-5dc0-84ab-6fd5f67873b2")
+		(uuid "a9f0e7c6-2eec-5474-b7fc-501295e3ccef")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 46.99 49.53 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -543,7 +559,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "bc7101ce-8584-50d4-afdc-794adeae92d3")
+		(uuid "c126f38f-2705-5e3c-9bc9-a54f6003ccd6")
 		(property "Reference" "R74"
 			(at 54.61 37.87 0)
 			(effects (font (size 1.27 1.27)))
@@ -568,15 +584,19 @@
 			(at 54.61 43.18 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Yageo/UniOhm (generic)"
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 54.61 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C25803"
 			(at 54.61 43.18 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "b9c1eb35-033b-5464-a6a7-d10163038abc")
+			(uuid "18f1d62e-a88b-569f-9163-d500d0b9d04d")
 		)
 		(pin "2"
-			(uuid "004623fb-fa53-5fcf-b04e-593192682d9c")
+			(uuid "2b35f27d-9895-552c-b7a8-c4bbde0ad0b5")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R74") (unit 1)))
@@ -591,7 +611,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "bd5e44f3-6e27-5f49-b5b2-532e1ad87987")
+		(uuid "670770c4-aed0-51e8-871a-4be798ee8d01")
 	)
 	(global_label "MOT_IN2"
 		(shape passive)
@@ -601,7 +621,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "e8618a53-41f9-5f9b-9e52-d752caea99c6")
+		(uuid "ba2b9726-8696-5296-b5ed-4902f2046bb1")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 54.61 36.83 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -616,7 +636,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "a71f2958-8b71-50af-88ce-cfcd41bcf36d")
+		(uuid "765e62c6-2512-56b5-b329-c5c222117d1c")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -626,7 +646,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "5a35c72b-1700-5b91-8ac9-d78646e31658")
+		(uuid "2fe35b9d-0f2e-52b5-b5e4-3faaa32d9e41")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 54.61 49.53 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -641,7 +661,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "a9eb9708-179a-5c64-8268-c515c5d2f726")
+		(uuid "ea88357f-6391-52da-98d6-5f7ed6a05a6d")
 		(property "Reference" "R75"
 			(at 63.5 37.87 0)
 			(effects (font (size 1.27 1.27)))
@@ -666,15 +686,19 @@
 			(at 63.5 43.18 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Yageo/UniOhm (generic)"
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 63.5 43.18 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C25803"
 			(at 63.5 43.18 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "c06e0074-dd3b-5f70-ab5d-44130f437822")
+			(uuid "696b3d74-6bc7-5c79-a021-270bb5389e3a")
 		)
 		(pin "2"
-			(uuid "de78214b-779f-5314-912f-d173c220b0fa")
+			(uuid "5f1a3fdd-e7a3-5a3d-9e28-f1fc4f254737")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R75") (unit 1)))
@@ -689,7 +713,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "a66412fa-cedc-5f24-8e8d-66ef62d6a121")
+		(uuid "946d838d-8adc-51c0-b89f-8ce7432722a0")
 	)
 	(global_label "MOT_ENA"
 		(shape passive)
@@ -699,7 +723,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "9abc9bd8-f49a-5764-94ae-ca4d5e27af7a")
+		(uuid "a8529d37-6867-55c0-9bfc-0f324251a7e9")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 63.5 36.83 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -714,7 +738,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "090f6a14-0d8e-5e6a-932c-a276baf24f5e")
+		(uuid "4c7709a9-1849-5f45-94f5-3ebe58c54702")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -724,7 +748,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "4bc126ca-65b6-5f48-90b7-179e41dd2728")
+		(uuid "6c793936-b82a-517d-b533-ce9ecbe608b3")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 63.5 49.53 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -739,7 +763,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "e1651c5e-5194-5ce4-9c5e-b4cbeaabd9aa")
+		(uuid "800f4164-7e73-5266-b932-931c8b2826de")
 		(property "Reference" "R76"
 			(at 71.12 39.14 0)
 			(effects (font (size 1.27 1.27)))
@@ -764,15 +788,19 @@
 			(at 71.12 44.45 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Yageo/UniOhm (generic)"
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 71.12 44.45 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C25803"
 			(at 71.12 44.45 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "fc8769f5-bdbb-5683-a2c3-ba233f27ebf0")
+			(uuid "601c336d-0344-5786-8d62-c5de673613d8")
 		)
 		(pin "2"
-			(uuid "ae87d1bd-8e9c-5145-a5e6-9f82fa9c32db")
+			(uuid "5826f9df-c0db-5a07-ac16-52a805d2ab51")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R76") (unit 1)))
@@ -787,7 +815,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "f10f6315-7614-5527-8697-72624e630b59")
+		(uuid "1e7a36d7-5d48-5af5-8555-a568d4da8554")
 	)
 	(global_label "SERVO_PWM"
 		(shape passive)
@@ -797,7 +825,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "2a129b98-ddb2-5726-b06f-1d08c5c6cc09")
+		(uuid "bfda8e9d-b596-52b8-bc70-435bd606aae1")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 71.12 38.1 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -812,7 +840,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "72626d92-8f9e-58ee-a82a-55f319f15255")
+		(uuid "913b45c2-d697-5b39-8b9c-e1180d1aa4cc")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -822,7 +850,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "7abcbc4b-c08f-510f-bf74-4fdf33ffa65d")
+		(uuid "2e217703-3d01-500d-b272-d79e25fd041b")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 71.12 50.8 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -837,7 +865,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "b4b694f4-0a74-591c-ae0c-70a5169105c9")
+		(uuid "7cf786ff-bdd5-522c-b2a4-a9c53ca35c97")
 		(property "Reference" "U6"
 			(at 106.68 25.17 0)
 			(effects (font (size 1.27 1.27)))
@@ -866,14 +894,18 @@
 			(at 106.68 31.75 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+		(property "LCSC" "C352973"
+			(at 106.68 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
 		(pin "1"
-			(uuid "202a5c42-c3c6-5487-bef3-4157de44b2db")
+			(uuid "a2fa929c-2268-527c-9d01-740bee05811b")
 		)
 		(pin "2"
-			(uuid "a2685776-0f16-5c0a-8d04-b460f89e4cb2")
+			(uuid "c71ff1b3-d90d-53ca-b79c-ce9b426495ef")
 		)
 		(pin "7"
-			(uuid "a32521cf-2a2a-5a10-a20f-bfba92b7c595")
+			(uuid "ef9a8c8c-33ff-5f47-85cb-996f1a51128a")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U6") (unit 1)))
@@ -888,7 +920,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "8e3b3665-3e79-53bf-af55-1e7bd7a41eda")
+		(uuid "4f7f815a-8bac-55a8-b381-a8bc454685f6")
 	)
 	(global_label "PUMP_IN1"
 		(shape passive)
@@ -898,7 +930,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "e18f416f-72cd-5dbf-abe7-7eadeaf0a492")
+		(uuid "61d938fe-33f5-59cc-afb2-292e67a96842")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 88.9 29.21 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -913,7 +945,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "9eadde71-79c1-5994-aa36-aeed9e6041d7")
+		(uuid "fdbb22d0-54fa-54f0-8217-c6fd04c8c554")
 	)
 	(global_label "PUMP_ENA"
 		(shape passive)
@@ -923,7 +955,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "e5a6c326-6218-53f0-83ec-e2cfc19b561c")
+		(uuid "4a0aa6e8-29d2-52bb-85a1-b9461633bdfa")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 88.9 34.29 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -938,7 +970,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "20c12e93-88e0-52b3-9e46-5d8c9d0036db")
+		(uuid "27fa943f-087c-5024-acee-02411fee760f")
 	)
 	(global_label "PUMP_A_CTL"
 		(shape passive)
@@ -948,7 +980,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "9598e67b-9a55-5730-8b6e-34b1cedfb782")
+		(uuid "9c6b7052-f93b-5c0c-a3a3-dc708a573cc3")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 121.92 31.75 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -963,7 +995,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "0afd2286-ebdc-5811-9f9e-415d030f5237")
+		(uuid "d2d1f121-51fe-5c40-a9ab-096cc42f55b8")
 		(property "Reference" "U6"
 			(at 168.91 25.17 0)
 			(effects (font (size 1.27 1.27)))
@@ -992,14 +1024,18 @@
 			(at 168.91 31.75 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+		(property "LCSC" "C352973"
+			(at 168.91 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
 		(pin "5"
-			(uuid "38affb95-ecaf-5965-84d7-574b7266d95f")
+			(uuid "c0a916c9-8959-55f4-89d7-0619d52a43ed")
 		)
 		(pin "6"
-			(uuid "db8143e6-00e6-5dd0-9011-1b5a205d850f")
+			(uuid "224755e7-c8e8-5367-9618-f7f1adf7e957")
 		)
 		(pin "3"
-			(uuid "082a04dc-a3ac-5089-aa34-c4c4645d7f8c")
+			(uuid "68c48195-a138-50ca-b571-17f9be8f1380")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U6") (unit 2)))
@@ -1014,7 +1050,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "b69960af-3f44-5ffa-a1f8-65d3703f4d92")
+		(uuid "a2932697-5367-5915-90c4-bd7865974eba")
 	)
 	(global_label "PUMP_IN2"
 		(shape passive)
@@ -1024,7 +1060,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "6233dca4-dbd2-5114-af37-fe3d6f15fd9d")
+		(uuid "64d0811c-e089-5b2e-8be5-82976868519c")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 151.13 29.21 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1039,7 +1075,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "4c73b8a5-5708-5e49-ae35-8e2cd42e9b8a")
+		(uuid "7de340ff-20ab-5893-b236-893de14d2c17")
 	)
 	(global_label "PUMP_ENA"
 		(shape passive)
@@ -1049,7 +1085,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "d8eb3557-1991-5449-9cdf-beb05848f456")
+		(uuid "dbddfe1e-205e-56a2-9ace-74414d4265ff")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 151.13 34.29 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1064,7 +1100,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "95c15f22-190b-515c-a2eb-136b310964f9")
+		(uuid "e231186f-2602-5a65-8e3a-2db255ffda5c")
 	)
 	(global_label "PUMP_B_CTL"
 		(shape passive)
@@ -1074,7 +1110,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "eb864f81-ca73-5ce3-a8ed-4c0128a81aa8")
+		(uuid "57d385ec-33d4-549a-af8d-53a0b173a469")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 184.15 31.75 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1089,7 +1125,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "cde289fd-2080-5e07-be39-54088fb25bc2")
+		(uuid "e44514b3-0f05-5367-afc3-cc1eb52fa703")
 		(property "Reference" "U6"
 			(at 207.01 35.33 0)
 			(effects (font (size 1.27 1.27)))
@@ -1118,11 +1154,15 @@
 			(at 207.01 46.99 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+		(property "LCSC" "C352973"
+			(at 207.01 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
 		(pin "8"
-			(uuid "eada4344-e3b9-52e7-ad9d-f942760596cd")
+			(uuid "a44d9a10-28be-5890-b33d-a0fc1a8fb05f")
 		)
 		(pin "4"
-			(uuid "7f4e33f1-f6ec-5bd0-9bde-eee4c04e2c55")
+			(uuid "2a8c7afd-4f5f-55ea-aa14-7f2d4ad0b68f")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U6") (unit 3)))
@@ -1137,7 +1177,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "64ddabda-598f-5c0d-a183-67c16952fb76")
+		(uuid "cf87f350-324c-55c0-b092-6a60014d20ab")
 	)
 	(global_label "+3V3"
 		(shape passive)
@@ -1147,7 +1187,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "8895bca8-a616-5926-9509-8d5754f92f25")
+		(uuid "93cb7213-a0a4-57e4-abdc-ee9def4a0905")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 207.01 34.29 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1162,7 +1202,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "c026561a-c00d-59b9-bfbb-957f8cdc768a")
+		(uuid "5655aff9-6e93-563c-9829-a6d9247ebda5")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -1172,7 +1212,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "c581c52d-9422-5565-a279-4c5efbd23a28")
+		(uuid "a38b60f7-f0b3-570e-9004-9969a55ac026")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 207.01 59.69 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1187,7 +1227,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "656d3560-9076-56c6-8660-a6e058633c3c")
+		(uuid "495360d0-3382-542a-ab9e-d36befb31317")
 		(property "Reference" "C50"
 			(at 220.98 35.33 0)
 			(effects (font (size 1.27 1.27)))
@@ -1212,15 +1252,19 @@
 			(at 220.98 40.64 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Samsung/Murata (generic)"
+		(property "Manufacturer" "Samsung/Yageo (JLCPCB basic)"
+			(at 220.98 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C14663"
 			(at 220.98 40.64 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "d840b53e-a0b7-5434-b5d1-4d6016a30b54")
+			(uuid "0c7dac71-1ecf-50de-a202-dba1081e34ac")
 		)
 		(pin "2"
-			(uuid "e20f5490-2b44-5434-a75a-5454ae9267e6")
+			(uuid "c2986562-78b8-5945-81d2-63ae74f3f3d6")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C50") (unit 1)))
@@ -1235,7 +1279,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "321c45ab-efd1-51ff-ac35-664dc54aedef")
+		(uuid "caa45a35-9532-51bd-a293-0cccfb56fe69")
 	)
 	(global_label "+3V3"
 		(shape passive)
@@ -1245,7 +1289,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "4d790129-3762-536e-b90b-95bc6bfeaa02")
+		(uuid "898c59d1-d614-5e8f-965d-9b00564d292e")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 220.98 34.29 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1260,7 +1304,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "9a254068-5590-59bd-98e2-a8f636fa34a8")
+		(uuid "fd99572a-d147-5894-9478-97ed37f8ece0")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -1270,7 +1314,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "d54d1732-09e7-5c42-9b50-5c3e534cdfc5")
+		(uuid "44672320-0da1-5755-a835-4821b013088c")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 220.98 46.99 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1285,7 +1329,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "5f4db796-95a5-5a1b-8452-188ccc6dbb38")
+		(uuid "7c59a7cf-1098-5756-beed-a7614aef9364")
 		(property "Reference" "U7"
 			(at 256.54 25.17 0)
 			(effects (font (size 1.27 1.27)))
@@ -1314,14 +1358,18 @@
 			(at 256.54 31.75 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+		(property "LCSC" "C352973"
+			(at 256.54 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
 		(pin "1"
-			(uuid "baa9f455-c635-5fa3-843c-0f12ceb5ad68")
+			(uuid "00cd4ac1-790e-5112-bfbc-10651346ff1a")
 		)
 		(pin "2"
-			(uuid "1c381a68-80b8-583d-b4cd-a88214d9e971")
+			(uuid "16ceeb21-1eeb-57c7-9703-3a807ab55eac")
 		)
 		(pin "7"
-			(uuid "27799775-a73b-552f-b899-d9a7c085c99d")
+			(uuid "5f548516-a4db-58b9-937a-c43b0004b34b")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U7") (unit 1)))
@@ -1336,7 +1384,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "9fda9a85-9baa-55dc-9373-4c8696174d88")
+		(uuid "98e21920-606c-5011-bd13-542fe7ddf34b")
 	)
 	(global_label "MOT_IN1"
 		(shape passive)
@@ -1346,7 +1394,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "3436b456-4b37-59a3-b440-25a09ce17d52")
+		(uuid "fbed0c98-7fe9-5a17-b945-3f0c4e9cc308")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 238.76 29.21 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1361,7 +1409,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "a2e6d520-772f-5431-bbf7-465af687bc38")
+		(uuid "555829c3-5fc7-5fcf-b34b-b76bcc65018e")
 	)
 	(global_label "MOT_ENA"
 		(shape passive)
@@ -1371,7 +1419,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "fc68274e-0e5f-5d9e-918a-e57f0516e5aa")
+		(uuid "6df75d3b-00ef-56a0-851a-050b10420f18")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 238.76 34.29 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1386,7 +1434,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "c93d1862-aecc-54dc-b7a4-4a1a6e102d5e")
+		(uuid "f35cab1a-18ba-5fb0-adff-9b3fdedcf1c2")
 	)
 	(global_label "MOT_A_CTL"
 		(shape passive)
@@ -1396,7 +1444,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "040e8428-e678-5a7c-aef9-a2ee0a43cbbe")
+		(uuid "87b4ea5a-6b2d-5d1d-ad04-c1e3cc5a581d")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 271.78 31.75 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1411,7 +1459,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "537f0693-ffea-5d6c-b792-dbc735432fe6")
+		(uuid "5d626eeb-c432-5986-b193-302b05c016ba")
 		(property "Reference" "U7"
 			(at 316.23 25.17 0)
 			(effects (font (size 1.27 1.27)))
@@ -1440,14 +1488,18 @@
 			(at 316.23 31.75 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+		(property "LCSC" "C352973"
+			(at 316.23 31.75 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
 		(pin "5"
-			(uuid "5e4053da-2f90-5fe9-b1f0-5b65d29276f5")
+			(uuid "45a51a59-347d-5bd9-81a8-36b04a74fcdf")
 		)
 		(pin "6"
-			(uuid "69f688da-51d7-52c4-b746-8945b219fa13")
+			(uuid "953aa027-7599-50be-9318-fe4b234c77f7")
 		)
 		(pin "3"
-			(uuid "f389bca8-71ce-5b0f-aae2-b5306e1ec6e4")
+			(uuid "ef3f1f84-4d41-503e-a1be-49f7880fbce0")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U7") (unit 2)))
@@ -1462,7 +1514,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "4a13b83f-633d-50a9-807c-c14a8ac6c67f")
+		(uuid "3926ebee-fa92-55d4-bcd3-addf5c91dbee")
 	)
 	(global_label "MOT_IN2"
 		(shape passive)
@@ -1472,7 +1524,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "aef984da-42b9-5c33-914e-0b57b8ee22c8")
+		(uuid "4ebb0a23-fc43-513f-83c0-3d177bc15dee")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 298.45 29.21 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1487,7 +1539,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "5c4327c7-e96e-5e79-be4d-e7fc4027f2b3")
+		(uuid "20efbfba-8eed-5e62-aaaf-6242a57bb31b")
 	)
 	(global_label "MOT_ENA"
 		(shape passive)
@@ -1497,7 +1549,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "34485dc6-f8d9-5e8d-a825-a91d16245515")
+		(uuid "792a8cb4-b804-5b38-8730-21dd1e166329")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 298.45 34.29 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1512,7 +1564,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "a883fa47-e35d-549a-bbcb-c3001f001b3d")
+		(uuid "dffd8ecb-31c7-5c30-9a23-cde28df4d755")
 	)
 	(global_label "MOT_B_CTL"
 		(shape passive)
@@ -1522,7 +1574,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "f5472820-5de9-518d-bdc0-7638cfa7c12a")
+		(uuid "a78ad9a5-2ffc-5511-a70f-fedc3225017d")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 331.47 31.75 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1537,7 +1589,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "4fd744d7-1bac-593f-a1e1-f077eb234d2e")
+		(uuid "f0792633-079c-516f-b788-495775c0ee66")
 		(property "Reference" "U7"
 			(at 354.33 35.33 0)
 			(effects (font (size 1.27 1.27)))
@@ -1566,11 +1618,15 @@
 			(at 354.33 46.99 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+		(property "LCSC" "C352973"
+			(at 354.33 46.99 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
 		(pin "8"
-			(uuid "d15a4fd9-b8e8-55e2-8bda-09fec4af465e")
+			(uuid "6c797f67-dc86-571f-bd1b-389d8164a4b0")
 		)
 		(pin "4"
-			(uuid "c7992f2b-72a0-5de2-b4b0-7200416f6c67")
+			(uuid "0304b0fd-2717-5438-b8c0-666201841420")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U7") (unit 3)))
@@ -1585,7 +1641,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "080f7497-fa7d-5bab-8a72-0d61f6fae25e")
+		(uuid "31615f8d-44cd-50f0-864a-c6e6d500f4d2")
 	)
 	(global_label "+3V3"
 		(shape passive)
@@ -1595,7 +1651,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "2b3ace78-c66c-5b08-b6a7-4a9ece13c2e6")
+		(uuid "42eae880-81d0-5c83-bcd4-43bfcee9448b")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 354.33 34.29 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1610,7 +1666,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "8efd7485-4ccc-5fd2-b8fa-ba6d91c83eff")
+		(uuid "29f80bed-5f1d-5c65-bd7a-aa621fdcaa70")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -1620,7 +1676,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "94dd9aeb-3735-5354-93af-fa3537b4a4c5")
+		(uuid "8af05b0e-4b59-5d4e-9e5d-3215420cfd1d")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 354.33 59.69 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1635,7 +1691,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "3c6ef280-4ff5-568e-b124-ece4c9602e95")
+		(uuid "05dfcd6e-d728-53e1-a787-bab0ae9a4a05")
 		(property "Reference" "C51"
 			(at 367.03 35.33 0)
 			(effects (font (size 1.27 1.27)))
@@ -1660,15 +1716,19 @@
 			(at 367.03 40.64 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Samsung/Murata (generic)"
+		(property "Manufacturer" "Samsung/Yageo (JLCPCB basic)"
+			(at 367.03 40.64 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C14663"
 			(at 367.03 40.64 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "c5de310a-4cdc-5abc-8b07-a4dac79bc8d2")
+			(uuid "9bcabd1c-0e09-54be-abf2-5545e6d73d53")
 		)
 		(pin "2"
-			(uuid "6cab9b14-f9e3-5f1f-8105-21771e0683b9")
+			(uuid "5e98e03a-4b23-5f95-bd46-be002e4171e2")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C51") (unit 1)))
@@ -1683,7 +1743,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "3ba5aa64-843c-5919-8e9d-733c7915338e")
+		(uuid "db320da4-d71a-5335-a88e-e3db6042b3b6")
 	)
 	(global_label "+3V3"
 		(shape passive)
@@ -1693,7 +1753,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "13548135-d277-5e85-a169-05ac20145ed3")
+		(uuid "76d63a20-7026-56f8-966c-edc494888f00")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 367.03 34.29 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1708,7 +1768,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "8c758054-a34f-5dba-abe1-464fb03017b6")
+		(uuid "96db0080-7186-52af-b41e-c38436fdeb04")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -1718,7 +1778,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "bf5de4f9-1368-5293-93fc-2ac0868fcfe7")
+		(uuid "a42d14f2-2061-50bd-ae01-716b435eebdc")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 367.03 46.99 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1733,12 +1793,12 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "e96726f2-e477-58b5-a2de-baca0392d71f")
+		(uuid "bdabb398-c029-5892-b6d6-2290ec5cda51")
 		(property "Reference" "U8"
 			(at 43.18 89.94 0)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Value" "BTN8982TA"
+		(property "Value" "BTN8962TA"
 			(at 43.18 113.26 0)
 			(effects (font (size 1.27 1.27)))
 		)
@@ -1750,11 +1810,11 @@
 			(at 43.18 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Description" "Mezzo ponte pompa lato A (30 A, 10 mOhm); SR a GND = slew rate massimo"
+		(property "Description" "Mezzo ponte pompa lato A (30 A, 14 mOhm); SR a GND = slew rate massimo"
 			(at 43.18 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "MPN" "BTN8982TAAUMA1"
+		(property "MPN" "BTN8962TAAUMA1"
 			(at 43.18 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -1762,29 +1822,33 @@
 			(at 43.18 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+		(property "LCSC" "C112630"
+			(at 43.18 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
 		(pin "3"
-			(uuid "d2d64419-d4ab-5fd7-911d-840baecac7ce")
+			(uuid "1fe3ada8-bfbd-596b-b993-502f7831b063")
 		)
 		(pin "2"
-			(uuid "5128e5fa-548d-56f3-a545-63a20caf02d9")
+			(uuid "c43baa5c-97b3-5347-a4ad-6f2d4dc47d2a")
 		)
 		(pin "6"
-			(uuid "f1149f74-5726-59b4-a5b7-295083ae90ae")
+			(uuid "bc2e772b-7cab-5fb0-ad5b-dab4d7c7ceee")
 		)
 		(pin "5"
-			(uuid "2e2fdc5b-290f-57ce-90ba-8090a8feaa78")
+			(uuid "a958689e-fc77-5dc0-84ab-6fd5f67873b2")
 		)
 		(pin "7"
-			(uuid "e627b38a-7d61-591f-9492-45cd48aa647a")
+			(uuid "bc7101ce-8584-50d4-afdc-794adeae92d3")
 		)
 		(pin "1"
-			(uuid "c517402d-4fed-5d74-a6a2-c0c95799c691")
+			(uuid "b9c1eb35-033b-5464-a6a7-d10163038abc")
 		)
 		(pin "4"
-			(uuid "7b0020ec-0b94-5964-943c-a2ab9d3e5e2a")
+			(uuid "004623fb-fa53-5fcf-b04e-593192682d9c")
 		)
 		(pin "8"
-			(uuid "6986a9a9-50aa-5ed5-a21a-8f20ce6d5ff6")
+			(uuid "bd5e44f3-6e27-5f49-b5b2-532e1ad87987")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U8") (unit 1)))
@@ -1799,7 +1863,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "79df1fe1-3870-5c65-bf81-4a192188f906")
+		(uuid "e8618a53-41f9-5f9b-9e52-d752caea99c6")
 	)
 	(global_label "PUMP_INH"
 		(shape passive)
@@ -1809,7 +1873,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "6aaac315-dbfe-5b6c-a955-2b03b8bf22a6")
+		(uuid "a71f2958-8b71-50af-88ce-cfcd41bcf36d")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 33.02 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1824,7 +1888,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "06a613d1-4fdd-5088-baa0-082a40166e77")
+		(uuid "5a35c72b-1700-5b91-8ac9-d78646e31658")
 	)
 	(global_label "PUMP_A_IN"
 		(shape passive)
@@ -1834,7 +1898,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "41dda796-3ef3-58bf-948b-88d1d54a416d")
+		(uuid "a9eb9708-179a-5c64-8268-c515c5d2f726")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 33.02 99.06 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1849,7 +1913,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "d3143e1b-deef-5718-af82-2c94c7aa6ce3")
+		(uuid "c06e0074-dd3b-5f70-ab5d-44130f437822")
 	)
 	(global_label "PUMP_IS_A"
 		(shape passive)
@@ -1859,7 +1923,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "61b5f3f9-3033-5329-bf75-9d8f89e9c747")
+		(uuid "de78214b-779f-5314-912f-d173c220b0fa")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 33.02 104.14 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1874,7 +1938,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "23d95c50-6d62-5c28-acd4-c0539fb8d851")
+		(uuid "a66412fa-cedc-5f24-8e8d-66ef62d6a121")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -1884,7 +1948,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "3102f623-4c9e-5284-8de5-580eecbf8c17")
+		(uuid "9abc9bd8-f49a-5764-94ae-ca4d5e27af7a")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 33.02 106.68 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1899,7 +1963,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "e091d502-ae16-5b3f-8e5c-ccfe2a46459e")
+		(uuid "090f6a14-0d8e-5e6a-932c-a276baf24f5e")
 	)
 	(global_label "+12V_PUMP"
 		(shape passive)
@@ -1909,7 +1973,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "f3a5e026-26b5-5527-8341-537a86af3e37")
+		(uuid "4bc126ca-65b6-5f48-90b7-179e41dd2728")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 45.72 88.9 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1924,7 +1988,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "af4b914c-f821-556f-9775-3b612a5f7cce")
+		(uuid "e1651c5e-5194-5ce4-9c5e-b4cbeaabd9aa")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -1934,7 +1998,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "c1961be5-1279-553e-9699-84339b8ea18c")
+		(uuid "fc8769f5-bdbb-5683-a2c3-ba233f27ebf0")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 45.72 114.3 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1949,7 +2013,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "0d49b0ff-b06f-597d-a9fc-482514c196dc")
+		(uuid "ae87d1bd-8e9c-5145-a5e6-9f82fa9c32db")
 	)
 	(global_label "PUMP_OUT_A"
 		(shape passive)
@@ -1959,7 +2023,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "278a13e7-91ad-53d5-a2b0-fbbd07d17b6e")
+		(uuid "f10f6315-7614-5527-8697-72624e630b59")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 53.34 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1974,7 +2038,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "0e0bfdcd-9032-550c-8a7a-0860448ff203")
+		(uuid "2a129b98-ddb2-5726-b06f-1d08c5c6cc09")
 	)
 	(global_label "PUMP_OUT_A"
 		(shape passive)
@@ -1984,7 +2048,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "8303172c-58a7-59eb-a79c-77b068df3f7c")
+		(uuid "72626d92-8f9e-58ee-a82a-55f319f15255")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 53.34 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1999,7 +2063,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "86bd23ad-ff05-5517-88b4-38002b93ed66")
+		(uuid "7abcbc4b-c08f-510f-bf74-4fdf33ffa65d")
 		(property "Reference" "R80"
 			(at 73.66 91.21 0)
 			(effects (font (size 1.27 1.27)))
@@ -2024,15 +2088,19 @@
 			(at 73.66 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Yageo/UniOhm (generic)"
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 73.66 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C25804"
 			(at 73.66 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "15484738-c081-5e99-963c-4440268f9639")
+			(uuid "b4b694f4-0a74-591c-ae0c-70a5169105c9")
 		)
 		(pin "2"
-			(uuid "1783f89b-e85e-5286-90c5-a322d3549acb")
+			(uuid "202a5c42-c3c6-5487-bef3-4157de44b2db")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R80") (unit 1)))
@@ -2047,7 +2115,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "24d0dc68-f625-56ee-bafe-514329f817ce")
+		(uuid "a2685776-0f16-5c0a-8d04-b460f89e4cb2")
 	)
 	(global_label "PUMP_A_CTL"
 		(shape passive)
@@ -2057,7 +2125,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "b2125af4-5cbe-5b2a-90b5-dd1feac85faf")
+		(uuid "a32521cf-2a2a-5a10-a20f-bfba92b7c595")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 73.66 90.17 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2072,7 +2140,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "7b7185ff-8960-58a4-af78-fadb51c4be0f")
+		(uuid "8e3b3665-3e79-53bf-af55-1e7bd7a41eda")
 	)
 	(global_label "PUMP_A_IN"
 		(shape passive)
@@ -2082,7 +2150,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "f5084ae3-e052-5f7b-a198-d6d3690797ab")
+		(uuid "e18f416f-72cd-5dbf-abe7-7eadeaf0a492")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 73.66 102.87 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2097,7 +2165,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "3c2b16e0-89c9-5b74-aba8-9ecf9ea8ea52")
+		(uuid "9eadde71-79c1-5994-aa36-aeed9e6041d7")
 		(property "Reference" "C52"
 			(at 82.55 89.94 0)
 			(effects (font (size 1.27 1.27)))
@@ -2122,15 +2190,19 @@
 			(at 82.55 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Samsung/Murata (generic)"
+		(property "Manufacturer" "Samsung/Yageo (JLCPCB basic)"
+			(at 82.55 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C49678"
 			(at 82.55 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "e5f7d920-2070-58c6-8e1d-d62d4efcf93c")
+			(uuid "e5a6c326-6218-53f0-83ec-e2cfc19b561c")
 		)
 		(pin "2"
-			(uuid "2a98c99a-30bc-55b1-b560-b1e16f1aad4d")
+			(uuid "20c12e93-88e0-52b3-9e46-5d8c9d0036db")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C52") (unit 1)))
@@ -2145,7 +2217,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "b0c1af91-5211-55fc-bbf1-30033c9dfec6")
+		(uuid "9598e67b-9a55-5730-8b6e-34b1cedfb782")
 	)
 	(global_label "+12V_PUMP"
 		(shape passive)
@@ -2155,7 +2227,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "9c33804e-3db6-51fb-8241-db6937c8e8b9")
+		(uuid "0afd2286-ebdc-5811-9f9e-415d030f5237")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 82.55 88.9 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2170,7 +2242,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "c0614883-e2d6-56b0-87df-7608e8178c24")
+		(uuid "38affb95-ecaf-5965-84d7-574b7266d95f")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -2180,7 +2252,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "b061f891-9e5d-54c7-b883-4f2540f7921c")
+		(uuid "db8143e6-00e6-5dd0-9011-1b5a205d850f")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 82.55 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2195,12 +2267,12 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "ce198e09-6906-55b1-aa2b-02fe6d85a3cc")
+		(uuid "082a04dc-a3ac-5089-aa34-c4c4645d7f8c")
 		(property "Reference" "U9"
 			(at 111.76 89.94 0)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Value" "BTN8982TA"
+		(property "Value" "BTN8962TA"
 			(at 111.76 113.26 0)
 			(effects (font (size 1.27 1.27)))
 		)
@@ -2212,11 +2284,11 @@
 			(at 111.76 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Description" "Mezzo ponte pompa lato B (30 A, 10 mOhm); SR a GND = slew rate massimo"
+		(property "Description" "Mezzo ponte pompa lato B (30 A, 14 mOhm); SR a GND = slew rate massimo"
 			(at 111.76 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "MPN" "BTN8982TAAUMA1"
+		(property "MPN" "BTN8962TAAUMA1"
 			(at 111.76 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -2224,29 +2296,33 @@
 			(at 111.76 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+		(property "LCSC" "C112630"
+			(at 111.76 101.6 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
 		(pin "3"
-			(uuid "69f80526-3461-5f43-acd4-13fc421589e6")
+			(uuid "b69960af-3f44-5ffa-a1f8-65d3703f4d92")
 		)
 		(pin "2"
-			(uuid "ae0cc6a8-6d1b-5b39-9ab8-a0e11df2afce")
+			(uuid "6233dca4-dbd2-5114-af37-fe3d6f15fd9d")
 		)
 		(pin "6"
-			(uuid "8f4549de-d077-57f7-83dc-933888fd624c")
+			(uuid "4c73b8a5-5708-5e49-ae35-8e2cd42e9b8a")
 		)
 		(pin "5"
-			(uuid "dab11bda-5669-516c-a8b5-81f738a8f990")
+			(uuid "d8eb3557-1991-5449-9cdf-beb05848f456")
 		)
 		(pin "7"
-			(uuid "f291e5fb-6961-5a2f-b8e7-20ae26890fbb")
+			(uuid "95c15f22-190b-515c-a2eb-136b310964f9")
 		)
 		(pin "1"
-			(uuid "e0314a63-5cb1-51d2-a284-2961fe4a7fba")
+			(uuid "eb864f81-ca73-5ce3-a8ed-4c0128a81aa8")
 		)
 		(pin "4"
-			(uuid "673d99e8-40bc-5788-936d-21c5b813f61e")
+			(uuid "cde289fd-2080-5e07-be39-54088fb25bc2")
 		)
 		(pin "8"
-			(uuid "b54942a0-82ae-522d-b057-5ec50633ebb5")
+			(uuid "eada4344-e3b9-52e7-ad9d-f942760596cd")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U9") (unit 1)))
@@ -2261,7 +2337,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "146a8d42-f9af-56a4-b289-5ff799382660")
+		(uuid "7f4e33f1-f6ec-5bd0-9bde-eee4c04e2c55")
 	)
 	(global_label "PUMP_INH"
 		(shape passive)
@@ -2271,7 +2347,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "f12a6ecd-a34d-5581-9f43-da60a33c22d8")
+		(uuid "64ddabda-598f-5c0d-a183-67c16952fb76")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 101.6 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2286,7 +2362,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "221da98e-1409-54e2-b933-8a667c0f9d56")
+		(uuid "8895bca8-a616-5926-9509-8d5754f92f25")
 	)
 	(global_label "PUMP_B_IN"
 		(shape passive)
@@ -2296,7 +2372,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "2b7a612b-3df8-5ddd-bc22-13012aac4c46")
+		(uuid "c026561a-c00d-59b9-bfbb-957f8cdc768a")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 101.6 99.06 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2311,7 +2387,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "b13278e4-f909-5f0e-88ba-99bc64409e25")
+		(uuid "c581c52d-9422-5565-a279-4c5efbd23a28")
 	)
 	(global_label "PUMP_IS_B"
 		(shape passive)
@@ -2321,7 +2397,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "0a099950-a71f-5dd7-b871-92f70ed8ccf5")
+		(uuid "656d3560-9076-56c6-8660-a6e058633c3c")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 101.6 104.14 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2336,7 +2412,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "d68f9c0e-0c60-585b-a7cb-47db5559fdda")
+		(uuid "d840b53e-a0b7-5434-b5d1-4d6016a30b54")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -2346,7 +2422,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "9e0a34dc-5dcb-59cb-b5ce-4e2c26fff29b")
+		(uuid "e20f5490-2b44-5434-a75a-5454ae9267e6")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 101.6 106.68 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2361,7 +2437,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "e7dea8f8-c057-52ff-8627-1129f257975a")
+		(uuid "321c45ab-efd1-51ff-ac35-664dc54aedef")
 	)
 	(global_label "+12V_PUMP"
 		(shape passive)
@@ -2371,7 +2447,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "b7473ebc-85d1-5cef-8d90-51a69090c6af")
+		(uuid "4d790129-3762-536e-b90b-95bc6bfeaa02")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 114.3 88.9 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2386,7 +2462,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "bbf25219-25ce-5829-94c1-bd571ee3a3f9")
+		(uuid "9a254068-5590-59bd-98e2-a8f636fa34a8")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -2396,7 +2472,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "2a1a669d-6c44-59e5-9483-f847cd196dfa")
+		(uuid "d54d1732-09e7-5c42-9b50-5c3e534cdfc5")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 114.3 114.3 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2411,7 +2487,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "59bd91e0-242f-5c05-b1d3-78329300a66e")
+		(uuid "5f4db796-95a5-5a1b-8452-188ccc6dbb38")
 	)
 	(global_label "PUMP_OUT_B"
 		(shape passive)
@@ -2421,7 +2497,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "aa347458-9282-5603-9308-df14aa0e8611")
+		(uuid "baa9f455-c635-5fa3-843c-0f12ceb5ad68")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 121.92 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2436,7 +2512,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "80ad8224-2184-5a16-9957-9349abea58b2")
+		(uuid "1c381a68-80b8-583d-b4cd-a88214d9e971")
 	)
 	(global_label "PUMP_OUT_B"
 		(shape passive)
@@ -2446,7 +2522,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "1e5f07ed-e7f8-51d8-9d15-c4b1057fae44")
+		(uuid "27799775-a73b-552f-b899-d9a7c085c99d")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 121.92 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2461,7 +2537,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "a7c011a5-fd2a-5e59-8099-98363078e92b")
+		(uuid "9fda9a85-9baa-55dc-9373-4c8696174d88")
 		(property "Reference" "R82"
 			(at 142.24 91.21 0)
 			(effects (font (size 1.27 1.27)))
@@ -2486,15 +2562,19 @@
 			(at 142.24 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Yageo/UniOhm (generic)"
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 142.24 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C25804"
 			(at 142.24 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "6cf448a6-2214-5fa5-9fff-d3360e99a31b")
+			(uuid "3436b456-4b37-59a3-b440-25a09ce17d52")
 		)
 		(pin "2"
-			(uuid "99eef5c5-2675-596d-9079-087025b3bc06")
+			(uuid "a2e6d520-772f-5431-bbf7-465af687bc38")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R82") (unit 1)))
@@ -2509,7 +2589,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "437e260a-c3d6-581b-9ac2-31ba5e98bfe0")
+		(uuid "fc68274e-0e5f-5d9e-918a-e57f0516e5aa")
 	)
 	(global_label "PUMP_B_CTL"
 		(shape passive)
@@ -2519,7 +2599,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "a7b8abd2-e54c-589c-8f91-9307bbadd8ea")
+		(uuid "c93d1862-aecc-54dc-b7a4-4a1a6e102d5e")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 142.24 90.17 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2534,7 +2614,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "ce738b15-a462-5d81-bb96-b6a49fade9fa")
+		(uuid "040e8428-e678-5a7c-aef9-a2ee0a43cbbe")
 	)
 	(global_label "PUMP_B_IN"
 		(shape passive)
@@ -2544,7 +2624,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "185a06f8-591d-5b34-8f8b-18fcc3ad6368")
+		(uuid "537f0693-ffea-5d6c-b792-dbc735432fe6")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 142.24 102.87 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2559,7 +2639,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "b553403a-a3a9-58c5-a39a-40b0d26c5c8c")
+		(uuid "5e4053da-2f90-5fe9-b1f0-5b65d29276f5")
 		(property "Reference" "C53"
 			(at 151.13 89.94 0)
 			(effects (font (size 1.27 1.27)))
@@ -2584,15 +2664,19 @@
 			(at 151.13 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Samsung/Murata (generic)"
+		(property "Manufacturer" "Samsung/Yageo (JLCPCB basic)"
+			(at 151.13 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C49678"
 			(at 151.13 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "28b92eef-e08c-51e3-8600-a6f2cc13e0b7")
+			(uuid "69f688da-51d7-52c4-b746-8945b219fa13")
 		)
 		(pin "2"
-			(uuid "5384470e-9f14-5fb0-96ac-592afb655013")
+			(uuid "f389bca8-71ce-5b0f-aae2-b5306e1ec6e4")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C53") (unit 1)))
@@ -2607,7 +2691,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "c046f08d-0890-54d9-a2cd-0dc8a190f670")
+		(uuid "4a13b83f-633d-50a9-807c-c14a8ac6c67f")
 	)
 	(global_label "+12V_PUMP"
 		(shape passive)
@@ -2617,7 +2701,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "ac5eab83-2fc6-593e-9d7c-3eaa579ea83f")
+		(uuid "aef984da-42b9-5c33-914e-0b57b8ee22c8")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 151.13 88.9 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2632,7 +2716,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "89d86526-3ef6-5f1d-820b-a6a87fd69b54")
+		(uuid "5c4327c7-e96e-5e79-be4d-e7fc4027f2b3")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -2642,7 +2726,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "1aebc95f-74ae-5575-bd9c-a3e9dab563d3")
+		(uuid "34485dc6-f8d9-5e8d-a825-a91d16245515")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 151.13 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2657,12 +2741,12 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "a001d089-6142-5698-a28a-71fbc410e048")
+		(uuid "a883fa47-e35d-549a-bbcb-c3001f001b3d")
 		(property "Reference" "R84"
 			(at 160.02 84.86 0)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Value" "10k"
+		(property "Value" "1k"
 			(at 160.02 95.48 0)
 			(effects (font (size 1.27 1.27)))
 		)
@@ -2674,23 +2758,27 @@
 			(at 160.02 90.17 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Description" "INH alto = ponte attivo"
+		(property "Description" "INH alto = ponte attivo (basso senza display: pompa inibita); 1k: I_INH(H) fino a 2 x 93 uA a 3,3 V"
 			(at 160.02 90.17 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "MPN" "0603 10k 1%"
+		(property "MPN" "0603 1k 1%"
 			(at 160.02 90.17 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Yageo/UniOhm (generic)"
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 160.02 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C21190"
 			(at 160.02 90.17 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "c722969a-18f5-59c5-ac48-7537b5eb55db")
+			(uuid "f5472820-5de9-518d-bdc0-7638cfa7c12a")
 		)
 		(pin "2"
-			(uuid "785fea04-3b4b-54fe-8f12-12a14c6f9d7c")
+			(uuid "4fd744d7-1bac-593f-a1e1-f077eb234d2e")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R84") (unit 1)))
@@ -2705,7 +2793,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "f1a2d4f4-0d01-57ee-9323-5b09c7773e36")
+		(uuid "d15a4fd9-b8e8-55e2-8bda-09fec4af465e")
 	)
 	(global_label "+3V3"
 		(shape passive)
@@ -2715,7 +2803,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "be17db96-f28e-5b4e-9647-6fadb49c5e8d")
+		(uuid "c7992f2b-72a0-5de2-b4b0-7200416f6c67")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 160.02 83.82 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2730,7 +2818,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "b963476a-7361-5d50-a1df-8df6006dcf3b")
+		(uuid "080f7497-fa7d-5bab-8a72-0d61f6fae25e")
 	)
 	(global_label "PUMP_INH"
 		(shape passive)
@@ -2740,7 +2828,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "d30643b1-cbd6-5bc8-adac-860557c52c18")
+		(uuid "2b3ace78-c66c-5b08-b6a7-4a9ece13c2e6")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 160.02 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2755,7 +2843,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "11b87581-cbd0-5b2a-ac0e-bcd76243d9e0")
+		(uuid "8efd7485-4ccc-5fd2-b8fa-ba6d91c83eff")
 		(property "Reference" "R85"
 			(at 167.64 89.94 0)
 			(effects (font (size 1.27 1.27)))
@@ -2772,7 +2860,7 @@
 			(at 167.64 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Description" "Sense IS lato A: 10 A -> ~0,8 V (peggior caso < 2,048 V)"
+		(property "Description" "Sense IS lato A: kILIS 10000 -> 6 A = 0,8 mA = 1,2 V (10 A = 1,8 V)"
 			(at 167.64 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -2780,15 +2868,19 @@
 			(at 167.64 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Yageo/UniOhm (generic)"
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 167.64 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C22843"
 			(at 167.64 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "8be85102-cc51-5860-a311-57bce689bfda")
+			(uuid "94dd9aeb-3735-5354-93af-fa3537b4a4c5")
 		)
 		(pin "2"
-			(uuid "3c6fe650-54a9-5732-80b3-5bb1347b3dbc")
+			(uuid "3c6ef280-4ff5-568e-b124-ece4c9602e95")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R85") (unit 1)))
@@ -2803,7 +2895,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "11de656c-f115-5b5d-b728-4ed0a1106015")
+		(uuid "c5de310a-4cdc-5abc-8b07-a4dac79bc8d2")
 	)
 	(global_label "PUMP_IS_A"
 		(shape passive)
@@ -2813,7 +2905,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "1f2bc6a7-212f-5d36-ae79-76fd34b7ccc3")
+		(uuid "6cab9b14-f9e3-5f1f-8105-21771e0683b9")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 167.64 88.9 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2828,7 +2920,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "33d04dcf-2d52-56a3-bb4b-48cea4635381")
+		(uuid "3ba5aa64-843c-5919-8e9d-733c7915338e")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -2838,7 +2930,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "2c6aab3d-d368-5060-a2ed-4b2db872559b")
+		(uuid "13548135-d277-5e85-a169-05ac20145ed3")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 167.64 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2853,7 +2945,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "03615cea-e7aa-57c1-912f-05d2c493f27e")
+		(uuid "8c758054-a34f-5dba-abe1-464fb03017b6")
 		(property "Reference" "C54"
 			(at 176.53 89.94 0)
 			(effects (font (size 1.27 1.27)))
@@ -2878,15 +2970,19 @@
 			(at 176.53 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Samsung/Murata (generic)"
+		(property "Manufacturer" "Samsung/Yageo (JLCPCB basic)"
+			(at 176.53 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C1588"
 			(at 176.53 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "d3b48483-1a7b-5d34-8878-1ba16ba324d1")
+			(uuid "bf5de4f9-1368-5293-93fc-2ac0868fcfe7")
 		)
 		(pin "2"
-			(uuid "b7b0b725-b656-527f-96df-a8714c02150d")
+			(uuid "e96726f2-e477-58b5-a2de-baca0392d71f")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C54") (unit 1)))
@@ -2901,7 +2997,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "d62edddf-d7ba-50b7-8c0c-1c3648a88823")
+		(uuid "d2d64419-d4ab-5fd7-911d-840baecac7ce")
 	)
 	(global_label "PUMP_IS_A"
 		(shape passive)
@@ -2911,7 +3007,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "49b5bba9-1481-53ff-8186-94f6a7840b17")
+		(uuid "5128e5fa-548d-56f3-a545-63a20caf02d9")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 176.53 88.9 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2926,7 +3022,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "3a86a251-77b1-5c28-868a-2fc0e39146bf")
+		(uuid "f1149f74-5726-59b4-a5b7-295083ae90ae")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -2936,7 +3032,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "b3669217-d6a9-52fc-a0ca-90473d78ecb4")
+		(uuid "2e2fdc5b-290f-57ce-90ba-8090a8feaa78")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 176.53 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -2951,7 +3047,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "b8614b76-c3aa-58f6-8c0e-fab53426d09d")
+		(uuid "e627b38a-7d61-591f-9492-45cd48aa647a")
 		(property "Reference" "R88"
 			(at 186.69 89.94 0)
 			(effects (font (size 1.27 1.27)))
@@ -2968,7 +3064,7 @@
 			(at 186.69 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Description" "Sense IS lato B: 10 A -> ~0,8 V (peggior caso < 2,048 V)"
+		(property "Description" "Sense IS lato B"
 			(at 186.69 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -2976,15 +3072,19 @@
 			(at 186.69 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Yageo/UniOhm (generic)"
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 186.69 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C22843"
 			(at 186.69 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "2feb865d-20db-5a59-8e73-dce8e6f7ab63")
+			(uuid "c517402d-4fed-5d74-a6a2-c0c95799c691")
 		)
 		(pin "2"
-			(uuid "c0414713-dd47-5343-8d6c-0b3427f940c1")
+			(uuid "7b0020ec-0b94-5964-943c-a2ab9d3e5e2a")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R88") (unit 1)))
@@ -2999,7 +3099,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "a85bc502-febd-5219-b178-09fa32db9f69")
+		(uuid "6986a9a9-50aa-5ed5-a21a-8f20ce6d5ff6")
 	)
 	(global_label "PUMP_IS_B"
 		(shape passive)
@@ -3009,7 +3109,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "9f11eb25-fa24-59f2-b2b3-28c7cd4ebcce")
+		(uuid "79df1fe1-3870-5c65-bf81-4a192188f906")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 186.69 88.9 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3024,7 +3124,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "9f78639f-45bb-5c02-b9fb-8adb8da5473d")
+		(uuid "6aaac315-dbfe-5b6c-a955-2b03b8bf22a6")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -3034,7 +3134,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "de769a85-b1ef-5f3c-af80-8cebbc2630d8")
+		(uuid "06a613d1-4fdd-5088-baa0-082a40166e77")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 186.69 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3049,7 +3149,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "c1e4008f-b344-5b60-b61a-883af2daadac")
+		(uuid "41dda796-3ef3-58bf-948b-88d1d54a416d")
 		(property "Reference" "C61"
 			(at 195.58 89.94 0)
 			(effects (font (size 1.27 1.27)))
@@ -3074,15 +3174,19 @@
 			(at 195.58 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Samsung/Murata (generic)"
+		(property "Manufacturer" "Samsung/Yageo (JLCPCB basic)"
+			(at 195.58 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C1588"
 			(at 195.58 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "54544a7e-414b-51cd-bdb2-ffa8c5e23858")
+			(uuid "d3143e1b-deef-5718-af82-2c94c7aa6ce3")
 		)
 		(pin "2"
-			(uuid "497573c0-a083-5e46-aeb9-779e0cae5915")
+			(uuid "61b5f3f9-3033-5329-bf75-9d8f89e9c747")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C61") (unit 1)))
@@ -3097,7 +3201,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "9194562e-13f0-5ba2-b198-c90f3ea27ca1")
+		(uuid "23d95c50-6d62-5c28-acd4-c0539fb8d851")
 	)
 	(global_label "PUMP_IS_B"
 		(shape passive)
@@ -3107,7 +3211,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "b2d99047-0b96-58c6-9b30-3e073b10a6d1")
+		(uuid "3102f623-4c9e-5284-8de5-580eecbf8c17")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 195.58 88.9 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3122,7 +3226,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "4a130be4-f6ba-5215-8909-1bdf3ed41491")
+		(uuid "e091d502-ae16-5b3f-8e5c-ccfe2a46459e")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -3132,7 +3236,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "93939f1d-1e87-5651-a382-c37117a5644e")
+		(uuid "f3a5e026-26b5-5527-8341-537a86af3e37")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 195.58 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3147,7 +3251,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "b674ff41-8d34-5bc6-ae1c-d718042243d2")
+		(uuid "af4b914c-f821-556f-9775-3b612a5f7cce")
 		(property "Reference" "C55"
 			(at 205.74 89.94 0)
 			(effects (font (size 1.27 1.27)))
@@ -3164,23 +3268,27 @@
 			(at 205.74 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Description" "Bulk ponte pompa (basso ESR)"
+		(property "Description" "Bulk ponte pompa (ZLH basso ESR, 1,33 A ripple)"
 			(at 205.74 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "MPN" "EEU-FR1E471"
+		(property "MPN" "25ZLH470MEFC10X12.5"
 			(at 205.74 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Panasonic"
+		(property "Manufacturer" "Rubycon"
+			(at 205.74 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C338188"
 			(at 205.74 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "e2524212-5750-526e-b491-a7e504cf3778")
+			(uuid "c1961be5-1279-553e-9699-84339b8ea18c")
 		)
 		(pin "2"
-			(uuid "c572a537-45c2-5d1e-9607-7f84d8fbc431")
+			(uuid "0d49b0ff-b06f-597d-a9fc-482514c196dc")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C55") (unit 1)))
@@ -3195,7 +3303,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "bc56436b-59d6-52bd-abab-3252e30067ba")
+		(uuid "278a13e7-91ad-53d5-a2b0-fbbd07d17b6e")
 	)
 	(global_label "+12V_PUMP"
 		(shape passive)
@@ -3205,7 +3313,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "686f155d-806a-53cf-9cf0-05c0cf805e42")
+		(uuid "0e0bfdcd-9032-550c-8a7a-0860448ff203")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 205.74 88.9 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3220,7 +3328,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "b2627ed3-3db9-57b1-8ed4-a9e978c86020")
+		(uuid "8303172c-58a7-59eb-a79c-77b068df3f7c")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -3230,7 +3338,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "67b6f8e7-53db-55f4-ad66-75cc49d21c2a")
+		(uuid "86bd23ad-ff05-5517-88b4-38002b93ed66")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 205.74 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3245,7 +3353,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "2fb2faca-4d60-53c8-9662-2db78bce3c24")
+		(uuid "15484738-c081-5e99-963c-4440268f9639")
 		(property "Reference" "C56"
 			(at 215.9 89.94 0)
 			(effects (font (size 1.27 1.27)))
@@ -3262,23 +3370,27 @@
 			(at 215.9 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Description" "Bulk ponte pompa (basso ESR)"
+		(property "Description" "Bulk ponte pompa (ZLH basso ESR, 1,33 A ripple)"
 			(at 215.9 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "MPN" "EEU-FR1E471"
+		(property "MPN" "25ZLH470MEFC10X12.5"
 			(at 215.9 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Panasonic"
+		(property "Manufacturer" "Rubycon"
+			(at 215.9 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C338188"
 			(at 215.9 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "49e580a7-e484-5463-a5cd-1364b68257b3")
+			(uuid "1783f89b-e85e-5286-90c5-a322d3549acb")
 		)
 		(pin "2"
-			(uuid "75d81275-7aab-59c3-9825-abdc407b75a2")
+			(uuid "24d0dc68-f625-56ee-bafe-514329f817ce")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C56") (unit 1)))
@@ -3293,7 +3405,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "62de7a1a-6963-5a0d-af13-34545cefd667")
+		(uuid "b2125af4-5cbe-5b2a-90b5-dd1feac85faf")
 	)
 	(global_label "+12V_PUMP"
 		(shape passive)
@@ -3303,7 +3415,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "5cac71f3-78b1-5e04-8326-de62deaac851")
+		(uuid "7b7185ff-8960-58a4-af78-fadb51c4be0f")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 215.9 88.9 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3318,7 +3430,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "73d43be8-6c95-55da-a9e1-cedfc64d097c")
+		(uuid "f5084ae3-e052-5f7b-a198-d6d3690797ab")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -3328,7 +3440,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "8b0e926d-64da-592d-aa52-1b3810a4a1d6")
+		(uuid "3c2b16e0-89c9-5b74-aba8-9ecf9ea8ea52")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 215.9 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3343,7 +3455,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "24fe4ebd-6507-5d8d-97ba-eb9825e41bdc")
+		(uuid "e5f7d920-2070-58c6-8e1d-d62d4efcf93c")
 		(property "Reference" "C57"
 			(at 226.06 89.94 0)
 			(effects (font (size 1.27 1.27)))
@@ -3352,7 +3464,7 @@
 			(at 226.06 100.56 0)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric"
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
 			(at 226.06 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -3364,19 +3476,23 @@
 			(at 226.06 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "MPN" "GRM32ER71H106KA12L"
+		(property "MPN" "MLCC 10uF 50V"
 			(at 226.06 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Samsung/Murata (generic)"
+		(property "Manufacturer" "Samsung/Yageo (JLCPCB basic)"
+			(at 226.06 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C13585"
 			(at 226.06 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "75e6dcc0-c1ca-5789-ba86-f2ca8faac236")
+			(uuid "2a98c99a-30bc-55b1-b560-b1e16f1aad4d")
 		)
 		(pin "2"
-			(uuid "edcccf71-7ada-5837-a1ef-42f544bdadb8")
+			(uuid "b0c1af91-5211-55fc-bbf1-30033c9dfec6")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C57") (unit 1)))
@@ -3391,7 +3507,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "ad4eaf01-68ba-5c21-a2aa-850ec2db2d76")
+		(uuid "9c33804e-3db6-51fb-8241-db6937c8e8b9")
 	)
 	(global_label "+12V_PUMP"
 		(shape passive)
@@ -3401,7 +3517,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "5970aa87-a7e4-5664-adf0-f68461a5d004")
+		(uuid "c0614883-e2d6-56b0-87df-7608e8178c24")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 226.06 88.9 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3416,7 +3532,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "0d2f2530-7f49-5d7e-8035-b5e2ee2195f3")
+		(uuid "b061f891-9e5d-54c7-b883-4f2540f7921c")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -3426,7 +3542,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "16a18763-6718-5e58-9e42-51b8d9f15e2a")
+		(uuid "ce198e09-6906-55b1-aa2b-02fe6d85a3cc")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 226.06 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3441,8 +3557,8 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "c3456665-3803-51d2-b991-5b2ee5a43ff5")
-		(property "Reference" "J20"
+		(uuid "69f80526-3461-5f43-acd4-13fc421589e6")
+		(property "Reference" "J25"
 			(at 254 75.97 0)
 			(effects (font (size 1.27 1.27)))
 		)
@@ -3450,7 +3566,7 @@
 			(at 254 84.05 0)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-2-5.08_1x02_P5.08mm_Horizontal"
+		(property "Footprint" "FM:TB_WJ500V-5.08-2P"
 			(at 254 78.74 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -3462,22 +3578,26 @@
 			(at 254 78.74 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "MPN" "1711026"
+		(property "MPN" "WJ500V-5.08-2P"
 			(at 254 78.74 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Phoenix Contact"
+		(property "Manufacturer" "Ningbo Kangnex"
+			(at 254 78.74 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C8465"
 			(at 254 78.74 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "80fea0a1-7c78-5e00-ade0-0d57502c561a")
+			(uuid "ae0cc6a8-6d1b-5b39-9ab8-a0e11df2afce")
 		)
 		(pin "2"
-			(uuid "4c22152d-4161-5525-a10b-e0514d0bc398")
+			(uuid "8f4549de-d077-57f7-83dc-933888fd624c")
 		)
 		(instances
-			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "J20") (unit 1)))
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "J25") (unit 1)))
 		)
 	)
 	(wire
@@ -3489,7 +3609,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "99c8ff39-68a8-52bf-8db5-fcba0e3bfd82")
+		(uuid "dab11bda-5669-516c-a8b5-81f738a8f990")
 	)
 	(global_label "PUMP_OUT_A"
 		(shape passive)
@@ -3499,7 +3619,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "211fd269-1f94-59b3-b553-b7f5653af499")
+		(uuid "f291e5fb-6961-5a2f-b8e7-20ae26890fbb")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 246.38 78.74 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3514,7 +3634,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "12e3f15b-c778-526c-b0f8-1a97ec82637e")
+		(uuid "e0314a63-5cb1-51d2-a284-2961fe4a7fba")
 	)
 	(global_label "PUMP_OUT_B"
 		(shape passive)
@@ -3524,7 +3644,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "15b5c5dd-0870-5cfb-98ca-d62ac7ab8e77")
+		(uuid "673d99e8-40bc-5788-936d-21c5b813f61e")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 246.38 81.28 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3539,7 +3659,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "bede544d-4d7d-52e3-a114-b1b8b2d5dbbc")
+		(uuid "b54942a0-82ae-522d-b057-5ec50633ebb5")
 		(property "Reference" "U10"
 			(at 285.75 84.86 0)
 			(effects (font (size 1.27 1.27)))
@@ -3568,32 +3688,36 @@
 			(at 285.75 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+		(property "LCSC" "C75864"
+			(at 285.75 96.52 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
 		(pin "3"
-			(uuid "69a1db3e-db18-519e-889f-34aa09eb2961")
+			(uuid "146a8d42-f9af-56a4-b289-5ff799382660")
 		)
 		(pin "2"
-			(uuid "111fd9df-f448-53e6-8f96-edce8480602b")
+			(uuid "f12a6ecd-a34d-5581-9f43-da60a33c22d8")
 		)
 		(pin "5"
-			(uuid "d8acda57-dc10-5084-8daa-be563574b31e")
+			(uuid "221da98e-1409-54e2-b933-8a667c0f9d56")
 		)
 		(pin "1"
-			(uuid "a032984d-791d-5ac1-96d0-423b13b6a3c3")
+			(uuid "2b7a612b-3df8-5ddd-bc22-13012aac4c46")
 		)
 		(pin "7"
-			(uuid "9322cebe-d62f-5774-b127-b9ee4f5eddfc")
+			(uuid "b13278e4-f909-5f0e-88ba-99bc64409e25")
 		)
 		(pin "9"
-			(uuid "c1f49bb3-f29e-5eae-93fa-30adea7f6867")
+			(uuid "0a099950-a71f-5dd7-b871-92f70ed8ccf5")
 		)
 		(pin "6"
-			(uuid "34b76ab3-5144-5bd7-bac8-0b527e5f6975")
+			(uuid "d68f9c0e-0c60-585b-a7cb-47db5559fdda")
 		)
 		(pin "8"
-			(uuid "b8d8363f-1ad7-5193-b360-8e59fb328c3c")
+			(uuid "9e0a34dc-5dcb-59cb-b5ce-4e2c26fff29b")
 		)
 		(pin "4"
-			(uuid "3606c97d-f3c0-5cfe-906a-fdebdc297837")
+			(uuid "e7dea8f8-c057-52ff-8627-1129f257975a")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "U10") (unit 1)))
@@ -3608,7 +3732,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "8c8b9f0e-e26e-5c84-9d1b-7f43c87f5fb2")
+		(uuid "b7473ebc-85d1-5cef-8d90-51a69090c6af")
 	)
 	(global_label "MOT_A_CTL"
 		(shape passive)
@@ -3618,7 +3742,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "e1c565c0-1a48-5541-b2b5-35429c1295a7")
+		(uuid "bbf25219-25ce-5829-94c1-bd571ee3a3f9")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 273.05 91.44 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3633,7 +3757,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "def36a81-f8e7-592e-b309-c6d9cd8e19e4")
+		(uuid "2a1a669d-6c44-59e5-9483-f847cd196dfa")
 	)
 	(global_label "MOT_B_CTL"
 		(shape passive)
@@ -3643,7 +3767,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "b9e90154-fba9-5b08-9431-29f0d5ebadec")
+		(uuid "59bd91e0-242f-5c05-b1d3-78329300a66e")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 273.05 93.98 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3658,7 +3782,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "00b9b77e-8d6e-5497-a705-d65e8b12b4a9")
+		(uuid "aa347458-9282-5603-9308-df14aa0e8611")
 	)
 	(global_label "+12V"
 		(shape passive)
@@ -3668,7 +3792,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "6160d2c3-4b1f-55a8-b428-6e9cc62cdb19")
+		(uuid "80ad8224-2184-5a16-9957-9349abea58b2")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 285.75 83.82 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3683,7 +3807,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "731c833b-fb0e-5c7c-9113-d92ca6f80a89")
+		(uuid "1e5f07ed-e7f8-51d8-9d15-c4b1057fae44")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -3693,7 +3817,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "a2ef8a6f-e358-58ef-bfaf-ddfc9f92f3d9")
+		(uuid "a7c011a5-fd2a-5e59-8099-98363078e92b")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 285.75 109.22 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3708,7 +3832,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "c686e622-9b49-5d92-8c98-ff86f2a5f117")
+		(uuid "6cf448a6-2214-5fa5-9fff-d3360e99a31b")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -3718,7 +3842,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "878576f6-9cce-56b2-a730-ac07dde2bc15")
+		(uuid "99eef5c5-2675-596d-9079-087025b3bc06")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 285.75 109.22 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3733,7 +3857,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "76e4c41b-5644-5764-afd1-c0be5757f45f")
+		(uuid "437e260a-c3d6-581b-9ac2-31ba5e98bfe0")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -3743,7 +3867,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "ed52da85-a47e-5e93-a9dc-cfe33f426fef")
+		(uuid "a7b8abd2-e54c-589c-8f91-9307bbadd8ea")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 285.75 109.22 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3758,7 +3882,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "177f5d5c-ec19-58c6-a4e9-b7c77bf87332")
+		(uuid "ce738b15-a462-5d81-bb96-b6a49fade9fa")
 	)
 	(global_label "MOT_OUT_A"
 		(shape passive)
@@ -3768,7 +3892,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "53c35bf7-2160-507a-aecf-51cc018e044c")
+		(uuid "185a06f8-591d-5b34-8f8b-18fcc3ad6368")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 298.45 91.44 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3783,7 +3907,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "f8d4446c-adfb-5749-89b7-871c2c68689f")
+		(uuid "b553403a-a3a9-58c5-a39a-40b0d26c5c8c")
 	)
 	(global_label "MOT_OUT_B"
 		(shape passive)
@@ -3793,7 +3917,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "a0cfa943-f244-50cc-94ee-cb8c905ee7c5")
+		(uuid "28b92eef-e08c-51e3-8600-a6f2cc13e0b7")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 298.45 93.98 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3808,7 +3932,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "b498609d-90e1-54c7-8814-bfb1621f19f7")
+		(uuid "5384470e-9f14-5fb0-96ac-592afb655013")
 	)
 	(global_label "MOT_ILIM"
 		(shape passive)
@@ -3818,7 +3942,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "c97ba765-47e1-5e95-b1d0-952f6aebfae8")
+		(uuid "c046f08d-0890-54d9-a2cd-0dc8a190f670")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 298.45 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3833,7 +3957,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "63838ad9-cce6-5efa-98f6-caf51b4ac5ef")
+		(uuid "ac5eab83-2fc6-593e-9d7c-3eaa579ea83f")
 		(property "Reference" "R86"
 			(at 317.5 88.67 0)
 			(effects (font (size 1.27 1.27)))
@@ -3858,15 +3982,19 @@
 			(at 317.5 93.98 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Yageo/UniOhm (generic)"
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 317.5 93.98 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C22984"
 			(at 317.5 93.98 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "2267659f-d5d4-5366-8fdf-b5e98f47c38d")
+			(uuid "89d86526-3ef6-5f1d-820b-a6a87fd69b54")
 		)
 		(pin "2"
-			(uuid "9e637143-9f47-5d2e-b754-75982ab49786")
+			(uuid "1aebc95f-74ae-5575-bd9c-a3e9dab563d3")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R86") (unit 1)))
@@ -3881,7 +4009,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "c1ed74cf-11aa-5c4f-a520-8c3de45192bb")
+		(uuid "a001d089-6142-5698-a28a-71fbc410e048")
 	)
 	(global_label "MOT_ILIM"
 		(shape passive)
@@ -3891,7 +4019,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "9334224a-5c09-597d-a67b-c6f214a3bc27")
+		(uuid "c722969a-18f5-59c5-ac48-7537b5eb55db")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 317.5 87.63 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3906,7 +4034,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "6d4f80dc-d415-5c3e-822b-cfe6bb4f12c4")
+		(uuid "785fea04-3b4b-54fe-8f12-12a14c6f9d7c")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -3916,7 +4044,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "0705227b-b15b-51b2-8762-f1dc2a855c54")
+		(uuid "f1a2d4f4-0d01-57ee-9323-5b09c7773e36")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 317.5 100.33 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -3931,7 +4059,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "a8e58c83-b184-58c1-bfcd-cebdde056d58")
+		(uuid "be17db96-f28e-5b4e-9647-6fadb49c5e8d")
 		(property "Reference" "C58"
 			(at 326.39 84.86 0)
 			(effects (font (size 1.27 1.27)))
@@ -3956,15 +4084,19 @@
 			(at 326.39 90.17 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Samsung/Murata (generic)"
+		(property "Manufacturer" "Samsung/Yageo (JLCPCB basic)"
+			(at 326.39 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C49678"
 			(at 326.39 90.17 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "00d4a149-e368-55a4-ad64-1f2462485ec1")
+			(uuid "b963476a-7361-5d50-a1df-8df6006dcf3b")
 		)
 		(pin "2"
-			(uuid "6a262472-1bcd-5816-a849-d69d888c0a88")
+			(uuid "d30643b1-cbd6-5bc8-adac-860557c52c18")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C58") (unit 1)))
@@ -3979,7 +4111,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "b09d0fc0-f81c-5095-a23a-424a0606322c")
+		(uuid "11b87581-cbd0-5b2a-ac0e-bcd76243d9e0")
 	)
 	(global_label "+12V"
 		(shape passive)
@@ -3989,7 +4121,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "304605e8-2da8-5173-ba45-8bd621b1ddc8")
+		(uuid "8be85102-cc51-5860-a311-57bce689bfda")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 326.39 83.82 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -4004,7 +4136,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "80aeb7be-9eca-58ed-a6f6-ac3f946afd72")
+		(uuid "3c6fe650-54a9-5732-80b3-5bb1347b3dbc")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -4014,7 +4146,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "2b7e612c-3031-50a9-9fff-ea45cfc85a1e")
+		(uuid "11de656c-f115-5b5d-b728-4ed0a1106015")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 326.39 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -4029,7 +4161,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "da1e9091-ae0e-5169-8c7b-be85c38aa6c8")
+		(uuid "1f2bc6a7-212f-5d36-ae79-76fd34b7ccc3")
 		(property "Reference" "C59"
 			(at 336.55 84.86 0)
 			(effects (font (size 1.27 1.27)))
@@ -4038,7 +4170,7 @@
 			(at 336.55 95.48 0)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric"
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
 			(at 336.55 90.17 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -4050,19 +4182,23 @@
 			(at 336.55 90.17 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "MPN" "GRM32ER71E226KE15L"
+		(property "MPN" "MLCC 22uF 25V"
 			(at 336.55 90.17 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Samsung/Murata (generic)"
+		(property "Manufacturer" "Samsung/Yageo (JLCPCB basic)"
+			(at 336.55 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C12891"
 			(at 336.55 90.17 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "4193f6a0-ef47-555c-9b95-15ab92b11438")
+			(uuid "33d04dcf-2d52-56a3-bb4b-48cea4635381")
 		)
 		(pin "2"
-			(uuid "769d4482-d28d-5f38-9da0-622aac6a80a8")
+			(uuid "2c6aab3d-d368-5060-a2ed-4b2db872559b")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C59") (unit 1)))
@@ -4077,7 +4213,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "d4915c03-0bc9-51c2-920f-72aeab923220")
+		(uuid "03615cea-e7aa-57c1-912f-05d2c493f27e")
 	)
 	(global_label "+12V"
 		(shape passive)
@@ -4087,7 +4223,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "72c1bc3c-fb42-50ae-b211-c4c05f526d71")
+		(uuid "d3b48483-1a7b-5d34-8878-1ba16ba324d1")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 336.55 83.82 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -4102,7 +4238,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "3d2d12df-7d41-5869-9c9e-18cbcd43eb69")
+		(uuid "b7b0b725-b656-527f-96df-a8714c02150d")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -4112,7 +4248,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "28ed7d0a-d0f8-52b2-b3b1-071e4cac4787")
+		(uuid "d62edddf-d7ba-50b7-8c0c-1c3648a88823")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 336.55 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -4127,8 +4263,8 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "8398e12d-b8f0-5af8-9aae-fe0dd981b704")
-		(property "Reference" "J21"
+		(uuid "49b5bba9-1481-53ff-8186-94f6a7840b17")
+		(property "Reference" "J26"
 			(at 363.22 75.97 0)
 			(effects (font (size 1.27 1.27)))
 		)
@@ -4136,7 +4272,7 @@
 			(at 363.22 84.05 0)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_PT-1,5-2-3.5-H_1x02_P3.50mm_Horizontal"
+		(property "Footprint" "FM:TB_DB301V-3.5-2P"
 			(at 363.22 78.74 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -4148,22 +4284,26 @@
 			(at 363.22 78.74 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "MPN" "1984617"
+		(property "MPN" "DB301V-3.5-2P-GN-S"
 			(at 363.22 78.74 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Phoenix Contact"
+		(property "Manufacturer" "DORABO"
+			(at 363.22 78.74 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C695629"
 			(at 363.22 78.74 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "880f102f-8f8d-5d27-8b64-65f3fae032a2")
+			(uuid "3a86a251-77b1-5c28-868a-2fc0e39146bf")
 		)
 		(pin "2"
-			(uuid "1174e037-1836-5e78-929b-9659de10220b")
+			(uuid "b3669217-d6a9-52fc-a0ca-90473d78ecb4")
 		)
 		(instances
-			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "J21") (unit 1)))
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "J26") (unit 1)))
 		)
 	)
 	(wire
@@ -4175,7 +4315,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "f4eac4c5-5637-5bc1-bfad-7974afc9b484")
+		(uuid "b8614b76-c3aa-58f6-8c0e-fab53426d09d")
 	)
 	(global_label "MOT_OUT_A"
 		(shape passive)
@@ -4185,7 +4325,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "94e02642-3f84-5d20-bbeb-95a98943d0e1")
+		(uuid "2feb865d-20db-5a59-8e73-dce8e6f7ab63")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 355.6 78.74 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -4200,7 +4340,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "6b6572e7-160d-54b4-883d-d820ece2af53")
+		(uuid "c0414713-dd47-5343-8d6c-0b3427f940c1")
 	)
 	(global_label "MOT_OUT_B"
 		(shape passive)
@@ -4210,7 +4350,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "c9f1d73f-a657-556e-817e-6c843bc759ad")
+		(uuid "a85bc502-febd-5219-b178-09fa32db9f69")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 355.6 81.28 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -4225,7 +4365,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "77808f0b-3eac-5a8d-a30d-60fc80534a07")
+		(uuid "9f11eb25-fa24-59f2-b2b3-28c7cd4ebcce")
 		(property "Reference" "R87"
 			(at 372.11 89.94 0)
 			(effects (font (size 1.27 1.27)))
@@ -4250,15 +4390,19 @@
 			(at 372.11 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Yageo/UniOhm (generic)"
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 372.11 95.25 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C22962"
 			(at 372.11 95.25 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "0186cc2b-97c9-530b-ab00-7379707828cd")
+			(uuid "9f78639f-45bb-5c02-b9fb-8adb8da5473d")
 		)
 		(pin "2"
-			(uuid "a489768d-f51b-5aef-be2f-f64a53a5a9f2")
+			(uuid "de769a85-b1ef-5f3c-af80-8cebbc2630d8")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "R87") (unit 1)))
@@ -4273,7 +4417,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "01eae3e5-aab2-50f8-901b-78f6891a5580")
+		(uuid "c1e4008f-b344-5b60-b61a-883af2daadac")
 	)
 	(global_label "SERVO_PWM"
 		(shape passive)
@@ -4283,7 +4427,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "fdaec5d5-6811-54f2-af38-5033c5adeba3")
+		(uuid "54544a7e-414b-51cd-bdb2-ffa8c5e23858")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 372.11 88.9 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -4298,7 +4442,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "469d08cf-07b4-5514-8b62-2ca1a077060a")
+		(uuid "497573c0-a083-5e46-aeb9-779e0cae5915")
 	)
 	(global_label "SERVO_SIG"
 		(shape passive)
@@ -4308,7 +4452,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "7fdb51df-a3ac-5286-b0af-b88f719ad37d")
+		(uuid "9194562e-13f0-5ba2-b198-c90f3ea27ca1")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 372.11 101.6 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -4323,8 +4467,8 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "5fa7dd3a-27eb-5976-a23b-57e6e52ab075")
-		(property "Reference" "J22"
+		(uuid "b2d99047-0b96-58c6-9b30-3e073b10a6d1")
+		(property "Reference" "J27"
 			(at 40.64 130.58 0)
 			(effects (font (size 1.27 1.27)))
 		)
@@ -4352,17 +4496,21 @@
 			(at 40.64 135.89 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
+		(property "LCSC" "C2937625"
+			(at 40.64 135.89 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
 		(pin "1"
-			(uuid "554568af-1530-5c8d-87fd-24dbc5ccba28")
+			(uuid "4a130be4-f6ba-5215-8909-1bdf3ed41491")
 		)
 		(pin "2"
-			(uuid "c7957174-ae72-512a-9366-de94310a6e06")
+			(uuid "93939f1d-1e87-5651-a382-c37117a5644e")
 		)
 		(pin "3"
-			(uuid "f8838328-65fe-518c-b9a7-e4833803f1d0")
+			(uuid "b674ff41-8d34-5bc6-ae1c-d718042243d2")
 		)
 		(instances
-			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "J22") (unit 1)))
+			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "J27") (unit 1)))
 		)
 	)
 	(wire
@@ -4374,7 +4522,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "adf6f715-0ac4-5228-b5bb-0e6df359e43d")
+		(uuid "e2524212-5750-526e-b491-a7e504cf3778")
 	)
 	(global_label "SERVO_SIG"
 		(shape passive)
@@ -4384,7 +4532,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "df637b3d-1d2b-59bd-b5e3-ba69809e6beb")
+		(uuid "c572a537-45c2-5d1e-9607-7f84d8fbc431")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 33.02 133.35 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -4399,7 +4547,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "7a34db15-926f-5e45-aaf6-0e45d4e36471")
+		(uuid "bc56436b-59d6-52bd-abab-3252e30067ba")
 	)
 	(global_label "+5V"
 		(shape passive)
@@ -4409,7 +4557,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "7c053ccd-018e-573b-91c0-9e98009b942c")
+		(uuid "686f155d-806a-53cf-9cf0-05c0cf805e42")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 33.02 135.89 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -4424,7 +4572,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "87c6c9b5-a94d-5e3a-914d-e9ac5dc1ab91")
+		(uuid "b2627ed3-3db9-57b1-8ed4-a9e978c86020")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -4434,7 +4582,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "14608b30-953a-5832-8aa1-ccc5464c7d4b")
+		(uuid "67b6f8e7-53db-55f4-ad66-75cc49d21c2a")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 33.02 138.43 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -4449,16 +4597,16 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "9083e450-11eb-50a5-85dd-cc066cb78717")
+		(uuid "2fb2faca-4d60-53c8-9662-2db78bce3c24")
 		(property "Reference" "C60"
 			(at 50.8 138.2 0)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Value" "100uF 10V"
+		(property "Value" "47uF 10V"
 			(at 50.8 148.82 0)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric"
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
 			(at 50.8 143.51 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -4470,19 +4618,23 @@
 			(at 50.8 143.51 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "MPN" "GRM32ER61A107ME20L"
+		(property "MPN" "MLCC 47uF 10V"
 			(at 50.8 143.51 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Manufacturer" "Samsung/Murata (generic)"
+		(property "Manufacturer" "Samsung/Yageo (JLCPCB basic)"
+			(at 50.8 143.51 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "LCSC" "C96123"
 			(at 50.8 143.51 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
 		(pin "1"
-			(uuid "bb8dc05c-246e-58ba-9dd4-0f2058f363f2")
+			(uuid "49e580a7-e484-5463-a5cd-1364b68257b3")
 		)
 		(pin "2"
-			(uuid "45cd4787-00da-56ca-a43c-c5b2ce14fe1e")
+			(uuid "75d81275-7aab-59c3-9825-abdc407b75a2")
 		)
 		(instances
 			(project "FilMachine_Mainboard" (path "/a927e185-7e3f-5b80-b685-b3395dc9b500/d349440b-0928-522a-a8f3-b3b172eb680a" (reference "C60") (unit 1)))
@@ -4497,7 +4649,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "0d77eb43-2ffb-5757-ad17-943694e61b4c")
+		(uuid "62de7a1a-6963-5a0d-af13-34545cefd667")
 	)
 	(global_label "+5V"
 		(shape passive)
@@ -4507,7 +4659,7 @@
 			(font (size 1.27 1.27))
 			(justify left)
 		)
-		(uuid "3c4f07c6-4678-5823-bb71-9ede07a5a34c")
+		(uuid "5cac71f3-78b1-5e04-8326-de62deaac851")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 50.8 137.16 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -4522,7 +4674,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "65596e5f-9961-5aa4-a739-f3ab88c78c9a")
+		(uuid "73d43be8-6c95-55da-a9e1-cedfc64d097c")
 	)
 	(global_label "GND"
 		(shape passive)
@@ -4532,7 +4684,7 @@
 			(font (size 1.27 1.27))
 			(justify right)
 		)
-		(uuid "546bf21c-5f06-5868-9f33-b55b1c65543e")
+		(uuid "8b0e926d-64da-592d-aa52-1b3810a4a1d6")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 50.8 149.86 0)
 			(effects (font (size 1.27 1.27)) (hide yes))

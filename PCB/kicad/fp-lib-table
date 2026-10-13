@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "FM")(type "KiCad")(uri "${KIPRJMOD}/FM.pretty")(options "")(descr "FilMachine custom footprints (LCSC parts)"))
+)

@@ -40,7 +40,7 @@ def place_fp(fp, x, y, rot, side):
 fps = {}
 for p in design.PARTS:
     lib, name = p["fp"].split(":")
-    fp = pcbnew.FootprintLoad(f"{FPDIR}/{lib}.pretty", name)
+    fp = pcbnew.FootprintLoad(os.path.join(os.path.dirname(os.path.abspath(__file__)), "FM.pretty") if lib == "FM" else f"{FPDIR}/{lib}.pretty", name)
     if fp is None:
         raise SystemExit("missing fp " + p["fp"])
     fp.SetReference(p["ref"])
@@ -51,7 +51,7 @@ for p in design.PARTS:
     fp.SetPath(pcbnew.KIID_PATH(f"/{sheet_u}/{sym_u}"))
     fp.SetSheetname(dict(design.SHEETS)[p["sheet"]])
     fp.SetSheetfile(f"{p['sheet']}.kicad_sch")
-    for fld, val in (("MPN", p["mpn"]), ("Manufacturer", p["mfr"]), ("Description", p["desc"])):
+    for fld, val in (("MPN", p["mpn"]), ("Manufacturer", p["mfr"]), ("Description", p["desc"]), ("LCSC", p.get("lcsc", ""))):
         fp.SetField(fld, val)
         f = fp.GetFieldByName(fld); f.SetVisible(False); f.SetLayer(pcbnew.F_Fab)
     if p["dnp"]:
@@ -60,7 +60,7 @@ for p in design.PARTS:
         fp.SetExcludedFromBOM(True); fp.SetExcludedFromPosFiles(True)
     for pad in fp.Pads():
         num = pad.GetNumber()
-        if p["ref"] in ("J1", "J2", "C1", "J5", "J3", "J4", "C55", "J22") and p["pins"].get(num) == "GND":
+        if p["ref"] in ("J1", "J2", "J3", "C1", "J5", "J6", "C55", "J27", "J28", "J29", "J30") and p["pins"].get(num) == "GND":
             pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
         if name.startswith("JST_XH") and p["pins"].get(num) == "GND":
             pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)

@@ -316,7 +316,11 @@
     "netclass_patterns": [
       {
         "netclass": "HC",
-        "pattern": "+12V_IN_H"
+        "pattern": "+12V_IN_H1"
+      },
+      {
+        "netclass": "HC",
+        "pattern": "+12V_IN_H2"
       },
       {
         "netclass": "HC",
@@ -372,23 +376,15 @@
       },
       {
         "netclass": "Power",
-        "pattern": "+5V_USB"
+        "pattern": "+12V_AUX"
       },
       {
         "netclass": "Power",
-        "pattern": "VBUS_C"
-      },
-      {
-        "netclass": "Power",
-        "pattern": "USBC_S"
+        "pattern": "+5V_AUX"
       },
       {
         "netclass": "Power",
         "pattern": "SERVO_SIG"
-      },
-      {
-        "netclass": "Power",
-        "pattern": "3V3_DISP"
       },
       {
         "netclass": "Power",

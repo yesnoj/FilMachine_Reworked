@@ -1,0 +1,171 @@
+(footprint "L_SLO0630H"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(descr "Sunltech SLO0630H molded power inductor 7.1x6.6x3.0 mm (LCSC C207842); pads 3.0x3.6, centres +-2.25")
+	(property "Reference" "REF**"
+		(at 0 -1 0)
+		(layer "F.SilkS")
+		(uuid "cc3d881c-4951-443e-8d81-aaf1b17d4349")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "L_SLO0630H"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(uuid "53b064a0-c7a0-417a-ba1d-5d6c4e59423c")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "4400fe56-6280-49d1-9525-c20b99ae9f61")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "f3d276dd-34d4-41df-a4c1-918fb368f966")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_line
+		(start -3.66 -3.41)
+		(end 3.66 -3.41)
+		(stroke
+			(width 0.12)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "d0129ce5-09d1-4f23-8977-ac8df9d7d145")
+	)
+	(fp_line
+		(start -3.66 3.41)
+		(end 3.66 3.41)
+		(stroke
+			(width 0.12)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "fb77e644-f11e-46f2-b991-5df6bbdbb67b")
+	)
+	(fp_line
+		(start -4 -3.55)
+		(end 4 -3.55)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "475bb7b5-5e3f-47d6-b613-953c0a2c4cc9")
+	)
+	(fp_line
+		(start -4 3.55)
+		(end -4 -3.55)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "9c2e67f4-b667-44e9-87a5-a88ddd023e65")
+	)
+	(fp_line
+		(start 4 -3.55)
+		(end 4 3.55)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "f4d2ec94-39fd-4416-98ea-cb5fa98d8269")
+	)
+	(fp_line
+		(start 4 3.55)
+		(end -4 3.55)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "49a73a5f-302c-46a5-9bb7-00fce8b88a93")
+	)
+	(fp_line
+		(start -3.55 -3.3)
+		(end 3.55 -3.3)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "b9d7edc7-89be-4933-b87e-cafcb89cfe53")
+	)
+	(fp_line
+		(start -3.55 3.3)
+		(end -3.55 -3.3)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "8a30fe4b-932e-4188-be92-a802f491cc64")
+	)
+	(fp_line
+		(start 3.55 -3.3)
+		(end 3.55 3.3)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "0b21893a-5004-4484-bb70-d8aa9e07f4de")
+	)
+	(fp_line
+		(start 3.55 3.3)
+		(end -3.55 3.3)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "ed899a4d-1fa3-49dd-8828-4bfcc2d7e978")
+	)
+	(pad "1" smd roundrect
+		(at -2.25 0)
+		(size 3 3.6)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.1)
+		(thermal_bridge_angle 45)
+		(uuid "108feb52-f2a3-4a31-a151-274e13d4bd06")
+	)
+	(pad "2" smd roundrect
+		(at 2.25 0)
+		(size 3 3.6)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.1)
+		(thermal_bridge_angle 45)
+		(uuid "738cff99-1ca3-4d7a-b362-2d052a914690")
+	)
+	(embedded_fonts no)
+)

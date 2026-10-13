@@ -1,0 +1,533 @@
+diff --git a/boards/board_jc4880p433.h b/boards/board_jc4880p433.h
+index b3ecb5c..2232c57 100644
+--- a/boards/board_jc4880p433.h
++++ b/boards/board_jc4880p433.h
+@@ -109,15 +109,28 @@
+  * Drop-in replacement for discrete relay board — same chip,
+  * same address, same register layout.
+  * ═══════════════════════════════════════════════ */
+-/* Port A — solenoid valves + heater relay via Adafruit #6318 MOSFET channels (3.6A max)
+- * Pins 0-4: solenoid valves, Pins 5-6: free, Pin 7: heater relay trigger */
++/* Port A — solenoid valves via Adafruit #6318 MOSFET channels (3.6A max)
++ * Pins 0-4: solenoid valves, Pin 5: mains inlet valve (v6), Pins 6-7: FREE.
++ * On the FilMachine Mainboard A6/A7 drive the "SPARE OUT 1/2" low-side 12 V
++ * outputs (J21/J22, gate pull-down 1 M) and are also brought out on the
++ * "GPIO SPARE" header J30 (A6, A7, 3V3, 5V, GND) through 1 k + Schottky clamp
++ * to 3.3 V. As outputs: J30 follows the pin and the matching SPARE OUT switches.
++ * As inputs: a high level on the pin (external signal, or the MCP internal
++ * pull-up) also turns the matching SPARE OUT on, so read them with the pull-up
++ * OFF and a push-pull 3.3 V source, or accept that SPARE OUT follows the input.
++ * The firmware itself never touches A6/A7 (they stay inputs after reset). */
+ #define RELAY_NUMBER                5       /* Valve channels on MCP23017 port A (pins 0-4) */
+ #define C1_RLY                      0
+ #define C2_RLY                      1
+ #define C3_RLY                      2
+ #define WB_RLY                      3
+ #define WASTE_RLY                   4
+-#define HEATER_RLY                  7       /* Port A pin 7 — drives external relay for heater */
++/* Port A pin 5 — mains water-inlet valve (machine v6). Same pin on the Adafruit
++ * #6318 (MOSFET channel 6) and on the FilMachine Mainboard (terminal J20 "VALVE INLET").
++ * Deliberately outside RELAY_NUMBER: process code never touches it, only the
++ * Maintenance "fill machine" task opens it, and closeAllValves() closes it. */
++#define INLET_RLY                   5
++#define HEATER_RLY                  7       /* Port A pin 7 — legacy single-heater relay; unused with HAS_DUAL_HEATER (A7 is free) */
+ 
+ /* Port B — external relay board (10A per channel, for high-power loads)
+  * 4-channel relay board connected to MCP23017 port B pins 8-11.
+@@ -151,21 +164,23 @@
+ #define HEATER1_PIN                 14      /* B6 — heater MOSFET 1 */
+ #define HEATER2_PIN                 15      /* B7 — heater MOSFET 2 */
+ 
+-/* ── Power-rail monitoring (future custom board) ──
+- * The 12V/5V/3.3V rails must be scaled below the ADC full-scale (~2.5V @ 12dB)
+- * with resistor dividers, each feeding an ADC1 channel. When the custom board
+- * provides them, set HAS_RAIL_MONITOR to 1 and fill in the channels + divider
+- * ratios (ratio = (R_top + R_bottom) / R_bottom). The diagnostics "Power rails"
+- * panel then shows live voltages; until then it shows "n/a". */
+-#define HAS_RAIL_MONITOR            0
+-#if HAS_RAIL_MONITOR
+-#define RAIL_12V_ADC_CH             ADC_CHANNEL_0
+-#define RAIL_12V_DIVIDER            6.0f     /* e.g. 100k/20k → 6.0 */
+-#define RAIL_5V_ADC_CH              ADC_CHANNEL_1
+-#define RAIL_5V_DIVIDER             3.0f     /* e.g. 20k/10k → 3.0 */
+-#define RAIL_3V3_ADC_CH             ADC_CHANNEL_2
+-#define RAIL_3V3_DIVIDER            2.0f     /* e.g. 10k/10k → 2.0 */
+-#endif
++/* ── Power-rail / pump-current monitoring — ADS1115 on the FilMachine Mainboard ──
++ * No JP1 GPIO is left for the P4's own ADC, so the Mainboard carries an ADS1115
++ * (16-bit I2C ADC, U4, ADDR = GND) on the shared I2C bus at 0x48. It is probed at
++ * boot: with the separate modules (Adafruit #6318 + DBH-12V) nothing answers at
++ * 0x48 and the diagnostics "Power rails" panel simply shows "n/a" — no other effect.
++ *   AIN0: +12V through 100k/15k  -> V12 = Vin * 115/15
++ *   AIN1: +5V  through 20k/10k   -> V5  = Vin * 3
++ *   AIN2/AIN3: BTN8962TA IS of pump half-bridge A/B into 1.5k (then 10k + 100nF):
++ *            I = (Vin/1.5k - I_IS(offset)) * kILIS, kILIS = 10000, offset ~0.2 mA
++ *            (BTN8962TA datasheet typ.; calibrate on the bench if needed) */
++#define HAS_RAIL_MONITOR            1
++#define RAIL_MON_I2C_ADDR           0x48
++#define RAIL_12V_DIVIDER            (115.0f / 15.0f)
++#define RAIL_5V_DIVIDER             3.0f
++#define RAIL_PUMP_IS_OHM            1500.0f
++#define RAIL_PUMP_IS_OFFSET_A       0.0002f
++#define RAIL_PUMP_KILIS             10000.0f
+ 
+ /* Pump direction is now handled by DBH-12V H-bridge channel B.
+  * These constants are kept as logical direction markers so that
+diff --git a/c_pages/page_debug.c b/c_pages/page_debug.c
+index 1f742b2..b33c5ae 100644
+--- a/c_pages/page_debug.c
++++ b/c_pages/page_debug.c
+@@ -45,28 +45,12 @@ static const char *reset_reason_str(void) {
+ }
+ #endif
+ 
+-#if HAS_RAIL_MONITOR
+-#include "esp_adc/adc_oneshot.h"
+-static adc_oneshot_unit_handle_t s_adc = NULL;
+-
+-static void rails_adc_init(void) {
+-    if (s_adc) return;
+-    adc_oneshot_unit_init_cfg_t uc = { .unit_id = ADC_UNIT_1 };
+-    if (adc_oneshot_new_unit(&uc, &s_adc) != ESP_OK) { s_adc = NULL; return; }
+-    adc_oneshot_chan_cfg_t cc = { .atten = ADC_ATTEN_DB_12, .bitwidth = ADC_BITWIDTH_DEFAULT };
+-    adc_oneshot_config_channel(s_adc, RAIL_12V_ADC_CH, &cc);
+-    adc_oneshot_config_channel(s_adc, RAIL_5V_ADC_CH,  &cc);
+-    adc_oneshot_config_channel(s_adc, RAIL_3V3_ADC_CH, &cc);
+-}
+-
+-/* Approximate rail voltage. 12dB atten ≈ 0..~2.5V full-scale on 12 bit.
+- * Refine with adc_cali once the real board + dividers exist. Returns <0 on error. */
+-static float rail_read(int ch, float divider) {
+-    if (!s_adc) return -1.0f;
+-    int raw = 0;
+-    if (adc_oneshot_read(s_adc, ch, &raw) != ESP_OK) return -1.0f;
+-    return ((float)raw * (2.5f / 4095.0f)) * divider;
+-}
++/* Power rails: read through the ADS1115 on the FilMachine Mainboard (see
++ * railMonitor* in accessories.c). Shows "n/a" with the separate modules. */
++#if HAS_RAIL_MONITOR && defined(BOARD_JC4880P433)
++#define DBG_RAILS 1
++#else
++#define DBG_RAILS 0
+ #endif
+ 
+ /* ── Layout: header + 3x3 grid of panels on 800x480 ── */
+@@ -275,14 +259,17 @@ static void dbg_refresh(lv_timer_t *t) {
+     snprintf(b, sizeof b, "up %lus", (unsigned long)(lv_tick_get() / 1000));
+     lv_label_set_text(D.lbl_up, b);
+ 
+-#if HAS_RAIL_MONITOR
+-    float rv;
+-    rv = rail_read(RAIL_12V_ADC_CH, RAIL_12V_DIVIDER);
+-    if (rv >= 0) { snprintf(b, sizeof b, "%.2f V", (double)rv); lv_label_set_text(D.lbl_v12, b); }
+-    rv = rail_read(RAIL_5V_ADC_CH, RAIL_5V_DIVIDER);
+-    if (rv >= 0) { snprintf(b, sizeof b, "%.2f V", (double)rv); lv_label_set_text(D.lbl_v5, b); }
+-    rv = rail_read(RAIL_3V3_ADC_CH, RAIL_3V3_DIVIDER);
+-    if (rv >= 0) { snprintf(b, sizeof b, "%.2f V", (double)rv); lv_label_set_text(D.lbl_v33, b); }
++#if DBG_RAILS
++    if (railMonitorPresent()) {
++        float rv;
++        railMonitorPoll();
++        rv = railMonitor12V();
++        if (rv >= 0) { snprintf(b, sizeof b, "%.2f V", (double)rv); lv_label_set_text(D.lbl_v12, b); }
++        rv = railMonitor5V();
++        if (rv >= 0) { snprintf(b, sizeof b, "%.2f V", (double)rv); lv_label_set_text(D.lbl_v5, b); }
++        rv = railMonitorPumpA();
++        if (rv >= 0) { snprintf(b, sizeof b, "~%.1f A", (double)rv); lv_label_set_text(D.lbl_v33, b); }
++    }
+ #endif
+ }
+ 
+@@ -393,14 +380,13 @@ void debugScreenCreate(void) {
+     D.lbl_v12 = make_label(p, 70,  34, &lv_font_montserrat_14, 0xFFFFFF, "n/a");
+     make_label(p, 270, 34, &lv_font_montserrat_14, 0xDDDDDD, "5V");
+     D.lbl_v5  = make_label(p, 330, 34, &lv_font_montserrat_14, 0xFFFFFF, "n/a");
+-    make_label(p, 520, 34, &lv_font_montserrat_14, 0xDDDDDD, "3.3V");
++    make_label(p, 520, 34, &lv_font_montserrat_14, 0xDDDDDD, "Pump");
+     D.lbl_v33 = make_label(p, 590, 34, &lv_font_montserrat_14, 0xFFFFFF, "n/a");
+-#if HAS_RAIL_MONITOR
+-    rails_adc_init();
+-#else
+-    make_label(p, 0, 70, &lv_font_montserrat_12, 0x888888,
+-               "Add resistor dividers on the custom board, then set HAS_RAIL_MONITOR + channels/ratios.");
++#if DBG_RAILS
++    if (!railMonitorPresent())
+ #endif
++        make_label(p, 0, 70, &lv_font_montserrat_12, 0x888888,
++                   "Rail monitor (ADS1115, FilMachine Mainboard) not found: separate modules.");
+ 
+     lv_screen_load(D.scr);
+     dbg_refresh(NULL);
+diff --git a/drivers/ads1115.c b/drivers/ads1115.c
+new file mode 100644
+index 0000000..89a61bd
+--- /dev/null
++++ b/drivers/ads1115.c
+@@ -0,0 +1,108 @@
++/**
++ * @file ads1115.c
++ * @brief Minimal ADS1115 driver (ESP32-P4 i2c_master API). See ads1115.h.
++ */
++#include "include/ads1115.h"
++
++#if defined(BOARD_JC4880P433)
++#include <string.h>
++#include "esp_log.h"
++
++#define TAG              "ADS1115"
++#define I2C_TIMEOUT_MS   50
++
++/* Register pointer values */
++#define REG_CONVERSION   0x00
++#define REG_CONFIG       0x01
++
++/* Config register (16 bit):
++ *   bit 15    OS        write 1 = start a single conversion; read 1 = idle, 0 = converting
++ *   bits14:12 MUX       100..111 = AIN0..AIN3 single-ended (vs GND)
++ *   bits11:9  PGA       010 = +-2.048 V full scale (LSB 62.5 uV)
++ *   bit 8     MODE      1 = single-shot / power-down
++ *   bits 7:5  DR        100 = 128 SPS (~7.8 ms per conversion)
++ *   bits 4:0  comparator disabled (COMP_QUE = 11) */
++#define CFG_OS_START     0x8000
++#define CFG_MUX_SE(ch)   ((uint16_t)(0x4000 | ((uint16_t)(ch) << 12)))
++#define CFG_PGA_2V048    0x0400
++#define CFG_MODE_SINGLE  0x0100
++#define CFG_DR_128SPS    0x0080
++#define CFG_COMP_OFF     0x0003
++#define LSB_VOLTS        (2.048f / 32768.0f)
++
++static esp_err_t write_reg(ads1115_t *dev, uint8_t reg, uint16_t val)
++{
++    uint8_t buf[3] = { reg, (uint8_t)(val >> 8), (uint8_t)val };
++    return i2c_master_transmit(dev->dev_handle, buf, sizeof buf, I2C_TIMEOUT_MS);
++}
++
++static esp_err_t read_reg(ads1115_t *dev, uint8_t reg, uint16_t *val)
++{
++    uint8_t rx[2] = { 0, 0 };
++    esp_err_t ret = i2c_master_transmit_receive(dev->dev_handle, &reg, 1, rx, sizeof rx, I2C_TIMEOUT_MS);
++    if (ret == ESP_OK) *val = (uint16_t)(((uint16_t)rx[0] << 8) | rx[1]);
++    return ret;
++}
++
++esp_err_t ads1115_init(ads1115_t *dev, i2c_master_bus_handle_t bus, uint8_t addr)
++{
++    memset(dev, 0, sizeof(*dev));
++    dev->addr = addr;
++
++    /* Probe first: with the separate-module setup nothing answers here and we
++     * must not register a device that is not there. */
++    if (i2c_master_probe(bus, addr, I2C_TIMEOUT_MS) != ESP_OK) {
++        ESP_LOGI(TAG, "no ADS1115 at 0x%02X (rail monitor disabled)", addr);
++        return ESP_ERR_NOT_FOUND;
++    }
++
++    i2c_device_config_t cfg = {
++        .dev_addr_length = I2C_ADDR_BIT_LEN_7,
++        .device_address  = addr,
++        .scl_speed_hz    = 400000,
++    };
++    esp_err_t ret = i2c_master_bus_add_device(bus, &cfg, &dev->dev_handle);
++    if (ret != ESP_OK) {
++        ESP_LOGE(TAG, "add device 0x%02X failed: %s", addr, esp_err_to_name(ret));
++        dev->dev_handle = NULL;
++        return ret;
++    }
++    /* Sanity check that it really is an ADS1115: the config register must read
++     * back as idle single-shot with the comparator bits we write. */
++    uint16_t cfgv = 0;
++    ret = write_reg(dev, REG_CONFIG, CFG_MUX_SE(0) | CFG_PGA_2V048 | CFG_MODE_SINGLE | CFG_DR_128SPS | CFG_COMP_OFF);
++    if (ret == ESP_OK) ret = read_reg(dev, REG_CONFIG, &cfgv);
++    if (ret != ESP_OK || (cfgv & 0x7FFF) != (CFG_MUX_SE(0) | CFG_PGA_2V048 | CFG_MODE_SINGLE | CFG_DR_128SPS | CFG_COMP_OFF)) {
++        ESP_LOGW(TAG, "device at 0x%02X does not behave like an ADS1115 (cfg 0x%04X): rail monitor disabled", addr, cfgv);
++        i2c_master_bus_rm_device(dev->dev_handle);
++        dev->dev_handle = NULL;
++        return ESP_ERR_NOT_SUPPORTED;
++    }
++    ESP_LOGI(TAG, "ADS1115 found at 0x%02X", addr);
++    return ESP_OK;
++}
++
++esp_err_t ads1115_start(ads1115_t *dev, uint8_t ch)
++{
++    if (!dev->dev_handle || ch > 3) return ESP_ERR_INVALID_STATE;
++    dev->channel = ch;
++    return write_reg(dev, REG_CONFIG,
++                     CFG_OS_START | CFG_MUX_SE(ch) | CFG_PGA_2V048 | CFG_MODE_SINGLE | CFG_DR_128SPS | CFG_COMP_OFF);
++}
++
++esp_err_t ads1115_read(ads1115_t *dev, float *volts, bool *ready)
++{
++    *ready = false;
++    if (!dev->dev_handle) return ESP_ERR_INVALID_STATE;
++    uint16_t cfg = 0;
++    esp_err_t ret = read_reg(dev, REG_CONFIG, &cfg);
++    if (ret != ESP_OK) return ret;
++    if (!(cfg & CFG_OS_START)) return ESP_OK;       /* OS = 0: still converting */
++    uint16_t raw = 0;
++    ret = read_reg(dev, REG_CONVERSION, &raw);
++    if (ret != ESP_OK) return ret;
++    *volts = (float)(int16_t)raw * LSB_VOLTS;       /* single-ended: 0..+2.048 V (small negative = noise) */
++    *ready = true;
++    return ESP_OK;
++}
++#endif /* BOARD_JC4880P433 */
+diff --git a/drivers/include/ads1115.h b/drivers/include/ads1115.h
+new file mode 100644
+index 0000000..9b53f4b
+--- /dev/null
++++ b/drivers/include/ads1115.h
+@@ -0,0 +1,44 @@
++/**
++ * @file ads1115.h
++ * @brief Minimal ESP-IDF driver for the TI ADS1115 4-channel 16-bit delta-sigma ADC (I2C)
++ *
++ * Used on the FilMachine Mainboard (U4, ADDR = GND -> 0x48) for the 12 V / 5 V rails
++ * and the pump current (BTN8962 IS pins). Non-blocking use: ads1115_start() launches a
++ * one-shot single-ended conversion on a channel, ads1115_read() fetches it later and
++ * reports not-ready while it is still converting.
++ * Fixed setup: PGA +-2.048 V (LSB 62.5 uV), 128 SPS (one conversion ~ 8 ms).
++ */
++#ifndef ADS1115_H
++#define ADS1115_H
++
++#include <stdint.h>
++#include <stdbool.h>
++#include "esp_err.h"
++
++#if defined(BOARD_JC4880P433)
++#include "driver/i2c_master.h"
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++typedef struct {
++    i2c_master_dev_handle_t dev_handle;
++    uint8_t                 addr;
++    uint8_t                 channel;    /* channel of the last started conversion (0..3 = AIN0..AIN3) */
++} ads1115_t;
++
++/** Probe @p addr on @p bus; on success register the device. ESP_ERR_NOT_FOUND if absent. */
++esp_err_t ads1115_init(ads1115_t *dev, i2c_master_bus_handle_t bus, uint8_t addr);
++
++/** Start a one-shot conversion of AINn against GND, n = @p ch (0..3). */
++esp_err_t ads1115_start(ads1115_t *dev, uint8_t ch);
++
++/** Read the last conversion. *ready = false while still converting. */
++esp_err_t ads1115_read(ads1115_t *dev, float *volts, bool *ready);
++
++#ifdef __cplusplus
++}
++#endif
++#endif /* BOARD_JC4880P433 */
++#endif /* ADS1115_H */
+diff --git a/main/accessories.c b/main/accessories.c
+index b38c7bf..e709801 100644
+--- a/main/accessories.c
++++ b/main/accessories.c
+@@ -37,6 +37,10 @@
+ #include "FilMachine.h"
+ #include "ws_server.h"
+ #include "mcp23017.h"
++#include "ads1115.h"
++#if HAS_RAIL_MONITOR && defined(BOARD_JC4880P433)
++static void railMonitorInit(void);
++#endif
+ #include "ds18b20.h"
+ #include "mini_json.h"
+ /* pca9685.h removed — pump now driven by DBH-12V H-bridge */
+@@ -1081,6 +1085,9 @@ void init_Pins_and_Buses( void ) {
+         initializeRelayPins();
+         initializeMotorPins();
+         initializeChemLevelPins();
++#if HAS_RAIL_MONITOR && defined(BOARD_JC4880P433)
++        railMonitorInit();      /* FilMachine Mainboard only; absent = no-op */
++#endif
+         /* NOTE: the valve self-test used to run here and blocked boot for
+          * ~3.75s before the display came up. It is now deferred: app_main posts
+          * SELFTEST_VALVES to sysMan right after the splash loads, so the display
+@@ -1820,6 +1827,13 @@ void initializeRelayPins(){
+         mcp23017_digitalWrite(&mcp, i, 0);
+         LV_LOG_USER("Relay pin %d init: %d", i, mcp23017_digitalRead(&mcp, i));
+     }
++#if defined(INLET_RLY)
++    /* Mains water-inlet valve (A5): output, closed. Outside RELAY_NUMBER, so it
++     * is set up here explicitly — otherwise it stays an MCP input and the
++     * Maintenance fill could never open it. */
++    mcp23017_pinMode(&mcp, INLET_RLY, MCP23017_OUTPUT);
++    mcp23017_digitalWrite(&mcp, INLET_RLY, 0);
++#endif
+ #if defined(PORTB_RELAY_COUNT) && !defined(HAS_CHEM_LEVEL_SENSORS)
+     /* Port B: external relay board channels (pins 8-11, active HIGH) */
+     for (uint8_t i = 0; i < PORTB_RELAY_COUNT; i++) {
+@@ -1889,10 +1903,57 @@ bool debugMcpPresent(void) {
+     return initErrors != INIT_ERROR_I2C_MCP;
+ }
+ 
++#if HAS_RAIL_MONITOR && defined(BOARD_JC4880P433)
++/* ── Rail / pump-current monitor (ADS1115 on the FilMachine Mainboard) ──
++ * Probed once at boot. Absent (separate modules) -> railMonitorPresent() false
++ * and nothing else ever touches address 0x48. Present -> the diagnostics page
++ * calls railMonitorPoll() from its refresh timer: each call collects the
++ * conversion started by the previous call and starts the next channel, so no
++ * call ever waits for the ADC. Nothing runs outside the diagnostics page. */
++static ads1115_t s_railAdc;
++static bool      s_railPresent = false;
++static bool      s_railStarted = false;
++static float     s_railVin[4]  = { -1.0f, -1.0f, -1.0f, -1.0f };
++
++static void railMonitorInit(void) {
++    s_railPresent = (ads1115_init(&s_railAdc, g_i2c_bus_handle, RAIL_MON_I2C_ADDR) == ESP_OK);
++}
++
++bool railMonitorPresent(void) { return s_railPresent; }
++
++void railMonitorPoll(void) {
++    if (!s_railPresent) return;
++    uint8_t next = 0;
++    if (s_railStarted) {
++        float v; bool ready = false;
++        if (ads1115_read(&s_railAdc, &v, &ready) == ESP_OK && !ready) return;  /* try again next tick */
++        if (ready) s_railVin[s_railAdc.channel] = v < 0.0f ? 0.0f : v;   /* -1 LSB of noise at 0 V is not "n/a" */
++        next = (uint8_t)((s_railAdc.channel + 1) & 3);
++    }
++    s_railStarted = (ads1115_start(&s_railAdc, next) == ESP_OK);
++}
++
++/* Latest values; negative = not available yet. */
++float railMonitor12V(void) { return s_railVin[0] < 0 ? -1.0f : s_railVin[0] * RAIL_12V_DIVIDER; }
++float railMonitor5V(void)  { return s_railVin[1] < 0 ? -1.0f : s_railVin[1] * RAIL_5V_DIVIDER; }
++/* Pump supply current: only the high side that is conducting reports current,
++ * so take the larger of the two half-bridges. Averaged over the PWM period by
++ * the 10k/100nF filter. Approximate until calibrated on the bench. */
++float railMonitorPumpA(void) {
++    if (s_railVin[2] < 0 || s_railVin[3] < 0) return -1.0f;
++    float vis = s_railVin[2] > s_railVin[3] ? s_railVin[2] : s_railVin[3];
++    float a = (vis / RAIL_PUMP_IS_OHM - RAIL_PUMP_IS_OFFSET_A) * RAIL_PUMP_KILIS;
++    return a < 0.0f ? 0.0f : a;
++}
++#endif
++
+ void closeAllValves(void) {
+     for (uint8_t i = 0; i < RELAY_NUMBER; i++) {
+         mcp23017_digitalWrite(&mcp, i, 0);
+     }
++#if defined(INLET_RLY)
++    mcp23017_digitalWrite(&mcp, INLET_RLY, 0);
++#endif
+ }
+ 
+ /* Boot self-test: turn on then off each Port-A channel of the #6318 in sequence
+@@ -1958,7 +2019,7 @@ void sensorsSelfTestInit(void) {}
+ #endif
+ 
+ /* ── Machine (water-bath) fill ──
+- * Maintenance action: open the WB valve and meter the incoming water with the
++ * Maintenance action: open the mains inlet valve (INLET_RLY) and meter the incoming water with the
+  * flow sensor, stopping once FILL_TARGET_ML has been dispensed. The MAX level
+  * switch is a safety backstop (stop early if it trips), plus a safety timeout
+  * and a manual Stop. The water inlet is already pressurized, so NO pump is
+@@ -1968,10 +2029,15 @@ void sensorsSelfTestInit(void) {}
+  * This is standalone and does NOT touch the process state machine, so it must
+  * not go through sendValueToRelay (that dereferences the active process node,
+  * which is NULL outside a running process). */
+-#define MACHINE_FILL_TIMEOUT_MS   600000    /* 10 min safety cap (5 L bath)      */
++#define MACHINE_FILL_TIMEOUT_MS   1200000   /* 20 min safety cap (12.8 L bath, v6) */
+ #define FILL_FLOW_GRACE_MS        4000      /* window to see flow start          */
+ #define FILL_FLOW_MIN_PULSES      3         /* pulses that confirm real flow     */
+-#define FILL_MIN_CONFIRM_MS       20000     /* low float must wet within this after flow starts */
++#define FILL_MAX_VOLUME_ML        16000     /* hard cap: the v6 bath holds 12.8 L up to MAX; more than
++                                               * this means the MAX float failed -> stop (FILL_TIMEOUT) */
++#define FILL_FLOW_STALL_MS        10000     /* flow stopped this long with the valve open -> FILL_NOFLOW */
++#define FILL_MIN_CONFIRM_ML       12000     /* low float must wet within this volume: on an empty
++                                               * v6 bath the MIN float wets after ~9.3 L, which a
++                                               * 3-5 L/min tap needs 2-3 minutes for */
+ 
+ static volatile int      s_fillState    = FILL_IDLE;
+ static volatile bool     s_fillStopReq  = false;
+@@ -2029,6 +2095,14 @@ bool machineFillManual(void) {
+ }
+ 
+ #if defined(BOARD_JC4880P433)
++/* Valve that lets mains water into the bath. v6: a dedicated inlet valve on A5
++ * (the WB valve connects the bath pick-up to the pump, not to the mains). */
++#if defined(INLET_RLY)
++#define FILL_VALVE  INLET_RLY
++#else
++#define FILL_VALVE  WB_RLY
++#endif
++
+ static void machine_fill_task(void *arg) {
+     (void)arg;
+     s_fillStopReq  = false;
+@@ -2081,14 +2155,15 @@ static void machine_fill_task(void *arg) {
+         return;
+     }
+ 
+-    ESP_LOGI(TAG, "Machine fill: opening WB valve, target %d ml", FILL_TARGET_ML);
++    ESP_LOGI(TAG, "Machine fill: opening inlet valve (A%d), target %d ml", FILL_VALVE, FILL_TARGET_ML);
+ 
+-    mcp23017_digitalWrite(&mcp, WB_RLY, 1);          /* open water-bath valve   */
++    mcp23017_digitalWrite(&mcp, FILL_VALVE, 1);      /* open the mains inlet    */
+ 
+     const uint32_t ppl        = sensors_flow_pulses_per_litre();   /* ~450     */
+     const uint32_t startTotal = sensors_flow_get_total_pulses();
+     uint32_t       prevTotal  = startTotal;
+     bool           flowConfirmed = false;
++    int            lastFlowMs  = 0;    /* last tick that saw at least one pulse */
+     bool           minConfirmed  = false;
+     int            elapsed     = 0;
+     int            minWetMs    = -1;   /* time the MIN float first wet (MIN→MAX calibration) */
+@@ -2104,6 +2179,7 @@ static void machine_fill_task(void *arg) {
+         /* Instantaneous flow rate over the 200 ms tick (L/min). */
+         uint32_t stepPulses = total - prevTotal;
+         prevTotal = total;
++        if (stepPulses > 0) lastFlowMs = elapsed;
+         s_fillFlowLpm = ((float)stepPulses / ppl) * (60.0f / 0.2f);
+ 
+         bool maxWet = FILL_IGNORE_MAX ? false : sensors_water_level_max_detected();
+@@ -2125,18 +2201,23 @@ static void machine_fill_task(void *arg) {
+          * the valve; if not, the inlet has no water — abort. */
+         if (!flowConfirmed && dPulses >= FILL_FLOW_MIN_PULSES) flowConfirmed = true;
+         if (!flowConfirmed && elapsed >= FILL_FLOW_GRACE_MS)   { s_fillState = FILL_NOFLOW; break; }
++        /* Tap closed / mains pressure lost mid-fill: don't leave the valve open. */
++        if (flowConfirmed && elapsed - lastFlowMs >= FILL_FLOW_STALL_MS) { s_fillState = FILL_NOFLOW; break; }
++        /* Belt and braces against a failed MAX float: never let more than the
++         * bath could possibly hold go in (the rest would leave by the overflow). */
++        if (s_fillVolumeMl >= FILL_MAX_VOLUME_ML)              { s_fillState = FILL_TIMEOUT; break; }
+ 
+         /* Level cross-check: flow is going in, so the low float must wet within a
+          * short window — otherwise water flows but the bath isn't filling. */
+         if (!minConfirmed && sensors_water_level_detected())          minConfirmed = true;
+-        if (!minConfirmed && elapsed >= FILL_MIN_CONFIRM_MS)          { s_fillState = FILL_NOLEVEL; break; }
++        if (!minConfirmed && s_fillVolumeMl >= FILL_MIN_CONFIRM_ML)  { s_fillState = FILL_NOLEVEL; break; }
+ 
+         vTaskDelay(pdMS_TO_TICKS(200));
+         elapsed += 200;
+     }
+ 
+     s_fillFlowLpm = 0.0f;
+-    mcp23017_digitalWrite(&mcp, WB_RLY, 0);          /* close valve             */
++    mcp23017_digitalWrite(&mcp, FILL_VALVE, 0);      /* close the mains inlet   */
+     ESP_LOGI(TAG, "Machine fill ended (state=%d, %lu ml)", s_fillState, (unsigned long)s_fillVolumeMl);
+     vTaskDelete(NULL);
+ }
+diff --git a/main/include/FilMachine.h b/main/include/FilMachine.h
+index 3921030..c33b79b 100644
+--- a/main/include/FilMachine.h
++++ b/main/include/FilMachine.h
+@@ -2220,6 +2220,13 @@ void closeAllValves(void);
+ void    debugScreenCreate(void);            /* build + show the diagnostics screen */
+ void    debugMcpWrite(uint8_t pin, bool on);/* direct MCP output write (heaters etc.) */
+ bool    debugMcpPresent(void);              /* MCP23017 detected on the I2C bus */
++#if HAS_RAIL_MONITOR && defined(BOARD_JC4880P433)
++bool    railMonitorPresent(void);           /* ADS1115 (Mainboard) answered at boot */
++void    railMonitorPoll(void);              /* non-blocking: collect one channel, start the next */
++float   railMonitor12V(void);               /* volts, <0 = n/a */
++float   railMonitor5V(void);
++float   railMonitorPumpA(void);             /* pump supply current, amps (approx.) */
++#endif
+ uint8_t ui_active_touch_points(void);       /* simultaneous touch points (board only) */
+ void valveSelfTest(void);
+ void sensorsSelfTestInit(void);

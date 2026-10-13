@@ -233,24 +233,24 @@
  {
   "nome": "B14_slitta_DX",
   "q": 1,
-  "volume_cm3": 5.0,
+  "volume_cm3": 5.3,
   "ingombro": [
-   30.0,
-   29.5,
+   29.1,
+   29.8,
    73.0
   ],
-  "note": "in piedi sulla coda; supporti solo dal piatto (sotto il piano e l'aletta); si blocca con una vite zigrinata M3 x 6"
+  "note": "in piedi sulla coda; supporti solo dal piatto (sotto il mozzo e il cappuccio); si blocca con una vite zigrinata M3 x 10 nell'orecchia del mozzo"
  },
  {
   "nome": "B15_slitta_SX",
   "q": 1,
-  "volume_cm3": 5.0,
+  "volume_cm3": 5.3,
   "ingombro": [
-   30.0,
-   29.5,
+   29.1,
+   29.8,
    73.0
   ],
-  "note": "in piedi sulla coda; supporti solo dal piatto (sotto il piano e l'aletta); si blocca con una vite zigrinata M3 x 6"
+  "note": "in piedi sulla coda; supporti solo dal piatto (sotto il mozzo e il cappuccio); si blocca con una vite zigrinata M3 x 10 nell'orecchia del mozzo"
  },
  {
   "nome": "B16_trascinatore",

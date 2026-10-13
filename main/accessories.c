@@ -37,7 +37,7 @@
 #include "FilMachine.h"
 #include "ws_server.h"
 #include "mcp23017.h"
-#include "mcp3424.h"
+#include "ads1115.h"
 #if HAS_RAIL_MONITOR && defined(BOARD_JC4880P433)
 static void railMonitorInit(void);
 #endif
@@ -1904,19 +1904,19 @@ bool debugMcpPresent(void) {
 }
 
 #if HAS_RAIL_MONITOR && defined(BOARD_JC4880P433)
-/* ── Rail / pump-current monitor (MCP3424 on the FilMachine Mainboard) ──
+/* ── Rail / pump-current monitor (ADS1115 on the FilMachine Mainboard) ──
  * Probed once at boot. Absent (separate modules) -> railMonitorPresent() false
- * and nothing else ever touches address 0x68. Present -> the diagnostics page
+ * and nothing else ever touches address 0x48. Present -> the diagnostics page
  * calls railMonitorPoll() from its refresh timer: each call collects the
  * conversion started by the previous call and starts the next channel, so no
  * call ever waits for the ADC. Nothing runs outside the diagnostics page. */
-static mcp3424_t s_railAdc;
+static ads1115_t s_railAdc;
 static bool      s_railPresent = false;
 static bool      s_railStarted = false;
 static float     s_railVin[4]  = { -1.0f, -1.0f, -1.0f, -1.0f };
 
 static void railMonitorInit(void) {
-    s_railPresent = (mcp3424_init(&s_railAdc, g_i2c_bus_handle, RAIL_MON_I2C_ADDR) == ESP_OK);
+    s_railPresent = (ads1115_init(&s_railAdc, g_i2c_bus_handle, RAIL_MON_I2C_ADDR) == ESP_OK);
 }
 
 bool railMonitorPresent(void) { return s_railPresent; }
@@ -1926,11 +1926,11 @@ void railMonitorPoll(void) {
     uint8_t next = 0;
     if (s_railStarted) {
         float v; bool ready = false;
-        if (mcp3424_read(&s_railAdc, &v, &ready) == ESP_OK && !ready) return;  /* try again next tick */
-        if (ready) s_railVin[s_railAdc.channel] = v;
+        if (ads1115_read(&s_railAdc, &v, &ready) == ESP_OK && !ready) return;  /* try again next tick */
+        if (ready) s_railVin[s_railAdc.channel] = v < 0.0f ? 0.0f : v;   /* -1 LSB of noise at 0 V is not "n/a" */
         next = (uint8_t)((s_railAdc.channel + 1) & 3);
     }
-    s_railStarted = (mcp3424_start(&s_railAdc, next) == ESP_OK);
+    s_railStarted = (ads1115_start(&s_railAdc, next) == ESP_OK);
 }
 
 /* Latest values; negative = not available yet. */

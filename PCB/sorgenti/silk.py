@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Silkscreen: references, connector names, input polarity legends, board name, the warranty line. Idempotent."""
+"""Silkscreen: references, connector names, input polarity legends, board name, the warranty line. Idempotent.
+v1.1 refs: J1-J3 12 V inputs (left), J5 display, J28/J29 service outputs (top), J7-J14 sensors (right), J15-J22 valves (bottom),
+J23/J24 heaters (top), J25 pump (left), J26 motor (bottom-left), J27 servo."""
 import sys
 import pcbnew
 from placement import ORIGIN, BOARD_W, BOARD_H
@@ -19,8 +21,8 @@ def text(s, x, y, size=1.0, layer=pcbnew.F_SilkS, angle=0, bold=False):
     if layer == pcbnew.B_SilkS: t.SetMirrored(True)
     b.Add(t)
 
-SMALL = ("R_0603", "C_0603", "C_0805", "LED_0603", "D_SOD-323", "D_SOD-123", "C_1206", "C_1210", "Fuse_1206",
-         "Fuse_1812", "SOT-23", "SolderJumper", "D_SMA")
+SMALL = ("R_0603", "C_0603", "C_0805", "LED_0603", "LED_0805", "D_SOD-323", "D_SOD-123", "C_1206", "C_1210",
+         "Fuse_1206", "Fuse_1812", "SOT-23", "SolderJumper", "D_SMA")
 for f in b.GetFootprints():
     name = str(f.GetFPID().GetLibItemName())
     ref = f.Reference(); ref.SetTextSize(pcbnew.VECTOR2I(MM(0.8), MM(0.8))); ref.SetTextThickness(MM(0.13))
@@ -28,43 +30,74 @@ for f in b.GetFootprints():
     ref.SetVisible(not (small or f.GetReference().startswith(("H", "J"))))
     v = f.Value(); v.SetVisible(False)
 
+def pad(ref, num):
+    f = b.FindFootprintByReference(ref)
+    p = [q for q in f.Pads() if q.GetNumber() == str(num)][0].GetPosition()
+    return p.x / 1e6 - ORIGIN[0], p.y / 1e6 - ORIGIN[1]
+
 # connector names, placed where they stay visible after assembly
 LABEL = {  # ref: (text, x, y, angle, size)
-    "J18": ("HEATER 1", 25.65, 6.0, 90, 0.9), "J19": ("HEATER 2", 40.15, 6.0, 90, 0.9),
-    "J4": ("DISPLAY JP1  (pin 1 = quadrato)", 63.0, 15.3, 0, 0.8),
-    "J21": ("MOTOR", 13.05, 80.4, 0, 0.9), "J14": ("VALVE C1 | C2", 48.8, 80.4, 0, 0.9),
-    "J15": ("VALVE C3 | WB", 64.1, 80.4, 0, 0.9), "J16": ("WASTE | INLET", 79.4, 80.4, 0, 0.9),
-    "J17": ("SPARE A6 | A7", 94.6, 80.4, 0, 0.9),
+    "J23": ("HEATER 1", 25.6, 6.0, 90, 0.9), "J24": ("HEATER 2", 40.0, 6.0, 90, 0.9),
+    "J5": ("DISPLAY JP1  (pin 1 = quadrato)", 63.0, 15.3, 0, 0.8),
+    "J26": ("MOTOR", 12.8, 81.7, 0, 0.9),
 }
+VALVE = {"J15": "C1", "J16": "C2", "J17": "C3", "J18": "WB", "J19": "WASTE", "J20": "INLET", "J21": "SPARE 1", "J22": "SPARE 2"}
 for f in b.GetFootprints():
     r = f.GetReference()
+    c = f.GetCourtyard(pcbnew.F_CrtYd).BBox()
+    cx = (c.GetLeft() + c.GetRight()) / 2e6 - ORIGIN[0]
     if r in LABEL:
         s, x, y, a, sz = LABEL[r]; text(s, x, y, sz, angle=a)
-    elif r in ("J6", "J7", "J8", "J9", "J10"):
-        c = f.GetCourtyard(pcbnew.F_CrtYd).BBox()
+    elif r in VALVE:
+        text(VALVE[r], cx, 81.6, 0.8)
+    elif r in ("J7", "J8", "J9", "J10", "J11"):     # right-edge JST, name to the left, vertical
         text(f.GetValue(), c.GetLeft() / 1e6 - ORIGIN[0] - 0.8, (c.GetTop() + c.GetBottom()) / 2e6 - ORIGIN[1], 0.8, angle=90)
-    elif r in ("J11", "J12", "J13", "J22", "J5"):
-        c = f.GetCourtyard(pcbnew.F_CrtYd).BBox()
-        text(f.GetValue(), (c.GetLeft() + c.GetRight()) / 2e6 - ORIGIN[0], c.GetTop() / 1e6 - ORIGIN[1] - 0.6, 0.8)
+    elif r in ("J12", "J13", "J14", "J27", "J6"):   # name above
+        text(f.GetValue(), cx, c.GetTop() / 1e6 - ORIGIN[1] - 0.6, 0.8)
 
-# supply inputs: the only connectors where polarity matters
-text("12V HEAT IN", 6.3, 17.0, 0.8, bold=True)
-text("-  sopra", 6.3, 18.5, 0.8)
-text("+  sotto", 6.3, 19.9, 0.8)
-text("12V MAIN IN", 6.3, 48.4, 0.8, bold=True)
-text("- sopra + sotto", 6.3, 49.9, 0.8)
-text("PUMP", 6.3, 66.4, 0.9, bold=True)
-text("USB-C", 99.8, 2.4, 0.8, bold=True)   # J3: 5 V output only
-text("5V OUT", 99.8, 3.9, 0.8)
+# supply inputs and pump on the left edge: vertical legend right next to the terminal (x 11.1, between the
+# terminal body and F1/F3), reading bottom-to-top so that the first character sits at the LOWER pin (pin 2 = +)
+for ref, s in (("J2", "+ 12V IN HEATER 2 -"), ("J1", "+ 12V IN HEATER 1 -"), ("J3", "+ 12V IN MAIN -"), ("J25", "B  PUMP  A")):
+    (x1, y1), (x2, y2) = pad(ref, 1), pad(ref, 2)
+    text(s, 11.1, (y1 + y2) / 2, 0.7, angle=90, bold=True)
+# heater outputs: polarity marks under the terminal, between it and D41/D42
+for ref in ("J23", "J24"):
+    text("+", pad(ref, 2)[0], 11.3, 0.8, bold=True)
+    text("-", pad(ref, 1)[0], 11.3, 0.8, bold=True)
+text("VALVOLE 12V:  + sx   - dx", 33.0, 80.0, 0.7)
+# service outputs on the top edge: name + polarity under each terminal (pin 2 = + on the left, pin 1 = GND)
+f8 = b.FindFootprintByReference("F8").GetCourtyard(pcbnew.F_CrtYd).BBox().GetTop() / 1e6 - ORIGIN[1]
+if f8 > 9.0:      # PTC block lowered (placement >= v18): label in the gap between terminal body and PTCs
+    for ref, s in (("J28", "+ 12V OUT 2A -"), ("J29", "+ 5V OUT 1A -")):
+        f = b.FindFootprintByReference(ref); c = f.GetCourtyard(pcbnew.F_CrtYd).BBox()
+        cx = (c.GetLeft() + c.GetRight()) / 2e6 - ORIGIN[0]
+        text(s, cx, 8.45, 0.65, bold=True)     # pin 2 = + on the left
+else:             # PTC block right under the terminals: two lines below the PTCs
+    text("sx 12V OUT 2A  dx 5V OUT 1A", 91.6, 15.0, 0.7, bold=True)
+    text("+ a sinistra, - a destra", 91.6, 16.1, 0.7)
+# spare GPIO header: pin names beside the pins (pin 1 at the top)
+f = b.FindFootprintByReference("J30"); c = f.GetCourtyard(pcbnew.F_CrtYd).BBox()
+text("GPIO SPARE", c.GetLeft() / 1e6 - ORIGIN[0] - 3.3, pad("J30", 1)[1], 0.7, bold=True)   # left of pin 1 (R97/D47 sit above the header)
+for n, nm in enumerate(("A6", "A7", "3V3", "5V", "GND")):
+    x, y = pad("J30", n + 1)
+    text(nm, x + 2.9, y, 0.7)
+for ref, s in (("F1", "15A"), ("F2", "15A"), ("F3", "15A"), ("F4", "8A")):
+    f = b.FindFootprintByReference(ref); c = f.GetCourtyard(pcbnew.F_CrtYd).BBox()
+    if abs(f.GetOrientationDegrees()) == 90:    # vertical fuse: value beside it (F2: on the left, away from Q10's reference)
+        xs = c.GetLeft() / 1e6 - ORIGIN[0] - 0.6 if ref == "F2" else c.GetRight() / 1e6 - ORIGIN[0] + 0.6
+        text(s, xs, (c.GetTop() + c.GetBottom()) / 2e6 - ORIGIN[1], 0.7, angle=90)
+    else:
+        text(s, (c.GetLeft() + c.GetRight()) / 2e6 - ORIGIN[0], c.GetTop() / 1e6 - ORIGIN[1] - 0.6, 0.7)
 
 text("FilMachine", 6.6, 70.8, 1.4, bold=True)
-text("Board v1.0", 6.6, 73.2, 1.4, bold=True)
+text("Board v1.1", 6.6, 73.2, 1.4, bold=True)
 text("2026-10", 6.6, 75.2, 0.8)
 text("If you can read this,", 97.2, 68.0, 0.9, angle=90)
 text("you have voided your warranty", 98.9, 68.0, 0.9, angle=90)
 
-text("FilMachine Board v1.0 - 2026-10", 55.0, 45.0, 1.5, layer=pcbnew.B_SilkS)
+text("FilMachine Board v1.1 - 2026-10", 55.0, 45.0, 1.5, layer=pcbnew.B_SilkS)
 text("4 layers 1.6 mm - outer 2 oz / inner 1 oz", 55.0, 48.0, 1.0, layer=pcbnew.B_SilkS)
+text("JLCJLCJLCJLC", 55.0, 42.5, 1.2, layer=pcbnew.B_SilkS)   # JLCPCB replaces this with its order number (choose "specify a location")
 text("L2 GND  L3 +12V", 55.0, 50.0, 1.0, layer=pcbnew.B_SilkS)
 pcbnew.SaveBoard(PCB, b)
 print("silk ok")
