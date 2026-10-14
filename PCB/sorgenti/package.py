@@ -19,6 +19,9 @@ for fn in ("design.py", "placement.py", "power.py", "mkfp.py", "gen_sch.py", "bu
            "gndvia.py", "export.py", "eco.py", "cmpnet.py", "padsdump.py", "sympins.py", "render.sh", "make.sh", "package.py"):
     shutil.copy(f"{HERE}/{fn}", f"{DEST}/sorgenti/{fn}")
 shutil.copy("/home/claude/jlc/cpl_rotations_db.csv", f"{DEST}/sorgenti/cpl_rotations_db.csv")
+for fn in ("jlcpos.py", "jlcpos.json", "fetch_easyeda.sh", "jlc.py"):
+    shutil.copy(f"/home/claude/jlc/{fn}", f"{DEST}/sorgenti/{fn}")
+shutil.copytree("/home/claude/jlc/easyeda", f"{DEST}/sorgenti/easyeda")
 shutil.copy(f"{HERE}/sorgenti_LEGGIMI.md", f"{DEST}/sorgenti/LEGGIMI.md")
 shutil.copy(f"{HERE}/LEGGIMI_JLCPCB.md", f"{DEST}/LEGGIMI.md")
 shutil.copy(f"{HERE}/NOTE_firmware_mainboard.md", f"{DEST}/NOTE_firmware.md")

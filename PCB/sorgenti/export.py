@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Manufacturing outputs for JLCPCB (PCB + SMT/THT assembly): Gerbers + drill (zip), BOM CSV, CPL CSV with the
 JLCPCB rotation conventions, schematic/assembly PDFs, STEP, renders.  Usage: export.py <out_dir>"""
-import sys, os, re, subprocess, csv, zipfile, collections, shutil
+import sys, os, re, subprocess, csv, zipfile, collections, shutil, json, math
 import pcbnew
 import design
 
@@ -31,42 +31,51 @@ for fn in sorted(os.listdir(f"{FAB}/gerber")):
 z.close()
 
 # ── CPL: Designator, Mid X, Mid Y, Layer, Rotation ─────────────────────────────────────────────────
-# Position: footprint anchor for SMD library parts (KiCad puts it at the body centre) and for the FM custom
-# footprints (anchored at the body centre on purpose); courtyard centre for KiCad THT parts, whose anchor is pin 1.
-# Rotation: KiCad angle + the per-footprint correction of the public JLCPCB rotation table (matthewlai), so the
-# angle in the file follows the JLCPCB library orientation, not KiCad's.
+# JLCPCB places each part with ITS OWN library footprint (the EasyEDA footprint of the LCSC part): "Mid X/Y" is that
+# footprint's origin and "Rotation" is measured from that footprint's 0 deg orientation (counter-clockwise).
+# jlcpos.py compares every EasyEDA footprint with the KiCad footprint used here and stores, per KiCad footprint and
+# LCSC code, the rotation offset and the position of the EasyEDA origin in KiCad footprint coordinates
+# (jlcpos.json). Without an entry we fall back to the KiCad anchor + the public rotation table.
+_JP = [p for p in (os.path.join(os.path.dirname(os.path.abspath(__file__)), "jlcpos.json"), "/home/claude/jlc/jlcpos.json") if os.path.exists(p)]
+JLCPOS = json.load(open(_JP[0])) if _JP else {}
 rot_rules = []
 for row in csv.reader(open(ROT_DB)):
     if not row or row[0].startswith("Footprint pattern") or row[0].startswith("#"):
         continue
     rot_rules.append((re.compile(row[0]), float(row[1])))
-rot_rules += [(re.compile(r"^TI_SO-PowerPAD-8"), 270.0)]      # SOIC-8 with pad: same convention as SOIC
-def jlc_rotation(fpname, kicad_rot):
-    corr = 0.0
+def db_rotation(fpname):
     for rx, r in rot_rules:
-        if rx.search(fpname):
-            corr = r; break
-    return (kicad_rot + corr) % 360.0, corr
+        if rx.search(fpname): return r
+    return 0.0
+def R(x, y, th):
+    c, s_ = math.cos(math.radians(th)), math.sin(math.radians(th))
+    return (x * c + y * s_, -x * s_ + y * c)       # KiCad: positive = CCW on screen (y down)
 
 board = pcbnew.LoadBoard(PCB)
 cpl_rows = []
-nocorr = collections.OrderedDict()
+fallback = collections.OrderedDict()
 for fp in board.GetFootprints():
     if fp.IsDNP() or fp.IsExcludedFromPosFiles():
         continue
     if fp.GetLayer() != pcbnew.F_Cu:
         raise SystemExit("bottom-side part: " + fp.GetReference())
-    name = str(fp.GetFPID().GetLibItemName())
-    lib = str(fp.GetFPID().GetLibNickname())
-    tht = fp.GetAttributes() & pcbnew.FP_THROUGH_HOLE
-    if tht and lib != "FM":
-        c = fp.GetCourtyard(pcbnew.F_CrtYd).BBox()
-        cx, cy = (c.GetLeft() + c.GetRight()) / 2e6, (c.GetTop() + c.GetBottom()) / 2e6
+    fpid = str(fp.GetFPID().GetLibNickname()) + ":" + str(fp.GetFPID().GetLibItemName())
+    lcsc = fp.GetFieldByName("LCSC").GetText() if fp.GetFieldByName("LCSC") else ""
+    krot = fp.GetOrientationDegrees()
+    pos = fp.GetPosition(); ax, ay = pos.x / 1e6, pos.y / 1e6
+    ent = JLCPOS.get(f"{fpid}|{lcsc}")
+    if ent and "error" not in ent:
+        dx, dy = R(ent["tx"], ent["ty"], krot)
+        cx, cy = ax + dx, ay + dy
+        rot = (krot + ent["dtheta"]) % 360.0
     else:
-        pos = fp.GetPosition(); cx, cy = pos.x / 1e6, pos.y / 1e6
-    rot, corr = jlc_rotation(name, fp.GetOrientationDegrees())
-    if corr == 0.0:
-        nocorr.setdefault(name, []).append(fp.GetReference())
+        name = fpid.split(":")[1]
+        cx, cy = ax, ay
+        if fp.GetAttributes() & pcbnew.FP_THROUGH_HOLE and not fpid.startswith("FM:"):
+            c = fp.GetCourtyard(pcbnew.F_CrtYd).BBox()
+            cx, cy = (c.GetLeft() + c.GetRight()) / 2e6, (c.GetTop() + c.GetBottom()) / 2e6
+        rot = (krot + db_rotation(name)) % 360.0
+        fallback.setdefault(f"{fpid}|{lcsc}", []).append(fp.GetReference())
     # KiCad pos files negate Y (Gerber coordinates grow upwards); do the same so CPL and Gerbers agree
     cpl_rows.append((fp.GetReference(), round(cx, 4), round(-cy, 4), "Top", round(rot, 1)))
 def natkey(r):
@@ -99,9 +108,8 @@ with open(f"{FAB}/FilMachine_Mainboard_BOM.csv", "w", newline="") as fh:
 bom_refs = {p["ref"] for ps in groups.values() for p in ps}
 print("BOM lines:", len(groups), "placed refs:", len(bom_refs), "CPL refs:", len(cpl_refs),
       "missing in CPL:", sorted(bom_refs - cpl_refs), "extra in CPL:", sorted(cpl_refs - bom_refs))
-print("footprints without a rotation rule (0 deg correction):")
-for k, v in nocorr.items():
-    print("   ", k, "->", ",".join(sorted(v, key=natkey)))
+print("CPL entries from the EasyEDA/JLCPCB footprint comparison:", len(cpl_rows) - sum(len(v) for v in fallback.values()),
+      "| fallback (KiCad anchor + public rotation table):", {k: v for k, v in fallback.items()})
 
 # ── a human-readable BOM too (xlsx): value, designators, MPN, manufacturer, description, LCSC ──
 try:
@@ -114,15 +122,23 @@ try:
     for lcsc, ps in sorted(groups.items(), key=lambda kv: natkey(kv[1][0]["ref"])):
         ws.append([len(ps), ",".join(sorted((q["ref"] for q in ps), key=natkey)), " / ".join(sorted({q["value"] for q in ps})),
                    ps[0]["mfr"], ps[0]["mpn"], lcsc, ps[0]["fp"].split(":")[1], ps[0]["desc"]])
-    dnp = [p for p in design.PARTS if p["dnp"]]
-    if dnp:
-        ws.append([])
-        ws.append(["NON MONTATI (DNP, non sono nella BOM JLCPCB):", ",".join(p["ref"] for p in dnp), "", "", "", "", "", ""])
     for i, w_ in enumerate([5, 40, 16, 20, 26, 12, 40, 70]):
         ws.column_dimensions[openpyxl.utils.get_column_letter(i + 1)].width = w_
     for row in ws.iter_rows(min_row=2):
         for c in row:
             c.alignment = Alignment(wrap_text=True, vertical="top")
+    # The DNP parts go on a separate sheet: a note row inside the BOM table would be parsed as a part if someone
+    # uploaded this xlsx to JLCPCB ("R6,R7,J6 designators don't exist in the CPL file").
+    dnp = [p for p in design.PARTS if p["dnp"]]
+    if dnp:
+        wn = wb.create_sheet("Non montati")
+        wn.append(["Designator", "Value", "Note"])
+        for c in wn[1]:
+            c.font = Font(bold=True, color="FFFFFF"); c.fill = PatternFill("solid", fgColor="1F4E79")
+        for p in sorted(dnp, key=lambda q: natkey(q["ref"])):
+            wn.append([p["ref"], p["value"], "DNP: non montato, non e' nella BOM/CPL JLCPCB. " + p.get("desc", "")])
+        for i, w_ in enumerate([12, 16, 90]):
+            wn.column_dimensions[openpyxl.utils.get_column_letter(i + 1)].width = w_
     wb.save(f"{FAB}/FilMachine_Mainboard_BOM_leggibile.xlsx")
 except ImportError:
     pass

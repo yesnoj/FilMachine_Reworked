@@ -1,0 +1,807 @@
+{
+ "Capacitor_SMD:C_0603_1608Metric|C14663": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "C0603",
+  "lcsc": "C14663",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "C5",
+   "C13",
+   "C14",
+   "C15",
+   "C16",
+   "C17",
+   "C18",
+   "C19",
+   "C41",
+   "C50",
+   "C51"
+  ]
+ },
+ "Capacitor_SMD:C_0603_1608Metric|C15849": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "C0603",
+  "lcsc": "C15849",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "C6"
+  ]
+ },
+ "Capacitor_SMD:C_0603_1608Metric|C1588": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "C0603",
+  "lcsc": "C1588",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "C20",
+   "C21",
+   "C22",
+   "C23",
+   "C24",
+   "C25",
+   "C26",
+   "C27",
+   "C28",
+   "C29",
+   "C54",
+   "C61"
+  ]
+ },
+ "Capacitor_SMD:C_0805_2012Metric|C15850": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "C0805",
+  "lcsc": "C15850",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "C63",
+   "C64",
+   "C62"
+  ]
+ },
+ "Capacitor_SMD:C_0805_2012Metric|C28323": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "C0805",
+  "lcsc": "C28323",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "C40"
+  ]
+ },
+ "Capacitor_SMD:C_0805_2012Metric|C49678": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "C0805",
+  "lcsc": "C49678",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "C52",
+   "C53",
+   "C58"
+  ]
+ },
+ "Capacitor_SMD:C_0805_2012Metric|C5378": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "C0805",
+  "lcsc": "C5378",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "C4"
+  ]
+ },
+ "Capacitor_SMD:C_1206_3216Metric|C12891": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "C1206",
+  "lcsc": "C12891",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "C7",
+   "C8",
+   "C9",
+   "C10",
+   "C59"
+  ]
+ },
+ "Capacitor_SMD:C_1206_3216Metric|C13585": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "C1206",
+  "lcsc": "C13585",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "C2",
+   "C3",
+   "C57"
+  ]
+ },
+ "Capacitor_SMD:C_1206_3216Metric|C96123": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "C1206",
+  "lcsc": "C96123",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "C60"
+  ]
+ },
+ "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm|C338188": {
+  "dtheta": 0,
+  "tx": 2.5,
+  "ty": 0.0,
+  "eda": "CAP-TH_BD10.0-P5.00-D1.0-FD",
+  "lcsc": "C338188",
+  "note": "no polarity pin name in EDA symbol ({}): matched by pad number",
+  "nsol": 1,
+  "refs": [
+   "C55",
+   "C56"
+  ]
+ },
+ "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm|C106694": {
+  "dtheta": 0,
+  "tx": 1.25,
+  "ty": 0.0,
+  "eda": "CAP-TH_BD6.3-P2.50-D1.0-FD",
+  "lcsc": "C106694",
+  "note": "no polarity pin name in EDA symbol ({}): matched by pad number | body centre differs: EDA silk centroid at (-36.8,-16.3) vs KiCad courtyard (1.3,0.0)",
+  "nsol": 1,
+  "refs": [
+   "C1"
+  ]
+ },
+ "Connector_IDC:IDC-Header_2x13_P2.54mm_Horizontal|C7430326": {
+  "dtheta": 90,
+  "tx": 1.27,
+  "ty": 15.24,
+  "eda": "IDC-TH_26P-P2.54_DS1013-26RSIB-B-0",
+  "lcsc": "C7430326",
+  "note": " | body centre differs: EDA silk centroid at (9.0,15.2) vs KiCad courtyard (6.2,15.2)",
+  "nsol": 1,
+  "refs": [
+   "J5"
+  ]
+ },
+ "Connector_JST:JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical|C2316": {
+  "dtheta": 0,
+  "tx": 2.5,
+  "ty": 0.0,
+  "eda": "CONN-TH_XH-3A",
+  "lcsc": "C2316",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "J11",
+   "J12",
+   "J13",
+   "J14"
+  ]
+ },
+ "Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical|C37815": {
+  "dtheta": 0,
+  "tx": 3.75,
+  "ty": 0.0,
+  "eda": "CONN-TH_4P-P2.50_XH-4A",
+  "lcsc": "C37815",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "J7",
+   "J8",
+   "J9",
+   "J10"
+  ]
+ },
+ "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical|C2937625": {
+  "dtheta": 270,
+  "tx": 0.0,
+  "ty": 2.54,
+  "eda": "HDR-TH_3P-P2.54-V-M_PZ254V-11-03P",
+  "lcsc": "C2937625",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "J27"
+  ]
+ },
+ "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical|C492404": {
+  "dtheta": 270,
+  "tx": 0.0,
+  "ty": 5.08,
+  "eda": "HDR-TH_5P-P2.54-V-M",
+  "lcsc": "C492404",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "J30"
+  ]
+ },
+ "Diode_SMD:D_SMA|C8678": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "SMA_L4.3-W2.6-LS5.2-RD",
+  "lcsc": "C8678",
+  "note": "EDA cathode pad is #1 (symbol pin names {'2': 'A', '1': 'K'})",
+  "nsol": 1,
+  "refs": [
+   "D8",
+   "D41",
+   "D42"
+  ]
+ },
+ "Diode_SMD:D_SMB|C19077571": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "SMB_L4.6-W3.5-LS5.3-RD",
+  "lcsc": "C19077571",
+  "note": "EDA cathode pad is #1 (symbol pin names {'2': 'A', '1': 'C'})",
+  "nsol": 1,
+  "refs": [
+   "D1",
+   "D2"
+  ]
+ },
+ "Diode_SMD:D_SOD-123|C8598": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "SOD-123_L2.7-W1.6-LS3.7-RD-1",
+  "lcsc": "C8598",
+  "note": "EDA cathode pad is #1 (symbol pin names {'1': '-', '2': '+'})",
+  "nsol": 1,
+  "refs": [
+   "D21",
+   "D22",
+   "D23",
+   "D24",
+   "D25",
+   "D26",
+   "D27",
+   "D28"
+  ]
+ },
+ "Diode_SMD:D_SOD-323|C191023": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "SOD-323_L1.8-W1.3-LS2.5-RD",
+  "lcsc": "C191023",
+  "note": "EDA cathode pad is #1 (symbol pin names {'1': 'K', '2': 'A'})",
+  "nsol": 1,
+  "refs": [
+   "D6",
+   "D7",
+   "D10",
+   "D11",
+   "D12",
+   "D13",
+   "D14",
+   "D15",
+   "D16",
+   "D17",
+   "D18",
+   "D19",
+   "D47",
+   "D48"
+  ]
+ },
+ "FM:FUSE_2410_SMD|C136390": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "F2410",
+  "lcsc": "C136390",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "F4"
+  ]
+ },
+ "FM:FUSE_2410_SMD|C136393": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "F2410",
+  "lcsc": "C136393",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "F1",
+   "F2",
+   "F3"
+  ]
+ },
+ "FM:L_SLO0630H|C207842": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "IND-SMD_L7.3-W6.6_MHCI06030",
+  "lcsc": "C207842",
+  "note": "(loose match, tol 1.0 mm: land patterns differ) ",
+  "nsol": 1,
+  "refs": [
+   "L1"
+  ]
+ },
+ "FM:TB_DB301V-3.5-2P|C695629": {
+  "dtheta": 0,
+  "tx": -0.0,
+  "ty": -0.05,
+  "eda": "CONN-TH_DB301V-3.5-2P-GN",
+  "lcsc": "C695629",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "J28",
+   "J29",
+   "J15",
+   "J16",
+   "J17",
+   "J18",
+   "J19",
+   "J20",
+   "J21",
+   "J22",
+   "J26"
+  ]
+ },
+ "FM:TB_WJ500V-5.08-2P|C8465": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.5,
+  "eda": "CONN-TH_2P-P5.00_WJ500V-5.08-2P",
+  "lcsc": "C8465",
+  "note": " | body centre differs: EDA silk centroid at (-1.7,-1.3) vs KiCad courtyard (0.0,0.0)",
+  "nsol": 1,
+  "refs": [
+   "J1",
+   "J2",
+   "J3",
+   "J23",
+   "J24",
+   "J25"
+  ]
+ },
+ "Fuse:Fuse_1206_3216Metric|C720075": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "F1206",
+  "lcsc": "C720075",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "F6"
+  ]
+ },
+ "Fuse:Fuse_1812_4532Metric|C269134": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "R1812",
+  "lcsc": "C269134",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "F5",
+   "F7"
+  ]
+ },
+ "Fuse:Fuse_1812_4532Metric|C960026": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "F1812",
+  "lcsc": "C960026",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "F8"
+  ]
+ },
+ "LED_SMD:LED_0603_1608Metric|C2286": {
+  "dtheta": 0,
+  "tx": -0.0,
+  "ty": -0.0,
+  "eda": "LED-SMD_L1.6-W0.8-R-RD",
+  "lcsc": "C2286",
+  "note": "EDA cathode pad is #2 (symbol pin names {'2': 'K', '1': 'A'}) -> numbering differs from KiCad",
+  "nsol": 1,
+  "refs": [
+   "D43",
+   "D44"
+  ]
+ },
+ "LED_SMD:LED_0805_2012Metric|C2296": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "LED0805-R-RD",
+  "lcsc": "C2296",
+  "note": "EDA cathode pad is #2 (symbol pin names {'2': '-', '1': '+'}) -> numbering differs from KiCad",
+  "nsol": 1,
+  "refs": [
+   "D31",
+   "D32",
+   "D33",
+   "D34",
+   "D35",
+   "D36",
+   "D37",
+   "D38"
+  ]
+ },
+ "LED_SMD:LED_0805_2012Metric|C2297": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "LED0805-R-RD",
+  "lcsc": "C2297",
+  "note": "EDA cathode pad is #2 (symbol pin names {'2': 'K', '1': 'A'}) -> numbering differs from KiCad",
+  "nsol": 1,
+  "refs": [
+   "D3",
+   "D4",
+   "D5"
+  ]
+ },
+ "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm|C465729": {
+  "dtheta": 270,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "SOIC-8_L4.9-W3.9-P1.27-LS6.0-BL",
+  "lcsc": "C465729",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "U5"
+  ]
+ },
+ "Package_SO:SSOP-28_5.3x10.2mm_P0.65mm|C558584": {
+  "dtheta": 270,
+  "tx": 0.0,
+  "ty": -0.0,
+  "eda": "SSOP-28_L10.2-W5.3-P0.65-LS7.8-BL",
+  "lcsc": "C558584",
+  "note": " | body centre differs: EDA silk centroid at (197.5,-297.3) vs KiCad courtyard (0.0,0.0)",
+  "nsol": 1,
+  "refs": [
+   "U3"
+  ]
+ },
+ "Package_SO:SSOP-8_2.95x2.8mm_P0.65mm|C352973": {
+  "dtheta": 270,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "SSOP-8_L3.0-W2.8-P0.65-LS4.0-BL",
+  "lcsc": "C352973",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "U6",
+   "U7"
+  ]
+ },
+ "Package_SO:TI_SO-PowerPAD-8_ThermalVias|C75864": {
+  "dtheta": 270,
+  "tx": -0.0,
+  "ty": 0.002,
+  "eda": "SO-8_L4.9-W3.9-P1.27-LS6.0-BL-EP",
+  "lcsc": "C75864",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "U10"
+  ]
+ },
+ "Package_SO:TI_SO-PowerPAD-8_ThermalVias|C841384": {
+  "dtheta": 0,
+  "tx": -0.0,
+  "ty": 0.002,
+  "eda": "ESOP-8_L4.9-W3.9-P1.27-LS6.0-TL-EP",
+  "lcsc": "C841384",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "U1"
+  ]
+ },
+ "Package_SO:VSSOP-10_3x3mm_P0.5mm|C37593": {
+  "dtheta": 270,
+  "tx": 0.0,
+  "ty": -0.0,
+  "eda": "MSOP-10_L3.0-W3.0-P0.50-LS5.0-BL",
+  "lcsc": "C37593",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "U4"
+  ]
+ },
+ "Package_TO_SOT_SMD:SOT-23|C20917": {
+  "dtheta": 180,
+  "tx": 0.021,
+  "ty": 0.0,
+  "eda": "SOT-23-3_L2.9-W1.3-P1.90-LS2.4-BR",
+  "lcsc": "C20917",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "Q1",
+   "Q2",
+   "Q3",
+   "Q4",
+   "Q5",
+   "Q6",
+   "Q7",
+   "Q8"
+  ]
+ },
+ "Package_TO_SOT_SMD:TO-252-2|C99124": {
+  "dtheta": 0,
+  "tx": -1.843,
+  "ty": 0.0,
+  "eda": "TO-252-2_L6.6-W6.1-P4.57-LS9.9-TL-CW",
+  "lcsc": "C99124",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "Q9",
+   "Q10"
+  ]
+ },
+ "Package_TO_SOT_SMD:TO-263-7_TabPin8|C112630": {
+  "dtheta": 180,
+  "tx": -2.76,
+  "ty": 0.0,
+  "eda": "TO-263-7_L10.2-W10.4-P1.27-LS14.4-BR",
+  "lcsc": "C112630",
+  "note": "(loose match, tol 1.0 mm: land patterns differ)  | body centre differs: EDA silk centroid at (-4.6,-0.0) vs KiCad courtyard (-1.9,0.0)",
+  "nsol": 1,
+  "refs": [
+   "U8",
+   "U9"
+  ]
+ },
+ "Resistor_SMD:R_0603_1608Metric|C21190": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "R0603",
+  "lcsc": "C21190",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "R4",
+   "R5",
+   "R97",
+   "R98",
+   "R84"
+  ]
+ },
+ "Resistor_SMD:R_0603_1608Metric|C22775": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "R0603",
+  "lcsc": "C22775",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "R31",
+   "R32",
+   "R33",
+   "R34",
+   "R35",
+   "R36",
+   "R37",
+   "R38"
+  ]
+ },
+ "Resistor_SMD:R_0603_1608Metric|C22809": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "R0603",
+  "lcsc": "C22809",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "R10"
+  ]
+ },
+ "Resistor_SMD:R_0603_1608Metric|C22843": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "R0603",
+  "lcsc": "C22843",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "R85",
+   "R88"
+  ]
+ },
+ "Resistor_SMD:R_0603_1608Metric|C22859": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "R0603",
+  "lcsc": "C22859",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "R63",
+   "R65"
+  ]
+ },
+ "Resistor_SMD:R_0603_1608Metric|C22935": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "R0603",
+  "lcsc": "C22935",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "R47",
+   "R48"
+  ]
+ },
+ "Resistor_SMD:R_0603_1608Metric|C22962": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "R0603",
+  "lcsc": "C22962",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "R87"
+  ]
+ },
+ "Resistor_SMD:R_0603_1608Metric|C22984": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "R0603",
+  "lcsc": "C22984",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "R86"
+  ]
+ },
+ "Resistor_SMD:R_0603_1608Metric|C23162": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "R0603",
+  "lcsc": "C23162",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "R3",
+   "R16",
+   "R51",
+   "R52",
+   "R53",
+   "R54",
+   "R55",
+   "R56",
+   "R57",
+   "R58",
+   "R67",
+   "R68"
+  ]
+ },
+ "Resistor_SMD:R_0603_1608Metric|C23352": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "R0603",
+  "lcsc": "C23352",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "R2"
+  ]
+ },
+ "Resistor_SMD:R_0603_1608Metric|C25803": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "R0603",
+  "lcsc": "C25803",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "R1",
+   "R9",
+   "R41",
+   "R42",
+   "R43",
+   "R44",
+   "R45",
+   "R46",
+   "R61",
+   "R62",
+   "R70",
+   "R71",
+   "R72",
+   "R73",
+   "R74",
+   "R75",
+   "R76"
+  ]
+ },
+ "Resistor_SMD:R_0603_1608Metric|C25804": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "R0603",
+  "lcsc": "C25804",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "R8",
+   "R12",
+   "R13",
+   "R14",
+   "R20",
+   "R21",
+   "R22",
+   "R23",
+   "R24",
+   "R25",
+   "R26",
+   "R27",
+   "R28",
+   "R29",
+   "R64",
+   "R66",
+   "R80",
+   "R82"
+  ]
+ },
+ "Resistor_SMD:R_0603_1608Metric|C4184": {
+  "dtheta": 0,
+  "tx": 0.0,
+  "ty": 0.0,
+  "eda": "R0603",
+  "lcsc": "C4184",
+  "note": "",
+  "nsol": 1,
+  "refs": [
+   "R11"
+  ]
+ }
+}

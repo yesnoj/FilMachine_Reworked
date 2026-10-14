@@ -17,8 +17,8 @@ header 2,54.
 |---|---|
 | `FilMachine_Mainboard_Gerber.zip` | Gerber (estensioni Protel) + forature Excellon, da caricare in *Order now* |
 | `FilMachine_Mainboard_BOM.csv` | Distinta nel formato JLCPCB: `Comment, Designator, Footprint, LCSC Part #` (una riga per codice; i DNP non ci sono) |
-| `FilMachine_Mainboard_CPL.csv` | Piazzamento nel formato JLCPCB: `Designator, Mid X, Mid Y, Layer, Rotation` (solo lato Top; rotazioni già convertite alla convenzione JLCPCB) |
-| `FilMachine_Mainboard_BOM_leggibile.xlsx` | La stessa distinta, leggibile (quantità, produttore, codice costruttore, descrizione) |
+| `FilMachine_Mainboard_CPL.csv` | Piazzamento nel formato JLCPCB: `Designator, Mid X, Mid Y, Layer, Rotation` (solo lato Top). Posizione e rotazione di ogni componente sono riferite al **footprint della libreria JLCPCB/EasyEDA di quel codice LCSC** (origine e orientamento a 0°), ricavate confrontando pezzo per pezzo i due footprint (`sorgenti/jlcpos.py`): nell'anteprima di JLCPCB i componenti devono risultare già sui loro pad |
+| `FilMachine_Mainboard_BOM_leggibile.xlsx` | La stessa distinta, leggibile (quantità, produttore, codice costruttore, descrizione; i non montati nel foglio «Non montati»). Solo da consultare: **su JLCPCB va caricato il CSV** |
 | `FilMachine_Mainboard_Schema.pdf` | Schema elettrico completo (4 fogli) |
 | `FilMachine_Mainboard_Assembly_Top.pdf` | Disegno di montaggio lato componenti |
 | `FilMachine_Mainboard.step` | Modello 3D della scheda montata, per il cabinet |
@@ -44,22 +44,25 @@ header 2,54.
 
 ## Assemblaggio (PCB Assembly → Standard; solo lato **Top**)
 
-1. Carica `FilMachine_Mainboard_BOM.csv` e `FilMachine_Mainboard_CPL.csv`.
+1. Carica `FilMachine_Mainboard_BOM.csv` (non l'xlsx) e `FilMachine_Mainboard_CPL.csv`.
 2. Nella pagina dei componenti tutte le righe devono risultare abbinate per codice LCSC (nessuna riga «no part
    selected»). Se un codice risultasse momentaneamente esaurito, in fondo c'è la tabella delle alternative.
-3. **Anteprima di piazzamento**: JLCPCB mostra ogni componente sulle piazzole. Controlla (e correggi col tasto *rotate*,
-   se serve) l'orientamento di questi, confrontandolo con il disegno `Assembly_Top.pdf` / la serigrafia:
+3. **Anteprima di piazzamento**: JLCPCB mostra ogni componente sulle piazzole con il proprio modello. Con questo CPL
+   devono risultare tutti al posto giusto (anche i THT: morsetti, box header, header, JST, elettrolitici). I modelli dei
+   morsetti alti (14 mm) nella vista 3D in prospettiva sembrano «sporgere» dalle piazzole: è solo la prospettiva — con
+   la vista dall'alto (2D) i pin coincidono con i fori. Da controllare comunque, confrontando con `Assembly_Top.pdf`:
    - integrati U1–U10 (pin 1 = puntino/smusso sul lato del segno in serigrafia);
-   - diodi: D1, D2 (TVS, banda = catodo verso il +12 V), D6, D7, D8, D10–D19, D21–D28, D41, D42 (banda sul lato della
-     riga in serigrafia); LED D3, D4, D5, D31–D38, D43, D44;
-   - transistor Q1–Q8 (SOT-23), Q9/Q10 (TO-252: linguetta in alto), U8/U9 (TO-263: linguetta verso sinistra, pin verso destra);
+   - diodi D1, D2 (TVS, banda = catodo verso il +12 V), D6, D7, D8, D10–D19, D21–D28, D41, D42, D47, D48 (banda sul
+     lato della riga in serigrafia); LED D3, D4, D5, D31–D38, D43, D44;
+   - transistor Q1–Q8 (SOT-23), Q9/Q10 (TO-252: linguetta in alto), U8/U9 (TO-263: linguetta a sinistra, pin a destra);
    - elettrolitici C1, C55, C56: piazzola **quadrata = +**;
    - morsetti a vite J1–J3, J15–J26, J28, J29: l'apertura per i fili guarda **verso il bordo** della scheda;
-   - box header J5: la tacca della chiave verso il bordo alto (il flat esce verso il bordo).
-   JLCPCB comunque verifica le polarità col suo controllo DFM prima di produrre; se chiede conferma, rispondere
-   facendo riferimento alla serigrafia.
+   - box header J5: il flat esce verso il bordo alto.
+   Se qualcosa non torna, ruotarlo nell'anteprima: JLCPCB verifica comunque le polarità col controllo DFM prima di produrre.
 4. **Non montati (DNP)**: J6 (header ESP32-C6), R6, R7 (pull-up I2C: ci sono già sul display). Non compaiono né nella
-   BOM né nel CPL, quindi JLCPCB non li chiede.
+   BOM né nel CPL, quindi JLCPCB non li chiede. Se compare l'avviso «R6,R7,J6 designators don't exist in the CPL file»
+   vuol dire che come BOM è stato caricato un file che li contiene (p. es. l'xlsx): si può premere *Continue* (quei tre
+   non vanno montati) oppure, meglio, ricaricare `FilMachine_Mainboard_BOM.csv`.
 
 ## Cosa collegare
 
