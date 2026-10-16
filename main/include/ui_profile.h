@@ -406,6 +406,7 @@ typedef struct {
     int maintenance_fill_y;
     int maintenance_fillchem_y;
     int maintenance_loadfilm_y;
+    int maintenance_recover_y;   /* "Empty chemistry" row (v7) */
     int utilities_import_y;
     int utilities_export_y;
     int statistics_completed_y;
@@ -568,6 +569,34 @@ typedef struct {
     const lv_font_t *secondary_font;
     const lv_font_t *button_font;
 } ui_drain_popup_layout_t;
+
+/* Tools -> "Empty Cx into the bottle" (machine v7): source / tank / bottle
+ * bars with a drop running along the pipe, the four phases underneath. */
+typedef struct {
+    int bar_w;                /* the three vertical bars */
+    int bar_h;
+    int bar_y;
+    int bar_src_x;            /* x of the source, tank and destination bars inside the process container */
+    int bar_tank_x;
+    int bar_dst_x;
+    int bar_label_y;          /* below the bars */
+    int pipe_y;               /* the horizontal line the drop runs on (bar mid-height) */
+    int drop_size;
+    int dot_y;                /* the four phase dots */
+    int dot_x0;
+    int dot_pitch;
+    int dot_size;
+    int dot_label_y;
+    int status_y;             /* phase text */
+    int time_y;               /* remaining time */
+    int status_w;
+    int pick_w;               /* the C1 / C2 / C3 buttons on the confirm page */
+    int pick_h;
+    int pick_y;
+    int pick_pitch;
+    const lv_font_t *dot_font;
+    const lv_font_t *status_font;
+} ui_recover_popup_layout_t;
 
 typedef struct {
     int title_x;
@@ -1006,6 +1035,7 @@ typedef struct {
     ui_roller_popup_layout_t roller_popup;
     ui_clean_popup_layout_t clean_popup;
     ui_drain_popup_layout_t drain_popup;
+    ui_recover_popup_layout_t recover_popup;
     ui_popup_layout_t popups;
     ui_filter_popup_layout_t filter_popup;
     ui_selfcheck_popup_layout_t selfcheck_popup;

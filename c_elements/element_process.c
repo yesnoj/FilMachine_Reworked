@@ -12,14 +12,7 @@ extern struct gui_components gui;
 //ACCESSORY INCLUDES
 
 static uint16_t process_card_fill_time_seconds(void) {
-    uint8_t volume_index = gui.page.settings.settingsParams.chemistryVolume;
-    uint8_t tank_size = gui.page.settings.settingsParams.tankSize;
-    uint16_t table[2][3][2] = tanksSizesAndTimes;
-
-    if(volume_index < 1 || volume_index > 2) volume_index = 2;
-    if(tank_size < 1 || tank_size > 3) tank_size = 2;
-
-    return table[volume_index - 1][tank_size - 1][1];
+    return tankFillSeconds(gui.page.settings.settingsParams.chemistryVolume, gui.page.settings.settingsParams.tankSize);
 }
 
 static uint32_t process_card_overlap_credit_seconds(uint16_t fill_time_seconds) {

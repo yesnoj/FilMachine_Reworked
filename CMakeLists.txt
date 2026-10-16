@@ -114,6 +114,7 @@ else()
         c_elements/element_loadPopup.c
         c_elements/element_cleanPopup.c
         c_elements/element_drainPopup.c
+        c_elements/element_recoverPopup.c
         c_elements/element_selfcheckPopup.c
         c_elements/element_otaWifiPopup.c
         c_elements/element_wifiPopup.c

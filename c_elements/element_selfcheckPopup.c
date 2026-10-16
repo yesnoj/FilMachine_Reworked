@@ -57,7 +57,15 @@ static const char *phaseDescription(int i) {
     }
 }
 
-static const int32_t phaseDurations[] = { 5, 10, 30, 10, 10, 10, 10, 10 };
+#if defined(RECOVERY_RLY)
+static const uint8_t sc_valve_relays[] = { C1_RLY, C2_RLY, C3_RLY, WB_RLY, WASTE_RLY, RECOVERY_RLY };
+#define SC_NUM_VALVES 6
+#else
+static const uint8_t sc_valve_relays[] = { C1_RLY, C2_RLY, C3_RLY, WB_RLY, WASTE_RLY };
+#define SC_NUM_VALVES 5
+#endif
+
+static const int32_t phaseDurations[] = { 5, 10, 30, 2 * SC_NUM_VALVES, 10, 10, 10, 10 };
 
 static uint8_t phaseState[SC_NUM_PHASES];
 static char    phaseSavedStatus[SC_NUM_PHASES][40]; /* saved status text per phase */
@@ -73,20 +81,30 @@ static void sc_update_buttons(void);
 
 /* ── Color for stopped state (grey) ────────────────────── */
 #define SC_STOPPED_COLOR 0x888888
+#define SC_PUMP_TEST_DUTY 180  /* ~70% speed for test */
 
 /* ── Valve relay indices for Self Check valve test ───── */
-static const uint8_t sc_valve_relays[] = { C1_RLY, C2_RLY, C3_RLY, WB_RLY, WASTE_RLY };
-#define SC_NUM_VALVES 5
 static int8_t sc_last_valve = -1;  /* tracks which valve is currently open (-1 = none) */
 
 /* ── Stop all hardware actuators (valves + pump) ──────── */
 static void sc_stop_all_hw(void) {
+    xferAbort();                 /* no transfer may be running during a self-check, but be sure */
     closeAllValves();
-    cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
     pump_set_stop();
     motor_set_stop();
     sc_last_valve = -1;
     ESP_LOGI(TAG, "All HW stopped (valves closed, pump off, motor off)");
+}
+
+/* One flow pulse of the self-check: a single collector valve open and the pump
+ * towards the tank (forward) or from the tank (reverse). With one collector
+ * every liquid movement is tank <-> one valve: see the container phases. */
+static void sc_flow(uint8_t relay, bool toTank) {
+    closeAllValves();
+    pump_set_stop();
+    setValveState(relay, true);
+    if (toTank) pump_set_forward(SC_PUMP_TEST_DUTY);
+    else        pump_set_reverse(SC_PUMP_TEST_DUTY);
 }
 
 /* ── Check if all phases are non-pending ────────────────── */
@@ -277,7 +295,6 @@ static void sc_timer_cb(lv_timer_t *timer) {
         case 1: {
             /* Pump test: 1-4s forward, 5s pause, 6-9s reverse, 10s done */
             int sub = sc->phaseElapsed;
-            #define SC_PUMP_TEST_DUTY 180  /* ~70% speed for test */
             if (sub <= 4) {
                 if (sub == 1) {
                     pump_set_forward(SC_PUMP_TEST_DUTY);
@@ -313,8 +330,9 @@ static void sc_timer_cb(lv_timer_t *timer) {
             break;
         }
         case 3: {
-            const char *valves[] = {"C1", "C2", "C3", "WB", "WASTE"};
-            int vi = sc->phaseElapsed / 2;
+            const char *valves[] = {"C1", "C2", "C3", "WB", "WASTE", "RECOVERY"};
+            int vi = (sc->phaseElapsed - 1) / 2;
+            if (vi < 0) vi = 0;
             if (vi >= SC_NUM_VALVES) vi = SC_NUM_VALVES - 1;
             lv_label_set_text_fmt(sc->phaseStatus, selfCheckValveFmt_text, valves[vi]);
             snprintf(phaseSavedStatus[phase], sizeof(phaseSavedStatus[phase]), "%s", selfCheckAllValvesOk_text);
@@ -334,44 +352,28 @@ static void sc_timer_cb(lv_timer_t *timer) {
             break;
         }
         case 4: case 5: case 6: {
+            /* Container lines, 10 s each, through the tank (one collector):
+             * 1-2 water from the bath into the tank, 3-5 tank -> container,
+             * 6-8 container -> tank, 9-10 tank -> waste. Every line is seen
+             * flowing both ways and the water ends in the waste. */
             int sub = sc->phaseElapsed;
             /* Map phase 4→C1, 5→C2, 6→C3 */
             uint8_t containerSrc = (phase == 4) ? C1 : (phase == 5) ? C2 : C3;
             const char *cName    = (phase == 4) ? "C1" : (phase == 5) ? "C2" : "C3";
-            const char *msg;
 
-            if (sub <= 3) {
-                msg = selfCheckFillingFromWB_text;
-                /* Pump WB → Container (forward) */
-                if (sub == 1) {
-                    cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
-                    cleanRelayManager(getValueForChemicalSource(WB),
-                                      getValueForChemicalSource(containerSrc),
-                                      PUMP_IN_RLY, true);
-                    ESP_LOGI(TAG, "%s: pumping WB → %s (fill)", cName, cName);
-                }
-            } else if (sub <= 6) {
-                msg = selfCheckDrainBackWB_text;
-                /* Pump Container → WB (reverse) */
-                if (sub == 4) {
-                    cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
-                    cleanRelayManager(getValueForChemicalSource(containerSrc),
-                                      getValueForChemicalSource(WB),
-                                      PUMP_OUT_RLY, true);
-                    ESP_LOGI(TAG, "%s: pumping %s → WB (drain back)", cName, cName);
-                }
+            if (sub <= 2) {
+                if (sub == 1) { sc_flow(getValueForChemicalSource(WB), true); ESP_LOGI(TAG, "%s: WB -> tank", cName); }
+                lv_label_set_text(sc->phaseStatus, selfCheckFillingFromWB_text);
+            } else if (sub <= 5) {
+                if (sub == 3) { sc_flow(getValueForChemicalSource(containerSrc), false); ESP_LOGI(TAG, "%s: tank -> %s", cName, cName); }
+                lv_label_set_text_fmt(sc->phaseStatus, selfCheckToContainerFmt_text, cName);
+            } else if (sub <= 8) {
+                if (sub == 6) { sc_flow(getValueForChemicalSource(containerSrc), true); ESP_LOGI(TAG, "%s: %s -> tank", cName, cName); }
+                lv_label_set_text_fmt(sc->phaseStatus, selfCheckBackToTankFmt_text, cName);
             } else {
-                msg = selfCheckDrainToWaste_text;
-                /* Pump WB → Waste */
-                if (sub == 7) {
-                    cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
-                    cleanRelayManager(getValueForChemicalSource(WB),
-                                      getValueForChemicalSource(WASTE),
-                                      PUMP_IN_RLY, true);
-                    ESP_LOGI(TAG, "%s: pumping WB → WASTE", cName);
-                }
+                if (sub == 9) { sc_flow(getValueForChemicalSource(WASTE), false); ESP_LOGI(TAG, "%s: tank -> WASTE", cName); }
+                lv_label_set_text(sc->phaseStatus, selfCheckDrainToWaste_text);
             }
-            lv_label_set_text(sc->phaseStatus, msg);
             snprintf(phaseSavedStatus[phase], sizeof(phaseSavedStatus[phase]), "%s", selfCheckFlowOk_text);
             break;
         }

@@ -10,7 +10,7 @@
     "drainFillOverlapSetpoint": 10,
     "multiRinseTime": 60,
     "tankSize": 3,
-    "pumpSpeed": 40,
+    "pumpSpeed": 100,
     "chemContainerMl": 1500,
     "wbContainerMl": 1500,
     "chemistryVolume": 1,

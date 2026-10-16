@@ -17,13 +17,25 @@
 
 static uint16_t s_origChemSecs, s_origWbSecs;
 
+static void wait_pump_idle(void);
 static void fast_fill_times(void)
 {
     struct machineSettings *S = &gui.page.settings.settingsParams;
+    wait_pump_idle();
     s_origChemSecs = S->chemCalibFillSecs;
     s_origWbSecs   = S->wbCalibFillSecs;
     S->chemCalibFillSecs = 1;     /* one fill or drain of a container = 1 s */
     S->wbCalibFillSecs   = 1;     /* water bath = 1 s */
+}
+
+/* The tank-mediated transfer engine (v7) finishes every stop by draining the
+ * tank for a few seconds: wait for it so the next tool is not refused as busy. */
+static void wait_pump_idle(void)
+{
+    for (int t = 0; t < 400 && xferBusy(); t++) {
+        usleep(50000);
+        test_pump(50);
+    }
 }
 
 static void restore_fill_times(void)
@@ -31,6 +43,7 @@ static void restore_fill_times(void)
     struct machineSettings *S = &gui.page.settings.settingsParams;
     S->chemCalibFillSecs = s_origChemSecs;
     S->wbCalibFillSecs   = s_origWbSecs;
+    wait_pump_idle();
 }
 
 /* Run LVGL for `ms` of real time. */
@@ -93,6 +106,7 @@ static void test_drain_remote_full(void)
     TEST_ASSERT(pump_until(drain_ended, 15000), "drain ends");
     TEST_ASSERT_EQ(drainToolState(), DRAIN_TOOL_DONE, "DONE");
     TEST_ASSERT_EQ(drainToolLevelPct(), 0, "level 0 when done");
+    wait_pump_idle();                                     /* the engine empties the tank after the last stop */
     TEST_ASSERT(!maintenanceBusy(), "not busy when done");
     TEST_ASSERT(state_has("\"drainToolState\":2"), "state JSON: drainToolState 2");
 

@@ -40,14 +40,30 @@ void sim_ui_debug_tag(lv_obj_t *obj, const char *name);
 /* Boot valve self-test — opens then closes each valve in sequence at power-on. */
 #define VALVE_SELFTEST_ON_BOOT		1                      /* set to 0 to disable */
 #define SENSOR_SELFTEST_ON_BOOT		1                      /* live-log Hall/water-level/flow every 500ms (set 0 to disable) */
-#define VALVE_SELFTEST_LAST_PIN		4                      /* valves only (0-4). Pins 5-6 unused, heater moved to Port B — skip 5-7 */
+#define VALVE_SELFTEST_LAST_PIN		4                      /* the five collector valves (0-4); the recovery valve (6) is cycled after them, the inlet (5) never */
 #define VALVE_SELFTEST_ON_MS		500                    /* how long each channel stays on */
 #define VALVE_SELFTEST_OFF_MS		250                    /* pause between channels */
 
-/* Pump speed (0-255, 8-bit duty cycle) */
-#define PUMP_DEFAULT_SPEED          200     /* Fallback only (e.g. checkup/manual actions) */
-#define PUMP_MIN_ANALOG_VAL         150     /* Duty at pumpSpeed=10%. Measured stall/start ~148 on the bench, so 10% now already moves. */
-#define PUMP_MAX_ANALOG_VAL         250     /* Duty at pumpSpeed=100% (DBH-12V safe max) */
+/* Pump speed (0-255, 8-bit duty cycle) — Kamoer KPHM600 peristaltic pump.
+ * The duty is proportional to the speed setting (flow = PUMP_FLOW_ML_MIN x %),
+ * with a floor so the geared motor always starts. Default setting 100 %. */
+#define PUMP_DEFAULT_SPEED          250     /* Fallback only (e.g. checkup/manual actions) */
+#define PUMP_MIN_ANALOG_VAL         64      /* lowest duty ever applied (~25 %: a loaded 12 V gear motor starts around 3 V) */
+#define PUMP_MAX_ANALOG_VAL         250     /* Duty at pumpSpeed=100% (H-bridge safe max) */
+#define PUMP_SPEED_DEFAULT_PCT      100     /* default of the "Pump speed" setting: a peristaltic pump runs at full speed */
+/* After every drain the pump keeps running this long (at 100 %; scaled with the
+ * speed): the tank is empty, so it pushes air through the line and the liquid
+ * still in the tube ends up where the drain went (its own container, or the
+ * waste). The next fill then starts with a dry line: the only residue left is
+ * the wetted film of the tube, a fraction of a millilitre. Same after a
+ * transfer through the tank (see xfer* below). */
+#define PUMP_PURGE_SECS             4
+/* Nominal volumes for the time estimates of the Tools until a measured
+ * (MIN -> MAX) time exists: v7 chemistry containers of 1 litre, v6/v7 bath of
+ * 12.8 litres (the bath also has a manual tap: draining it with the pump
+ * through the tank takes about 45 minutes). */
+#define CHEM_CONTAINER_ML           1000
+#define BATH_VOLUME_ML              12800
 
 /* LCD timing (used by parallel-bus boards, ignored by QSPI/simulator) */
 #ifndef LCD_PIXEL_CLOCK_HZ
@@ -461,6 +477,27 @@ typedef enum {
 /* Film loader (Tools → Load film) texts */
 #define loadFilm_text	tr(STR_loadFilm_text)
 #define loadPopupTitle_text	tr(STR_loadPopupTitle_text)
+/* Tools -> Empty chemistry into the bottle (machine v7), process start guard, self-check flows */
+#define recoverRow_text	tr(STR_recoverRow_text)
+#define recoverPopupTitle_text	tr(STR_recoverPopupTitle_text)
+#define recoverConfirmBody_text	tr(STR_recoverConfirmBody_text)
+#define recoverPopupTitleFmt_text	tr(STR_recoverPopupTitleFmt_text)
+#define recoverPhaseWash1_text	tr(STR_recoverPhaseWash1_text)
+#define recoverPhaseHead_text	tr(STR_recoverPhaseHead_text)
+#define recoverPhaseXferFmt_text	tr(STR_recoverPhaseXferFmt_text)
+#define recoverPhaseWash2_text	tr(STR_recoverPhaseWash2_text)
+#define recoverWaiting_text	tr(STR_recoverWaiting_text)
+#define recoverStopping_text	tr(STR_recoverStopping_text)
+#define recoverStopped_text	tr(STR_recoverStopped_text)
+#define recoverCompleteFmt_text	tr(STR_recoverCompleteFmt_text)
+#define recoverStepNames	tr(STR_recoverStepNames)
+#define recoverLblTank_text	tr(STR_recoverLblTank_text)
+#define recoverLblBottle_text	tr(STR_recoverLblBottle_text)
+#define recoverLblWaste_text	tr(STR_recoverLblWaste_text)
+#define checkupStartBusyTitle_text	tr(STR_checkupStartBusyTitle_text)
+#define checkupStartBusyBody_text	tr(STR_checkupStartBusyBody_text)
+#define selfCheckToContainerFmt_text	tr(STR_selfCheckToContainerFmt_text)
+#define selfCheckBackToTankFmt_text	tr(STR_selfCheckBackToTankFmt_text)
 #define loadStatusReady_text	tr(STR_loadStatusReady_text)
 #define loadStatusWinding_text	tr(STR_loadStatusWinding_text)
 #define loadStatusCutting_text	tr(STR_loadStatusCutting_text)
@@ -626,7 +663,10 @@ typedef enum {
 #define stepSourceList	tr(STR_stepSourceList)
 #define processSourceList							{"C1", "C2", "C3", "WB"}
 #define processTempControlList						{"Off", "Run", "Susp."}
-#define tanksSizesAndTimes 							{ { {250,  8}, {350, 11}, {550, 16} }, { {500,  15}, {700,  19}, {1000, 25} } } // Ml and seconds
+/* Tank volumes [chemistryVolume Low/High][tankSize Small/Medium/Large], ml. The
+ * fill (and drain) time of a step comes from the volume and the pump speed:
+ * tankFillSeconds() (Kamoer KPHM600, see PUMP_FLOW_ML_MIN). */
+#define tankSizesMl 								{ {250, 350, 550}, {500, 700, 1000} }
 
 typedef enum {
     SOURCE_C1    = 0,
@@ -851,7 +891,8 @@ typedef struct sCheckupData {
     uint16_t            tempTimeoutCounter;
     bool                multiRinseChanging; /* true while a multi-rinse step is doing a mid-step drain→refill water change */
     bool                lineRinsing;        /* true while flushing the shared pump line with water after a chemistry step */
-    uint16_t            lineRinseElapsed;   /* seconds elapsed in the current line-rinse flush */
+    bool                lineRinseDrain;     /* line rinse phase: false = water from the bath into the tank, true = tank to waste */
+    uint16_t            lineRinseElapsed;   /* seconds elapsed in the current line-rinse phase */
 } sCheckupData;
 
 typedef struct sCheckup{
@@ -1300,6 +1341,52 @@ struct sDrainPopup {
 	uint8_t				 result;            /* DRAIN_TOOL_DONE / DRAIN_TOOL_STOPPED once a run has ended, 0 otherwise */
 };
 
+/* Tools -> "Empty Cx into the bottle" (machine v7, element_recoverPopup.c) */
+struct sRecoverPopup {
+	lv_obj_t			*recoverPopupParent;
+	lv_obj_t			*recoverContainer;
+	lv_obj_t			*recoverTitle;
+	lv_obj_t			*recoverTitleLine;
+	lv_style_t			 style_recoverTitleLine;
+	lv_point_precise_t	 titleLinePoints[2];
+
+	/* Confirm phase: choose the container, then Start */
+	lv_obj_t			*recoverConfirmContainer;
+	lv_obj_t			*recoverInfoLabel;
+	lv_obj_t			*pickButton[3];     /* C1 / C2 / C3, one checked */
+	lv_obj_t			*recoverStartButton;
+	lv_obj_t			*recoverStartButtonLabel;
+	lv_obj_t			*recoverCancelButton;
+	lv_obj_t			*recoverCancelButtonLabel;
+
+	/* Process phase: source -> tank -> destination with a drop on the pipe */
+	lv_obj_t			*recoverProcessContainer;
+	lv_obj_t			*srcBar, *tankBar, *dstBar;
+	lv_obj_t			*srcLabel, *tankLabel, *dstLabel;
+	lv_obj_t			*pipe;
+	lv_obj_t			*drop;
+	lv_obj_t			*phaseDot[4];
+	lv_obj_t			*phaseDotLabel[4];
+	lv_obj_t			*recoverStatusLabel;
+	lv_obj_t			*recoverTimeLabel;
+	lv_obj_t			*recoverStopButton;
+	lv_obj_t			*recoverStopButtonLabel;
+	lv_timer_t			*recoverTimer;
+
+	/* Data */
+	uint8_t				 container;         /* 0..2 = C1..C3, 255 = not chosen yet */
+	uint8_t				 phase;             /* RECOVER_PH_* */
+	bool				 isRunning;
+	bool				 stopNowPressed;
+	bool				 stopping;          /* Stop: the engine is draining the tank, then STOPPED */
+	bool				 waitingPump;       /* another tool's drain still running: start when free */
+	uint8_t				 result;            /* RECOVER_TOOL_DONE / STOPPED once a run has ended, 0 otherwise */
+	int8_t				 dropDir;           /* 0 still, 1 source -> tank, 2 tank -> destination */
+	uint32_t			 elapsed;           /* seconds since Start */
+	uint32_t			 estimate;          /* estimated total seconds */
+	uint16_t			 xferCycles;        /* cycles of the transfer phase (for "cycle n/m") */
+};
+
 struct sSelfcheckPopup {
 	lv_obj_t			*selfcheckPopupParent;
 	lv_obj_t			*selfcheckContainer;
@@ -1625,6 +1712,10 @@ struct sTools {
 	lv_obj_t 	        	*toolsLoadFilmLabel;
 	lv_obj_t 	        	*toolsLoadFilmButton;
 	lv_obj_t 	        	*toolsLoadFilmButtonLabel;
+	lv_obj_t 	        	*toolsRecoverContainer;      /* v7: Empty chemistry (C1/C2/C3 chosen in the popup) */
+	lv_obj_t 	        	*toolsRecoverLabel;
+	lv_obj_t 	        	*toolsRecoverButton;
+	lv_obj_t 	        	*toolsRecoverButtonLabel;
 	lv_obj_t 	        	*toolsImportContainer;
 	lv_obj_t 	        	*toolsExportContainer;
 
@@ -1738,6 +1829,7 @@ struct sElements {
 	struct sFilterPopup			filterPopup;
   struct sCleanPopup      cleanPopup;
   struct sDrainPopup      drainPopup;
+  struct sRecoverPopup    recoverPopup;
   struct sSelfcheckPopup  selfcheckPopup;
   struct sOtaWifiPopup    otaWifiPopup;
   struct sOtaProgressPopup otaProgressPopup;
@@ -1883,6 +1975,30 @@ bool     drainToolBusy(void);
 void     drainPopupRemoteStart(void);   /* app: open popup + Start (no confirm page) */
 void     drainPopupRemoteStop(void);
 void     drainPopupRemoteClose(void);   /* after DONE/STOPPED: back to idle, alarm off, popup closed */
+// @file element_recoverPopup.c — Tools → "Empty Cx into the bottle" (machine v7)
+void event_recoverPopup(lv_event_t *e);
+void recoverPopupCreate(void);                /* open the popup: choose C1..C3, then Start */
+#define RECOVER_TOOL_IDLE      0
+#define RECOVER_TOOL_RUNNING   1
+#define RECOVER_TOOL_STOPPING  2   /* Stop pressed: the tank is being drained to where the liquid was going */
+#define RECOVER_TOOL_DONE      3
+#define RECOVER_TOOL_STOPPED   4
+#define RECOVER_PH_WASH1       0   /* bath water through the line to waste */
+#define RECOVER_PH_HEAD        1   /* first millilitres of the chemistry to waste */
+#define RECOVER_PH_XFER        2   /* the chemistry into the bottle */
+#define RECOVER_PH_WASH2       3   /* bath water through the line to waste */
+#define RECOVER_WASH_ML        100
+#define RECOVER_HEAD_ML        30
+int      recoverToolState(void);        /* RECOVER_TOOL_* */
+int      recoverToolContainer(void);    /* 0..2 */
+int      recoverToolPhase(void);        /* RECOVER_PH_* (valid while running / after) */
+int      recoverToolPercent(void);      /* whole run, 0..100 */
+uint32_t recoverToolRemainingSecs(void);
+uint16_t recoverToolMovedMl(void);      /* chemistry delivered to the bottle so far */
+bool     recoverToolBusy(void);
+bool     recoverPopupRemoteStart(uint8_t container); /* app: open popup + Start (no confirm page) */
+void     recoverPopupRemoteStop(void);
+void     recoverPopupRemoteClose(void); /* after DONE/STOPPED: back to idle, alarm off, popup closed */
 /* Export (Tools → Export) — result of the last export, for the app */
 extern volatile uint16_t g_exportSeq;   /* +1 after every export attempt */
 extern volatile bool     g_exportOk;    /* result of the last one */
@@ -2213,8 +2329,34 @@ char *ftoa(char *a, float f, uint8_t precisione);
 uint8_t getValueForChemicalSource(uint8_t source);
 void getMinutesAndSeconds(uint16_t containerFillingTime, const bool containerToClean[3]);
 void cleanRelayManager(uint8_t pumpFrom, uint8_t pumpTo,uint8_t pumpDir,bool activePump);
-void setValveState(uint8_t relayPin, bool open);
+void setValveState(uint8_t relayPin, bool open);   /* collector valves, inlet and recovery valve */
 void closeAllValves(void);
+/* Water-bath circulator (machine v7, A7): on only while a process heats/develops. */
+void circulatorSet(bool on);
+bool circulatorOn(void);
+
+/* ── Tank-mediated transfer (machine v6/v7: one collector, one pump, the tank
+ * as the measuring cup) — the engine behind cleanRelayManager(). A transfer
+ * from A to B fills the tank from A for one cycle (XFER_CYCLE_ML), then drains
+ * it to B (plus PUMP_PURGE_SECS of air to empty the line), and repeats until
+ * stopped. Stop is graceful: whatever is in the tank is drained to B first.
+ * A start requested while the previous transfer is still draining is queued. */
+#define XFER_CYCLE_ML        300   /* per cycle; the tank overflows at ~500 ml */
+bool     xferBusy(void);           /* true while liquid is moving (also while finishing) */
+bool     xferFinishing(void);      /* stop requested, draining the last cycle to the destination */
+int      xferPhase(void);          /* 0 idle, 1 filling the tank from the source, 2 draining it to the destination */
+uint16_t xferPhaseSecs(void);      /* seconds into the current phase */
+uint16_t xferPhaseTotalSecs(void); /* length of the current phase */
+uint16_t xferMovedMl(void);        /* delivered to the destination so far (completed cycles) */
+uint16_t xferTargetMl(void);       /* volume asked for, 0 = until stopped */
+uint8_t  xferFrom(void);           /* source / destination relay pins of the current transfer */
+uint8_t  xferTo(void);
+uint16_t xferCycleSecs(void);      /* seconds of one full tank cycle fill at the current pump speed */
+uint16_t xferTransferSecs(uint16_t ml); /* total seconds to move `ml` through the tank (cycles + purges) */
+bool     xferStartVolume(uint8_t from, uint8_t to, uint16_t ml, bool (*srcEmpty)(void)); /* move `ml`, stop by itself */
+void     xferStop(void);           /* graceful stop: drain the tank to the destination, then idle */
+void     xferAbort(void);          /* immediate stop (pump off, valves closed) — the process start uses it */
+void     xferInit(void);           /* creates the engine timer (LVGL context); called from create_keyboard() */
 
 /* ── Peripheral diagnostics page (2-finger gesture on the splash) ── */
 void    debugScreenCreate(void);            /* build + show the diagnostics screen */
@@ -2245,6 +2387,10 @@ void readSettingsOnly(const char *path);  /* Read just machineSettings — for s
 void writeConfigFile( const char *path, bool enableLog );
 bool copyAndRenameFile( const char* sourceFile, const char* destFile );
 uint16_t calculateFillTime(uint16_t capacityMl, uint8_t pumpSpeedPercent);
+uint16_t tankVolumeMl(uint8_t volume_index, uint8_t tank_size);     /* 1-based indexes as in the settings */
+uint16_t tankFillSeconds(uint8_t volume_index, uint8_t tank_size);  /* one fill (or drain) of that volume */
+uint16_t pumpPurgeSecs(void);          /* air after a drain at the current pump speed */
+void     pumpSetTestParams(uint32_t flowMlMin, uint16_t purgeSecs);  /* tests only: faster pump, shorter purge (0 = real) */
 uint16_t getContainerFillTime(void);
 uint16_t getWbFillTime(void);
 /* Self-calibration: store the real measured fill time (seconds) once a fill

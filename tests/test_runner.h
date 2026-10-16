@@ -271,6 +271,7 @@ void test_suite_websocket(void);
 void test_suite_live_sync(void);
 void test_suite_film_loader(void);
 void test_suite_maintenance_remote(void);
+void test_suite_recover(void);
 
 
 /* ═══════════════════════════════════════════════

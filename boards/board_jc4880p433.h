@@ -110,15 +110,13 @@
  * same address, same register layout.
  * ═══════════════════════════════════════════════ */
 /* Port A — solenoid valves via Adafruit #6318 MOSFET channels (3.6A max)
- * Pins 0-4: solenoid valves, Pin 5: mains inlet valve (v6), Pins 6-7: FREE.
+ * Pins 0-4: solenoid valves, Pin 5: mains inlet valve (v6), Pin 6: recovery
+ * outlet valve (v7), Pin 7: water-bath circulator pump (v7).
  * On the FilMachine Mainboard A6/A7 drive the "SPARE OUT 1/2" low-side 12 V
  * outputs (J21/J22, gate pull-down 1 M) and are also brought out on the
  * "GPIO SPARE" header J30 (A6, A7, 3V3, 5V, GND) through 1 k + Schottky clamp
- * to 3.3 V. As outputs: J30 follows the pin and the matching SPARE OUT switches.
- * As inputs: a high level on the pin (external signal, or the MCP internal
- * pull-up) also turns the matching SPARE OUT on, so read them with the pull-up
- * OFF and a push-pull 3.3 V source, or accept that SPARE OUT follows the input.
- * The firmware itself never touches A6/A7 (they stay inputs after reset). */
+ * to 3.3 V. Both are driven as outputs from boot (low = off), so J30 just
+ * follows them. On the Adafruit #6318 they are MOSFET channels 7 and 8. */
 #define RELAY_NUMBER                5       /* Valve channels on MCP23017 port A (pins 0-4) */
 #define C1_RLY                      0
 #define C2_RLY                      1
@@ -130,7 +128,15 @@
  * Deliberately outside RELAY_NUMBER: process code never touches it, only the
  * Maintenance "fill machine" task opens it, and closeAllValves() closes it. */
 #define INLET_RLY                   5
-#define HEATER_RLY                  7       /* Port A pin 7 — legacy single-heater relay; unused with HAS_DUAL_HEATER (A7 is free) */
+/* Port A pin 6 — recovery outlet valve (machine v7): seventh port of the
+ * collector, hose to the front of the machine where the recovery bottle goes.
+ * Mainboard terminal J21 "SPARE OUT 1". Outside RELAY_NUMBER like the inlet:
+ * only Tools -> "Empty chemistry" opens it, closeAllValves() closes it. */
+#define RECOVERY_RLY                6
+/* Port A pin 7 — 12 V water-bath circulator pump (machine v7, small aquarium
+ * pump in a corner of the bath, always pumping the same way). Mainboard
+ * terminal J22 "SPARE OUT 2". On only while a process heats or develops. */
+#define CIRC_PUMP_PIN               7
 
 /* Port B — external relay board (10A per channel, for high-power loads)
  * 4-channel relay board connected to MCP23017 port B pins 8-11.
@@ -190,12 +196,17 @@
 #define INVALID_RELAY               255
 
 /* ═══════════════════════════════════════════════
- * Pump — DBH-12V H-bridge channel B
+ * Pump — Kamoer KPHM600 peristaltic pump (machine v7) on the H-bridge
+ * channel B (DBH-12V module, or the BTN8962 bridge of the Mainboard, J25).
+ * 12 V brushed DC, 0.8 A, 600 ml/min at full speed, PharMed tube 6.4 x 9.6.
+ * Positive displacement: flow is proportional to the duty, the tube holds the
+ * liquid when stopped, and it pumps air as happily as liquid (that is what
+ * empties the line after a drain, see PUMP_PURGE_SECS in FilMachine.h).
+ * PUMP_FLOW_ML_MIN below is what every fill/drain time is computed from.
  *
- * The DBH-12V dual DC motor driver handles both the agitation
- * motor (channel A, see MOTOR_* defines above) and the pump
- * (channel B, below). Pump direction (fill/drain) is controlled
- * by reversing the H-bridge instead of using solenoid valves.
+ * The H-bridge handles both the agitation motor (channel A, see MOTOR_*
+ * defines above) and the pump (channel B, below). Pump direction (fill/drain)
+ * is controlled by reversing the H-bridge instead of using solenoid valves.
  *
  * Control scheme (same as motor channel A):
  *   IN1=HIGH, IN2=LOW  → forward  (filling)
@@ -213,6 +224,7 @@
 #define PUMP_IN1_PIN                49      /* JP1 pin 13 — pump direction A */
 #define PUMP_IN2_PIN                50      /* JP1 pin 11 — pump direction B */
 #define PUMP_ENA_PIN                51      /* JP1 pin 9  — pump PWM speed  */
+#define PUMP_FLOW_ML_MIN            600     /* Kamoer KPHM600 at 100 % (12 V): 600 ml/min */
 
 /* ═══════════════════════════════════════════════
  * Additional sensors

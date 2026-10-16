@@ -37,9 +37,30 @@ static uint8_t secondsStepLeft = 0;
 static uint8_t stepPercentage = 0;
 static uint8_t processPercentage = 0;
 
-static uint8_t tankFillTime = 0;
-static uint8_t tankTimeElapsed = 0;
+static uint16_t tankFillTime = 0;      /* one fill of the tank at the current pump speed (Kamoer) */
+static uint16_t tankTimeElapsed = 0;
 static uint8_t tankPercentage = 0;
+static bool s_draining = false;        /* v7: the pump is emptying the tank, then pushing air through the line */
+static bool s_stopPurge = false;       /* Stop now: the air purge has been added to the countdown */
+
+/* ── Fill / drain timing (machine v7: Kamoer peristaltic pump) ──
+ * A fill lasts tankFillTime seconds. A drain lasts the same plus
+ * pumpPurgeSecs(): once the tank is empty the pump keeps running and pushes
+ * the liquid still in the line to where the drain went (its own container or
+ * the waste), so the next fill starts with a dry line and no residue of the
+ * previous chemistry ends up in the next bath. */
+static uint8_t tank_pct(uint16_t elapsed, uint16_t total) {
+    if (total == 0) return 100;
+    uint32_t p = (uint32_t)elapsed * 100U / total;
+    return p > 100U ? 100 : (uint8_t)p;
+}
+static uint16_t tank_phase_secs(void) {
+    return s_draining ? (uint16_t)(tankFillTime + pumpPurgeSecs()) : tankFillTime;
+}
+/* Pump arc while draining: the liquid left in the tank (the air purge at the end shows as empty). */
+static int32_t drain_arc(void) { return 100 - tank_pct(tankTimeElapsed, tankFillTime); }
+static void pump_fill_start(uint8_t from) { s_draining = false; sendValueToRelay(from, PUMP_IN_RLY, true); }
+static void pump_drain_start(uint8_t to)  { s_draining = true;  sendValueToRelay(to, PUMP_OUT_RLY, true); }
 
 /* static bool isPumping = false; */  /* Currently unused - reserved for future pump state tracking */
 static uint8_t pumpFrom = 0;
@@ -56,11 +77,7 @@ static uint16_t checkup_get_tank_fill_time_seconds(const sCheckup *ckup) {
             tank_size = ckup->data.tankSize;
     }
 
-    if (volume_index < 1 || volume_index > 2) volume_index = 2;
-    if (tank_size < 1 || tank_size > 3) tank_size = 2;
-
-    uint16_t table[2][3][2] = tanksSizesAndTimes;
-    return table[volume_index - 1][tank_size - 1][1];
+    return tankFillSeconds(volume_index, tank_size);
 }
 
 static uint32_t checkup_elapsed_process_seconds(void) {
@@ -171,6 +188,8 @@ static void resetStuffBeforeNextProcess(){
     tankFillTime = 0;
     tankTimeElapsed = 0;
     tankPercentage = 0;
+    s_draining = false;
+    s_stopPurge = false;
 
     sim_resetTemperatures();
 }
@@ -189,6 +208,13 @@ void event_checkup(lv_event_t * e){
   if(code == LV_EVENT_CLICKED){
     if(widget == ckup->checkupStartButton){
       alarm_stop();
+      if(ckup->data.processStep == 0 && maintenanceBusy()){
+        /* A tool is still moving liquid (or the transfer engine is draining
+         * the tank after one): the first fill would overflow the tank. */
+        LV_LOG_WARN("Start refused: maintenance / transfer still running");
+        messagePopupCreate(checkupStartBusyTitle_text, checkupStartBusyBody_text, NULL, NULL, NULL);
+        return;
+      }
       if(ckup->data.processStep == 0){
         LV_LOG_USER("User pressed checkupStartButton on Step 0");
         ckup->data.isProcessing = 0;
@@ -252,6 +278,7 @@ void event_checkup(lv_event_t * e){
         safeTimerDelete(&ckup->checkupFilmTimer);
         /* Safety: always turn off the heater when leaving checkup */
         sim_setHeater(false);
+        circulatorSet(false);
         /* Safety: stop motor if user exits during step 3 rotation check */
         motor_set_stop();
 
@@ -437,6 +464,7 @@ void processTimer(lv_timer_t * timer) {
                 secondsStepElapsed = 0;
                 ckup->data.multiRinseChanging = false;
                 ckup->data.lineRinsing = false;
+                ckup->data.lineRinseDrain = false;
                 ckup->data.lineRinseElapsed = 0;
                 ckup->currentStep = ckup->currentStep->next;
                 lv_label_set_text(ckup->checkupStepNameValue, checkupEllipsis_text);
@@ -617,7 +645,7 @@ void handleFirstStep(processNode *pn) {
 
         if (checkup->data.isAlreadyPumping == false) {
             runMotorTask();
-            sendValueToRelay(pumpFrom, pumpDir, true);
+            pump_fill_start(pumpFrom);
             checkup->data.isAlreadyPumping = true;
         }
 
@@ -662,14 +690,14 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
             LV_LOG_USER("Last step DRAINING");
 
             if (checkup->data.isAlreadyPumping == false) {
-                sendValueToRelay(pumpFrom, pumpDir, true);
+                pump_drain_start(pumpFrom);
                 checkup->data.isAlreadyPumping = true;
                 /* Disable stop buttons — last step is already draining */
                 lv_obj_add_state(checkup->checkupStopAfterButton, LV_STATE_DISABLED);
                 lv_obj_add_state(checkup->checkupStopNowButton, LV_STATE_DISABLED);
             }
 
-            lv_arc_set_value(checkup->pumpArc, 100 - tankPercentage);
+            lv_arc_set_value(checkup->pumpArc, drain_arc());
             lv_label_set_text(checkup->checkupStepKindValue, checkupDraining_text);
             tankTimeElapsed++;
         } else {
@@ -678,9 +706,10 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
             sendValueToRelay(pumpFrom, pumpDir, false);
             stopMotor(MOTOR_IN1_PIN, MOTOR_IN2_PIN);
             stopMotorTask();
+            circulatorSet(false);                       /* process over: bath circulator off */
             checkup->data.isAlreadyPumping = false;
 
-            lv_arc_set_value(checkup->pumpArc, 100 - tankPercentage);
+            lv_arc_set_value(checkup->pumpArc, 0);
             lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
             lv_obj_remove_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
 
@@ -727,7 +756,7 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
 
                 if (checkup->data.isAlreadyPumping == false) {
 
-                    sendValueToRelay(pumpFrom, pumpDir, true);
+                    pump_fill_start(pumpFrom);
                     checkup->data.isAlreadyPumping = true;
                 }
 
@@ -762,11 +791,11 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
                 LV_LOG_USER("Middle step DRAINING");
 
                 if (checkup->data.isAlreadyPumping == false) {
-                    sendValueToRelay(pumpFrom, pumpDir, true);
+                    pump_drain_start(pumpFrom);
                     checkup->data.isAlreadyPumping = true;
                 }
 
-                lv_arc_set_value(checkup->pumpArc, 100 - tankPercentage);
+                lv_arc_set_value(checkup->pumpArc, drain_arc());
                 lv_label_set_text(checkup->checkupStepKindValue, checkupDraining_text);
                 tankTimeElapsed++;
             } else {
@@ -775,7 +804,7 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
                 sendValueToRelay(pumpFrom, pumpDir, false);
                 checkup->data.isAlreadyPumping = false;
 
-                lv_arc_set_value(checkup->pumpArc, 100 - tankPercentage);
+                lv_arc_set_value(checkup->pumpArc, 0);
                 lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
 
                 tankPercentage = 0;
@@ -790,6 +819,7 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
                     && justFinished->step.stepDetails != NULL
                     && justFinished->step.stepDetails->data.type == CHEMISTRY) {
                     checkup->data.lineRinsing = true;
+                    checkup->data.lineRinseDrain = false;
                     checkup->data.lineRinseElapsed = 0;
                     /* isFilling stays false; handleLineRinse sets it true when done */
                 } else {
@@ -818,10 +848,10 @@ void handleMultiRinseChange(processNode *pn) {
         pumpDir = PUMP_OUT_RLY;
         if (tankPercentage < 100) {
             if (checkup->data.isAlreadyPumping == false) {
-                sendValueToRelay(pumpFrom, pumpDir, true);
+                pump_drain_start(pumpFrom);
                 checkup->data.isAlreadyPumping = true;
             }
-            lv_arc_set_value(checkup->pumpArc, 100 - tankPercentage);
+            lv_arc_set_value(checkup->pumpArc, drain_arc());
             lv_label_set_text(checkup->checkupStepKindValue, checkupDraining_text);
             tankTimeElapsed++;
         } else {
@@ -837,7 +867,7 @@ void handleMultiRinseChange(processNode *pn) {
         pumpDir = PUMP_IN_RLY;
         if (tankPercentage < 100) {
             if (checkup->data.isAlreadyPumping == false) {
-                sendValueToRelay(pumpFrom, pumpDir, true);
+                pump_fill_start(pumpFrom);
                 checkup->data.isAlreadyPumping = true;
             }
             lv_arc_set_value(checkup->pumpArc, tankPercentage);
@@ -859,43 +889,54 @@ void handleMultiRinseChange(processNode *pn) {
     }
 }
 
-/* ── Line rinse after a chemistry step ──
+/* ── Line rinse after a chemistry step (machine v6/v7 plumbing) ──
  * When enabled (settingsParams.lineRinseEnabled), after draining a chemistry
- * step the shared pump line is flushed with clean water from the water bath and
- * discarded to waste, for `lineRinseTime` seconds, before the next liquid is
- * drawn. This clears chemistry residue from the common tubing to prevent
- * cross-contamination between different chemistries.
- * NOTE: the exact valve/pump combination for a "water bath → line → waste"
- * flush depends on the real plumbing and may need bench tuning; the timing,
- * gating and hand-off logic here are hardware-agnostic. */
+ * step the shared line is flushed with clean water before the next liquid is
+ * drawn: the tank is filled from the water bath for `lineRinseTime` seconds
+ * (about 100 ml at 10 s / 100 %), then drained to waste plus the air purge.
+ * Every valve sits on the collector, on the suction side of the pump, so a
+ * flush must go in and out through the tank like everything else; the line
+ * ends up dry, with only water in its wetted film. */
 void handleLineRinse(processNode *pn) {
     sCheckup* checkup = pn->process.processDetails->checkup;
-
-    pumpFrom = getValueForChemicalSource(WB);   /* clean water from the bath */
-    pumpDir  = PUMP_OUT_RLY;                     /* push it through the line to waste */
-
-    if (checkup->data.isAlreadyPumping == false) {
-        sendValueToRelay(pumpFrom, pumpDir, true);
-        checkup->data.isAlreadyPumping = true;
-    }
-    lv_label_set_text(checkup->checkupStepKindValue, checkupRinsingLine_text);
-
-    checkup->data.lineRinseElapsed++;
     uint16_t dur = (uint16_t)gui.page.settings.settingsParams.lineRinseTime;
     if (dur < 1) dur = 1;
 
-    /* Animate the pump bargraph 0→100% over the flush duration, so the line
-     * rinse is visible like the fill/drain phases. */
-    {
-        uint32_t pct = ((uint32_t)checkup->data.lineRinseElapsed * 100U) / dur;
-        if (pct > 100U) pct = 100U;
-        lv_arc_set_value(checkup->pumpArc, (int32_t)pct);
+    lv_label_set_text(checkup->checkupStepKindValue, checkupRinsingLine_text);
+
+    if (!checkup->data.lineRinseDrain) {
+        /* Phase 1: clean water from the bath into the tank */
+        pumpFrom = getValueForChemicalSource(WB);
+        pumpDir  = PUMP_IN_RLY;
+        if (checkup->data.isAlreadyPumping == false) {
+            pump_fill_start(pumpFrom);
+            checkup->data.isAlreadyPumping = true;
+        }
+        checkup->data.lineRinseElapsed++;
+        lv_arc_set_value(checkup->pumpArc, (int32_t)tank_pct(checkup->data.lineRinseElapsed, dur));
+        if (checkup->data.lineRinseElapsed >= dur) {
+            sendValueToRelay(pumpFrom, pumpDir, false);
+            checkup->data.isAlreadyPumping = false;
+            checkup->data.lineRinseDrain = true;
+            checkup->data.lineRinseElapsed = 0;
+        }
+        return;
     }
 
-    if (checkup->data.lineRinseElapsed >= dur) {
+    /* Phase 2: the rinse water goes to waste, then air through the line */
+    pumpFrom = getValueForChemicalSource(WASTE);
+    pumpDir  = PUMP_OUT_RLY;
+    if (checkup->data.isAlreadyPumping == false) {
+        pump_drain_start(pumpFrom);
+        checkup->data.isAlreadyPumping = true;
+    }
+    checkup->data.lineRinseElapsed++;
+    lv_arc_set_value(checkup->pumpArc, 100 - (int32_t)tank_pct(checkup->data.lineRinseElapsed, dur));
+    if (checkup->data.lineRinseElapsed >= (uint16_t)(dur + pumpPurgeSecs())) {
         sendValueToRelay(pumpFrom, pumpDir, false);
         checkup->data.isAlreadyPumping = false;
         checkup->data.lineRinsing = false;
+        checkup->data.lineRinseDrain = false;
         checkup->data.lineRinseElapsed = 0;
         tankPercentage = 0;
         tankTimeElapsed = 0;
@@ -913,26 +954,30 @@ void handleStopNow(processNode *pn) {
     pumpDir = PUMP_OUT_RLY;
 
     if (!checkup->data.isFilling && tankPercentage == 0) {
+        /* Developing: the tank is full, drain it all */
         tankPercentage = 100;
         tankTimeElapsed = tankFillTime;
         checkup->data.isFilling = true;
 
         sendValueToRelay(0, 0, false);
-        sendValueToRelay(pumpFrom, pumpDir, true);
+        pump_drain_start(pumpFrom);
         checkup->data.isAlreadyPumping = false;
     }
-    if (tankPercentage > 0) {
+    if (!s_stopPurge) {
+        /* Once: after the liquid, pumpPurgeSecs() of air to empty the line */
+        tankTimeElapsed += pumpPurgeSecs();
+        s_stopPurge = true;
+    }
+    if (tankTimeElapsed > 0) {
         LV_LOG_USER("STOP NOW DRAINING");
 
-        
-        if(checkup->data.isAlreadyPumping == true){
+        if(checkup->data.isAlreadyPumping == true){     /* was filling: reverse the pump */
             sendValueToRelay(0, 0, false);
-            sendValueToRelay(pumpFrom, pumpDir, true);
+            pump_drain_start(pumpFrom);
             checkup->data.isAlreadyPumping = false;
         }
-      
 
-        lv_arc_set_value(checkup->pumpArc, tankPercentage);
+        lv_arc_set_value(checkup->pumpArc, (int32_t)tank_pct(tankTimeElapsed > pumpPurgeSecs() ? tankTimeElapsed - pumpPurgeSecs() : 0, tankFillTime));
         lv_label_set_text(checkup->checkupStepKindValue, checkupDraining_text);
         tankTimeElapsed--;
     } else {
@@ -941,9 +986,10 @@ void handleStopNow(processNode *pn) {
         sendValueToRelay(pumpFrom, pumpDir, false);
         stopMotor(MOTOR_IN1_PIN, MOTOR_IN2_PIN);
         stopMotorTask();
+        circulatorSet(false);
         checkup->data.isAlreadyPumping = false;
 
-        lv_arc_set_value(checkup->pumpArc, tankPercentage);
+        lv_arc_set_value(checkup->pumpArc, 0);
         lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
         lv_obj_remove_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
         safeTimerDelete(&checkup->pumpTimer);
@@ -962,7 +1008,7 @@ void handleStopAfter(processNode *pn) {
             LV_LOG_USER("STOP AFTER step FILLING");
 
         if (checkup->data.isAlreadyPumping == false) {
-            sendValueToRelay(pumpFrom, pumpDir, true);
+            pump_fill_start(pumpFrom);
             checkup->data.isAlreadyPumping = true;
         }
 
@@ -1004,11 +1050,11 @@ void handleStopAfter(processNode *pn) {
 
 
             if (checkup->data.isAlreadyPumping == false) {
-                sendValueToRelay(pumpFrom, pumpDir, true);
+                pump_drain_start(pumpFrom);
                 checkup->data.isAlreadyPumping = true;
             }
 
-            lv_arc_set_value(checkup->pumpArc, 100 - tankPercentage);
+            lv_arc_set_value(checkup->pumpArc, drain_arc());
             lv_label_set_text(checkup->checkupStepKindValue, checkupDraining_text);
             tankTimeElapsed++;
         } else {
@@ -1017,9 +1063,10 @@ void handleStopAfter(processNode *pn) {
             sendValueToRelay(pumpFrom, pumpDir, false);
             stopMotor(MOTOR_IN1_PIN, MOTOR_IN2_PIN);
             stopMotorTask();
+            circulatorSet(false);
             checkup->data.isAlreadyPumping = false;
 
-            lv_arc_set_value(checkup->pumpArc, 100 - tankPercentage);
+            lv_arc_set_value(checkup->pumpArc, 0);
             lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
             lv_obj_remove_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
             safeTimerDelete(&checkup->pumpTimer);
@@ -1045,28 +1092,35 @@ void handleStopNowAfterStopAfter(processNode *pn) {
         checkup->data.isFilling = true;
 
         sendValueToRelay(0, 0, false);
-        sendValueToRelay(pumpFrom, pumpDir, true);
+        pump_drain_start(pumpFrom);
         checkup->data.isAlreadyPumping = false;
     }
-    if (tankPercentage > 0) {
+    if (!s_stopPurge) {
+        tankTimeElapsed += pumpPurgeSecs();
+        s_stopPurge = true;
+    }
+    if (tankTimeElapsed > 0) {
         LV_LOG_USER("STOP NOW after STOP AFTER step NOW DRAINING");
 
         if(checkup->data.isAlreadyPumping == true){
             sendValueToRelay(0, 0, false);
-            sendValueToRelay(pumpFrom, pumpDir, true);
+            pump_drain_start(pumpFrom);
             checkup->data.isAlreadyPumping = false;
         }
 
-        lv_arc_set_value(checkup->pumpArc, tankPercentage);
+        lv_arc_set_value(checkup->pumpArc, (int32_t)tank_pct(tankTimeElapsed > pumpPurgeSecs() ? tankTimeElapsed - pumpPurgeSecs() : 0, tankFillTime));
         lv_label_set_text(checkup->checkupStepKindValue, checkupDraining_text);
         tankTimeElapsed--;
     } else {
         LV_LOG_USER("STOP NOW after STOP AFTER DRAINING COMPLETE");
 
         sendValueToRelay(pumpFrom, pumpDir, false);
+        stopMotor(MOTOR_IN1_PIN, MOTOR_IN2_PIN);
+        stopMotorTask();
+        circulatorSet(false);
         checkup->data.isAlreadyPumping = false;
 
-        lv_arc_set_value(checkup->pumpArc, tankPercentage);
+        lv_arc_set_value(checkup->pumpArc, 0);
         lv_label_set_text(checkup->checkupStepKindValue, checkupDrainingComplete_text);
         lv_obj_remove_state(checkup->checkupCloseButton, LV_STATE_DISABLED);
         safeTimerDelete(&checkup->pumpTimer);
@@ -1082,7 +1136,7 @@ void pumpTimer(lv_timer_t *timer) {
     processNode *pn = (processNode *)lv_timer_get_user_data(timer);
     if(pn == NULL || pn->process.processDetails == NULL || pn->process.processDetails->checkup == NULL) return;
 
-    tankPercentage = calculatePercentage(0, tankTimeElapsed, 0, tankFillTime);
+    tankPercentage = tank_pct(tankTimeElapsed, tank_phase_secs());
 
     sCheckup *checkup = pn->process.processDetails->checkup;
 
@@ -1409,6 +1463,7 @@ static void checkup_renderReachTemp(processNode *proc) {
             ckup->data.currentWaterTemp = getCachedTemperature(TEMPERATURE_SENSOR_BATH);
             ckup->data.currentChemTemp = getCachedTemperature(TEMPERATURE_SENSOR_CHEMICAL);
             ckup->tempTimer = lv_timer_create(tempTimerCallback, 1000, proc);
+            circulatorSet(true);                        /* v7: stir the bath while it heats up */
         } else {
             ckup->tempTimer = NULL;
             lv_label_set_text(ckup->checkupHeaterStatusLabel, checkupNoTempControl_text);
@@ -1496,8 +1551,9 @@ static void checkup_renderProcessing(processNode *proc) {
     /* processStep 4: Main processing */
     sCheckup *ckup = proc->process.processDetails->checkup;
     if(isStepStatus4created == 0) {
-        tankFillTime = (uint8_t)checkup_get_tank_fill_time_seconds(ckup);
-        LV_LOG_USER("tankFillTime Volume %"PRIu32", size %"PRIu8", time %"PRIu8"",ckup->data.activeVolume_index > 0 ? ckup->data.activeVolume_index - 1 : 0, ckup->data.tankSize > 0 ? ckup->data.tankSize - 1 : 0, tankFillTime);
+        tankFillTime = checkup_get_tank_fill_time_seconds(ckup);
+        LV_LOG_USER("tankFillTime Volume %"PRIu32", size %"PRIu8", time %"PRIu16" s (+ %u s of air after each drain)",ckup->data.activeVolume_index > 0 ? ckup->data.activeVolume_index - 1 : 0, ckup->data.tankSize > 0 ? ckup->data.tankSize - 1 : 0, tankFillTime, (unsigned)pumpPurgeSecs());
+        circulatorSet(true);                            /* v7: stir the bath while developing */
 
         ckup->data.isFilling = true;
         ckup->pumpTimer = lv_timer_create(pumpTimer, 1000, proc);

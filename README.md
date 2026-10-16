@@ -342,6 +342,7 @@ The simulator opens an 800×480 window that reproduces the exact touchscreen int
 - Configuration save/load (reads/writes `sd/FilMachine.json`)
 - Export/Import (backup to `sd/FilMachine_Backup.json`)
 - Drain machine with animated tank-level bars and relay management
+- Empty chemistry (machine v7): C1, C2 or C3 into its recovery bottle through the pump and the recovery outlet, line washed before and after, with a source → tank → bottle animation
 - Clean machine with per-container rinse cycles and arc progress
 - Self-check diagnostic wizard with 8-phase hardware test simulation (temp sensors, pump, heater, valves, containers, motor)
 - OTA update UI (SD card check + Wi-Fi popup with simulated IP/PIN/progress)
@@ -451,6 +452,7 @@ All commands use JSON format: `{"cmd":"command_name", ...params}`.
 | `fill_start` / `fill_stop` | `target` (0 = water bath, 1 = chemistry) | Maintenance fill (self-calibrates the fill time; refused with `fill_rejected` while a process runs) |
 | `tune_test` / `tune_set` / `tune_cancel` | `kind` (0 pump, 1 motor, 2 volume), `percent`, `on` | Live test, store or cancel a Tune value |
 | `drain_start` / `drain_stop` / `drain_close` | — | Drain machine: start (no confirm page, the app asks), Stop, Close after the end (alarm off, popup closed). Refused with `drain_rejected` while a process or another maintenance tool runs |
+| `recover_start` / `recover_stop` / `recover_close` | `container` (0 = C1, 1 = C2, 2 = C3) | Empty that chemistry into its recovery bottle (machine v7): wash the line, discard the head, transfer, wash again. Progress in `recoverToolState` (0 idle, 1 running, 2 stopping, 3 done, 4 stopped), `recoverToolPhase` (0..3), `recoverToolPct`, `recoverToolRemaining`, `recoverToolMovedMl`. Refused with `recover_rejected` while a process or another tool runs; a drain still finishing is waited for |
 | `clean_start` | `mask` (bit0 C1, bit1 C2, bit2 C3), `cycles` (1–5), `drainWb` | Clean machine with these choices (shown on the display popup). Refused with `clean_rejected` (`processing`, `busy`, `no_container`) |
 | `clean_stop` / `clean_close` | — | Clean: Stop (the container is pumped back first) / Close after the end |
 | `export_config` | — | Export configuration and processes to the backup file on the SD card; the result arrives as `exportSeq` / `exportOk` in the state |
@@ -577,7 +579,7 @@ The settings are grouped in sections, like the Tools tab; the whole page scrolls
 | Film rotation | Randomness | Random variation on inversion interval | 0–100% |
 | Pump and liquids | Tank size | Default developing tank size | S (500ml) / M (700ml) / L (1000ml) |
 | Pump and liquids | Chemistry volume | Amount of chemistry used per step | Low / High |
-| Pump and liquids | Pump speed | Water pump speed percentage | 10–100% |
+| Pump and liquids | Pump speed | Peristaltic pump speed (Kamoer KPHM600: 600 ml/min at 100 %); every fill/drain time is computed from it | 10–100% (default 100) |
 | Pump and liquids | Invert pump | Invert H-bridge direction to compensate for pump physical switch position | On/Off |
 | Pump and liquids | Water inlet | Automatic water fill if connected | On/Off |
 | Pump and liquids | Drain/fill overlap | How much of fill/drain time counts as processing time (100% recommended) | 0–100% |
@@ -599,6 +601,7 @@ All settings are saved automatically to the SD card when changed. Slider values 
 ### The Tools Tab
 
 - **Clean machine** — Automated cleaning cycle: select which containers to clean (C1, C2, C3), set the number of rinse cycles (1–5), and optionally drain the water bath when done. Only the selected containers are cleaned, in order: each cycle fills the container with water from the water bath and then pumps it back, with real-time progress shown via arc animations and remaining-time countdown. Stop pumps the water still in the current container back to the bath before ending. It can also be started, stopped and closed from the app (the popup shows the app's choices).
+- **Empty chemistry** (machine v7) — One row: the popup asks which container (C1, C2 or C3) and moves its whole content into its recovery bottle through the RECOVERY outlet (valve A6, the seventh port of the collector). Four phases, all through the tank: bath water through the line to waste, the first 30 ml of the chemistry to waste (they carry away the water film), the chemistry into the bottle cycle after cycle (until its MIN sensor pulls air, or 1 litre), bath water through the line again. Nothing but that chemistry and a few tenths of a millilitre of water can reach the bottle. The popup shows source → tank → bottle bars with a drop running along the pipe, the four phases as dots, the remaining time; Stop drains the tank to where the liquid was going and ends the run. Also from the app (`recover_start`).
 - **Drain machine** — Drains all containers (C1, C2, C3, WB) to waste sequentially. A confirmation screen lists the affected containers; once started, four colored tank bars animate from full to empty in real time, showing which container is currently draining, a ">> WASTE <<" indicator, and a countdown timer. The drain can be stopped at any time via the Stop button. It can also be started, stopped and closed from the app.
 - **Self-check** — Guided hardware diagnostic wizard that tests all machine components in 8 phases: temperature sensors (5s), water pump (10s), heater (30s), valves (10s), the three containers C1/C2/C3 (10s each), and agitation motor (10s). The UI is split in two panels: a task list on the left showing icons per phase (check for done, dot for pending/skipped/stopped) and a detail panel on the right with phase description, real-time sensor data, countdown timer, and a progress bar. Three buttons control the flow: Stop (halts current phase), Start/Re-run (begins or repeats a phase), and Next (skips to the next phase). Each phase's state (done, skipped, stopped) is saved and visible when revisiting. When all phases complete successfully the title shows "Self-check complete!" in green; if any were skipped or stopped it shows "Self-check finished" in orange.
 - **Load film** — Loads the film onto the reel with the built-in loader: choose 135 or 120 and press Start. The reel motor winds the film while the Hall sensor counts the turns; when the reel stops at the end of the film, the servo raises the blade and cuts, then half a turn pulls the tail inside and a beep says the tank is ready. *Cut now* cuts at once (e.g. when the 120 tape shows), *Stop* halts everything, and with the machine idle a *Test blade* button runs one blade cycle. The cut is refused if the reel stops too early (clip not hooked) or turns too long, and the motor is checked for rotation right after the start. The same cycle can be started from the app; a process cannot start while a film is loading.
@@ -761,8 +764,9 @@ All 12 P4 GPIO pins on JP1 are allocated — GPIO 28, the last spare, now drives
 | 2 | A2 | Valve **C3** |
 | 3 | A3 | Valve **WB** (water bath) |
 | 4 | A4 | Valve **WASTE** |
-| 5–6 | A5–A6 | Spare |
-| 7 | A7 | Heater relay (legacy / external relay) |
+| 5 | A5 | Valve **INLET** (mains water into the bath, machine v6+) |
+| 6 | A6 | Valve **RECOVERY** (seventh port of the collector, hose to the recovery bottle — Mainboard SPARE OUT 1, machine v7) |
+| 7 | A7 | Bath **circulator** pump, 12 V (Mainboard SPARE OUT 2, machine v7) — on only while a process heats or develops |
 | 8 | B0 | Chem **C1** level MIN (XKC-Y21) |
 | 9 | B1 | Chem **C1** level MAX |
 | 10 | B2 | Chem **C2** level MIN |
@@ -816,7 +820,7 @@ Two spreadsheets in the repository root complement this list (both in Italian): 
 | 4 | Solenoid valve, 12 V | 5 | C1, C2, C3, WB, WASTE. |
 | 5 | **DBH-12V** dual DC motor driver (H-bridge) | 1 | Ch. A = agitation motor, ch. B = pump. |
 | 6 | DC gear motor, 12 V | 1 | Tank agitation / rotation. |
-| 7 | DC pump, 12 V (diaphragm/peristaltic, reversible) | 1 | Fill/drain by direction reversal. |
+| 7 | Kamoer KPHM600 peristaltic pump, 12 V (600 ml/min, PharMed tube 6.4 x 9.6) | 1 | Fill/drain by direction reversal; holds the liquid when stopped, pumps air to empty the line. |
 | 8 | Heater MOSFET module | 2 | Driven from MCP Port B (B6/B7). |
 | 9 | Heating element / immersion heater, 12 V | 1–2 | Water-bath heating (thermostat control). |
 
@@ -979,7 +983,7 @@ A hidden factory/bring-up screen for validating hardware (especially a custom bo
 
 **Live monitor (grouped panels, refresh ~3×/s):** bath/chem temperatures, water-bath level (min/max), 3× chemical level (min/max), Hall magnet, flow (L/min + pulses), MCP23017 / SD / Wi-Fi status, and a **System** panel with ESP32-P4 **internal chip temperature**, free PSRAM, **last reset reason**, and uptime. A **Power rails** panel shows 12V/5V/3.3V (`n/a` until dividers + `HAS_RAIL_MONITOR` are provided).
 
-**Output controls (to test the board):** toggle each valve (C1/C2/C3/WB/Waste), run pump FW/RV/Stop, motor FW/RV/Stop, toggle heaters H1/H2, play an audio test tone. **Close** turns every output off and returns to the splash.
+**Output controls (to test the board):** toggle each valve (C1/C2/C3/WB/Waste/Rec — the recovery outlet on A6), run pump FW/RV/Stop, motor FW/RV/Stop, toggle heaters H1/H2 and the bath circulator (Circ, A7), play an audio test tone. **Close** turns every output off and returns to the splash.
 
 ---
 
@@ -994,7 +998,11 @@ Compile-time flags (in `main/include/FilMachine.h` and the board header) that ch
 | `HAS_DUAL_HEATER` | 1 | Two heater MOSFETs on MCP B6/B7 (vs a single Port-A relay). |
 | `HAS_CHEM_LEVEL_SENSORS` | 1 | 6 chemical-level sensors on MCP Port B (B0–B5). |
 | `HAS_RAIL_MONITOR` | 0 | 1 → read 12V/5V/3.3V rails via ADC in the diagnostics page (needs dividers + channel/ratio defines). |
-| `MOTOR_MIN_ANALOG_VAL` / `PUMP_MIN_ANALOG_VAL` | 90 / 150 | Duty at the 10% slider position — raise if the motor/pump stalls at low speed. |
+| `MOTOR_MIN_ANALOG_VAL` / `PUMP_MIN_ANALOG_VAL` | 90 / 64 | Lowest duty applied (motor: at the 10% slider position; pump: floor of the linear 0..250 mapping) — raise if the motor/pump stalls at low speed. |
+| `PUMP_FLOW_ML_MIN` (board header) | 600 | Flow of the pump at 100 %: fill/drain times of the process and of the Tools are computed from it (ml / flow). |
+| `PUMP_PURGE_SECS` | 4 | Seconds of air pumped after every drain (at 100 %, scaled with the speed): the tank is empty, so the liquid still in the line is pushed to where the drain went and the next fill starts with a dry line. |
+| `XFER_CYCLE_ML` | 300 | Volume of one tank cycle when the Tools move liquid between two collector ports (the tank is the measuring cup; it overflows at ~500 ml). |
+| `CHEM_CONTAINER_ML` / `BATH_VOLUME_ML` | 1000 / 12800 | Nominal volumes for the Tools' time estimates until a measured fill time exists. |
 
 ---
 
@@ -1011,7 +1019,7 @@ All data is stored on the SD card as a single **JSON** file, `FilMachine.json` (
     "filmRotationSpeedSetpoint": 50, "rotationIntervalSetpoint": 10, "randomSetpoint": 20,
     "isPersistentAlarm": 1, "isProcessAutostart": 0, "drainFillOverlapSetpoint": 100,
     "multiRinseTime": 60, "lineRinseEnabled": 0, "lineRinseTime": 10,
-    "tankSize": 2, "pumpSpeed": 30,
+    "tankSize": 2, "pumpSpeed": 100,
     "chemCalibFillSecs": 0, "wbCalibFillSecs": 0, "chemistryVolume": 2,
     "tempCalibOffset": 0, "chemCalibOffset": 0,
     "splashRandom": 0, "splashPalette": 3, "splashShapeStyle": 0,

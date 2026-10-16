@@ -384,7 +384,7 @@ static void test_default_settings_values(void)
 
     /* According to requirements, after initGlobals() these should be:
      * tankSize == 2 (Medium)
-     * pumpSpeed == 30
+     * pumpSpeed == PUMP_SPEED_DEFAULT_PCT (100: peristaltic pump, machine v7)
      * chemCalibFillSecs == 0 (uncalibrated; was chemContainerMl)
      * wbCalibFillSecs == 0 (uncalibrated; was wbContainerMl)
      * drainFillOverlapSetpoint == 100 */
@@ -395,8 +395,8 @@ static void test_default_settings_values(void)
 
     TEST_ASSERT_EQ((int)s->tankSize, 2,
                    "tankSize should default to 2 (Medium)");
-    TEST_ASSERT_EQ((int)s->pumpSpeed, 30,
-                   "pumpSpeed should default to 30");
+    TEST_ASSERT_EQ((int)s->pumpSpeed, PUMP_SPEED_DEFAULT_PCT,
+                   "pumpSpeed should default to PUMP_SPEED_DEFAULT_PCT (100 %)");
     TEST_ASSERT_EQ((int)s->chemCalibFillSecs, 0,
                    "chemCalibFillSecs should default to 0 (uncalibrated)");
     TEST_ASSERT_EQ((int)s->wbCalibFillSecs, 0,

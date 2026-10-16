@@ -165,7 +165,7 @@ DEFAULT_SETTINGS = {
     "lineRinseEnabled": 0,
     "lineRinseTime": 10,
     "tankSize": 2,
-    "pumpSpeed": 30,
+    "pumpSpeed": 100,
     "chemCalibFillSecs": 0,
     "wbCalibFillSecs": 0,
     "chemistryVolume": 2,

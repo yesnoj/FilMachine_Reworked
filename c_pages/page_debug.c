@@ -79,11 +79,20 @@ static struct {
     lv_obj_t *lbl_chip, *lbl_heap, *lbl_reset, *lbl_up;
     lv_obj_t *lbl_v12, *lbl_v5, *lbl_v33;
 
-    bool      valve[5];       /* C1 C2 C3 WB WASTE */
-    lv_obj_t *vbtn[5];
+    bool      valve[6];       /* C1 C2 C3 WB WASTE + recovery outlet (v7) */
+    lv_obj_t *vbtn[6];
     bool      heater[2];
     lv_obj_t *hbtn[2];
+    lv_obj_t *cbtn;           /* water-bath circulator (v7) */
 } D;
+
+/* Diagnostics valve index -> MCP pin: 0..4 are the collector valves, 5 the recovery outlet. */
+static uint8_t dbg_valve_pin(int i) {
+#if defined(RECOVERY_RLY)
+    if (i == 5) return RECOVERY_RLY;
+#endif
+    return (uint8_t)i;
+}
 
 /* ── small helpers ── */
 static void dot_set(lv_obj_t *d, uint32_t rgb) {
@@ -150,10 +159,16 @@ static lv_obj_t *make_ctrl(lv_obj_t *parent, int x, int y, int w, const char *tx
 /* ── output control handlers ── */
 static void ev_valve(lv_event_t *e) {
     int i = (int)(intptr_t)lv_event_get_user_data(e);
-    if (i < 0 || i > 4) return;
+    if (i < 0 || i > 5) return;
     D.valve[i] = !D.valve[i];
-    setValveState((uint8_t)i, D.valve[i]);           /* C1..WASTE = relay 0..4 */
+    setValveState(dbg_valve_pin(i), D.valve[i]);     /* C1..WASTE = relay 0..4, Rec = A6 */
     lv_obj_set_style_bg_color(D.vbtn[i], lv_color_hex(D.valve[i] ? DBG_GREEN : DBG_GREY), 0);
+}
+
+static void ev_circ(lv_event_t *e) {
+    (void)e;
+    circulatorSet(!circulatorOn());
+    lv_obj_set_style_bg_color(D.cbtn, lv_color_hex(circulatorOn() ? DBG_GREEN : DBG_GREY), 0);
 }
 
 static void ev_heater(lv_event_t *e) {
@@ -192,6 +207,7 @@ static void ev_close(lv_event_t *e) {
     closeAllValves();
     debugMcpWrite(HEATER1_PIN, false);
     debugMcpWrite(HEATER2_PIN, false);
+    circulatorSet(false);
     pump_set_stop();
     motor_set_stop();
 
@@ -351,8 +367,8 @@ void debugScreenCreate(void) {
     /* ── Row 2: interactive output controls ── */
     p = make_panel(D.scr, 0, 2, "Valves");
     {
-        const char *nm[5] = { "C1", "C2", "C3", "WB", "Wst" };
-        for (int i = 0; i < 5; i++) {
+        const char *nm[6] = { "C1", "C2", "C3", "WB", "Wst", "Rec" };
+        for (int i = 0; i < 6; i++) {
             int col = i % 3, r = i / 3;
             D.vbtn[i] = make_ctrl(p, col * 78, 30 + r * 42, 74, nm[i], DBG_GREY,
                                   ev_valve, (void *)(intptr_t)i);
@@ -369,9 +385,10 @@ void debugScreenCreate(void) {
     make_ctrl(p, 100, 70, 52, "RV", DBG_AMBER, ev_motor, (void *)(intptr_t)1);
     make_ctrl(p, 156, 70, 60, "Stop", DBG_RED, ev_motor, (void *)(intptr_t)2);
 
-    p = make_panel(D.scr, 2, 2, "Heaters / Audio");
+    p = make_panel(D.scr, 2, 2, "Heaters / Circ / Audio");
     D.hbtn[0] = make_ctrl(p, 0, 30, 74, "H1", DBG_GREY, ev_heater, (void *)(intptr_t)0);
     D.hbtn[1] = make_ctrl(p, 82, 30, 74, "H2", DBG_GREY, ev_heater, (void *)(intptr_t)1);
+    D.cbtn    = make_ctrl(p, 164, 30, 74, "Circ", DBG_GREY, ev_circ, NULL);
     make_ctrl(p, 0, 74, 156, "Test tone", 0x1565C0, ev_tone, NULL);
 
     /* ── Row 3: Power rails (future custom board — scroll down to see) ── */

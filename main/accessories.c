@@ -78,7 +78,8 @@ volatile uint16_t g_exportSeq = 0;
 volatile bool     g_exportOk  = false;
 
 bool maintenanceBusy(void) {
-    return machineFillState() == FILL_RUNNING || filmLoaderBusy() || drainToolBusy() || cleanToolBusy();
+    return machineFillState() == FILL_RUNNING || filmLoaderBusy() || drainToolBusy() || cleanToolBusy()
+        || recoverToolBusy() || xferBusy();
 }
 
 void safeTimerDelete(lv_timer_t **timer) {
@@ -193,20 +194,51 @@ static void pump_run(bool forward, uint8_t duty) {
 static void pump_stop(void) { LV_LOG_USER("Pump: STOPPED (stub)"); }
 #endif /* BOARD_SIMULATOR */
 
-/* Map an arbitrary pump-speed percentage (10-100%) to H-bridge duty (PUMP_MIN..PUMP_MAX).
- * Public so the speed-tuning popup can drive a live test at any selected value. */
+/* Map a pump-speed percentage (10-100%) to H-bridge duty. The Kamoer is a DC
+ * gear motor, so its flow follows the duty: the mapping is linear (100 % =
+ * PUMP_MAX_ANALOG_VAL) with a floor (PUMP_MIN_ANALOG_VAL) below which the
+ * motor would not start under load. Public so the speed-tuning popup can
+ * drive a live test at any selected value. */
 uint8_t pumpPercentToDuty(uint8_t pct)
 {
     if (pct < 10)  pct = 10;
     if (pct > 100) pct = 100;
-    return (uint8_t)(((uint16_t)(pct - 10) * (PUMP_MAX_ANALOG_VAL - PUMP_MIN_ANALOG_VAL)) / 90
-                     + PUMP_MIN_ANALOG_VAL);
+    uint16_t duty = ((uint16_t)pct * PUMP_MAX_ANALOG_VAL) / 100;
+    if (duty < PUMP_MIN_ANALOG_VAL) duty = PUMP_MIN_ANALOG_VAL;
+    return (uint8_t)duty;
+}
+
+/* The saved pump-speed setting, 10..100 (0 in an old config = default). */
+static uint8_t pumpSpeedPct(void)
+{
+    uint8_t pct = gui.page.settings.settingsParams.pumpSpeed;
+    if (pct < 10)  pct = PUMP_SPEED_DEFAULT_PCT;
+    if (pct > 100) pct = 100;
+    return pct;
 }
 
 /* Map the saved pump-speed setting to duty. */
 static uint8_t pumpSpeedToDuty(void)
 {
-    return pumpPercentToDuty(gui.page.settings.settingsParams.pumpSpeed);
+    return pumpPercentToDuty(pumpSpeedPct());
+}
+
+/* Pump constants, overridable by the automated tests so a whole transfer runs
+ * in seconds (pumpSetTestParams(0, 0) restores the real values). */
+static uint32_t s_pumpFlowMlMin = PUMP_FLOW_ML_MIN;
+static uint16_t s_pumpPurgeSecs = PUMP_PURGE_SECS;
+void pumpSetTestParams(uint32_t flowMlMin, uint16_t purgeSecs)
+{
+    s_pumpFlowMlMin = flowMlMin ? flowMlMin : PUMP_FLOW_ML_MIN;
+    s_pumpPurgeSecs = purgeSecs ? purgeSecs : PUMP_PURGE_SECS;
+}
+
+/* Seconds of air after a drain at the current pump speed (PUMP_PURGE_SECS is
+ * given at 100 %: the line volume is fixed, a slower pump needs longer). */
+uint16_t pumpPurgeSecs(void)
+{
+    uint16_t s = (uint16_t)((s_pumpPurgeSecs * 100 + pumpSpeedPct() - 1) / pumpSpeedPct());
+    return s < 1 ? 1 : s;
 }
 
 void rebootBoard(void) {
@@ -450,6 +482,7 @@ void event_keyboard(lv_event_t* e) {
 
 
 void create_keyboard() {
+    xferInit();                 /* first LVGL-context init shared by board, simulator and tests */
 		
     gui.element.keyboardPopup.keyBoardParent = lv_obj_class_create_obj(&lv_msgbox_backdrop_class, lv_layer_top());
     lv_obj_class_init_obj(gui.element.keyboardPopup.keyBoardParent);
@@ -814,7 +847,7 @@ void initGlobals( void ) {
   
   /* Sensible defaults for settings (overridden by config file if present) */
   gui.page.settings.settingsParams.tankSize = 2;           /* Medium */
-  gui.page.settings.settingsParams.pumpSpeed = 30;
+  gui.page.settings.settingsParams.pumpSpeed = PUMP_SPEED_DEFAULT_PCT;   /* peristaltic pump: full speed */
   gui.page.settings.settingsParams.invertPump = false;
   gui.page.settings.settingsParams.chemCalibOffset = 0;
   gui.page.settings.settingsParams.chemCalibFillSecs = 0;   /* uncalibrated (was chemContainerMl) */
@@ -1834,6 +1867,16 @@ void initializeRelayPins(){
     mcp23017_pinMode(&mcp, INLET_RLY, MCP23017_OUTPUT);
     mcp23017_digitalWrite(&mcp, INLET_RLY, 0);
 #endif
+#if defined(RECOVERY_RLY)
+    /* Recovery outlet valve (A6, machine v7): output, closed. */
+    mcp23017_pinMode(&mcp, RECOVERY_RLY, MCP23017_OUTPUT);
+    mcp23017_digitalWrite(&mcp, RECOVERY_RLY, 0);
+#endif
+#if defined(CIRC_PUMP_PIN)
+    /* Water-bath circulator (A7, machine v7): output, off until a process runs. */
+    mcp23017_pinMode(&mcp, CIRC_PUMP_PIN, MCP23017_OUTPUT);
+    mcp23017_digitalWrite(&mcp, CIRC_PUMP_PIN, 0);
+#endif
 #if defined(PORTB_RELAY_COUNT) && !defined(HAS_CHEM_LEVEL_SENSORS)
     /* Port B: external relay board channels (pins 8-11, active HIGH) */
     for (uint8_t i = 0; i < PORTB_RELAY_COUNT; i++) {
@@ -1888,9 +1931,31 @@ bool chemLevelMaxDetected(uint8_t container){
 }
 
 void setValveState(uint8_t relayPin, bool open) {
-    if (relayPin >= RELAY_NUMBER) return;
+    bool isValve = relayPin < RELAY_NUMBER;
+#if defined(INLET_RLY)
+    if (relayPin == INLET_RLY) isValve = true;
+#endif
+#if defined(RECOVERY_RLY)
+    if (relayPin == RECOVERY_RLY) isValve = true;
+#endif
+    if (!isValve) return;
     mcp23017_digitalWrite(&mcp, relayPin, open ? 1 : 0);
 }
+
+/* ── Water-bath circulator (machine v7, A7 = Mainboard SPARE OUT 2) ──
+ * A small 12 V aquarium pump in a corner of the bath that only stirs the water
+ * so the three containers and the probe see the same temperature. One
+ * direction, no speed: on while a process heats or develops, off otherwise. */
+static bool s_circOn = false;
+void circulatorSet(bool on) {
+#if defined(CIRC_PUMP_PIN)
+    if (s_circOn == on) return;
+    mcp23017_digitalWrite(&mcp, CIRC_PUMP_PIN, on ? 1 : 0);
+    LV_LOG_USER("Bath circulator %s (A%d)", on ? "ON" : "OFF", CIRC_PUMP_PIN);
+#endif
+    s_circOn = on;
+}
+bool circulatorOn(void) { return s_circOn; }
 
 /* Direct MCP output write for the diagnostics page (heaters on Port B, etc.).
  * Exposed because the mcp handle is file-static. */
@@ -1954,12 +2019,16 @@ void closeAllValves(void) {
 #if defined(INLET_RLY)
     mcp23017_digitalWrite(&mcp, INLET_RLY, 0);
 #endif
+#if defined(RECOVERY_RLY)
+    mcp23017_digitalWrite(&mcp, RECOVERY_RLY, 0);
+#endif
 }
 
 /* Boot self-test: turn on then off each Port-A channel of the #6318 in sequence
  * so you can verify the wiring at power-on (red LED + click per channel).
- * Cycles channels 0..VALVE_SELFTEST_LAST_PIN. NOTE: pin 7 is the HEATER relay,
- * not a valve — it is included on purpose but flagged in the log. */
+ * Cycles channels 0..VALVE_SELFTEST_LAST_PIN (the five collector valves), then
+ * the recovery valve on its own. The inlet (A5) is skipped on purpose: half a
+ * second of mains water into the bath at every boot is not a test. */
 void valveSelfTest(void) {
     LV_LOG_USER("=== Channel self-test: cycling 0..%d ===", VALVE_SELFTEST_LAST_PIN);
     /* Make sure every tested channel is an output, starting OFF. */
@@ -1969,12 +2038,20 @@ void valveSelfTest(void) {
     }
     for (uint8_t i = 0; i <= VALVE_SELFTEST_LAST_PIN; i++) {
         mcp23017_digitalWrite(&mcp, i, 1);
-        LV_LOG_USER("Channel %d: ON%s", i, (i == HEATER_RLY) ? "  <-- HEATER" : "");
+        LV_LOG_USER("Channel %d: ON", i);
         vTaskDelay(pdMS_TO_TICKS(VALVE_SELFTEST_ON_MS));
         mcp23017_digitalWrite(&mcp, i, 0);
         LV_LOG_USER("Channel %d: OFF", i);
         vTaskDelay(pdMS_TO_TICKS(VALVE_SELFTEST_OFF_MS));
     }
+#if defined(RECOVERY_RLY)
+    mcp23017_pinMode(&mcp, RECOVERY_RLY, MCP23017_OUTPUT);
+    mcp23017_digitalWrite(&mcp, RECOVERY_RLY, 1);
+    LV_LOG_USER("Channel %d: ON  <-- RECOVERY", RECOVERY_RLY);
+    vTaskDelay(pdMS_TO_TICKS(VALVE_SELFTEST_ON_MS));
+    mcp23017_digitalWrite(&mcp, RECOVERY_RLY, 0);
+    LV_LOG_USER("Channel %d: OFF", RECOVERY_RLY);
+#endif
     LV_LOG_USER("=== Channel self-test done ===");
 }
 
@@ -2301,36 +2378,229 @@ void pump_set_stop(void) {
     pump_stop();
 }
 
-void cleanRelayManager(uint8_t pumpFrom, uint8_t pumpTo, uint8_t pumpDir, bool activePump){
-    if (activePump) {
-        /* Open source and destination valves via MCP23017 */
-        mcp23017_digitalWrite(&mcp, pumpFrom, 1);
-        LV_LOG_USER("From %d on : %d", pumpFrom, mcp23017_digitalRead(&mcp, pumpFrom));
-        mcp23017_digitalWrite(&mcp, pumpTo, 1);
-        LV_LOG_USER("To %d on : %d", pumpTo, mcp23017_digitalRead(&mcp, pumpTo));
-        /* Pump direction via DBH-12V H-bridge */
-        pump_run(pumpDir == PUMP_IN_RLY, pumpSpeedToDuty());
+/* ═══════════════════════════════════════════════════════════════════════════
+ * Tank-mediated transfer (machine v6/v7)
+ *
+ * All the valves sit on one collector on the suction side of the pump; the
+ * only thing on the other side is the developing tank. So liquid cannot go
+ * from one collector port to another directly: a "transfer" A -> B fills the
+ * tank from A (A open, pump IN) for one cycle of up to XFER_CYCLE_ML, then
+ * drains the tank to B (B open, pump OUT) for the same time plus
+ * PUMP_PURGE_SECS of air, and starts over. The tank is the measuring cup.
+ * Used by the Tools (clean, drain, fill chem, empty chemistry); the process
+ * itself only ever fills or drains the tank, see sendValueToRelay().
+ *
+ * A transfer either runs until stopped (cleanRelayManager) or moves a given
+ * volume (xferStartVolume), optionally ending early when the source runs dry
+ * (its line pulls air: the MIN sensor of a container goes dry). Stop is
+ * graceful: the current cycle is completed by draining whatever is in the
+ * tank to B before the pump stops, so the tank is always left empty. A
+ * transfer requested meanwhile starts as soon as that drain is over.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+static struct {
+    uint8_t     from, to;        /* relay pins (C1_RLY .. WASTE_RLY, RECOVERY_RLY) */
+    uint8_t     phase;           /* 0 idle, 1 filling the tank from `from`, 2 draining it to `to` */
+    uint16_t    phaseSecs;       /* seconds in the current phase */
+    uint16_t    fillSecs;        /* seconds of fill in this cycle: the drain lasts fillSecs + purge */
+    uint16_t    cycleMl;         /* volume of the current cycle */
+    uint16_t    targetMl;        /* total to move, 0 = until stopped */
+    uint16_t    movedMl;         /* delivered to the destination so far (completed cycles) */
+    bool      (*srcEmpty)(void); /* optional: true when the source line pulls air */
+    bool        sawLiquid;       /* srcEmpty() was false at least once (sensor present, line primed) */
+    uint16_t    emptySecs;       /* consecutive seconds with srcEmpty() true */
+    bool        stopReq;         /* finish the current drain, then stop */
+    bool        pending;         /* a start was requested while finishing */
+    uint8_t     pFrom, pTo;
+    lv_timer_t *timer;
+} X;
+static void xfer_timer_cb(lv_timer_t *t);
+
+bool     xferBusy(void)      { return X.phase != 0; }
+bool     xferFinishing(void) { return X.phase != 0 && X.stopReq; }
+int      xferPhase(void)     { return X.phase; }
+uint16_t xferCycleSecs(void) { return calculateFillTime(XFER_CYCLE_ML, pumpSpeedPct()); }
+uint16_t xferPhaseSecs(void) { return X.phaseSecs; }
+uint16_t xferMovedMl(void)   { return X.movedMl; }
+uint16_t xferTargetMl(void)  { return X.targetMl; }
+uint8_t  xferFrom(void)      { return X.from; }
+uint8_t  xferTo(void)        { return X.to; }
+
+/* Length of the current phase in seconds (fill: this cycle; drain: what went in + air). */
+uint16_t xferPhaseTotalSecs(void)
+{
+    if (X.phase == 1) return calculateFillTime(X.cycleMl, pumpSpeedPct());
+    if (X.phase == 2) return (uint16_t)(X.fillSecs + pumpPurgeSecs());
+    return 0;
+}
+
+/* Seconds to move `ml` through the tank: every millilitre is pumped twice (in
+ * and out) plus one air purge per cycle. */
+uint16_t xferTransferSecs(uint16_t ml)
+{
+    uint16_t cycles = (uint16_t)((ml + XFER_CYCLE_ML - 1) / XFER_CYCLE_ML);
+    if (cycles < 1) cycles = 1;
+    uint32_t s = 2u * calculateFillTime(ml, pumpSpeedPct()) + (uint32_t)cycles * pumpPurgeSecs();
+    return s > 65000 ? 65000 : (uint16_t)s;
+}
+
+static void xfer_valves_closed(void)
+{
+    for (uint8_t i = 0; i < RELAY_NUMBER; i++) mcp23017_digitalWrite(&mcp, i, 0);
+#if defined(RECOVERY_RLY)
+    mcp23017_digitalWrite(&mcp, RECOVERY_RLY, 0);
+#endif
+}
+
+static void xfer_enter(uint8_t phase)
+{
+    X.phase = phase;
+    X.phaseSecs = 0;
+    pump_stop();
+    xfer_valves_closed();
+    if (phase == 1) {
+        uint16_t left = X.targetMl ? (uint16_t)(X.targetMl - X.movedMl) : XFER_CYCLE_ML;
+        X.cycleMl = left < XFER_CYCLE_ML ? left : XFER_CYCLE_ML;
+        if (X.cycleMl == 0) X.cycleMl = 1;
+        X.emptySecs = 0;
+        mcp23017_digitalWrite(&mcp, X.from, 1);
+        pump_run(true, pumpSpeedToDuty());                 /* collector -> tank */
+        LV_LOG_USER("Transfer: tank <- valve %d (fill %u ml, %u s)", X.from, (unsigned)X.cycleMl,
+                    (unsigned)calculateFillTime(X.cycleMl, pumpSpeedPct()));
+    } else if (phase == 2) {
+        mcp23017_digitalWrite(&mcp, X.to, 1);
+        pump_run(false, pumpSpeedToDuty());                /* tank -> collector */
+        LV_LOG_USER("Transfer: tank -> valve %d (drain, %u s + %u s of air)", X.to,
+                    (unsigned)X.fillSecs, (unsigned)pumpPurgeSecs());
     } else {
-        /* Stop pump H-bridge */
-        pump_stop();
-        /* Close all valves */
-        if (pumpFrom != INVALID_RELAY && pumpTo != INVALID_RELAY) {
-            mcp23017_digitalWrite(&mcp, pumpFrom, 0);
-            LV_LOG_USER("From %d off : %d", pumpFrom, mcp23017_digitalRead(&mcp, pumpFrom));
-            mcp23017_digitalWrite(&mcp, pumpTo, 0);
-            LV_LOG_USER("To %d off : %d", pumpTo, mcp23017_digitalRead(&mcp, pumpTo));
-        } else {
-            for (uint8_t i = 0; i < RELAY_NUMBER; i++) {
-                mcp23017_digitalWrite(&mcp, i, 0);
-                LV_LOG_USER("Relay %d off : %d", i, mcp23017_digitalRead(&mcp, i));
+        LV_LOG_USER("Transfer: idle (%u ml moved)", (unsigned)X.movedMl);
+    }
+}
+
+/* The engine ticks on one permanent 1 s LVGL timer, created once from the
+ * LVGL context (xferInit from create_keyboard, common to board, simulator and
+ * tests): cleanRelayManager() may be called from another FreeRTOS task (the
+ * Maintenance fill) and must never create or delete LVGL timers itself. */
+void xferInit(void)
+{
+    if (X.timer == NULL) X.timer = lv_timer_create(xfer_timer_cb, 1000, NULL);
+}
+
+static void xfer_start_now(uint8_t from, uint8_t to, uint16_t ml, bool (*srcEmpty)(void))
+{
+    X.from = from; X.to = to;
+    X.targetMl = ml; X.movedMl = 0;
+    X.srcEmpty = srcEmpty; X.sawLiquid = false; X.emptySecs = 0;
+    X.stopReq = false; X.pending = false;
+    X.fillSecs = 0;
+    xfer_enter(1);
+    if (X.timer != NULL) lv_timer_reset(X.timer);
+}
+
+/* Millilitres that went into the tank in `secs` of filling at the current speed. */
+static uint16_t xfer_ml_in(uint16_t secs)
+{
+    uint32_t ml = (uint32_t)secs * s_pumpFlowMlMin * pumpSpeedPct() / 6000u;
+    return ml > 65000 ? 65000 : (uint16_t)ml;
+}
+
+static void xfer_timer_cb(lv_timer_t *t)
+{
+    (void)t;
+    if (X.phase == 0) return;
+    X.phaseSecs++;
+    if (X.phase == 1) {
+        bool done = X.phaseSecs >= calculateFillTime(X.cycleMl, pumpSpeedPct());
+        if (X.srcEmpty != NULL) {
+            /* Source ran dry: keep pumping for the purge time to pull what is
+             * left in its line into the tank, then this is the last cycle. */
+            if (!X.srcEmpty()) { X.sawLiquid = true; X.emptySecs = 0; }
+            else if (X.sawLiquid && ++X.emptySecs >= pumpPurgeSecs()) {
+                X.cycleMl = xfer_ml_in(X.phaseSecs - X.emptySecs);
+                X.stopReq = true;
+                done = true;
+                LV_LOG_USER("Transfer: source empty after %u s", (unsigned)(X.phaseSecs - X.emptySecs));
             }
         }
+        if (done) {                                        /* tank full (or source empty): send it on */
+            X.fillSecs = X.phaseSecs;
+            xfer_enter(2);
+        }
+        return;
     }
+    /* phase 2: drain for the time it took to fill, then air through the line */
+    if (X.phaseSecs >= (uint16_t)(X.fillSecs + pumpPurgeSecs())) {
+        X.movedMl = (uint16_t)(X.movedMl + X.cycleMl);
+        bool finished = X.stopReq || (X.targetMl != 0 && X.movedMl >= X.targetMl);
+        if (finished) {
+            xfer_enter(0);
+            if (X.pending) { X.pending = false; xfer_start_now(X.pFrom, X.pTo, 0, NULL); }
+        } else {
+            X.fillSecs = 0;
+            xfer_enter(1);
+        }
+    }
+}
+
+/* Move `ml` from valve `from` to valve `to` through the tank, then stop by
+ * itself. With `srcEmpty` (may be NULL) the transfer also ends as soon as the
+ * source line pulls air, after the first time the sensor has seen liquid.
+ * Returns false if a transfer is already running. */
+bool xferStartVolume(uint8_t from, uint8_t to, uint16_t ml, bool (*srcEmpty)(void))
+{
+    if (X.phase != 0) return false;
+    if (from == INVALID_RELAY || to == INVALID_RELAY) return false;
+    xfer_start_now(from, to, ml, srcEmpty);
+    return true;
+}
+
+/* Graceful stop: finish by draining what is in the tank to the destination. */
+void xferStop(void)
+{
+    X.pending = false;
+    if (X.phase == 0) { pump_stop(); xfer_valves_closed(); return; }
+    if (X.stopReq) return;                                 /* already finishing */
+    X.stopReq = true;
+    if (X.phase == 1) {                                    /* drain what went in so far */
+        X.cycleMl = xfer_ml_in(X.phaseSecs);
+        X.fillSecs = X.phaseSecs;
+        xfer_enter(2);
+    }
+}
+
+/* Immediate stop: pump off, valves closed, no final drain. Only for safety
+ * (process start, diagnostics): the tank may be left with liquid in it. */
+void xferAbort(void)
+{
+    X.pending = false;
+    if (X.phase != 0) LV_LOG_WARN("Transfer aborted in phase %d (%u s): tank may hold liquid", X.phase, (unsigned)X.phaseSecs);
+    X.phase = 0; X.stopReq = false;
+    pump_stop();
+    xfer_valves_closed();
+}
+
+/* Transfer pumpFrom -> pumpTo through the tank until stopped (activePump =
+ * true), or stop gracefully (activePump = false: the liquid already in the
+ * tank is drained to the destination first). pumpDir is accepted for
+ * compatibility with the old two-valve plumbing and ignored: the phases decide
+ * the direction. */
+void cleanRelayManager(uint8_t pumpFrom, uint8_t pumpTo, uint8_t pumpDir, bool activePump){
+    (void)pumpDir;
+    if (activePump) {
+        if (pumpFrom == INVALID_RELAY || pumpTo == INVALID_RELAY) return;
+        if (X.phase == 0) { xfer_start_now(pumpFrom, pumpTo, 0, NULL); return; }
+        /* Still moving liquid: finish what is in the tank, then start this one. */
+        if (!X.stopReq) xferStop();
+        X.pending = true; X.pFrom = pumpFrom; X.pTo = pumpTo;   /* after xferStop, which clears it */
+        LV_LOG_USER("Transfer %d -> %d queued after the current drain", pumpFrom, pumpTo);
+        return;
+    }
+    xferStop();
 }
 
 
 void sendValueToRelay(uint8_t pumpFrom, uint8_t pumpDir, bool activePump) {
     if (activePump) {
+        if (X.phase != 0) xferAbort();                     /* the process owns the pump now */
         /* Open the source valve via MCP23017 relay */
         mcp23017_digitalWrite(&mcp, pumpFrom, 1);
         LV_LOG_USER("From %d on : %d", pumpFrom, mcp23017_digitalRead(&mcp, pumpFrom));
@@ -2599,18 +2869,10 @@ float sim_getTemperature(uint8_t sensorIndex) {
 }
 
 void sim_setHeater(bool on) {
-#if defined(HAS_DUAL_HEATER)
     /* Two heater MOSFET modules on Port B (B6/B7), driven together. */
     mcp23017_digitalWrite(&mcp, HEATER1_PIN, on ? 1 : 0);
     mcp23017_digitalWrite(&mcp, HEATER2_PIN, on ? 1 : 0);
-#else
-    mcp23017_digitalWrite(&mcp, HEATER_RLY, on ? 1 : 0);
-#endif
-#if defined(HAS_DUAL_HEATER)
     LV_LOG_USER("Heater %s (B6/B7)", on ? "ON" : "OFF");
-#else
-    LV_LOG_USER("Heater %s (pin %d)", on ? "ON" : "OFF", HEATER_RLY);
-#endif
 }
 
 void sim_resetTemperatures(void) {
@@ -3262,33 +3524,34 @@ uint8_t mapPercentageToValue(uint8_t percentage, uint8_t minPercent, uint8_t max
     return value;
 }
 
+/* Seconds the pump needs to move `capacityMl` in one direction at
+ * `pumpSpeedPercent` (Kamoer KPHM600: PUMP_FLOW_ML_MIN at 100 %, flow
+ * proportional to the speed). This is the raw pump time: a tank fill or drain
+ * in the process. A transfer between two containers goes through the tank and
+ * takes about twice as long, see xferTransferSecs(). */
 uint16_t calculateFillTime(uint16_t capacityMl, uint8_t pumpSpeedPercent) {
-    if (pumpSpeedPercent == 0) pumpSpeedPercent = 30;
-    /* Pump max = 15L/min = 250 ml/s */
-    /* flow = 250 * pumpSpeed / 100 */
-    /* time = capacity / flow = capacity * 100 / (250 * pumpSpeed) */
-    uint32_t timeMs = (uint32_t)capacityMl * 100 * 1000 / (250 * pumpSpeedPercent);
-    uint16_t timeSec = (timeMs + 500) / 1000; /* round to nearest second */
+    if (pumpSpeedPercent < 10)  pumpSpeedPercent = PUMP_SPEED_DEFAULT_PCT;
+    if (pumpSpeedPercent > 100) pumpSpeedPercent = 100;
+    /* flow [ml/s] = PUMP_FLOW_ML_MIN / 60 * pct / 100  ->  t = ml * 6000 / (flow_ml_min * pct) */
+    uint64_t timeMs = (uint64_t)capacityMl * 6000ULL * 1000ULL / ((uint64_t)s_pumpFlowMlMin * pumpSpeedPercent);
+    uint32_t timeSec = (uint32_t)((timeMs + 500) / 1000); /* round to nearest second */
     if (timeSec < 1) timeSec = 1;
-    return timeSec;
+    return timeSec > 65000 ? 65000 : (uint16_t)timeSec;
 }
 
 uint16_t getContainerFillTime(void) {
     /* Prefer the real measured time (self-calibrated from the MIN/MAX sensors);
-     * fall back to a nominal capacity-based estimate until a measurement exists. */
+     * fall back to a nominal capacity-based estimate until a measurement exists.
+     * Both describe a transfer through the tank (WB -> container or back). */
     if (gui.page.settings.settingsParams.chemCalibFillSecs > 0)
         return gui.page.settings.settingsParams.chemCalibFillSecs;
-    uint8_t spd = gui.page.settings.settingsParams.pumpSpeed;
-    if (spd == 0) spd = 30;
-    return calculateFillTime(500, spd);      /* nominal chem container = 500 ml */
+    return xferTransferSecs(CHEM_CONTAINER_ML);
 }
 
 uint16_t getWbFillTime(void) {
     if (gui.page.settings.settingsParams.wbCalibFillSecs > 0)
         return gui.page.settings.settingsParams.wbCalibFillSecs;
-    uint8_t spd = gui.page.settings.settingsParams.pumpSpeed;
-    if (spd == 0) spd = 30;
-    return calculateFillTime(2000, spd);     /* nominal water bath = 2000 ml */
+    return xferTransferSecs(BATH_VOLUME_ML);
 }
 
 /* Store a measured fill time (seconds). Called once a fill completes on the
@@ -3307,15 +3570,22 @@ void recordFillCalibration(bool isWb, uint16_t secs) {
     LV_LOG_USER("Fill calibration saved: %s = %u s", isWb ? "WB" : "chem", secs);
 }
 
-static uint16_t process_list_fill_time_seconds(void) {
-    uint8_t volume_index = gui.page.settings.settingsParams.chemistryVolume;
-    uint8_t tank_size = gui.page.settings.settingsParams.tankSize;
-    uint16_t table[2][3][2] = tanksSizesAndTimes;
-
+/* Tank volume (ml) for the chemistry-volume / tank-size settings (1-based). */
+uint16_t tankVolumeMl(uint8_t volume_index, uint8_t tank_size) {
+    uint16_t table[2][3] = tankSizesMl;
     if(volume_index < 1 || volume_index > 2) volume_index = 2;
     if(tank_size < 1 || tank_size > 3) tank_size = 2;
+    return table[volume_index - 1][tank_size - 1];
+}
 
-    return table[volume_index - 1][tank_size - 1][1];
+/* Seconds for one fill (or one drain, before the air purge) of that volume at
+ * the current pump speed. */
+uint16_t tankFillSeconds(uint8_t volume_index, uint8_t tank_size) {
+    return calculateFillTime(tankVolumeMl(volume_index, tank_size), pumpSpeedPct());
+}
+
+static uint16_t process_list_fill_time_seconds(void) {
+    return tankFillSeconds(gui.page.settings.settingsParams.chemistryVolume, gui.page.settings.settingsParams.tankSize);
 }
 
 static uint32_t process_list_overlap_credit_seconds(uint16_t fill_time_seconds) {

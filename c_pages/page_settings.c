@@ -214,7 +214,7 @@ void settingsApplyFactoryDefaults(void)
     p->lineRinseEnabled = false;
     p->lineRinseTime = 10;
     p->tankSize = 2;               /* Medium */
-    p->pumpSpeed = 30;
+    p->pumpSpeed = PUMP_SPEED_DEFAULT_PCT;   /* peristaltic pump: full speed */
     p->invertPump = false;
     p->brightness = 100;
     p->volume = 60;

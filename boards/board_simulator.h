@@ -100,7 +100,9 @@
 #define C3_RLY                      2
 #define WB_RLY                      3
 #define WASTE_RLY                   4
-#define HEATER_RLY                  7       /* Port A pin 7 — drives external relay for heater */
+#define INLET_RLY                   5       /* mains water-inlet valve (v6) */
+#define RECOVERY_RLY                6       /* recovery outlet valve (v7, SPARE OUT 1) */
+#define CIRC_PUMP_PIN               7       /* water-bath circulator pump (v7, SPARE OUT 2) */
 
 /* Port B: chemistry level sensors (B0-B5) + heater MOSFETs (B6-B7) */
 #define HAS_CHEM_LEVEL_SENSORS      1
@@ -128,6 +130,7 @@
 #define PUMP_IN1_PIN                0
 #define PUMP_IN2_PIN                0
 #define PUMP_ENA_PIN                0
+#define PUMP_FLOW_ML_MIN            600     /* same pump as the board: Kamoer KPHM600, 600 ml/min at 100 % */
 
 /* ═══════════════════════════════════════════════
  * Speaker — SDL2 audio

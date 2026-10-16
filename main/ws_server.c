@@ -332,6 +332,13 @@ static void ws_async_clean_start(void *u) {
 }
 static void ws_async_clean_stop(void *u)  { (void)u; cleanPopupRemoteStop(); }
 static void ws_async_clean_close(void *u) { (void)u; cleanPopupRemoteClose(); }
+/* Empty chemistry into the bottle (Tools, machine v7) */
+static void ws_async_recover_start(void *u) {
+    if (!recoverPopupRemoteStart((uint8_t)(uintptr_t)u))
+        ws_broadcast_event("recover_rejected", "{\"reason\":\"busy\"}");
+}
+static void ws_async_recover_stop(void *u)  { (void)u; recoverPopupRemoteStop(); }
+static void ws_async_recover_close(void *u) { (void)u; recoverPopupRemoteClose(); }
 
 /* ── Tune (pump / motor / volume) from the app: mirrors the display popup ── */
 typedef struct { uint8_t kind; uint8_t percent; bool on; } ws_tune_arg_t;
@@ -654,6 +661,16 @@ static int build_state_json(char *buf, int bufsize) {
         "\"cleanToolProcessArc\":%d,"
         "\"cleanToolCycleArc\":%d,"
         "\"cleanToolPumpArc\":%d,"
+        /* Empty chemistry into the bottle (Tools, machine v7); RECOVER_TOOL_* / RECOVER_PH_* from FilMachine.h */
+        "\"recoverToolState\":%d,"
+        "\"recoverToolContainer\":%d,"
+        "\"recoverToolPhase\":%d,"
+        "\"recoverToolPct\":%d,"
+        "\"recoverToolRemaining\":%lu,"
+        "\"recoverToolMovedMl\":%u,"
+        /* Tank-mediated transfer engine: 0 idle, 1 filling the tank, 2 draining it */
+        "\"xferPhase\":%d,"
+        "\"bathCirculator\":%s,"
         /* Export (Tools → Export): exportSeq changes after every attempt */
         "\"exportSeq\":%u,"
         "\"exportOk\":%s,"
@@ -762,6 +779,14 @@ static int build_state_json(char *buf, int bufsize) {
         cleanToolProcessArc(),
         cleanToolCycleArc(),
         cleanToolPumpArc(),
+        recoverToolState(),
+        recoverToolContainer(),
+        recoverToolPhase(),
+        recoverToolPercent(),
+        (unsigned long)recoverToolRemainingSecs(),
+        (unsigned)recoverToolMovedMl(),
+        xferPhase(),
+        circulatorOn() ? "true" : "false",
         (unsigned)g_exportSeq,
         g_exportOk ? "true" : "false",
         ota_get_running_version(),   /* same source as Splash and Tools (version.txt), not the fixed macro */
@@ -1174,6 +1199,28 @@ static void ws_handle_command(const char *msg, int len) {
     if (strstr(msg, "\"drain_close\"")) { ws_queue_lvgl_action(ws_async_drain_close, NULL); return; }
     if (strstr(msg, "\"clean_stop\""))  { ws_queue_lvgl_action(ws_async_clean_stop, NULL);  return; }
     if (strstr(msg, "\"clean_close\"")) { ws_queue_lvgl_action(ws_async_clean_close, NULL); return; }
+
+    /* ── recover_start / recover_stop / recover_close: Tools → Empty Cx into the bottle (v7) ──
+     * {"cmd":"recover_start","container":0..2}  no confirm page: the app asks.
+     * Progress in the recoverTool* fields; close = Close button after the end. */
+    if (strstr(msg, "\"recover_start\"")) {
+        sCheckupData *ck = find_active_checkup();
+        if (ck && ck->isProcessing) {
+            ws_broadcast_event("recover_rejected", "{\"reason\":\"processing\"}");
+            return;
+        }
+        if (recoverToolBusy() || (maintenanceBusy() && !xferBusy())) {   /* a finishing drain is fine: the tool waits for it */
+            ws_broadcast_event("recover_rejected", "{\"reason\":\"busy\"}");
+            return;
+        }
+        int c = ws_json_get_int(msg, "container", 0);
+        if (c < 0 || c > 2) c = 0;
+        ws_queue_lvgl_action(ws_async_recover_start, (void *)(intptr_t)c);
+        LV_LOG_USER("[WS] recover_start container=%d queued", c);
+        return;
+    }
+    if (strstr(msg, "\"recover_stop\""))  { ws_queue_lvgl_action(ws_async_recover_stop, NULL);  return; }
+    if (strstr(msg, "\"recover_close\"")) { ws_queue_lvgl_action(ws_async_recover_close, NULL); return; }
 
     /* ── export_config: Tools → Export (config + processes → backup file on SD) ──
      * Runs on the system task like the display's Export; the result arrives

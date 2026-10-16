@@ -94,6 +94,10 @@ void event_toolsElement(lv_event_t * e) {
               LV_LOG_USER("PRESSED gui.page.tools.toolsFillChemButton");
               fillPopupCreate(FILL_TARGET_CHEM);
           }
+      if(obj == gui.page.tools.toolsRecoverButton){
+              LV_LOG_USER("PRESSED gui.page.tools.toolsRecoverButton");
+              recoverPopupCreate();           /* v7: empty one chemistry into its recovery bottle (C1/C2/C3 chosen in the popup) */
+          }
       if(obj == gui.page.tools.toolsExportButton){
               LV_LOG_USER("PRESSED gui.page.tools.toolsExportButton");
 			  messagePopupCreate(exportConfigAndProcesses_text,exportConfigAndProcessesMBox_text, checkupNo_text, checkupYes_text, obj);
@@ -285,6 +289,32 @@ static void initTools_maintenance(lv_obj_t *parent) {
   lv_label_set_text(gui.page.tools.toolsLoadFilmButtonLabel, play_icon);
   lv_obj_set_style_text_font(gui.page.tools.toolsLoadFilmButtonLabel, ui->button_icon_font, 0);
   lv_obj_align(gui.page.tools.toolsLoadFilmButtonLabel, LV_ALIGN_CENTER, 0, 0);
+
+  /* Empty chemistry (machine v7): one container, chosen in the popup, into its
+   * recovery bottle through the pump and the RECOVERY outlet, line washed
+   * before and after (element_recoverPopup.c) */
+  gui.page.tools.toolsRecoverContainer = lv_obj_create(parent);
+  lv_obj_align(gui.page.tools.toolsRecoverContainer, LV_ALIGN_TOP_LEFT, ui->item_row_x, ui->maintenance_recover_y);
+  lv_obj_set_size(gui.page.tools.toolsRecoverContainer, ui->item_row_w, ui->action_row_h);
+  lv_obj_remove_flag(gui.page.tools.toolsRecoverContainer, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_scroll_dir(gui.page.tools.toolsRecoverContainer, LV_DIR_VER);
+  lv_obj_set_style_border_opa(gui.page.tools.toolsRecoverContainer, LV_OPA_TRANSP, 0);
+
+  gui.page.tools.toolsRecoverLabel = lv_label_create(gui.page.tools.toolsRecoverContainer);
+  lv_label_set_text(gui.page.tools.toolsRecoverLabel, recoverRow_text);
+  lv_obj_set_style_text_font(gui.page.tools.toolsRecoverLabel, ui->item_font, 0);
+  lv_obj_align(gui.page.tools.toolsRecoverLabel, LV_ALIGN_LEFT_MID, ui->item_label_x, ui->item_label_y);
+
+  gui.page.tools.toolsRecoverButton = lv_button_create(gui.page.tools.toolsRecoverContainer);
+  lv_obj_set_size(gui.page.tools.toolsRecoverButton, ui->action_btn_w, BUTTON_PROCESS_HEIGHT);
+  lv_obj_align(gui.page.tools.toolsRecoverButton, LV_ALIGN_RIGHT_MID, ui->item_btn_x, ui->item_label_y);
+  lv_obj_add_event_cb(gui.page.tools.toolsRecoverButton, event_toolsElement, LV_EVENT_CLICKED, gui.page.tools.toolsRecoverButton);
+  lv_obj_set_style_bg_color(gui.page.tools.toolsRecoverButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
+
+  gui.page.tools.toolsRecoverButtonLabel = lv_label_create(gui.page.tools.toolsRecoverButton);
+  lv_label_set_text(gui.page.tools.toolsRecoverButtonLabel, play_icon);
+  lv_obj_set_style_text_font(gui.page.tools.toolsRecoverButtonLabel, ui->button_icon_font, 0);
+  lv_obj_align(gui.page.tools.toolsRecoverButtonLabel, LV_ALIGN_CENTER, 0, 0);
 }
 
 static void initTools_utilities(lv_obj_t *parent) {
