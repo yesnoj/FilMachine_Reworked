@@ -400,13 +400,19 @@ typedef struct {
     int item_label_x;
     int item_label_y;       /* y offset for item labels/values (LEFT_MID/RIGHT_MID) */
     int item_btn_x;
-    int maintenance_clean_y;
-    int maintenance_drain_y;
-    int maintenance_selfcheck_y;
-    int maintenance_fill_y;
-    int maintenance_fillchem_y;
+    int maintenance_liquids_y;   /* Maintenance rows: Liquids (submenu), Load film, Self-check */
     int maintenance_loadfilm_y;
-    int maintenance_recover_y;   /* "Empty chemistry" row (v7) */
+    int maintenance_selfcheck_y;
+    int liquids_popup_w;         /* Liquids submenu popup */
+    int liquids_popup_h;
+    int liquids_title_y;
+    int liquids_line_y;
+    int liquids_row_y0;
+    int liquids_row_pitch;
+    int liquids_row_w;
+    int liquids_close_w;
+    int liquids_close_h;
+    int liquids_close_y;
     int utilities_import_y;
     int utilities_export_y;
     int statistics_completed_y;

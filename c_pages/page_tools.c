@@ -48,6 +48,18 @@ void event_toolsElement(lv_event_t * e) {
   lv_obj_t * obj = (lv_obj_t *)lv_event_get_target(e);
   
   if(code == LV_EVENT_CLICKED) { 
+      if(obj == gui.page.tools.toolsLiquidsButton) {
+            LV_LOG_USER("PRESSED gui.page.tools.toolsLiquidsButton");
+            lv_obj_remove_flag(gui.page.tools.toolsLiquidsPopupParent, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_move_foreground(gui.page.tools.toolsLiquidsPopupParent);
+            return;
+      }
+      /* A tool of the Liquids submenu: close the submenu, open the tool */
+      if(obj == gui.page.tools.toolsCleaningButton || obj == gui.page.tools.toolsDrainingButton
+         || obj == gui.page.tools.toolsFillButton || obj == gui.page.tools.toolsFillChemButton
+         || obj == gui.page.tools.toolsRecoverButton) {
+            lv_obj_add_flag(gui.page.tools.toolsLiquidsPopupParent, LV_OBJ_FLAG_HIDDEN);
+      }
       if(obj == gui.page.tools.toolsCleaningButton) { 
             LV_LOG_USER("PRESSED gui.page.tools.toolsCleaningButton");
             if(gui.element.cleanPopup.cleanPopupParent == NULL) {
@@ -134,6 +146,87 @@ void guiUpdater_timer(lv_timer_t * timer) {
   lv_label_set_text_fmt(gui.page.tools.toolStatCompleteCycleValue, "%"PRIu32"", gui.page.tools.machineStats.clean);
 }
 
+/* One Tools row: label on the left, play button on the right. */
+static void tools_row(lv_obj_t *parent, lv_align_t align, int32_t x, int32_t y, int32_t w, const char *text,
+                      lv_obj_t **container, lv_obj_t **label, lv_obj_t **button, lv_obj_t **buttonLabel) {
+  const ui_tools_layout_t *ui = &ui_get_profile()->tools;
+  *container = lv_obj_create(parent);
+  lv_obj_align(*container, align, x, y);
+  lv_obj_set_size(*container, w, ui->action_row_h);
+  lv_obj_remove_flag(*container, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_scroll_dir(*container, LV_DIR_VER);
+  lv_obj_set_style_border_opa(*container, LV_OPA_TRANSP, 0);
+
+  *label = lv_label_create(*container);
+  lv_label_set_text(*label, text);
+  lv_obj_set_style_text_font(*label, ui->item_font, 0);
+  lv_obj_align(*label, LV_ALIGN_LEFT_MID, ui->item_label_x, ui->item_label_y);
+
+  *button = lv_button_create(*container);
+  lv_obj_set_size(*button, ui->action_btn_w, BUTTON_PROCESS_HEIGHT);
+  lv_obj_align(*button, LV_ALIGN_RIGHT_MID, ui->item_btn_x, ui->item_label_y);
+  lv_obj_add_event_cb(*button, event_toolsElement, LV_EVENT_CLICKED, *button);
+  lv_obj_set_style_bg_color(*button, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
+
+  *buttonLabel = lv_label_create(*button);
+  lv_label_set_text(*buttonLabel, play_icon);
+  lv_obj_set_style_text_font(*buttonLabel, ui->button_icon_font, 0);
+  lv_obj_align(*buttonLabel, LV_ALIGN_CENTER, 0, 0);
+}
+
+/* "Liquids" submenu: the five tools that move liquid, in a popup opened from
+ * the Maintenance section. Built once with the page (hidden), so the buttons
+ * exist from the start; launching a tool closes the submenu. */
+static void tools_liquids_close_cb(lv_event_t *e) {
+  (void)e;
+  lv_obj_add_flag(gui.page.tools.toolsLiquidsPopupParent, LV_OBJ_FLAG_HIDDEN);
+}
+
+static void initTools_liquidsPopup(void) {
+  const ui_tools_layout_t *ui = &ui_get_profile()->tools;
+  lv_obj_t *c;
+  createPopupBackdrop(&gui.page.tools.toolsLiquidsPopupParent, &c, ui->liquids_popup_w, ui->liquids_popup_h);
+  lv_obj_add_flag(gui.page.tools.toolsLiquidsPopupParent, LV_OBJ_FLAG_HIDDEN);
+
+  lv_obj_t *title = lv_label_create(c);
+  lv_label_set_text(title, toolsLiquids_text);
+  lv_obj_set_style_text_font(title, ui->section_font, 0);
+  lv_obj_align(title, LV_ALIGN_TOP_MID, 0, ui->liquids_title_y);
+
+  lv_obj_t *line = lv_line_create(c);
+  lv_line_set_points(line, gui.page.tools.titleLinePoints, 2);
+  lv_obj_add_style(line, &gui.page.tools.style_sectionTitleLine, 0);
+  lv_obj_align(line, LV_ALIGN_TOP_MID, 0, ui->liquids_line_y);
+
+  int32_t y = ui->liquids_row_y0, dy = ui->liquids_row_pitch, w = ui->liquids_row_w;
+  tools_row(c, LV_ALIGN_TOP_MID, 0, y + 0 * dy, w, fillBath_text,
+            &gui.page.tools.toolsFillContainer, &gui.page.tools.toolsFillLabel,
+            &gui.page.tools.toolsFillButton, &gui.page.tools.toolsFillButtonLabel);
+  tools_row(c, LV_ALIGN_TOP_MID, 0, y + 1 * dy, w, fillChem_text,
+            &gui.page.tools.toolsFillChemContainer, &gui.page.tools.toolsFillChemLabel,
+            &gui.page.tools.toolsFillChemButton, &gui.page.tools.toolsFillChemButtonLabel);
+  tools_row(c, LV_ALIGN_TOP_MID, 0, y + 2 * dy, w, recoverRow_text,
+            &gui.page.tools.toolsRecoverContainer, &gui.page.tools.toolsRecoverLabel,
+            &gui.page.tools.toolsRecoverButton, &gui.page.tools.toolsRecoverButtonLabel);
+  tools_row(c, LV_ALIGN_TOP_MID, 0, y + 3 * dy, w, drainMachine_text,
+            &gui.page.tools.toolsDrainingContainer, &gui.page.tools.toolsDrainingLabel,
+            &gui.page.tools.toolsDrainingButton, &gui.page.tools.toolsDrainingButtonLabel);
+  tools_row(c, LV_ALIGN_TOP_MID, 0, y + 4 * dy, w, cleanMachine_text,
+            &gui.page.tools.toolsCleaningContainer, &gui.page.tools.toolsCleaningLabel,
+            &gui.page.tools.toolsCleaningButton, &gui.page.tools.toolsCleaningButtonLabel);
+
+  lv_obj_t *close = lv_button_create(c);
+  lv_obj_set_size(close, ui->liquids_close_w, ui->liquids_close_h);
+  lv_obj_align(close, LV_ALIGN_BOTTOM_MID, 0, ui->liquids_close_y);
+  lv_obj_set_style_bg_color(close, lv_color_hex(GREEN_DARK), LV_PART_MAIN);
+  lv_obj_add_event_cb(close, tools_liquids_close_cb, LV_EVENT_CLICKED, NULL);
+  lv_obj_t *cl = lv_label_create(close);
+  lv_label_set_text(cl, buttonClose_text);
+  lv_obj_set_style_text_font(cl, ui->credit_button_font, 0);
+  lv_obj_center(cl);
+  gui.page.tools.toolsLiquidsCloseButton = close;
+}
+
 static void initTools_maintenance(lv_obj_t *parent) {
   const ui_tools_layout_t *ui = &ui_get_profile()->tools;
   gui.page.tools.toolsMaintenanceLabel = lv_label_create(parent);
@@ -149,172 +242,18 @@ static void initTools_maintenance(lv_obj_t *parent) {
   lv_obj_add_style(gui.page.tools.sectionTitleLine, &gui.page.tools.style_sectionTitleLine, 0);
   lv_obj_align(gui.page.tools.sectionTitleLine, LV_ALIGN_TOP_MID, ui->section_line_x, ui->section_line_y_maintenance);
 
-  gui.page.tools.toolsCleaningContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.tools.toolsCleaningContainer, LV_ALIGN_TOP_LEFT, ui->item_row_x, ui->maintenance_clean_y);
-  lv_obj_set_size(gui.page.tools.toolsCleaningContainer, ui->item_row_w, ui->action_row_h);
-  lv_obj_remove_flag(gui.page.tools.toolsCleaningContainer, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_scroll_dir(gui.page.tools.toolsCleaningContainer, LV_DIR_VER);
-  lv_obj_set_style_border_opa(gui.page.tools.toolsCleaningContainer, LV_OPA_TRANSP, 0);
+  /* Liquids ▸ (fill bath, fill chem, empty chemistry, drain, clean), Load film, Self-check */
+  tools_row(parent, LV_ALIGN_TOP_LEFT, ui->item_row_x, ui->maintenance_liquids_y, ui->item_row_w, toolsLiquidsRow_text,
+            &gui.page.tools.toolsLiquidsContainer, &gui.page.tools.toolsLiquidsLabel,
+            &gui.page.tools.toolsLiquidsButton, &gui.page.tools.toolsLiquidsButtonLabel);
+  tools_row(parent, LV_ALIGN_TOP_LEFT, ui->item_row_x, ui->maintenance_loadfilm_y, ui->item_row_w, loadFilm_text,
+            &gui.page.tools.toolsLoadFilmContainer, &gui.page.tools.toolsLoadFilmLabel,
+            &gui.page.tools.toolsLoadFilmButton, &gui.page.tools.toolsLoadFilmButtonLabel);
+  tools_row(parent, LV_ALIGN_TOP_LEFT, ui->item_row_x, ui->maintenance_selfcheck_y, ui->item_row_w, selfCheck_text,
+            &gui.page.tools.toolsSelfcheckContainer, &gui.page.tools.toolsSelfcheckLabel,
+            &gui.page.tools.toolsSelfcheckButton, &gui.page.tools.toolsSelfcheckButtonLabel);
 
-  gui.page.tools.toolsCleaningLabel = lv_label_create(gui.page.tools.toolsCleaningContainer);
-  lv_label_set_text(gui.page.tools.toolsCleaningLabel, cleanMachine_text);
-  lv_obj_set_style_text_font(gui.page.tools.toolsCleaningLabel, ui->item_font, 0);
-  lv_obj_align(gui.page.tools.toolsCleaningLabel, LV_ALIGN_LEFT_MID, ui->item_label_x, ui->item_label_y);
-
-  gui.page.tools.toolsCleaningButton =  lv_button_create(gui.page.tools.toolsCleaningContainer);
-  lv_obj_set_size(gui.page.tools.toolsCleaningButton, ui->action_btn_w, BUTTON_PROCESS_HEIGHT);
-  lv_obj_align(gui.page.tools.toolsCleaningButton, LV_ALIGN_RIGHT_MID, ui->item_btn_x, ui->item_label_y);
-  lv_obj_add_event_cb(gui.page.tools.toolsCleaningButton, event_toolsElement, LV_EVENT_CLICKED, gui.page.tools.toolsCleaningButton);
-  lv_obj_set_style_bg_color(gui.page.tools.toolsCleaningButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
-
-  gui.page.tools.toolsCleaningButtonLabel = lv_label_create(gui.page.tools.toolsCleaningButton);
-  lv_label_set_text(gui.page.tools.toolsCleaningButtonLabel, play_icon);
-  lv_obj_set_style_text_font(gui.page.tools.toolsCleaningButtonLabel, ui->button_icon_font, 0);
-  lv_obj_align(gui.page.tools.toolsCleaningButtonLabel, LV_ALIGN_CENTER, 0, 0);
-
-  gui.page.tools.toolsDrainingContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.tools.toolsDrainingContainer, LV_ALIGN_TOP_LEFT, ui->item_row_x, ui->maintenance_drain_y);
-  lv_obj_set_size(gui.page.tools.toolsDrainingContainer, ui->item_row_w, ui->action_row_h);
-  lv_obj_remove_flag(gui.page.tools.toolsDrainingContainer, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_scroll_dir(gui.page.tools.toolsDrainingContainer, LV_DIR_VER);
-  lv_obj_set_style_border_opa(gui.page.tools.toolsDrainingContainer, LV_OPA_TRANSP, 0);
-
-  gui.page.tools.toolsDrainingLabel = lv_label_create(gui.page.tools.toolsDrainingContainer);
-  lv_label_set_text(gui.page.tools.toolsDrainingLabel, drainMachine_text);
-  lv_obj_set_style_text_font(gui.page.tools.toolsDrainingLabel, ui->item_font, 0);
-  lv_obj_align(gui.page.tools.toolsDrainingLabel, LV_ALIGN_LEFT_MID, ui->item_label_x, ui->item_label_y);
-
-  gui.page.tools.toolsDrainingButton =  lv_button_create(gui.page.tools.toolsDrainingContainer);
-  lv_obj_set_size(gui.page.tools.toolsDrainingButton, ui->action_btn_w, BUTTON_PROCESS_HEIGHT);
-  lv_obj_align(gui.page.tools.toolsDrainingButton, LV_ALIGN_RIGHT_MID, ui->item_btn_x, ui->item_label_y);
-  lv_obj_add_event_cb(gui.page.tools.toolsDrainingButton, event_toolsElement, LV_EVENT_CLICKED, gui.page.tools.toolsDrainingButton);
-  lv_obj_set_style_bg_color(gui.page.tools.toolsDrainingButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
-
-  gui.page.tools.toolsDrainingButtonLabel = lv_label_create(gui.page.tools.toolsDrainingButton);
-  lv_label_set_text(gui.page.tools.toolsDrainingButtonLabel, play_icon);
-  lv_obj_set_style_text_font(gui.page.tools.toolsDrainingButtonLabel, ui->button_icon_font, 0);
-  lv_obj_align(gui.page.tools.toolsDrainingButtonLabel, LV_ALIGN_CENTER, 0, 0);
-
-  gui.page.tools.toolsSelfcheckContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.tools.toolsSelfcheckContainer, LV_ALIGN_TOP_LEFT, ui->item_row_x, ui->maintenance_selfcheck_y);
-  lv_obj_set_size(gui.page.tools.toolsSelfcheckContainer, ui->item_row_w, ui->action_row_h);
-  lv_obj_remove_flag(gui.page.tools.toolsSelfcheckContainer, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_scroll_dir(gui.page.tools.toolsSelfcheckContainer, LV_DIR_VER);
-  lv_obj_set_style_border_opa(gui.page.tools.toolsSelfcheckContainer, LV_OPA_TRANSP, 0);
-
-  gui.page.tools.toolsSelfcheckLabel = lv_label_create(gui.page.tools.toolsSelfcheckContainer);
-  lv_label_set_text(gui.page.tools.toolsSelfcheckLabel, selfCheck_text);
-  lv_obj_set_style_text_font(gui.page.tools.toolsSelfcheckLabel, ui->item_font, 0);
-  lv_obj_align(gui.page.tools.toolsSelfcheckLabel, LV_ALIGN_LEFT_MID, ui->item_label_x, ui->item_label_y);
-
-  gui.page.tools.toolsSelfcheckButton =  lv_button_create(gui.page.tools.toolsSelfcheckContainer);
-  lv_obj_set_size(gui.page.tools.toolsSelfcheckButton, ui->action_btn_w, BUTTON_PROCESS_HEIGHT);
-  lv_obj_align(gui.page.tools.toolsSelfcheckButton, LV_ALIGN_RIGHT_MID, ui->item_btn_x, ui->item_label_y);
-  lv_obj_add_event_cb(gui.page.tools.toolsSelfcheckButton, event_toolsElement, LV_EVENT_CLICKED, gui.page.tools.toolsSelfcheckButton);
-  lv_obj_set_style_bg_color(gui.page.tools.toolsSelfcheckButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
-
-  gui.page.tools.toolsSelfcheckButtonLabel = lv_label_create(gui.page.tools.toolsSelfcheckButton);
-  lv_label_set_text(gui.page.tools.toolsSelfcheckButtonLabel, play_icon);
-  lv_obj_set_style_text_font(gui.page.tools.toolsSelfcheckButtonLabel, ui->button_icon_font, 0);
-  lv_obj_align(gui.page.tools.toolsSelfcheckButtonLabel, LV_ALIGN_CENTER, 0, 0);
-
-  /* Fill bath: open the WB valve + pump, stop automatically on the MAX level sensor */
-  gui.page.tools.toolsFillContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.tools.toolsFillContainer, LV_ALIGN_TOP_LEFT, ui->item_row_x, ui->maintenance_fill_y);
-  lv_obj_set_size(gui.page.tools.toolsFillContainer, ui->item_row_w, ui->action_row_h);
-  lv_obj_remove_flag(gui.page.tools.toolsFillContainer, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_scroll_dir(gui.page.tools.toolsFillContainer, LV_DIR_VER);
-  lv_obj_set_style_border_opa(gui.page.tools.toolsFillContainer, LV_OPA_TRANSP, 0);
-
-  gui.page.tools.toolsFillLabel = lv_label_create(gui.page.tools.toolsFillContainer);
-  lv_label_set_text(gui.page.tools.toolsFillLabel, fillBath_text);
-  lv_obj_set_style_text_font(gui.page.tools.toolsFillLabel, ui->item_font, 0);
-  lv_obj_align(gui.page.tools.toolsFillLabel, LV_ALIGN_LEFT_MID, ui->item_label_x, ui->item_label_y);
-
-  gui.page.tools.toolsFillButton = lv_button_create(gui.page.tools.toolsFillContainer);
-  lv_obj_set_size(gui.page.tools.toolsFillButton, ui->action_btn_w, BUTTON_PROCESS_HEIGHT);
-  lv_obj_align(gui.page.tools.toolsFillButton, LV_ALIGN_RIGHT_MID, ui->item_btn_x, ui->item_label_y);
-  lv_obj_add_event_cb(gui.page.tools.toolsFillButton, event_toolsElement, LV_EVENT_CLICKED, gui.page.tools.toolsFillButton);
-  lv_obj_set_style_bg_color(gui.page.tools.toolsFillButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
-
-  gui.page.tools.toolsFillButtonLabel = lv_label_create(gui.page.tools.toolsFillButton);
-  lv_label_set_text(gui.page.tools.toolsFillButtonLabel, play_icon);
-  lv_obj_set_style_text_font(gui.page.tools.toolsFillButtonLabel, ui->button_icon_font, 0);
-  lv_obj_align(gui.page.tools.toolsFillButtonLabel, LV_ALIGN_CENTER, 0, 0);
-
-  /* Fill chemistry container: pump water from the WB into C1, calibrate its time */
-  gui.page.tools.toolsFillChemContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.tools.toolsFillChemContainer, LV_ALIGN_TOP_LEFT, ui->item_row_x, ui->maintenance_fillchem_y);
-  lv_obj_set_size(gui.page.tools.toolsFillChemContainer, ui->item_row_w, ui->action_row_h);
-  lv_obj_remove_flag(gui.page.tools.toolsFillChemContainer, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_scroll_dir(gui.page.tools.toolsFillChemContainer, LV_DIR_VER);
-  lv_obj_set_style_border_opa(gui.page.tools.toolsFillChemContainer, LV_OPA_TRANSP, 0);
-
-  gui.page.tools.toolsFillChemLabel = lv_label_create(gui.page.tools.toolsFillChemContainer);
-  lv_label_set_text(gui.page.tools.toolsFillChemLabel, fillChem_text);
-  lv_obj_set_style_text_font(gui.page.tools.toolsFillChemLabel, ui->item_font, 0);
-  lv_obj_align(gui.page.tools.toolsFillChemLabel, LV_ALIGN_LEFT_MID, ui->item_label_x, ui->item_label_y);
-
-  gui.page.tools.toolsFillChemButton = lv_button_create(gui.page.tools.toolsFillChemContainer);
-  lv_obj_set_size(gui.page.tools.toolsFillChemButton, ui->action_btn_w, BUTTON_PROCESS_HEIGHT);
-  lv_obj_align(gui.page.tools.toolsFillChemButton, LV_ALIGN_RIGHT_MID, ui->item_btn_x, ui->item_label_y);
-  lv_obj_add_event_cb(gui.page.tools.toolsFillChemButton, event_toolsElement, LV_EVENT_CLICKED, gui.page.tools.toolsFillChemButton);
-  lv_obj_set_style_bg_color(gui.page.tools.toolsFillChemButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
-
-  gui.page.tools.toolsFillChemButtonLabel = lv_label_create(gui.page.tools.toolsFillChemButton);
-  lv_label_set_text(gui.page.tools.toolsFillChemButtonLabel, play_icon);
-  lv_obj_set_style_text_font(gui.page.tools.toolsFillChemButtonLabel, ui->button_icon_font, 0);
-  lv_obj_align(gui.page.tools.toolsFillChemButtonLabel, LV_ALIGN_CENTER, 0, 0);
-
-  /* Load film: wind the film onto the reel, cut at the end of the roll (film_loader.c) */
-  gui.page.tools.toolsLoadFilmContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.tools.toolsLoadFilmContainer, LV_ALIGN_TOP_LEFT, ui->item_row_x, ui->maintenance_loadfilm_y);
-  lv_obj_set_size(gui.page.tools.toolsLoadFilmContainer, ui->item_row_w, ui->action_row_h);
-  lv_obj_remove_flag(gui.page.tools.toolsLoadFilmContainer, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_scroll_dir(gui.page.tools.toolsLoadFilmContainer, LV_DIR_VER);
-  lv_obj_set_style_border_opa(gui.page.tools.toolsLoadFilmContainer, LV_OPA_TRANSP, 0);
-
-  gui.page.tools.toolsLoadFilmLabel = lv_label_create(gui.page.tools.toolsLoadFilmContainer);
-  lv_label_set_text(gui.page.tools.toolsLoadFilmLabel, loadFilm_text);
-  lv_obj_set_style_text_font(gui.page.tools.toolsLoadFilmLabel, ui->item_font, 0);
-  lv_obj_align(gui.page.tools.toolsLoadFilmLabel, LV_ALIGN_LEFT_MID, ui->item_label_x, ui->item_label_y);
-
-  gui.page.tools.toolsLoadFilmButton = lv_button_create(gui.page.tools.toolsLoadFilmContainer);
-  lv_obj_set_size(gui.page.tools.toolsLoadFilmButton, ui->action_btn_w, BUTTON_PROCESS_HEIGHT);
-  lv_obj_align(gui.page.tools.toolsLoadFilmButton, LV_ALIGN_RIGHT_MID, ui->item_btn_x, ui->item_label_y);
-  lv_obj_add_event_cb(gui.page.tools.toolsLoadFilmButton, event_toolsElement, LV_EVENT_CLICKED, gui.page.tools.toolsLoadFilmButton);
-  lv_obj_set_style_bg_color(gui.page.tools.toolsLoadFilmButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
-
-  gui.page.tools.toolsLoadFilmButtonLabel = lv_label_create(gui.page.tools.toolsLoadFilmButton);
-  lv_label_set_text(gui.page.tools.toolsLoadFilmButtonLabel, play_icon);
-  lv_obj_set_style_text_font(gui.page.tools.toolsLoadFilmButtonLabel, ui->button_icon_font, 0);
-  lv_obj_align(gui.page.tools.toolsLoadFilmButtonLabel, LV_ALIGN_CENTER, 0, 0);
-
-  /* Empty chemistry (machine v7): one container, chosen in the popup, into its
-   * recovery bottle through the pump and the RECOVERY outlet, line washed
-   * before and after (element_recoverPopup.c) */
-  gui.page.tools.toolsRecoverContainer = lv_obj_create(parent);
-  lv_obj_align(gui.page.tools.toolsRecoverContainer, LV_ALIGN_TOP_LEFT, ui->item_row_x, ui->maintenance_recover_y);
-  lv_obj_set_size(gui.page.tools.toolsRecoverContainer, ui->item_row_w, ui->action_row_h);
-  lv_obj_remove_flag(gui.page.tools.toolsRecoverContainer, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_scroll_dir(gui.page.tools.toolsRecoverContainer, LV_DIR_VER);
-  lv_obj_set_style_border_opa(gui.page.tools.toolsRecoverContainer, LV_OPA_TRANSP, 0);
-
-  gui.page.tools.toolsRecoverLabel = lv_label_create(gui.page.tools.toolsRecoverContainer);
-  lv_label_set_text(gui.page.tools.toolsRecoverLabel, recoverRow_text);
-  lv_obj_set_style_text_font(gui.page.tools.toolsRecoverLabel, ui->item_font, 0);
-  lv_obj_align(gui.page.tools.toolsRecoverLabel, LV_ALIGN_LEFT_MID, ui->item_label_x, ui->item_label_y);
-
-  gui.page.tools.toolsRecoverButton = lv_button_create(gui.page.tools.toolsRecoverContainer);
-  lv_obj_set_size(gui.page.tools.toolsRecoverButton, ui->action_btn_w, BUTTON_PROCESS_HEIGHT);
-  lv_obj_align(gui.page.tools.toolsRecoverButton, LV_ALIGN_RIGHT_MID, ui->item_btn_x, ui->item_label_y);
-  lv_obj_add_event_cb(gui.page.tools.toolsRecoverButton, event_toolsElement, LV_EVENT_CLICKED, gui.page.tools.toolsRecoverButton);
-  lv_obj_set_style_bg_color(gui.page.tools.toolsRecoverButton, lv_color_hex(LIGHT_BLUE), LV_PART_MAIN);
-
-  gui.page.tools.toolsRecoverButtonLabel = lv_label_create(gui.page.tools.toolsRecoverButton);
-  lv_label_set_text(gui.page.tools.toolsRecoverButtonLabel, play_icon);
-  lv_obj_set_style_text_font(gui.page.tools.toolsRecoverButtonLabel, ui->button_icon_font, 0);
-  lv_obj_align(gui.page.tools.toolsRecoverButtonLabel, LV_ALIGN_CENTER, 0, 0);
+  initTools_liquidsPopup();
 }
 
 static void initTools_utilities(lv_obj_t *parent) {

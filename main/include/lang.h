@@ -407,6 +407,8 @@ enum lang_str_id {
     STR_checkupStartBusyBody_text,
     STR_selfCheckToContainerFmt_text,
     STR_selfCheckBackToTankFmt_text,
+    STR_toolsLiquidsRow_text,
+    STR_toolsLiquids_text,
     STR__COUNT
 };
 

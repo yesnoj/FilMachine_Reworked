@@ -35,7 +35,7 @@ uint8_t analogVal_rotationSpeedPercent;
 #define SLIDER_STEP                  (SETTINGS_H_SLIDER + SETTINGS_GAP_Y)
 #define SEC_LINE_DY                  (UI_SETTINGS->section_line_y - UI_SETTINGS->section_label_y)  /* title -> line */
 #define SEC_ROWS_DY                  (SEC_LINE_DY + 16)                                            /* title -> first row */
-#define SETTINGS_SCROLL_TOP          (-12)                                                         /* scroll area starts at the top of the page */
+#define SETTINGS_SCROLL_TOP          (-22)                                                         /* scroll area starts at the top of the page */
 #define SEC_GAP_Y                    (12)                                                          /* last row -> next title */
 
 /* Process */

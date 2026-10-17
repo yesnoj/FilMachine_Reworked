@@ -380,6 +380,8 @@ IT = {
  "screenOff_text": r"Spegnimento schermo",
  "screenOffAlertMBox_text": r"Dopo quanto tempo dall'ultimo tocco lo schermo si spegne. Prima si attenua in due passi, poi si spegne del tutto. Tocca lo schermo per riattivarlo. 'Mai' lo tiene sempre acceso. Durante un processo lo schermo non si spegne.",
  "screenOffNever_text": r"Mai",
+ "toolsLiquidsRow_text": r"Liquidi",
+ "toolsLiquids_text": r"Liquidi",
  "recoverRow_text": r"Svuota chimiche",
  "recoverPopupTitle_text": r"Svuota chimica",
  "recoverConfirmBody_text": r"Metti la bottiglia di recupero sotto\nl'uscita RECUPERO. La linea viene\nlavata prima e dopo, i primi 30 ml\ndella chimica vanno nello scarico.",

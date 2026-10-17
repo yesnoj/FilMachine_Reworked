@@ -403,6 +403,8 @@ static const lang_pair_t strings[STR__COUNT] = {
     [STR_checkupStartBusyBody_text] = { "A maintenance tool is still moving\nliquid. Wait for it to finish.", "Uno strumento sta ancora muovendo\nliquido: attendi che finisca." },
     [STR_selfCheckToContainerFmt_text] = { "Water to %s...", "Acqua verso %s..." },
     [STR_selfCheckBackToTankFmt_text] = { "%s back to the tank...", "%s torna nella tank..." },
+    [STR_toolsLiquidsRow_text] = { "Liquids", "Liquidi" },
+    [STR_toolsLiquids_text] = { "Liquids", "Liquidi" },
 };
 
 static uint8_t s_lang = LANG_EN;

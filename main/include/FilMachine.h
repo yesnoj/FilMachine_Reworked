@@ -479,6 +479,8 @@ typedef enum {
 #define loadPopupTitle_text	tr(STR_loadPopupTitle_text)
 /* Tools -> Empty chemistry into the bottle (machine v7), process start guard, self-check flows */
 #define recoverRow_text	tr(STR_recoverRow_text)
+#define toolsLiquidsRow_text	tr(STR_toolsLiquidsRow_text)
+#define toolsLiquids_text	tr(STR_toolsLiquids_text)
 #define recoverPopupTitle_text	tr(STR_recoverPopupTitle_text)
 #define recoverConfirmBody_text	tr(STR_recoverConfirmBody_text)
 #define recoverPopupTitleFmt_text	tr(STR_recoverPopupTitleFmt_text)
@@ -1712,6 +1714,12 @@ struct sTools {
 	lv_obj_t 	        	*toolsLoadFilmLabel;
 	lv_obj_t 	        	*toolsLoadFilmButton;
 	lv_obj_t 	        	*toolsLoadFilmButtonLabel;
+	lv_obj_t 	        	*toolsLiquidsContainer;      /* Maintenance -> Liquids submenu (popup with the five liquid tools) */
+	lv_obj_t 	        	*toolsLiquidsLabel;
+	lv_obj_t 	        	*toolsLiquidsButton;
+	lv_obj_t 	        	*toolsLiquidsButtonLabel;
+	lv_obj_t 	        	*toolsLiquidsPopupParent;
+	lv_obj_t 	        	*toolsLiquidsCloseButton;
 	lv_obj_t 	        	*toolsRecoverContainer;      /* v7: Empty chemistry (C1/C2/C3 chosen in the popup) */
 	lv_obj_t 	        	*toolsRecoverLabel;
 	lv_obj_t 	        	*toolsRecoverButton;
