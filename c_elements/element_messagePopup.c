@@ -231,6 +231,8 @@ static void message_popup_handle_stop_now(void)
 
     gui.page.tools.machineStats.stopped++;
     safeTimerDelete(&ckup->processTimer);
+    sim_setHeater(false);                       /* Stop: no thermostat any more, heaters off */
+    ckup->data.heaterOn = false;
     if (ckup->pumpTimer) lv_timer_resume(ckup->pumpTimer);
     qSysAction(SAVE_MACHINE_STATS);
 }

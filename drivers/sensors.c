@@ -227,9 +227,12 @@ uint32_t sensors_flow_get_total_pulses(void) { return 0; }
 uint32_t sensors_flow_pulses_per_litre(void) { return 450; }
 void     sensors_flow_reset(void) {}
 
+static bool s_simWaterMin = true;    /* bath above MIN: heaters allowed */
+static bool s_simWaterMax = false;
+void sensors_sim_set_water_level(bool minWet, bool maxWet) { s_simWaterMin = minWet; s_simWaterMax = maxWet; }
 void sensors_water_level_init(void) {}
-bool sensors_water_level_detected(void) { return true; }
-bool sensors_water_level_max_detected(void) { return false; }
+bool sensors_water_level_detected(void) { return s_simWaterMin; }
+bool sensors_water_level_max_detected(void) { return s_simWaterMax; }
 
 void sensors_hall_init(void) {}
 bool sensors_hall_magnet_detected(void) { return true; }

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Silkscreen: references, connector names, input polarity legends, board name, the warranty line. Idempotent.
-v1.1 refs: J1-J3 12 V inputs (left), J5 display, J28/J29 service outputs (top), J7-J14 sensors (right), J15-J22 valves (bottom),
+v1.2 refs: J1-J3 12 V inputs (left), J5 display, J28/J29 service outputs (top), J7/J11-J14 sensors (right), J15-J22 valves (bottom),
 J23/J24 heaters (top), J25 pump (left), J26 motor (bottom-left), J27 servo."""
 import sys
 import pcbnew
@@ -50,9 +50,9 @@ for f in b.GetFootprints():
         s, x, y, a, sz = LABEL[r]; text(s, x, y, sz, angle=a)
     elif r in VALVE:
         text(VALVE[r], cx, 81.6, 0.8)
-    elif r in ("J7", "J8", "J9", "J10", "J11"):     # right-edge JST, name to the left, vertical
+    elif r in ("J7", "J11", "J12", "J13", "J14"):   # right-edge JST column, name to the left, vertical
         text(f.GetValue(), c.GetLeft() / 1e6 - ORIGIN[0] - 0.8, (c.GetTop() + c.GetBottom()) / 2e6 - ORIGIN[1], 0.8, angle=90)
-    elif r in ("J12", "J13", "J14", "J27", "J6"):   # name above
+    elif r in ("J27", "J6"):                        # name above
         text(f.GetValue(), cx, c.GetTop() / 1e6 - ORIGIN[1] - 0.6, 0.8)
 
 # supply inputs and pump on the left edge: vertical legend right next to the terminal (x 11.1, between the
@@ -75,12 +75,12 @@ if f8 > 9.0:      # PTC block lowered (placement >= v18): label in the gap betwe
 else:             # PTC block right under the terminals: two lines below the PTCs
     text("sx 12V OUT 2A  dx 5V OUT 1A", 91.6, 15.0, 0.7, bold=True)
     text("+ a sinistra, - a destra", 91.6, 16.1, 0.7)
-# spare GPIO header: pin names beside the pins (pin 1 at the top)
-f = b.FindFootprintByReference("J30"); c = f.GetCourtyard(pcbnew.F_CrtYd).BBox()
-text("GPIO SPARE", c.GetLeft() / 1e6 - ORIGIN[0] - 3.3, pad("J30", 1)[1], 0.7, bold=True)   # left of pin 1 (R97/D47 sit above the header)
-for n, nm in enumerate(("A6", "A7", "3V3", "5V", "GND")):
+# spare GPIO header (horizontal, pin 1 on the left): pin names under the pins, title under the names
+for n, nm in enumerate(("B0", "B1", "B2", "B3", "B4", "B5", "3V3", "5V", "GND")):
     x, y = pad("J30", n + 1)
-    text(nm, x + 2.9, y, 0.7)
+    text(nm, x, y + 2.1, 0.6)
+(x1, y1), (x9, _) = pad("J30", 1), pad("J30", 9)
+text("GPIO SPARE  (3,3 V)", (x1 + x9) / 2, y1 + 3.4, 0.7, bold=True)
 for ref, s in (("F1", "15A"), ("F2", "15A"), ("F3", "15A"), ("F4", "8A")):
     f = b.FindFootprintByReference(ref); c = f.GetCourtyard(pcbnew.F_CrtYd).BBox()
     if abs(f.GetOrientationDegrees()) == 90:    # vertical fuse: value beside it (F2: on the left, away from Q10's reference)
@@ -90,12 +90,12 @@ for ref, s in (("F1", "15A"), ("F2", "15A"), ("F3", "15A"), ("F4", "8A")):
         text(s, (c.GetLeft() + c.GetRight()) / 2e6 - ORIGIN[0], c.GetTop() / 1e6 - ORIGIN[1] - 0.6, 0.7)
 
 text("FilMachine", 6.6, 70.8, 1.4, bold=True)
-text("Board v1.1", 6.6, 73.2, 1.4, bold=True)
-text("2026-10", 6.6, 75.2, 0.8)
+text("Board v1.2", 6.6, 73.2, 1.4, bold=True)
+text("2026-10-22", 6.6, 75.2, 0.8)
 text("If you can read this,", 97.2, 68.0, 0.9, angle=90)
 text("you have voided your warranty", 98.9, 68.0, 0.9, angle=90)
 
-text("FilMachine Board v1.1 - 2026-10", 55.0, 45.0, 1.5, layer=pcbnew.B_SilkS)
+text("FilMachine Board v1.2 - 2026-10-22", 55.0, 45.0, 1.5, layer=pcbnew.B_SilkS)
 text("4 layers 1.6 mm - outer 2 oz / inner 1 oz", 55.0, 48.0, 1.0, layer=pcbnew.B_SilkS)
 text("JLCJLCJLCJLC", 55.0, 42.5, 1.2, layer=pcbnew.B_SilkS)   # JLCPCB replaces this with its order number (choose "specify a location")
 text("L2 GND  L3 +12V", 55.0, 50.0, 1.0, layer=pcbnew.B_SilkS)

@@ -46,12 +46,6 @@
    "C21",
    "C22",
    "C23",
-   "C24",
-   "C25",
-   "C26",
-   "C27",
-   "C28",
-   "C29",
    "C54",
    "C61"
   ]
@@ -211,10 +205,7 @@
   "note": "",
   "nsol": 1,
   "refs": [
-   "J7",
-   "J8",
-   "J9",
-   "J10"
+   "J7"
   ]
  },
  "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical|C2937625": {
@@ -229,13 +220,13 @@
    "J27"
   ]
  },
- "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical|C492404": {
+ "Connector_PinHeader_2.54mm:PinHeader_1x09_P2.54mm_Vertical|C492408": {
   "dtheta": 270,
   "tx": 0.0,
-  "ty": 5.08,
-  "eda": "HDR-TH_5P-P2.54-V-M",
-  "lcsc": "C492404",
-  "note": "",
+  "ty": 10.16,
+  "eda": "HDR-TH_9P-P2.54-V-M",
+  "lcsc": "C492408",
+  "note": " | body centre differs: EDA silk centroid at (-0.0,8.4) vs KiCad courtyard (0.0,10.2)",
   "nsol": 1,
   "refs": [
    "J30"
@@ -302,14 +293,12 @@
    "D11",
    "D12",
    "D13",
-   "D14",
-   "D15",
-   "D16",
-   "D17",
-   "D18",
-   "D19",
    "D47",
-   "D48"
+   "D48",
+   "D49",
+   "D50",
+   "D51",
+   "D52"
   ]
  },
  "FM:FUSE_2410_SMD|C136390": {
@@ -603,6 +592,10 @@
    "R5",
    "R97",
    "R98",
+   "R99",
+   "R100",
+   "R101",
+   "R102",
    "R84"
   ]
  },
@@ -661,19 +654,6 @@
   "refs": [
    "R63",
    "R65"
-  ]
- },
- "Resistor_SMD:R_0603_1608Metric|C22935": {
-  "dtheta": 0,
-  "tx": 0.0,
-  "ty": 0.0,
-  "eda": "R0603",
-  "lcsc": "C22935",
-  "note": "",
-  "nsol": 1,
-  "refs": [
-   "R47",
-   "R48"
   ]
  },
  "Resistor_SMD:R_0603_1608Metric|C22962": {
@@ -752,6 +732,8 @@
    "R44",
    "R45",
    "R46",
+   "R47",
+   "R48",
    "R61",
    "R62",
    "R70",
@@ -780,12 +762,6 @@
    "R21",
    "R22",
    "R23",
-   "R24",
-   "R25",
-   "R26",
-   "R27",
-   "R28",
-   "R29",
    "R64",
    "R66",
    "R80",

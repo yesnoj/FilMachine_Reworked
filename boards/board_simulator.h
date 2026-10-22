@@ -104,15 +104,9 @@
 #define RECOVERY_RLY                6       /* recovery outlet valve (v7, SPARE OUT 1) */
 #define CIRC_PUMP_PIN               7       /* water-bath circulator pump (v7, SPARE OUT 2) */
 
-/* Port B: chemistry level sensors (B0-B5) + heater MOSFETs (B6-B7) */
-#define HAS_CHEM_LEVEL_SENSORS      1
-#define CHEM_LEVEL_CONTAINERS       3
-#define CHEM1_MIN_PIN               8
-#define CHEM1_MAX_PIN               9
-#define CHEM2_MIN_PIN               10
-#define CHEM2_MAX_PIN               11
-#define CHEM3_MIN_PIN               12
-#define CHEM3_MAX_PIN               13
+/* Port B: free GPIO B0-B5 (Mainboard J30 «GPIO SPARE») + heater MOSFETs (B6-B7) */
+#define GPIO_SPARE_B_FIRST          8
+#define GPIO_SPARE_B_COUNT          6
 #define HAS_DUAL_HEATER             1
 #define HEATER1_PIN                 14
 #define HEATER2_PIN                 15

@@ -10,8 +10,9 @@
  *   1. wash the line: RECOVER_WASH_ML of bath water through the line to waste
  *   2. head: the first RECOVER_HEAD_ML of the chemistry to waste, they carry
  *      away the film of water left by the wash
- *   3. transfer: the chemistry into the bottle, cycle after cycle, until the
- *      container is empty (its MIN sensor pulls air) or CHEM_CONTAINER_ML
+ *   3. transfer: CHEM_CONTAINER_ML of the chemistry into the bottle, cycle
+ *      after cycle (no level sensor since Mainboard v1.2: once the container
+ *      is empty the pump just moves air, which is harmless)
  *   4. wash the line again, so the next use finds it clean
  *
  * Nothing but that chemistry (and a few tenths of a millilitre of water) can
@@ -88,13 +89,6 @@ static uint32_t total_estimate(void) {
     return t;
 }
 
-/* MIN sensor of the container being emptied: "the line has liquid". The
- * engine only trusts it after it has seen liquid once, so a missing sensor
- * (always dry) just means the nominal volume is pumped. */
-static bool recover_source_empty(void) {
-    return !chemLevelMinDetected(gui.element.recoverPopup.container);
-}
-
 /* Start the engine for `phase`; false if the pump is still busy elsewhere. */
 static bool recover_start_phase(uint8_t phase) {
     struct sRecoverPopup *rp = &gui.element.recoverPopup;
@@ -107,7 +101,7 @@ static bool recover_start_phase(uint8_t phase) {
             return xferStartVolume(cx, getValueForChemicalSource(WASTE), RECOVER_HEAD_ML, NULL);
         default:
 #if defined(RECOVERY_RLY)
-            return xferStartVolume(cx, RECOVERY_RLY, CHEM_CONTAINER_ML, recover_source_empty);
+            return xferStartVolume(cx, RECOVERY_RLY, CHEM_CONTAINER_ML, NULL);   /* no level sensor: the nominal volume */
 #else
             return false;
 #endif

@@ -60,7 +60,7 @@ for p in design.PARTS:
         fp.SetExcludedFromBOM(True); fp.SetExcludedFromPosFiles(True)
     for pad in fp.Pads():
         num = pad.GetNumber()
-        if p["ref"] in ("J1", "J2", "J3", "C1", "J5", "J6", "C55", "J27", "J28", "J29", "J30") and p["pins"].get(num) == "GND":
+        if p["ref"] in ("J1", "J2", "J3", "C1", "J5", "J6", "C55", "C56", "J27", "J28", "J29", "J30") and p["pins"].get(num) == "GND":
             pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
         if name.startswith("JST_XH") and p["pins"].get(num) == "GND":
             pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)

@@ -58,11 +58,14 @@ void sim_ui_debug_tag(lv_obj_t *obj, const char *name);
  * the wetted film of the tube, a fraction of a millilitre. Same after a
  * transfer through the tank (see xfer* below). */
 #define PUMP_PURGE_SECS             4
-/* Nominal volumes for the time estimates of the Tools until a measured
- * (MIN -> MAX) time exists: v7 chemistry containers of 1 litre, v6/v7 bath of
- * 12.8 litres (the bath also has a manual tap: draining it with the pump
- * through the tank takes about 45 minutes). */
-#define CHEM_CONTAINER_ML           1000
+/* Nominal volumes of the Tools. The chemistry containers have no level sensors
+ * (removed with Mainboard v1.2: levels are checked by eye), so these volumes are
+ * what the tools actually move: "Empty chemistry" pumps CHEM_CONTAINER_ML into
+ * the bottle, "Fill chemistry" pours CHEM_CONTAINER_ML of bath water into an
+ * EMPTY C1. Machine v7 (mechanics, 20/10/2026): containers of 500 ml. Bath of
+ * 12.8 litres (it also has a manual tap: draining it with the pump through the
+ * tank takes about 45 minutes). */
+#define CHEM_CONTAINER_ML           500
 #define BATH_VOLUME_ML              12800
 
 /* LCD timing (used by parallel-bus boards, ignored by QSPI/simulator) */
@@ -424,6 +427,7 @@ typedef enum {
 #define checkupHeaterStatusFmt_text	tr(STR_checkupHeaterStatusFmt_text)
 #define checkupHeaterOn_text	tr(STR_checkupHeaterOn_text)
 #define checkupHeaterOff_text	tr(STR_checkupHeaterOff_text)
+#define checkupHeaterBlocked_text	tr(STR_checkupHeaterBlocked_text)
 #define checkupTempReached_text	tr(STR_checkupTempReached_text)
 #define checkupTempTimedOut_text	tr(STR_checkupTempTimedOut_text)
 #define checkupContinue_text	tr(STR_checkupContinue_text)
@@ -457,6 +461,8 @@ typedef enum {
 #define fillPopupTitle_text	tr(STR_fillPopupTitle_text)
 #define fillChemPopupTitle_text	tr(STR_fillChemPopupTitle_text)
 #define fillChemFilling_text	tr(STR_fillChemFilling_text)
+#define fillChemReadyFmt_text	tr(STR_fillChemReadyFmt_text)
+#define fillChemDone_text	tr(STR_fillChemDone_text)
 #define fillStatusReady_text	tr(STR_fillStatusReady_text)
 #define fillManualPour_text	tr(STR_fillManualPour_text)
 #define fillManualFilling_text	tr(STR_fillManualFilling_text)
@@ -2291,9 +2297,7 @@ void hbridge_safe_init(void);
 void initializeRelayPins();
 void sendValueToRelay(uint8_t pumpFrom, uint8_t pumpDir, bool activePump);
 void initializeMotorPins();
-void initializeChemLevelPins(void);              /* Port B: 6 chem sensors + 2 heaters */
-bool chemLevelMinDetected(uint8_t container);    /* container 0..2 (C1..C3), true=water */
-bool chemLevelMaxDetected(uint8_t container);
+void initializePortB(void);                      /* Port B: B0-B5 spare inputs + 2 heaters */
 void stopMotor(uint8_t pin1, uint8_t pin2);
 void runMotorFW(uint8_t pin1, uint8_t pin2);
 void runMotorRV(uint8_t pin1, uint8_t pin2);
@@ -2307,8 +2311,16 @@ void initializeTemperatureSensor();
 void printTemperature(float temp);
 /* Temperature control — simulator stubs / hardware wrappers */
 float sim_getTemperature(uint8_t sensorIndex);
-void  sim_setHeater(bool on);
+void  sim_setHeater(bool on);          /* heater request, through the bath-level guard */
 void  sim_resetTemperatures(void);
+void  heaterHwSet(bool on);            /* raw heater outputs (board / simulator / tests); guard only */
+void  heaterGuardInit(void);           /* 1 s check of the bath MIN sensor (from xferInit) */
+bool  heaterBathOk(void);              /* bath MIN sensor reads water (debounced) */
+bool  heaterBlockedLowWater(void);     /* heat requested but held off: bath below MIN */
+bool  heaterOutputOn(void);            /* heater outputs actually on */
+bool  heaterDebugSet(uint8_t idx, bool on); /* diagnostics: heater 1/2 by hand, still guarded; returns new state */
+bool  heaterDebugOn(uint8_t idx);      /* diagnostics heater still on (the guard may cut it) */
+void  heaterDebugAllOff(void);
 //char* printAddressSensor(DeviceAddress deviceAddress);
 void writeMachineStats(machineStatistics *machineStats);
 void readMachineStats(machineStatistics *machineStats);
@@ -2369,6 +2381,7 @@ void     xferInit(void);           /* creates the engine timer (LVGL context); c
 /* ── Peripheral diagnostics page (2-finger gesture on the splash) ── */
 void    debugScreenCreate(void);            /* build + show the diagnostics screen */
 void    debugMcpWrite(uint8_t pin, bool on);/* direct MCP output write (heaters etc.) */
+bool    debugMcpRead(uint8_t pin);          /* direct MCP input read (spare GPIO B0-B5) */
 bool    debugMcpPresent(void);              /* MCP23017 detected on the I2C bus */
 #if HAS_RAIL_MONITOR && defined(BOARD_JC4880P433)
 bool    railMonitorPresent(void);           /* ADS1115 (Mainboard) answered at boot */

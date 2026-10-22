@@ -71,7 +71,8 @@ __attribute__((weak)) void tools_resume_timer(void) { }
 
 /* Temperature control stubs for tests (no simulation needed) */
 float sim_getTemperature(uint8_t sensorIndex) { return 20.0f; }
-void  sim_setHeater(bool on) { }
+bool  g_testHeaterHw = false;                     /* heater outputs, as driven by the heater guard */
+void  heaterHwSet(bool on) { g_testHeaterHw = on; }
 void  sim_resetTemperatures(void) { }
 
 /* ═══════════════════════════════════════════════
@@ -318,6 +319,7 @@ int main(int argc, char *argv[])
     RUN_SUITE(test_suite_film_loader);
     RUN_SUITE(test_suite_maintenance_remote);
     RUN_SUITE(test_suite_recover);
+    RUN_SUITE(test_suite_mainboard_v12);
 #undef RUN_SUITE
 
     /* ── Summary ── */

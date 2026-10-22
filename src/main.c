@@ -108,7 +108,7 @@ float sim_getTemperature(uint8_t sensorIndex) {
     return SIM_AMBIENT + offset;
 }
 
-void sim_setHeater(bool on) {
+void heaterHwSet(bool on) {
     sim_heater_active = on;
     printf("[SIM] Heater %s\n", on ? "ON" : "OFF");
 }

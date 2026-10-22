@@ -403,6 +403,9 @@ static const lang_pair_t strings[STR__COUNT] = {
     [STR_checkupStartBusyBody_text] = { "A maintenance tool is still moving\nliquid. Wait for it to finish.", "Uno strumento sta ancora muovendo\nliquido: attendi che finisca." },
     [STR_selfCheckToContainerFmt_text] = { "Water to %s...", "Acqua verso %s..." },
     [STR_selfCheckBackToTankFmt_text] = { "%s back to the tank...", "%s torna nella tank..." },
+    [STR_checkupHeaterBlocked_text] = { "Heating paused: bath below MIN", "Riscaldamento in pausa: vasca sotto il MIN" },
+    [STR_fillChemReadyFmt_text] = { "Pours %d ml of bath water into C1: C1 must be empty", "Versa %d ml d'acqua della vasca nel C1: il C1 deve essere vuoto" },
+    [STR_fillChemDone_text] = { "C1 filled", "C1 riempito" },
     [STR_toolsLiquidsRow_text] = { "Liquids", "Liquidi" },
     [STR_toolsLiquids_text] = { "Liquids", "Liquidi" },
 };

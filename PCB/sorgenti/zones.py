@@ -15,7 +15,13 @@ _c=np.where(_m.sum(0)>500)[0]; _r=np.where(_m.sum(1)>500)[0]
 X0,X1,Y0,Y1=_c.min(),_c.max(),_r.min(),_r.max()
 sx=(X1-X0)/110; sy=(Y1-Y0)/90
 def P(x,y): return (X0+x*sx, Y0+y*sy)
-F=lambda s,b=True: ImageFont.truetype("DejaVuSans%s.ttf"%("-Bold" if b else ""), s)
+def F(s, b=True):
+    # DejaVu (Linux) oppure Arial (macOS); in mancanza, il font di default di Pillow
+    for n in (("DejaVuSans-Bold.ttf", "Arial Bold.ttf", "/System/Library/Fonts/Supplemental/Arial Bold.ttf") if b else
+              ("DejaVuSans.ttf", "Arial.ttf", "/System/Library/Fonts/Supplemental/Arial.ttf")):
+        try: return ImageFont.truetype(n, s)
+        except OSError: pass
+    return ImageFont.load_default(s)
 # zones: id, color, rects(mm), dashed(new function)
 Z=[
  ("1","#e53935",[(11.4,-0.3,42.4,29.6),(43.7,15.5,67.2,22.0)],False),
@@ -24,8 +30,8 @@ Z=[
  ("4","#1565c0",[(42.1,44.2,53.1,51.9),(61.8,56.9,75.2,61.0)],False),
  ("5","#43a047",[(65.1,25.7,75.3,40.6),(58.7,62.7,94.4,80.7),(40.8,82.3,102.0,90.3)],False),
  ("6","#8e24aa",[(43.0,23.1,65.4,40.0)],False),
- ("7","#00acc1",[(95.3,8.8,110.1,76.3),(75.0,17.7,95.5,31.0),(76.8,52.3,94.3,56.5)],False),
- ("8","#43a047",[(52.9,35.8,62.0,54.6)],True),
+ ("7","#00acc1",[(102.8,8.8,110.1,78.7),(75.0,17.7,95.6,25.3),(76.8,52.3,94.3,56.5)],False),
+ ("8","#43a047",[(74.9,25.3,100.8,39.2)],True),
  ("9","#757575",[(-0.3,7.7,11.0,47.1),(14.4,35.7,38.7,48.9),(52.8,54.3,60.1,61.6)],True),
  ("10","#757575",[(41.8,-0.3,84.0,15.4),(61.9,41.1,69.6,51.8)],True),
  ("11","#757575",[(83.8,-0.3,100.3,14.4)],True),
@@ -62,7 +68,7 @@ im=im.crop((120,150,2460,2070))
 W=im.width+1500; H=im.height
 can=Image.new("RGB",(W,H),"white"); can.paste(im,(0,0)); d=ImageDraw.Draw(can)
 x=im.width+50; y=40
-d.text((x,y),"FilMachine Mainboard v1.1",font=F(52),fill="#222"); y+=70
+d.text((x,y),"FilMachine Mainboard v1.2",font=F(52),fill="#222"); y+=70
 d.text((x,y),"cosa sostituisce ogni zona della scheda",font=F(36,False),fill="#444"); y+=80
 L=[("Moduli che la scheda sostituisce",None,None,None),
  ("1","#e53935","Modulo MOSFET IRF540 (2 canali) — riscaldatori","Q9/Q10 + gate driver U5, fusibili F1/F2, morsetti HEATER 1/2"),
@@ -71,9 +77,9 @@ L=[("Moduli che la scheda sostituisce",None,None,None),
  ("4","#1565c0","DBH-12V — logica di comando ENA·IN","porte AND U6/U7 + pull-down dei comandi"),
  ("5","#43a047","Adafruit #6318 — MCP23017 + 8 uscite","U3 (I2C 0x20) + MOSFET Q1–Q8, LED, morsetti valvole"),
  ("6","#8e24aa","Convertitore 12 → 5 V","buck U1 (LMR33630, 3 A), L1, condensatori"),
- ("7","#00acc1","Cablaggio sensori e servo (oggi fili diretti a JP1)","JST di livelli, flusso, Hall, DS18B20 + filtri/pull-up; header SERVO"),
+ ("7","#00acc1","Cablaggio sensori e servo (oggi fili diretti a JP1)","5 JST in una fila: livello vasca, flusso, Hall, DS18B20 + filtri/pull-up; SERVO"),
  ("Funzioni nuove (tratteggiate)",None,None,None),
- ("8","#43a047","GPIO SPARE: pin A6/A7 del #6318","header J30, protezioni R97/R98, D47/D48"),
+ ("8","#43a047","GPIO SPARE: pin B0–B5 del #6318","header J30 (B0–B5, 3V3, 5V, GND), protezioni R97–R102, D47–D52"),
  ("9","#757575","Ingressi 12 V e protezioni","3 morsetti 12V IN, fusibili F3/F4, TVS D1/D2, C1"),
  ("10","#757575","Connettore e alimentazione display","box header 2×13, PTC F7 + diodo D8"),
  ("11","#757575","Uscite di servizio 12 V / 5 V","morsetti 12V OUT / 5V OUT, PTC F8/F5"),

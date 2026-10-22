@@ -16,18 +16,19 @@ shutil.copytree(f"{HERE}/FM.pretty", f"{DEST}/kicad/FM.pretty")
 open(f"{DEST}/kicad/fp-lib-table", "w").write('(fp_lib_table\n  (version 7)\n  (lib (name "FM")(type "KiCad")(uri "${KIPRJMOD}/FM.pretty")(options "")(descr "FilMachine custom footprints (LCSC parts)"))\n)\n')
 for fn in ("design.py", "placement.py", "power.py", "mkfp.py", "gen_sch.py", "build_pcb.py", "mkpro.py", "fanout.py", "route.py",
            "finish.py", "maze.py", "ripup.py", "gndfix.py", "fill_drc.py", "silk.py", "stubclean.py", "fullconn.py", "nudge.py",
-           "gndvia.py", "export.py", "eco.py", "cmpnet.py", "padsdump.py", "sympins.py", "render.sh", "make.sh", "package.py"):
+           "gndvia.py", "export.py", "eco.py", "cmpnet.py", "padsdump.py", "sympins.py", "render.sh", "make.sh", "package.py",
+           "fix_v12.py", "zones.py", "handroute.py"):
     shutil.copy(f"{HERE}/{fn}", f"{DEST}/sorgenti/{fn}")
 shutil.copy("/home/claude/jlc/cpl_rotations_db.csv", f"{DEST}/sorgenti/cpl_rotations_db.csv")
-for fn in ("jlcpos.py", "jlcpos.json", "fetch_easyeda.sh", "jlc.py"):
+for fn in ("jlcpos.py", "jlcpos.json", "fetch_easyeda.sh", "jlc.py", "cplcheck.py"):
     shutil.copy(f"/home/claude/jlc/{fn}", f"{DEST}/sorgenti/{fn}")
 shutil.copytree("/home/claude/jlc/easyeda", f"{DEST}/sorgenti/easyeda")
 shutil.copy(f"{HERE}/sorgenti_LEGGIMI.md", f"{DEST}/sorgenti/LEGGIMI.md")
 shutil.copy(f"{HERE}/LEGGIMI_JLCPCB.md", f"{DEST}/LEGGIMI.md")
 shutil.copy(f"{HERE}/NOTE_firmware_mainboard.md", f"{DEST}/NOTE_firmware.md")
-shutil.copy(f"{PATCH}/firmware_mainboard.patch", f"{DEST}/firmware_mainboard.patch")
-shutil.copy(f"{PATCH}/firmware_mainboard_completo.patch", f"{DEST}/firmware_mainboard_completo.patch")
-z = zipfile.ZipFile(f"{DEST}/FilMachine_Mainboard_v1.1_JLCPCB.zip", "w", zipfile.ZIP_DEFLATED)
+if os.path.exists(f"{HERE}/FilMachine_Mainboard_zone.png"):        # zone map (sorgenti/zones.py)
+    shutil.copy(f"{HERE}/FilMachine_Mainboard_zone.png", f"{DEST}/FilMachine_Mainboard_zone.png")
+z = zipfile.ZipFile(f"{DEST}/FilMachine_Mainboard_v1.2_JLCPCB.zip", "w", zipfile.ZIP_DEFLATED)
 for fn in sorted(os.listdir(f"{DEST}/produzione")):
     z.write(f"{DEST}/produzione/{fn}", f"produzione/{fn}")
 z.write(f"{DEST}/LEGGIMI.md", "LEGGIMI.md")

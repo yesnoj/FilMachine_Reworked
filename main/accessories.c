@@ -1117,7 +1117,7 @@ void init_Pins_and_Buses( void ) {
         LV_LOG_USER("MCP23017 init OK at 0x%02X", MCP23017_DEFAULT_ADDR);
         initializeRelayPins();
         initializeMotorPins();
-        initializeChemLevelPins();
+        initializePortB();
 #if HAS_RAIL_MONITOR && defined(BOARD_JC4880P433)
         railMonitorInit();      /* FilMachine Mainboard only; absent = no-op */
 #endif
@@ -1877,28 +1877,15 @@ void initializeRelayPins(){
     mcp23017_pinMode(&mcp, CIRC_PUMP_PIN, MCP23017_OUTPUT);
     mcp23017_digitalWrite(&mcp, CIRC_PUMP_PIN, 0);
 #endif
-#if defined(PORTB_RELAY_COUNT) && !defined(HAS_CHEM_LEVEL_SENSORS)
-    /* Port B: external relay board channels (pins 8-11, active HIGH) */
-    for (uint8_t i = 0; i < PORTB_RELAY_COUNT; i++) {
-        uint8_t pin = PORTB_RELAY_START + i;
-        mcp23017_pinMode(&mcp, pin, MCP23017_OUTPUT);
-        mcp23017_digitalWrite(&mcp, pin, 0);
-        LV_LOG_USER("PortB relay pin %d init: %d", pin, mcp23017_digitalRead(&mcp, pin));
-    }
-#endif
 }
 
-/* Port B repurposed: 6 chemistry level sensors (B0-B5, input + pull-up) and
- * 2 heater MOSFETs (B6-B7, output). Called once after the MCP is up. */
-void initializeChemLevelPins(void){
-#if defined(HAS_CHEM_LEVEL_SENSORS)
-    const uint8_t sensorPins[] = {
-        CHEM1_MIN_PIN, CHEM1_MAX_PIN,
-        CHEM2_MIN_PIN, CHEM2_MAX_PIN,
-        CHEM3_MIN_PIN, CHEM3_MAX_PIN,
-    };
-    for (uint8_t i = 0; i < sizeof(sensorPins); i++)
-        mcp23017_pinMode(&mcp, sensorPins[i], MCP23017_INPUT_PULLUP);
+/* Port B: B0-B5 are free GPIO (Mainboard J30 «GPIO SPARE»; until Mainboard
+ * v1.1 the chemistry level sensors), left as inputs with the internal pull-up;
+ * B6-B7 drive the two heater MOSFETs. Called once after the MCP is up. */
+void initializePortB(void){
+#if defined(GPIO_SPARE_B_FIRST)
+    for (uint8_t i = 0; i < GPIO_SPARE_B_COUNT; i++)
+        mcp23017_pinMode(&mcp, GPIO_SPARE_B_FIRST + i, MCP23017_INPUT_PULLUP);
 #endif
 #if defined(HAS_DUAL_HEATER)
     mcp23017_pinMode(&mcp, HEATER1_PIN, MCP23017_OUTPUT);
@@ -1906,28 +1893,7 @@ void initializeChemLevelPins(void){
     mcp23017_digitalWrite(&mcp, HEATER1_PIN, 0);
     mcp23017_digitalWrite(&mcp, HEATER2_PIN, 0);
 #endif
-    LV_LOG_USER("Port B init: chem level inputs (B0-B5) + heater outputs (B6-B7)");
-}
-
-/* Chemistry container level: index 0=C1, 1=C2, 2=C3. XKC-Y21 NPN → LOW = water. */
-bool chemLevelMinDetected(uint8_t container){
-#if defined(HAS_CHEM_LEVEL_SENSORS) && defined(BOARD_JC4880P433)
-    static const uint8_t pins[] = { CHEM1_MIN_PIN, CHEM2_MIN_PIN, CHEM3_MIN_PIN };
-    if (container >= CHEM_LEVEL_CONTAINERS) return false;
-    return mcp23017_digitalRead(&mcp, pins[container]) == 0;
-#else
-    (void)container; return false;
-#endif
-}
-
-bool chemLevelMaxDetected(uint8_t container){
-#if defined(HAS_CHEM_LEVEL_SENSORS) && defined(BOARD_JC4880P433)
-    static const uint8_t pins[] = { CHEM1_MAX_PIN, CHEM2_MAX_PIN, CHEM3_MAX_PIN };
-    if (container >= CHEM_LEVEL_CONTAINERS) return false;
-    return mcp23017_digitalRead(&mcp, pins[container]) == 0;
-#else
-    (void)container; return false;
-#endif
+    LV_LOG_USER("Port B init: spare inputs (B0-B5) + heater outputs (B6-B7)");
 }
 
 void setValveState(uint8_t relayPin, bool open) {
@@ -1961,6 +1927,11 @@ bool circulatorOn(void) { return s_circOn; }
  * Exposed because the mcp handle is file-static. */
 void debugMcpWrite(uint8_t pin, bool on) {
     mcp23017_digitalWrite(&mcp, pin, on ? 1 : 0);
+}
+
+/* Direct MCP input read for the diagnostics page (spare GPIO B0-B5). */
+bool debugMcpRead(uint8_t pin) {
+    return mcp23017_digitalRead(&mcp, pin) != 0;
 }
 
 /* MCP23017 presence for the diagnostics page. */
@@ -2122,8 +2093,33 @@ static volatile uint32_t s_fillVolumeMl = 0;
 static volatile float    s_fillFlowLpm  = 0.0f;
 static uint8_t           s_fillTarget   = FILL_TARGET_WB;  /* WB or a chem container */
 
-int      machineFillState(void)   { return s_fillState; }
-void     machineFillStop(void)    { s_fillStopReq = true; }
+/* "Fill chemistry": CHEM_CONTAINER_ML of bath water into C1 through the tank,
+ * by volume (no level sensors since Mainboard v1.2: C1 must be empty). It runs
+ * on the transfer engine (non-blocking LVGL timer), so no task: its state is
+ * picked up here whenever the popup / WebSocket polls. */
+static bool     s_chemFillActive = false;
+static uint32_t s_chemFillStartMs = 0;
+static uint32_t s_chemFillTotalMs = 1;
+
+/* Called by the transfer engine whenever it goes idle (finished, stopped or
+ * aborted by a process start), always on the LVGL thread. FULL only if the
+ * whole volume reached C1. */
+static void chem_fill_poll(void)
+{
+    if (!s_chemFillActive || xferBusy()) return;
+    s_chemFillActive = false;
+    s_fillVolumeMl   = xferMovedMl();
+    s_fillState      = (!s_fillStopReq && s_fillVolumeMl >= CHEM_CONTAINER_ML) ? FILL_FULL : FILL_STOPPED;
+    LV_LOG_USER("Chem fill ended (state=%d, %lu ml)", s_fillState, (unsigned long)s_fillVolumeMl);
+}
+void xferIdleHook(void) { chem_fill_poll(); }
+
+int  machineFillState(void) { return s_fillState; }
+void machineFillStop(void)
+{
+    s_fillStopReq = true;
+    if (s_chemFillActive) xferStop();       /* finish the cycle in progress, then stop */
+}
 float    machineFillFlowLpm(void) { return s_fillFlowLpm; }
 uint32_t machineFillVolumeMl(void){ return s_fillVolumeMl; }
 
@@ -2139,23 +2135,25 @@ int machineFillProgress(void) {
 bool machineFillBathFull(void) {
 #if defined(BOARD_JC4880P433)
     if (FILL_IGNORE_MAX) return false;
-    return (s_fillTarget == FILL_TARGET_CHEM) ? chemLevelMaxDetected(0)
-                                              : sensors_water_level_max_detected();
+    if (s_fillTarget == FILL_TARGET_CHEM) return false;   /* no sensor: C1 is filled by volume */
+    return sensors_water_level_max_detected();
 #else
     return false;
 #endif
 }
 
-/* Coarse level from the two floats (0 empty / 50 above low / 100 at max), for
- * the level-based bargraph when there is no flow meter reading. Reads the WB
- * floats or the chem container floats depending on the active fill target. */
+/* Level for the bargraph when there is no flow meter reading. Water bath:
+ * coarse level from its two floats (0 empty / 50 above low / 100 at max).
+ * Chemistry container (no sensors): share of the transfer time elapsed. */
 int machineFillLevelPct(void) {
-#if defined(BOARD_JC4880P433)
     if (s_fillTarget == FILL_TARGET_CHEM) {
-        if (chemLevelMaxDetected(0)) return 100;
-        if (chemLevelMinDetected(0)) return 50;
-        return 0;
+        if (s_fillState == FILL_FULL) return 100;
+        if (!s_chemFillActive) return 0;
+        uint32_t el = lv_tick_elaps(s_chemFillStartMs);
+        uint32_t pct = el * 100u / s_chemFillTotalMs;
+        return (int)(pct > 99u ? 99u : pct);
     }
+#if defined(BOARD_JC4880P433)
     if (sensors_water_level_max_detected()) return 100;
     if (sensors_water_level_detected())     return 50;
     return 0;
@@ -2186,32 +2184,6 @@ static void machine_fill_task(void *arg) {
     s_fillVolumeMl = 0;
     s_fillFlowLpm  = 0.0f;
     s_fillState    = FILL_RUNNING;
-
-    /* Chemistry container: pump water from the WB into container C1 and watch
-     * that container's own floats. Times MIN→MAX to calibrate the chem fill. */
-    if (s_fillTarget == FILL_TARGET_CHEM) {
-        ESP_LOGI(TAG, "Chem fill: WB -> C1 (pump), watching C1 floats");
-        cleanRelayManager(getValueForChemicalSource(WB), getValueForChemicalSource(0), PUMP_IN_RLY, true);
-        int elapsed = 0, minWetMs = -1;
-        for (;;) {
-            if (minWetMs < 0 && chemLevelMinDetected(0)) minWetMs = elapsed;
-            if (chemLevelMaxDetected(0)) {
-                s_fillState = FILL_FULL;
-#if CLEAN_USE_LEVEL_SENSORS
-                if (minWetMs >= 0) recordFillCalibration(false, (uint16_t)((elapsed - minWetMs) / 1000));
-#endif
-                break;
-            }
-            if (s_fillStopReq)                      { s_fillState = FILL_STOPPED; break; }
-            if (elapsed >= MACHINE_FILL_TIMEOUT_MS) { s_fillState = FILL_TIMEOUT; break; }
-            vTaskDelay(pdMS_TO_TICKS(200));
-            elapsed += 200;
-        }
-        cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);
-        ESP_LOGI(TAG, "Chem fill ended (state=%d)", s_fillState);
-        vTaskDelete(NULL);
-        return;
-    }
 
     /* No pressurized inlet → the user fills by hand; watch the floats only,
      * no valve and no flow metering. Stop when the MAX float is wet. */
@@ -2308,8 +2280,28 @@ void machineFillSetTarget(uint8_t target) { s_fillTarget = target; }
 int machineFillTarget(void) { return (int)s_fillTarget; }
 
 void machineFillStart(uint8_t target) {
+    chem_fill_poll();                       /* settle a chemistry fill the engine already ended */
     if (s_fillState == FILL_RUNNING) return;
     s_fillTarget = target;
+    if (target == FILL_TARGET_CHEM) {
+        s_fillStopReq  = false;
+        s_fillVolumeMl = 0;
+        s_fillFlowLpm  = 0.0f;
+        if (!xferStartVolume(getValueForChemicalSource(WB), getValueForChemicalSource(0),
+                             CHEM_CONTAINER_ML, NULL)) {
+            LV_LOG_USER("Chem fill: pump busy, not started");
+            s_fillState = FILL_STOPPED;
+            return;
+        }
+        s_chemFillActive  = true;
+        s_chemFillStartMs = lv_tick_get();
+        s_chemFillTotalMs = (uint32_t)xferTransferSecs(CHEM_CONTAINER_ML) * 1000u;
+        if (s_chemFillTotalMs == 0) s_chemFillTotalMs = 1;
+        s_fillState = FILL_RUNNING;
+        LV_LOG_USER("Chem fill: WB -> C1, %d ml through the tank (~%lu s)", CHEM_CONTAINER_ML,
+                    (unsigned long)(s_chemFillTotalMs / 1000u));
+        return;
+    }
 #if defined(BOARD_JC4880P433)
     xTaskCreate(machine_fill_task, "mfill", 3072, NULL, 5, NULL);
 #else
@@ -2473,6 +2465,7 @@ static void xfer_enter(uint8_t phase)
                     (unsigned)X.fillSecs, (unsigned)pumpPurgeSecs());
     } else {
         LV_LOG_USER("Transfer: idle (%u ml moved)", (unsigned)X.movedMl);
+        xferIdleHook();                     /* e.g. "Fill chemistry" ends here */
     }
 }
 
@@ -2483,7 +2476,104 @@ static void xfer_enter(uint8_t phase)
 void xferInit(void)
 {
     if (X.timer == NULL) X.timer = lv_timer_create(xfer_timer_cb, 1000, NULL);
+    heaterGuardInit();
 }
+
+/* ── Heater guard: never heat with the water bath below its MIN sensor ──
+ * A 100 W heater out of the water burns out in seconds. Callers ask with
+ * sim_setHeater(on) (the thermostat in the checkup page, Stop, WebSocket) or,
+ * from the diagnostics page, heaterDebugSet(); the outputs follow the request
+ * only while the bath MIN level sensor (XKC-Y21, LOW = water) reads water.
+ * The level is sampled once a second: HEATER_GUARD_DRY_S dry samples in a row
+ * (1-2 s) -> heaters off (diagnostics ones too); a heat request is kept, so
+ * the thermostat's heaters come back by themselves after HEATER_GUARD_WET_S
+ * wet samples (4-5 s). A missing or unplugged sensor reads "dry" (pull-up):
+ * the heaters stay off. Every HEATER_GUARD_REFRESH_S s the guard writes the
+ * outputs again, so a lost I2C write cannot leave a heater on.
+ * heaterBlockedLowWater() tells the UI and the app. */
+#define HEATER_GUARD_DRY_S      2
+#define HEATER_GUARD_WET_S      5
+#define HEATER_GUARD_REFRESH_S  5
+static bool        s_heatReq   = false;   /* what the thermostat wants      */
+static bool        s_heatOut   = false;   /* what the MOSFETs are doing     */
+static bool        s_bathOk    = true;    /* debounced MIN level            */
+static bool        s_bathInit  = false;
+static uint8_t     s_bathCnt   = 0;
+static uint8_t     s_dbgHeat   = 0;       /* diagnostics: heater 1 = bit 0, heater 2 = bit 1 */
+static uint8_t     s_refresh   = 0;
+static lv_timer_t *s_heatGuardTimer = NULL;
+
+static void heater_apply(void)
+{
+    bool out = s_heatReq && s_bathOk;
+    if (out != s_heatOut) {
+        s_heatOut = out;
+        heaterHwSet(out);
+    }
+}
+
+static void heater_debug_off(void)
+{
+    if (s_dbgHeat == 0) return;
+    s_dbgHeat = 0;
+    heaterHwSet(s_heatOut);                 /* both MOSFETs back to the guarded state */
+}
+
+static void heater_bath_sample(void)
+{
+    bool wet = sensors_water_level_detected();
+    if (!s_bathInit) { s_bathOk = wet; s_bathInit = true; s_bathCnt = 0; return; }
+    if (wet == s_bathOk) { s_bathCnt = 0; return; }
+    if (++s_bathCnt >= (s_bathOk ? HEATER_GUARD_DRY_S : HEATER_GUARD_WET_S)) {
+        s_bathOk  = wet;
+        s_bathCnt = 0;
+        LV_LOG_USER("Heater guard: bath %s", wet ? "above MIN, heating allowed"
+                                                 : "below MIN, heaters off");
+        if (!wet) { s_dbgHeat = 0; s_heatOut = false; heaterHwSet(false); }   /* cut everything now */
+    }
+}
+
+static void heater_guard_cb(lv_timer_t *t)
+{
+    (void)t;
+    heater_bath_sample();
+    heater_apply();
+    if (++s_refresh >= HEATER_GUARD_REFRESH_S) {     /* re-assert: a lost I2C write must not stick */
+        s_refresh = 0;
+        if (s_dbgHeat == 0 || !s_bathOk) { s_dbgHeat = 0; heaterHwSet(s_heatOut); }
+    }
+}
+
+void heaterGuardInit(void)
+{
+    if (s_heatGuardTimer == NULL) s_heatGuardTimer = lv_timer_create(heater_guard_cb, 1000, NULL);
+}
+
+void sim_setHeater(bool on)
+{
+    if (!s_bathInit) heater_bath_sample();      /* first call before the timer ran: read it now */
+    s_heatReq = on;
+    if (on && !s_bathOk) LV_LOG_USER("Heater requested ON but the bath is below MIN: kept off");
+    heater_apply();
+}
+
+bool heaterBathOk(void)          { if (!s_bathInit) heater_bath_sample(); return s_bathOk; }
+
+/* Diagnostics page: switch one heater by hand, still under the guard (refused
+ * with the bath below MIN, cut as soon as it goes below MIN). The thermostat's
+ * request, if any, keeps both heaters on regardless. Returns the new state. */
+bool heaterDebugSet(uint8_t idx, bool on)
+{
+    if (idx > 1) return false;
+    if (on && !heaterBathOk()) return false;
+    if (on) s_dbgHeat |= (uint8_t)(1u << idx); else s_dbgHeat &= (uint8_t)~(1u << idx);
+    debugMcpWrite(idx == 0 ? HEATER1_PIN : HEATER2_PIN, on || s_heatOut);
+    return on;
+}
+bool heaterDebugOn(uint8_t idx)  { return idx <= 1 && (s_dbgHeat & (1u << idx)); }
+void heaterDebugAllOff(void)     { heater_debug_off(); }
+bool heaterBlockedLowWater(void) { return s_heatReq && !s_bathOk; }
+bool heaterOutputOn(void)        { return s_heatOut; }
 
 static void xfer_start_now(uint8_t from, uint8_t to, uint16_t ml, bool (*srcEmpty)(void))
 {
@@ -2576,6 +2666,7 @@ void xferAbort(void)
     X.phase = 0; X.stopReq = false;
     pump_stop();
     xfer_valves_closed();
+    xferIdleHook();
 }
 
 /* Transfer pumpFrom -> pumpTo through the tank until stopped (activePump =
@@ -2868,8 +2959,9 @@ float sim_getTemperature(uint8_t sensorIndex) {
     return raw;
 }
 
-void sim_setHeater(bool on) {
-    /* Two heater MOSFET modules on Port B (B6/B7), driven together. */
+void heaterHwSet(bool on) {
+    /* Two heater MOSFET modules on Port B (B6/B7), driven together.
+     * Only the heater guard (sim_setHeater) calls this. */
     mcp23017_digitalWrite(&mcp, HEATER1_PIN, on ? 1 : 0);
     mcp23017_digitalWrite(&mcp, HEATER2_PIN, on ? 1 : 0);
     LV_LOG_USER("Heater %s (B6/B7)", on ? "ON" : "OFF");
@@ -3012,8 +3104,9 @@ void step_detail_destroy(sStepDetail *sd) {
 
 void checkup_destroy(sCheckup *ckup) {
     if (ckup == NULL) return;
-    /* Stop all timers owned by this checkup */
+    /* Stop all timers owned by this checkup; without its thermostat the heaters go off */
     safeTimerDelete(&ckup->processTimer);
+    sim_setHeater(false);
     safeTimerDelete(&ckup->pumpTimer);
     safeTimerDelete(&ckup->tempTimer);
     /* Reset runtime style */
@@ -3079,6 +3172,7 @@ void emptyList(void *list, NodeType_t type) {
             if (scan->process.processDetails != NULL &&
                 scan->process.processDetails->checkup != NULL) {
                 safeTimerDelete(&scan->process.processDetails->checkup->processTimer);
+                sim_setHeater(false);
                 safeTimerDelete(&scan->process.processDetails->checkup->pumpTimer);
                 safeTimerDelete(&scan->process.processDetails->checkup->tempTimer);
             }
@@ -3540,12 +3634,13 @@ uint16_t calculateFillTime(uint16_t capacityMl, uint8_t pumpSpeedPercent) {
 }
 
 uint16_t getContainerFillTime(void) {
-    /* Prefer the real measured time (self-calibrated from the MIN/MAX sensors);
-     * fall back to a nominal capacity-based estimate until a measurement exists.
-     * Both describe a transfer through the tank (WB -> container or back). */
-    if (gui.page.settings.settingsParams.chemCalibFillSecs > 0)
-        return gui.page.settings.settingsParams.chemCalibFillSecs;
-    return xferTransferSecs(CHEM_CONTAINER_ML);
+    /* The containers have no level sensors (Mainboard v1.2): the nominal volume
+     * through the tank. A chemCalibFillSecs saved by an older firmware (measured
+     * on the MIN/MAX sensors of a 1 l container) may only shorten it, never make
+     * it longer: a longer time would overfill a 500 ml container. */
+    uint16_t nominal = xferTransferSecs(CHEM_CONTAINER_ML);
+    uint16_t cal = gui.page.settings.settingsParams.chemCalibFillSecs;
+    return (cal > 0 && cal < nominal) ? cal : nominal;
 }
 
 uint16_t getWbFillTime(void) {

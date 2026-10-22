@@ -380,6 +380,8 @@ static void ws_async_stop_now(void *user_data) {
 
     gui.page.tools.machineStats.stopped++;
     safeTimerDelete(&ckup->processTimer);
+    sim_setHeater(false);                       /* Stop: no thermostat any more, heaters off */
+    ckup->data.heaterOn = false;
     if (ckup->pumpTimer) lv_timer_resume(ckup->pumpTimer);
     qSysAction(SAVE_MACHINE_STATS);
 
@@ -595,6 +597,7 @@ static int build_state_json(char *buf, int bufsize) {
         "\"waterTemp\":%.1f,"
         "\"chemTemp\":%.1f,"
         "\"heaterOn\":%s,"
+        "\"heaterBlocked\":%s,"
         "\"fillStatus\":%u,"
         "\"tempStatus\":%u,"
         "\"filmStatus\":%u,"
@@ -719,6 +722,7 @@ static int build_state_json(char *buf, int bufsize) {
         live_bath_temp,
         live_chem_temp,
         ck->heaterOn ? "true" : "false",
+        heaterBlockedLowWater() ? "true" : "false",   /* heat wanted, bath below MIN */
         (unsigned)ck->stepFillWaterStatus,
         (unsigned)ck->stepReachTempStatus,
         (unsigned)ck->stepCheckFilmStatus,

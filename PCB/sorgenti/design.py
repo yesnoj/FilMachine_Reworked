@@ -182,14 +182,15 @@ P("J6", "Connector_Generic:Conn_01x05", "C6 UART", "Connector_PinHeader_2.54mm:P
 R("R6", "4.7k", "I2C_SDA", "+3V3", S, "Pull-up I2C (non montata: c'e' gia' 2k2 sul display)", dnp=True)
 R("R7", "4.7k", "I2C_SCL", "+3V3", S, "Pull-up I2C (non montata)", dnp=True)
 
-# MCP23017 @0x20 — stessa mappa del firmware attuale (board_jc4880p433.h + note v6)
+# MCP23017 @0x20 — stessa mappa del firmware (board_jc4880p433.h). v1.2: B0-B5 (prima sensori di livello delle
+# chimiche, tolti: i livelli si controllano a vista) sono GPIO liberi sull'header J30 «GPIO SPARE».
 P("U3", "Interface_Expansion:MCP23017_SS", "MCP23017-E/SS", "Package_SO:SSOP-28_5.3x10.2mm_P0.65mm",
   {"9": "+3V3", "10": "GND", "13": "I2C_SDA", "12": "I2C_SCL", "18": "MCP_RST",
    "15": "GND", "16": "GND", "17": "GND", "19": NC, "20": NC, "11": NC, "14": NC,
    "21": "VLV_C1", "22": "VLV_C2", "23": "VLV_C3", "24": "VLV_WB",
    "25": "VLV_WASTE", "26": "VLV_INLET", "27": "VLV_SP1", "28": "VLV_SP2",
-   "1": "CHEM1_MIN", "2": "CHEM1_MAX", "3": "CHEM2_MIN", "4": "CHEM2_MAX",
-   "5": "CHEM3_MIN", "6": "CHEM3_MAX", "7": "HEAT1_CMD", "8": "HEAT2_CMD"}, S,
+   "1": "MCP_B0", "2": "MCP_B1", "3": "MCP_B2", "4": "MCP_B3",
+   "5": "MCP_B4", "6": "MCP_B5", "7": "HEAT1_CMD", "8": "HEAT2_CMD"}, S,
   "MCP23017T-E/SS", "Espansore I2C 16 I/O, indirizzo 0x20", mfr="Microchip", lcsc="C558584")
 C("C13", "100nF", "+3V3", "GND", S, desc="Disaccoppiamento MCP23017")
 R("R8", "10k", "MCP_RST", "+3V3", S, "Pull-up RESET MCP23017")
@@ -221,12 +222,6 @@ INPUTS = [  # (canale, net lato MCU, net lato connettore)
     ("BATH_MAX", "BATH_MAX_IN", "SNS_BATH_MAX"),
     ("HALL",     "HALL_IN",     "SNS_HALL"),
     ("FLOW",     "FLOW_IN",     "SNS_FLOW"),
-    ("C1_MIN",   "CHEM1_MIN",   "SNS_C1_MIN"),
-    ("C1_MAX",   "CHEM1_MAX",   "SNS_C1_MAX"),
-    ("C2_MIN",   "CHEM2_MIN",   "SNS_C2_MIN"),
-    ("C2_MAX",   "CHEM2_MAX",   "SNS_C2_MAX"),
-    ("C3_MIN",   "CHEM3_MIN",   "SNS_C3_MIN"),
-    ("C3_MAX",   "CHEM3_MAX",   "SNS_C3_MAX"),
 ]
 for i, (ch, mcu, sns) in enumerate(INPUTS):
     P(f"D{10+i}", "Device:D_Schottky", "1N5819WS", "Diode_SMD:D_SOD-323", {"1": sns, "2": mcu}, S,
@@ -239,15 +234,6 @@ XH3 = "Connector_JST:JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical"
 P("J7", "Connector_Generic:Conn_01x04", "BATH LEVEL", XH4,
   {"1": "+5V_SENS", "2": "SNS_BATH_MIN", "3": "SNS_BATH_MAX", "4": "GND"}, S,
   "XH-4A", "XKC-Y21 bagno MIN/MAX (5V, MIN, MAX, GND)", mfr="BOOMELE", lcsc="C37815")
-P("J8", "Connector_Generic:Conn_01x04", "CHEM 1", XH4,
-  {"1": "+5V_SENS", "2": "SNS_C1_MIN", "3": "SNS_C1_MAX", "4": "GND"}, S,
-  "XH-4A", "XKC-Y21 chimica 1 MIN/MAX", mfr="BOOMELE", lcsc="C37815")
-P("J9", "Connector_Generic:Conn_01x04", "CHEM 2", XH4,
-  {"1": "+5V_SENS", "2": "SNS_C2_MIN", "3": "SNS_C2_MAX", "4": "GND"}, S,
-  "XH-4A", "XKC-Y21 chimica 2 MIN/MAX", mfr="BOOMELE", lcsc="C37815")
-P("J10", "Connector_Generic:Conn_01x04", "CHEM 3", XH4,
-  {"1": "+5V_SENS", "2": "SNS_C3_MIN", "3": "SNS_C3_MAX", "4": "GND"}, S,
-  "XH-4A", "XKC-Y21 chimica 3 MIN/MAX", mfr="BOOMELE", lcsc="C37815")
 P("J11", "Connector_Generic:Conn_01x03", "FLOW", XH3,
   {"1": "+5V_SENS", "2": "SNS_FLOW", "3": "GND"}, S, "XH-3A", "Flussimetro YF-S201", mfr="BOOMELE", lcsc="C2316")
 P("J12", "Connector_Generic:Conn_01x03", "HALL", XH3,
@@ -270,9 +256,8 @@ for i, (name, sig) in enumerate(VALVES):
     gate = f"VLV{n}_G"
     spare = name.startswith("SP")
     R(f"R{30+n}", "100R", sig, gate, S, f"Gate valvola {name}")
-    # SP1/SP2 (A6/A7, liberi nel firmware): pull-down da 1 M cosi' il pin puo' anche fare da INGRESSO su J30
-    # con il pull-up interno (100k) dell'MCP23017; gate comunque a 0 durante il reset
-    R(f"R{40+n}", "1M" if spare else "100k", gate, "GND", S, f"Pull-down gate {'uscita spare' if spare else 'valvola'} {name} (spenta al boot)")
+    # SP1/SP2 = A6/A7: uscite come le valvole (firmware v7: valvola di recupero e pompetta di ricircolo)
+    R(f"R{40+n}", "100k", gate, "GND", S, f"Pull-down gate {'uscita spare' if spare else 'valvola'} {name} (spenta al boot)")
     P(f"Q{n}", "Transistor_FET:AO3400A", "AO3400A", "Package_TO_SOT_SMD:SOT-23",
       {"1": gate, "2": "GND", "3": drain}, S, "AO3400A", f"Low-side {'uscita spare' if spare else 'valvola'} {name} (30 V, 5,7 A)", mfr="Alpha & Omega", lcsc="C20917")
     P(f"D{20+n}", "Device:D_Schottky", "B5819W", "Diode_SMD:D_SOD-123", {"1": "+12V", "2": drain}, S,
@@ -283,17 +268,16 @@ for i, (name, sig) in enumerate(VALVES):
       {"1": "+12V", "2": drain}, S, "DB301V-3.5-2P-GN-S",
       (f"Uscita 12 V commutata di riserva {name[-1]} (MCP23017 A{5+int(name[-1])}): valvola, rele', carico fino a 2 A; pin 1 = +12 V, pin 2 = -" if spare
        else f"Valvola {name} (pin 1 = +12 V, pin 2 = -)"), mfr="DORABO", lcsc="C695629")
-# I due pin liberi dell'MCP23017 (A6, A7 = SP1, SP2) anche come GPIO 3,3 V su header, con 3,3 V, 5 V (PTC F6) e GND.
-# Usati come uscite commutano anche SPARE OUT 1/2; come ingressi vanno letti col pull-up interno dell'MCP.
-R("R97", "1k", "VLV_SP1", "SP1_IO", S, "Serie verso J30 pin 1 (limita la corrente se vi arriva un segnale a 5 V)")
-R("R98", "1k", "VLV_SP2", "SP2_IO", S, "Serie verso J30 pin 2")
-P("D47", "Device:D_Schottky", "1N5819WS", "Diode_SMD:D_SOD-323", {"1": "+3V3", "2": "SP1_IO"}, S,
-  "1N5819WS", "Clamp J30 pin 1 a 3,3 V", mfr="JLCPCB basic", lcsc="C191023")
-P("D48", "Device:D_Schottky", "1N5819WS", "Diode_SMD:D_SOD-323", {"1": "+3V3", "2": "SP2_IO"}, S,
-  "1N5819WS", "Clamp J30 pin 2 a 3,3 V", mfr="JLCPCB basic", lcsc="C191023")
-P("J30", "Connector_Generic:Conn_01x05", "GPIO SPARE", "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical",
-  {"1": "SP1_IO", "2": "SP2_IO", "3": "+3V3", "4": "+5V_AUX", "5": "GND"}, S, "PZ254V-11-05P",
-  "Header 2,54: A6, A7 (GPIO liberi MCP23017, 3,3 V, tramite 1k + clamp), +3V3, +5V di servizio (PTC F5), GND", mfr="XFCN", lcsc="C492404")
+# GPIO liberi dell'MCP23017 (B0-B5) su header 2,54 con 3,3 V, 5 V di servizio (PTC F5) e GND. Ogni pin passa da
+# 1 kOhm in serie con un clamp Schottky ai 3,3 V: un segnale a 5 V non fa danni. Il firmware li lascia ingressi con
+# pull-up interno (100 kOhm).
+for k in range(6):
+    R(f"R{97+k}", "1k", f"MCP_B{k}", f"SPB{k}_IO", S, f"Serie verso J30 pin {k+1} (B{k}; limita la corrente se vi arriva un segnale a 5 V)")
+    P(f"D{47+k}", "Device:D_Schottky", "1N5819WS", "Diode_SMD:D_SOD-323", {"1": "+3V3", "2": f"SPB{k}_IO"}, S,
+      "1N5819WS", f"Clamp J30 pin {k+1} (B{k}) a 3,3 V", mfr="JLCPCB basic", lcsc="C191023")
+P("J30", "Connector_Generic:Conn_01x09", "GPIO SPARE", "Connector_PinHeader_2.54mm:PinHeader_1x09_P2.54mm_Vertical",
+  {**{str(k + 1): f"SPB{k}_IO" for k in range(6)}, "7": "+3V3", "8": "+5V_AUX", "9": "GND"}, S, "PZ254V-11-09P",
+  "Header 2,54: B0-B5 (GPIO liberi MCP23017, 3,3 V, tramite 1k + clamp), +3V3, +5V di servizio (PTC F5), GND", mfr="XFCN", lcsc="C492408")
 
 # Riscaldatori 2 x 100 W (8,3 A): gate driver a 12 V + MOSFET 40 V / 7 mOhm
 P("U5", "Driver_FET:UCC27524D", "UCC27524D", "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm",

@@ -92,11 +92,10 @@ static void drain_timer_cb(lv_timer_t *timer) {
     /* --- Current tank finished? (time estimate, or the float says empty) --- */
     bool sensorEmpty = false;
 #if CLEAN_USE_LEVEL_SENSORS
-    /* #13: finish a drain as soon as the float says the tank is empty (MIN dry)
-     * instead of waiting out the time estimate. Chem containers use their own
-     * floats; the WB uses the water-bath MIN sensor. */
-    if (tank < CHEM_LEVEL_CONTAINERS) sensorEmpty = !chemLevelMinDetected(tank);
-    else                              sensorEmpty = !sensors_water_level_detected();
+    /* #13: finish draining the WB as soon as its MIN float reads dry instead of
+     * waiting out the time estimate. The chemistry containers have no level
+     * sensors (Mainboard v1.2): they always go by time. */
+    if (tank == NUM_TANKS - 1) sensorEmpty = !sensors_water_level_detected();
 #endif
     if (dp->tankElapsed >= tt || sensorEmpty) {
         cleanRelayManager(INVALID_RELAY, INVALID_RELAY, INVALID_RELAY, false);

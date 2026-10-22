@@ -29,6 +29,9 @@ void     sensors_flow_reset(void);
 void sensors_water_level_init(void);
 bool sensors_water_level_detected(void);      /* true = water at min level */
 bool sensors_water_level_max_detected(void);  /* true = water at max level */
+#ifdef BOARD_SIMULATOR
+void sensors_sim_set_water_level(bool minWet, bool maxWet);   /* simulator/tests: float states */
+#endif
 
 /* ── Hall effect (KY-003 / A3144) ── */
 void sensors_hall_init(void);

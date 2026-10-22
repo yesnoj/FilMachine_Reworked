@@ -113,10 +113,10 @@
  * Pins 0-4: solenoid valves, Pin 5: mains inlet valve (v6), Pin 6: recovery
  * outlet valve (v7), Pin 7: water-bath circulator pump (v7).
  * On the FilMachine Mainboard A6/A7 drive the "SPARE OUT 1/2" low-side 12 V
- * outputs (J21/J22, gate pull-down 1 M) and are also brought out on the
- * "GPIO SPARE" header J30 (A6, A7, 3V3, 5V, GND) through 1 k + Schottky clamp
- * to 3.3 V. Both are driven as outputs from boot (low = off), so J30 just
- * follows them. On the Adafruit #6318 they are MOSFET channels 7 and 8. */
+ * outputs (J21/J22, gate pull-down 100 k like the valves). Both are driven as
+ * outputs from boot (low = off). On the Adafruit #6318 they are MOSFET
+ * channels 7 and 8. (Mainboard v1.1 also brought them out on J30; since v1.2
+ * J30 carries the free port B pins B0-B5 instead.) */
 #define RELAY_NUMBER                5       /* Valve channels on MCP23017 port A (pins 0-4) */
 #define C1_RLY                      0
 #define C2_RLY                      1
@@ -138,33 +138,20 @@
  * terminal J22 "SPARE OUT 2". On only while a process heats or develops. */
 #define CIRC_PUMP_PIN               7
 
-/* Port B — external relay board (10A per channel, for high-power loads)
- * 4-channel relay board connected to MCP23017 port B pins 8-11.
- * Active HIGH (relay board jumpered to high-level trigger).
- * JD-VCC on relay board powered from 12V (separate from logic VCC).
- * Heater moved to Port A pin 7 — all 4 Port B channels are spare. */
-#define PORTB_RELAY_START           8       /* First port B pin */
-#define PORTB_RELAY_COUNT           4       /* 4-channel relay board */
-#define RELAY_SPARE_1               8       /* Port B pin 0 — relay ch.1: spare */
-#define RELAY_SPARE_2               9       /* Port B pin 1 — relay ch.2: spare */
-#define RELAY_SPARE_3               10      /* Port B pin 2 — relay ch.3: spare */
-#define RELAY_SPARE_4               11      /* Port B pin 3 — relay ch.4: spare */
-
-/* ── Port B repurposed: chemistry level sensors + heater MOSFETs ──
+/* ── Port B: free GPIO B0-B5 + heater MOSFETs B6-B7 ──
  * MCP23017 pin numbering: Port B = pins 8..15 (B0=8 … B7=15). Port B pins are
  * raw push-pull GPIO (broken out on the Adafruit #6318 bottom edge), unlike
  * Port A which is behind the board's MOSFET drivers.
  *
- * B0-B5: 3 chemistry containers × (min, max) XKC-Y21 sensors (INPUT + pull-up,
- *        LOW = water). B6-B7: 2 heater MOSFET modules (OUTPUT, HIGH = on). */
-#define HAS_CHEM_LEVEL_SENSORS      1
-#define CHEM_LEVEL_CONTAINERS       3
-#define CHEM1_MIN_PIN               8       /* B0 */
-#define CHEM1_MAX_PIN               9       /* B1 */
-#define CHEM2_MIN_PIN               10      /* B2 */
-#define CHEM2_MAX_PIN               11      /* B3 */
-#define CHEM3_MIN_PIN               12      /* B4 */
-#define CHEM3_MAX_PIN               13      /* B5 */
+ * B0-B5: free. Up to Mainboard v1.1 they read the MIN/MAX level sensors of the
+ *        three chemistry containers; those sensors are gone (the container
+ *        levels are checked by eye and every maintenance tool moves a known
+ *        volume with the peristaltic pump). They stay INPUTS with the internal
+ *        pull-up; on the Mainboard v1.2 they are the header J30 «GPIO SPARE»
+ *        (1 kOhm in series + clamp to 3.3 V), on the Adafruit #6318 its B0-B5.
+ * B6-B7: 2 heater MOSFETs (OUTPUT, HIGH = on). */
+#define GPIO_SPARE_B_FIRST          8       /* B0 */
+#define GPIO_SPARE_B_COUNT          6       /* B0..B5 */
 
 #define HAS_DUAL_HEATER             1
 #define HEATER1_PIN                 14      /* B6 — heater MOSFET 1 */

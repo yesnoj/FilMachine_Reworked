@@ -74,7 +74,8 @@ static struct {
     lv_obj_t *lbl_bath, *lbl_chem, *dot_bath, *dot_chem;
     lv_obj_t *dot_wbmin, *dot_wbmax;
     lv_obj_t *dot_hall, *lbl_flow;
-    lv_obj_t *dot_cmin[3], *dot_cmax[3];
+    lv_obj_t *dot_spare[6];                 /* MCP23017 B0-B5 = Mainboard J30 "GPIO SPARE" */
+    lv_obj_t *dot_heatlock;                 /* heaters held off: bath below MIN */
     lv_obj_t *dot_mcp, *dot_sd, *dot_wifi, *lbl_ip;
     lv_obj_t *lbl_chip, *lbl_heap, *lbl_reset, *lbl_up;
     lv_obj_t *lbl_v12, *lbl_v5, *lbl_v33;
@@ -174,8 +175,11 @@ static void ev_circ(lv_event_t *e) {
 static void ev_heater(lv_event_t *e) {
     int i = (int)(intptr_t)lv_event_get_user_data(e);
     if (i < 0 || i > 1) return;
-    D.heater[i] = !D.heater[i];
-    debugMcpWrite(i == 0 ? HEATER1_PIN : HEATER2_PIN, D.heater[i]);
+    /* through the heater guard: refused with the bath below MIN, and cut by the
+     * guard as soon as the bath drops below MIN while it is on */
+    D.heater[i] = heaterDebugSet((uint8_t)i, !D.heater[i]);
+    if (!D.heater[i] && !heaterBathOk())
+        LV_LOG_USER("Diagnostics: heater %d not switched on, bath below MIN", i + 1);
     lv_obj_set_style_bg_color(D.hbtn[i], lv_color_hex(D.heater[i] ? DBG_RED : DBG_GREY), 0);
 }
 
@@ -205,8 +209,7 @@ static void ev_tone(lv_event_t *e) {
 static void ev_close(lv_event_t *e) {
     (void)e;
     closeAllValves();
-    debugMcpWrite(HEATER1_PIN, false);
-    debugMcpWrite(HEATER2_PIN, false);
+    heaterDebugAllOff();
     circulatorSet(false);
     pump_set_stop();
     motor_set_stop();
@@ -243,10 +246,16 @@ static void dbg_refresh(lv_timer_t *t) {
              (unsigned long)sensors_flow_get_total_pulses());
     lv_label_set_text(D.lbl_flow, b);
 
-    for (int i = 0; i < 3; i++) {
-        dot_set(D.dot_cmin[i], chemLevelMinDetected((uint8_t)i) ? DBG_GREEN : DBG_GREY);
-        dot_set(D.dot_cmax[i], chemLevelMaxDetected((uint8_t)i) ? DBG_GREEN : DBG_GREY);
-    }
+#if defined(GPIO_SPARE_B_FIRST)
+    for (int i = 0; i < GPIO_SPARE_B_COUNT && i < 6; i++)   /* high = green (inputs with pull-up) */
+        dot_set(D.dot_spare[i], debugMcpRead((uint8_t)(GPIO_SPARE_B_FIRST + i)) ? DBG_GREEN : DBG_GREY);
+#endif
+    dot_set(D.dot_heatlock, heaterBathOk() ? DBG_GREEN : DBG_RED);
+    for (int i = 0; i < 2; i++)                      /* the guard may have cut a heater */
+        if (D.heater[i] && !heaterDebugOn((uint8_t)i)) {
+            D.heater[i] = false;
+            lv_obj_set_style_bg_color(D.hbtn[i], lv_color_hex(DBG_GREY), 0);
+        }
 
     dot_set(D.dot_mcp, debugMcpPresent() ? DBG_GREEN : DBG_RED);
     dot_set(D.dot_sd,  (initErrors != INIT_ERROR_SD) ? DBG_GREEN : DBG_RED);
@@ -319,6 +328,8 @@ void debugScreenCreate(void) {
     D.dot_wbmin = make_dot(p, 70, 42);
     make_label(p, 0, 74, &lv_font_montserrat_14, 0xDDDDDD, "MAX");
     D.dot_wbmax = make_dot(p, 70, 76);
+    make_label(p, 0, 108, &lv_font_montserrat_14, 0xDDDDDD, "Heat OK");
+    D.dot_heatlock = make_dot(p, 70, 110);
 
     p = make_panel(D.scr, 2, 0, "Motion");
     make_label(p, 0, 40, &lv_font_montserrat_14, 0xDDDDDD, "Hall magnet");
@@ -327,14 +338,12 @@ void debugScreenCreate(void) {
     D.lbl_flow = make_label(p, 44, 74, &lv_font_montserrat_14, 0xFFFFFF, "--");
 
     /* ── Row 1 ── */
-    p = make_panel(D.scr, 0, 1, "Chem levels");
-    for (int i = 0; i < 3; i++) {
-        char c[8]; snprintf(c, sizeof c, "C%d", i + 1);
-        make_label(p, 0, 32 + i * 30, &lv_font_montserrat_14, 0xDDDDDD, c);
-        make_label(p, 40, 32 + i * 30, &lv_font_montserrat_12, 0x999999, "min");
-        D.dot_cmin[i] = make_dot(p, 84, 34 + i * 30);
-        make_label(p, 120, 32 + i * 30, &lv_font_montserrat_12, 0x999999, "max");
-        D.dot_cmax[i] = make_dot(p, 164, 34 + i * 30);
+    p = make_panel(D.scr, 0, 1, "GPIO spare (J30)");
+    for (int i = 0; i < 6; i++) {                    /* B0 B1 B2 / B3 B4 B5 */
+        char c[8]; snprintf(c, sizeof c, "B%d", i);
+        int x = (i % 3) * 64, y = 32 + (i / 3) * 34;
+        make_label(p, x, y, &lv_font_montserrat_14, 0xDDDDDD, c);
+        D.dot_spare[i] = make_dot(p, x + 30, y + 2);
     }
 
     p = make_panel(D.scr, 1, 1, "Bus / Network");

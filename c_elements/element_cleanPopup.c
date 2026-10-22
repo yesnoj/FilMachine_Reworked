@@ -267,21 +267,7 @@ void cleanPumpTimer(lv_timer_t * timer) {
     uint32_t stepEl = minutesStepElapsed * 60 + secondsStepElapsed;
     stepPercentage = (int16_t)(stepEl >= fillTime ? 100 : (stepEl * 100) / fillTime);
 
-#if CLEAN_USE_LEVEL_SENSORS
-    /* #13: finish the fill/drain step as soon as the container's float sensor
-     * confirms the target level, instead of waiting out the time estimate.
-     * Filling (dir 1): MAX wet = full. Draining (dir -1): MIN dry = empty.
-     * containerIndex 0/1/2 = C1/C2/C3. Disabled by default (see the flag). */
-    if (cp->stepDirection == 1) {
-        if (chemLevelMaxDetected(containerIndex)) {
-            /* Full confirmed: remember the real fill time for the bargraph. */
-            recordFillCalibration(false, (uint16_t)stepEl);
-            stepPercentage = 100;
-        }
-    } else {
-        if (!chemLevelMinDetected(containerIndex)) stepPercentage = 100;
-    }
-#endif
+    /* The chemistry containers have no level sensors (Mainboard v1.2): every step goes by time. */
 
     uint32_t cycleTotal = (uint32_t)fillTime * 2 * cp->cleanCycles;      /* one container, all its cycles */
     uint32_t cycleEl = minutesCycleElapsed * 60 + secondsCycleElapsed;

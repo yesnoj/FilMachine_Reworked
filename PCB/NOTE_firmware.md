@@ -1,53 +1,72 @@
-# Firmware e FilMachine Mainboard v1.1
+# Firmware e FilMachine Mainboard v1.2
 
 Il firmware è **uno solo** e funziona uguale con i moduli separati (Adafruit #6318, DBH-12V, modulo IRF540)
-e con la Mainboard: stessi GPIO su JP1, stessa mappa dell'MCP23017, stessa logica ENA/IN1/IN2 del DBH-12V.
-Non c'è niente da cambiare, ricompilare o impostare quando si passa da una configurazione all'altra.
+e con la Mainboard (v1.1 o v1.2): stessi GPIO su JP1, stessa mappa dell'MCP23017, stessa logica ENA/IN1/IN2 del
+DBH-12V. Non c'è niente da cambiare, ricompilare o impostare quando si passa da una configurazione all'altra.
 
-## Modifiche fatte (`PCB/firmware_mainboard.patch`, già applicata alla cartella, non committata)
+## Cosa cambia con la v1.2 (firmware e app aggiornati nelle cartelle, da committare)
 
-| Cosa | Perché | Moduli separati | Mainboard |
-|---|---|---|---|
-| `INLET_RLY 5`: A5 configurato come uscita e chiuso all'avvio, chiuso anche da `closeAllValves()` | prima A5 restava un ingresso e la valvola dell'ingresso acqua non si poteva aprire | A5 = canale 6 del #6318 | A5 = J20 `VALVE INLET` |
-| Riempimento del bagno dalla rete: apre `INLET_RLY` invece di `WB_RLY` | nella v6 WB collega il bagno alla pompa, l'acqua di rete ha la sua valvola (note v6, 1.1 A) | uguale | uguale |
-| Controllo del sensore MIN a **12 l entrati** invece che a 20 s; timeout 20 min invece di 10 | il bagno v6 (12,8 l) bagna il MIN dopo ~9,3 l (note v6, 1.1 B); 12 l lascia margine a un flussimetro che legge fino al 25 % in più | uguale | uguale |
-| Due sicurezze nuove nel riempimento: stop se entrano **16 l** (`FILL_TIMEOUT`) e se il flusso si ferma per **10 s** a valvola aperta (`FILL_NOFLOW`) | se il sensore MAX si guastasse, con 20 minuti di timeout potrebbero passare 60–100 l dal troppopieno; se si chiude il rubinetto la valvola non resta aperta | uguale | uguale |
-| Driver **ADS1115** (`drivers/ads1115.c`) + pannello *Power rails* nella diagnostica: 12 V, 5 V, corrente pompa | sulla Mainboard non restano GPIO per gli ADC del P4 | nessuno risponde a 0x48: il pannello mostra «n/a», nient'altro cambia | valori dal vivo |
+La v1.2 toglie i **sensori di livello dei contenitori delle chimiche** (i livelli si controllano a vista; con la
+peristaltica ogni strumento sposta un volume noto) e aggiunge il **blocco dei riscaldatori** sul sensore MIN della vasca.
 
-Il vecchio codice `HAS_RAIL_MONITOR` con gli ADC del P4 è stato tolto: gli ADC1 del P4 sono sui GPIO 16–23,
-che sulla JC4880P433 sono l'SDIO verso l'ESP32-C6 (Wi-Fi); attivarlo avrebbe rotto il Wi-Fi.
+| Cosa | Prima | Ora |
+|---|---|---|
+| MCP23017 B0–B5 | MIN/MAX dei 3 contenitori (`HAS_CHEM_LEVEL_SENSORS`, `CHEM*_PIN`) | GPIO liberi (`GPIO_SPARE_B_FIRST/COUNT`): ingressi con pull-up interno; sulla Mainboard v1.2 sono l'header **J30 `GPIO SPARE`** |
+| «Riempi chimica» (Strumenti → Liquidi) | WB → C1 finché il MAX del C1 si bagnava | versa **`CHEM_CONTAINER_ML`** d'acqua della vasca nel C1 attraverso la tank (motore di trasferimento a volume, Stop compreso); il popup dice quanti ml e che **il C1 dev'essere vuoto** |
+| «Svuota chimiche» (travaso nella bottiglia) | si fermava quando il MIN del contenitore sentiva aria | travasa `CHEM_CONTAINER_ML`; a contenitore vuoto la pompa sposta solo aria (innocuo) |
+| Svuota macchina / Pulisci | sensori disattivati di default (`CLEAN_USE_LEVEL_SENSORS` 0) | a tempo per i contenitori; il WB può ancora fermarsi sul MIN della vasca |
+| `CHEM_CONTAINER_ML` | 1000 | **500** (contenitori della macchina v7, meccanica del 20/10/2026) |
+| Riscaldatori | accesi dal termostato senza guardare il livello | **blocco**: si accendono solo con il MIN della vasca bagnato (vedi sotto) |
+| Diagnostica | pallini MIN/MAX C1–C3 | pallini **B0–B5** (stato di J30) e «Heat OK» (vasca sopra il MIN); il test manuale dei riscaldatori non li accende con la vasca sotto il MIN |
+| WebSocket / app | — | campo `heaterBlocked` nello stato; l'app mostra «Riscaldamento in pausa: vasca sotto il MIN» e i nuovi testi di «Riempi chimica» |
+
+### Blocco dei riscaldatori
+
+`sim_setHeater(on)` (chiamato dal termostato della pagina di processo, da Stop e dalla WebSocket) ora è una **richiesta**:
+le uscite B6/B7 la seguono solo se il sensore **MIN della vasca** (XKC-Y21 su JP1 pin 14 / GPIO29, LOW = acqua) legge
+acqua. Il livello è campionato una volta al secondo:
+- **2 campioni** asciutti di fila (1–2 s) → riscaldatori spenti subito, anche quelli accesi a mano in diagnostica;
+- la richiesta del termostato resta, quindi ripartono da soli dopo **5 campioni** bagnati (4–5 s);
+- ogni 5 s il blocco riscrive comunque lo stato delle uscite, così una scrittura I2C persa non lascia un riscaldatore
+  acceso.
+
+Nella pagina di processo, al posto di «Riscaldatore: ON/OFF» compare «Riscaldamento in pausa: vasca sotto il MIN»; se la
+vasca non torna sopra il MIN, la fase «raggiungi temperatura» finisce con il suo timeout come prima. Il test manuale dei
+riscaldatori in diagnostica passa dallo stesso blocco (`heaterDebugSet()`): rifiutato con la vasca sotto il MIN, spento
+se la vasca scende.
+
+Corretto anche un difetto che c'era già: a fine processo (ultimo scarico finito, Stop subito, Stop dopo lo step, Stop
+dall'app) il termostato si fermava ma il riscaldatore poteva restare acceso fino a «Chiudi». Ora ogni uscita dal
+processo spegne i riscaldatori.
+
+Il sensore MIN va montato **sopra i riscaldatori**. Se è scollegato o rotto legge «asciutto» (pull-up): la macchina non
+scalda. È voluto: un riscaldatore da 100 W fuori dall'acqua si brucia in pochi secondi.
+
+### A6 e A7 (J21 / J22)
+
+Con il firmware v7 sono **uscite**: A6 = valvola di recupero (J21 `SPARE OUT 1`), A7 = pompetta di ricircolo della vasca
+(J22 `SPARE OUT 2`). Sulla v1.2 hanno il pull-down del gate da 100 kΩ come le valvole (nella v1.1 era 1 MΩ perché A6/A7
+uscivano anche su J30). Sul #6318 sono i canali MOSFET 7 e 8.
+
+### J30 `GPIO SPARE` (B0–B5)
+
+Header 2,54 a 9 poli: **B0, B1, B2, B3, B4, B5, 3V3, 5V, GND** (pin 1 = B0, a sinistra). Ogni pin passa da 1 kΩ in serie
+con un diodo di clamp ai 3,3 V: un segnale a 5 V non fa danni, ma niente 12 V. Il firmware li lascia **ingressi con
+pull-up interno** (100 kΩ): un pulsante o un contatto verso GND si legge subito con `mcp23017_digitalRead(&mcp, 8 + n)`;
+per usarli come uscite basta `mcp23017_pinMode(..., MCP23017_OUTPUT)`. Il 3V3 viene dal display (pochi mA), il 5 V è
+quello di servizio (PTC F5, condiviso con J29). Con i moduli separati sono i B0–B5 del #6318.
+
+### ADS1115 (monitor tensioni e corrente pompa)
 
 L'ADS1115 (U4, indirizzo 0x48, ADDR a massa) viene cercato **una volta** all'avvio, sul bus I2C, dopo l'MCP23017 e prima
 del reset del bus che precede il touch; oltre al probe, il driver verifica che il registro di configurazione risponda
 come un ADS1115, altrimenti il monitor resta spento. Viene letto solo mentre la pagina di diagnostica è aperta: un
 canale ogni 350 ms, in single-shot a 128 SPS (±2,048 V, 62,5 µV/LSB), senza mai aspettare la conversione. Nel resto
-del funzionamento non c'è nessun traffico I2C in più.
+del funzionamento non c'è nessun traffico I2C in più. Con i moduli separati nessuno risponde a 0x48 e il pannello
+*Power rails* mostra «n/a».
 
-Nella versione precedente della scheda l'ADC era un MCP3424 a 0x68: il driver `mcp3424.c/.h` è stato tolto e
-sostituito; indirizzo, registri e costanti sono in `boards/board_jc4880p433.h` (`RAIL_*`).
-
-### A6 e A7 (pin liberi dell'MCP23017)
-
-Il firmware non li tocca: all'avvio restano **ingressi** (stato di reset dell'MCP23017), il self-test delle valvole
-cicla solo A0–A4, `HEATER_RLY` (A7) è usato solo se `HAS_DUAL_HEATER` è 0 (non è il nostro caso).
-Sulla Mainboard sono disponibili in due forme, entrambe sullo stesso pin:
-- **J21 / J22 `SPARE 1/2`**: uscite 12 V commutate (MOSFET low-side come le valvole, con diodo di ricircolo e LED);
-  spente finché il pin è ingresso o basso (pull-down da 1 MΩ sul gate);
-- **J30 `GPIO SPARE`** (header 2,54: A6, A7, 3V3, 5V, GND): gli stessi pin come GPIO a 3,3 V, attraverso 1 kΩ in serie
-  e un diodo di clamp a 3,3 V (un segnale a 5 V non li danneggia). Come uscite, J30 segue il pin e la rispettiva SPARE
-  si accende. Come ingressi: **un livello alto sul pin accende anche la SPARE corrispondente** (è lo stesso nodo, con
-  pull-down da 1 MΩ sul gate), compreso il pull-up interno da 100 kΩ dell'MCP23017 — quindi leggerli senza pull-up
-  interno, da una sorgente push-pull a 3,3 V (o accettare che la SPARE segua l'ingresso, se J21/J22 non è usata).
-  Il 5 V di J30 è quello di servizio (PTC F5, condiviso con J29), non quello dei sensori.
-Sul #6318 restano i canali MOSFET 7 e 8, come oggi.
-
-Gli stati del riempimento sono quelli di prima: display e app non cambiano.
-
-**Verifiche:** build ESP-IDF 5.5.1 per esp32p4 riuscita, nessun avviso nei file toccati; simulatore compilato;
-tutti i test del simulatore passati (vedi il riepilogo nel report).
-
-**Non toccato:** il trasferimento a due tempi di `cleanRelayManager()` (note v6, punto 4). Riguarda l'impianto
-idraulico, non la scheda.
+**Verifiche (v1.2):** simulatore compilato, **208 test su 208** passati (3 nuovi: blocco dei riscaldatori, «Riempi
+chimica» a volume, porta B; suite eseguita 3 volte di fila senza errori); build ESP-IDF 5.5.1 per esp32p4 riuscita.
 
 ## Corrente pompa (AIN2/AIN3 dell'ADS1115)
 

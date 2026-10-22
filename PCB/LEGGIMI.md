@@ -1,13 +1,13 @@
-# FilMachine Mainboard v1.1 — ordine JLCPCB (PCB + assemblaggio)
+# FilMachine Mainboard v1.2 — ordine JLCPCB (PCB + assemblaggio)
 
-Scheda madre per la FilMachine v6. Il display JC4880P433 (ESP32-P4) resta separato e si collega con il flat 2×13
+Scheda madre per la FilMachine (macchine v6 e v7). Il display JC4880P433 (ESP32-P4) resta separato e si collega con il flat 2×13
 su **J5**, che porta anche la sua **alimentazione** (5 V su JP1 pin 2/4, tramite PTC F7 e diodo D8) e da cui la scheda
 prende i **3,3 V** per la sua logica (MCP23017, ADS1115, porte AND, pull-up): così l'I2C del display non resta mai
 bloccato da un chip spento, nemmeno con la scheda senza 12 V e il display alimentato da USB.
 La scheda arriva **completa e pronta**: tutti i componenti montati (SMD e THT), fusibili SMD già saldati.
 
 **Tutti i componenti sono presi dal catalogo JLCPCB/LCSC** (codice C… in ogni riga della distinta, verificato in
-magazzino il 13/10/2026): 30 codici *Basic* e 24 *Extended*; costo componenti ≈ 20 $ a scheda più i costi fissi degli
+magazzino il 22/10/2026): 29 codici *Basic* e 24 *Extended*; costo componenti ≈ 20 $ a scheda più i costi fissi degli
 Extended. I connettori sono i più economici del catalogo: morsetti a vite WJ500V (5,08 mm) e DB301V (3,5 mm), JST-XH,
 header 2,54.
 
@@ -52,7 +52,7 @@ header 2,54.
    morsetti alti (14 mm) nella vista 3D in prospettiva sembrano «sporgere» dalle piazzole: è solo la prospettiva — con
    la vista dall'alto (2D) i pin coincidono con i fori. Da controllare comunque, confrontando con `Assembly_Top.pdf`:
    - integrati U1–U10 (pin 1 = puntino/smusso sul lato del segno in serigrafia);
-   - diodi D1, D2 (TVS, banda = catodo verso il +12 V), D6, D7, D8, D10–D19, D21–D28, D41, D42, D47, D48 (banda sul
+   - diodi D1, D2 (TVS, banda = catodo verso il +12 V), D6, D7, D8, D10–D13, D21–D28, D41, D42, D47–D52 (banda sul
      lato della riga in serigrafia); LED D3, D4, D5, D31–D38, D43, D44;
    - transistor Q1–Q8 (SOT-23), Q9/Q10 (TO-252: linguetta in alto), U8/U9 (TO-263: linguetta a sinistra, pin a destra);
    - elettrolitici C1, C55, C56: piazzola **quadrata = +**;
@@ -72,16 +72,18 @@ header 2,54.
 | J2 `12V IN HEATER 2` | LRS-350-12, coppia +V/−V n. 2 | **− sopra, + sotto**; solo riscaldatore 2 (F2 15 A) |
 | J3 `12V IN MAIN` | LRS-350-12, coppia +V/−V n. 3 | **− sopra, + sotto**; pompa (F3 15 A), valvole/motore/logica/uscite (F4 8 A) |
 | J23 / J24 `HEATER 1/2` | riscaldatori 100 W | + a sinistra, − a destra (indifferente per una resistenza) |
-| J25 `PUMP` | Marco UP3-R | A sopra, B sotto; il verso si inverte da firmware (*Inverti pompa*) |
+| J25 `PUMP` | pompa peristaltica Kamoer KPHM600 (12 V, 0,8 A, motore DC a spazzole) | A sopra, B sotto; il verso si inverte da firmware (*Inverti pompa*). Va bene qualsiasi motore DC 12 V reversibile |
 | J26 `MOTOR` | motore spirale JGB37-520 | |
 | J15 … J20 | elettrovalvole 12 V: C1, C2, C3, WB, WASTE, INLET | un morsetto a 2 poli per valvola, + a sinistra (nome in serigrafia) |
-| J21 / J22 `SPARE 1/2` (`SPARE OUT 1/2` nello schema) | uscite 12 V commutate di riserva (MCP23017 A6 / A7) | come le valvole: carico fino a 2 A, con diodo di ricircolo e LED; spente finché il firmware non le usa |
-| J30 `GPIO SPARE` | header 2,54: A6, A7, 3V3, 5V, GND | gli stessi A6/A7 dell'MCP23017 come GPIO **a 3,3 V** (tramite 1 kΩ in serie e diodo di clamp a 3,3 V: un segnale a 5 V non fa danni, ma non collegare uscite a 12 V), più 3,3 V (dal display, pochi mA), 5 V di servizio (PTC F5, condiviso con J29) e GND. Attenzione: A6/A7 sono gli stessi pin delle uscite SPARE 1/2, quindi un livello alto su J30 (come uscita o come ingresso) accende anche la corrispondente SPARE |
+| J21 / J22 `SPARE 1/2` (`SPARE OUT 1/2` nello schema) | macchina v7: J21 = valvola di **recupero** (A6), J22 = **pompetta di ricircolo** della vasca (A7) | come le valvole: carico fino a 2 A, con diodo di ricircolo e LED |
+| J30 `GPIO SPARE` | header 2,54 a 9 poli: B0, B1, B2, B3, B4, B5, 3V3, 5V, GND (pin 1 = B0, a sinistra) | i 6 pin liberi della porta B dell'MCP23017 (fino alla v1.1 erano i sensori di livello delle chimiche) come GPIO **a 3,3 V**: 1 kΩ in serie e diodo di clamp a 3,3 V (un segnale a 5 V non fa danni, ma niente 12 V); il firmware li lascia ingressi con pull-up. 3,3 V dal display (pochi mA), 5 V di servizio (PTC F5, condiviso con J29), GND |
 | J28 `12V OUT` · J29 `5V OUT` | uscite di servizio per accessori (ventola, striscia LED, modulo relè…) | + a sinistra; PTC autoripristinanti: 12 V max 2 A (F8), 5 V max 1 A (F5) |
-| J7 `BATH LEVEL` | XKC-Y21 MIN, MAX del bagno | JST-XH 4 poli: 5 V, MIN, MAX, GND |
-| J8 … J10 `CHEM 1/2/3` | XKC-Y21 MIN, MAX di ogni chimica | JST-XH 4 poli |
+| J7 `BATH LEVEL` | XKC-Y21 MIN e MAX della vasca | JST-XH 4 poli: 5 V, MIN, MAX, GND. Il **MIN** va montato **sopra i riscaldatori**: senza MIN bagnato il firmware non li accende. Il MAX serve al riempimento automatico dalla rete |
 | J11 `FLOW` · J12 `HALL` | YF-S201 · KY-003 | JST-XH 3 poli: 5 V, segnale, GND |
 | J13 / J14 `TEMP 1/2` | DS18B20 bagno / chimica | JST-XH 3 poli: 3,3 V, DQ, GND |
+
+I 5 connettori dei sensori stanno in **una sola fila** sul lato corto destro (dall'alto: BATH LEVEL, FLOW, HALL, TEMP 1,
+TEMP 2). Dalla v1.2 i contenitori delle chimiche non hanno sensori di livello: i livelli si controllano a vista.
 | J27 `SERVO` | MG90S della taglierina | header 2,54: segnale, +5 V, GND |
 | J5 `DISPLAY JP1` | flat 2×13 verso JP1 del JC4880P433 | pin 1 = pin 1 (piazzola quadrata); porta segnali, alimentazione del display (pin 2/4) e i 3,3 V verso la scheda (pin 1/3, `VCC3.3`); il pin 18 (`ESP_3V3`) è lasciato scollegato sulla scheda |
 

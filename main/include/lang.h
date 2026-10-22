@@ -409,6 +409,9 @@ enum lang_str_id {
     STR_selfCheckBackToTankFmt_text,
     STR_toolsLiquidsRow_text,
     STR_toolsLiquids_text,
+    STR_checkupHeaterBlocked_text,
+    STR_fillChemReadyFmt_text,
+    STR_fillChemDone_text,
     STR__COUNT
 };
 

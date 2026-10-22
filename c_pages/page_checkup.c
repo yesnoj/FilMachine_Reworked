@@ -482,6 +482,8 @@ void processTimer(lv_timer_t * timer) {
     }
     else{
         safeTimerDelete(&ckup->processTimer);
+        sim_setHeater(false);                   /* thermostat gone: heaters off */
+        ckup->data.heaterOn = false;
     }
 }
 
@@ -571,8 +573,12 @@ void tempTimerCallback(lv_timer_t * timer) {
     }
 
     /* Update heater status label */
-    if(ckup->checkupHeaterStatusLabel != NULL)
-        lv_label_set_text_fmt(ckup->checkupHeaterStatusLabel, checkupHeaterStatusFmt_text, ckup->data.heaterOn ? checkupHeaterOn_text : checkupHeaterOff_text);
+    if(ckup->checkupHeaterStatusLabel != NULL) {
+        if(heaterBlockedLowWater())      /* heat wanted, bath below MIN: the guard keeps it off */
+            lv_label_set_text(ckup->checkupHeaterStatusLabel, checkupHeaterBlocked_text);
+        else
+            lv_label_set_text_fmt(ckup->checkupHeaterStatusLabel, checkupHeaterStatusFmt_text, ckup->data.heaterOn ? checkupHeaterOn_text : checkupHeaterOff_text);
+    }
 
     /* Safety timeout counter (logged to terminal only) */
     ckup->data.tempTimeoutCounter++;
@@ -707,6 +713,8 @@ void handleIntermediateOrLastStep(processNode *pn, bool isLastStep) {
             stopMotor(MOTOR_IN1_PIN, MOTOR_IN2_PIN);
             stopMotorTask();
             circulatorSet(false);                       /* process over: bath circulator off */
+            sim_setHeater(false);                       /* ...and no thermostat any more: heaters off */
+            checkup->data.heaterOn = false;
             checkup->data.isAlreadyPumping = false;
 
             lv_arc_set_value(checkup->pumpArc, 0);
@@ -987,6 +995,8 @@ void handleStopNow(processNode *pn) {
         stopMotor(MOTOR_IN1_PIN, MOTOR_IN2_PIN);
         stopMotorTask();
         circulatorSet(false);
+        sim_setHeater(false);
+        checkup->data.heaterOn = false;
         checkup->data.isAlreadyPumping = false;
 
         lv_arc_set_value(checkup->pumpArc, 0);
@@ -1064,6 +1074,8 @@ void handleStopAfter(processNode *pn) {
             stopMotor(MOTOR_IN1_PIN, MOTOR_IN2_PIN);
             stopMotorTask();
             circulatorSet(false);
+            sim_setHeater(false);
+            checkup->data.heaterOn = false;
             checkup->data.isAlreadyPumping = false;
 
             lv_arc_set_value(checkup->pumpArc, 0);
@@ -1118,6 +1130,8 @@ void handleStopNowAfterStopAfter(processNode *pn) {
         stopMotor(MOTOR_IN1_PIN, MOTOR_IN2_PIN);
         stopMotorTask();
         circulatorSet(false);
+        sim_setHeater(false);
+        checkup->data.heaterOn = false;
         checkup->data.isAlreadyPumping = false;
 
         lv_arc_set_value(checkup->pumpArc, 0);

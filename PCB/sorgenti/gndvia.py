@@ -2,6 +2,8 @@
 """Add a GND via + short track for an SMD GND pad the fanout/maze could not tie. Usage: gndvia.py board REF PADNUM"""
 import sys, math, pcbnew
 PCB, REF, NUM = sys.argv[1], sys.argv[2], sys.argv[3]
+import os
+VD = float(os.environ.get("GNDVIA_D", "0.6"))   # via diameter; 0.5 allowed by the rules for tight spots
 b = pcbnew.LoadBoard(PCB)
 MM = pcbnew.FromMM
 fp = b.FindFootprintByReference(REF)
@@ -25,14 +27,14 @@ cands = sorted((math.hypot(i * 0.2, j * 0.2), i * 0.2, j * 0.2) for i in range(-
 found = None
 for d, dx, dy in cands:
     vpos = pcbnew.VECTOR2I(int(ppos.x + MM(dx)), int(ppos.y + MM(dy)))
-    if not all(clear_at(vpos, MM(0.3 + 0.205), L) for L in (pcbnew.F_Cu, pcbnew.B_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu)): continue
+    if not all(clear_at(vpos, MM(VD / 2 + 0.205), L) for L in (pcbnew.F_Cu, pcbnew.B_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu)): continue
     n = 8
     if all(clear_at(pcbnew.VECTOR2I(int(ppos.x + (vpos.x - ppos.x) * k / n), int(ppos.y + (vpos.y - ppos.y) * k / n)), MM(0.125 + 0.205), pcbnew.F_Cu) for k in range(1, n)):
         found = (dx, dy, vpos); break
 print("candidate:", found and (round(found[0], 2), round(found[1], 2)))
 if found:
     dx, dy, vpos = found
-    v = pcbnew.PCB_VIA(b); v.SetPosition(vpos); v.SetWidth(MM(0.6)); v.SetDrill(MM(0.3)); v.SetNet(b.FindNet("GND")); v.SetIsFree(False); b.Add(v)
+    v = pcbnew.PCB_VIA(b); v.SetPosition(vpos); v.SetWidth(MM(VD)); v.SetDrill(MM(0.3)); v.SetNet(b.FindNet("GND")); v.SetIsFree(False); b.Add(v)
     t = pcbnew.PCB_TRACK(b); t.SetStart(ppos); t.SetEnd(vpos); t.SetWidth(MM(0.25)); t.SetLayer(pcbnew.F_Cu); t.SetNet(b.FindNet("GND")); b.Add(t)
     pcbnew.ZONE_FILLER(b).Fill(b.Zones())
     pcbnew.SaveBoard(PCB, b)

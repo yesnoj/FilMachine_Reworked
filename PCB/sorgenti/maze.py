@@ -15,7 +15,7 @@ RES = 0.05            # mm per cell
 import os
 CLR = float(os.environ.get("MAZE_CLR", "0.30"))  # clearance used by the maze (DRC 0.2) + grid-snapping margin
 TW = {"Default": 0.25, "Power": 0.6, "Power1": 1.0}
-VIA_D, VIA_H = 0.6, 0.3
+VIA_D, VIA_H = float(os.environ.get("MAZE_VIA", "0.6")), 0.3   # 0.5 is allowed by the rules (annular 0.1) for tight spots
 PLANE_OF = {"+12V": "12V_PLANE", "GND": "GND_PLANE"}
 LAYERS = [pcbnew.F_Cu, pcbnew.B_Cu]
 

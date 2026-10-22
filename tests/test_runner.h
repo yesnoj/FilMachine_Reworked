@@ -272,6 +272,8 @@ void test_suite_live_sync(void);
 void test_suite_film_loader(void);
 void test_suite_maintenance_remote(void);
 void test_suite_recover(void);
+/** test_mainboard_v12.c — heater guard, Fill chemistry by volume, spare GPIO B0-B5 */
+void test_suite_mainboard_v12(void);
 
 
 /* ═══════════════════════════════════════════════

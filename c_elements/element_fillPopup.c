@@ -55,7 +55,7 @@ static void fill_popup_close(void)
 static const char *fill_manual_status(int state)
 {
     switch (state) {
-        case FILL_FULL:    return fillStatusFull_text;
+        case FILL_FULL:    return (s_target == FILL_TARGET_CHEM) ? fillChemDone_text : fillStatusFull_text;
         case FILL_STOPPED: return fillStatusStopped_text;
         case FILL_TIMEOUT: return fillStatusTimeout_text;
         default:
@@ -89,8 +89,8 @@ static void fill_live_cb(lv_timer_t *t)
 
     int state = machineFillState();
 
-    /* Bargraph is always level-based (MIN/MAX floats) — there is no volume
-     * target, the sensor decides when it's full. */
+    /* Bargraph: water bath = level from its MIN/MAX floats; chemistry
+     * container = share of the transfer time (it is filled by volume). */
     lv_label_set_text(fp->statusLabel, s_manual ? fill_manual_status(state) : fill_status_text(state));
     lv_bar_set_value(fp->levelBar, machineFillLevelPct(), LV_ANIM_ON);
 
@@ -206,7 +206,10 @@ void fillPopupCreate(uint8_t target)
     lv_obj_set_width(fp->statusLabel, FILL_POPUP_W - 80);
     lv_obj_set_style_text_align(fp->statusLabel, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_long_mode(fp->statusLabel, LV_LABEL_LONG_WRAP);
-    lv_label_set_text(fp->statusLabel, alreadyFull ? fillStatusFull_text : fillStatusReady_text);
+    if (target == FILL_TARGET_CHEM)     /* no sensor in C1: say how much goes in and that C1 must be empty */
+        lv_label_set_text_fmt(fp->statusLabel, fillChemReadyFmt_text, CHEM_CONTAINER_ML);
+    else
+        lv_label_set_text(fp->statusLabel, alreadyFull ? fillStatusFull_text : fillStatusReady_text);
     lv_obj_align(fp->statusLabel, LV_ALIGN_CENTER, 0, FILL_STATUS_Y);
 
     /* Water-bath level bargraph */
