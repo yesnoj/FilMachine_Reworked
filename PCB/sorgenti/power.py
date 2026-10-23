@@ -109,8 +109,10 @@ def edge_dist(pts, x, y):
         t = max(0, min(1, ((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy)))
         d = min(d, math.hypot(x - (x1 + t * dx), y - (y1 + t * dy)))
     return d
+HC_VIA = {"+12V_IN_H2": (0.8, 0.4), "+12V_PUMP": (0.8, 0.4)}   # 23/10/2026: HC rails use the HC netclass via (0,2 mm ring)
 def stitch(net, pts, pitch=1.3, margin=0.75, xmin=-1e9, xmax=1e9, ymin=-1e9, ymax=1e9, clear=0.45, maxn=999):
     ni = b.FindNet(net)
+    VIA_D, VIA_H = HC_VIA.get(net, (0.6, 0.3))
     xs = [p[0] for p in pts]; ys = [p[1] for p in pts]
     n = 0
     y = min(ys) + margin

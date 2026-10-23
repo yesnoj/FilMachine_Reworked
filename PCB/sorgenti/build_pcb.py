@@ -60,10 +60,16 @@ for p in design.PARTS:
         fp.SetExcludedFromBOM(True); fp.SetExcludedFromPosFiles(True)
     for pad in fp.Pads():
         num = pad.GetNumber()
-        if p["ref"] in ("J1", "J2", "J3", "C1", "J5", "J6", "C55", "C56", "J27", "J28", "J29", "J30") and p["pins"].get(num) == "GND":
-            pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
-        if name.startswith("JST_XH") and p["pins"].get(num) == "GND":
-            pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
+        # 23/10/2026: through-hole pads get thermal reliefs (wave soldering on 4 layers with 2 oz outer copper), with
+        # wide spokes where current flows: 1.0 mm on the 12 V inputs / heater / pump terminals, 0.8 mm on the
+        # electrolytics, 0.6 mm elsewhere (the zones give the 0.3 mm gap). J6 (not mounted) keeps solid GND.
+        if pad.GetAttribute() == pcbnew.PAD_ATTRIB_PTH and num in p["pins"] and p["pins"][num] is not None:
+            if p["ref"] == "J6" and p["pins"][num] == "GND":
+                pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
+            else:
+                pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_THERMAL)
+                pad.SetLocalThermalSpokeWidthOverride(MM(1.0 if p["ref"] in ("J1", "J2", "J3", "J23", "J24", "J25")
+                                                         else 0.8 if p["ref"] in ("C1", "C55", "C56") else 0.6))
         if name.startswith("TI_SO-PowerPAD") and num == "9":
             pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
         if num in p["pins"] and p["pins"][num] is not None:
@@ -122,6 +128,7 @@ ds.m_ViasMinSize = MM(0.6)
 ds.m_MinThroughDrill = MM(0.3)
 ds.m_HoleClearance = MM(0.25)
 ds.m_CopperEdgeClearance = MM(0.4)
+ds.m_MinResolvedSpokes = 1          # signal GND pins may get a single spoke on F/B (plus the In1 plane)
 ds.SetBoardThickness(MM(1.6))
 
 pcbnew.SaveBoard(f"{OUT}/FilMachine_Mainboard.kicad_pcb", board)

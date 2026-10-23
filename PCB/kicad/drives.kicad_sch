@@ -2068,7 +2068,7 @@
 			(at 73.66 91.21 0)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Value" "10k"
+		(property "Value" "4.7k"
 			(at 73.66 101.83 0)
 			(effects (font (size 1.27 1.27)))
 		)
@@ -2080,11 +2080,11 @@
 			(at 73.66 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Description" "Serie ingresso IN (datasheet: > 7 kOhm)"
+		(property "Description" "Serie ingresso IN (4,7k: livello alto >= 2,5 V con logica 3,3 V e I_IN(H) max 150 uA)"
 			(at 73.66 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "MPN" "0603 10k 1%"
+		(property "MPN" "0603 4.7k 1%"
 			(at 73.66 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -2092,7 +2092,7 @@
 			(at 73.66 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C25804"
+		(property "LCSC" "C23162"
 			(at 73.66 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -2542,7 +2542,7 @@
 			(at 142.24 91.21 0)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Value" "10k"
+		(property "Value" "4.7k"
 			(at 142.24 101.83 0)
 			(effects (font (size 1.27 1.27)))
 		)
@@ -2554,11 +2554,11 @@
 			(at 142.24 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Description" "Serie ingresso IN (datasheet: > 7 kOhm)"
+		(property "Description" "Serie ingresso IN (4,7k: livello alto >= 2,5 V con logica 3,3 V e I_IN(H) max 150 uA)"
 			(at 142.24 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "MPN" "0603 10k 1%"
+		(property "MPN" "0603 4.7k 1%"
 			(at 142.24 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -2566,7 +2566,7 @@
 			(at 142.24 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "LCSC" "C25804"
+		(property "LCSC" "C23162"
 			(at 142.24 96.52 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
@@ -3574,7 +3574,7 @@
 			(at 254 78.74 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(property "Description" "Pompa Marco UP3-R"
+		(property "Description" "Pompa peristaltica Kamoer KPHM600 (A = pin 1, B = pin 2; qualsiasi motore DC 12 V reversibile)"
 			(at 254 78.74 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)

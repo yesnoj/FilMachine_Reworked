@@ -1,4 +1,4 @@
-# FilMachine Mainboard v1.2 — ordine JLCPCB (PCB + assemblaggio)
+# FilMachine Mainboard v1.2 (rev. 23/10/2026) — ordine JLCPCB (PCB + assemblaggio)
 
 Scheda madre per la FilMachine (macchine v6 e v7). Il display JC4880P433 (ESP32-P4) resta separato e si collega con il flat 2×13
 su **J5**, che porta anche la sua **alimentazione** (5 V su JP1 pin 2/4, tramite PTC F7 e diodo D8) e da cui la scheda
@@ -68,8 +68,8 @@ header 2,54.
 
 | Connettore | Cosa | Note |
 |---|---|---|
-| J1 `12V IN HEATER 1` | LRS-350-12, coppia +V/−V n. 1 | **− sopra, + sotto** (serigrafia accanto al morsetto); solo riscaldatore 1 (fusibile F1 15 A) |
-| J2 `12V IN HEATER 2` | LRS-350-12, coppia +V/−V n. 2 | **− sopra, + sotto**; solo riscaldatore 2 (F2 15 A) |
+| J1 `12V IN HEATER 1` (serigrafia `12V IN H1`) | LRS-350-12, coppia +V/−V n. 1 | **− sopra, + sotto** (segni «−» e «+» accanto ai due pin); solo riscaldatore 1 (fusibile F1 15 A) |
+| J2 `12V IN HEATER 2` (serigrafia `12V IN H2`) | LRS-350-12, coppia +V/−V n. 2 | **− sopra, + sotto**; solo riscaldatore 2 (F2 15 A) |
 | J3 `12V IN MAIN` | LRS-350-12, coppia +V/−V n. 3 | **− sopra, + sotto**; pompa (F3 15 A), valvole/motore/logica/uscite (F4 8 A) |
 | J23 / J24 `HEATER 1/2` | riscaldatori 100 W | + a sinistra, − a destra (indifferente per una resistenza) |
 | J25 `PUMP` | pompa peristaltica Kamoer KPHM600 (12 V, 0,8 A, motore DC a spazzole) | A sopra, B sotto; il verso si inverte da firmware (*Inverti pompa*). Va bene qualsiasi motore DC 12 V reversibile |
@@ -77,7 +77,7 @@ header 2,54.
 | J15 … J20 | elettrovalvole 12 V: C1, C2, C3, WB, WASTE, INLET | un morsetto a 2 poli per valvola, + a sinistra (nome in serigrafia) |
 | J21 / J22 `SPARE 1/2` (`SPARE OUT 1/2` nello schema) | macchina v7: J21 = valvola di **recupero** (A6), J22 = **pompetta di ricircolo** della vasca (A7) | come le valvole: carico fino a 2 A, con diodo di ricircolo e LED |
 | J30 `GPIO SPARE` | header 2,54 a 9 poli: B0, B1, B2, B3, B4, B5, 3V3, 5V, GND (pin 1 = B0, a sinistra) | i 6 pin liberi della porta B dell'MCP23017 (fino alla v1.1 erano i sensori di livello delle chimiche) come GPIO **a 3,3 V**: 1 kΩ in serie e diodo di clamp a 3,3 V (un segnale a 5 V non fa danni, ma niente 12 V); il firmware li lascia ingressi con pull-up. 3,3 V dal display (pochi mA), 5 V di servizio (PTC F5, condiviso con J29), GND |
-| J28 `12V OUT` · J29 `5V OUT` | uscite di servizio per accessori (ventola, striscia LED, modulo relè…) | + a sinistra; PTC autoripristinanti: 12 V max 2 A (F8), 5 V max 1 A (F5) |
+| J28 `12V OUT` · J29 `5V OUT` (serigrafia `+ 12V −`, `+ 5V −`; legenda `12V OUT 2A / 5V OUT 1A` a fianco) | uscite di servizio per accessori (ventola, striscia LED, modulo relè…) | + a sinistra; PTC autoripristinanti: 12 V max 2 A (F8), 5 V max 1 A (F5) |
 | J7 `BATH LEVEL` | XKC-Y21 MIN e MAX della vasca | JST-XH 4 poli: 5 V, MIN, MAX, GND. Il **MIN** va montato **sopra i riscaldatori**: senza MIN bagnato il firmware non li accende. Il MAX serve al riempimento automatico dalla rete |
 | J11 `FLOW` · J12 `HALL` | YF-S201 · KY-003 | JST-XH 3 poli: 5 V, segnale, GND |
 | J13 / J14 `TEMP 1/2` | DS18B20 bagno / chimica | JST-XH 3 poli: 3,3 V, DQ, GND |
@@ -94,7 +94,10 @@ della pompa non passano mai dallo stesso morsetto (ogni morsetto resta sotto 8�
 
 - Schema: ERC 0 violazioni; netlist dello schema identica pin per pin a `design.py`; PCB identico pin per pin.
 - PCB: DRC con le regole JLCPCB 4 strati (0,2/0,2 mm, foro 0,3): 0 errori, 0 collegamenti mancanti; restano solo
-  avvisi di serigrafia (testi che si toccano), che non riguardano la produzione.
+  avvisi di serigrafia (sigle di U5/U6/Q10 che toccano i contorni vicini), che non riguardano la produzione.
+- Revisione indipendente del 23/10/2026 (KiCad 9.0.9 in ambiente pulito, netlist/CPL/polarità rifatte con script
+  propri, datasheet LCSC, pinout JP1 sullo schema Guition): vedi «Revisione del 23/10/2026» in fondo; le correzioni
+  che ne sono uscite sono applicate in questi file.
 - Distinta: ogni riga ha un codice LCSC esistente, in magazzino e abbinabile (controllo fatto sul catalogo live di
   JLCPCB); BOM e CPL con gli stessi designator (nessun DNP in nessuno dei due).
 - Revisione dei datasheet LCSC per i footprint dei connettori e dei fusibili (misure prese dai disegni dei costruttori).
@@ -110,6 +113,34 @@ della pompa non passano mai dallo stesso morsetto (ogni morsetto resta sotto 8�
   non è un guasto.
 - Da misurare alla prima accensione, col display collegato e il suo cavo USB-C staccato: la tensione sul VBUS della
   USB-C del display (dice se l'IP5306 lascia passare il 5 V all'indietro; è innocuo, ma è bene saperlo).
+
+## Revisione del 23/10/2026 (applicata)
+
+Esito della revisione indipendente: nessun errore di collegamento, pinout, polarità o distinta. Applicate queste correzioni
+(`sorgenti/fix_v12b.py` sulla scheda instradata, `design.py`, `silk.py`, `mkfp.py`, `build_pcb.py`, `fullconn.py`,
+`power.py` aggiornati di conseguenza; il CPL e le forature non cambiano):
+
+- **R80, R82 (serie sugli ingressi IN dei BTN8962): 10 kΩ → 4,7 kΩ.** Il BTN8962TA ha V_IN(H) max 2,0 V e assorbe fino
+  a 150 µA sull'ingresso: con la porta AND a 3,3 V e 10 kΩ il livello alto scendeva a 1,7 V nel caso peggiore (tipico
+  2,9 V, quindi funzionava quasi sempre, ma non per specifica); con 4,7 kΩ resta ≥ 2,5 V. Il «> 7 kΩ» del datasheet
+  vale per lo schema applicativo con microcontrollore a 5 V. Stesso codice LCSC delle altre 4,7 k (C23162): 53 codici.
+- **Serigrafia ≥ 1,0 mm** (minimo JLCPCB; prima 0,6–0,9 mm): nomi dei morsetti e segni di polarità rifatti. Ingressi
+  12 V: `12V IN H2` (verticale) e `12V IN H1`, `12V IN MAIN`, `PUMP` con i segni «−»/«+» (o A/B) accanto a ogni pin;
+  uscite di servizio `+ 12V −` / `+ 5V −` con legenda `12V OUT 2A` / `5V OUT 1A`; nomi dei pin di J30 su due righe;
+  `GPIO SPARE 3V3`. Solo le sigle dei componenti restano a 0,8 mm.
+- **Piazzole passanti con rilievi termici** al posto del rame pieno (saldatura a onda su 4 strati con 2 oz esterni):
+  4 raggi da 1,0 mm sui morsetti di potenza (J1–J3, J23–J25; ≈ 16 A per strato), 0,8 mm sugli elettrolitici, 0,6 mm
+  sui pin di massa dei connettori di segnale (J5.16 e J14.3 ne hanno uno solo su F/B, più quattro sul piano In1).
+- **Vie di cucitura** dei rail `+12V_IN_H2` e `+12V_PUMP`: 0,6/0,4 → **0,8/0,4 mm** (anello 0,2 mm, come la netclass HC).
+- **Footprint di L1 (SLO0630H)**: piazzole 1,95 × 3,0 mm a ±2,775 secondo il datasheet Sunltech (G = 7,5 ingombro,
+  H = 3,6 spazio tra le piazzole, I = 3,0); prima 3,0 × 3,6 a ±2,25 (H e I scambiati, il pezzo si saldava comunque).
+- Testi residui «Pompa Marco UP3-R» in `design.py` sostituiti con la Kamoer KPHM600.
+
+Note senza azione: il +12 V a valle di F4 raggiunge i carichi solo dal piano In2 (1 oz) con una strozzatura di
+~2,3 mm, adeguata ai 2–4 A reali; i 5 V al display arrivano a ≈ 4,6–4,75 V (PTC + SS34), compatibili con il buck
+TLV62569 della Guition; l'UCC27524 ha V_DD max 20 V contro i 26 V di clamp del TVS (transitori reali di frazioni di
+volt su un LRS-350); il blocco dei riscaldatori è solo firmware (gli ENA/ENB dell'UCC27524 sono liberi per un
+eventuale watchdog hardware; un termostato bimetallico in serie ai riscaldatori costa poco).
 
 ## Alternative se un codice risultasse esaurito
 

@@ -99,9 +99,10 @@ rect(fp, -4.75, -0.9 + OY, 4.75, 7.1 + OY, pcbnew.F_CrtYd, 0.05)
 # pin-1 style marker not meaningful; reference text above the pads
 save(fp)
 
-# ── Sunltech SLO0630H100MTT (LCSC C207842): 7.1 x 6.6 x 3.0 molded inductor; land pattern 3.0 x 3.6 pads, outer span 7.5 ──
-fp = new("L_SLO0630H", "Sunltech SLO0630H molded power inductor 7.1x6.6x3.0 mm (LCSC C207842); pads 3.0x3.6, centres +-2.25", True)
-pad_smd(fp, 1, -2.25, 0, 3.0, 3.6, 0.1); pad_smd(fp, 2, 2.25, 0, 3.0, 3.6, 0.1)
+# ── Sunltech SLO0630H100MTT (LCSC C207842): 7.1 x 6.6 x 3.0 molded inductor. Land pattern from the datasheet (Rev.03):
+#    G = 7.5 outer span, H = 3.6 gap between the pads, I = 3.0 pad height -> pads 1.95 x 3.0 at +-2.775 (terminals E = 1.6 long)
+fp = new("L_SLO0630H", "Sunltech SLO0630H molded power inductor 7.1x6.6x3.0 mm (LCSC C207842); pads 1.95x3.0, centres +-2.775 (span 7.5, gap 3.6)", True)
+pad_smd(fp, 1, -2.775, 0, 1.95, 3.0, 0.1); pad_smd(fp, 2, 2.775, 0, 1.95, 3.0, 0.1)
 rect(fp, -3.55, -3.3, 3.55, 3.3, pcbnew.F_Fab)
 line(fp, -3.66, -3.41, 3.66, -3.41, pcbnew.F_SilkS, 0.12); line(fp, -3.66, 3.41, 3.66, 3.41, pcbnew.F_SilkS, 0.12)
 rect(fp, -4.0, -3.55, 4.0, 3.55, pcbnew.F_CrtYd, 0.05)

@@ -17,7 +17,7 @@ open(f"{DEST}/kicad/fp-lib-table", "w").write('(fp_lib_table\n  (version 7)\n  (
 for fn in ("design.py", "placement.py", "power.py", "mkfp.py", "gen_sch.py", "build_pcb.py", "mkpro.py", "fanout.py", "route.py",
            "finish.py", "maze.py", "ripup.py", "gndfix.py", "fill_drc.py", "silk.py", "stubclean.py", "fullconn.py", "nudge.py",
            "gndvia.py", "export.py", "eco.py", "cmpnet.py", "padsdump.py", "sympins.py", "render.sh", "make.sh", "package.py",
-           "fix_v12.py", "zones.py", "handroute.py"):
+           "fix_v12.py", "fix_v12b.py", "zones.py", "handroute.py"):
     shutil.copy(f"{HERE}/{fn}", f"{DEST}/sorgenti/{fn}")
 shutil.copy("/home/claude/jlc/cpl_rotations_db.csv", f"{DEST}/sorgenti/cpl_rotations_db.csv")
 for fn in ("jlcpos.py", "jlcpos.json", "fetch_easyeda.sh", "jlc.py", "cplcheck.py"):

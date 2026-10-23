@@ -13,7 +13,12 @@ sexpdata, numpy, scipy, Pillow, openpyxl. Il progetto in `../kicad/` si può anc
 La versione in `../kicad/` (v1.2) è uscita da `MAZE_CLR=0.25 bash make.sh out` (router di rifinitura a 0,25 mm; le
 net ad alta corrente restano a 0,3 mm), più le correzioni di `fix_v12.py` (descritte nel file: HEAT1_DRV con vie da
 0,5 mm via `MAZE_VIA=0.5 MAZE_CLR=0.22 maze.py`, R62 ruotata per legare il suo pad di massa, due tratti +3V3 ristretti
-vicino a U7, una scheggia di massa isolata eliminata, C56 a rame pieno), poi `export.py`. Strumenti di ritocco:
+vicino a U7, una scheggia di massa isolata eliminata, C56 a rame pieno), poi — revisione del 23/10/2026 —
+`fix_v12b.py` (R80/R82 4,7k, piazzole di L1 da datasheet, rilievi termici sulle piazzole passanti, vie HC 0,8/0,4),
+`silk.py` rilanciato (scritte ≥ 1,0 mm) e `export.py`. `design.py`, `mkfp.py`, `build_pcb.py`, `fullconn.py`,
+`power.py` e `silk.py` contengono già le stesse scelte, così una rigenerazione completa dà lo stesso risultato
+(lo schema rigenerato da `gen_sch.py` differisce solo nei campi di R80/R82 e J25: gli UUID sono deterministici).
+Strumenti di ritocco:
 - `ripup.py board NET1,NET2` rifà alcune net con il router a griglia;
 - `maze.py board` chiude i collegamenti rimasti (`MAZE_VIA=0.5` per le vie strette, `--tie REF.PAD` lega un pad al piano);
 - `gndvia.py board REF PAD` cerca una via di massa accanto a un pad (`GNDVIA_D=0.5` per vie da 0,5 mm);

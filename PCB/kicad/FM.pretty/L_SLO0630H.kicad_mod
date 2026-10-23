@@ -3,11 +3,11 @@
 	(generator "pcbnew")
 	(generator_version "9.0")
 	(layer "F.Cu")
-	(descr "Sunltech SLO0630H molded power inductor 7.1x6.6x3.0 mm (LCSC C207842); pads 3.0x3.6, centres +-2.25")
+	(descr "Sunltech SLO0630H molded power inductor 7.1x6.6x3.0 mm (LCSC C207842); pads 1.95x3.0, centres +-2.775 (span 7.5, gap 3.6)")
 	(property "Reference" "REF**"
 		(at 0 -1 0)
 		(layer "F.SilkS")
-		(uuid "cc3d881c-4951-443e-8d81-aaf1b17d4349")
+		(uuid "f5208908-53d2-481e-8c09-fddb031f6409")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -18,7 +18,7 @@
 	(property "Value" "L_SLO0630H"
 		(at 0 0 0)
 		(layer "F.Fab")
-		(uuid "53b064a0-c7a0-417a-ba1d-5d6c4e59423c")
+		(uuid "f94ae701-9e17-449a-9191-ec544c69ab33")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -30,7 +30,7 @@
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "4400fe56-6280-49d1-9525-c20b99ae9f61")
+		(uuid "4aeed4ee-bdc9-4df4-9cf6-c20504d811fd")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -42,7 +42,7 @@
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "f3d276dd-34d4-41df-a4c1-918fb368f966")
+		(uuid "d3ba3b27-4495-4192-9bb2-70d76a0fe2f4")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -59,7 +59,7 @@
 			(type default)
 		)
 		(layer "F.SilkS")
-		(uuid "d0129ce5-09d1-4f23-8977-ac8df9d7d145")
+		(uuid "3b263bd3-0cf9-4f63-a059-9e19f1eda2ce")
 	)
 	(fp_line
 		(start -3.66 3.41)
@@ -69,7 +69,7 @@
 			(type default)
 		)
 		(layer "F.SilkS")
-		(uuid "fb77e644-f11e-46f2-b991-5df6bbdbb67b")
+		(uuid "6d2cf403-2a70-46ca-94e9-ef0e5f521b50")
 	)
 	(fp_line
 		(start -4 -3.55)
@@ -79,7 +79,7 @@
 			(type default)
 		)
 		(layer "F.CrtYd")
-		(uuid "475bb7b5-5e3f-47d6-b613-953c0a2c4cc9")
+		(uuid "16c2bffc-ff02-4086-8966-3ebdc7e9a60d")
 	)
 	(fp_line
 		(start -4 3.55)
@@ -89,7 +89,7 @@
 			(type default)
 		)
 		(layer "F.CrtYd")
-		(uuid "9c2e67f4-b667-44e9-87a5-a88ddd023e65")
+		(uuid "e6aa708b-018c-4d11-8d4b-f810f2d2ebb8")
 	)
 	(fp_line
 		(start 4 -3.55)
@@ -99,7 +99,7 @@
 			(type default)
 		)
 		(layer "F.CrtYd")
-		(uuid "f4d2ec94-39fd-4416-98ea-cb5fa98d8269")
+		(uuid "5e0de4a0-74a6-45ce-b8ab-08be436216b2")
 	)
 	(fp_line
 		(start 4 3.55)
@@ -109,7 +109,7 @@
 			(type default)
 		)
 		(layer "F.CrtYd")
-		(uuid "49a73a5f-302c-46a5-9bb7-00fce8b88a93")
+		(uuid "0cbe233f-e14c-4dad-8ace-6d5bbc38a929")
 	)
 	(fp_line
 		(start -3.55 -3.3)
@@ -119,7 +119,7 @@
 			(type default)
 		)
 		(layer "F.Fab")
-		(uuid "b9d7edc7-89be-4933-b87e-cafcb89cfe53")
+		(uuid "68d73925-43d3-4849-a26e-51279b8f890d")
 	)
 	(fp_line
 		(start -3.55 3.3)
@@ -129,7 +129,7 @@
 			(type default)
 		)
 		(layer "F.Fab")
-		(uuid "8a30fe4b-932e-4188-be92-a802f491cc64")
+		(uuid "9baf2015-df8f-4b46-bbb8-fa77a4eef905")
 	)
 	(fp_line
 		(start 3.55 -3.3)
@@ -139,7 +139,7 @@
 			(type default)
 		)
 		(layer "F.Fab")
-		(uuid "0b21893a-5004-4484-bb70-d8aa9e07f4de")
+		(uuid "f3e3209f-3dd8-46de-a8fa-83b75825afdf")
 	)
 	(fp_line
 		(start 3.55 3.3)
@@ -149,23 +149,23 @@
 			(type default)
 		)
 		(layer "F.Fab")
-		(uuid "ed899a4d-1fa3-49dd-8828-4bfcc2d7e978")
+		(uuid "0bc773cf-d913-421c-878f-50bb4edd01a3")
 	)
 	(pad "1" smd roundrect
-		(at -2.25 0)
-		(size 3 3.6)
+		(at -2.775 0)
+		(size 1.95 3)
 		(layers "F.Cu" "F.Mask" "F.Paste")
 		(roundrect_rratio 0.1)
 		(thermal_bridge_angle 45)
-		(uuid "108feb52-f2a3-4a31-a151-274e13d4bd06")
+		(uuid "53144a23-4a3e-48f2-beef-600e7e6c97cd")
 	)
 	(pad "2" smd roundrect
-		(at 2.25 0)
-		(size 3 3.6)
+		(at 2.775 0)
+		(size 1.95 3)
 		(layers "F.Cu" "F.Mask" "F.Paste")
 		(roundrect_rratio 0.1)
 		(thermal_bridge_angle 45)
-		(uuid "738cff99-1ca3-4d7a-b362-2d052a914690")
+		(uuid "84f5c638-d6c1-4c71-9eb5-782e99336b9d")
 	)
 	(embedded_fonts no)
 )

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-FilMachine Mainboard v1.1 — single source of truth for schematic + PCB (JLCPCB / LCSC parts).
+FilMachine Mainboard v1.2 — single source of truth for schematic + PCB (JLCPCB / LCSC parts).
 
 Every part:  P(ref, symbol, value, footprint, pins={pin: net}, sheet, mpn, desc, dnp, mfr, lcsc)
 Pin keys are symbol pin numbers (strings). Nets are plain strings. `lcsc` is the LCSC part number used by
@@ -322,14 +322,18 @@ P("U7", "74xGxx:74LVC2G08", "74LVC2G08", "Package_SO:SSOP-8_2.95x2.8mm_P0.65mm",
    "8": "+3V3", "4": "GND"}, S, "SN74LVC2G08DCTR", "AND: IN1·ENA, IN2·ENA motore", mfr="Texas Instruments", lcsc="C352973")
 C("C51", "100nF", "+3V3", "GND", S)
 
-# Ponte H pompa (UP3-R 12 V, 6 A): 2 x Infineon BTN8962TA (stesso pinout del BTN8982TA, 14 mOhm, limite 30 A min)
+# Ponte H pompa (Kamoer KPHM600 12 V 0,8 A; dimensionato per la Marco UP3-R da 6 A): 2 x Infineon BTN8962TA
+# (stesso pinout del BTN8982TA, 14 mOhm, limite 30 A min)
 for n, side in ((8, "A"), (9, "B")):
     P(f"U{n}", "Power_Management:BTN8982TA", "BTN8962TA", "Package_TO_SOT_SMD:TO-263-7_TabPin8",
       {"7": "+12V_PUMP", "1": "GND", "2": f"PUMP_{side}_IN", "3": "PUMP_INH", "6": f"PUMP_IS_{side}",
        "5": "GND", "4": f"PUMP_OUT_{side}", "8": f"PUMP_OUT_{side}"}, S,
       "BTN8962TAAUMA1", f"Mezzo ponte pompa lato {side} (30 A, 14 mOhm); SR a GND = slew rate massimo", mfr="Infineon", lcsc="C112630")
-    R(f"R{80 if side=='A' else 82}", "10k", f"PUMP_{side}_CTL", f"PUMP_{side}_IN", S,
-      f"Serie ingresso IN (datasheet: > 7 kOhm)")
+    # 4,7k (era 10k): V_IN(H) max 2,0 V e I_IN(H) fino a 150 uA (datasheet 5.4.1/5.4.4) -> con la porta AND a 3,3 V e
+    # 10k l'ingresso scendeva a 1,7 V nel caso peggiore; con 4,7k resta >= 2,5 V. Il "> 7 kOhm" dello schema applicativo
+    # del datasheet vale per un microcontrollore a 5 V.
+    R(f"R{80 if side=='A' else 82}", "4.7k", f"PUMP_{side}_CTL", f"PUMP_{side}_IN", S,
+      f"Serie ingresso IN (4,7k: livello alto >= 2,5 V con logica 3,3 V e I_IN(H) max 150 uA)")
     C(f"C{52 if side=='A' else 53}", "100nF 50V", "+12V_PUMP", "GND", S, FP_C0805, desc="VS locale")
 R("R84", "1k", "+3V3", "PUMP_INH", S, "INH alto = ponte attivo (basso senza display: pompa inibita); 1k: I_INH(H) fino a 2 x 93 uA a 3,3 V")
 R("R85", "1.5k", "PUMP_IS_A", "GND", S, "Sense IS lato A: kILIS 10000 -> 6 A = 0,8 mA = 1,2 V (10 A = 1,8 V)")
@@ -342,7 +346,7 @@ CP("C56", "470uF 25V", "+12V_PUMP", "GND", S, "Capacitor_THT:CP_Radial_D10.0mm_P
    "Bulk ponte pompa (ZLH basso ESR, 1,33 A ripple)", mfr="Rubycon", lcsc="C338188")
 C("C57", "10uF 50V", "+12V_PUMP", "GND", S, FP_C1206, desc="Ceramico ponte pompa")
 P("J25", "Connector_Generic:Conn_01x02", "PUMP", TB2_508,
-  {"1": "PUMP_OUT_A", "2": "PUMP_OUT_B"}, S, "WJ500V-5.08-2P", "Pompa Marco UP3-R", mfr="Ningbo Kangnex", lcsc="C8465")
+  {"1": "PUMP_OUT_A", "2": "PUMP_OUT_B"}, S, "WJ500V-5.08-2P", "Pompa peristaltica Kamoer KPHM600 (A = pin 1, B = pin 2; qualsiasi motore DC 12 V reversibile)", mfr="Ningbo Kangnex", lcsc="C8465")
 
 # Motore spirale JGB37-520 (0,2 A, ~1,5 A bloccato): TI DRV8871, limite 2,1 A
 P("U10", "Driver_Motor:DRV8871DDA", "DRV8871DDA", "Package_SO:TI_SO-PowerPAD-8_ThermalVias",
